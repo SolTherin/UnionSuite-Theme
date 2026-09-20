@@ -38,6 +38,10 @@ all validation, error and recovery paths.
 - [ ] Named panel action injection and verified handlers: [action plan](THEME-PANEL-ACTIONS.md). Shared report action slots/styles already exist.
 - [ ] Combined activity feed: [feed plan](THEME-ACTIVITY-FEED.md). Requires source contracts and lifecycle work, not just styling.
 
+- [ ] Enhanced IQA — preview Business Object sources.
+- [ ] Enhanced IQA — when quick search returns an exact match, sort it first.
+- [ ] Enhanced IQA — add useful functions to the SQL autofill, for example asi_path and asi_GetDate.
+
 ## Parked by owner
 
 - Staff Bulletin authoring redesign — deferred by owner on 12 September 2026; revisit only when requested. Current workflow is a bulletin management page with editable content blocks and a title/HTML-editor popup. Explore an Add/Edit bulletin form with a template picker (Announcement, Policy/action required, Staff welcome), relevant content fields, an optional link toggle with label/URL, visibility/expiry controls and a card preview. Assess a dedicated standalone iMIS panel/data source versus generating HTML for the existing Content Block; the storage/save approach is not decided or implemented. On resumption, confirm the actual iPart/editor, verify saving and reopening all fields, plan any existing-post migration, and map the homepage query to the chosen source, including blank AlertUrl values for unlinked records. Keep the existing approved card styling and Query Template Display working while this is parked.
@@ -58,6 +62,7 @@ all validation, error and recovery paths.
 - Theme Upload and XML Import layout, button states and file-drop integration.
 - Messages, native validation presentation and native IQA/report styling.
 - Selected section circles, popup/panel loaders and IQA refresh overlay.
+- Enhanced IQA reorder: Display, Filters and Sources share the taskbar command palette drag — floating held row, dashed drop slot and sliding neighbours.
 - CCO, Save, Sign In, Find and scoped upload/import busy adapters.
 
 Unselected loader variants and taskbar comparisons remain demonstrations.
