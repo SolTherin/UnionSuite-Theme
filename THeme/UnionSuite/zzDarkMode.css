@@ -1,0 +1,920 @@
+/* UnionSuite dark mode. Load LAST: after native, shared and client CSS.
+   This is the sole maintained dark palette / override stylesheet.
+   Requires zUnionSuite.css; shared zUnionSuite.js owns the root state.
+   All dark colours are screen-only; print keeps the original light theme.
+   Tabler.css supplies the existing moon/sun glyphs; no new asset is required. */
+:root {
+  --us-dark-mode-enabled: 1;
+}
+
+/* Preserve brand ramps: they also colour filled buttons and inverse banners. */
+@media screen {
+  :root[data-us-color-scheme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-us-color-scheme="dark"] {
+    color-scheme: dark;
+    --bg-page: #111a20;
+    --bg-surface: #1b272f;
+    --bg-subtle: #202f39;
+    --bg-sunken: #263740;
+    --text-strong: #edf3f6;
+    --text-base: #ccd8df;
+    --text-muted: #acbec9;
+    --text-faint: #99aebc;
+    --text-link: #83d7f5;
+    --text-link-hover: #b6e9fa;
+    --text-link-visited: #b6d4ed;
+    --border: #405460;
+    --border-strong: #758e9e;
+    --border-focus: #83d7f5;
+    --field-focus-colour: #83d7f5;
+    --success: #9ed789;
+    --success-bg: #243d2d;
+    --warning: #ffc17e;
+    --warning-bg: #443322;
+    --danger: #ffaaa3;
+    --danger-bg: #472d31;
+    --info: #83d7f5;
+    --info-bg: #203d4b;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 20%);
+    --shadow: 0 2px 5px rgb(0 0 0 / 24%);
+    --shadow-lg: 0 12px 30px rgb(0 0 0 / 30%);
+    --focus-ring: 0 0 0 2px var(--bg-surface),0 0 0 4px var(--border-focus);
+    --dm-hover: #263f4c;
+    --dm-selected: #314959;
+    --dm-accent-bg: #433629;
+    --dm-accent-text: #ffd4a8;
+    --dm-muted: var(--text-muted);
+    --dm-border: var(--border);
+    --auxiliary-nav-icon-color: var(--text-base);
+    --us-pip-fur: #ebc492;
+    --us-pip-fur-edge: #c39a6c;
+    --us-pip-fur-light: #fff0d6;
+    --us-pip-ear: #b98459;
+    --us-pip-shadow: #07100c35;
+  }
+
+  /* The real taskbar declares local aliases. Root tokens cannot override them
+     through inheritance, so explicitly map the taskbar component. */
+  :root[data-us-color-scheme="dark"] :is(#injected-taskbar, #tb-search-dropdown) {
+    --bg: var(--bg-subtle);
+    --surface: var(--bg-surface);
+    --text: var(--text-strong);
+    --text-muted: var(--dm-muted);
+    --border: var(--dm-border);
+    --selected-bg: var(--dm-accent-bg);
+    --shadow-md: var(--shadow-lg);
+  }
+
+  :root[data-us-color-scheme="dark"] #injected-taskbar .us-taskbar__quick-link {
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] #injected-taskbar .us-taskbar__quick-link:hover,
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown .us-taskbar__history-row:hover {
+    background: var(--bg-sunken);
+  }
+
+  :root[data-us-color-scheme="dark"] #injected-taskbar .us-taskbar__quick-link:active {
+    background: var(--bg-sunken);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown :is(.us-taskbar__result-kind, .us-taskbar__history-clock svg) {
+    color: var(--text-link);
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown :is(.tb-dd-id, .tb-dd-match strong) {
+    color: var(--dm-accent-text);
+    background: var(--dm-accent-bg);
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown .tb-dd-item:focus-visible {
+    background: var(--dm-accent-bg);
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown .tb-dd-input {
+    background: var(--bg-subtle);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown .tb-dd-input:focus {
+    background: var(--bg-surface);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(#injected-taskbar, #tb-search-dropdown) input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  :root[data-us-color-scheme="dark"] #tb-search-dropdown .tb-dd-close {
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] #injected-taskbar .us-taskbar__full-search {
+    --button-bg: transparent;
+    --button-text: var(--text-base);
+    --button-border: var(--border-strong);
+    --button-hover-bg: var(--bg-sunken);
+    --button-hover-text: var(--text-strong);
+    color: var(--text-base);
+    background: transparent;
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] #injected-taskbar .us-taskbar__full-search:hover {
+    background: var(--bg-sunken);
+    color: var(--text-strong);
+  }
+}
+
+/* Appearance switch: keep Full Search's 36px footprint on every pointer type.
+   Shared TextButton/us-outline-button classes own colours and interaction states. */
+
+/* Clouds & moon switch; native button supplies Space/Enter behaviour. */
+:root #injected-taskbar .us-taskbar__theme-toggle {
+  --scene-width: 44px;
+  --scene-sky: #79a8fa;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  order: 1;
+  width: 44px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+@media (pointer:coarse) {
+  :root #injected-taskbar .us-taskbar__theme-toggle {
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
+:root #injected-taskbar .us-taskbar__theme-toggle[hidden] {
+  display: none;
+}
+
+:root #injected-taskbar .us-taskbar__theme-toggle[aria-checked="true"] {
+  --scene-sky: #13263c;
+}
+
+:root #injected-taskbar .us-taskbar__theme-toggle:focus-visible {
+  outline: 3px solid var(--text-strong);
+  outline-offset: 3px;
+}
+
+.us-taskbar__theme-toggle .scene-track {
+  box-sizing: border-box;
+  border: 1px solid var(--text-muted);
+  display: block;
+  position: relative;
+  width: var(--scene-width);
+  height: 24px;
+  border-radius: 999px;
+  background: var(--scene-sky);
+  box-shadow: inset 0 1px 3px #0003;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background 480ms;
+  flex: none;
+}
+
+.us-taskbar__theme-toggle .scene-disc {
+  position: absolute;
+  left: 7%;
+  top: 14%;
+  width: 36%;
+  height: 72%;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px #0002;
+  transition: left 480ms cubic-bezier(.22,1.08,.4,1),background 480ms,transform 480ms;
+  z-index: 2;
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-track .scene-disc {
+  left: 57%;
+  transform: rotate(20deg);
+}
+
+.us-taskbar__theme-toggle .scene-cutout {
+  position: absolute;
+  left: 8%;
+  top: 5%;
+  width: 30%;
+  height: 60%;
+  background: var(--scene-sky);
+  border-radius: 50%;
+  z-index: 3;
+  opacity: 0;
+  transform: translate(-20%,-30%);
+  transition: left 480ms cubic-bezier(.22,1.08,.4,1),background 480ms,opacity 320ms,transform 480ms;
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-track .scene-cutout {
+  left: 55%;
+  opacity: 1;
+  transform: translate(-8%,-8%);
+}
+
+.us-taskbar__theme-toggle .scene-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(12%);
+  transition: opacity 400ms,transform 480ms;
+  color: #fff;
+}
+
+.us-taskbar__theme-toggle .scene-stars .ti {
+  position: absolute;
+  font-size: calc(var(--scene-width) * .07);
+}
+
+.us-taskbar__theme-toggle .scene-stars .ti:nth-child(1) {
+  left: 14%;
+  top: 23%;
+}
+
+.us-taskbar__theme-toggle .scene-stars .ti:nth-child(2) {
+  left: 34%;
+  top: 55%;
+  font-size: calc(var(--scene-width) * .05);
+}
+
+.us-taskbar__theme-toggle .scene-stars .ti:nth-child(3) {
+  left: 41%;
+  top: 19%;
+  font-size: calc(var(--scene-width) * .04);
+}
+
+.us-taskbar__theme-toggle .scene-stars .ti:nth-child(4) {
+  left: 11%;
+  top: 68%;
+  font-size: calc(var(--scene-width) * .04);
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-track .scene-stars {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.us-taskbar__theme-toggle .scene-clouds {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  color: #fff;
+  transition: transform 480ms,opacity 360ms;
+}
+
+.us-taskbar__theme-toggle .scene-clouds .ti {
+  position: absolute;
+  font-size: calc(var(--scene-width) * .58);
+  line-height: 1;
+  left: 30%;
+  top: 31%;
+}
+
+.us-taskbar__theme-toggle .scene-clouds .ti+ .ti {
+  left: 66%;
+  top: 1%;
+}
+
+.us-taskbar__theme-toggle .scene-clouds-back {
+  color: #d6e6ff;
+  transform: translate(-5%,-12%);
+  z-index: 1;
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-track .scene-clouds {
+  opacity: 0;
+  transform: translate(20%,65%);
+}
+
+.us-taskbar__theme-toggle .scene-craters {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 380ms;
+}
+
+.us-taskbar__theme-toggle .scene-craters b {
+  position: absolute;
+  border-radius: 50%;
+  background: #bac8df;
+  box-shadow: inset 1px 1px 3px #0002;
+  width: 28%;
+  height: 28%;
+  left: 18%;
+  top: 42%;
+}
+
+.us-taskbar__theme-toggle .scene-craters b:nth-child(2) {
+  width: 18%;
+  height: 18%;
+  left: 52%;
+  top: 18%;
+}
+
+.us-taskbar__theme-toggle .scene-craters b:nth-child(3) {
+  width: 16%;
+  height: 16%;
+  left: 61%;
+  top: 61%;
+}
+
+.us-taskbar__theme-toggle .scene-disc {
+  background: #ffc444;
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-disc {
+  background: #e2eaff;
+}
+
+.us-taskbar__theme-toggle[aria-checked="true"] .scene-craters {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .us-taskbar__theme-toggle * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (forced-colors:active) {
+  .us-taskbar__theme-toggle .scene-track {
+    background: Canvas;
+    border: 1px solid ButtonText;
+  }
+
+  .us-taskbar__theme-toggle .scene-disc {
+    background: ButtonText !important;
+  }
+
+  .us-taskbar__theme-toggle .scene-clouds,
+  .us-taskbar__theme-toggle .scene-stars,
+  .us-taskbar__theme-toggle .scene-craters {
+    display: none;
+  }
+}
+
+/* Native header controls declare brand colours locally, including SVG, hover
+   and OBO states. Match their native scope instead of changing brand ramps. */
+@media screen {
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.nav-aux-cart > a, .ste-toggle, .obo-toggle, .account-toggle) {
+    color: var(--text-base);
+    background-color: transparent;
+    --auxiliary-nav-icon-color: currentColor;
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.nav-aux-cart > a, .ste-toggle, .obo-toggle)::before {
+    background-color: currentColor;
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(a, button).account-toggle {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.nav-aux-cart > a, .ste-toggle, .obo-toggle, .account-toggle):is(:hover, :focus-visible):not(:is([aria-disabled=true], .disabled, .aspNetDisabled)) {
+    color: var(--text-strong);
+    background-color: var(--dm-hover);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.nav-aux-cart > a, .ste-toggle, .obo-toggle, .account-toggle):active:not(:is([aria-disabled=true], .disabled, .aspNetDisabled)) {
+    color: var(--text-strong);
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.ste-toggle, .obo-toggle).on {
+    color: var(--text-link);
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right :is(.ste-toggle, .obo-toggle).on:is(:hover, :focus-visible, :active):not(:is([aria-disabled=true], .disabled, .aspNetDisabled)) {
+    color: var(--text-link-hover);
+    background-color: var(--dm-hover);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right .account-toggle[aria-expanded="true"],
+  :root[data-us-color-scheme="dark"] .navbar-right.navbar-right.navbar-right .account-toggle-wrapper.open > .account-toggle {
+    color: var(--text-strong);
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .account-menu > .account-toggle-wrapper > .dropdown-menu > li > a:is(:hover, :focus-visible, :active) {
+    color: var(--text-strong);
+    background-color: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] .account-menu .obo-label {
+    color: var(--text-muted);
+  }
+
+  :root[data-us-color-scheme="dark"] .account-menu .obo-actions a {
+    color: var(--text-link);
+  }
+
+  :root[data-us-color-scheme="dark"] .account-menu .obo-actions a:is(:hover, :focus-visible, :active) {
+    color: var(--text-link-hover);
+  }
+}
+
+/* Native surfaces: colour only. Existing geometry, wrapper ownership, open /
+   collapsed states and handlers stay in their existing theme files. */
+@media screen {
+  :root[data-us-color-scheme="dark"],
+  :root[data-us-color-scheme="dark"] body,
+  :root[data-us-color-scheme="dark"] :is(.wrapper, .col-primary, #bd, .footer-main):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-page);
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(#hd, .header, .navbar-default, .breadcrumb):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(
+    .ContentItemContainer > .panel,
+    .ContentItemContainer > div > .panel,
+    .panel-border,
+    .ContentBorder,
+    .card,
+    .NeutralShading
+  ):not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner, .us-banner *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.ContentItemContainer > .panel, .ContentItemContainer > div > .panel) > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *)) {
+    background-color: var(--bg-subtle);
+    color: var(--text-strong);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(h1, h2, h3, h4, h5, h6, .PanelTitle, .PageTitle):not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *, .account-banner *, .AltBgColor1 *, .AltBgColor2 *)) {
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(hr, fieldset, .panel-footer, .CommandBar, .modal-footer):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *)),
+  :root[data-us-color-scheme="dark"] :is(label, .Label, .PanelFieldLabelFont, legend):not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *)) {
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.panel-body, .rgRow, .rgAltRow, .us-list__body) a:not(:where(
+    .TextButton,
+    .btn,
+    .PrimaryButton,
+    .AccentButton,
+    .LinkButton,
+    .us-panel-action,
+    .us-banner *,
+    .us-report-no-styling,
+    .us-report-no-styling *
+  )) {
+    color: var(--text-link);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.panel-body, .rgRow, .rgAltRow, .us-list__body) a:visited:not(:where(
+    .TextButton,
+    .btn,
+    .PrimaryButton,
+    .AccentButton,
+    .LinkButton,
+    .us-panel-action,
+    .us-banner *,
+    .us-report-no-styling,
+    .us-report-no-styling *
+  )) {
+    color: var(--text-link-visited);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.panel-body, .rgRow, .rgAltRow, .us-list__body) a:hover:not(:where(
+    .TextButton,
+    .btn,
+    .PrimaryButton,
+    .AccentButton,
+    .LinkButton,
+    .us-panel-action,
+    .us-banner *,
+    .us-report-no-styling,
+    .us-report-no-styling *
+  )) {
+    color: var(--text-link-hover);
+  }
+
+  /* Native editable text fields; exclude choices, buttons and editor internals. */
+  :root[data-us-color-scheme="dark"] :is(
+    input[type="text"],
+    input[type="search"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="number"],
+    input[type="password"],
+    input:not([type]),
+    textarea,
+    select
+  ):not(:where(.tb-search-input, .tb-dd-input, .us-report-no-styling, .us-report-no-styling *, .RadEditor *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-strong);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(input, textarea)::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  :root[data-us-color-scheme="dark"] :is(input, textarea, select):disabled:not(:where(.TextButton, .btn, .us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-sunken);
+    color: var(--text-muted);
+  }
+
+  /* IQA components resolve aliases on their own owner, not just :root. */
+  :root[data-us-color-scheme="dark"] :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]):not(:where(.us-report-no-styling, .us-report-no-styling *)),
+  :root[data-us-color-scheme="dark"] :is(.ContentItemContainer, .ContentItemContainer > div):has(> .panel > .panel-body-container > .panel-body):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --iqa-selected: var(--dm-selected);
+    --iqa-sort-bg: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.RadGrid, .k-grid):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid :is(.rgRow, .rgAltRow):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid :is(.rgRow, .rgAltRow) > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid :is(.rgHeader, .rgHeaderWrapper, .rgFilterRow, .rgPager):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-subtle);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid .rgInfoPart:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    color: var(--text-muted);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid .rgInfoPart strong:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid :is(.rgHoveredRow, .rgRow:hover, .rgAltRow:hover):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid .rgSelectedRow:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--dm-selected);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid .rgMasterTable > tbody > :is(.rgHoveredRow, .rgRow:hover, .rgAltRow:hover) > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadGrid .rgMasterTable > tbody > .rgSelectedRow > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--dm-selected);
+    color: var(--text-strong);
+  }
+
+  /* Popup chrome is in this document. Its content document loads these same
+     assets itself; CSS cannot cross an iframe boundary. */
+  :root[data-us-color-scheme="dark"] .RadWindow_Bootstrap :is(.rwTitlebar, .rwTopLeft, .rwTopRight, .rwWindowContent, .rwContent):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  /* Classic RadWindow uses table cells as resize rails, not just an outer border.
+     Scope to its own table so nested content tables/windows retain their styles. */
+  :root[data-us-color-scheme="dark"] .RadWindow.RadWindow_Bootstrap:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadWindow.RadWindow_Bootstrap:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .rwTable > tbody > tr > :is(.rwCorner, .rwFooterCenter, .rwTitlebar, .rwStatusbar) {
+    background-color: var(--bg-surface);
+    background-image: none;
+    border-color: var(--border);
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .RadWindow.RadWindow_Bootstrap:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .rwTable > tbody > .rwTitleRow > .rwTitlebar .rwTitlebarControls em {
+    color: var(--text-strong);
+    text-shadow: none;
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.RadComboBoxDropDown, .RadAutoCompleteBoxPopup, .dropdown-menu):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.RadComboBoxDropDown .rcbHovered, .RadComboBoxDropDown .rcbSelected, .RadAutoCompleteBoxPopup .racItemHovered):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--dm-hover);
+    color: var(--text-strong);
+  }
+
+  /* Keep pale text on transparent actions and dark text on pale status fills. */
+  :root[data-us-color-scheme="dark"] :is(.TextButton, .btn).us-outline-button:not(.us-icon-button):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --button-bg: var(--bg-surface);
+    --button-current-bg: var(--bg-surface);
+    --button-text: var(--text-base);
+    --button-current-text: var(--text-base);
+    --button-hover-text: var(--text-strong);
+    --button-border: var(--border-strong);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.TextButton, .btn).us-outline-button:not(.us-icon-button):hover:not(:where(:disabled, [aria-disabled=true], .disabled, .aspNetDisabled, .us-report-no-styling, .us-report-no-styling *)) {
+    --button-current-bg: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.TextButton, .btn).us-outline-button:not(.us-icon-button):active:not(:where(:disabled, [aria-disabled=true], .disabled, .aspNetDisabled, .us-report-no-styling, .us-report-no-styling *)) {
+    --button-current-bg: var(--dm-selected);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.DangerButton, .SuccessButton):not(:where(.us-icon-button, .us-report-no-styling, .us-report-no-styling *)) {
+    --button-text: var(--bg-page);
+    --button-hover-text: var(--bg-page);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-badge--primary:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    color: var(--text-link);
+    background: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.RadTabStrip, .RadTabStripVertical):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --active-color: var(--text-strong);
+    --hover-bg: var(--dm-hover);
+    --hover-color: var(--text-strong);
+    --focus-color: var(--border-focus);
+  }
+}
+
+/* iMIS Object Browser: captured Metro splitters and MetroTouch menu/tree.
+   Keep native dimensions, overflow, resize handles, images and event ownership. */
+@media screen {
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper :is(
+    .RadSplitter.RadSplitter_Metro,
+    .rspPane,
+    .rspPaneHorizontal,
+    [id^="RAD_SPLITTER_PANE_CONTENT_"],
+    .TreePane,
+    .ContentListUpdatePanel,
+    .ObjectBrowserContentList
+  ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-surface);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper :is(.MenuPane, .Toolbars):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    background-color: var(--bg-subtle);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  /* The captured read-only path has an inline #ddd background. */
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .AddressPane input[readonly][id$="_Address"] {
+    background-color: var(--bg-sunken) !important;
+    color: var(--text-base);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .Toolbars .TextButton:is(:disabled, .aspNetDisabled) {
+    background-color: var(--bg-sunken);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper [id$="_AddressAutoCompleteExtender_completionListElem"] {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-base) !important;
+    border-color: var(--border-strong) !important;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadSplitter_Metro :is(
+    .rspResizeBar,
+    .rspResizeBarHorizontal,
+    .rspCollapseBarExpand,
+    .rspCollapseBarCollapse,
+    .rspCollapseBarHorizontalExpand,
+    .rspCollapseBarHorizontalCollapse
+  ) {
+    background-color: var(--bg-sunken);
+    color: var(--text-base);
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadSplitter_Metro :is(.rspResizeBarOver, .rspResizeBarOverHorizontal, .rspResizeBar:hover, .rspResizeBarHorizontal:hover) {
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  /* Invert only the native monochrome arrow sprites, never folder/content images. */
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadSplitter_Metro :is(
+    .rspCollapseBarExpand,
+    .rspCollapseBarCollapse,
+    .rspCollapseBarHorizontalExpand,
+    .rspCollapseBarHorizontalCollapse
+  ) {
+    background-color: transparent;
+    filter: brightness(0) invert(1);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch,
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch .rtIn {
+    color: var(--text-base);
+    background-color: transparent;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch :is(.rtHover, .rtTop:hover, .rtMid:hover, .rtBot:hover) > .rtIn {
+    color: var(--text-strong);
+    background-color: var(--dm-hover);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch .rtSelected > .rtIn,
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch .rtSelected:hover > .rtIn {
+    color: var(--text-strong);
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch :is(.rtTop, .rtMid, .rtBot):focus-visible > .rtIn {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 1px;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch .rtDisabled > .rtIn {
+    color: var(--text-muted);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadTreeView.RadTreeView_MetroTouch :is(.rtPlus, .rtMinus) {
+    filter: brightness(0) invert(1);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentItem {
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentListName {
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentItem .text-muted {
+    color: var(--text-muted) !important;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentItem:is(.hover, :hover, :focus) {
+    background-color: var(--dm-hover);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentItem:is(.selected, :active) {
+    background-color: var(--dm-selected);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .ObjectBrowserContentItem:is(.selected, :focus) > td {
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch :is(.rmRootGroup, .rmGroup, .rmPopup) {
+    color: var(--text-base);
+    background-color: var(--bg-subtle);
+    background-image: none;
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmLink {
+    color: var(--text-base);
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmLink:is(:hover, :focus-visible, .rmFocused, .rmExpanded) {
+    color: var(--text-strong);
+    background-color: var(--dm-hover);
+    border-color: var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmLink:is(:active, .rmSelected) {
+    color: var(--text-strong);
+    background-color: var(--dm-selected);
+    border-color: var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmLink:is(.rmDisabled, .rmDisabled:hover, .rmDisabled:active) {
+    color: var(--text-muted);
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmSeparator .rmText {
+    border-color: var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .ObjectBrowserWrapper .RadMenu.RadMenu_MetroTouch .rmToggle .rmIcon {
+    filter: brightness(0) invert(1);
+  }
+}
+
+@media print {
+  #injected-taskbar .us-taskbar__theme-toggle {
+    display: none;
+  }
+}
+
+/* Night completion celebration palette; dark-specific values stay here. */
+
+/* Native horizontal Recent contacts iPart; independent of wrapper depth. */
+@media screen {
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryTitleHorizontal,
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryTitleHorizontal > span {
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryItem > a {
+    color: var(--text-link);
+    background-color: var(--bg-subtle);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryItem > a:visited {
+    color: var(--text-link-visited);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryItem > a > span {
+    color: inherit;
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryItem > a:is(:hover, :focus-visible) {
+    color: var(--text-link-hover);
+    background-color: var(--dm-hover);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryItem > a:active {
+    color: var(--text-strong);
+    background-color: var(--dm-selected);
+    box-shadow: inset 0 0 0 1px var(--border-focus);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryClear > a {
+    color: var(--text-link);
+    background-color: transparent;
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RecentHistoryClear > a:is(:hover, :focus-visible) {
+    color: var(--text-link-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] .RecentHistoryListHorizontal:not(:where(.us-report-no-styling, .us-report-no-styling *)) > li > a:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+}
+
+@media screen {
+  :root[data-us-color-scheme="dark"] {
+    --task-night-1: #ffe5a0;
+    --task-night-2: #d7e8ff;
+    --task-night-3: #acbaff;
+  }
+}

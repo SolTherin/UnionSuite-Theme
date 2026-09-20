@@ -1,0 +1,9 @@
+<!-- Paste into the repeating Query Template field only.
+     Staff Bulletin iPart CSS class: us-staff-bulletin.
+     iMIS creates QueryTemplateItem and, when Display in cards is checked,
+     the card/card-body wrappers. The Header and Footer fields are separate. -->
+<div class="BulletinCard">
+  <h3>{#query.DocumentName}</h3>
+  <em>{#query.FirstName} {#query.LastName} - {#query.CreatedOn}</em>
+  <div class="us-list__body">{#query.DocumentBody noencode}</div>
+</div>

@@ -1,0 +1,9 @@
+/* Preview layout/arrow artwork only; header hiding and column resizing are shared/native CSS/JS. */
+html,body{height:auto}body{padding:16px;margin:0;background:var(--bg-page);font:14px/1.5 var(--font-ui)}
+.expand-example-note{margin:16px 0 0;color:var(--text-muted);font-size:13px}
+.rgDetailRow[hidden]{display:none!important}
+.rgDetailRow>td{padding:16px 20px;background:var(--bg-subtle);border-bottom:1px solid var(--border)}
+.rgDetailRow p{margin:6px 0 0}
+/* Live Telerik supplies these glyphs. The local fixture uses text triangles. */
+.rgExpandCol>input:is(.rgExpand,.rgCollapse){display:inline-block;appearance:none;background:transparent;border:0;width:28px;height:30px;margin:0;padding:0;color:var(--text-strong);font:18px/1 var(--font-ui);cursor:pointer}
+.rgExpandCol>input:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px}

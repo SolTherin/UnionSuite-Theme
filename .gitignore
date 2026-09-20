@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Scratch / temporary working dirs
+.tmp-*/
+
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Oversized generated artefacts (exceed GitHub's comfortable file size)
+THeme/UnionSuite/Usage-Guide.html
+THeme/UnionSuite.zip

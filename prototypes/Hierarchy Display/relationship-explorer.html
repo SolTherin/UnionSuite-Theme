@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membership relationship explorer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/tabler-icons.min.css">
+<style>
+  :root {
+    --bg:          #f4f6f9;
+    --surface:     #ffffff;
+    --border:      #dde1e7;
+    --text:        #1a1f2e;
+    --text-muted:  #6b7280;
+    --primary:       #2563eb;
+    --primary-hover: #1d4ed8;
+    --success:    #16a34a;
+    --warning:    #d97706;
+    --banner-bg:      #2c3e50;
+    --banner-text:    #ffffff;
+    --banner-divider: rgba(255,255,255,.3);
+    --action:         #3498db;
+    --action-hover:   #2980b9;
+    --selected-bg:     #eff6ff;
+    --selected-border: #93c5fd;
+    --radius:    10px;
+    --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px; background: var(--bg); color: var(--text);
+    line-height: 1.5; min-height: 100vh;
+  }
+  .app { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+
+  .banner {
+    display: flex; justify-content: space-between; align-items: center; gap: 30px;
+    padding: 20px 40px; background: var(--banner-bg); color: var(--banner-text);
+    border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .banner h1 { font-size: 24px; font-weight: 600; margin: 0; color: #fff; }
+  .banner h1 .muted { opacity: .6; font-size: 18px; font-weight: 400; }
+  .banner-left { display: flex; align-items: center; gap: 30px; flex: 1; flex-wrap: wrap; }
+  .banner-details { display: flex; flex-direction: column; gap: 5px; padding: 0 20px; border-left: 2px solid var(--banner-divider); }
+  .info-item { font-size: 13px; opacity: .9; color: #fff; display: flex; align-items: center; gap: 5px; }
+  .info-label { opacity: .7; }
+  .nav-buttons { display: flex; gap: 10px; }
+  .nav-button {
+    background: transparent; color: #fff; border: 2px solid var(--banner-divider);
+    padding: 10px 20px; border-radius: 5px; font-size: 14px; cursor: pointer;
+    text-decoration: none; transition: all .3s ease; white-space: nowrap;
+  }
+  .nav-button:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.6); }
+  .nav-button.selected { background: var(--action); border-color: var(--action); }
+  .nav-button i { margin-right: 6px; }
+
+  .toolbar { position: sticky; top: 0; z-index: 30; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--bg); padding: 10px 0; margin-bottom: 8px; }
+  .search-wrap { position: relative; flex: 1; min-width: 240px; }
+  .search-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 18px; pointer-events: none; }
+  .input {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s;
+  }
+  .input:focus { border-color: var(--primary); background: #fff; }
+  .input.search { padding-left: 40px; padding-right: 36px; }
+  .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; cursor: pointer; display: none; }
+  .search-clear.show { display: block; }
+  .search-clear:hover { color: var(--text); }
+  mark { background: #fde68a; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .tree-co.hit { border-color: var(--warning); }
+  .roster-row.hit { border-color: var(--warning); background: #fffbeb; }
+
+  .btn {
+    padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; transition: background .15s, border-color .15s, transform .1s;
+    background: var(--surface); color: var(--text); border: 1.5px solid var(--border);
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:hover { border-color: #9ca3af; }
+  .btn-toggle.active { background: var(--selected-bg); border-color: var(--selected-border); color: var(--primary); }
+  .chip { background: var(--border); color: var(--text); border-radius: 9px; padding: 0 6px; font-size: 11px; font-weight: 700; }
+  .btn-toggle.active .chip { background: var(--primary); color: #fff; }
+  .btn-end { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 5px; border: 1px solid #fca5a5; background: #fff5f5; color: #dc2626; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .btn-end:hover { background: #fee2e2; border-color: #dc2626; }
+  .edit-note { margin: 0 0 14px; padding: 8px 12px; font-size: 12px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+
+  .tab-panel { display: none; background: var(--surface); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); }
+  .tab-panel.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .phead { display: flex; align-items: center; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .phead .p-title { font-size: 18px; font-weight: 600; }
+  .phead .scope { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+
+  .crumbbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .back-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); border-radius: 7px; cursor: pointer; flex-shrink: 0; }
+  .back-btn:hover:not(:disabled) { border-color: #9ca3af; }
+  .back-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .breadcrumb { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 13px; }
+  .crumb { color: var(--text-muted); cursor: pointer; padding: 2px 7px; border-radius: 5px; }
+  .crumb:hover { color: var(--primary); background: var(--selected-bg); text-decoration: underline; }
+  .crumb.current { color: var(--text); font-weight: 600; cursor: default; }
+  .crumb.current:hover { background: none; text-decoration: none; }
+  .crumb-sep { color: var(--text-muted); font-size: 13px; }
+  .crumb-note { color: var(--text-muted); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+
+  .kbd-hint { font-size: 11px; color: var(--text-muted); margin: 0 0 12px 2px; }
+  .kbd-hint kbd { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; font-family: monospace; font-size: 10px; }
+
+  .group-lbl { display: flex; align-items: center; gap: 8px; padding: 10px 2px 4px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .count-pill { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0 8px; font-size: 11px; font-weight: 600; }
+
+  /* Company tree */
+  .tree-co { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; transition: border-color .15s, box-shadow .15s; }
+  .tree-co.root { border-color: var(--selected-border); background: var(--selected-bg); box-shadow: 0 0 0 2px var(--selected-border); }
+  .tree-co .chev { color: var(--text-muted); cursor: pointer; flex-shrink: 0; }
+  .tree-co .co-ico { color: var(--primary); flex-shrink: 0; }
+  .tree-co .co-name { font-weight: 600; cursor: pointer; }
+  .tree-co .co-name:hover { color: var(--primary); text-decoration: underline; }
+  .tree-co .co-id { font-family: monospace; font-size: 11px; color: var(--text-muted); }
+  .tree-co .heads { margin-left: auto; font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; cursor: help; }
+  .tree-children { margin-left: 14px; padding-left: 12px; border-left: 2px solid var(--border); margin-top: 4px; }
+  .node { margin: 6px 0; }
+  .nav-item.nav-sel { box-shadow: 0 0 0 2px var(--primary); border-color: var(--primary); }
+  .empty-leaf { padding: 10px 12px; margin: 4px 0; font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+
+  /* Roster rows (display-only inside the company tab) */
+  .roster-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin: 4px 0; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+  .roster-row.past { opacity: .72; }
+  .m-name { font-weight: 600; }
+  .m-title { color: var(--text-muted); font-size: 13px; }
+  .m-id { margin-left: auto; font-family: monospace; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-primary { background: #fffbeb; color: #d97706; }
+  .badge-viewing { background: #eff6ff; color: #2563eb; }
+  .badge-muted   { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* Member tab: master-detail */
+  .member-layout { display: flex; gap: 16px; align-items: flex-start; }
+  .member-list { width: 280px; flex-shrink: 0; max-height: 600px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+  .member-list-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); padding: 9px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 1; }
+  .ml-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
+  .ml-row:last-child { border-bottom: none; }
+  .ml-row:hover { background: var(--selected-bg); }
+  .ml-row.sel { background: var(--selected-bg); box-shadow: inset 3px 0 0 var(--primary); }
+  .ml-text { flex: 1; min-width: 0; }
+  .ml-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ml-sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ml-id { font-family: monospace; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .member-detail { flex: 1; min-width: 0; }
+
+  .m-header { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--selected-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .avatar.sm { width: 32px; height: 32px; font-size: 11px; }
+  .m-header .nm { font-weight: 600; font-size: 16px; }
+  .m-header .sub { font-size: 13px; color: var(--text-muted); }
+  .job-card { padding: 12px 14px; margin: 8px 0; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; }
+  .job-card.primary { border-color: #fcd34d; background: #fffbeb; }
+  .job-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .job-title { font-weight: 600; }
+  .job-dates { margin-left: auto; font-size: 12px; color: var(--text-muted); }
+  .job-dates.current { color: var(--success); }
+  .lineage { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border); font-size: 12px; }
+  .lineage .lbl { color: var(--text-muted); }
+  .lineage .seg { color: var(--text-muted); }
+  .lineage .seg.cur { color: var(--text); font-weight: 600; }
+  .lineage .jid { margin-left: auto; font-family: monospace; color: var(--text-muted); }
+  .hidden-note { padding: 12px 2px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+
+  .ic-star { color: #d97706; flex-shrink: 0; }
+  .ic-dim  { color: var(--text-muted); flex-shrink: 0; }
+
+  .skeleton { height: 40px; border-radius: 8px; background: linear-gradient(90deg,#eceff3 25%,#f5f7fa 50%,#eceff3 75%); background-size: 200% 100%; animation: sk 1.4s ease-in-out infinite; }
+  @keyframes sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .flash { animation: flash 1.2s ease; }
+  @keyframes flash { 0%, 100% { background: var(--selected-bg); } 25%, 55% { background: #fef9c3; } }
+
+  .log { margin-top: 18px; font-size: 13px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-height: 42px; box-shadow: var(--shadow); }
+  .log:empty::before { content: "Actions appear here (in production these would persist to the record)."; color: var(--text-muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .nav-buttons { flex-direction: column; gap: 8px; }
+    .nav-button { text-align: center; }
+  }
+  @media (max-width: 768px) {
+    .banner, .banner-left { flex-direction: column; align-items: stretch; gap: 15px; }
+    .banner { padding: 15px 20px; }
+    .banner h1 { text-align: center; font-size: 20px; }
+    .banner-details { border-left: none; border-top: 2px solid var(--banner-divider); padding: 15px 0 0 0; }
+    .nav-buttons { flex-direction: column; width: 100%; }
+    .nav-button { width: 100%; text-align: center; }
+    .member-layout { flex-direction: column; }
+    .member-list { width: 100%; max-height: 260px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner">
+    <div class="banner-left">
+      <h1><span class="muted">Membership CRM</span><br>Relationship explorer</h1>
+      <div class="banner-details">
+        <div class="info-item"><span class="info-label">Companies:</span><span id="coCount">0</span></div>
+        <div class="info-item"><span class="info-label">Members:</span><span id="memCount">0</span></div>
+      </div>
+      <div class="nav-buttons" role="tablist">
+        <a class="nav-button selected" id="tab-company" role="tab" onclick="switchTab('company')"><i class="ti ti-sitemap" aria-hidden="true"></i>Company roster</a>
+        <a class="nav-button" id="tab-member" role="tab" onclick="switchTab('member')"><i class="ti ti-user" aria-hidden="true"></i>Member view</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="ti ti-search search-ico" aria-hidden="true"></i>
+      <input id="search" class="input search" type="text" autocomplete="off" aria-label="Search">
+      <i class="ti ti-x search-clear" id="searchClear" title="Clear search" aria-label="Clear search"></i>
+    </div>
+    <button class="btn btn-toggle" id="histToggle" aria-pressed="false"></button>
+    <button class="btn btn-toggle" id="editToggle" aria-pressed="false" title="Permission-gated — only staff with edit rights would see this in production"><i class="ti ti-pencil" aria-hidden="true"></i> Edit mode</button>
+  </div>
+
+  <div class="edit-note" id="editNote" style="display:none;"><i class="ti ti-lock-open" aria-hidden="true"></i> Edit mode on — in production this is restricted to staff with edit permission. Changes are local to this demo session.</div>
+
+  <!-- COMPANY TAB — self-contained: companies & rosters only, no navigation to the member tab -->
+  <div class="tab-panel active" id="panel-company" role="tabpanel">
+    <h2 class="sr-only">Company-centric roster hierarchy with parents above the root and child companies plus rosters below.</h2>
+    <div class="phead">
+      <i class="ti ti-sitemap" style="font-size:18px; color:var(--primary);" aria-hidden="true"></i>
+      <span class="p-title">Company roster</span>
+      <span id="cScope" class="scope"></span>
+    </div>
+    <div class="crumbbar">
+      <button class="back-btn" id="backBtn" onclick="goBack()" disabled><i class="ti ti-arrow-back-up" aria-hidden="true"></i> Back</button>
+      <div id="crumbs" class="breadcrumb"></div>
+      <button class="back-btn" id="collapseBtn" onclick="toggleCollapseAll()" style="margin-left:auto;"></button>
+    </div>
+    <div class="kbd-hint">Tip: <kbd>/</kbd> search · <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> re-root · <kbd>Esc</kbd> clear</div>
+    <div id="tree"></div>
+  </div>
+
+  <!-- MEMBER TAB — self-contained: own searchable member list + detail, no navigation to the company tab -->
+  <div class="tab-panel" id="panel-member" role="tabpanel">
+    <h2 class="sr-only">Member-centric view: pick a member to see their employment grouped into current and historical, with each company's lineage shown for reference.</h2>
+    <div class="phead">
+      <i class="ti ti-user" style="font-size:18px; color:var(--primary);" aria-hidden="true"></i>
+      <span class="p-title">Member view</span>
+      <span id="mScope" class="scope"></span>
+    </div>
+    <div class="kbd-hint">Tip: <kbd>/</kbd> search · <kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> clear</div>
+    <div class="member-layout">
+      <div class="member-list" id="memberList"></div>
+      <div class="member-detail">
+        <div id="memberHeader"></div>
+        <div id="memberJobs"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="log" class="log"></div>
+</div>
+
+<script>
+/* ---- Data model: three linked tables (Company.parent is the self-referencing CompanyID) ---- */
+const companies = {
+  "C-100":{name:"Acme Group", parent:null},
+  "C-101":{name:"Acme Manufacturing", parent:"C-100"},
+  "C-102":{name:"Acme Northeast Division", parent:"C-101"},
+  "C-103":{name:"Boston Plant", parent:"C-102"},
+  "C-104":{name:"Hartford Plant", parent:"C-102"},
+  "C-105":{name:"Acme Logistics", parent:"C-100"},
+  "C-106":{name:"Acme Robotics", parent:"C-101"},
+  "C-200":{name:"Globex Corporation", parent:null},
+  "C-201":{name:"Globex Services", parent:"C-200"},
+  "C-202":{name:"Globex Tech Solutions", parent:"C-200"},
+  "C-203":{name:"Globex Training Institute", parent:"C-202"},
+  "C-117":{name:"Initech Systems", parent:null},
+  "C-118":{name:"Initech Consulting", parent:"C-117"},
+  "C-300":{name:"Patterson Supply", parent:null},
+  "C-301":{name:"Patterson Regional", parent:"C-300"}
+};
+const members = {
+  "M-1001":"Edward Cole","M-1002":"Maya Rodriguez","M-1003":"James Chen","M-1004":"Sarah Mitchell",
+  "M-1005":"Robert Thompson","M-1006":"Jessica Park","M-1007":"David Williamson","M-1008":"Amanda Foster",
+  "M-1009":"Michael Zhang","M-1010":"Elena Vasquez","M-1011":"Christopher Hayes","M-1012":"Nicole Bennett",
+  "M-1013":"Kevin O'Brien","M-1014":"Lauren Patterson","M-1015":"Anthony Rossi","M-1016":"Sophia Nakamura",
+  "M-1017":"Marcus Jefferson","M-1018":"Gabrielle Moreau","M-1019":"Thomas Anderson","M-1020":"Rachel Kaufman",
+  "M-1021":"Victor Santiago"
+};
+const jobs = [
+  {jid:"J-8821", mid:"M-1002", cid:"C-101", title:"VP of Engineering",          start:"2022-03-01", end:null,         primary:true},
+  {jid:"J-6402", mid:"M-1002", cid:"C-117", title:"Director of Engineering",    start:"2018-06-01", end:"2022-02-28", primary:false},
+  {jid:"J-5511", mid:"M-1002", cid:"C-100", title:"Board Advisor",              start:"2023-06-15", end:null,         primary:false},
+  {jid:"J-7733", mid:"M-1001", cid:"C-102", title:"Manufacturing Manager",      start:"2021-01-15", end:null,         primary:true},
+  {jid:"J-4421", mid:"M-1001", cid:"C-101", title:"Senior Production Analyst",  start:"2017-08-20", end:"2020-12-31", primary:false},
+  {jid:"J-3309", mid:"M-1003", cid:"C-103", title:"Plant Operations Director",  start:"2019-07-01", end:null,         primary:true},
+  {jid:"J-2214", mid:"M-1003", cid:"C-104", title:"Shift Supervisor",           start:"2014-02-10", end:"2019-06-30", primary:false},
+  {jid:"J-9955", mid:"M-1004", cid:"C-105", title:"Supply Chain Manager",       start:"2020-09-01", end:null,         primary:true},
+  {jid:"J-8844", mid:"M-1004", cid:"C-100", title:"Logistics Coordinator",      start:"2016-11-15", end:"2020-08-31", primary:false},
+  {jid:"J-7722", mid:"M-1005", cid:"C-200", title:"Chief Operations Officer",   start:"2023-01-10", end:null,         primary:true},
+  {jid:"J-6611", mid:"M-1005", cid:"C-201", title:"Operations Manager",         start:"2019-04-01", end:"2022-12-31", primary:false},
+  {jid:"J-5500", mid:"M-1006", cid:"C-202", title:"Senior Systems Architect",   start:"2021-05-15", end:null,         primary:true},
+  {jid:"J-4499", mid:"M-1006", cid:"C-117", title:"Systems Engineer",           start:"2018-09-01", end:"2021-05-14", primary:false},
+  {jid:"J-3388", mid:"M-1007", cid:"C-201", title:"Client Services Director",   start:"2022-02-01", end:null,         primary:true},
+  {jid:"J-2277", mid:"M-1007", cid:"C-200", title:"Account Executive",          start:"2015-10-15", end:"2022-01-31", primary:false},
+  {jid:"J-1166", mid:"M-1008", cid:"C-203", title:"Training Program Manager",   start:"2020-06-01", end:null,         primary:true},
+  {jid:"J-9944", mid:"M-1009", cid:"C-102", title:"Quality Assurance Lead",     start:"2023-03-15", end:null,         primary:true},
+  {jid:"J-8833", mid:"M-1009", cid:"C-104", title:"QA Technician",              start:"2019-11-01", end:"2023-03-14", primary:false},
+  {jid:"J-7721", mid:"M-1010", cid:"C-105", title:"Procurement Specialist",     start:"2024-01-10", end:null,         primary:true},
+  {jid:"J-6610", mid:"M-1011", cid:"C-118", title:"Principal Consultant",       start:"2022-08-01", end:null,         primary:true},
+  {jid:"J-5501", mid:"M-1011", cid:"C-117", title:"Senior Consultant",          start:"2017-03-15", end:"2022-07-31", primary:false},
+  {jid:"J-4399", mid:"M-1012", cid:"C-103", title:"Maintenance Supervisor",     start:"2021-09-01", end:null,         primary:true},
+  {jid:"J-3288", mid:"M-1013", cid:"C-101", title:"HR Manager",                 start:"2023-02-15", end:null,         primary:true},
+  {jid:"J-2177", mid:"M-1013", cid:"C-100", title:"HR Specialist",              start:"2020-05-01", end:"2023-02-14", primary:false},
+  {jid:"J-1066", mid:"M-1014", cid:"C-300", title:"Regional Sales Director",    start:"2022-07-01", end:null,         primary:true},
+  {jid:"J-9951", mid:"M-1015", cid:"C-201", title:"Finance Manager",            start:"2023-11-01", end:null,         primary:true},
+  {jid:"J-8845", mid:"M-1016", cid:"C-202", title:"Data Scientist",             start:"2024-02-01", end:null,         primary:true},
+  {jid:"J-7731", mid:"M-1017", cid:"C-102", title:"Production Planner",         start:"2021-06-15", end:null,         primary:true},
+  {jid:"J-6622", mid:"M-1017", cid:"C-103", title:"Production Associate",       start:"2018-09-01", end:"2021-06-14", primary:false},
+  {jid:"J-5512", mid:"M-1018", cid:"C-105", title:"Warehouse Manager",          start:"2020-04-01", end:null,         primary:true},
+  {jid:"J-4400", mid:"M-1019", cid:"C-200", title:"Executive Vice President",   start:"2023-06-01", end:null,         primary:true},
+  {jid:"J-3399", mid:"M-1020", cid:"C-104", title:"Equipment Technician",       start:"2022-10-15", end:null,         primary:true},
+  {jid:"J-2288", mid:"M-1021", cid:"C-301", title:"Logistics Coordinator",      start:"2023-01-01", end:null,         primary:true}
+];
+
+/* ---- State (search is per-tab so the two views stay isolated) ---- */
+let rootId = "C-101";
+let currentMemberId = "M-1002";
+let showHistorical = false;
+let editMode = false;
+let activeTab = "company";
+let companyQuery = "";
+let memberQuery = "";
+let flashRoot = false;
+const collapsed = new Set();
+const navStack = [];
+let navItems = [], navIndex = -1;
+
+/* ---- Helpers ---- */
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmt(d){ if(!d) return "Present"; const [y,m]=d.split("-"); return MONTHS[+m-1]+" "+y; }
+function dur(s,e){ const sd=new Date(s), ed=e?new Date(e):new Date(); let mo=(ed.getFullYear()-sd.getFullYear())*12+(ed.getMonth()-sd.getMonth()); const y=Math.floor(mo/12), m=mo%12; return ((y?y+"y ":"")+(m?m+"mo":"")) || "<1mo"; }
+function initials(name){ return name.replace(/[^A-Za-z. ]/g,"").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
+function childrenOf(id){ return Object.keys(companies).filter(c=>companies[c].parent===id); }
+function topLevel(){ return Object.keys(companies).filter(c=>!companies[c].parent); }
+function chainUp(id){ const out=[]; let p=companies[id].parent, g=0; while(p && g++<50){ out.unshift(p); p=companies[p].parent; } return out; }
+function jobsAtCompany(id){ return jobs.filter(j=>j.cid===id && (showHistorical || !j.end)); }
+function jobsForMember(id){ return jobs.filter(j=>j.mid===id); }
+function totalHeads(id){ let n=jobsAtCompany(id).length; childrenOf(id).forEach(c=>n+=totalHeads(c)); return n; }
+function histInBranch(id){ let n=jobs.filter(j=>j.cid===id && j.end).length; childrenOf(id).forEach(c=>n+=histInBranch(c)); return n; }
+function memberPrimary(mid){ const cur=jobsForMember(mid).filter(j=>!j.end); return cur.find(j=>j.primary) || cur[0] || null; }
+function hl(text,q){ if(!q) return text; const i=text.toLowerCase().indexOf(q); if(i<0) return text; return text.slice(0,i)+"<mark>"+text.slice(i,i+q.length)+"</mark>"+text.slice(i+q.length); }
+
+/* ---- Edit action: end a current job (sets EndDate = today) ---- */
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function endJob(jid){
+  const j=jobs.find(x=>x.jid===jid);
+  if(!j || j.end || !editMode) return;
+  const today=todayISO();
+  if(!confirm(`End ${members[j.mid]}'s role “${j.title}” at ${companies[j.cid].name}?\n\nThe end date will be set to today (${today}) and this becomes historical employment.`)) return;
+  j.end=today;
+  j.primary=false;            /* a primary flag marks the member's current primary job; an ended job is no longer current */
+  renderCompany(); renderMember();
+  logMsg(`Ended ${members[j.mid]} — “${j.title}” at ${companies[j.cid].name}. End date set to ${today}.`);
+}
+
+/* ========================= COMPANY TAB ========================= */
+function matchText(s){ return s.toLowerCase().includes(companyQuery); }
+function ownMatch(id){ return matchText(companies[id].name) || matchText(id); }
+function jobMatch(j){ return matchText(members[j.mid]) || matchText(j.mid) || matchText(j.title); }
+function subtreeMatches(id){
+  if(!companyQuery) return true;
+  if(ownMatch(id)) return true;
+  if(jobsAtCompany(id).some(jobMatch)) return true;
+  return childrenOf(id).some(subtreeMatches);
+}
+function rosterRow(j){
+  const star = j.primary ? '<i class="ti ti-star ic-star" aria-hidden="true"></i>'
+                         : '<i class="ti ti-user ic-dim" aria-hidden="true"></i>';
+  const past = !!j.end;
+  const hit = companyQuery && jobMatch(j);
+  return `<div class="roster-row ${past?'past':''} ${hit?'hit':''}">
+    ${star}<span class="m-name">${hl(members[j.mid],companyQuery)}</span>
+    <span class="m-title">${hl(j.title,companyQuery)}</span>
+    ${past?'<span class="badge badge-muted"><i class="ti ti-history" aria-hidden="true"></i> '+fmt(j.start)+' – '+fmt(j.end)+'</span>':''}
+    <span class="m-id">${hl(j.mid,companyQuery)}</span>
+    ${(editMode && !past)?`<button class="btn-end" onclick="endJob('${j.jid}')" title="Set end date to today"><i class="ti ti-calendar-off" aria-hidden="true"></i> End today</button>`:''}
+  </div>`;
+}
+function companyNode(id, isRoot){
+  const c=companies[id], own=companyQuery?ownMatch(id):false;
+  const allRoster=jobsAtCompany(id);
+  let roster=allRoster, kids=childrenOf(id);
+  if(companyQuery && !own){ roster=allRoster.filter(jobMatch); kids=kids.filter(subtreeMatches); }
+  const open=companyQuery ? true : !collapsed.has(id);
+  const direct=allRoster.length, total=totalHeads(id), hasKids=childrenOf(id).length>0;
+  const headsTxt = hasKids ? `${direct} here &middot; ${total} in group` : `${direct} member${direct===1?'':'s'}`;
+  const headsTitle = hasKids ? `${direct} direct member(s) at this company; ${total} including all sub-companies`
+                             : `${direct} member(s) at this company`;
+  const hasHist = jobs.some(j=>j.cid===id && j.end);
+  const head=`<div class="tree-co nav-item ${isRoot?'root':''} ${own?'hit':''}" data-kind="co" data-id="${id}">
+      <i class="ti ti-chevron-${open?'down':'right'} chev" onclick="event.stopPropagation();tog('${id}')" title="${open?'Collapse':'Expand'}" aria-hidden="true"></i>
+      <i class="ti ti-building co-ico" aria-hidden="true"></i>
+      <span class="co-name" onclick="openCompany('${id}')" title="Re-root the tree on ${c.name}">${hl(c.name,companyQuery)}</span>
+      <span class="co-id">${hl(id,companyQuery)}</span>
+      ${isRoot?'<span class="badge badge-viewing">VIEWING</span>':''}
+      <span class="heads" title="${headsTitle}"><i class="ti ti-users" aria-hidden="true"></i> ${headsTxt}</span>
+    </div>`;
+  let inner = roster.map(rosterRow).join("") + kids.map(k=>companyNode(k,false)).join("");
+  if(open && !roster.length && !kids.length){
+    inner = `<div class="empty-leaf"><i class="ti ti-users-group" aria-hidden="true"></i> No ${showHistorical?'':'current '}members at this company.${(!showHistorical && hasHist)?' Toggle “Show historical” to see past employees.':''}</div>`;
+  }
+  const body = open ? `<div class="tree-children">${inner}</div>` : "";
+  return `<div class="node">${head}${body}</div>`;
+}
+function renderCrumbs(){
+  const bar=document.getElementById("crumbs");
+  if(companyQuery){ bar.innerHTML=`<span class="crumb-note"><i class="ti ti-search" aria-hidden="true"></i> Matches across all companies for “${companyQuery}”</span>`; return; }
+  const chain=[...chainUp(rootId), rootId];
+  bar.innerHTML=chain.map((id,i)=>{
+    const last=i===chain.length-1;
+    const sep=i?'<i class="ti ti-chevron-right crumb-sep" aria-hidden="true"></i>':'';
+    return `${sep}<span class="crumb ${last?'current':''}" ${last?'':`onclick="openCompany('${id}')"`} title="${last?'Current company':'Go to '+companies[id].name}">${companies[id].name}</span>`;
+  }).join("");
+}
+function branchDescendants(id){ let out=[]; childrenOf(id).forEach(c=>{ out.push(c); out=out.concat(branchDescendants(c)); }); return out; }
+function updateCollapseBtn(){
+  const btn=document.getElementById("collapseBtn");
+  const desc=companyQuery?[]:branchDescendants(rootId);
+  if(!desc.length){ btn.style.display="none"; return; }
+  btn.style.display="";
+  const allCollapsed=desc.every(c=>collapsed.has(c));
+  btn.innerHTML = allCollapsed
+    ? '<i class="ti ti-arrows-maximize" aria-hidden="true"></i> Expand all'
+    : '<i class="ti ti-arrows-minimize" aria-hidden="true"></i> Collapse all';
+  btn.title = allCollapsed ? "Expand every sub-company" : "Collapse to just "+companies[rootId].name+" and its direct sub-companies";
+}
+function toggleCollapseAll(){
+  const desc=branchDescendants(rootId);
+  if(!desc.length) return;
+  const allCollapsed=desc.every(c=>collapsed.has(c));
+  if(allCollapsed) desc.forEach(c=>collapsed.delete(c));
+  else desc.forEach(c=>collapsed.add(c));
+  renderCompany();
+}
+function updateHistButton(){
+  const b=document.getElementById("histToggle");
+  const n = companyQuery ? jobs.filter(j=>j.end).length : histInBranch(rootId);
+  b.innerHTML=`<i class="ti ti-history" aria-hidden="true"></i> ${showHistorical?'Hide':'Show'} historical <span class="chip">${n}</span>`;
+  b.classList.toggle("active",showHistorical);
+  b.setAttribute("aria-pressed",showHistorical);
+}
+function renderCompany(){
+  updateHistButton();
+  renderCrumbs();
+  updateCollapseBtn();
+  const tree=document.getElementById("tree");
+  if(companyQuery){
+    const tops=topLevel().filter(subtreeMatches);
+    tree.innerHTML = tops.length ? tops.map(id=>companyNode(id,false)).join("")
+      : `<div class="hidden-note"><i class="ti ti-search-off" aria-hidden="true"></i> No companies or members match “${companyQuery}”.</div>`;
+    document.getElementById("cScope").textContent=`Filtered by “${companyQuery}”`;
+  } else {
+    tree.innerHTML=companyNode(rootId,true);
+    const total=totalHeads(rootId);
+    document.getElementById("cScope").textContent=`${total} ${showHistorical?'job record':'current member'}${total===1?'':'s'} in this branch`;
+    if(flashRoot){ const el=tree.querySelector(".tree-co.root"); if(el){ el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),1200); } flashRoot=false; }
+  }
+  if(activeTab==="company") refreshNavItems();
+  saveState();
+}
+function renderCompanyWithSkeleton(){
+  updateHistButton(); renderCrumbs(); updateCollapseBtn();
+  document.getElementById("tree").innerHTML=Array.from({length:5}).map((_,i)=>`<div class="skeleton" style="margin:6px 0 6px ${(i%3)*16}px;"></div>`).join("");
+  setTimeout(renderCompany,320);
+}
+
+/* ========================= MEMBER TAB ========================= */
+function memberMatch(id){
+  if(!memberQuery) return true;
+  if(members[id].toLowerCase().includes(memberQuery) || id.toLowerCase().includes(memberQuery)) return true;
+  return jobsForMember(id).some(j=>j.title.toLowerCase().includes(memberQuery) || companies[j.cid].name.toLowerCase().includes(memberQuery));
+}
+function renderMemberList(){
+  const ids=Object.keys(members).filter(memberMatch);
+  const list=document.getElementById("memberList");
+  const rows=ids.map(id=>{
+    const p=memberPrimary(id);
+    const sub=p?`${p.title} · ${companies[p.cid].name}`:"No current role";
+    return `<div class="ml-row nav-item ${id===currentMemberId?'sel':''}" data-kind="member" data-mid="${id}" onclick="selectMember('${id}')">
+        <div class="avatar sm">${initials(members[id])}</div>
+        <div class="ml-text">
+          <div class="ml-name">${hl(members[id],memberQuery)}</div>
+          <div class="ml-sub">${sub}</div>
+        </div>
+        <div class="ml-id">${id}</div>
+      </div>`;
+  }).join("");
+  list.innerHTML = `<div class="member-list-head">${ids.length} member${ids.length===1?'':'s'}${memberQuery?' matched':''}</div>` +
+    (rows || `<div class="hidden-note" style="padding:14px;">No members match “${memberQuery}”.</div>`);
+  document.getElementById("mScope").textContent = memberQuery ? `Filtered by “${memberQuery}”` : `${Object.keys(members).length} members`;
+  if(activeTab==="member") refreshNavItems();
+}
+function lineageStatic(cid){
+  const chain=[...chainUp(cid), cid];
+  return chain.map((id,i)=>{
+    const last=i===chain.length-1;
+    const sep=i?'<i class="ti ti-chevron-right" style="font-size:11px;color:var(--text-muted);" aria-hidden="true"></i>':'';
+    const ico=last?'ti-building':'ti-building-skyscraper';
+    return `${sep}<span class="seg ${last?'cur':''}"><i class="ti ${ico}" aria-hidden="true"></i> ${companies[id].name}</span>`;
+  }).join(" ");
+}
+function jobNode(j){
+  const star=j.primary?'<i class="ti ti-star ic-star" aria-hidden="true"></i>':'<i class="ti ti-briefcase ic-dim" aria-hidden="true"></i>';
+  const cur=!j.end;
+  return `<div class="job-card ${j.primary?'primary':''}">
+    <div class="job-top">
+      ${star}<span class="job-title">${j.title}</span>
+      ${j.primary?'<span class="badge badge-primary">PRIMARY</span>':''}
+      <span class="job-dates ${cur?'current':''}">${fmt(j.start)} – ${fmt(j.end)} &middot; ${dur(j.start,j.end)}</span>
+      ${(editMode && cur)?`<button class="btn-end" onclick="endJob('${j.jid}')" title="Set end date to today"><i class="ti ti-calendar-off" aria-hidden="true"></i> End today</button>`:''}
+    </div>
+    <div class="lineage">
+      <span class="lbl">Company tree:</span>
+      ${lineageStatic(j.cid)}
+      <span class="jid">${j.jid}</span>
+    </div>
+  </div>`;
+}
+function jobGroup(label, icon, list){
+  if(!list.length) return "";
+  return `<div><div class="group-lbl"><i class="ti ${icon}" aria-hidden="true"></i> ${label} <span class="count-pill">${list.length}</span></div>${list.map(jobNode).join("")}</div>`;
+}
+function renderMemberDetail(){
+  const name=members[currentMemberId];
+  document.getElementById("memberHeader").innerHTML=`<div class="m-header">
+      <div class="avatar">${initials(name)}</div>
+      <div>
+        <div class="nm">${name}</div>
+        <div class="sub"><i class="ti ti-id" style="font-size:14px; vertical-align:-2px;" aria-hidden="true"></i> Member &middot; ${currentMemberId}</div>
+      </div>
+    </div>`;
+  const mine=jobsForMember(currentMemberId);
+  const current=mine.filter(j=>!j.end);
+  const past=mine.filter(j=>j.end);
+  let html=jobGroup("Current employment","ti-briefcase",current);
+  if(!current.length) html+=`<div class="empty-leaf"><i class="ti ti-briefcase-off" aria-hidden="true"></i> No current employment on record.</div>`;
+  if(showHistorical) html+=jobGroup("Historical employment","ti-history",past);
+  else if(past.length) html+=`<div class="hidden-note"><i class="ti ti-eye-off" aria-hidden="true"></i> ${past.length} historical job(s) hidden — enable “Show historical”.</div>`;
+  document.getElementById("memberJobs").innerHTML=html;
+}
+function renderMember(){ renderMemberList(); renderMemberDetail(); }
+function selectMember(id){ if(!members[id]) return; currentMemberId=id; renderMember(); saveState(); logMsg("Selected member "+members[id]+" ("+id+")"); }
+
+/* ---- Search (per-tab; no cross-over between the two views) ---- */
+function applySearch(raw){
+  const q=raw.trim().toLowerCase();
+  document.getElementById("searchClear").classList.toggle("show",!!q);
+  navIndex=-1;
+  if(activeTab==="company"){ companyQuery=q; renderCompany(); }
+  else { memberQuery=q; renderMemberList(); }
+}
+function clearSearch(){
+  const inp=document.getElementById("search"); inp.value=""; inp.focus();
+  document.getElementById("searchClear").classList.remove("show");
+  navIndex=-1;
+  if(activeTab==="company"){ companyQuery=""; renderCompany(); }
+  else { memberQuery=""; renderMemberList(); }
+}
+function resetCompanySearch(){
+  companyQuery="";
+  if(activeTab==="company"){ const i=document.getElementById("search"); i.value=""; document.getElementById("searchClear").classList.remove("show"); }
+}
+
+/* ---- Tabs + history (back applies to company-tab navigation) ---- */
+function setTabClasses(t){
+  activeTab=t;
+  document.getElementById("tab-company").classList.toggle("selected",t==="company");
+  document.getElementById("tab-member").classList.toggle("selected",t==="member");
+  document.getElementById("panel-company").classList.toggle("active",t==="company");
+  document.getElementById("panel-member").classList.toggle("active",t==="member");
+  const inp=document.getElementById("search");
+  const q = t==="company" ? companyQuery : memberQuery;
+  inp.value=q;
+  inp.placeholder = t==="company" ? "Search companies & members in the tree…  ( press / )" : "Search members by name, role or company…  ( press / )";
+  document.getElementById("searchClear").classList.toggle("show",!!q);
+}
+function pushHistory(){ navStack.push({tab:activeTab,root:rootId,member:currentMemberId}); if(navStack.length>50) navStack.shift(); updateBack(); }
+function updateBack(){ document.getElementById("backBtn").disabled = navStack.length===0; }
+function goBack(){
+  if(!navStack.length) return;
+  const s=navStack.pop();
+  resetCompanySearch();
+  rootId=s.root; currentMemberId=s.member; navIndex=-1;
+  setTabClasses(s.tab);
+  renderMember(); renderCompany();
+  updateBack();
+  logMsg("Went back");
+}
+function switchTab(t){ if(t===activeTab) return; pushHistory(); navIndex=-1; setTabClasses(t); if(t==="company") renderCompany(); else renderMember(); saveState(); }
+function openCompany(id){
+  if(!companies[id]) return;
+  pushHistory(); resetCompanySearch();
+  if(id!==rootId) collapsed.clear();
+  rootId=id; flashRoot=true; navIndex=-1;
+  setTabClasses("company");
+  renderCompanyWithSkeleton();
+  logMsg("Re-rooted on "+companies[id].name+" ("+id+")");
+}
+function tog(id){ if(collapsed.has(id)) collapsed.delete(id); else collapsed.add(id); renderCompany(); }
+function logMsg(t){ document.getElementById("log").textContent=t; }
+
+/* ---- Keyboard navigation (scoped to the active panel) ---- */
+function refreshNavItems(){
+  const sel = activeTab==="company" ? "#panel-company .nav-item" : "#panel-member .nav-item";
+  navItems=[...document.querySelectorAll(sel)];
+  if(navIndex>=navItems.length) navIndex=navItems.length-1;
+  applyNavSel();
+}
+function applyNavSel(){ navItems.forEach((el,i)=>el.classList.toggle("nav-sel",i===navIndex)); }
+function moveNav(d){
+  if(!navItems.length) return;
+  navIndex = navIndex<0 ? 0 : Math.max(0,Math.min(navItems.length-1,navIndex+d));
+  applyNavSel();
+  navItems[navIndex].scrollIntoView({block:"nearest"});
+}
+function activateNav(){
+  const el=navItems[navIndex]; if(!el) return;
+  if(el.dataset.kind==="co") openCompany(el.dataset.id);
+  else if(el.dataset.kind==="member") selectMember(el.dataset.mid);
+}
+
+/* ---- Persistence (URL hash + localStorage) ---- */
+function saveState(){
+  const p=new URLSearchParams();
+  p.set("tab",activeTab); p.set("root",rootId); p.set("mem",currentMemberId);
+  p.set("hist",showHistorical?"1":"0"); p.set("edit",editMode?"1":"0");
+  if(companyQuery) p.set("cq",companyQuery);
+  if(memberQuery) p.set("mq",memberQuery);
+  if(collapsed.size) p.set("col",[...collapsed].join("."));
+  const s=p.toString();
+  try{ history.replaceState(null,"","#"+s); }catch(e){}
+  try{ localStorage.setItem("relExplorer",s); }catch(e){}
+}
+function loadState(){
+  let s=location.hash.slice(1);
+  if(!s){ try{ s=localStorage.getItem("relExplorer")||""; }catch(e){} }
+  if(!s) return;
+  const p=new URLSearchParams(s);
+  const root=p.get("root"); if(root&&companies[root]) rootId=root;
+  const mem=p.get("mem"); if(mem&&members[mem]) currentMemberId=mem;
+  showHistorical = p.get("hist")==="1";
+  editMode = p.get("edit")==="1";
+  const tab=p.get("tab"); if(tab==="company"||tab==="member") activeTab=tab;
+  companyQuery = p.get("cq")||"";
+  memberQuery = p.get("mq")||"";
+  const col=p.get("col"); if(col) col.split(".").forEach(c=>{ if(companies[c]) collapsed.add(c); });
+}
+
+/* ---- Wire up ---- */
+const searchInput=document.getElementById("search");
+searchInput.addEventListener("input", e=>applySearch(e.target.value));
+searchInput.addEventListener("keydown", e=>{ if(e.key==="Escape"){ clearSearch(); searchInput.blur(); } });
+document.getElementById("searchClear").addEventListener("click", clearSearch);
+document.getElementById("histToggle").addEventListener("click", ()=>{ showHistorical=!showHistorical; renderCompany(); renderMember(); });
+function applyEditMode(){
+  const b=document.getElementById("editToggle");
+  b.classList.toggle("active",editMode);
+  b.setAttribute("aria-pressed",editMode);
+  document.getElementById("editNote").style.display = editMode ? "flex" : "none";
+}
+document.getElementById("editToggle").addEventListener("click", ()=>{ editMode=!editMode; applyEditMode(); renderCompany(); renderMember(); saveState(); });
+document.addEventListener("keydown", e=>{
+  const inField = document.activeElement===searchInput;
+  if(e.key==="/" && !inField){ e.preventDefault(); searchInput.focus(); return; }
+  if(inField) return;
+  if(e.key==="ArrowDown"){ e.preventDefault(); moveNav(1); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); moveNav(-1); }
+  else if(e.key==="Enter"){ e.preventDefault(); activateNav(); }
+});
+
+/* ---- Init ---- */
+loadState();
+document.getElementById("coCount").textContent=Object.keys(companies).length;
+document.getElementById("memCount").textContent=Object.keys(members).length;
+applyEditMode();
+setTabClasses(activeTab);
+renderMember();
+updateBack();
+renderCompanyWithSkeleton();
+</script>
+</body>
+</html>

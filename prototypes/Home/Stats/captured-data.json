@@ -1,0 +1,143 @@
+{
+  "capturedAt": "2026-09-13T12:18:40.415Z",
+  "timeZone": "Australia/Sydney",
+  "folder": "$/_i4u_/SandBox/CRM Layouts/Home_Page/Stats",
+  "periods": {
+    "current": {
+      "start": "2026-09-01",
+      "end": "2026-09-14"
+    },
+    "previous": {
+      "start": "2026-08-01",
+      "end": "2026-08-14"
+    },
+    "empty": {
+      "start": "2026-09-01",
+      "end": "2026-09-01"
+    }
+  },
+  "queries": {
+    "category": {
+      "name": "Member Counts by Category",
+      "current": [
+        {
+          "CategoryCode": "Associate Member",
+          "CategoryName": "Member Type",
+          "MemberCount": 1
+        },
+        {
+          "CategoryCode": "Regular Member",
+          "CategoryName": "Member Type",
+          "MemberCount": 83080
+        },
+        {
+          "CategoryCode": "Regular Member - SL",
+          "CategoryName": "Member Type",
+          "MemberCount": 2
+        },
+        {
+          "CategoryCode": "Student Member",
+          "CategoryName": "Member Type",
+          "MemberCount": 1
+        }
+      ]
+    },
+    "total": {
+      "name": "Total Member Count",
+      "current": [
+        {
+          "MemberCount": 83084
+        }
+      ]
+    },
+    "group": {
+      "name": "Member Counts by Group",
+      "current": [
+        {
+          "GroupCode": null,
+          "GroupName": "Member Type",
+          "MemberCount": 80699
+        },
+        {
+          "GroupCode": "Billing Category 1",
+          "GroupName": "Member Type",
+          "MemberCount": 2358
+        },
+        {
+          "GroupCode": "Billing Category 2",
+          "GroupName": "Member Type",
+          "MemberCount": 15
+        },
+        {
+          "GroupCode": "Billing Category 3",
+          "GroupName": "Member Type",
+          "MemberCount": 10
+        },
+        {
+          "GroupCode": "Billing Category 4",
+          "GroupName": "Member Type",
+          "MemberCount": 1
+        },
+        {
+          "GroupCode": "Retired",
+          "GroupName": "Member Type",
+          "MemberCount": 1
+        }
+      ]
+    },
+    "resigned": {
+      "name": "Members Resigned",
+      "current": [
+        {
+          "GroupCode": "Billing Category 3",
+          "GroupName": "Member Category",
+          "ResignedCount": 1
+        }
+      ],
+      "previous": [
+        {
+          "GroupCode": null,
+          "GroupName": "Member Category",
+          "ResignedCount": 1
+        }
+      ]
+    },
+    "joined": {
+      "name": "Members Joined",
+      "current": [
+        {
+          "GroupCode": "Billing Category 1",
+          "GroupName": "Member Category",
+          "JoinedCount": 8
+        }
+      ],
+      "previous": [
+        {
+          "GroupCode": "Billing Category 1",
+          "GroupName": "Member Category",
+          "JoinedCount": 1
+        }
+      ]
+    },
+    "financial": {
+      "name": "Member Counts by Financial Status",
+      "current": [
+        {
+          "FinancialStatusCode": null,
+          "FinancialStatusName": "Financial Status",
+          "MemberCount": 20616
+        },
+        {
+          "FinancialStatusCode": "Financial",
+          "FinancialStatusName": "Financial Status",
+          "MemberCount": 7227
+        },
+        {
+          "FinancialStatusCode": "Unfinancial",
+          "FinancialStatusName": "Financial Status",
+          "MemberCount": 55241
+        }
+      ]
+    }
+  }
+}

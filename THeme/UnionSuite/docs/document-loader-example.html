@@ -1,0 +1,33 @@
+<!-- Sanitised native Document Loader structure. No generated runtime markers. -->
+<form id="document-demo-form">
+  <div id="sample_DocumentEditPanel" class="panel">
+    <div class="panel-heading"></div>
+    <div class="panel-body-container"><div class="panel-body">
+      <div class="PanelField Left" data-inputid="TextField">
+        <div style="display:inline"><label for="document-name" class="Required">Document Name</label></div>
+        <div class="PanelFieldValue InputLargeWrapper"><input id="document-name" data-propertyname="Name" type="text" value="Example.zip" required maxlength="100"></div>
+      </div>
+      <div class="PanelField Left" data-inputid="TextArea">
+        <div style="display:inline"><label for="document-description">Document Description</label></div>
+        <div class="PanelFieldValue"><textarea id="document-description" data-propertyname="Description" rows="3" maxlength="250"></textarea></div>
+      </div>
+      <div class="PanelField Left" style="white-space:nowrap">
+        <label for="document-file">Upload new version</label>
+        <div class="PanelFieldValue AutoWidth" style="white-space:nowrap">
+          <div class="RadUpload RadUpload_Orion"><ul class="ruInputs"><li><span class="ruFileWrap ruStyled"><input id="document-file" type="file" class="ruFileInput"><input aria-label="Selected filename" type="text" class="ruFakeInput" readonly><input type="button" value="Select" class="ruButton ruBrowse"></span><input type="button" value="Remove" class="ruButton ruClear"></li></ul></div>
+          <span id="sample_lblMaxFileSize">Maximum file size: supplied by iMIS</span>
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="CommandBar"><input type="button" value="Save" class="TextButton SaveAndClose PrimaryButton" data-ajaxupdatedcontrolid="ContentDiv" onclick="if(this.disabled)return false;if(!this.form.reportValidity())return false;this.disabled=true;documentDemoSave(this)"></div>
+  <p role="status" id="document-demo-status">Local example only; no upload or save requests.</p>
+</form>
+<script>
+// Preview-only stand-ins for Telerik and server completion.
+const documentDemoFile=document.getElementById('document-file');
+documentDemoFile.addEventListener('change',()=>document.querySelector('.ruFakeInput').value=documentDemoFile.files[0]?.name||'');
+document.querySelector('.ruBrowse').addEventListener('click',()=>documentDemoFile.click());
+document.querySelector('.ruClear').addEventListener('click',()=>{documentDemoFile.value='';documentDemoFile.dispatchEvent(new Event('change',{bubbles:true}));});
+function documentDemoSave(button){setTimeout(()=>{button.disabled=false;document.getElementById('document-demo-status').textContent='Save demonstration complete. Nothing was uploaded.';},1000);}
+</script>

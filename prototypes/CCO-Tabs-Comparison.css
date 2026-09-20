@@ -1,0 +1,65 @@
+/* Comparison page layout only. Never promote this file into the theme. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f6f7; color: #545962; font: 15px/1.55 system-ui, sans-serif; }
+main { max-width: 1540px; padding: 38px 28px 64px; margin: auto; }
+a { color: #006f94; text-underline-offset: 3px; }
+h1, h2, h3 { color: #003a4c; }
+h1 { font-size: 38px; letter-spacing: -.035em; line-height: 1.2; margin: 12px 0; }
+h2 { font-size: 23px; letter-spacing: -.02em; margin: 0; }
+h3 { font-size: 16px; margin: 0; }
+p { margin: 8px 0 0; }
+.intro { max-width: 80ch; }
+.eyebrow { margin-top: 24px; font-size: 12px; font-weight: 700; letter-spacing: .12em; color: #006f94; }
+.badge { display: inline-block; padding: 3px 9px; margin-left: 8px; vertical-align: middle; border: 1px solid #d8b898; border-radius: 20px; color: #825020; background: #fff4e9; font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; margin: 26px 0 34px; padding: 16px 18px; background: #fff; border: 1px solid #e2e5e9; border-radius: 8px; }
+.toolbar fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.toolbar legend { float: left; padding: 0; margin-right: 16px; font-weight: 600; color: #003a4c; }
+.toolbar label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.toolbar input { accent-color: #006f94; }
+button { font: inherit; cursor: pointer; }
+.toolbar button, .copy { padding: 6px 12px; background: white; color: #003a4c; border: 1px solid #c8ccd2; border-radius: 5px; }
+button:hover { background: #eef6f9; }
+:focus-visible { outline: 2px solid #006f94; outline-offset: 3px; }
+.section-head { margin-bottom: 16px; }
+.section-head p { font-size: 14px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 22px; margin-bottom: 38px; align-items: start; }
+.comparison-card { min-width: 0; overflow: hidden; background: #fff; border: 1px solid #dce1e5; border-radius: 9px; }
+.card-head { padding: 16px 20px; border-bottom: 1px solid #dce1e5; min-height: 92px; }
+.card-head p { font-size: 13px; margin-top: 4px; }
+.proposed .card-head { border-top: 3px solid #006f94; padding-top: 13px; }
+.frame-wrap { margin: auto; max-width: 100%; background: #eeeeef; }
+iframe { width: 100%; height: 470px; border: 0; display: block; }
+body[data-layout="full"] .pair { grid-template-columns: 1fr; }
+body[data-layout="narrow"] .frame-wrap { width: 390px; }
+.technical { padding: 22px 24px; border: 1px solid #dce1e5; border-radius: 9px; background: white; }
+.technical summary { cursor: pointer; color: #003a4c; font-weight: 600; }
+.technical details { margin-top: 20px; }
+.technical table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+.technical td, .technical th { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e2e5e9; vertical-align: top; }
+.technical th { width: 28%; color: #003a4c; }
+code { font: 13px/1.5 Consolas, monospace; overflow-wrap: anywhere; }
+pre { padding: 18px; background: #f5f6f7; border-radius: 6px; overflow: auto; max-height: 340px; }
+.copy { margin-top: 14px; }
+.foot { margin-top: 18px; font-size: 13px; }
+#copy-status { font-size: 13px; min-height: 20px; }
+@media (max-width: 1050px) { .pair { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { main { padding: 24px 14px 40px; } h1 { font-size: 32px; } .toolbar { gap: 16px; } .card-head { padding-inline: 14px; } .technical { padding: 18px 14px; } .technical th { width: 36%; } }
+/* Option gallery; swatches use real tab CSS in isolated offline frames. */
+.jump-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.jump-links a { display: block; padding: 8px 13px; border: 1px solid #dce1e5; background: white; border-radius: 6px; text-decoration: none; }
+.option-grid { display: grid; gap: 20px; margin-bottom: 38px; }
+.vertical-options { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.horizontal-options { grid-template-columns: 1fr; }
+.option-grid .card-head { min-height: 124px; }
+.horizontal-options .card-head { min-height: auto; }
+.option-code { display: inline-block; margin-right: 10px; padding: 3px 8px; background: #ffe8d6; color: #002632; border-radius: 4px; font-size: 12px; }
+.option-grid iframe { height: 140px; }
+.vertical-options iframe { height: 550px; }
+.combined-section { margin-bottom: 38px; }
+.combined-section .toolbar { margin: 0 0 16px; }
+.style-choice { display: flex; align-items: center; gap: 8px; max-width: 100%; }
+.toolbar select { max-width: 100%; padding: 7px 9px; font: inherit; color: #003a4c; background: white; border: 1px solid #c8ccd2; border-radius: 5px; }
+body[data-layout="narrow"] .option-grid .frame-wrap { width: auto; }
+.section-head { scroll-margin-top: 20px; }
+@media (max-width: 1150px) { .vertical-options { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 650px) { .vertical-options { grid-template-columns: 1fr; } .option-grid .card-head { min-height: auto; } }

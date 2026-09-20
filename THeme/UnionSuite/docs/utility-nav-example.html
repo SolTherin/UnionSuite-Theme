@@ -1,0 +1,40 @@
+<div class="wrapper SVG-enabled">
+  <header class="header navbar" id="hd">
+    <div class="navbar-header nav-auxiliary">
+      <div class="navbar-left"><a class="logo" href="#logo-preview" aria-label="Client home (offline sample logo)">Client home</a></div>
+      <div class="navbar-right" role="navigation" aria-label="utility">
+        <div class="us-taskbar" id="injected-taskbar" data-taskbar>
+          <div class="tb-search-wrap us-taskbar__search">
+            <div class="us-taskbar__search-shell"><input class="tb-search-input us-taskbar__search-input" aria-label="Quick Search" placeholder="Search members…"></div>
+            <a class="TextButton us-outline-button us-taskbar__full-search" href="#directory-preview" title="Full search" aria-label="Full search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="10" r="5"></circle><path d="m13 14 4 4M16 4h5v5M21 4l-5 5"></path></svg></a>
+          </div>
+        </div>
+        <ul class="NavigationUnorderedList"><li class="NavigationListItem nav-aux-button nav-aux-cart"><a class="NavigationLink" onclick="MenuLI_OnClick()" href="#cart-preview"><span class="nav-text">Cart</span><span data-cartlink="y" class="cartEmpty"><span class="cartSprite"></span></span></a></li></ul>
+        <a title="Easy edit is off. Click to turn it on." class="ste-toggle off" href="javascript:__doPostBack('easy-edit','')">Enable easy edit</a>
+        <ul class="account-menu obo-off">
+          <li class="dropdown batch-toggle-wrapper"><a class="dropdown-toggle transaction-date-toggle off" title="Select transaction date" href="#">Select transaction date</a><div class="dropdown-menu">Transaction date options</div></li>
+          <li class="obo-toggle-wrapper"><a onclick="ToggleOBO(this.id); return false;" id="utility-demo-obo" title="Select on behalf of" class="obo-toggle off" href="javascript:__doPostBack('obo','')">Select on behalf of</a></li>
+          <li class="dropdown account-toggle-wrapper">
+            <a href="#" class="dropdown-toggle account-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><div class="profile-picture-wrapper"><img class="picture-primary" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34'%3E%3Crect width='34' height='34' fill='gray'/%3E%3C/svg%3E"></div><span class="nav-text">James Driscoll</span><span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li class="obo-section"><div class="obo-panel off ProxyPanelNoContact"><div class="obo-label">On behalf of</div><ul class="obo-actions"><li id="utility-demo-contact" hidden><a href="#contact-preview">Stark Enterprise - Melbourne</a></li><li><a id="utility-demo-select" onclick="TargetSelectOpenFinderAdder(); return false;" href="javascript:__doPostBack('select','')">(select)</a></li><li><a id="utility-demo-clear" class="obo-action obo-clear" onclick="__doPostBack('clear-obo',''); return false;" href="#" hidden>Clear</a></li></ul></div></li>
+              <li class="divider">&nbsp;</li><li><a href="#account-preview">My account</a></li><li><a href="#signout-preview" class="sign-out-link">Sign out</a></li><li class="divider">&nbsp;</li><li><span class="dropdown-header">Go to</span></li>
+              <li class="website-item"><a href="#member-portal-preview">Member portal</a></li><li class="website-item"><a href="#staff-portal-preview">Staff portal</a></li><li class="website-item" hidden><a href="#other-site-preview">Additional site</a></li><li class="js-show-more-sites"><a href="#more-preview">(show more)</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+</div>
+<section class="utility-example-controls">
+  <p id="utility-example-status" role="status">Preview only. Cart navigation, Easy Edit requests and the contact picker are simulated.</p>
+  <p>Select a contact using the headset icon to preview the OBO header colour, logo and selected-contact name. The logo is a labelled offline sample using the client stylesheet's actual logo dimensions.</p>
+  <p><label for="utility-example-appearance">Appearance</label><select id="utility-example-appearance"><option value="system">Device setting</option><option value="light">Light</option><option value="dark">Dark</option></select> Preview the native icons, account name, open menu and on/off states in either theme.</p>
+  <label for="utility-example-mode">Request outcome</label>
+  <select id="utility-example-mode"><option value="success">Complete successfully</option><option value="hold">Hold request open</option><option value="failure">Request fails</option><option value="cancel">Cancelled before request</option></select>
+  <button type="button" class="TextButton LinkButton" id="utility-example-finish">Finish held request</button>
+  <button type="button" class="TextButton LinkButton" id="utility-example-replace">Replace native controls</button>
+  <p id="utility-example-counts">Cart calls: 0 · Easy Edit calls: 0 · OBO calls: 0</p>
+</section>
+<dialog id="utility-example-picker" aria-labelledby="utility-picker-title"><h2 id="utility-picker-title">Select on behalf of</h2><p>Fictional contact picker.</p><button type="button" class="TextButton" id="utility-example-select">Select Stark Enterprise - Melbourne</button><button type="button" class="TextButton LinkButton" id="utility-example-cancel">Cancel</button></dialog>

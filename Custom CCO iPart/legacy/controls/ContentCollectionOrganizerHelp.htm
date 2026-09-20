@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Content Collection Organizer Content Item Configuration</title>
+    </head>
+<body>
+    <h1>Content Collection Organizer</h1>
+    <p>This content item displays content pages as a related group through unordered tabs or as 
+        workflow-based steps.</p>
+    <ul>
+        <li><strong>Name</strong> - Enter a name for the content item. This text appears during design mode (configuration).</li>
+
+<li><strong>Title</strong> - Enter the text to display above this content item on the rendered page. If blank, no title displays.</li>
+
+<li><strong>Do not render in design mode</strong> - Select this option to prevent content record data from being loaded in the content editor. This improves performance during design time (configuration).</li>
+        <li><strong>iPart CSS class </strong>- (optional) Enter the name of a CSS class to associate with this iPart, which will add a DIV so named around the iPart. Add this CSS class to an appropriate style sheet. Using such classes lets you apply special formatting to targeted iParts in a reusable way.</li>
+
+<li><strong>Display a border around this content</strong> - Select this option to display a border around this content item on the rendered page.</li>
+        <li><strong>Display content within a collapsible panel </strong>- Enable to allow users to minimize the panel within the page, to work with dense pages more efficiently.<ul>
+            <li><strong>Show the content as collapsed</strong> - Enable to display the panel minimized by default. </li>
+            </ul>
+        </li>
+        <li><strong>Display on screen sizes (for responsive themes only)</strong>:<ul>
+            <li><strong>Extra-small screens </strong>- When disabled, this content item is hidden on extra small devices, such as smartphones, where the width of the screen is less than 768px.</li>
+            <li><strong>Small screens</strong> - When disabled, this content item is hidden on small devices, such as tablets, where the width of the screen is greater than 768px and less than 991px.</li>
+            <li><strong>Medium screens</strong> - When disabled, this content item is hidden on medium devices, such as laptops, where the width of the screen is greater than 992px and less than 1199px.</li>
+            <li><strong>Large screens</strong> - When disabled, this content item is hidden on large devices, such as wide computer monitors, where the width of the screen is greater than or equal to 1200px wide. </li>
+            <br><em>Note:</em> When <strong>Easy Edit</strong> is enabled, all content items for a page are displayed, regardless of the <strong>Display on screen sizes (for responsive themes only)</strong> options that are selected.</br>
+            </ul>
+        </li>
+        <li>
+            <strong>Use content folder to define tabs</strong> - Select this checkbox to use a content folder's records as the content to display on each tab. This option is not available if <strong>Function as wizard</strong> is selected.
+        </li>
+        <li><strong>Function as wizard - </strong>Select this option to display the content item as 
+            a workflow (wizard). If not selected, the content item displays tabs for content items. 
+            If this option is selected, the following item displays.
+        <ul>
+                <li><strong>Steps must be sequential</strong> (available if <strong>Function as wizard
+                    </strong>option is selected) - Select this option if your workflow has fixed sequential steps. 
+                </li>
+            <li>
+                <strong>Redirect on finish</strong> - You can choose to define content to which a user is redirected once they have completed a wizard workflow:<ul>
+                    <li>
+                        <strong>Content or URL to redirect to</strong> - Select the content to which you want to redirect a user.
+                        <br />This is the target of the navigation link. You can specify an absolute URL to any website, a relative URL to pages within the website associated with this sitemap, or you can click <strong>select</strong> to browse for a content record. For relative URLs, use a tilde character to represent the IIS web site root where this sitemap’s website is located.
+                        For example:<br /><i>~/ThisWebsiteFolder/Default.aspx</i>.
+                    </li>
+                </ul>
+            </li>
+            <li class="v10only"><strong>Include ID as a URL parameter</strong> - Include the ID for the newly created account in the URL that is linked to. For example, select this option if you link to a contact profile page and would like to display the newly created contact's profile.</li>
+            <li class="v100only"><strong>Include ContactKey as a URL parameter</strong> - Include the ContactKey for the newly created account in the URL that is linked to. For example, select this option if you link to a contact profile page and would like to display the newly created contact's profile.</li>
+            <i>Note:</i> On the last step in the wizard, a <strong>Finish</strong> button will be added instead of a <strong>Next</strong> button.
+            </ul>
+        </li>
+        <li>Click + to add a tab/step.</li>
+        <li><strong>Move left</strong> - Click to move the selected tab/step to the left 
+            (changes display/process order).</li>
+        <li><strong>Move right</strong> - Click to move the selected tab/step to the right 
+            (changes display/process order).</li>
+        <li><strong>Remove this step</strong> - Click to remove the selected tab/step.</li>
+        <li><strong>Step name</strong> - Enter the <strong>Tab/Step Name</strong> to display.</li>
+        <li><strong>Content to display </strong>- Browse for <strong>Content to display</strong>, or enter in a shortcut. The shortcut must conform to the format /Shortcut. When selecting a content record 
+            to display, keep in mind that access to content records can be limited by 
+            security. To prevent errors, make sure that the content records you select can 
+            be accessed by the intended users. <i>Access Settings</i> are defined when 
+            editing a content record from <i>Page Builder &gt; Manage content</i>.<ul>
+                <li>Click <strong>Preview</strong> to check the data to be displayed. </li>
+            </ul>
+        </li>
+        <li><strong>Hide this step</strong> - (available if Function as wizard
+                    option is selected) Select this option to hide the step to the user (does not display). 
+                This allows you to attach any action content items without user intervention. For 
+                example, you might want to send an email message when a certain step is 
+                complete.</li>
+        <li><strong>Next step on success - </strong>(available if <strong>Function as wizard
+                    </strong>option is selected and <strong>Steps must be sequential</strong> option is 
+                    <i>not</i> selected) 
+                Select the step to display if the current step is successful.</li>
+        <li><strong>Next step on failure</strong> - (available if <strong>Function as wizard 
+                    </strong>option is selected and <strong>Steps must be sequential</strong> option is 
+                    <i>not</i> 
+                selected) Select the step to display if the current step fails. <strong>Default</strong> causes the wizard to remain on the current step..</li>
+        
+    </ul>
+    <p><strong>Notes</strong></p>
+    <ul>
+        <li>When displaying multiple Content Collection Organizer (CCO) content items on a single web page, you must configure each
+            CCO content item to have a unique <strong>Name.</strong></li>
+        <li>You can create links to specific tabs of your CCO
+            content item using URL parameters. The parameter is either passed through from the webpage&#39;s
+            navigation item or from a direct link to the page, and it can be built using either
+            the tab name or tab index. The available URL parameters are <strong>[ContentItem Name]=[Tab name]</strong>
+            and <strong>[ContentItem Name]=[tab index]</strong>. For example, if you want to create a link directly
+            to the <strong>Giving History</strong> tab of your <strong>Account Pages</strong> CCO content item, set the URL to <strong>http://mywebsite.com/Account_Page.aspx?Account_Pages=Giving
+            History</strong>. Or, if you want to attach that same parameter to the navigation item instead,
+            enter <strong>Account_Pages=Giving History</strong> into the navigation item&#39;s <strong>URL Parameters</strong> field.
+            You also have the option to link by the tab index. For example, if the <strong>Giving History</strong>
+            tab is the second tab displayed, use <strong>Account_Pages=2</strong>.
+            <p>
+                When creating a link to a tab, keep the following guidelines in mind:</p>
+            <ul>
+                <li>Use the content item <strong>Name</strong> and <strong>Tab name</strong> defined within the configuration page of your CCO content item.</li>
+                <li>Replace any spaces in the content item <strong>Name</strong> with underscores.</li>
+                <li>Enter the exact <strong>Tab name</strong>, including spaces.</li>
+                <li>Direct tab linking does not work when the option <strong>Function as wizard</strong> is enabled.</li>
+                <li>If you change the content item <strong>Name</strong>, <strong>Tab name</strong>, or tab order, you may need to update any
+                    navigation items or links that point to that tab.</li>
+            </ul>
+        </li>
+    </ul>
+        </body>
+</html>

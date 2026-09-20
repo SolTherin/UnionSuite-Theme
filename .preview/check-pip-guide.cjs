@@ -1,0 +1,43 @@
+const path=require('node:path'),{pathToFileURL}=require('node:url'),assert=require('node:assert/strict');
+const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
+(async()=>{
+  const browser=await chromium.launch({channel:'msedge',headless:true});
+  try{
+    const page=await browser.newPage({viewport:{width:1280,height:900}});
+    await page.route('https://**/*',r=>r.abort());
+    await page.goto(pathToFileURL(path.resolve('THeme/UnionSuite/Usage-Guide.html')).href+'#taskbar-pip');
+    const element=page.locator('#taskbar-colours-demo');
+    await element.scrollIntoViewIfNeeded();
+    const frame=page.frameLocator('#taskbar-colours-demo');
+    await frame.locator('[data-pip-preview-replay]').click();
+    await frame.locator('.us-taskbar__pip[data-phase="visit"]').waitFor();
+    await frame.locator('.us-taskbar__pip-button').click();
+    assert.equal(await frame.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Make Biscuit hop');
+    await page.waitForTimeout(900);
+    await frame.locator('.us-taskbar__pip-button').click();
+    assert.equal(await frame.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Say goodbye to Biscuit');
+    await frame.locator('[data-pip-preview-idle="curious"]').click();
+    assert(await frame.locator('.us-taskbar__pip').evaluate(el=>el.classList.contains('is-curious')));
+    await frame.locator('[data-pip-preview-idle="scratch"]').click();
+    assert(await frame.locator('.us-taskbar__pip').evaluate(el=>el.classList.contains('is-scratching')));
+    assert.equal(await frame.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Say goodbye to Biscuit','idle preview buttons preserve the third click');
+    await page.waitForTimeout(600);
+    await element.screenshot({path:'.preview/taskbar-pip-guide.png'});
+    await frame.locator('.us-taskbar__pip-button').click();
+    await frame.locator('.us-taskbar__pip-button').waitFor({state:'hidden'});
+    assert(await frame.locator('[data-pip-preview-idle="scratch"]').isDisabled());
+    assert(await frame.locator('[data-pip-preview-idle="curious"]').isDisabled());
+    await frame.locator('[data-pip-preview-reload]').click();
+    await page.waitForTimeout(3000);
+    assert.equal(await frame.locator('.us-taskbar__pip').getAttribute('data-phase'),'away');
+    await frame.locator('[data-pip-preview-scheme]').selectOption('dark');
+    await frame.locator('[data-pip-preview-replay]').click();
+    await frame.locator('.us-taskbar__pip[data-phase="visit"]').waitFor();
+    assert(await frame.locator('.us-taskbar__pip-button').isVisible());
+    assert.equal(await frame.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Biscuit says hello. Make Biscuit wave');
+    assert(await frame.locator('[data-pip-preview-idle="scratch"]').isEnabled());
+    assert(await page.locator('#taskbar-pip-install').textContent());
+    assert.equal(await page.locator('[data-copy="taskbar-pip-config"]').count(),1);
+    console.log('PASS: actual offline guide wave/hop/goodbye, both idle preview controls, replay reset, reload daily gating, dark example and copyable installation/configuration');
+  }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

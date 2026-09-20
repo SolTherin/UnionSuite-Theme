@@ -1,0 +1,917 @@
+/* Preview layout and proposed components only; deliberately outside the theme. */
+body.ws-frame {
+  margin: 0;
+  color: var(--text-base);
+  background: var(--bg-page);
+  font: 13px/1.5 var(--font-ui);
+}
+
+.ws-frame *,
+.ws-frame *::before,
+.ws-frame *::after {
+  box-sizing: border-box;
+}
+
+.ws-frame [hidden] {
+  display: none !important;
+}
+
+.ws-header {
+  position: relative;
+  z-index: 3;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.ws-header-row {
+  display: flex;
+  align-items: center;
+  min-height: 76px;
+  padding: 18px 22px;
+  gap: 24px;
+}
+
+.ws-brand {
+  flex-shrink: 0;
+  color: var(--text-strong);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+}
+
+.ws-brand span {
+  display: block;
+  margin-top: 2px;
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  font-weight: 500;
+}
+
+.ws-frame #hd {
+  margin-left: auto;
+  min-width: 0;
+}
+
+.ws-page-content {
+  padding: 30px;
+}
+
+.ws-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.ws-page-heading p,
+.ws-overline {
+  font-size: 9px;
+  letter-spacing: .13em;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+.ws-page-heading h1 {
+  font: 600 25px/1.3 var(--font-ui);
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -.5px;
+}
+
+.ws-demo-label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.ws-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.ws-summary section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 20px;
+}
+
+.ws-summary span,
+.ws-summary small {
+  display: block;
+  font-size: 11px;
+}
+
+.ws-summary strong {
+  display: block;
+  margin: 10px 0 4px;
+  font-size: 29px;
+  line-height: 1.2;
+  color: var(--text-strong);
+  font-weight: 550;
+}
+
+.ws-summary small {
+  color: var(--text-muted);
+}
+
+.ws-activity {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.ws-activity > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-subtle);
+}
+
+.ws-activity h2 {
+  font: 600 12px var(--font-ui);
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.ws-activity > div > span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ws-activity p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  margin: 0;
+  font-size: 12px;
+}
+
+.ws-activity small {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.ws-activity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.ws-status {
+  margin: 0 30px 18px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+[data-variant="baseline"] .ws-page-content {
+  display: none;
+}
+
+[data-variant="baseline"] .ws-status {
+  margin: 14px 22px;
+}
+
+.ws-frame .ti {
+  font-family: workshop-tabler !important;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 19px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ws-feature-button,
+.ws-icon-button,
+.ws-pin,
+.ws-pin-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 34px;
+  min-height: 34px;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-strong);
+  font: 500 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.ws-feature-button {
+  background: var(--bg-subtle);
+  border-color: var(--border);
+}
+
+.ws-feature-button:hover,
+.ws-feature-button[aria-expanded="true"],
+.ws-icon-button:hover,
+.ws-pin:hover,
+.ws-pin-more:hover {
+  color: var(--text-link);
+  background: var(--bg-sunken);
+  border-color: var(--border);
+}
+
+.ws-frame button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.ws-frame button:focus-visible,
+.ws-frame input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+.ws-feature-button kbd,
+.ws-frame kbd {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font: 9px var(--font-ui);
+}
+
+.ws-feature-tools,
+.ws-pins,
+.ws-pins-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ws-feature-tools {
+  padding: 0 10px;
+  margin: 0 2px;
+  border-left: 1px solid var(--border);
+}
+
+[data-variant="proposal"] #injected-taskbar .tb-search-wrap {
+  width: clamp(180px, 24vw, 340px);
+  min-width: 160px;
+}
+
+[data-variant="proposal"] #injected-taskbar .us-taskbar__search-shell {
+  width: auto;
+}
+
+@media (min-width: 781px) {
+  [data-layout="shelf"] #injected-taskbar .tb-search-wrap {
+    width: clamp(230px, 34vw, 384px);
+  }
+}
+
+.ws-pin {
+  width: 32px;
+  padding: 5px;
+}
+
+.ws-pin-label,
+.ws-bookmark-label {
+  display: none;
+}
+
+.ws-pins .ws-icon-button,
+.ws-bookmark-toggle {
+  color: var(--text-muted);
+  min-width: 28px;
+  padding: 5px;
+}
+
+.ws-pins .ws-icon-button .ti,
+.ws-bookmark-toggle .ti {
+  font-size: 15px;
+}
+
+.ws-pin-more {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px;
+  min-width: 27px;
+}
+
+.ws-bookmark-shelf {
+  padding: 9px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.ws-bookmark-shelf .ws-bookmark-label {
+  display: block;
+  margin-right: 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.ws-bookmark-shelf .ws-pin {
+  width: auto;
+  max-width: 185px;
+  min-height: 29px;
+  padding: 5px 9px;
+  gap: 7px;
+}
+
+.ws-bookmark-shelf .ws-pin-label {
+  display: block;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-bookmark-shelf .ws-pin .ti {
+  font-size: 16px;
+}
+
+[data-layout="shelf"] .ws-feature-tools {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ws-hybrid-pins .ws-pins-items {
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.ws-hybrid-pins > .ws-feature-button {
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.ws-bookmark-toggle[aria-expanded="true"] {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+@media (max-width: 780px) {
+  [data-layout="hybrid"] #ws-pin-strip {
+    flex: 1 0 100%;
+  }
+}
+
+.ws-toast {
+  position: fixed;
+  z-index: 120;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 11px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-lg);
+  font-size: 12px;
+}
+
+.ws-popover {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  z-index: 40;
+  top: 68px;
+  right: 22px;
+  width: min(620px, calc(100% - 28px));
+  overflow: hidden;
+}
+
+.ws-bookmarks {
+  width: min(425px, calc(100% - 28px));
+}
+
+.ws-popover-heading,
+.ws-palette-heading {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ws-recents-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 20px 16px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.ws-recents-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+  min-height: 0;
+  overflow: auto;
+}
+
+.ws-recents-column + .ws-recents-column {
+  border-left: 1px solid var(--border);
+}
+
+.ws-recents-column h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px 8px;
+  margin: 0;
+  color: var(--text-muted);
+  font: 600 11px var(--font-ui);
+}
+
+.ws-recents-column h3 .ti {
+  color: var(--text-link);
+  font-size: 15px;
+}
+
+.ws-recents-list {
+  max-height: 295px;
+  overflow: auto;
+  padding: 0 7px 9px;
+}
+
+/* Selected narrow Recents design, integrated into the combined taskbar trial. */
+[data-layout="hybrid"] .ws-recents {
+  width: min(420px, calc(100% - 28px));
+}
+
+[data-layout="hybrid"] .ws-recents-columns {
+  grid-template-columns: 1fr;
+  max-height: 315px;
+  overflow-y: auto;
+}
+
+[data-layout="hybrid"] .ws-recents-column + .ws-recents-column {
+  border-left: 0;
+  border-top: 1px solid var(--border);
+}
+
+[data-layout="hybrid"] .ws-recents-list {
+  max-height: none;
+}
+
+.ws-recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  padding: 10px;
+  color: var(--text-strong);
+  font: 500 12px/1.4 var(--font-ui);
+  cursor: pointer;
+}
+
+.ws-recent-item:hover,
+.ws-palette-row:has(.ws-destination:hover),
+.ws-palette-row.is-active {
+  background: var(--bg-sunken);
+}
+
+.ws-recent-item small,
+.ws-destination small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.ws-recent-item > .ti {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.ws-popover-footer,
+.ws-palette-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ws-popover-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-link);
+  padding: 5px;
+  font: 500 11px var(--font-ui);
+  cursor: pointer;
+}
+
+.ws-popover-footer button .ti {
+  font-size: 15px;
+}
+
+.ws-palette {
+  position: fixed;
+  top: 38px;
+  bottom: auto;
+  margin: 0 auto;
+  width: min(610px, calc(100% - 28px));
+  max-height: calc(100% - 64px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.ws-palette[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.ws-palette::backdrop {
+  background: rgb(12 30 40 / 35%);
+  backdrop-filter: blur(2px);
+}
+
+.ws-palette h2 {
+  font-size: 19px;
+}
+
+.ws-palette-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 20px 15px;
+  padding: 0 11px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: none;
+  background: var(--bg-subtle);
+}
+
+.ws-palette-input:focus-within {
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+
+.ws-palette-input input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  box-shadow: none;
+  outline: 0;
+  background: transparent;
+  color: var(--text-strong);
+  font: 13px var(--font-ui);
+  padding: 11px 0;
+}
+
+.ws-palette-input input:focus-visible {
+  outline: none;
+}
+
+/* The composite field owns its surface, including under native dark input rules. */
+#ws-palette .ws-palette-input input,
+#ws-palette .ws-palette-input kbd {
+  background: transparent;
+}
+
+.ws-palette-meta {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 22px 7px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.ws-palette-results {
+  min-height: 100px;
+  overflow-y: auto;
+  padding: 0 10px 10px;
+}
+
+.ws-palette-row {
+  display: flex;
+  align-items: center;
+  border-radius: 7px;
+  padding-right: 7px;
+}
+
+.ws-palette-row:has(> .ws-palette-drag) {
+  /* Keep the handle's 2px focus ring and 3px offset inside the row. */
+  padding-left: 7px;
+}
+
+.ws-palette-row:has(> .ws-destination:focus-visible) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.ws-palette-row > .ws-destination:focus-visible {
+  outline: none;
+}
+
+.ws-palette-group {
+  padding: 9px 12px 5px;
+  color: var(--text-muted);
+  font: 600 10px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.ws-palette-divider {
+  margin-top: 9px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+
+.ws-palette-drag {
+  cursor: grab;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.ws-palette-drag:active {
+  cursor: grabbing;
+}
+
+.ws-palette.is-sorting,
+.ws-palette.is-sorting * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.ws-palette-floating {
+  position: fixed;
+  opacity: .8;
+  z-index: 200;
+  box-sizing: border-box;
+  pointer-events: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-focus);
+  box-shadow: var(--shadow-lg);
+}
+
+.ws-palette-placeholder {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border: 2px dashed var(--border-focus);
+  border-radius: 7px;
+  background: transparent;
+}
+
+.ws-destination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-strong);
+  font: 500 12px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-destination > .ti {
+  color: var(--text-link);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px;
+  font-size: 17px;
+}
+
+.ws-star {
+  color: var(--text-muted);
+}
+
+.ws-star[aria-pressed="true"] {
+  color: var(--accent-hover);
+}
+
+.ws-palette-footer {
+  flex-shrink: 0;
+}
+
+.ws-bookmark-editor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 10px;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.ws-bookmark-editor-row > .ti {
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.ws-bookmark-editor-row > span {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-strong);
+}
+
+.ws-bookmark-editor-row .ws-icon-button {
+  min-height: 28px;
+  min-width: 25px;
+  padding: 3px;
+}
+
+.ws-bookmark-editor-row .ws-icon-button .ti {
+  font-size: 16px;
+}
+
+.ws-bookmark-editor-row.is-drop-target {
+  border-color: var(--border-focus);
+  background: var(--bg-subtle);
+}
+
+#bookmark-editor {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0 0 10px;
+}
+
+.ws-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.ws-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-strong);
+}
+
+.ws-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 1060px) {
+  [data-variant="proposal"] .ws-brand span,
+  .ws-feature-button kbd {
+    display: none;
+  }
+
+  [data-variant="proposal"] .ws-header-row {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  [data-variant="proposal"] #injected-taskbar .us-taskbar__pip {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .ws-header-row {
+    flex-wrap: wrap;
+    gap: 13px;
+    padding: 14px;
+  }
+
+  .ws-brand span {
+    display: none;
+  }
+
+  .ws-frame #hd {
+    width: 100%;
+  }
+
+  [data-variant="proposal"] #injected-taskbar {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  [data-variant="proposal"] #injected-taskbar .us-taskbar__pip {
+    display: none;
+  }
+
+  [data-variant="proposal"] .ws-feature-tools {
+    margin-left: auto;
+    padding-right: 0;
+  }
+
+  [data-variant="proposal"] #injected-taskbar .tb-search-wrap {
+    order: 3;
+    flex: 1 0 calc(100% - 60px);
+    width: auto;
+  }
+
+  [data-variant="proposal"] #injected-taskbar .us-taskbar__search-shell {
+    width: 100%;
+  }
+
+  [data-variant="proposal"] #injected-taskbar .us-taskbar__theme-toggle {
+    order: 4;
+  }
+
+  .ws-bookmark-shelf {
+    padding: 8px 14px;
+  }
+
+  .ws-bookmark-shelf .ws-pins-items {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+  }
+
+  .ws-popover {
+    right: 14px;
+  }
+
+  .ws-summary {
+    gap: 8px;
+  }
+
+  .ws-summary section {
+    padding: 12px;
+  }
+
+  .ws-page-content {
+    padding: 22px 14px;
+  }
+
+  .ws-page-heading h1 {
+    font-size: 21px;
+  }
+
+  .ws-page-heading > span,
+  .ws-activity small {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ws-feature-button {
+    font-size: 11px;
+    padding: 5px 7px;
+  }
+
+  .ws-pin {
+    min-width: 27px;
+    width: 27px;
+  }
+
+  .ws-pins-items {
+    gap: 1px;
+  }
+
+  .ws-recents-columns {
+    grid-template-columns: 1fr;
+    max-height: 315px;
+    overflow-y: auto;
+  }
+
+  .ws-recents-column + .ws-recents-column {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .ws-recents-list {
+    max-height: none;
+  }
+
+  .ws-palette-heading,
+  .ws-popover-heading {
+    padding: 16px;
+  }
+
+  .ws-palette-footer > span:last-child {
+    display: none;
+  }
+
+  .ws-bookmark-label {
+    display: none !important;
+  }
+}

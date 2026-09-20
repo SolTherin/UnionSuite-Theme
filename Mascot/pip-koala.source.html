@@ -1,0 +1,315 @@
+<div id="pip-mascot-demo" aria-label="Pip, a taskbar mascot concept">
+  <style>
+    #pip-mascot-demo {
+      --pip-surface: light-dark(#f6f8f7, #202827);
+      --pip-bar: light-dark(#ffffff, #283230);
+      --pip-ink: light-dark(#263c37, #e2ede8);
+      --pip-muted: light-dark(#64756e, #aebeb6);
+      --pip-line: light-dark(#dce5df, #414e48);
+      --pip-accent: light-dark(#245e4b, #a6dcc2);
+      --pip-tint: light-dark(#e6efe9, #364b40);
+      --pip-fur: light-dark(#a1d5bd, #a5d4c0);
+      --pip-fur-edge: light-dark(#7bb39b, #77ab93);
+      --pip-fur-light: light-dark(#c1e8d4, #c5e8d7);
+      --pip-ear: light-dark(#efd9cf, #ebd2ca);
+      --pip-face: light-dark(#29473e, #29473e);
+      --pip-blush: light-dark(#dfaca7, #dfaca7);
+      --pip-shine: light-dark(#fffdf7, #fffdf7);
+      --pip-shadow: light-dark(#203c351a, #07100c35);
+      color: var(--pip-ink);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      width: 100%;
+    }
+    #pip-mascot-demo * { box-sizing: border-box; }
+    #pip-mascot-demo .pip-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    #pip-mascot-demo .pip-name { display:block; font-weight:500; }
+    #pip-mascot-demo .pip-subtitle { display:block; color:var(--pip-muted); margin-top:3px; }
+    #pip-mascot-demo .pip-replay { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid var(--pip-line); border-radius:9px; background:var(--pip-bar); color:var(--pip-ink); font:inherit; cursor:pointer; }
+    #pip-mascot-demo .pip-replay:hover { background:var(--pip-tint); }
+    #pip-mascot-demo .pip-product { border:1px solid var(--pip-line); border-radius:14px; overflow:hidden; background:var(--pip-surface); }
+    #pip-mascot-demo .pip-stage { height:272px; position:relative; overflow:hidden; }
+    #pip-mascot-demo .pip-watermark { position:absolute; left:22px; top:20px; color:var(--pip-muted); display:flex; align-items:center; gap:8px; }
+    #pip-mascot-demo .pip-visitor { position:absolute; bottom:0; right:14%; width:190px; height:225px; }
+    #pip-mascot-demo .pip-cutout { position:absolute; inset:0; overflow:hidden; }
+    #pip-mascot-demo .pip-character { position:absolute; bottom:-35px; left:15px; width:160px; height:158px; background:none; border:0; padding:0; color:var(--pip-face); cursor:pointer; transform:translateY(155px); visibility:hidden; transition:transform 500ms ease-in, visibility 0s linear 500ms; -webkit-tap-highlight-color:transparent; }
+    #pip-mascot-demo .pip-character:disabled { cursor:default; }
+    #pip-mascot-demo .pip-character:focus-visible { outline:2px solid var(--pip-accent); outline-offset:4px; border-radius:48%; }
+    #pip-mascot-demo[data-phase="peek"] .pip-character { transform:translateY(45px) rotate(-5deg); visibility:visible; transition:transform 620ms cubic-bezier(.3,1.25,.5,1), visibility 0s; }
+    #pip-mascot-demo[data-phase="visit"] .pip-character { transform:translateY(0); visibility:visible; transition:transform 720ms cubic-bezier(.34,1.5,.42,1), visibility 0s; }
+    #pip-mascot-demo[data-phase="leaving"] .pip-character { transform:translateY(155px) rotate(3deg); visibility:visible; transition:transform 640ms cubic-bezier(.55,-.38,.78,.22), visibility 0s; }
+    /* Separate layers keep arrival/wave movement independent of quiet breathing. */
+    #pip-mascot-demo .pip-creature { position:absolute; inset:0; transform-origin:50% 100%; }
+    #pip-mascot-demo .pip-figure { position:absolute; inset:0; transform-origin:50% 100%; }
+    #pip-mascot-demo.is-arriving .pip-creature { animation:pip-land 720ms cubic-bezier(.3,1.4,.5,1) both; }
+    #pip-mascot-demo[data-phase="visit"] .pip-figure { animation:pip-breathe 3.6s ease-in-out 720ms infinite; }
+    #pip-mascot-demo .pip-ear { position:absolute; top:22px; width:48px; height:51px; background:var(--pip-fur); border:2px solid var(--pip-fur-edge); border-radius:50%; box-shadow:inset 0 -4px 0 var(--pip-fur-edge); transition:transform 260ms cubic-bezier(.3,1.4,.5,1); }
+    #pip-mascot-demo .pip-ear::after { content:""; position:absolute; inset:9px; background:var(--pip-ear); border-radius:50%; }
+    #pip-mascot-demo .pip-ear-left { left:1px; transform:rotate(-18deg); }
+    #pip-mascot-demo .pip-ear-right { right:1px; transform:rotate(18deg); }
+    #pip-mascot-demo .pip-body { position:absolute; left:40px; top:84px; width:80px; height:75px; border:2px solid var(--pip-fur-edge); border-radius:48% 48% 42% 42%; background:var(--pip-fur); }
+    #pip-mascot-demo .pip-belly { position:absolute; left:15px; top:20px; width:47px; height:50px; border-radius:50%; background:var(--pip-fur-light); }
+    #pip-mascot-demo .pip-head { position:absolute; top:28px; left:23px; width:114px; height:89px; border:2px solid var(--pip-fur-edge); border-radius:46% 46% 44% 44%; background:var(--pip-fur); box-shadow:inset 0 5px 0 var(--pip-fur-light), 0 6px 10px var(--pip-shadow); transform:rotate(calc(-3deg + var(--pip-turn, 0deg))); transition:transform 320ms cubic-bezier(.3,1.2,.5,1); }
+    #pip-mascot-demo .pip-tuft { position:absolute; top:-7px; left:46px; width:14px; height:16px; background:var(--pip-fur-light); border-radius:80% 5% 70% 0; transform:rotate(-25deg); }
+    #pip-mascot-demo .pip-tuft::after { content:""; position:absolute; top:5px; left:8px; width:12px; height:12px; background:var(--pip-fur-light); border-radius:80% 5% 70% 0; transform:rotate(45deg); }
+    #pip-mascot-demo .pip-eye { position:absolute; top:32px; width:12px; height:17px; border-radius:50%; background:var(--pip-face); transform:translate(var(--pip-gaze-x, 0px), var(--pip-gaze-y, 0px)); transition:transform 170ms ease-out; }
+    #pip-mascot-demo .pip-eye::after { content:""; position:absolute; top:3px; right:2px; width:4px; height:5px; border-radius:50%; background:var(--pip-shine); }
+    #pip-mascot-demo .pip-eye-left { left:23px; }
+    #pip-mascot-demo .pip-eye-right { right:23px; }
+    #pip-mascot-demo .pip-nose { position:absolute; top:40px; left:45px; width:21px; height:26px; background:var(--pip-face); border-radius:46% 46% 48% 48%; box-shadow:inset 2px 3px 0 color-mix(in srgb, var(--pip-shine) 10%, transparent); }
+    #pip-mascot-demo .pip-mouth { position:absolute; left:49px; top:66px; width:14px; height:7px; border:2px solid var(--pip-face); border-top:0; border-radius:0 0 12px 12px; }
+    #pip-mascot-demo .pip-cheek { position:absolute; top:56px; width:20px; height:10px; border-radius:50%; background:var(--pip-blush); opacity:.72; }
+    #pip-mascot-demo .pip-cheek-left { left:11px; }
+    #pip-mascot-demo .pip-cheek-right { right:11px; }
+    #pip-mascot-demo .pip-paw { position:absolute; top:108px; width:29px; height:23px; border:2px solid var(--pip-fur-edge); border-radius:50% 50% 42% 42%; background:var(--pip-fur); box-shadow:inset 0 3px 0 var(--pip-fur-light); }
+    #pip-mascot-demo .pip-paw::after { content:""; position:absolute; left:8px; top:10px; width:8px; height:5px; border-left:1px solid var(--pip-fur-edge); border-right:1px solid var(--pip-fur-edge); }
+    #pip-mascot-demo .pip-paw-left { left:23px; transform:rotate(8deg); }
+    #pip-mascot-demo .pip-paw-right { right:23px; transform:rotate(-8deg); transform-origin:50% 100%; }
+    #pip-mascot-demo[data-phase="peek"] .pip-eye { animation:pip-glance 1.3s ease-in-out 120ms both; }
+    #pip-mascot-demo.is-blinking .pip-eye { animation:pip-blink 190ms ease-in-out both; }
+    #pip-mascot-demo.is-twitching .pip-ear-left { animation:pip-ear-twitch 420ms ease-in-out; }
+    #pip-mascot-demo.is-waving .pip-paw-right { animation:pip-wave 2000ms ease-in-out both; }
+    #pip-mascot-demo.is-waving .pip-creature { animation:pip-bounce 2000ms ease-in-out both; }
+    #pip-mascot-demo.is-waving .pip-head { transform:rotate(calc(4deg + var(--pip-turn, 0deg))); }
+    #pip-mascot-demo.is-waving .pip-ear-right { animation:pip-ear-wiggle 520ms ease-in-out 3; }
+    @media (hover:hover) and (pointer:fine) {
+      #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-left { transform:rotate(-23deg) scale(1.06); }
+      #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-right { transform:rotate(23deg) scale(1.06); }
+    }
+    #pip-mascot-demo[data-shape="blob"] .pip-ear { display:none; }
+    #pip-mascot-demo[data-shape="blob"] .pip-head { border-radius:48% 48% 42% 42%; height:96px; top:21px; }
+    #pip-mascot-demo[data-shape="blob"] .pip-nose { width:8px; height:5px; left:52px; top:54px; }
+    #pip-mascot-demo[data-shape="blob"] .pip-mouth { top:62px; }
+    #pip-mascot-demo .pip-taskbar { position:relative; background:var(--pip-bar); border-top:1px solid var(--pip-line); display:flex; align-items:center; gap:5px; padding:12px 16px; min-height:61px; }
+    #pip-mascot-demo .pip-task { display:flex; align-items:center; gap:8px; padding:8px 10px; color:var(--pip-muted); border-radius:7px; }
+    #pip-mascot-demo .pip-task-current { color:var(--pip-accent); background:var(--pip-tint); }
+    #pip-mascot-demo .pip-avatar { margin-left:auto; border:1px solid var(--pip-line); background:var(--pip-surface); border-radius:50%; width:32px; height:32px; display:grid; place-items:center; color:var(--pip-muted); }
+    #pip-mascot-demo .pip-footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px; color:var(--pip-muted); }
+    @keyframes pip-land { 0% { transform:scale(1.04, .9); } 45% { transform:scale(.96, 1.07); } 75% { transform:scale(1.02, .98); } 100% { transform:scale(1, 1); } }
+    @keyframes pip-breathe { 0%, 100% { transform:scale(1, 1); } 50% { transform:scale(1.014, .984) translateY(.6px); } }
+    @keyframes pip-glance { 0%, 100% { transform:translate(0, 0); } 25% { transform:translate(-2px, -.5px); } 65% { transform:translate(2px, -.5px); } }
+    @keyframes pip-blink { 0%, 100% { scale:1 1; } 40%, 60% { scale:1 .12; } }
+    @keyframes pip-ear-twitch { 0%, 100% { transform:rotate(-18deg); } 30% { transform:rotate(-27deg) scale(1.04); } 60% { transform:rotate(-14deg); } }
+    @keyframes pip-ear-wiggle { 0%, 100% { transform:rotate(18deg); } 50% { transform:rotate(27deg) scale(1.05); } }
+    @keyframes pip-wave {
+      0%, 100% { transform:translate(0, 0) rotate(-8deg); }
+      12%, 32%, 52%, 72%, 90% { transform:translate(8px, -29px) rotate(16deg); }
+      22%, 42%, 62%, 82% { transform:translate(10px, -31px) rotate(49deg); }
+    }
+    @keyframes pip-bounce {
+      0%, 100% { transform:translateY(0) scale(1, 1); }
+      12% { transform:translateY(-4px) scale(.98, 1.03); }
+      22%, 42%, 62% { transform:translateY(-2px) scale(.99, 1.015); }
+      32%, 52%, 72% { transform:translateY(0) scale(1.005, .995); }
+      90% { transform:translateY(-1px) scale(1, 1); }
+    }
+    @media (max-width:440px) {
+      #pip-mascot-demo .pip-stage { height:254px; }
+      #pip-mascot-demo .pip-visitor { right:7%; }
+      #pip-mascot-demo .pip-taskbar { padding:10px 8px; gap:2px; }
+      #pip-mascot-demo .pip-task { gap:5px; padding:8px 6px; }
+      #pip-mascot-demo .pip-avatar { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      #pip-mascot-demo .pip-character, #pip-mascot-demo .pip-head, #pip-mascot-demo .pip-ear, #pip-mascot-demo .pip-eye { transition:none !important; }
+      #pip-mascot-demo .pip-creature, #pip-mascot-demo .pip-figure, #pip-mascot-demo .pip-eye, #pip-mascot-demo .pip-ear, #pip-mascot-demo .pip-paw-right { animation:none !important; }
+      #pip-mascot-demo .pip-head, #pip-mascot-demo.is-waving .pip-head { transform:rotate(-3deg); }
+      #pip-mascot-demo .pip-eye { transform:none; }
+      #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-left { transform:rotate(-18deg); }
+      #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-right { transform:rotate(18deg); }
+      #pip-mascot-demo.is-waving .pip-paw-right { transform:translate(8px,-29px) rotate(16deg); }
+    }
+  </style>
+  <div class="pip-heading">
+    <div><span class="pip-name">Meet Pip</span><span class="pip-subtitle">A tiny taskbar visitor</span></div>
+    <button type="button" class="pip-replay"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Replay visit</button>
+  </div>
+  <div class="pip-product">
+    <div class="pip-stage">
+      <div class="pip-watermark"><i data-lucide="layers-2" aria-hidden="true"></i>UnionSuite</div>
+      <div class="pip-visitor" aria-label="Mascot appearance">
+        <div class="pip-cutout">
+          <button type="button" class="pip-character" aria-label="Make Pip wave" disabled>
+            <span class="pip-creature" aria-hidden="true">
+              <span class="pip-figure">
+                <span class="pip-ear pip-ear-left"></span><span class="pip-ear pip-ear-right"></span>
+                <span class="pip-body"><span class="pip-belly"></span></span>
+                <span class="pip-head"><span class="pip-tuft"></span><span class="pip-eye pip-eye-left"></span><span class="pip-eye pip-eye-right"></span><span class="pip-nose"></span><span class="pip-mouth"></span><span class="pip-cheek pip-cheek-left"></span><span class="pip-cheek pip-cheek-right"></span></span>
+                <span class="pip-paw pip-paw-left"></span><span class="pip-paw pip-paw-right"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="pip-taskbar" aria-label="Taskbar context">
+      <span class="pip-task pip-task-current"><i data-lucide="house" aria-hidden="true"></i>Home</span>
+      <span class="pip-task"><i data-lucide="users" aria-hidden="true"></i>Contacts</span>
+      <span class="pip-task"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Reports</span>
+      <span class="pip-avatar" aria-label="James">J</span>
+    </div>
+  </div>
+  <div class="pip-footer"><span class="pip-status" role="status" aria-live="polite">A little visitor is on the way.</span><span>Interactive concept</span></div>
+  <script>
+    (() => {
+      const root = document.getElementById('pip-mascot-demo');
+      const character = root.querySelector('.pip-character');
+      const replay = root.querySelector('.pip-replay');
+      const status = root.querySelector('.pip-status');
+      const visitor = root.querySelector('.pip-visitor');
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const settings = { shape:'koala', palette:'sage', size:100 };
+      const sequence = new Set();
+      let departure = null;
+      let reaction = null;
+      let blinkTimer = null;
+      let twitchTimer = null;
+      let started = false;
+      let disposed = false;
+      const rand = (min, max) => min + Math.random() * (max - min);
+      function later(fn, ms) {
+        const id = setTimeout(() => { sequence.delete(id); if (!disposed) fn(); }, ms);
+        sequence.add(id);
+      }
+      function clearIdle() { clearTimeout(blinkTimer); clearTimeout(twitchTimer); blinkTimer = twitchTimer = null; }
+      function clearSequence() { sequence.forEach(clearTimeout); sequence.clear(); clearTimeout(departure); clearTimeout(reaction); clearIdle(); }
+      function resetExpression() { root.classList.remove('is-arriving', 'is-blinking', 'is-waving', 'is-twitching'); }
+      function resetGaze() {
+        root.style.setProperty('--pip-gaze-x', '0px');
+        root.style.setProperty('--pip-gaze-y', '0px');
+        root.style.setProperty('--pip-turn', '0deg');
+      }
+      function phase(value) { root.dataset.phase = value; character.disabled = value !== 'visit'; }
+      function visiting() { return !disposed && root.dataset.phase === 'visit'; }
+
+      function pulse(className, ms) {
+        root.classList.remove(className);
+        void character.offsetWidth;
+        root.classList.add(className);
+        later(() => root.classList.remove(className), ms);
+      }
+      function blink() {
+        if (visiting() && !motion.matches && !root.classList.contains('is-waving')) pulse('is-blinking', 230);
+      }
+      function scheduleBlink() {
+        clearTimeout(blinkTimer);
+        if (!visiting() || motion.matches) return;
+        blinkTimer = setTimeout(() => {
+          if (!visiting() || motion.matches) return;
+          blink();
+          if (Math.random() < .25) later(blink, 290);
+          scheduleBlink();
+        }, rand(2400, 5200));
+      }
+      function scheduleTwitch() {
+        clearTimeout(twitchTimer);
+        if (!visiting() || motion.matches) return;
+        twitchTimer = setTimeout(() => {
+          if (!visiting() || motion.matches) return;
+          if (!root.classList.contains('is-waving')) pulse('is-twitching', 460);
+          scheduleTwitch();
+        }, rand(4500, 8500));
+      }
+      function leave() {
+        if (!visiting()) return;
+        if (document.activeElement === character) { departure = setTimeout(leave, 2000); return; }
+        clearIdle();
+        resetExpression();
+        resetGaze();
+        phase(motion.matches ? 'away' : 'leaving');
+        status.textContent = 'Pip has wandered off.';
+        departure = setTimeout(() => { if (!disposed) phase('away'); }, 700);
+      }
+      function planDeparture(ms) { clearTimeout(departure); departure = setTimeout(leave, ms); }
+      function visit() {
+        if (disposed) return;
+        started = true;
+        clearSequence();
+        resetExpression();
+        resetGaze();
+        phase('away');
+        status.textContent = 'A little visitor is on the way.';
+        later(() => phase(motion.matches ? 'visit' : 'peek'), 350);
+        later(() => {
+          phase('visit');
+          if (!motion.matches) pulse('is-arriving', 720);
+          status.textContent = 'Pip is visiting. Click to make him wave.';
+          planDeparture(11000);
+          scheduleBlink();
+          scheduleTwitch();
+        }, motion.matches ? 350 : 1900);
+        later(() => { if (visiting() && !root.classList.contains('is-waving')) wave(); }, 2750);
+      }
+      function wave() {
+        if (!visiting()) return;
+        clearTimeout(reaction);
+        resetExpression();
+        void character.offsetWidth;
+        root.classList.add('is-waving');
+        reaction = setTimeout(() => root.classList.remove('is-waving'), 2000);
+      }
+      function greet() {
+        if (!visiting()) return;
+        wave();
+        status.textContent = 'Pip waves hello.';
+        planDeparture(7000);
+      }
+      replay.addEventListener('click', visit);
+      character.addEventListener('click', greet);
+      root.addEventListener('pointermove', (event) => {
+        if (!visiting() || motion.matches || event.pointerType === 'touch') return;
+        const bounds = character.getBoundingClientRect();
+        const x = Math.max(-2, Math.min(2, (event.clientX - bounds.left - bounds.width / 2) / 90));
+        const y = Math.max(-1.5, Math.min(1.5, (event.clientY - bounds.top - 50) / 100));
+        root.style.setProperty('--pip-gaze-x', x + 'px');
+        root.style.setProperty('--pip-gaze-y', y + 'px');
+        root.style.setProperty('--pip-turn', (x * 1.8).toFixed(2) + 'deg');
+      });
+      root.addEventListener('pointerleave', resetGaze);
+      function motionChanged() {
+        resetGaze();
+        clearIdle();
+        root.classList.remove('is-arriving', 'is-blinking', 'is-twitching');
+        if (!motion.matches && visiting()) { scheduleBlink(); scheduleTwitch(); }
+      }
+      motion.addEventListener('change', motionChanged);
+      const palettes = {
+        sage:['#a1d5bd', '#a5d4c0', '#7bb39b', '#77ab93', '#c1e8d4', '#c5e8d7'],
+        lilac:['#c7b9e8', '#c7b9e8', '#a596cb', '#a596cb', '#e1d9f4', '#e1d9f4'],
+        peach:['#efc1a2', '#efc1a2', '#d29d83', '#d29d83', '#f9dbc5', '#f9dbc5']
+      };
+      function renderDesign() {
+        root.dataset.shape = settings.shape;
+        const p = palettes[settings.palette] || palettes.sage;
+        root.style.setProperty('--pip-fur', `light-dark(${p[0]}, ${p[1]})`);
+        root.style.setProperty('--pip-fur-edge', `light-dark(${p[2]}, ${p[3]})`);
+        root.style.setProperty('--pip-fur-light', `light-dark(${p[4]}, ${p[5]})`);
+        visitor.style.transform = `scale(${settings.size / 100})`;
+        visitor.style.transformOrigin = '50% 100%';
+      }
+      renderDesign();
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container:visitor, onChange:renderDesign });
+        tweak.addSelect(settings, 'shape', { label:'Character', options:[{label:'Koala',value:'koala'},{label:'Little blob',value:'blob'}] });
+        tweak.addSelect(settings, 'palette', { label:'Colour', options:[{label:'Sage',value:'sage'},{label:'Lilac',value:'lilac'},{label:'Peach',value:'peach'}] });
+        tweak.addSlider(settings, 'size', { label:'Size', min:85, max:110, step:5, unit:'%' });
+      }
+      phase('away');
+      let observer;
+      if ('IntersectionObserver' in window) {
+        observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting) && !started) { visit(); observer.disconnect(); }
+        }, { threshold:0.3 });
+        observer.observe(root);
+      } else { visit(); }
+      window.addEventListener('pagehide', () => {
+        disposed = true;
+        clearSequence();
+        resetExpression();
+        resetGaze();
+        phase('away');
+        observer?.disconnect();
+        motion.removeEventListener('change', motionChanged);
+      }, {once:true});
+    })();
+  </script>
+</div>

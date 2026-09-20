@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company hierarchy &amp; roster</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/tabler-icons.min.css">
+<style>
+  :root {
+    --bg:          #f4f6f9;
+    --surface:     #ffffff;
+    --border:      #dde1e7;
+    --text:        #1a1f2e;
+    --text-muted:  #6b7280;
+    --primary:       #2563eb;
+    --success:    #16a34a;
+    --warning:    #d97706;
+    --banner-bg:      #2c3e50;
+    --banner-text:    #ffffff;
+    --banner-divider: rgba(255,255,255,.3);
+    --selected-bg:     #eff6ff;
+    --selected-border: #93c5fd;
+    --radius:    10px;
+    --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px; background: var(--bg); color: var(--text);
+    line-height: 1.5; min-height: 100vh;
+  }
+  .app { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+
+  /* ===== DEMO host header (mock of the existing company-record page header) ===== */
+  .host-header {
+    display: flex; justify-content: space-between; align-items: center; gap: 30px;
+    padding: 20px 40px; background: var(--banner-bg); color: var(--banner-text);
+    border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 18px; position: relative;
+  }
+  .host-header h1 { font-size: 24px; font-weight: 600; margin: 0; color: #fff; }
+  .host-header h1 .muted { opacity: .6; font-size: 18px; font-weight: 400; }
+  .host-details { display: flex; flex-direction: column; gap: 5px; padding: 0 20px; border-left: 2px solid var(--banner-divider); }
+  .host-details .info-item { font-size: 13px; opacity: .9; color: #fff; display: flex; gap: 5px; }
+  .host-details .info-label { opacity: .7; }
+  .demo-tag { position: absolute; top: 6px; right: 10px; font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+
+  /* ===== The embeddable widget ===== */
+  .widget { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 24px; }
+
+  .subheader { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .sh-ico { width: 36px; height: 36px; border-radius: 8px; background: var(--selected-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .sh-title { font-size: 18px; font-weight: 600; }
+  .sh-sub { font-size: 13px; color: var(--text-muted); }
+  .sh-context { margin-left: auto; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; text-align: right; }
+  .sh-context .pill { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-family: monospace; font-size: 12px; color: var(--text); }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .search-wrap { position: relative; flex: 1; min-width: 220px; }
+  .search-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 18px; pointer-events: none; }
+  .input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; background: var(--bg); color: var(--text); transition: border-color .15s; }
+  .input:focus { border-color: var(--primary); background: #fff; }
+  .input.search { padding-left: 40px; padding-right: 36px; }
+  .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; cursor: pointer; display: none; }
+  .search-clear.show { display: block; }
+  .search-clear:hover { color: var(--text); }
+  mark { background: #fde68a; color: inherit; border-radius: 2px; padding: 0 1px; }
+
+  .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s, transform .1s; background: var(--surface); color: var(--text); border: 1.5px solid var(--border); display: inline-flex; align-items: center; gap: 7px; }
+  .btn:active { transform: scale(.97); }
+  .btn:hover { border-color: #9ca3af; }
+  .btn-toggle.active { background: var(--selected-bg); border-color: var(--selected-border); color: var(--primary); }
+  .chip { background: var(--border); color: var(--text); border-radius: 9px; padding: 0 6px; font-size: 11px; font-weight: 700; }
+  .btn-toggle.active .chip { background: var(--primary); color: #fff; }
+  .btn-end { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 5px; border: 1px solid #fca5a5; background: #fff5f5; color: #dc2626; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .btn-end:hover { background: #fee2e2; border-color: #dc2626; }
+  .edit-note { margin: 0 0 14px; padding: 8px 12px; font-size: 12px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+
+  .kbd-hint { font-size: 11px; color: var(--text-muted); margin: 6px 0 12px 2px; }
+  .kbd-hint kbd { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; font-family: monospace; font-size: 10px; }
+
+  /* Hierarchy rows */
+  .tree-co { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: 8px; padding: 9px 12px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; }
+  .tree-co .co-ico { color: var(--primary); flex-shrink: 0; }
+  .tree-co .co-name { font-weight: 600; }
+  .tree-co .co-id { font-family: monospace; font-size: 11px; color: var(--text-muted); }
+  .tree-co .heads { margin-left: auto; font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; cursor: help; }
+  .tree-co .chev { color: var(--text-muted); flex-shrink: 0; }
+  .tree-co:not(.ancestor):not(.selected) { cursor: pointer; }
+  .tree-co:not(.ancestor):not(.selected):hover { background: var(--selected-bg); border-color: var(--selected-border); }
+
+  /* Keyboard navigation focus */
+  .tree-co, .roster-row { scroll-margin: 10px; }
+  .tree-co:focus-visible, .roster-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .tree-co:focus, .roster-row:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+  /* Ancestor (parent path) — context only, not interactive */
+  .tree-co.ancestor { border-style: dashed; }
+  .tree-co.ancestor .co-ico { color: var(--text-muted); }
+  .tree-co.ancestor .co-name { font-weight: 500; color: var(--text-muted); }
+  .anc-tag { margin-left: auto; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); flex-shrink: 0; }
+
+  /* Selected record — always highlighted */
+  .tree-co.selected { border-color: var(--selected-border); background: var(--selected-bg); box-shadow: 0 0 0 2px var(--selected-border); }
+
+  .tree-children { margin-left: 14px; padding-left: 12px; border-left: 2px solid var(--border); margin-top: 4px; }
+  .node { margin: 6px 0; }
+  .empty-leaf { padding: 10px 12px; margin: 4px 0; font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+
+  .roster-row { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: 8px; padding: 8px 12px; margin: 4px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .roster-row.past { opacity: .72; }
+  .m-name { font-weight: 600; }
+  .m-title { color: var(--text-muted); font-size: 13px; }
+  /* let long names/titles shrink & break instead of forcing the row wider than its card */
+  .co-name, .m-name, .m-title { min-width: 0; overflow-wrap: anywhere; }
+  .m-id { margin-left: auto; font-family: monospace; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+  .m-status { margin-left: auto; }
+
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-selected { background: #eff6ff; color: #2563eb; }
+  .badge-muted   { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* company type — subtle borderless badge */
+  .co-type-badge { background: var(--bg); color: var(--text-muted); font-weight: 500; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); flex-shrink: 0; }
+
+  /* company attributes inline on the right */
+  .co-attrs { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-muted); }
+  .co-attr-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+  /* member metadata on its own line, aligned under the name (clears the 16px row icon + 8px gap) */
+  .m-meta { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-left: 24px; margin-top: -2px; }
+  .m-chip { font-size: 10px; line-height: 1.5; padding: 0 5px; border-radius: 3px; white-space: nowrap; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .m-chip-active { background: #f0fdf4; color: #15803d !important; border-color: #bbf7d0; }
+  .m-chip-warn   { background: #fffbeb; color: #b45309 !important; border-color: #fde68a; }
+
+  .ic-star { color: #d97706; flex-shrink: 0; }
+  .ic-dim  { color: var(--text-muted); flex-shrink: 0; }
+
+  .skeleton { height: 40px; border-radius: 8px; background: linear-gradient(90deg,#eceff3 25%,#f5f7fa 50%,#eceff3 75%); background-size: 200% 100%; animation: sk 1.4s ease-in-out infinite; }
+  @keyframes sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .log { margin-top: 16px; font-size: 13px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-height: 42px; box-shadow: var(--shadow); }
+  .log:empty::before { content: "Actions appear here (in production these would persist to the record)."; color: var(--text-muted); }
+
+  @media (max-width: 768px) {
+    .host-header { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px 20px; }
+    .host-header h1 { text-align: center; font-size: 20px; }
+    .host-details { border-left: none; border-top: 2px solid var(--banner-divider); padding: 15px 0 0 0; }
+    .subheader { flex-wrap: wrap; }
+    .sh-context { margin-left: 0; width: 100%; justify-content: flex-start; text-align: left; }
+  }
+  @media (max-width: 560px) {
+    .app { padding: 16px 10px 48px; }
+    .widget { padding: 16px 12px; }
+    /* shallower indentation so deep nesting keeps room for content on narrow screens */
+    .tree-children { margin-left: 7px; padding-left: 8px; }
+    /* when chips wrap, pack them left instead of auto-pushing them to a ragged right edge */
+    .co-attrs, .m-id, .anc-tag { margin-left: 0; }
+    /* drop the option buttons on small screens — search takes the full width */
+    .toolbar .btn { display: none !important; }   /* !important beats collapseAllBtn's inline display toggle */
+    /* hide the keyboard tip bar — keyboard nav isn't relevant on touch */
+    .kbd-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================================================================== -->
+  <!-- DEMO ONLY: a stand-in for the company record's existing page header.    -->
+  <!-- Your record page already renders this — DELETE this whole block when    -->
+  <!-- embedding the widget below.                                             -->
+  <!-- ===================================================================== -->
+  <div class="host-header">
+    <span class="demo-tag">demo host header — remove when embedding</span>
+    <h1><span class="muted">Company record</span><br><span id="hostName">Acme Manufacturing</span></h1>
+    <div class="host-details">
+      <div class="info-item"><span class="info-label">ID:</span><span id="hostId">C-101</span></div>
+      <div class="info-item"><span class="info-label">Status:</span><span>A - Active</span></div>
+      <div class="info-item"><span class="info-label">Type:</span><span>Subsidiary</span></div>
+    </div>
+  </div>
+  <!-- ===================== END DEMO HOST HEADER ===================== -->
+
+  <!-- ===================== COMPANY HIERARCHY WIDGET ===================== -->
+  <div class="widget">
+    <div class="subheader">
+      <div class="sh-ico"><i class="ti ti-sitemap" aria-hidden="true"></i></div>
+      <div>
+        <div class="sh-title">Company hierarchy &amp; roster</div>
+        <div class="sh-sub">Reporting line above; members at this company and every company beneath it</div>
+      </div>
+      <div class="sh-context">Record:&nbsp;<span id="recName">Acme Manufacturing</span> <span class="pill" id="recId">C-101</span></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i class="ti ti-search search-ico" aria-hidden="true"></i>
+        <input id="search" class="input search" type="text" placeholder="Search this company &amp; sub-companies…  ( press / )" autocomplete="off" aria-label="Search the hierarchy">
+        <i class="ti ti-x search-clear" id="searchClear" title="Clear search" aria-label="Clear search"></i>
+      </div>
+      <button type="button" class="btn btn-toggle" id="histToggle" aria-pressed="false"></button>
+      <button type="button" class="btn" id="collapseAllBtn" onclick="collapseExpandAll()" style="display:none;"></button>
+      <button type="button" class="btn btn-toggle" id="editToggle" aria-pressed="false" title="Permission-gated — only staff with edit rights would see this in production"><i class="ti ti-pencil" aria-hidden="true"></i> Edit mode</button>
+    </div>
+
+    <div class="edit-note" id="editNote" style="display:none;"><i class="ti ti-lock-open" aria-hidden="true"></i> Edit mode on — in production this is restricted to staff with edit permission. Changes are local to this demo session.</div>
+
+    <div class="kbd-hint">Tip: <kbd>/</kbd> search · <kbd>Esc</kbd> clear · <kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> collapse / expand · <kbd>Enter</kbd> toggle</div>
+
+    <div id="tree"></div>
+  </div>
+
+  <div id="log" class="log"></div>
+</div>
+
+<script>
+/* ---- Data model: three linked tables (Company.parent is the self-referencing CompanyID) ---- */
+const companies = {
+  "C-100":{name:"Acme Group",               parent:null,    code:"ACM",      type:"Parent"      },
+  "C-101":{name:"Acme Manufacturing",       parent:"C-100", code:"ACM-MFG",  type:"Division"    },
+  "C-102":{name:"Acme Northeast Division",  parent:"C-101", code:"ACM-NE",   type:"Division"    },
+  "C-103":{name:"Boston Plant",             parent:"C-102", code:"ACM-BOS",  type:"Branch"      },
+  "C-104":{name:"Hartford Plant",           parent:"C-102", code:"ACM-HFD",  type:"Branch"      },
+  "C-105":{name:"Acme Logistics",           parent:"C-100", code:"ACM-LOG",  type:"Subsidiary"  },
+  "C-106":{name:"Acme Robotics",            parent:"C-101", code:"ACM-RBT",  type:"Subsidiary"  },
+  "C-200":{name:"Globex Corporation",       parent:null,    code:"GLBX",     type:"Parent"      },
+  "C-201":{name:"Globex Services",          parent:"C-200", code:"GLBX-SVC", type:"Division"    },
+  "C-202":{name:"Globex Tech Solutions",    parent:"C-200", code:"GLBX-TEC", type:"Division"    },
+  "C-203":{name:"Globex Training Institute",parent:"C-202", code:"GLBX-TRN", type:"Branch"      },
+  "C-117":{name:"Initech Systems",          parent:null,    code:"INIT",     type:"Parent"      },
+  "C-118":{name:"Initech Consulting",       parent:"C-117", code:"INIT-CON", type:"Division"    },
+  "C-300":{name:"Patterson Supply",         parent:null,    code:"PAT",      type:"Parent"      },
+  "C-301":{name:"Patterson Regional",       parent:"C-300", code:"PAT-REG",  type:"Branch"      }
+};
+const members = {
+  "M-1001":{ name:"Edward Cole",        type:"Regular Member",   category:"Cat 2", status:"A - Active"   },
+  "M-1002":{ name:"Maya Rodriguez",     type:"Regular Member",   category:"Cat 1", status:"A - Active"   },
+  "M-1003":{ name:"James Chen",         type:"Regular Member",   category:"Cat 2", status:"A - Active"   },
+  "M-1004":{ name:"Sarah Mitchell",     type:"Associate Member", category:"Cat 3", status:"A - Active"   },
+  "M-1005":{ name:"Robert Thompson",    type:"Regular Member",   category:"Cat 1", status:"L - Lapsed"   },
+  "M-1006":{ name:"Jessica Park",       type:"Regular Member",   category:"Cat 2", status:"A - Active"   },
+  "M-1007":{ name:"David Williamson",   type:"Associate Member", category:"Cat 3", status:"G - Grace"    },
+  "M-1008":{ name:"Amanda Foster",      type:"Student Member",   category:"Cat 3", status:"A - Active"   },
+  "M-1009":{ name:"Michael Zhang",      type:"Regular Member",   category:"Cat 1", status:"A - Active"   },
+  "M-1010":{ name:"Elena Vasquez",      type:"Student Member",   category:"Cat 3", status:"A - Active"   },
+  "M-1011":{ name:"Christopher Hayes",  type:"Life Member",      category:"Cat 1", status:"F - Financial" },
+  "M-1012":{ name:"Nicole Bennett",     type:"Regular Member",   category:"Cat 2", status:"A - Active"   },
+  "M-1013":{ name:"Kevin O'Brien",      type:"Regular Member",   category:"Cat 2", status:"L - Lapsed"   },
+  "M-1014":{ name:"Lauren Patterson",   type:"Associate Member", category:"Cat 3", status:"A - Active"   },
+  "M-1015":{ name:"Anthony Rossi",      type:"Regular Member",   category:"Cat 1", status:"A - Active"   },
+  "M-1016":{ name:"Sophia Nakamura",    type:"Student Member",   category:"Cat 3", status:"A - Active"   },
+  "M-1017":{ name:"Marcus Jefferson",   type:"Regular Member",   category:"Cat 2", status:"G - Grace"    },
+  "M-1018":{ name:"Gabrielle Moreau",   type:"Regular Member",   category:"Cat 1", status:"A - Active"   },
+  "M-1019":{ name:"Thomas Anderson",    type:"Life Member",      category:"Cat 1", status:"F - Financial" },
+  "M-1020":{ name:"Rachel Kaufman",     type:"Associate Member", category:"Cat 3", status:"A - Active"   },
+  "M-1021":{ name:"Victor Santiago",    type:"Regular Member",   category:"Cat 2", status:"A - Active"   }
+};
+const jobs = [
+  {jid:"J-8821", mid:"M-1002", cid:"C-101", title:"VP of Engineering",          start:"2022-03-01", end:null,         primary:true},
+  {jid:"J-6402", mid:"M-1002", cid:"C-117", title:"Director of Engineering",    start:"2018-06-01", end:"2022-02-28", primary:false},
+  {jid:"J-5511", mid:"M-1002", cid:"C-100", title:"Board Advisor",              start:"2023-06-15", end:null,         primary:false},
+  {jid:"J-7733", mid:"M-1001", cid:"C-102", title:"Manufacturing Manager",      start:"2021-01-15", end:null,         primary:true},
+  {jid:"J-4421", mid:"M-1001", cid:"C-101", title:"Senior Production Analyst",  start:"2017-08-20", end:"2020-12-31", primary:false},
+  {jid:"J-3309", mid:"M-1003", cid:"C-103", title:"Plant Operations Director",  start:"2019-07-01", end:null,         primary:true},
+  {jid:"J-2214", mid:"M-1003", cid:"C-104", title:"Shift Supervisor",           start:"2014-02-10", end:"2019-06-30", primary:false},
+  {jid:"J-9955", mid:"M-1004", cid:"C-105", title:"Supply Chain Manager",       start:"2020-09-01", end:null,         primary:true},
+  {jid:"J-8844", mid:"M-1004", cid:"C-100", title:"Logistics Coordinator",      start:"2016-11-15", end:"2020-08-31", primary:false},
+  {jid:"J-7722", mid:"M-1005", cid:"C-200", title:"Chief Operations Officer",   start:"2023-01-10", end:null,         primary:true},
+  {jid:"J-6611", mid:"M-1005", cid:"C-201", title:"Operations Manager",         start:"2019-04-01", end:"2022-12-31", primary:false},
+  {jid:"J-5500", mid:"M-1006", cid:"C-202", title:"Senior Systems Architect",   start:"2021-05-15", end:null,         primary:true},
+  {jid:"J-4499", mid:"M-1006", cid:"C-117", title:"Systems Engineer",           start:"2018-09-01", end:"2021-05-14", primary:false},
+  {jid:"J-3388", mid:"M-1007", cid:"C-201", title:"Client Services Director",   start:"2022-02-01", end:null,         primary:true},
+  {jid:"J-2277", mid:"M-1007", cid:"C-200", title:"Account Executive",          start:"2015-10-15", end:"2022-01-31", primary:false},
+  {jid:"J-1166", mid:"M-1008", cid:"C-203", title:"Training Program Manager",   start:"2020-06-01", end:null,         primary:true},
+  {jid:"J-9944", mid:"M-1009", cid:"C-102", title:"Quality Assurance Lead",     start:"2023-03-15", end:null,         primary:true},
+  {jid:"J-8833", mid:"M-1009", cid:"C-104", title:"QA Technician",              start:"2019-11-01", end:"2023-03-14", primary:false},
+  {jid:"J-7721", mid:"M-1010", cid:"C-105", title:"Procurement Specialist",     start:"2024-01-10", end:null,         primary:true},
+  {jid:"J-6610", mid:"M-1011", cid:"C-118", title:"Principal Consultant",       start:"2022-08-01", end:null,         primary:true},
+  {jid:"J-5501", mid:"M-1011", cid:"C-117", title:"Senior Consultant",          start:"2017-03-15", end:"2022-07-31", primary:false},
+  {jid:"J-4399", mid:"M-1012", cid:"C-103", title:"Maintenance Supervisor",     start:"2021-09-01", end:null,         primary:true},
+  {jid:"J-3288", mid:"M-1013", cid:"C-101", title:"HR Manager",                 start:"2023-02-15", end:null,         primary:true},
+  {jid:"J-2177", mid:"M-1013", cid:"C-100", title:"HR Specialist",              start:"2020-05-01", end:"2023-02-14", primary:false},
+  {jid:"J-1066", mid:"M-1014", cid:"C-300", title:"Regional Sales Director",    start:"2022-07-01", end:null,         primary:true},
+  {jid:"J-9951", mid:"M-1015", cid:"C-201", title:"Finance Manager",            start:"2023-11-01", end:null,         primary:true},
+  {jid:"J-8845", mid:"M-1016", cid:"C-202", title:"Data Scientist",             start:"2024-02-01", end:null,         primary:true},
+  {jid:"J-7731", mid:"M-1017", cid:"C-102", title:"Production Planner",         start:"2021-06-15", end:null,         primary:true},
+  {jid:"J-6622", mid:"M-1017", cid:"C-103", title:"Production Associate",       start:"2018-09-01", end:"2021-06-14", primary:false},
+  {jid:"J-5512", mid:"M-1018", cid:"C-105", title:"Warehouse Manager",          start:"2020-04-01", end:null,         primary:true},
+  {jid:"J-4400", mid:"M-1019", cid:"C-200", title:"Executive Vice President",   start:"2023-06-01", end:null,         primary:true},
+  {jid:"J-3399", mid:"M-1020", cid:"C-104", title:"Equipment Technician",       start:"2022-10-15", end:null,         primary:true},
+  {jid:"J-2288", mid:"M-1021", cid:"C-301", title:"Logistics Coordinator",      start:"2023-01-01", end:null,         primary:true}
+];
+
+/* ---- Which company record is this page on? Host passes ?company=C-xxx. This is fixed — no re-rooting. ---- */
+function initialRecord(){
+  try{ const c=new URLSearchParams(location.search).get("company"); if(c && companies[c]) return c; }catch(e){}
+  return "C-101";
+}
+const selectedId = initialRecord();
+
+/* ---- State ---- */
+let showHistorical = false;
+let editMode = false;
+let searchQuery = "";
+let focusKey = null;              /* keyboard-nav: which row currently holds focus ("co:C-xxx" | "job:J-xxx") */
+const collapsed = new Set();      /* per direct-child company: collapse its member list */
+
+/* ---- Helpers ---- */
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmt(d){ if(!d) return "Present"; const [y,m]=d.split("-"); return MONTHS[+m-1]+" "+y; }
+function childrenOf(id){ return Object.keys(companies).filter(c=>companies[c].parent===id); }
+function descendantsOf(id){ const out=[]; childrenOf(id).forEach(c=>{ out.push(c); out.push(...descendantsOf(c)); }); return out; }
+function chainUp(id){ const out=[]; let p=companies[id].parent, g=0; while(p && g++<50){ out.unshift(p); p=companies[p].parent; } return out; }
+function jobsAtCompany(id){ return jobs.filter(j=>j.cid===id && (showHistorical || !j.end)); }
+function hl(text){ if(!searchQuery) return text; const i=text.toLowerCase().indexOf(searchQuery); if(i<0) return text; return text.slice(0,i)+"<mark>"+text.slice(i,i+searchQuery.length)+"</mark>"+text.slice(i+searchQuery.length); }
+function matchText(s){ return s.toLowerCase().includes(searchQuery); }
+function mname(mid){ return members[mid]?.name || mid; }
+function statusChipClass(s){ if(!s) return ''; const l=s.toLowerCase(); if(l.startsWith('a')||l.includes('financial')) return 'm-chip-active'; if(l.includes('lapsed')||l.includes('grace')) return 'm-chip-warn'; return ''; }
+function ownMatch(id){ const c=companies[id]; return matchText(c.name) || matchText(id) || matchText(c.code||'') || matchText(c.type||''); }
+function jobMatch(j){ const m=members[j.mid]; return matchText(m?.name||j.mid) || matchText(j.mid) || matchText(j.title) || matchText(m?.type||'') || matchText(m?.category||'') || matchText(m?.status||''); }
+function subtreeMatch(id){ return ownMatch(id) || jobsAtCompany(id).some(jobMatch) || childrenOf(id).some(subtreeMatch); }
+
+/* ---- Edit action: end a current job (sets EndDate = today) ---- */
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function endJob(jid){
+  const j=jobs.find(x=>x.jid===jid);
+  if(!j || j.end || !editMode) return;
+  const today=todayISO();
+  if(!confirm(`End ${mname(j.mid)}'s role “${j.title}” at ${companies[j.cid].name}?\n\nThe end date will be set to today (${today}) and this becomes historical employment.`)) return;
+  j.end=today;
+  j.primary=false;            /* a primary flag marks the member's current primary job; an ended job is no longer current */
+  renderTree();
+  logMsg(`Ended ${mname(j.mid)} — “${j.title}” at ${companies[j.cid].name}. End date set to ${today}.`);
+}
+
+/* ---- Rendering ---- */
+function rosterRow(j){
+  const star = j.primary ? '<i class="ti ti-star ic-star" aria-hidden="true"></i>'
+                         : '<i class="ti ti-user ic-dim" aria-hidden="true"></i>';
+  const past = !!j.end;
+  const m = members[j.mid] || {};
+  const meta = [
+    m.type     ? `<span class="m-chip">${hl(m.type)}</span>` : '',
+    m.category ? `<span class="m-chip">${hl(m.category)}</span>` : '',
+    m.status   ? `<span class="m-chip m-status ${statusChipClass(m.status)}">${hl(m.status)}</span>` : '',
+  ].join('');
+  return `<div class="roster-row ${past?'past':''}" data-jid="${j.jid}" tabindex="-1" role="treeitem">
+    ${star}<span class="m-name">${hl(mname(j.mid))}</span>
+    <span class="m-title">${hl(j.title)}</span>
+    ${past?'<span class="badge badge-muted"><i class="ti ti-history" aria-hidden="true"></i> '+fmt(j.start)+' – '+fmt(j.end)+'</span>':''}
+    <span class="m-id">${hl(j.mid)}</span>
+    ${(editMode && !past)?`<button type="button" class="btn-end" onclick="endJob('${j.jid}')" title="Set end date to today"><i class="ti ti-calendar-off" aria-hidden="true"></i> End today</button>`:''}
+    <div class="m-meta">${meta}</div>
+  </div>`;
+}
+/* Company attributes shown inline at the right of the row */
+function coMeta(id, memberCount, subCount){
+  const parts = [
+    `<span class="co-attr-item"><i class="ti ti-users" aria-hidden="true"></i> ${memberCount} member${memberCount===1?'':'s'}</span>`,
+    subCount ? `<span class="co-attr-item"><i class="ti ti-sitemap" aria-hidden="true"></i> ${subCount} sub-${subCount===1?'company':'companies'}</span>` : '',
+  ].join('');
+  return `<span class="co-attrs">${parts}</span>`;
+}
+function coTypeBadge(id){
+  const t = companies[id].type;
+  return t ? `<span class="badge co-type-badge">${hl(t)}</span>` : '';
+}
+function childCompany(id){
+  const roster=jobsAtCompany(id);
+  const own=searchQuery?ownMatch(id):false;
+  const shown = (searchQuery && !own) ? roster.filter(jobMatch) : roster;
+  const open = searchQuery ? true : !collapsed.has(id);
+  const allKids = childrenOf(id);
+  const kids = (searchQuery && !own) ? allKids.filter(subtreeMatch) : allKids;
+  const subCount = allKids.length;
+  const hasHist = jobs.some(j=>j.cid===id && j.end);
+  const head=`<div class="tree-co" data-co="${id}" tabindex="-1" role="treeitem" aria-expanded="${open}" onclick="tog('${id}')" title="${open?'Hide':'Show'} members">
+      <i class="ti ti-chevron-${open?'down':'right'} chev" aria-hidden="true"></i>
+      <i class="ti ti-building co-ico" aria-hidden="true"></i>
+      <span class="co-name">${hl(companies[id].name)}</span>
+      ${coTypeBadge(id)}
+      <span class="co-id">${hl(id)}</span>
+      ${coMeta(id, roster.length, subCount)}
+    </div>`;
+  let body="";
+  if(open){
+    body=kids.map(childCompany).join("");
+    if(shown.length) body+=shown.map(rosterRow).join("");
+    else body+=`<div class="empty-leaf"><i class="ti ti-user-off" aria-hidden="true"></i> No ${showHistorical?'':'current '}members${searchQuery?' match here':''}.${(!showHistorical && hasHist && !searchQuery)?' Toggle “Show historical”.':''}</div>`;
+  }
+  return `<div class="node">${head}${open?`<div class="tree-children">${body}</div>`:""}</div>`;
+}
+function selectedBody(){
+  const ownAll=jobsAtCompany(selectedId);
+  const ownShown = searchQuery ? ownAll.filter(jobMatch) : ownAll;
+  const allKids=childrenOf(selectedId);
+  const kids = searchQuery ? allKids.filter(subtreeMatch) : allKids;
+
+  if(searchQuery && !ownShown.length && !kids.length){
+    return `<div class="empty-leaf"><i class="ti ti-search-off" aria-hidden="true"></i> No members or sub-companies match “${searchQuery}”.</div>`;
+  }
+
+  let html = kids.map(childCompany).join("");
+  if(!searchQuery && !allKids.length){
+    html += `<div class="empty-leaf"><i class="ti ti-hierarchy-off" aria-hidden="true"></i> No sub-companies beneath this record.</div>`;
+  }
+  html += ownShown.map(rosterRow).join("");
+  if(!searchQuery && !ownAll.length){
+    const hasHist = jobs.some(j=>j.cid===selectedId && j.end);
+    html += `<div class="empty-leaf"><i class="ti ti-user-off" aria-hidden="true"></i> No ${showHistorical?'':'current '}members directly at this company.${(!showHistorical && hasHist)?' Toggle “Show historical”.':''}</div>`;
+  }
+  return html;
+}
+function ancestorRow(id){
+  return `<div class="tree-co ancestor">
+      <i class="ti ti-building-skyscraper co-ico" aria-hidden="true"></i>
+      <span class="co-name">${companies[id].name}</span>
+      <span class="co-id">${id}</span>
+      <span class="anc-tag">parent</span>
+    </div>`;
+}
+function selectedRow(){
+  const own=jobsAtCompany(selectedId).length;
+  const kids=childrenOf(selectedId).length;
+  return `<div class="tree-co selected" data-co="${selectedId}" tabindex="-1" role="treeitem">
+      <i class="ti ti-building co-ico" aria-hidden="true"></i>
+      <span class="co-name">${companies[selectedId].name}</span>
+      ${coTypeBadge(selectedId)}
+      <span class="co-id">${selectedId}</span>
+      ${coMeta(selectedId, own, kids)}
+    </div>`;
+}
+/* Build the direct path: top ancestor → … → selected (nested), with the children block under the selected */
+function buildPath(path, idx, leafHtml){
+  const id=path[idx];
+  const isSel = idx===path.length-1;
+  const row = isSel ? selectedRow() : ancestorRow(id);
+  const child = isSel ? leafHtml : buildPath(path, idx+1, leafHtml);
+  return `<div class="node">${row}<div class="tree-children">${child}</div></div>`;
+}
+function updateHistButton(){
+  const b=document.getElementById("histToggle");
+  /* historical jobs available at this company and every company beneath it */
+  const ids=[selectedId].concat(descendantsOf(selectedId));
+  const n = ids.reduce((acc,id)=>acc+jobs.filter(j=>j.cid===id && j.end).length,0);
+  b.innerHTML=`<i class="ti ti-history" aria-hidden="true"></i> ${showHistorical?'Hide':'Show'} historical <span class="chip">${n}</span>`;
+  b.classList.toggle("active",showHistorical);
+  b.setAttribute("aria-pressed",showHistorical);
+}
+function renderTree(){
+  updateHistButton();
+  updateCollapseBtn();
+  const refocus = !!focusedNav();   /* only pull focus back into the tree if it was already there */
+  const path=[...chainUp(selectedId), selectedId];
+  document.getElementById("tree").innerHTML = buildPath(path, 0, selectedBody());
+  restoreNav(refocus);
+  saveState();
+}
+function renderTreeWithSkeleton(){
+  updateHistButton();
+  document.getElementById("tree").innerHTML=Array.from({length:5}).map((_,i)=>`<div class="skeleton" style="margin:6px 0 6px ${(i%3)*16}px;"></div>`).join("");
+  setTimeout(renderTree,320);
+}
+
+/* ---- Search (scoped to the sub-companies directly beneath this record) ---- */
+function applySearch(raw){
+  searchQuery=raw.trim().toLowerCase();
+  document.getElementById("searchClear").classList.toggle("show",!!searchQuery);
+  renderTree();
+}
+function clearSearch(){ searchQuery=""; const i=document.getElementById("search"); i.value=""; i.focus(); document.getElementById("searchClear").classList.remove("show"); renderTree(); }
+
+function tog(id){ if(collapsed.has(id)) collapsed.delete(id); else collapsed.add(id); renderTree(); }
+function collapseExpandAll(){
+  const all=descendantsOf(selectedId);
+  const allCollapsed=all.length>0 && all.every(id=>collapsed.has(id));
+  if(allCollapsed){ all.forEach(id=>collapsed.delete(id)); }
+  else { all.forEach(id=>collapsed.add(id)); }
+  renderTree();
+}
+function updateCollapseBtn(){
+  const btn=document.getElementById("collapseAllBtn");
+  const all=descendantsOf(selectedId);
+  if(!all.length || searchQuery){ btn.style.display="none"; return; }
+  const allCollapsed=all.every(id=>collapsed.has(id));
+  btn.style.display="";
+  btn.innerHTML=allCollapsed
+    ? '<i class="ti ti-layout-list" aria-hidden="true"></i> Expand all'
+    : '<i class="ti ti-layout-list-tree" aria-hidden="true"></i> Collapse all';
+}
+function logMsg(t){ document.getElementById("log").textContent=t; }
+
+/* ---- Keyboard navigation: ↑/↓ move · ←/→ collapse/expand (or step out/in) · Enter toggles · Home/End jump ---- */
+function navEls(){ return [...document.querySelectorAll('#tree .tree-co:not(.ancestor), #tree .roster-row')]; }
+function keyForEl(el){ return el.dataset.co ? "co:"+el.dataset.co : (el.dataset.jid ? "job:"+el.dataset.jid : null); }
+function focusedNav(){ const a=document.activeElement; return (a && a.closest) ? a.closest('#tree .tree-co:not(.ancestor), #tree .roster-row') : null; }
+function isCollapsible(el){ return el.classList.contains("tree-co") && !!el.querySelector(".chev"); }
+function parentCompanyOf(el){ const cb=el.closest(".tree-children"); if(!cb) return null; const co=cb.parentElement.querySelector(":scope > .tree-co"); return (co && !co.classList.contains("ancestor")) ? co : null; }
+function firstChildOf(el){ const cb=el.closest(".node") && el.closest(".node").querySelector(":scope > .tree-children"); return cb ? cb.querySelector(".tree-co:not(.ancestor), .roster-row") : null; }
+function setNavFocus(el){ if(!el) return; navEls().forEach(e=>e.tabIndex=-1); el.tabIndex=0; focusKey=keyForEl(el); el.focus(); el.scrollIntoView({block:"nearest"}); }
+function moveNav(delta){ const els=navEls(); if(!els.length) return; let i=els.indexOf(focusedNav()); if(i<0) i=delta>0?-1:0; setNavFocus(els[Math.max(0,Math.min(els.length-1,i+delta))]); }
+function navLeft(el){
+  const id=el.dataset.co;
+  if(isCollapsible(el) && id && !collapsed.has(id)){ collapsed.add(id); renderTree(); return; }  /* open → collapse */
+  setNavFocus(parentCompanyOf(el));                                                                /* leaf/closed → step out to parent */
+}
+function navRight(el){
+  if(el.classList.contains("roster-row")) return;
+  const id=el.dataset.co;
+  if(isCollapsible(el) && id && collapsed.has(id)){ collapsed.delete(id); renderTree(); return; } /* closed → expand */
+  setNavFocus(firstChildOf(el));                                                                   /* open → step in to first child */
+}
+function restoreNav(refocus){
+  const els=navEls(); if(!els.length){ focusKey=null; return; }
+  let t = focusKey ? els.find(e=>keyForEl(e)===focusKey) : null;
+  if(!t) t=els[0];
+  els.forEach(e=>e.tabIndex=-1); t.tabIndex=0; focusKey=keyForEl(t);
+  if(refocus){ t.focus(); t.scrollIntoView({block:"nearest"}); }
+}
+
+/* ---- Persistence: preferences only (the record is fixed by the host) ---- */
+function saveState(){ try{ localStorage.setItem("companyHierarchyPrefs", JSON.stringify({hist:showHistorical, edit:editMode})); }catch(e){} }
+function loadState(){ try{ const s=JSON.parse(localStorage.getItem("companyHierarchyPrefs")||"{}"); showHistorical=!!s.hist; editMode=!!s.edit; }catch(e){} }
+
+/* ---- Wire up ---- */
+const searchInput=document.getElementById("search");
+searchInput.addEventListener("input", e=>applySearch(e.target.value));
+searchInput.addEventListener("keydown", e=>{ if(e.key==="Escape"){ clearSearch(); searchInput.blur(); } });
+document.getElementById("searchClear").addEventListener("click", clearSearch);
+document.getElementById("histToggle").addEventListener("click", ()=>{ showHistorical=!showHistorical; renderTree(); });
+function applyEditMode(){
+  const b=document.getElementById("editToggle");
+  b.classList.toggle("active",editMode);
+  b.setAttribute("aria-pressed",editMode);
+  document.getElementById("editNote").style.display = editMode ? "flex" : "none";
+}
+document.getElementById("editToggle").addEventListener("click", ()=>{ editMode=!editMode; applyEditMode(); renderTree(); saveState(); });
+document.addEventListener("keydown", e=>{
+  if(e.key==="/" && document.activeElement!==searchInput){ e.preventDefault(); searchInput.focus(); }
+});
+
+/* ---- Arrow-key tree navigation (scoped to the tree, so it never hijacks typing in search) ---- */
+const treeEl=document.getElementById("tree");
+treeEl.addEventListener("focusin", e=>{ const el=e.target.closest && e.target.closest(".tree-co:not(.ancestor), .roster-row"); if(el) focusKey=keyForEl(el); });
+treeEl.addEventListener("keydown", e=>{
+  const el=focusedNav(); if(!el) return;
+  switch(e.key){
+    case "ArrowDown":  e.preventDefault(); moveNav(1); break;
+    case "ArrowUp":    e.preventDefault(); moveNav(-1); break;
+    case "ArrowRight": e.preventDefault(); navRight(el); break;
+    case "ArrowLeft":  e.preventDefault(); navLeft(el); break;
+    case "Home":       e.preventDefault(); setNavFocus(navEls()[0]); break;
+    case "End":        e.preventDefault(); { const a=navEls(); setNavFocus(a[a.length-1]); } break;
+    case "Enter":
+    case " ":
+      if(el.dataset.co && isCollapsible(el)){ e.preventDefault(); tog(el.dataset.co); }
+      break;
+  }
+});
+
+/* ---- Init ---- */
+loadState();
+descendantsOf(selectedId).forEach(id=>collapsed.add(id));   /* start with every sub-company collapsed */
+document.getElementById("hostName").textContent=companies[selectedId].name;
+document.getElementById("hostId").textContent=selectedId;
+document.getElementById("recName").textContent=companies[selectedId].name;
+document.getElementById("recId").textContent=selectedId;
+applyEditMode();
+renderTreeWithSkeleton();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+/* Offline page layout only. Native control styles come from the captured skins. */
+html,body { height:auto; }
+body { margin:0;padding:20px;background:var(--bg-page);color:var(--text-base);font:14px/1.5 var(--font-ui); }
+.object-browser-example__controls { display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px; }
+.object-browser-example__controls p { margin:0;flex-basis:100%; }
+.object-browser-example__viewport { width:100%;overflow:auto; }
+.object-browser-example__status { margin:14px 0 0;min-height:24px; }
+@media(max-width:600px) { body { padding:12px; } }

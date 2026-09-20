@@ -1,0 +1,338 @@
+[
+  {
+    "kind": "grid",
+    "gutter": 40,
+    "width": 1440,
+    "overflow": 0,
+    "cardGap": 40,
+    "cardLeft": 20,
+    "sideRight": 1420,
+    "mainWidth": 920,
+    "formWidth": 440,
+    "nestedGap": 40,
+    "utilityGutter": "40px",
+    "stacked": false
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 40,
+    "width": 1440,
+    "gap": 40,
+    "attentionLeft": 20,
+    "bulletinRight": 1420,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 40,
+    "width": 1440,
+    "before": {
+      "left": 5,
+      "width": 1435,
+      "inset": 20
+    },
+    "after": {
+      "left": 5,
+      "width": 1435,
+      "slotLeft": 5,
+      "slotWidth": 1435,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 40,
+    "width": 768,
+    "overflow": 0,
+    "cardGap": 40,
+    "cardLeft": 20,
+    "sideRight": 748,
+    "mainWidth": 472,
+    "formWidth": 216,
+    "nestedGap": 40,
+    "utilityGutter": "40px",
+    "stacked": false
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 40,
+    "width": 768,
+    "gap": 40,
+    "attentionLeft": 20,
+    "bulletinRight": 748,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 40,
+    "width": 768,
+    "before": {
+      "left": 5,
+      "width": 763,
+      "inset": 20
+    },
+    "after": {
+      "left": 5,
+      "width": 763,
+      "slotLeft": 5,
+      "slotWidth": 763,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 40,
+    "width": 767,
+    "overflow": 0,
+    "cardGap": -727,
+    "cardLeft": 20,
+    "sideRight": 747,
+    "mainWidth": 727,
+    "formWidth": 727,
+    "nestedGap": -727,
+    "utilityGutter": "40px",
+    "stacked": true
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 40,
+    "width": 767,
+    "gap": -727,
+    "attentionLeft": 20,
+    "bulletinRight": 747,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 40,
+    "width": 767,
+    "before": {
+      "left": 0,
+      "width": 767,
+      "inset": 20
+    },
+    "after": {
+      "left": 0,
+      "width": 767,
+      "slotLeft": 0,
+      "slotWidth": 767,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 40,
+    "width": 390,
+    "overflow": 0,
+    "cardGap": -350,
+    "cardLeft": 20,
+    "sideRight": 370,
+    "mainWidth": 350,
+    "formWidth": 350,
+    "nestedGap": -350,
+    "utilityGutter": "40px",
+    "stacked": true
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 40,
+    "width": 390,
+    "gap": -350,
+    "attentionLeft": 20,
+    "bulletinRight": 370,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 40,
+    "width": 390,
+    "before": {
+      "left": 0,
+      "width": 390,
+      "inset": 20
+    },
+    "after": {
+      "left": 0,
+      "width": 390,
+      "slotLeft": 0,
+      "slotWidth": 390,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 24,
+    "width": 1440,
+    "overflow": 0,
+    "cardGap": 24,
+    "cardLeft": 20,
+    "sideRight": 1419.984375,
+    "mainWidth": 925.328125,
+    "formWidth": 450.65625,
+    "nestedGap": 24,
+    "utilityGutter": "24px",
+    "stacked": false
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 24,
+    "width": 1440,
+    "gap": 24,
+    "attentionLeft": 20,
+    "bulletinRight": 1419.984375,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 24,
+    "width": 1440,
+    "before": {
+      "left": 5,
+      "width": 1435,
+      "inset": 12
+    },
+    "after": {
+      "left": 5,
+      "width": 1435,
+      "slotLeft": 5,
+      "slotWidth": 1435,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 24,
+    "width": 768,
+    "overflow": 0,
+    "cardGap": 24,
+    "cardLeft": 20,
+    "sideRight": 747.984375,
+    "mainWidth": 477.328125,
+    "formWidth": 226.65625,
+    "nestedGap": 24,
+    "utilityGutter": "24px",
+    "stacked": false
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 24,
+    "width": 768,
+    "gap": 24,
+    "attentionLeft": 20,
+    "bulletinRight": 747.984375,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 24,
+    "width": 768,
+    "before": {
+      "left": 5,
+      "width": 763,
+      "inset": 12
+    },
+    "after": {
+      "left": 5,
+      "width": 763,
+      "slotLeft": 5,
+      "slotWidth": 763,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 24,
+    "width": 767,
+    "overflow": 0,
+    "cardGap": -727,
+    "cardLeft": 20,
+    "sideRight": 747,
+    "mainWidth": 727,
+    "formWidth": 727,
+    "nestedGap": -727,
+    "utilityGutter": "24px",
+    "stacked": true
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 24,
+    "width": 767,
+    "gap": -727,
+    "attentionLeft": 20,
+    "bulletinRight": 747,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 24,
+    "width": 767,
+    "before": {
+      "left": 0,
+      "width": 767,
+      "inset": 12
+    },
+    "after": {
+      "left": 0,
+      "width": 767,
+      "slotLeft": 0,
+      "slotWidth": 767,
+      "top": 76,
+      "overflow": 0
+    }
+  },
+  {
+    "kind": "grid",
+    "gutter": 24,
+    "width": 390,
+    "overflow": 0,
+    "cardGap": -350,
+    "cardLeft": 20,
+    "sideRight": 370,
+    "mainWidth": 350,
+    "formWidth": 350,
+    "nestedGap": -350,
+    "utilityGutter": "24px",
+    "stacked": true
+  },
+  {
+    "kind": "home-capture",
+    "gutter": 24,
+    "width": 390,
+    "gap": -350,
+    "attentionLeft": 20,
+    "bulletinRight": 370,
+    "verticalGap": 40,
+    "overflow": 0
+  },
+  {
+    "kind": "banner",
+    "gutter": 24,
+    "width": 390,
+    "before": {
+      "left": 0,
+      "width": 390,
+      "inset": 12
+    },
+    "after": {
+      "left": 0,
+      "width": 390,
+      "slotLeft": 0,
+      "slotWidth": 390,
+      "top": 76,
+      "overflow": 0
+    }
+  }
+]

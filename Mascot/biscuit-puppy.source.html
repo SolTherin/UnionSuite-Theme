@@ -1,0 +1,230 @@
+<div id="pup-mascot-demo" aria-label="Biscuit, a puppy taskbar mascot concept">
+  <style>
+    #pup-mascot-demo {
+      --pup-surface: light-dark(#f6f8f7, #202827);
+      --pup-bar: light-dark(#ffffff, #283230);
+      --pup-ink: light-dark(#263c37, #e2ede8);
+      --pup-muted: light-dark(#64756e, #aebeb6);
+      --pup-line: light-dark(#dce5df, #414e48);
+      --pup-accent: light-dark(#245e4b, #a6dcc2);
+      --pup-tint: light-dark(#e6efe9, #364b40);
+      --pup-fur: light-dark(#ebc492, #ebc492);
+      --pup-fur-edge: light-dark(#c39a6c, #c39a6c);
+      --pup-fur-light: light-dark(#fff0d6, #fff0d6);
+      --pup-ear: light-dark(#b98459, #b98459);
+      --pup-ear-edge: light-dark(#986a48, #986a48);
+      --pup-face: light-dark(#483729, #483729);
+      --pup-collar: light-dark(#6caa95, #6caa95);
+      --pup-tag: light-dark(#f6d66e, #f6d66e);
+      --pup-tongue: light-dark(#dc9297, #dc9297);
+      --pup-blush: light-dark(#dfaca7, #dfaca7);
+      --pup-shine: light-dark(#fffdf7, #fffdf7);
+      --pup-shadow: light-dark(#203c351a, #07100c35);
+      color: var(--pup-ink);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      width: 100%;
+    }
+    #pup-mascot-demo * { box-sizing: border-box; }
+    #pup-mascot-demo .pup-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    #pup-mascot-demo .pup-name { display:block; font-weight:500; }
+    #pup-mascot-demo .pup-subtitle { display:block; color:var(--pup-muted); margin-top:3px; }
+    #pup-mascot-demo .pup-replay { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid var(--pup-line); border-radius:9px; background:var(--pup-bar); color:var(--pup-ink); font:inherit; cursor:pointer; }
+    #pup-mascot-demo .pup-replay:hover { background:var(--pup-tint); }
+    #pup-mascot-demo .pup-product { border:1px solid var(--pup-line); border-radius:14px; overflow:hidden; background:var(--pup-surface); }
+    #pup-mascot-demo .pup-stage { height:272px; position:relative; overflow:hidden; }
+    #pup-mascot-demo .pup-watermark { position:absolute; left:22px; top:20px; color:var(--pup-muted); display:flex; align-items:center; gap:8px; }
+    #pup-mascot-demo .pup-visitor { position:absolute; bottom:0; right:14%; width:190px; height:225px; }
+    #pup-mascot-demo .pup-cutout { position:absolute; inset:0; overflow:hidden; }
+    #pup-mascot-demo .pup-character { position:absolute; bottom:-35px; left:15px; width:160px; height:158px; background:none; border:0; padding:0; color:var(--pup-face); cursor:pointer; transform:translateY(155px); visibility:hidden; transition:transform 650ms cubic-bezier(.34,1.35,.42,1), visibility 650ms; -webkit-tap-highlight-color:transparent; }
+    #pup-mascot-demo .pup-character:disabled { cursor:default; }
+    #pup-mascot-demo[data-phase="peek"] .pup-character { transform:translateY(45px) rotate(-5deg); visibility:visible; }
+    #pup-mascot-demo[data-phase="visit"] .pup-character { transform:translateY(0); visibility:visible; }
+    #pup-mascot-demo .pup-creature { position:absolute; inset:0; transform-origin:50% 100%; }
+    #pup-mascot-demo .pup-ear { position:absolute; z-index:2; top:35px; width:35px; height:68px; background:var(--pup-ear); border:2px solid var(--pup-ear-edge); border-radius:48% 48% 58% 58%; box-shadow:inset 4px 0 0 color-mix(in srgb, var(--pup-fur) 40%, transparent); transform-origin:50% 10%; }
+    #pup-mascot-demo .pup-ear-left { left:12px; transform:rotate(14deg); }
+    #pup-mascot-demo .pup-ear-right { right:12px; transform:rotate(-14deg); }
+    #pup-mascot-demo .pup-tail { position:absolute; top:89px; right:9px; width:41px; height:26px; border:12px solid var(--pup-ear); border-top:0; border-left:0; border-radius:0 0 85% 0; transform:rotate(-26deg); transform-origin:0 100%; }
+    #pup-mascot-demo .pup-body { position:absolute; left:40px; top:84px; width:80px; height:75px; border:2px solid var(--pup-fur-edge); border-radius:48% 48% 42% 42%; background:var(--pup-fur); }
+    #pup-mascot-demo .pup-belly { position:absolute; left:15px; top:20px; width:47px; height:50px; border-radius:50%; background:var(--pup-fur-light); }
+    #pup-mascot-demo .pup-head { position:absolute; top:28px; left:23px; width:114px; height:89px; border:2px solid var(--pup-fur-edge); border-radius:46% 46% 44% 44%; background:var(--pup-fur); box-shadow:inset 0 5px 0 var(--pup-fur-light), 0 6px 10px var(--pup-shadow); transform:rotate(-3deg); transition:transform 350ms; }
+    #pup-mascot-demo .pup-blaze { position:absolute; left:46px; top:2px; width:19px; height:46px; border-radius:35% 40% 50% 50%; background:var(--pup-fur-light); transform:rotate(5deg); }
+    #pup-mascot-demo .pup-eye-patch { position:absolute; right:13px; top:21px; width:31px; height:39px; border-radius:50%; background:color-mix(in srgb, var(--pup-ear) 39%, var(--pup-fur)); transform:rotate(13deg); }
+    #pup-mascot-demo .pup-muzzle { position:absolute; top:47px; left:29px; width:53px; height:33px; border-radius:48% 48% 45% 45%; background:var(--pup-fur-light); }
+    #pup-mascot-demo .pup-muzzle::before, #pup-mascot-demo .pup-muzzle::after { content:""; position:absolute; top:13px; width:3px; height:3px; border-radius:50%; background:var(--pup-fur-edge); box-shadow:4px 4px 0 var(--pup-fur-edge); }
+    #pup-mascot-demo .pup-muzzle::before { left:9px; }
+    #pup-mascot-demo .pup-muzzle::after { right:13px; }
+    #pup-mascot-demo .pup-collar { position:absolute; left:43px; top:107px; width:74px; height:10px; border-radius:5px; background:var(--pup-collar); }
+    #pup-mascot-demo .pup-collar::after { content:""; position:absolute; top:6px; left:31px; width:12px; height:12px; border-radius:50%; background:var(--pup-tag); border:1px solid var(--pup-fur-edge); }
+    #pup-mascot-demo .pup-tuft { position:absolute; top:-7px; left:46px; width:14px; height:16px; background:var(--pup-fur-light); border-radius:80% 5% 70% 0; transform:rotate(-25deg); }
+    #pup-mascot-demo .pup-tuft::after { content:""; position:absolute; top:5px; left:8px; width:12px; height:12px; background:var(--pup-fur-light); border-radius:80% 5% 70% 0; transform:rotate(45deg); }
+    #pup-mascot-demo .pup-eye { position:absolute; top:32px; width:12px; height:17px; border-radius:50%; background:var(--pup-face); transform:translate(var(--pup-gaze-x, 0px), var(--pup-gaze-y, 0px)); }
+    #pup-mascot-demo .pup-eye::after { content:""; position:absolute; top:3px; right:2px; width:4px; height:5px; border-radius:50%; background:var(--pup-shine); }
+    #pup-mascot-demo .pup-eye-left { left:23px; }
+    #pup-mascot-demo .pup-eye-right { right:23px; }
+    #pup-mascot-demo .pup-nose { position:absolute; top:49px; left:46px; width:19px; height:13px; background:var(--pup-face); border-radius:45% 45% 60% 60%; box-shadow:inset 2px 3px 0 color-mix(in srgb, var(--pup-shine) 15%, transparent); }
+    #pup-mascot-demo .pup-mouth { position:absolute; left:48px; top:64px; width:16px; height:8px; border:2px solid var(--pup-face); border-top:0; border-radius:0 0 12px 12px; }
+    #pup-mascot-demo .pup-mouth::before { content:""; position:absolute; left:5px; top:-4px; width:2px; height:6px; background:var(--pup-face); }
+    #pup-mascot-demo .pup-tongue { position:absolute; left:52px; top:70px; width:9px; height:10px; background:var(--pup-tongue); border-radius:0 0 6px 6px; opacity:0; }
+    #pup-mascot-demo .pup-cheek { position:absolute; top:56px; width:20px; height:10px; border-radius:50%; background:var(--pup-blush); opacity:.72; }
+    #pup-mascot-demo .pup-cheek-left { left:11px; }
+    #pup-mascot-demo .pup-cheek-right { right:11px; }
+    #pup-mascot-demo .pup-paw { position:absolute; z-index:3; top:108px; width:29px; height:23px; border:2px solid var(--pup-fur-edge); border-radius:50% 50% 42% 42%; background:var(--pup-fur-light); box-shadow:inset 0 3px 0 var(--pup-shine); }
+    #pup-mascot-demo .pup-paw::after { content:""; position:absolute; left:8px; top:10px; width:8px; height:5px; border-left:1px solid var(--pup-fur-edge); border-right:1px solid var(--pup-fur-edge); }
+    #pup-mascot-demo .pup-paw-left { left:23px; transform:rotate(8deg); }
+    #pup-mascot-demo .pup-paw-right { right:23px; transform:rotate(-8deg); transform-origin:50% 100%; }
+    #pup-mascot-demo.is-waving .pup-paw-right { animation:pup-wave 480ms ease-in-out 4; }
+    #pup-mascot-demo.is-waving .pup-tail { animation:pup-tail-wag 320ms ease-in-out 6; }
+    #pup-mascot-demo.is-waving .pup-ear-left { animation:pup-ear-flop 640ms ease-in-out 3; }
+    #pup-mascot-demo.is-waving .pup-head { transform:rotate(4deg); }
+    #pup-mascot-demo.is-waving .pup-tongue { opacity:1; }
+    #pup-mascot-demo.is-blinking .pup-eye { scale:1 .12; }
+    #pup-mascot-demo .pup-taskbar { position:relative; background:var(--pup-bar); border-top:1px solid var(--pup-line); display:flex; align-items:center; gap:5px; padding:12px 16px; min-height:61px; }
+    #pup-mascot-demo .pup-task { display:flex; align-items:center; gap:8px; padding:8px 10px; color:var(--pup-muted); border-radius:7px; }
+    #pup-mascot-demo .pup-task-current { color:var(--pup-accent); background:var(--pup-tint); }
+    #pup-mascot-demo .pup-avatar { margin-left:auto; border:1px solid var(--pup-line); background:var(--pup-surface); border-radius:50%; width:32px; height:32px; display:grid; place-items:center; color:var(--pup-muted); }
+    #pup-mascot-demo .pup-footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px; color:var(--pup-muted); }
+    @keyframes pup-wave { 0%,100% { transform:translate(8px,-29px) rotate(16deg); } 50% { transform:translate(10px,-31px) rotate(49deg); } }
+    @keyframes pup-tail-wag { 0%,100% { transform:rotate(-26deg); } 50% { transform:rotate(-65deg); } }
+    @keyframes pup-ear-flop { 0%,100% { transform:rotate(14deg); } 50% { transform:rotate(23deg); } }
+    @media (max-width:440px) {
+      #pup-mascot-demo .pup-stage { height:254px; }
+      #pup-mascot-demo .pup-visitor { right:7%; }
+      #pup-mascot-demo .pup-taskbar { padding:10px 8px; gap:2px; }
+      #pup-mascot-demo .pup-task { gap:5px; padding:8px 6px; }
+      #pup-mascot-demo .pup-avatar { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      #pup-mascot-demo .pup-character, #pup-mascot-demo .pup-head { transition:none; }
+      #pup-mascot-demo .pup-paw-right, #pup-mascot-demo .pup-tail, #pup-mascot-demo .pup-ear { animation:none !important; }
+      #pup-mascot-demo.is-waving .pup-paw-right { transform:translate(8px,-29px) rotate(16deg); }
+    }
+  </style>
+  <div class="pup-heading">
+    <div><span class="pup-name">Meet Biscuit</span><span class="pup-subtitle">A little puppy for your taskbar</span></div>
+    <button type="button" class="pup-replay"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Replay visit</button>
+  </div>
+  <div class="pup-product">
+    <div class="pup-stage">
+      <div class="pup-watermark"><i data-lucide="layers-2" aria-hidden="true"></i>UnionSuite</div>
+      <div class="pup-visitor" aria-label="Mascot appearance">
+        <div class="pup-cutout">
+          <button type="button" class="pup-character" aria-label="Make Biscuit wave" disabled>
+            <span class="pup-creature" aria-hidden="true">
+              <span class="pup-tail"></span>
+              <span class="pup-ear pup-ear-left"></span><span class="pup-ear pup-ear-right"></span>
+              <span class="pup-body"><span class="pup-belly"></span></span>
+              <span class="pup-collar"></span>
+              <span class="pup-head"><span class="pup-blaze"></span><span class="pup-eye-patch"></span><span class="pup-tuft"></span><span class="pup-muzzle"></span><span class="pup-eye pup-eye-left"></span><span class="pup-eye pup-eye-right"></span><span class="pup-nose"></span><span class="pup-mouth"></span><span class="pup-tongue"></span><span class="pup-cheek pup-cheek-left"></span><span class="pup-cheek pup-cheek-right"></span></span>
+              <span class="pup-paw pup-paw-left"></span><span class="pup-paw pup-paw-right"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="pup-taskbar" aria-label="Taskbar context">
+      <span class="pup-task pup-task-current"><i data-lucide="house" aria-hidden="true"></i>Home</span>
+      <span class="pup-task"><i data-lucide="users" aria-hidden="true"></i>Contacts</span>
+      <span class="pup-task"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Reports</span>
+      <span class="pup-avatar" aria-label="James">J</span>
+    </div>
+  </div>
+  <div class="pup-footer"><span class="pup-status" role="status" aria-live="polite">A little visitor is on the way.</span><span>Interactive concept</span></div>
+  <script>
+    (() => {
+      const root = document.getElementById('pup-mascot-demo');
+      const character = root.querySelector('.pup-character');
+      const replay = root.querySelector('.pup-replay');
+      const status = root.querySelector('.pup-status');
+      const visitor = root.querySelector('.pup-visitor');
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const settings = { palette:'biscuit', size:100 };
+      let sequence = [];
+      let departure = null;
+      let reaction = null;
+      let started = false;
+      let disposed = false;
+      function later(fn, ms) { const id = setTimeout(() => { if (!disposed) fn(); }, ms); sequence.push(id); }
+      function clearSequence() { sequence.forEach(clearTimeout); sequence = []; clearTimeout(departure); clearTimeout(reaction); }
+      function resetExpression() { root.classList.remove('is-blinking', 'is-waving'); }
+      function phase(value) { root.dataset.phase = value; character.disabled = value !== 'visit'; }
+      function leave() {
+        if (document.activeElement === character) { departure = setTimeout(leave, 2000); return; }
+        departure = setTimeout(() => { phase('away'); resetExpression(); status.textContent = 'Biscuit has wandered off.'; }, 900);
+      }
+      function planDeparture(ms) { clearTimeout(departure); departure = setTimeout(leave, ms); }
+      function visit() {
+        started = true;
+        clearSequence();
+        resetExpression();
+        phase('away');
+        status.textContent = 'A little visitor is on the way.';
+        later(() => phase(motion.matches ? 'visit' : 'peek'), 350);
+        later(() => {
+          phase('visit');
+          status.textContent = 'Biscuit is visiting. Click to make him wave.';
+          planDeparture(10000);
+        }, motion.matches ? 350 : 1550);
+        later(() => { if (!motion.matches && !root.classList.contains('is-waving')) wave(); }, 2250);
+        later(() => root.classList.add('is-blinking'), 5500);
+        later(() => root.classList.remove('is-blinking'), 5650);
+      }
+      function wave() {
+        clearTimeout(reaction);
+        root.classList.remove('is-waving', 'is-blinking');
+        void character.offsetWidth;
+        root.classList.add('is-waving');
+        reaction = setTimeout(() => root.classList.remove('is-waving'), 2000);
+      }
+      function greet() {
+        if (root.dataset.phase !== 'visit') return;
+        wave();
+        status.textContent = 'Biscuit waves hello.';
+        planDeparture(6500);
+      }
+      replay.addEventListener('click', visit);
+      character.addEventListener('click', greet);
+      root.addEventListener('pointermove', (event) => {
+        if (root.dataset.phase !== 'visit' || motion.matches || event.pointerType === 'touch') return;
+        const bounds = character.getBoundingClientRect();
+        const x = Math.max(-2, Math.min(2, (event.clientX - bounds.left - bounds.width / 2) / 90));
+        const y = Math.max(-1.5, Math.min(1.5, (event.clientY - bounds.top - 50) / 100));
+        root.style.setProperty('--pup-gaze-x', x + 'px');
+        root.style.setProperty('--pup-gaze-y', y + 'px');
+      });
+      root.addEventListener('pointerleave', () => {
+        root.style.setProperty('--pup-gaze-x', '0px');
+        root.style.setProperty('--pup-gaze-y', '0px');
+      });
+      const palettes = {
+        biscuit:{fur:'#ebc492', edge:'#c39a6c', light:'#fff0d6', ear:'#b98459', earEdge:'#986a48'},
+        cream:{fur:'#f4e5cc', edge:'#cab69b', light:'#fff7e9', ear:'#b49a7d', earEdge:'#937a60'},
+        cocoa:{fur:'#bc9278', edge:'#956c54', light:'#eed7bf', ear:'#815b45', earEdge:'#664934'}
+      };
+      function renderDesign() {
+        const p = palettes[settings.palette] || palettes.biscuit;
+        root.style.setProperty('--pup-fur', `light-dark(${p.fur}, ${p.fur})`);
+        root.style.setProperty('--pup-fur-edge', `light-dark(${p.edge}, ${p.edge})`);
+        root.style.setProperty('--pup-fur-light', `light-dark(${p.light}, ${p.light})`);
+        root.style.setProperty('--pup-ear', `light-dark(${p.ear}, ${p.ear})`);
+        root.style.setProperty('--pup-ear-edge', `light-dark(${p.earEdge}, ${p.earEdge})`);
+        visitor.style.transform = `scale(${settings.size / 100})`;
+        visitor.style.transformOrigin = '50% 100%';
+      }
+      renderDesign();
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container:visitor, onChange:renderDesign });
+        tweak.addSelect(settings, 'palette', { label:'Coat', options:[{label:'Biscuit',value:'biscuit'},{label:'Cream',value:'cream'},{label:'Cocoa',value:'cocoa'}] });
+        tweak.addSlider(settings, 'size', { label:'Size', min:85, max:110, step:5, unit:'%' });
+      }
+      phase('peek');
+      let observer;
+      if ('IntersectionObserver' in window) {
+        observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting) && !started) { visit(); observer.disconnect(); }
+        }, { threshold:0.3 });
+        observer.observe(root);
+      } else { visit(); }
+      window.addEventListener('pagehide', () => { disposed = true; clearSequence(); observer?.disconnect(); }, {once:true});
+    })();
+  </script>
+</div>

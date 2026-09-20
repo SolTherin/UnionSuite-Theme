@@ -1,0 +1,674 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Taskbar search comparison</title><style>body{margin:24px;font:15px/1.5 Arial;color:#283b44;background:#f5f6f7}h1{color:#00394b;margin-bottom:8px}main{max-width:1500px;margin:auto}.compare{display:grid;grid-template-columns:1fr 1fr;gap:24px}iframe{width:100%;height:820px;border:1px solid #d3d8db;border-radius:8px;background:#f1f2f3;box-sizing:border-box}select{padding:8px;margin:12px}h2{margin-bottom:4px}.note{min-height:48px;color:#535966} @media(max-width:1000px){.compare{grid-template-columns:1fr}}</style><main><a href="index.html">All references</a><h1>Taskbar search — current / proposed</h1><p>Colour update for the existing injection. Current colours and result styles come from the supplied script. Both sides use the same fictional data and simulated interactions. Preview spacing keeps the desktop taskbar visible within each column; this is not a mobile behaviour comparison.</p><label>Example <select id="scenario"><option value="name">Name search</option><option value="email">Email match</option><option value="phone">Phone match</option><option value="loading">Loading</option><option value="empty">No results</option><option value="error">Error</option></select></label><div class="compare"><section><h2>Current / legacy fallback</h2><p class="note">Blue Go button, compact 320px results, blue ID badges and yellow match highlights.</p><iframe title="Current taskbar" srcdoc="&lt;!doctype html>&lt;html>&lt;style>
+/* Hide the native search block (kept in DOM — other iMIS scripts
+   reference #ctl01_SearchFieldPlus_Shortcuts_RadAjaxPanel1) */
+#hd .searchfieldplus-dropdown { display: none !important; }
+/* #5: hide the redundant native mobile search toggle */
+#hd .search-dropdown { display: none !important; }
+#injected-taskbar {
+  --bg:            #f4f6f9;
+  --surface:       #ffffff;
+  --border:        #dde1e7;
+  --text:          #1a1f2e;
+  --text-muted:    #6b7280;
+  --primary:       #2563eb;
+  --primary-hover: #1d4ed8;
+  --selected-bg:   #eff6ff;
+  --shadow-md:     0 4px 12px rgba(0,0,0,.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  box-sizing: border-box;
+  min-width: 0;
+}
+#injected-taskbar label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+#injected-taskbar .tb-id-wrap,
+#injected-taskbar .tb-id-fields,
+#injected-taskbar .tb-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+#injected-taskbar .tb-id-fields,
+#injected-taskbar .tb-search-wrap { position: relative; }
+#injected-taskbar .tb-id-status {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  z-index: 10000;
+}
+#injected-taskbar .tb-id-status.error { color: #dc2626; background: #fee2e2; }
+#injected-taskbar .tb-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+#injected-taskbar .tb-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+#injected-taskbar .tb-input,
+#injected-taskbar .tb-search-input {
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 0;
+  transition: border-color .15s;
+  font-family: inherit;
+}
+#injected-taskbar .tb-input { width: 120px; }
+#injected-taskbar .tb-search-input { width: 180px; }
+#injected-taskbar .tb-input:focus,
+#injected-taskbar .tb-search-input:focus { border-color: var(--primary); background: #fff; }
+#injected-taskbar .tb-btn {
+  padding: 6px 16px;
+  border-radius: 7px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  background: var(--primary);
+  color: #fff;
+  transition: background .15s, transform .1s;
+}
+#injected-taskbar .tb-btn:hover { background: var(--primary-hover); }
+#injected-taskbar .tb-btn:active { transform: scale(.97); }
+/* Search dropdown */
+#tb-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  z-index: 10000;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;
+  --text:       #1a1f2e;
+  --text-muted: #6b7280;
+  --border:     #dde1e7;
+  --primary:    #2563eb;
+  --selected-bg:#eff6ff;
+  --bg:         #f4f6f9;
+}
+#tb-search-dropdown .tb-dd-header { display: none; }
+#tb-search-dropdown .tb-dd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: background .1s;
+}
+#tb-search-dropdown .tb-dd-item:last-child { border-bottom: none; }
+#tb-search-dropdown .tb-dd-item:hover { background: var(--selected-bg); }
+#tb-search-dropdown .tb-dd-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tb-search-dropdown .tb-dd-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--selected-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#tb-search-dropdown .tb-dd-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+#tb-search-dropdown .tb-dd-match {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tb-search-dropdown .tb-dd-match strong {
+  color: var(--text);
+  font-weight: 700;
+  background: #fef9c3;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+#tb-search-dropdown .tb-dd-msg {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+#tb-search-dropdown .tb-dd-section {
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+body{margin:16px;background:#f1f2f3;font-family:Arial,sans-serif}#injected-taskbar{background:white;padding:16px 12px;flex-wrap:wrap;justify-content:flex-end}#injected-taskbar .tb-search-wrap{position:relative}.tb-dd-body{background:white}#tb-search-dropdown[hidden]{display:none}.demo-feedback{margin-top:570px;font:13px/1.5 Arial;color:#535966}.tb-dd-item>div{min-width:0}#tb-search-dropdown{max-width:calc(100vw - 32px)}@media(max-width:430px){#injected-taskbar .tb-id-wrap{display:none}}&lt;/style>&lt;body data-proposed=&quot;false&quot;>&lt;div id=&quot;injected-taskbar&quot;>&lt;div class=&quot;tb-id-wrap&quot;>&lt;label for=&quot;record&quot;>Go to record:&lt;/label>&lt;div class=&quot;tb-id-fields&quot;>&lt;input id=&quot;record&quot; class=&quot;tb-input&quot; placeholder=&quot;iMIS ID&quot;>&lt;button type=&quot;button&quot; class=&quot;tb-btn&quot;>Go&lt;/button>&lt;/div>&lt;/div>&lt;div class=&quot;tb-search-wrap&quot;>&lt;label for=&quot;search&quot;>Quick Search:&lt;/label>&lt;input id=&quot;search&quot; class=&quot;tb-search-input&quot; value=&quot;morgan&quot; autocomplete=&quot;off&quot;>&lt;div id=&quot;tb-search-dropdown&quot;>&lt;div class=&quot;tb-dd-body&quot;>&lt;/div>&lt;/div>&lt;/div>&lt;/div>&lt;p class=&quot;demo-feedback&quot; role=&quot;status&quot;>Fictional records only. Try typing, arrow keys, Enter and Escape.&lt;/p>&lt;script>
+const query=document.querySelector('.tb-search-input'),body=document.querySelector('.tb-dd-body'),dropdown=document.querySelector('#tb-search-dropdown');
+const names=['Alex Morgan','Morgan Engineering','Jamie Morgan','Taylor Morgan','Sam Morgan','Casey Morgan','Robin Morgan','Jordan Morgan','Drew Morgan','Morgan Regional Services'];
+const rows=names.map((name,i)=>({name,kind:(i===1||i===9)?'organisation':'person',id:String(900101+i),meta:i===1?'Employer · Active':i===9?'Workplace · Active':i===5?'Regular Member · Suspended':'Regular Member · Active',email:'demo'+(i+1)+'@example.com',phone:'0400 111 '+String(100+i)}));
+let mode='name';
+function node(tag,cls,text){const n=document.createElement(tag);n.className=cls;if(text)n.textContent=text;return n}
+function render(){
+ dropdown.hidden=false;body.replaceChildren();
+ if(['loading','empty','error'].includes(mode)){
+ const message=node('div','tb-dd-msg',mode==='loading'?'Searching…':mode==='empty'?'No matching records. Try a name, ID, email or mobile.':'Search unavailable. Please try again.');
+ message.setAttribute('role','status');
+ if(mode==='loading'&amp;&amp;document.body.dataset.proposed==='true'){message.classList.add('tb-dd-loading');const spinner=node('span','section-loader-spinning-circles');spinner.setAttribute('aria-hidden','true');message.prepend(spinner)}
+ body.append(message);return}
+ const term=query.value.toLowerCase(),matches=rows.filter(r=>[r.name,r.id,r.email,r.phone].some(v=>v.toLowerCase().includes(term)));
+ if(!matches.length){body.append(node('div','tb-dd-msg','No matching records. Try another search.'));return}
+ for(const r of matches){const a=node('a','tb-dd-item');a.href='#';const info=node('div','');info.style.minWidth='0';info.append(node('div','tb-dd-name',r.name),node('div','tb-dd-meta',r.meta));if(mode==='email'||mode==='phone'){
+ const value=mode==='email'?r.email:r.phone,line=node('div','tb-dd-match'),start=value.toLowerCase().indexOf(term);
+ line.append(document.createTextNode(mode==='email'?'Preferred email: ':'Preferred mobile: '));
+ if(start>=0&amp;&amp;term){line.append(document.createTextNode(value.slice(0,start)),node('strong','',value.slice(start,start+term.length)),document.createTextNode(value.slice(start+term.length)))}else line.append(document.createTextNode(value));info.append(line)}
+ if(document.body.dataset.proposed==='true'){
+ const icon=node('span','tb-dd-kind '+r.kind);icon.setAttribute('aria-hidden','true');
+ icon.innerHTML=r.kind==='organisation'?'&lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.7&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;>&lt;path d=&quot;M4 21V4h11v17M15 10h5v11M2 21h20M8 21v-4h3v4M7 8h1m3 0h1M7 12h1m3 0h1m6 2h1m-1 3h1&quot;/>&lt;/svg>':'&lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.7&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;>&lt;circle cx=&quot;12&quot; cy=&quot;8&quot; r=&quot;4&quot;/>&lt;path d=&quot;M5 21v-2a7 7 0 0 1 14 0v2&quot;/>&lt;/svg>';
+ a.append(icon);info.className='tb-dd-info';
+ }
+ a.append(info,node('span','tb-dd-id',r.id));a.onclick=e=>{e.preventDefault();document.querySelector('.demo-feedback').textContent='Demo selection: '+r.name+' ('+r.id+'). No navigation.'};body.append(a)}
+}
+query.oninput=()=>{if(['loading','empty','error'].includes(mode))mode='name';render()};
+query.onfocus=()=>dropdown.hidden=false;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){dropdown.hidden=true;query.focus();dropdown.hidden=true}if(['ArrowDown','ArrowUp'].includes(e.key)){const items=[...body.querySelectorAll('a')];if(!items.length)return;e.preventDefault();let i=items.indexOf(document.activeElement);i=e.key==='ArrowDown'?(i+1)%items.length:(i-1+items.length)%items.length;items[i].focus()}});
+window.addEventListener('message',e=>{if(e.source!==parent||!e.data?.taskbarDemo)return;mode=e.data.taskbarDemo;query.value=mode==='email'?'example.com':mode==='phone'?'111':'morgan';render()});
+const go=document.querySelector('.tb-btn');go.onclick=()=>{go.disabled=true;if(document.body.dataset.proposed==='true'){go.replaceChildren(node('span','demo-ring'));go.setAttribute('aria-label','Checking record')}else go.textContent='Checking…';setTimeout(()=>{go.disabled=false;go.textContent='Go';go.removeAttribute('aria-label');document.querySelector('.demo-feedback').textContent='Demo lookup complete. No record opened.'},1200)};
+render();
+&lt;/script>&lt;/body>&lt;/html>"></iframe></section><section><h2>Current styling / brand accents</h2><p class="note">Same compact layout and interactions. Brand accent Go button, pale accent ID badges, result hover and match highlights.</p><iframe title="Current styling / brand accents" srcdoc="&lt;!doctype html>&lt;html>&lt;style>
+/* Hide the native search block (kept in DOM — other iMIS scripts
+   reference #ctl01_SearchFieldPlus_Shortcuts_RadAjaxPanel1) */
+#hd .searchfieldplus-dropdown { display: none !important; }
+/* #5: hide the redundant native mobile search toggle */
+#hd .search-dropdown { display: none !important; }
+#injected-taskbar {
+  --bg:            #f4f6f9;
+  --surface:       #ffffff;
+  --border:        #dde1e7;
+  --text:          #1a1f2e;
+  --text-muted:    #6b7280;
+  --primary:       #2563eb;
+  --primary-hover: #1d4ed8;
+  --selected-bg:   #eff6ff;
+  --shadow-md:     0 4px 12px rgba(0,0,0,.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  box-sizing: border-box;
+  min-width: 0;
+}
+#injected-taskbar label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+#injected-taskbar .tb-id-wrap,
+#injected-taskbar .tb-id-fields,
+#injected-taskbar .tb-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+#injected-taskbar .tb-id-fields,
+#injected-taskbar .tb-search-wrap { position: relative; }
+#injected-taskbar .tb-id-status {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  z-index: 10000;
+}
+#injected-taskbar .tb-id-status.error { color: #dc2626; background: #fee2e2; }
+#injected-taskbar .tb-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+#injected-taskbar .tb-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+#injected-taskbar .tb-input,
+#injected-taskbar .tb-search-input {
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 0;
+  transition: border-color .15s;
+  font-family: inherit;
+}
+#injected-taskbar .tb-input { width: 120px; }
+#injected-taskbar .tb-search-input { width: 180px; }
+#injected-taskbar .tb-input:focus,
+#injected-taskbar .tb-search-input:focus { border-color: var(--primary); background: #fff; }
+#injected-taskbar .tb-btn {
+  padding: 6px 16px;
+  border-radius: 7px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  background: var(--primary);
+  color: #fff;
+  transition: background .15s, transform .1s;
+}
+#injected-taskbar .tb-btn:hover { background: var(--primary-hover); }
+#injected-taskbar .tb-btn:active { transform: scale(.97); }
+/* Search dropdown */
+#tb-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  z-index: 10000;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;
+  --text:       #1a1f2e;
+  --text-muted: #6b7280;
+  --border:     #dde1e7;
+  --primary:    #2563eb;
+  --selected-bg:#eff6ff;
+  --bg:         #f4f6f9;
+}
+#tb-search-dropdown .tb-dd-header { display: none; }
+#tb-search-dropdown .tb-dd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: background .1s;
+}
+#tb-search-dropdown .tb-dd-item:last-child { border-bottom: none; }
+#tb-search-dropdown .tb-dd-item:hover { background: var(--selected-bg); }
+#tb-search-dropdown .tb-dd-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tb-search-dropdown .tb-dd-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--selected-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#tb-search-dropdown .tb-dd-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+#tb-search-dropdown .tb-dd-match {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tb-search-dropdown .tb-dd-match strong {
+  color: var(--text);
+  font-weight: 700;
+  background: #fef9c3;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+#tb-search-dropdown .tb-dd-msg {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+#tb-search-dropdown .tb-dd-section {
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+/* ==========================================================================
+   Design tokens — seeded model
+
+   A client edits FIVE values. Everything else is derived from them.
+   Any derived value can still be overridden individually, because each one
+   remains its own named token and the client sheet loads last.
+
+   ── How it works ────────────────────────────────────────────────────────
+   Layer 1  SEEDS          5 values. The client layer.
+   Layer 2  RAMPS          derived from the seeds with color-mix().
+   Layer 3  SEMANTICS      what each value is FOR. Never overridden.
+
+   Custom properties are not validated at parse time, so a browser without
+   color-mix() would not fall back — it would resolve every ramp token to
+   nothing. So the exact values are declared first, unconditionally, and the
+   derived versions are applied inside @supports. Old browser: Orion's exact
+   palette. Modern browser: the same palette, derived, and rebrandable.
+
+   The mix percentages were fitted against Orion's real ramp. Distance from
+   the native value, in RGB units, is noted per stop. Anything under ~6 is
+   imperceptible.
+   ========================================================================== */
+
+:root {
+
+  /* ── LAYER 1 — SEEDS. The five values a client changes. ───────────────── */
+  /* Client setting: use var(--brand-600) for primary-colour checkboxes. */
+  --checkbox-colour: var(--accent);
+  --radio-colour: var(--accent);
+
+  --seed-primary:       #006f94;  /* Orion link teal — the brand            */
+  --seed-primary-light: #5acbf8;  /* Orion bright cyan — top of the ramp    */
+  --seed-accent:        #ff9947;  /* Orion orange — the accent              */
+  --seed-accent-alt:    #ff734f;  /* Orion coral — secondary accent         */
+  --seed-neutral:       #545962;  /* Orion body text — the grey hue         */
+
+  /* ── LAYER 2 — RAMPS. Exact Orion values. Overridden below when the
+        browser supports color-mix(). Override any single one from the
+        client sheet to pin it. ──────────────────────────────────────────── */
+  --teal-950: #001b23;
+  --teal-900: #002632;
+  --teal-800: #003a4c;
+  --teal-700: #00506a;
+  --teal-600: #006f94;
+  --teal-500: #007ea8;
+  --teal-400: #3fb5d9;
+  --teal-300: #5acbf8;
+  --teal-100: #d0e4ea;
+  --teal-50:  #eef6f9;
+
+  --accent-700: #e07a1f;
+  --accent-600: #ff9947;
+  --accent-500: #ff734f;
+  --accent-100: #ffe8d6;
+
+  --neutral-900: #1c2024;
+  --neutral-800: #2b3036;
+  --neutral-700: #3d434b;
+  --neutral-600: #545962;
+  --neutral-500: #6b7580;
+  --neutral-400: #9aa1aa;
+  --neutral-300: #c8ccd2;
+  --neutral-200: #e2e5e9;
+  --neutral-100: #f1f3f5;
+  --neutral-50:  #f8f9fa;
+
+  --white: #ffffff;
+  --page:  #eeeeef;
+
+  /* ── Status. NOT derived from the brand, deliberately. A client's brand
+        should not change what danger looks like. Enumerated, and only
+        changed if a client has a real reason. ───────────────────────────── */
+  --status-red:         #d03528;
+  --status-red-bg:      #fbe4e2;
+  --status-green:       #3f7a2a;
+  --status-green-fill:  #68bd49;
+  --status-green-bg:    #e8f4e2;
+  --status-amber:       #a35a00;
+  --status-amber-fill:  #ff9947;
+  --status-amber-bg:    #fdefe0;
+  --status-info:        #006f94;
+  --status-info-bg:     #e4f0f4;
+  --status-purple:      #413d6b;
+  --status-purple-bg:   #e6e5ef;
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+  :root {
+    /* Dark end: primary toward black. Fits Orion within 0–1 units. */
+    --teal-950: color-mix(in srgb, var(--seed-primary) 24%, #000);   /* 1 */
+    --teal-900: color-mix(in srgb, var(--seed-primary) 34%, #000);   /* 0 */
+    --teal-800: color-mix(in srgb, var(--seed-primary) 51%, #000);   /* 1 */
+    --teal-700: color-mix(in srgb, var(--seed-primary) 72%, #000);   /* 1 */
+    --teal-600: var(--seed-primary);                                  /* 0 */
+
+    /* Mid: primary toward the light seed. teal-500 is the loosest fit in
+       the whole set at 14 units — visually negligible, but if you want
+       Orion's exact #007ea8, pin it in the client sheet. */
+    --teal-500: color-mix(in srgb, var(--seed-primary) 85%, var(--seed-primary-light));  /* 14 */
+    --teal-400: color-mix(in srgb, var(--seed-primary) 28%, var(--seed-primary-light));  /* 5 */
+    --teal-300: var(--seed-primary-light);                            /* 0 */
+
+    /* Tints: primary toward white. */
+    --teal-100: color-mix(in srgb, var(--seed-primary) 18%, #fff);   /* 2 */
+    --teal-50:  color-mix(in srgb, var(--seed-primary) 6%,  #fff);   /* 2 */
+
+    /* Accent. accent-700 is the hover state; a straight black mix reads
+       slightly browner than the hand-picked #e07a1f (31 units). It is a
+       hover, so the derived value is fine — pin it if you disagree. */
+    --accent-700: color-mix(in srgb, var(--seed-accent) 82%, #000);  /* 31 */
+    --accent-600: var(--seed-accent);                                 /* 0 */
+    --accent-500: var(--seed-accent-alt);                             /* 0 */
+    --accent-100: color-mix(in srgb, var(--seed-accent) 22%, #fff);  /* 1 */
+
+    /* Neutrals derive cleanly from one seed — every stop within 7 units.
+       These were hand-picked before, so deriving them is strictly better:
+       the ramp becomes consistent, and it follows a client's grey hue. */
+    --neutral-900: color-mix(in srgb, var(--seed-neutral) 35%, #000); /* 2 */
+    --neutral-800: color-mix(in srgb, var(--seed-neutral) 53%, #000); /* 3 */
+    --neutral-700: color-mix(in srgb, var(--seed-neutral) 74%, #000); /* 3 */
+    --neutral-600: var(--seed-neutral);                               /* 0 */
+    --neutral-500: color-mix(in srgb, var(--seed-neutral) 83%, #fff); /* 7 */
+    --neutral-400: color-mix(in srgb, var(--seed-neutral) 56%, #fff); /* 6 */
+    --neutral-300: color-mix(in srgb, var(--seed-neutral) 30%, #fff); /* 4 */
+    --neutral-200: color-mix(in srgb, var(--seed-neutral) 15%, #fff); /* 4 */
+    --neutral-100: color-mix(in srgb, var(--seed-neutral) 7%,  #fff); /* 2 */
+    --neutral-50:  color-mix(in srgb, var(--seed-neutral) 4%,  #fff); /* 1 */
+  }
+}
+
+/* ==========================================================================
+   LAYER 3 — SEMANTICS. What each value is FOR. Never overridden per client.
+   ========================================================================== */
+
+:root {
+  --brand-950: var(--teal-950);
+  --brand-900: var(--teal-900);
+  --brand-800: var(--teal-800);
+  --brand-700: var(--teal-700);
+  --brand-600: var(--teal-600);
+  --brand-500: var(--teal-500);
+  --brand-100: var(--teal-100);
+  --brand-50:  var(--teal-50);
+
+  --accent:       var(--accent-600);
+  --accent-hover: var(--accent-700);
+
+  --bg-page:    var(--page);
+  --bg-surface: var(--white);
+  --bg-subtle:  var(--neutral-50);
+  --bg-sunken:  var(--neutral-100);
+  --bg-inverse: var(--brand-900);
+
+  --text-strong:       var(--neutral-900);
+  --text-base:         var(--neutral-600);
+  --text-muted:        var(--neutral-600);
+  --text-faint:        var(--neutral-500);   /* card only — see the test sheet */
+  --text-inverse:      var(--white);
+  --text-link:         var(--brand-600);
+  --text-link-hover:   var(--brand-700);
+  --text-link-visited: var(--brand-800);
+  --text-on-accent:    var(--brand-900);
+
+  --border:        var(--neutral-200);
+  --border-strong: var(--neutral-400);
+  --border-focus:  var(--brand-600);
+  --focus-ring:    0 0 0 2px var(--white), 0 0 0 4px var(--brand-600);
+
+  --success:      var(--status-green);
+  --success-fill: var(--status-green-fill);
+  --success-bg:   var(--status-green-bg);
+  --warning:      var(--status-amber);
+  --warning-fill: var(--status-amber-fill);
+  --warning-bg:   var(--status-amber-bg);
+  --danger:       var(--status-red);
+  --danger-bg:    var(--status-red-bg);
+  --info:         var(--status-info);
+  --info-bg:      var(--status-info-bg);
+
+  /* Type, spacing, radii, shadows, layout, z-index — unchanged from the
+     enumerated sheet. Not brand-dependent, so not seeded. */
+  --face-body:    &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;, Arial, sans-serif;
+  --face-display: &quot;Red Hat Display&quot;, &quot;Open Sans&quot;, Helvetica, Arial, sans-serif;
+  --face-ui:      &quot;Inter&quot;, system-ui, -apple-system, sans-serif;
+  --face-mono:    ui-monospace, &quot;Cascadia Mono&quot;, Consolas, monospace;
+  --font-body:    var(--face-body);
+  --font-display: var(--face-display);
+  --font-ui:      var(--face-ui);
+
+  --fs-2xs: 11px; --fs-xs: 12px; --fs-sm: 13px; --fs-base: 14px;
+  --fs-md:  16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px;
+  --lh-tight: 1.25; --lh-base: 1.5; --lh-loose: 1.65;
+  --fw-normal: 400; --fw-medium: 500; --fw-semi: 600; --fw-bold: 700;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px;
+
+  --radius-sm: 4px; --radius: 8px; --radius-lg: 12px; --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 27, 35, .07);
+  --shadow:    0 2px 4px rgba(0, 27, 35, .11);
+  --shadow-lg: 0 8px 20px rgba(0, 27, 35, .16);
+
+  --page-gutter: 20px; --card-pad-x: 18px; --card-pad-y: 16px;
+  --sidebar-w: 62.5px; --sidebar-w-open: 250px; --header-h: 64px;
+
+  --z-sidebar: 1030; --z-header: 1031; --z-modal: 1040; --z-tooltip: 1060;
+}
+
+/* ==========================================================================
+   FOR A CLIENT SHEET (zzClientSpecific.css)
+
+   Normal rebrand — five values:
+
+     :root {
+       --seed-primary:       #4a2f7a;
+       --seed-primary-light: #b39ddb;
+       --seed-accent:        #d4a017;
+       --seed-accent-alt:    #e0704f;
+       --seed-neutral:       #5b5560;
+     }
+
+   Pin one derived stop, if a client insists on an exact shade:
+
+     :root { --teal-500: #007ea8; }
+
+   Both work: seeds feed the ramp, and a named stop set later wins over it.
+   ========================================================================== */
+
+
+:root #injected-taskbar, :root #tb-search-dropdown {
+  --primary: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --selected-bg: var(--accent-100);
+}
+:root #injected-taskbar .tb-btn { color: var(--text-on-accent); }
+:root #injected-taskbar .tb-btn:disabled { background: var(--neutral-300); color: var(--text-muted); }
+:root #injected-taskbar :is(.tb-input,.tb-search-input):focus { border-color: var(--border-focus); }
+:root #tb-search-dropdown .tb-dd-id { background: var(--accent-100); color: var(--brand-900); }
+:root #tb-search-dropdown .tb-dd-match strong { background: var(--accent-100); color: var(--brand-900); }
+:root #tb-search-dropdown .tb-dd-item:focus-visible { background: var(--accent-100); outline: 2px solid var(--border-focus); outline-offset: -2px; }
+body{margin:16px;background:#f1f2f3;font-family:Arial,sans-serif}#injected-taskbar{background:white;padding:16px 12px;flex-wrap:wrap;justify-content:flex-end}#injected-taskbar .tb-search-wrap{position:relative}.tb-dd-body{background:white}#tb-search-dropdown[hidden]{display:none}.demo-feedback{margin-top:570px;font:13px/1.5 Arial;color:#535966}.tb-dd-item>div{min-width:0}#tb-search-dropdown{max-width:calc(100vw - 32px)}@media(max-width:430px){#injected-taskbar .tb-id-wrap{display:none}}&lt;/style>&lt;body data-proposed=&quot;false&quot;>&lt;div id=&quot;injected-taskbar&quot;>&lt;div class=&quot;tb-id-wrap&quot;>&lt;label for=&quot;record&quot;>Go to record:&lt;/label>&lt;div class=&quot;tb-id-fields&quot;>&lt;input id=&quot;record&quot; class=&quot;tb-input&quot; placeholder=&quot;iMIS ID&quot;>&lt;button type=&quot;button&quot; class=&quot;tb-btn&quot;>Go&lt;/button>&lt;/div>&lt;/div>&lt;div class=&quot;tb-search-wrap&quot;>&lt;label for=&quot;search&quot;>Quick Search:&lt;/label>&lt;input id=&quot;search&quot; class=&quot;tb-search-input&quot; value=&quot;morgan&quot; autocomplete=&quot;off&quot;>&lt;div id=&quot;tb-search-dropdown&quot;>&lt;div class=&quot;tb-dd-body&quot;>&lt;/div>&lt;/div>&lt;/div>&lt;/div>&lt;p class=&quot;demo-feedback&quot; role=&quot;status&quot;>Fictional records only. Try typing, arrow keys, Enter and Escape.&lt;/p>&lt;script>
+const query=document.querySelector('.tb-search-input'),body=document.querySelector('.tb-dd-body'),dropdown=document.querySelector('#tb-search-dropdown');
+const names=['Alex Morgan','Morgan Engineering','Jamie Morgan','Taylor Morgan','Sam Morgan','Casey Morgan','Robin Morgan','Jordan Morgan','Drew Morgan','Morgan Regional Services'];
+const rows=names.map((name,i)=>({name,kind:(i===1||i===9)?'organisation':'person',id:String(900101+i),meta:i===1?'Employer · Active':i===9?'Workplace · Active':i===5?'Regular Member · Suspended':'Regular Member · Active',email:'demo'+(i+1)+'@example.com',phone:'0400 111 '+String(100+i)}));
+let mode='name';
+function node(tag,cls,text){const n=document.createElement(tag);n.className=cls;if(text)n.textContent=text;return n}
+function render(){
+ dropdown.hidden=false;body.replaceChildren();
+ if(['loading','empty','error'].includes(mode)){
+ const message=node('div','tb-dd-msg',mode==='loading'?'Searching…':mode==='empty'?'No matching records. Try a name, ID, email or mobile.':'Search unavailable. Please try again.');
+ message.setAttribute('role','status');
+ if(mode==='loading'&amp;&amp;document.body.dataset.proposed==='true'){message.classList.add('tb-dd-loading');const spinner=node('span','section-loader-spinning-circles');spinner.setAttribute('aria-hidden','true');message.prepend(spinner)}
+ body.append(message);return}
+ const term=query.value.toLowerCase(),matches=rows.filter(r=>[r.name,r.id,r.email,r.phone].some(v=>v.toLowerCase().includes(term)));
+ if(!matches.length){body.append(node('div','tb-dd-msg','No matching records. Try another search.'));return}
+ for(const r of matches){const a=node('a','tb-dd-item');a.href='#';const info=node('div','');info.style.minWidth='0';info.append(node('div','tb-dd-name',r.name),node('div','tb-dd-meta',r.meta));if(mode==='email'||mode==='phone'){
+ const value=mode==='email'?r.email:r.phone,line=node('div','tb-dd-match'),start=value.toLowerCase().indexOf(term);
+ line.append(document.createTextNode(mode==='email'?'Preferred email: ':'Preferred mobile: '));
+ if(start>=0&amp;&amp;term){line.append(document.createTextNode(value.slice(0,start)),node('strong','',value.slice(start,start+term.length)),document.createTextNode(value.slice(start+term.length)))}else line.append(document.createTextNode(value));info.append(line)}
+ if(document.body.dataset.proposed==='true'){
+ const icon=node('span','tb-dd-kind '+r.kind);icon.setAttribute('aria-hidden','true');
+ icon.innerHTML=r.kind==='organisation'?'&lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.7&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;>&lt;path d=&quot;M4 21V4h11v17M15 10h5v11M2 21h20M8 21v-4h3v4M7 8h1m3 0h1M7 12h1m3 0h1m6 2h1m-1 3h1&quot;/>&lt;/svg>':'&lt;svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.7&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;>&lt;circle cx=&quot;12&quot; cy=&quot;8&quot; r=&quot;4&quot;/>&lt;path d=&quot;M5 21v-2a7 7 0 0 1 14 0v2&quot;/>&lt;/svg>';
+ a.append(icon);info.className='tb-dd-info';
+ }
+ a.append(info,node('span','tb-dd-id',r.id));a.onclick=e=>{e.preventDefault();document.querySelector('.demo-feedback').textContent='Demo selection: '+r.name+' ('+r.id+'). No navigation.'};body.append(a)}
+}
+query.oninput=()=>{if(['loading','empty','error'].includes(mode))mode='name';render()};
+query.onfocus=()=>dropdown.hidden=false;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){dropdown.hidden=true;query.focus();dropdown.hidden=true}if(['ArrowDown','ArrowUp'].includes(e.key)){const items=[...body.querySelectorAll('a')];if(!items.length)return;e.preventDefault();let i=items.indexOf(document.activeElement);i=e.key==='ArrowDown'?(i+1)%items.length:(i-1+items.length)%items.length;items[i].focus()}});
+window.addEventListener('message',e=>{if(e.source!==parent||!e.data?.taskbarDemo)return;mode=e.data.taskbarDemo;query.value=mode==='email'?'example.com':mode==='phone'?'111':'morgan';render()});
+const go=document.querySelector('.tb-btn');go.onclick=()=>{go.disabled=true;if(document.body.dataset.proposed==='true'){go.replaceChildren(node('span','demo-ring'));go.setAttribute('aria-label','Checking record')}else go.textContent='Checking…';setTimeout(()=>{go.disabled=false;go.textContent='Go';go.removeAttribute('aria-label');document.querySelector('.demo-feedback').textContent='Demo lookup complete. No record opened.'},1200)};
+render();
+&lt;/script>&lt;/body>&lt;/html>"></iframe></section></div><p>Colour overrides are maintained in zUnionSuite.css. Upload that file to apply them to the existing injection. The standalone replacement is Scripts/UnionSuiteTaskbar.js; remove the old injection and load it once with the shared stylesheet. The left-hand snapshot is reference-only. The previous layout redesign remains a separate trial.</p></main><script>document.querySelector("#scenario").onchange=e=>document.querySelectorAll("iframe").forEach(f=>f.contentWindow.postMessage({taskbarDemo:e.target.value},"*"))</script></html>

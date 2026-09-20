@@ -1,0 +1,21 @@
+<article class="us-contact" data-us-contact-colour="{#query.RoleColour}"
+  data-us-search="{#query.ContactName} {#query.RoleLabel} {#query.WorkplaceName} {#query.Email} {#query.Phone} {#query.ContactId}">
+  <div class="us-contact__heading">
+    <a class="us-contact__name" href="{#query.ContactUrl}">{#query.ContactName}</a>
+    <span class="us-badge us-contact__role">{#query.RoleLabel}</span>
+  </div>
+  <div class="us-contact__workplace">
+    <i class="ti ti-building" aria-hidden="true"></i>
+    <a href="{#query.WorkplaceUrl}">{#query.WorkplaceName}</a>
+  </div>
+  <div class="us-contact__details">
+    <div class="us-contact__detail">
+      <i class="ti ti-mail" aria-hidden="true"></i>
+      <a href="mailto:{#query.Email}">{#query.Email}</a>
+    </div>
+    <div class="us-contact__detail">
+      <i class="ti ti-phone" aria-hidden="true"></i>
+      <a href="tel:{#query.Phone}">{#query.Phone}</a>
+    </div>
+  </div>
+</article>

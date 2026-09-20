@@ -1,0 +1,12 @@
+/* Guide examples only. Controls within .sample use the actual theme CSS. */
+html{height:auto;min-height:0}body{margin:0;padding:18px;height:auto;min-height:0;background:var(--bg-surface);color:var(--text-base);font:14px/1.5 var(--font-ui)}
+h2{font:600 18px/1.3 var(--font-ui);color:var(--text-strong);margin:0 0 16px}h3{font:600 15px/1.4 var(--font-ui);color:var(--text-strong);margin:0 0 12px}
+.example-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.example-card{min-width:0;border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--bg-surface)}
+.example-card p{font-size:12px;margin:10px 0}.sample{min-height:58px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 16px;padding:8px;background:var(--bg-subtle);border-radius:var(--radius-sm)}
+.example-placement{font-size:11px!important;color:var(--text-muted)}.copy-class{display:inline-flex;max-width:100%;overflow-wrap:anywhere;white-space:normal;word-break:break-word;align-items:center;gap:8px;border:1px solid var(--brand-100);border-radius:4px;background:var(--brand-50);color:var(--brand-800);padding:6px 8px;margin:4px 4px 4px 0;font:11px/1.5 var(--face-mono);text-align:left;cursor:pointer}.copy-class::after{content:'⧉';font-family:var(--font-ui);flex-shrink:0}.copy-class:hover{background:var(--brand-100)}
+.example-code{margin-top:14px;font-size:12px}.example-code summary{cursor:pointer;color:var(--text-link);padding:6px 0}.example-code pre{margin:8px 0;max-height:240px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:4px;background:var(--bg-subtle);padding:12px;font:11px/1.6 var(--face-mono);color:var(--text-strong)}
+.copy-template{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:4px;color:var(--text-strong);font:12px/1.5 var(--font-ui);padding:5px 10px;cursor:pointer}
+.example-note{font-size:12px;max-width:90ch;margin:0 0 18px}.example-section+.example-section{margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}.example-swatch{font:28px/1 'tabler-icons';color:var(--text-link)}
+:focus-visible{outline:2px solid var(--border-focus);outline-offset:3px}.example-state{font-size:12px;min-height:20px;margin:8px 0;color:var(--text-link)}
+@media(max-width:800px){.example-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){body{padding:12px}.example-grid{grid-template-columns:1fr}}

@@ -1,0 +1,700 @@
+<!-- Generated UnionSuite CCO 0.1.0: standalone iMIS upload variant. -->
+<style>
+/* Isolated trial component. Consume UnionSuite semantic tokens; no global theme overrides. */
+.us-cco, .us-cco-config { color: var(--text-base, #545962); font: 14px/1.5 var(--font-ui, system-ui, sans-serif); }
+.us-cco *, .us-cco-config * { box-sizing: border-box; }
+.us-cco [hidden], .us-cco-config [hidden] { display: none !important; }
+.us-cco { min-width: 0; background: var(--bg-surface, #fff); }
+.us-cco__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 16px 12px; }
+.us-cco__caption { margin: 0; color: var(--text-strong, #1c2024); font: 600 18px/1.4 var(--font-ui, system-ui, sans-serif); }
+.us-cco__tabs { display: flex; gap: 4px; overflow-x: auto; padding: 4px 16px 0; border-bottom: 1px solid var(--border, #e2e5e9); }
+.us-cco .us-cco__tab { flex: 0 0 auto; min-height: 44px; margin: 0; padding: 10px 16px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--text-base, #545962); font: inherit; cursor: pointer; border-radius: 0; }
+.us-cco .us-cco__tab:hover { background: var(--bg-subtle, #f8f9fa); color: var(--text-strong, #1c2024); }
+.us-cco .us-cco__tab[aria-selected=true] { color: var(--brand-700, #00506a); border-bottom-color: var(--brand-600, #006f94); background: var(--brand-50, #eef6f9); font-weight: 600; }
+.us-cco :is(button,a):focus-visible, .us-cco-config :is(button,a,input,select):focus-visible { outline: 2px solid var(--border-focus, #006f94); outline-offset: 2px; }
+.us-cco__status, .us-cco__note { margin: 0; padding: 10px 16px; }
+.us-cco__status { min-height: 41px; }
+.us-cco__note { color: var(--text-muted, #545962); font-size: 12px; }
+.us-cco__error { color: var(--danger, #a42620); }
+.us-cco__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 16px; align-items: center; padding: 8px 16px; background: var(--bg-subtle, #f8f9fa); border-block: 1px solid var(--border, #e2e5e9); }
+.us-cco__link { color: var(--text-link, #006f94); text-underline-offset: 3px; }
+.us-cco .us-cco__button, .us-cco-config button { min-height: 36px; padding: 6px 12px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; background: var(--bg-surface, #fff); color: var(--brand-700, #00506a); font: inherit; cursor: pointer; }
+.us-cco .us-cco__button:hover, .us-cco-config button:hover { background: var(--brand-50, #eef6f9); }
+.us-cco__frame { display: block; width: 100%; height: var(--us-cco-frame-height, 75vh); min-height: 360px; border: 0; background: var(--bg-surface, #fff); }
+.us-cco-config { max-width: 800px; margin: 16px 0; }
+.us-cco-config fieldset { border: 1px solid var(--border, #e2e5e9); border-radius: 6px; padding: 20px; }
+.us-cco-config legend { font-weight: 600; color: var(--text-strong, #1c2024); padding: 0 6px; }
+.us-cco-config label { display: block; margin: 0 0 16px; font-weight: 600; }
+.us-cco-config :is(input:not([type=checkbox]),select) { display: block; width: 100%; margin-top: 6px; min-height: 40px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; padding: 8px; font: inherit; background: var(--bg-surface, #fff); color: var(--text-strong, #1c2024); }
+.us-cco-config small { display: block; font-weight: 400; margin-top: 4px; }
+.us-cco-config [data-folder-results] { padding-left: 20px; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .us-cco__heading { padding: 12px; } .us-cco__tabs { padding-inline: 8px; } .us-cco .us-cco__tab { padding-inline: 12px; } }
+@media (prefers-reduced-motion: reduce) { .us-cco *, .us-cco-config * { scroll-behavior: auto; transition: none; animation: none; } }
+</style>
+<div class="us-cco" data-us-cco
+     data-content-item-key="[x-contentItemKey]"
+     data-content-key="[x-contentKey]">
+  Loading content pages… If this message remains, the CCO runtime asset did not load.
+</div>
+<script data-cfasync="false">
+/* UnionSuite CCO 0.1.0 — generated sandbox trial */
+(() => {
+'use strict';
+// src/contracts.js
+// iMIS wrappers shared by the runtime and the native JsonSettings editor.
+function unwrap(value) {
+  return value && typeof value === 'object' && '$value' in value ? value.$value : value;
+}
+
+function objectValue(value, label = 'value') {
+  value = unwrap(value);
+  if (typeof value === 'string') {
+    try { value = JSON.parse(value); } catch { throw new Error(`${label} is invalid JSON.`); }
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object.`);
+  return value;
+}
+
+function collection(value, label) {
+  const rows = unwrap(value)?.$values ?? unwrap(value);
+  if (!Array.isArray(rows)) throw new Error(`Unexpected ${label} response.`);
+  return rows;
+}
+
+function property(record, name) {
+  if (record[name] !== undefined) return unwrap(record[name]);
+  const props = record.Properties?.$values ?? record.Properties;
+  return Array.isArray(props) ? unwrap(props.find(p => p.Name === name)?.Value) : undefined;
+}
+
+function guid(value, label = 'Key') {
+  value = unwrap(value);
+  if (typeof value !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value) || /^0{8}(?:-0{4}){3}-0{12}$/.test(value)) {
+    throw new Error(`${label} must be a non-empty GUID. Check iMIS token substitution and configuration.`);
+  }
+  return value.toLowerCase();
+}
+
+function placementIdentity(contentKey, contentItemKey) {
+  return { contentKey: guid(contentKey, 'ContentKey'), contentItemKey: guid(contentItemKey, 'ContentItemKey') };
+}
+
+function placementId(identity) {
+  return `${identity.contentKey.replaceAll('-', '')}-${identity.contentItemKey.replaceAll('-', '')}`;
+}
+
+function verifiedPlacement(body, identity) {
+  const envelope = objectValue(body, 'ContentItem');
+  const rows = envelope.Items !== undefined ? collection(envelope.Items, 'ContentItem list') : [envelope];
+  const matches = rows.filter(row => {
+    const record = objectValue(row, 'ContentItem row');
+    const data = record.Data === undefined ? {} : objectValue(record.Data, 'ContentItem Data');
+    // Reject conflicts between direct, Data and property-bag identities; never trust a filter alone.
+    return [['ContentKey', identity.contentKey], ['ContentItemKey', identity.contentItemKey]].every(([name, expected]) => {
+      const values = [data, record].flatMap(owner => {
+        const props = owner.Properties?.$values ?? owner.Properties;
+        return [unwrap(owner[name]), ...(Array.isArray(props) ? props.filter(p => p.Name === name).map(p => unwrap(p.Value)) : [])];
+      }).filter(v => v !== undefined);
+      return values.length > 0 && values.every(v => typeof v === 'string' && v.toLowerCase() === expected);
+    });
+  });
+  if (matches.length !== 1) throw new Error('Configuration lookup did not return exactly one matching ContentKey + ContentItemKey placement.');
+  return objectValue(matches[0]);
+}
+
+function placementSettings(row) {
+  const data = row.Data === undefined ? {} : objectValue(row.Data);
+  for (const owner of [data, row]) {
+    for (const name of ['JsonSettings', 'Settings']) {
+      const candidate = property(owner, name);
+      if (candidate !== undefined && candidate !== null && candidate !== '') return objectValue(candidate, name);
+    }
+  }
+  throw new Error('No JsonSettings configuration was found. Configure this UnionSuite CCO placement.');
+}
+
+function validateConfig(input) {
+  const value = objectValue(input, 'JsonSettings');
+  if (value.schemaVersion !== 1) throw new Error('Unsupported or missing CCO schemaVersion. Reopen the configuration editor.');
+  const textSetting = (key, fallback, max) => {
+    const text = value[key] ?? fallback;
+    if (typeof text !== 'string' || text.length > max) throw new Error(`Invalid ${key}.`);
+    return text.trim();
+  };
+  const preload = value.preload ?? 'off';
+  if (!['off', 'sequential-idle'].includes(preload)) throw new Error('Unsupported preload policy.');
+  if (value.popupBridge !== undefined && typeof value.popupBridge !== 'boolean') throw new Error('popupBridge must be true or false.');
+  if (value.orientation !== undefined && value.orientation !== 'horizontal') throw new Error('Only horizontal tabs are currently supported.');
+  return {
+    schemaVersion: 1,
+    folderDocumentVersionId: guid(value.folderDocumentVersionId, 'Folder document-version key'),
+    folderPathLabel: textSetting('folderPathLabel', '', 500),
+    caption: textSetting('caption', 'Content pages', 120) || 'Content pages',
+    initialDocumentVersionId: value.initialDocumentVersionId ? guid(value.initialDocumentVersionId, 'Initial page key') : '',
+    orientation: 'horizontal', preload, popupBridge: value.popupBridge ?? false
+  };
+}
+
+function mergeConfig(existing, edits) {
+  const original = objectValue(existing, 'Existing JsonSettings');
+  if (original.schemaVersion !== undefined && original.schemaVersion !== 1) throw new Error('Unsupported existing schemaVersion. It was not overwritten.');
+  return { ...original, ...validateConfig({ ...original, ...edits, schemaVersion: 1 }) };
+}
+
+// src/api.js
+
+function webRoot(win) {
+  const root = String(win.gWebRoot || '').replace(/\/+$/, '');
+  const url = new URL(root || '/', win.location.origin);
+  if (url.origin !== win.location.origin || url.search || url.hash) throw new Error('The iMIS web root must be same-origin.');
+  return url.pathname.replace(/\/+$/, '');
+}
+
+function createApi(win) {
+  return async (method, path, payload, signal) => {
+    const controller = new win.AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) controller.abort();
+    const timeout = win.setTimeout(() => controller.abort(new Error('The iMIS request timed out after 30 seconds.')), 30000);
+    try {
+      const token = win.document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const response = await win.fetch(`${webRoot(win)}/api/${path}`, {
+        method, signal: controller.signal, credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+        headers: { Accept: 'application/json', ...(token ? { RequestVerificationToken: token } : {}), ...(payload === undefined ? {} : { 'Content-Type': 'application/json' }) },
+        ...(payload === undefined ? {} : { body: JSON.stringify(payload) })
+      });
+      if (!response.ok) throw new Error(`iMIS request failed (HTTP ${response.status}). Check access and session status.`);
+      let result;
+      try { result = await response.json(); } catch { throw new Error('iMIS returned an unexpected non-JSON response. Check session status.'); }
+      if (unwrap(result?.IsSuccessStatusCode) === false || unwrap(result?.IsValid) === false) throw new Error('iMIS reported that the requested operation failed.');
+      return result;
+    } finally {
+      win.clearTimeout(timeout);
+      signal?.removeEventListener('abort', abort);
+    }
+  };
+}
+
+// src/documents.js
+
+function folderRequest(folderVersionKey) {
+  return {
+    $type: 'Asi.Soa.Core.DataContracts.GenericExecuteRequest, Asi.Contracts',
+    OperationName: 'FindDocumentsInFolder', EntityTypeName: 'Document',
+    Parameters: {
+      $type: 'System.Collections.ObjectModel.Collection`1[[System.Object, mscorlib]], mscorlib',
+      $values: [guid(folderVersionKey, 'Folder document-version key'), { $type: 'System.String[], mscorlib', $values: ['CON', 'CFL'] }, { $type: 'System.Boolean', $value: true }]
+    },
+    ParameterTypeName: {
+      $type: 'System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib',
+      $values: ['System.String', 'System.String[]', 'System.Boolean']
+    }
+  };
+}
+
+function folderPages(body) {
+  if (unwrap(body?.IsSuccessStatusCode) === false) throw new Error('iMIS could not list this folder.');
+  const rows = collection(body?.Result !== undefined ? body.Result : body, 'folder');
+  const pages = [], seen = new Set();
+  let folders = 0, excluded = 0;
+  for (const value of rows) {
+    const row = objectValue(value, 'Folder row');
+    const type = property(row, 'DocumentTypeId');
+    if (type === 'CFL') { folders++; continue; } // Deliberately no traversal; cycles cannot recurse.
+    if (type !== 'CON') throw new Error('Folder listing contains an unexpected document type.');
+    const id = guid(property(row, 'DocumentVersionId'), 'Page document-version key');
+    if (seen.has(id)) throw new Error('Folder listing contains duplicate page document-version keys.');
+    seen.add(id);
+    const name = property(row, 'Name'), alternate = property(row, 'AlternateName');
+    if (typeof name !== 'string' || !name.trim() || (alternate != null && typeof alternate !== 'string')) throw new Error('Folder listing contains an invalid page name.');
+    const statusValue = property(row, 'Status');
+    const status = unwrap(statusValue?.Name ?? statusValue?.Description ?? statusValue);
+    // Known explicit non-published records fail closed. Unknown status shapes need a live contract.
+    if (status !== undefined && status !== null && status !== '' && status !== 'Published') { excluded++; continue; }
+    if (property(row, 'IsPublished') === false || property(row, 'IsDeleted') === true || property(row, 'IsAuthorized') === false) { excluded++; continue; }
+    pages.push({ id, name: name.trim(), caption: alternate?.trim() || name.trim() });
+  }
+  pages.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }) || a.id.localeCompare(b.id));
+  return { pages, folders, excluded };
+}
+
+// src/history.js
+
+function selectionParameter(identity) { return `us-cco-${placementId(identity)}`; }
+
+function effectiveContext(url) {
+  const reserved = new Set(['templatetype', 'imode', 'iuniformkey', 'ioperation', 'documenttypecode', 'dialogcacheparam', 'ispopup', 'popup', 'pageinstancekey', 'donotcache']);
+  const result = new URLSearchParams();
+  for (const [key, value] of url.searchParams) {
+    const lower = key.toLowerCase();
+    if (!reserved.has(lower) && !lower.startsWith('us-cco-') && !lower.startsWith('__')) result.append(key, value);
+  }
+  // Keep repeated-value order (it can be significant), but normalize inter-key ordering.
+  result.sort();
+  return result;
+}
+
+function contextSignature(win) { return effectiveContext(new URL(win.location.href)).toString(); }
+
+function pageUrl(win, id, fullPage = false) {
+  const url = new URL(`${webRoot(win)}/iMIS/ContentManagement/ContentPreview.aspx`, win.location.origin);
+  url.search = effectiveContext(new URL(win.location.href)).toString();
+  for (const [key, value] of Object.entries({ iMode: 'Execute', iUniformKey: guid(id), iOperation: 'Execute', TemplateType: 'E', DocumentTypeCode: 'CON', IsPopup: fullPage ? 'false' : 'true' })) url.searchParams.set(key, value);
+  return url.href;
+}
+
+// Notify consumers of host SPA/context changes as well as this component's selection changes.
+function watchHistory(win, changed) {
+  const originals = new Map();
+  for (const method of ['pushState', 'replaceState']) {
+    const original = win.history[method];
+    function wrapped(...args) { const result = original.apply(this, args); changed(); return result; }
+    originals.set(method, { original, wrapped });
+    win.history[method] = wrapped;
+  }
+  win.addEventListener('popstate', changed);
+  return () => {
+    win.removeEventListener('popstate', changed);
+    for (const [method, { original, wrapped }] of originals) if (win.history[method] === wrapped) win.history[method] = original;
+  };
+}
+
+// src/popup-bridge.js
+const bridgeMarker = Symbol('UnionSuiteCCO.popupBridge');
+
+function installPopupBridge(child, parent) {
+  let original, wrapper, disposed = false;
+  function reconcile() {
+    if (disposed) return;
+    try {
+      const current = child.ShowDialog_NoReturnValue;
+      if (current === wrapper || typeof current !== 'function' || current[bridgeMarker]) return;
+      original = current;
+      let forwarding = false;
+      wrapper = function (...args) {
+        const target = parent.ShowDialog_NoReturnValue;
+        if (typeof target !== 'function') return original.apply(child, args);
+        if (target === wrapper || forwarding) throw new Error('CCO popup forwarding loop prevented.');
+        forwarding = true;
+        try { return target.apply(parent, args); } // Preserve callback function objects and their child closure.
+        finally { forwarding = false; }
+      };
+      wrapper[bridgeMarker] = true;
+      child.ShowDialog_NoReturnValue = wrapper;
+    } catch { /* Navigation may temporarily make the frame inaccessible. */ }
+  }
+  reconcile();
+  const timer = parent.setInterval(reconcile, 500); // Also catches helper replacement during a partial update.
+  return () => {
+    disposed = true;
+    parent.clearInterval(timer);
+    try { if (wrapper && child.ShowDialog_NoReturnValue === wrapper) child.ShowDialog_NoReturnValue = original; } catch { /* Navigated away. */ }
+  };
+}
+
+// src/frames.js
+
+class FrameStore {
+  constructor(win, config, changed) {
+    this.win = win;
+    this.config = config;
+    this.changed = changed;
+    this.entries = new Map();
+    this.disposed = false;
+    this.idle = null;
+    this.started = win.performance.now();
+  }
+
+  hasDirty() { return [...this.entries.values()].some(entry => entry.dirty); }
+
+  ensure(page, panel) {
+    if (this.disposed) return null;
+    if (this.entries.has(page.id)) return this.entries.get(page.id);
+    const frame = this.win.document.createElement('iframe');
+    frame.title = page.caption;
+    frame.className = 'us-cco__frame';
+    frame.dataset.usCcoChild = 'true';
+    frame.referrerPolicy = 'same-origin';
+    const entry = { frame, page, panel, state: 'loading', dirty: false, cleanup: () => {}, start: this.win.performance.now(), loadCount: 0 };
+    entry.ready = new Promise(resolve => { entry.resolve = resolve; });
+    this.entries.set(page.id, entry);
+    const fail = message => {
+      if (this.disposed || entry.state === 'error' || this.entries.get(page.id) !== entry) return;
+      this.win.clearTimeout(entry.timeout);
+      entry.cleanup();
+      entry.state = 'error';
+      entry.error = message;
+      frame.remove(); // Stop late/inaccessible loads; retry creates a fresh frame.
+      entry.resolve(entry);
+      this.changed(entry);
+    };
+    frame.addEventListener('error', () => fail('This page could not be loaded.'));
+    frame.addEventListener('load', () => {
+      if (this.disposed || entry.state === 'error' || this.entries.get(page.id) !== entry) return;
+      entry.cleanup();
+      try {
+        const child = frame.contentWindow;
+        if (child.location.href === 'about:blank') return;
+        if (child.location.origin !== this.win.location.origin || !child.document?.body) throw new Error('This page is no longer accessible in a same-origin frame.');
+        if (/\/(?:signin|login|accessdenied|error)(?:\.aspx|\/|$)/i.test(child.location.pathname)) throw new Error('The page redirected to a sign-in or error page. Check access and session status.');
+        this.win.clearTimeout(entry.timeout);
+        entry.state = 'ready';
+        entry.loadCount++;
+        entry.dirty = false;
+        entry.readyMs = this.win.performance.now() - entry.start;
+        const events = new child.AbortController();
+        const markDirty = event => {
+          if (event.target.matches?.('input:not([type=hidden]):not([type=button]):not([type=submit]), textarea, select, [contenteditable]')) entry.dirty = true;
+        };
+        child.document.addEventListener('input', markDirty, { capture: true, signal: events.signal });
+        child.document.addEventListener('change', markDirty, { capture: true, signal: events.signal });
+        // Optional explicit adapter hook after a verified native save; generic detection stays conservative.
+        child.document.addEventListener('us-cco:clean', () => { entry.dirty = false; }, { signal: events.signal });
+        const unbridge = this.config.popupBridge ? installPopupBridge(child, this.win) : () => {};
+        child.addEventListener('beforeunload', event => {
+          if (entry.dirty) { event.preventDefault(); event.returnValue = ''; }
+        }, { signal: events.signal });
+        entry.cleanup = () => { events.abort(); unbridge(); };
+        entry.resolve(entry);
+        this.changed(entry);
+      } catch (error) { fail(error.message || 'This page could not be inspected.'); }
+    });
+    entry.timeout = this.win.setTimeout(() => fail('This page did not finish loading within 45 seconds.'), 45000);
+    frame.src = pageUrl(this.win, page.id);
+    panel.append(frame);
+    this.changed(entry);
+    return entry;
+  }
+
+  retry(page, panel) {
+    const entry = this.entries.get(page.id);
+    if (entry) {
+      this.win.clearTimeout(entry.timeout);
+      entry.cleanup();
+      entry.frame.remove();
+      entry.resolve(entry);
+      this.entries.delete(page.id);
+    }
+    return this.ensure(page, panel);
+  }
+
+  schedule(pages, panels, activeId) {
+    this.cancelIdle();
+    if (this.disposed || this.config.preload !== 'sequential-idle') return;
+    if (this.entries.get(activeId)?.state !== 'ready') return;
+    // Never stack speculative loads. A clicked page may start immediately alongside one in-flight preload.
+    if ([...this.entries.values()].some(entry => entry.state === 'loading')) return;
+    const next = pages.find(page => !this.entries.has(page.id));
+    if (!next) return;
+    const run = () => {
+      this.idle = null;
+      if (!this.disposed) this.ensure(next, panels.get(next.id));
+    };
+    this.idle = this.win.requestIdleCallback ? { type: 'idle', id: this.win.requestIdleCallback(run, { timeout: 2000 }) } : { type: 'timer', id: this.win.setTimeout(run, 300) };
+  }
+
+  cancelIdle() {
+    if (!this.idle) return;
+    if (this.idle.type === 'idle') this.win.cancelIdleCallback(this.idle.id);
+    else this.win.clearTimeout(this.idle.id);
+    this.idle = null;
+  }
+
+  dispose() {
+    this.disposed = true;
+    this.cancelIdle();
+    for (const entry of this.entries.values()) {
+      this.win.clearTimeout(entry.timeout);
+      entry.cleanup();
+      entry.frame.remove();
+      entry.resolve(entry);
+    }
+    this.entries.clear();
+  }
+}
+
+// src/runtime.js
+
+function element(doc, tag, className, text) {
+  const node = doc.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  if (tag === 'button') node.type = 'button';
+  return node;
+}
+
+class CcoInstance {
+  constructor(mount, win, identity) {
+    this.mount = mount; this.win = win; this.doc = mount.ownerDocument; this.identity = identity;
+    this.parameter = selectionParameter(identity);
+    this.events = new win.AbortController();
+    this.generation = 0; this.disposed = false; this.pages = []; this.panels = new Map(); this.tabs = new Map();
+    this.mount.addEventListener('us-cco:reload', () => this.requestReload(), { signal: this.events.signal });
+    this.load();
+  }
+
+  status(text, error = false) {
+    this.message.textContent = text;
+    this.message.classList.toggle('us-cco__error', error);
+  }
+
+  shell() {
+    this.mount.replaceChildren();
+    this.message = element(this.doc, 'p', 'us-cco__status', 'Loading content pages…');
+    this.message.setAttribute('role', 'status');
+    this.message.setAttribute('aria-live', 'polite');
+    this.mount.append(this.message);
+  }
+
+  async load() {
+    const generation = ++this.generation;
+    this.viewEvents?.abort();
+    this.viewEvents = new this.win.AbortController();
+    this.request?.abort();
+    this.request = new this.win.AbortController();
+    this.store?.dispose();
+    this.store = null; this.pages = []; this.panels.clear(); this.tabs.clear();
+    this.blocked = false; this.context = contextSignature(this.win);
+    this.shell();
+    this.mount.setAttribute('aria-busy', 'true');
+    try {
+      const api = createApi(this.win);
+      const query = new URLSearchParams({ ContentItemKey: this.identity.contentItemKey, ContentKey: this.identity.contentKey });
+      const body = await api('GET', `ContentItem?${query}`, undefined, this.request.signal);
+      if (this.disposed || generation !== this.generation) return;
+      this.config = validateConfig(placementSettings(verifiedPlacement(body, this.identity)));
+      const listing = folderPages(await api('POST', 'Document/_execute', folderRequest(this.config.folderDocumentVersionId), this.request.signal));
+      if (this.disposed || generation !== this.generation) return;
+      if (listing.pages.some(page => page.id === this.identity.contentKey)) throw new Error('This folder includes the containing page. Recursive CCO frames are not supported.');
+      this.pages = listing.pages;
+      if (!this.pages.length) {
+        this.status('No available published content pages were returned for this folder. Check folder contents and access.');
+        this.addReload();
+        return;
+      }
+      this.render(listing);
+    } catch (error) {
+      if (this.disposed || generation !== this.generation || error.name === 'AbortError') return;
+      this.status(error.message || 'Content pages could not be loaded.', true);
+      this.addReload();
+    } finally {
+      if (!this.disposed && generation === this.generation) this.mount.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  addReload() {
+    const retry = element(this.doc, 'button', 'us-cco__button', 'Reload configuration');
+    retry.addEventListener('click', () => this.requestReload(), { signal: this.viewEvents.signal });
+    this.mount.append(retry);
+  }
+
+  render(listing) {
+    const heading = element(this.doc, 'div', 'us-cco__heading');
+    heading.append(element(this.doc, 'h2', 'us-cco__caption', this.config.caption));
+    const reload = element(this.doc, 'button', 'us-cco__button', 'Reload configuration');
+    reload.addEventListener('click', () => this.requestReload(), { signal: this.viewEvents.signal });
+    heading.append(reload);
+    this.tablist = element(this.doc, 'div', 'us-cco__tabs');
+    this.tablist.setAttribute('role', 'tablist');
+    this.tablist.setAttribute('aria-label', this.config.caption);
+    this.tablist.setAttribute('aria-orientation', 'horizontal');
+    this.content = element(this.doc, 'div', 'us-cco__content');
+    this.mount.insertBefore(heading, this.message);
+    this.mount.insertBefore(this.tablist, this.message);
+    this.mount.append(this.content);
+    const baseId = `us-cco-${placementId(this.identity)}`;
+    for (const [index, page] of this.pages.entries()) {
+      const tab = element(this.doc, 'button', 'us-cco__tab', page.caption);
+      tab.id = `${baseId}-tab-${page.id}`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', `${baseId}-panel-${page.id}`);
+      const panel = element(this.doc, 'section', 'us-cco__panel');
+      panel.id = `${baseId}-panel-${page.id}`;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      panel.tabIndex = 0;
+      const actions = element(this.doc, 'div', 'us-cco__actions');
+      const full = element(this.doc, 'a', 'us-cco__link', 'Open full page ↗');
+      full.href = pageUrl(this.win, page.id, true); full.target = '_blank'; full.rel = 'noopener';
+      full.setAttribute('aria-label', `Open ${page.caption} in a new tab`);
+      const retry = element(this.doc, 'button', 'us-cco__button', 'Reload page');
+      retry.addEventListener('click', () => {
+        if (this.store.entries.get(page.id)?.dirty && !this.win.confirm('Discard unsaved changes and reload this page?')) return;
+        this.store.retry(page, panel);
+      }, { signal: this.viewEvents.signal });
+      actions.append(full, retry); panel.append(actions);
+      tab.addEventListener('click', () => this.select(page.id, true), { signal: this.viewEvents.signal });
+      tab.addEventListener('keydown', event => {
+        const count = this.pages.length;
+        let next;
+        if (event.key === 'Home') next = 0;
+        if (event.key === 'End') next = count - 1;
+        if (event.key === 'ArrowRight') next = (index + 1) % count;
+        if (event.key === 'ArrowLeft') next = (index + count - 1) % count;
+        if (next !== undefined) {
+          event.preventDefault();
+          // Manual activation: moving focus does not start an expensive page load.
+          for (const button of this.tabs.values()) button.tabIndex = -1;
+          const target = this.tabs.get(this.pages[next].id); target.tabIndex = 0; target.focus();
+        }
+      }, { signal: this.viewEvents.signal });
+      this.tabs.set(page.id, tab); this.panels.set(page.id, panel);
+      this.tablist.append(tab); this.content.append(panel);
+    }
+    if (listing.folders || listing.excluded) {
+      this.mount.append(element(this.doc, 'p', 'us-cco__note', `${listing.folders} nested folders omitted; ${listing.excluded} unavailable or non-published pages omitted.`));
+    }
+    this.store = new FrameStore(this.win, this.config, entry => this.frameChanged(entry));
+    this.syncSelection();
+  }
+
+  syncSelection() {
+    if (!this.pages.length || this.blocked) return;
+    const requested = new URL(this.win.location.href).searchParams.get(this.parameter)?.toLowerCase();
+    const configured = this.config.initialDocumentVersionId;
+    const fallback = this.pages.find(page => page.id === configured)?.id || this.pages[0].id;
+    const target = this.pages.some(page => page.id === requested) ? requested : fallback;
+    if (this.selected !== target || !this.store?.entries.has(target)) this.select(target, false);
+    if (requested && !this.pages.some(page => page.id === requested)) this.status('The linked tab is unavailable. Showing the default tab.');
+  }
+
+  select(id, writeHistory) {
+    if (this.blocked || !this.store) return;
+    const page = this.pages.find(item => item.id === id);
+    if (!page) return;
+    const start = this.win.performance.now();
+    const warm = this.store.entries.get(id)?.state === 'ready';
+    this.selected = id;
+    this.store.cancelIdle();
+    for (const item of this.pages) {
+      const active = item.id === id, tab = this.tabs.get(item.id), panel = this.panels.get(item.id);
+      tab.setAttribute('aria-selected', String(active)); tab.tabIndex = active ? 0 : -1;
+      panel.hidden = !active; panel.inert = !active;
+    }
+    const entry = this.store.ensure(page, this.panels.get(id));
+    this.frameChanged(entry);
+    if (writeHistory) {
+      const url = new URL(this.win.location.href);
+      if (url.searchParams.get(this.parameter) !== id) {
+        url.searchParams.set(this.parameter, id);
+        this.win.history.pushState(this.win.history.state, '', url);
+      }
+    }
+    this.mount.dispatchEvent(new this.win.CustomEvent('us-cco:timing', { detail: { kind: 'selection', warm, durationMs: this.win.performance.now() - start, retainedFrames: this.store.entries.size } }));
+  }
+
+  frameChanged(entry) {
+    if (this.disposed || this.blocked || !entry) return;
+    entry.panel.setAttribute('aria-busy', String(entry.state === 'loading'));
+    this.tabs.get(entry.page.id)?.setAttribute('data-state', entry.state);
+    if (entry.page.id === this.selected) this.status(entry.state === 'loading' ? `Loading ${entry.page.caption}…` : entry.state === 'error' ? `${entry.error} Use Reload page or Open full page.` : `${entry.page.caption} ready.`, entry.state === 'error');
+    this.store.schedule(this.pages, this.panels, this.selected);
+    if (entry.state === 'ready' && entry.reportedLoadCount !== entry.loadCount) {
+      entry.reportedLoadCount = entry.loadCount;
+      this.mount.dispatchEvent(new this.win.CustomEvent('us-cco:timing', { detail: { kind: 'frame-load', durationMs: entry.readyMs, retainedFrames: this.store.entries.size } }));
+    }
+  }
+
+  syncLocation() {
+    if (contextSignature(this.win) !== this.context) {
+      if (this.store?.hasDirty()) {
+        this.blocked = true; this.store.cancelIdle();
+        this.tablist.hidden = true; this.content.hidden = true; this.content.inert = true;
+        this.status('Page context changed. The previous pages are hidden because they may contain unsaved changes.');
+        if (!this.discard) {
+          this.discard = element(this.doc, 'button', 'us-cco__button', 'Discard changes and load current context');
+          this.discard.addEventListener('click', () => { this.discard = null; this.load(); }, { signal: this.viewEvents.signal });
+          this.mount.append(this.discard);
+        }
+      } else this.load();
+      return;
+    }
+    if (this.blocked) {
+      this.blocked = false; this.tablist.hidden = false; this.content.hidden = false; this.content.inert = false;
+      this.discard?.remove(); this.discard = null;
+      this.frameChanged(this.store?.entries.get(this.selected));
+    }
+    this.syncSelection();
+  }
+
+  requestReload() {
+    if (this.store?.hasDirty() && !this.win.confirm('Discard unsaved changes in retained pages and reload configuration?')) return;
+    this.discard = null; this.load();
+  }
+
+  dispose() {
+    this.disposed = true; this.generation++;
+    this.request?.abort(); this.events.abort(); this.viewEvents?.abort(); this.store?.dispose();
+    this.mount.replaceChildren();
+  }
+}
+
+function installRuntime(win) {
+  if (win.UnionSuiteCCO) { win.UnionSuiteCCO.scan(); return win.UnionSuiteCCO; }
+  const instances = new Map(), failures = new WeakMap();
+  const doc = win.document;
+  let queued = false, disposed = false, application, manager;
+  function scan() {
+    if (disposed) return;
+    for (const [mount, instance] of instances) {
+      if (!mount.isConnected || mount.dataset.contentKey?.toLowerCase() !== instance.identity.contentKey || mount.dataset.contentItemKey?.toLowerCase() !== instance.identity.contentItemKey) { instance.dispose(); instances.delete(mount); }
+    }
+    const owners = new Set([...instances.values()].map(instance => placementId(instance.identity)));
+    for (const mount of doc.querySelectorAll('[data-us-cco]')) {
+      if (instances.has(mount)) continue;
+      try {
+        if (win.frameElement?.dataset.usCcoChild || mount.parentElement.closest('[data-us-cco]')) throw new Error('Nested UnionSuite CCO components are not supported in this trial.');
+        const identity = placementIdentity(mount.dataset.contentKey, mount.dataset.contentItemKey);
+        const key = placementId(identity);
+        if (owners.has(key)) throw new Error('The same placement appears twice in this document. Use separate CCO placements.');
+        owners.add(key);
+        failures.delete(mount);
+        instances.set(mount, new CcoInstance(mount, win, identity));
+      } catch (error) {
+        if (failures.get(mount) !== error.message) { mount.textContent = error.message; mount.setAttribute('role', 'status'); failures.set(mount, error.message); }
+      }
+    }
+    hookAspNet();
+  }
+  function queueScan() {
+    if (!queued) { queued = true; win.queueMicrotask(() => { queued = false; scan(); }); }
+  }
+  function locationChanged() { for (const instance of instances.values()) instance.syncLocation(); }
+  function pageLoading(sender, args) {
+    const removed = [...(args.get_panelsDeleting?.() || []), ...(args.get_panelsUpdating?.() || [])];
+    for (const [mount, instance] of instances) if (removed.some(panel => panel === mount || panel.contains(mount))) { instance.dispose(); instances.delete(mount); }
+  }
+  function hookAspNet() {
+    const app = win.Sys?.Application;
+    if (app && application !== app) { application?.remove_load?.(queueScan); application = app; app.add_load(queueScan); }
+    const next = win.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+    if (next && manager !== next) { manager?.remove_pageLoading?.(pageLoading); manager = next; next.add_pageLoading(pageLoading); }
+  }
+  const observer = new win.MutationObserver(queueScan);
+  observer.observe(doc.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-content-key', 'data-content-item-key'] });
+  const unwatch = watchHistory(win, locationChanged);
+  const unload = event => {
+    if ([...instances.values()].some(instance => instance.store?.hasDirty())) { event.preventDefault(); event.returnValue = ''; }
+  };
+  win.addEventListener('beforeunload', unload);
+  const api = {
+    scan,
+    reload: mount => instances.get(mount)?.requestReload(),
+    diagnostics: () => [...instances.values()].map(instance => ({ placement: placementId(instance.identity), blocked: instance.blocked, frames: [...(instance.store?.entries.values() || [])].map(entry => ({ id: entry.page.id, state: entry.state, dirty: entry.dirty, loadCount: entry.loadCount, readyMs: entry.readyMs })) })),
+    dispose() {
+      disposed = true; observer.disconnect(); unwatch();
+      application?.remove_load?.(queueScan); manager?.remove_pageLoading?.(pageLoading);
+      win.removeEventListener('beforeunload', unload);
+      for (const instance of instances.values()) instance.dispose();
+      instances.clear(); delete win.UnionSuiteCCO;
+    }
+  };
+  win.UnionSuiteCCO = api;
+  scan();
+  return api;
+}
+
+installRuntime(window);
+})();
+</script>

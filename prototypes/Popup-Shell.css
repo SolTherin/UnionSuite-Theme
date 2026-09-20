@@ -1,0 +1,197 @@
+/* Shared trial shell: matches the theme's US-DIALOG-CHROME title/control
+   conventions and Dialog-Chrome reference without requiring RadWindow markup. */
+.ws-recents-toolbar .ws-segmented {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+}
+
+.ws-recents-toolbar .ws-segmented button {
+  min-width: 72px;
+  min-height: 28px;
+  margin: 0;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font: 500 12px/1.4 var(--font-ui);
+  cursor: pointer;
+}
+
+.ws-recents-toolbar .ws-segmented button:hover {
+  background: var(--bg-surface);
+  color: var(--text-strong);
+}
+
+.ws-recents-toolbar .ws-segmented button[aria-pressed="true"] {
+  background: var(--bg-surface);
+  color: var(--text-link);
+  box-shadow: var(--shadow-sm);
+}
+
+.ws-recents-toolbar .ws-segmented button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+
+
+body.ws-frame :is(.ws-popover, .ws-palette) {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--shadow-lg);
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) {
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) h2 {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+body.ws-frame .ws-palette-heading .ws-overline {
+  display: none;
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font: 400 12px/1.4 var(--font-ui);
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button {
+  width: 30px;
+  height: 28px;
+  min-width: 30px;
+  min-height: 28px;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  box-shadow: none;
+  transition: background-color 120ms, color 120ms, border-color 120ms;
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button .ti {
+  font-size: 18px;
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button:active {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+body.ws-frame :is(.ws-popover-footer, .ws-palette-footer) {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font: 400 12px/1.4 var(--font-ui);
+}
+
+/* Compact theme control scale, with the window close controls kept above. */
+body.ws-frame :is(.ws-feature-button, .ws-popover-footer button) {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-link);
+  background: var(--bg-surface);
+  font: 500 12px/1.4 var(--font-ui);
+  transition: background-color 120ms, border-color 120ms, color 120ms;
+}
+
+body.ws-frame :is(.ws-feature-button, .ws-popover-footer button):hover:not(:disabled) {
+  background: var(--brand-50);
+  color: var(--text-link-hover);
+  border-color: var(--border-strong);
+}
+
+body.ws-frame :is(.ws-feature-button, .ws-popover-footer button):is(:active, [aria-pressed="true"], [aria-expanded="true"]):not(:disabled) {
+  background: var(--bg-sunken);
+  border-color: var(--border-focus);
+  color: var(--text-strong);
+}
+
+
+
+body.ws-frame :is(.ws-feature-button, .ws-popover-footer button):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+body.ws-frame button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+body.ws-frame :is(.ws-palette-meta, .ws-palette-group, .ws-recents-toolbar, .ws-recents-column h3, .ws-recent-item small, .ws-destination small, .ws-pin-label, .ws-bookmark-label) {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+body.ws-frame :is(.ws-destination, .ws-recent-item, .ws-bookmark-editor-row > span) {
+  font-size: 13px;
+}
+
+body.ws-frame :is(.ws-destination, .ws-recent-item, .ws-pin, .ws-icon-button, .ws-palette-row, .ws-palette-placeholder) {
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.ws-frame :is(.ws-popover-heading, .ws-palette-heading) > button,
+  body.ws-frame :is(.ws-feature-button, .ws-popover-footer button) {
+    transition: none;
+  }
+}
+
+body.ws-frame .ws-popover-footer .ws-primary {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--white);
+}
+
+body.ws-frame .ws-popover-footer .ws-primary:hover:not(:disabled) {
+  background: var(--brand-700);
+  border-color: var(--brand-700);
+  color: var(--white);
+}
+
+/* Each section keeps its heading until the next section takes its place. */
+.ws-recents-column h3 {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 0 var(--border);
+}

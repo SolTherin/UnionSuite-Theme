@@ -1,0 +1,17 @@
+/* Config fixture layout only. Native controls/components use shared CSS. */
+body{margin:0;padding:20px;background:var(--bg-page);color:var(--text-base);font:14px/1.5 var(--font-ui)}
+.config-example{max-width:1100px;margin:auto}
+.config-example>section,.config-example>.us-banner{margin-bottom:20px}
+.config-card{padding:var(--space-6);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.config-card h2{margin:0 0 16px;font:600 var(--fs-lg)/var(--lh-tight) var(--font-display);color:var(--text-strong)}
+.config-button-row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.config-note{font-size:12px;line-height:1.6;margin:14px 0 0}
+.config-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.config-fields fieldset{min-width:0}
+.config-feedback{display:grid;gap:12px;margin-top:20px}
+.config-feedback>div{margin:0}
+.config-example .PanelField{min-width:0}
+.config-example .choice-group{border:0;padding:0;margin:0}
+.config-example .choice-group legend{font-size:13px;font-weight:600;margin-bottom:10px}
+.config-example .choice-group label{display:block;margin-bottom:10px}
+@media(max-width:550px){body{padding:12px}.config-fields{grid-template-columns:1fr}.config-card{padding:16px}}

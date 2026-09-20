@@ -1,0 +1,3705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Management System — v4</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-900: #0f2744;
+    --blue-800: #1a3a5c;
+    --blue-700: #1e4976;
+    --blue-600: #2563a8;
+    --blue-500: #3b82c4;
+    --blue-100: #dbeafe;
+    --blue-50:  #eff6ff;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50:  #f8fafc;
+    --green-600: #16a34a;
+    --green-100: #dcfce7;
+    --amber-600: #d97706;
+    --amber-100: #fef3c7;
+    --red-600:   #dc2626;
+    --red-100:   #fee2e2;
+    --purple-600:#7c3aed;
+    --purple-100:#ede9fe;
+    --indigo-600:#4f46e5;
+    --banner-h-full: 148px;
+    --banner-h-mini: 56px;
+    --sidebar-w: 240px;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--slate-100);
+    color: var(--slate-800);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ─── BANNER ─────────────────────────────────────────────── */
+  #banner {
+    position: sticky;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-800) 100%);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transition: height 0.28s cubic-bezier(.4,0,.2,1);
+    height: var(--banner-h-full);
+    overflow: visible;
+  }
+  #banner.mini { height: var(--banner-h-mini); }
+
+  .banner-collapse-clip {
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .banner-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0 28px;
+  }
+
+  .banner-mini-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: var(--banner-h-mini);
+    flex-shrink: 0;
+  }
+  .banner-mini-row .case-id-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .banner-mini-row .case-name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .status-pill.active  { background: var(--green-100); color: var(--green-600); }
+  .status-pill.pending { background: var(--amber-100); color: var(--amber-600); }
+  .status-pill.closed  { background: var(--slate-200); color: var(--slate-600); }
+  .status-pill.urgent  { background: var(--red-100);   color: var(--red-600);   }
+  .status-pill .dot { width:7px; height:7px; border-radius:50%; background: currentColor; }
+
+  /* ── actions button ── */
+  .actions-wrap { position: relative; flex-shrink: 0; }
+  .btn-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .btn-actions:hover { background: rgba(255,255,255,0.24); }
+  .btn-actions svg { transition: transform .2s; }
+  .btn-actions.open svg { transform: rotate(180deg); }
+
+  .actions-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+    min-width: 220px;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .actions-menu.open { display: block; }
+  .actions-menu-section {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .actions-menu-section:last-child { border-bottom: none; }
+  .actions-menu-label {
+    padding: 4px 14px 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+  }
+  .actions-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    color: var(--slate-700);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: background .1s;
+  }
+  .actions-menu a:hover { background: var(--blue-50); color: var(--blue-600); }
+  .actions-menu a .mi { font-size:16px; width:20px; text-align:center; opacity:.7; }
+
+  /* ── expanded details row ── */
+  .banner-details-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    padding-bottom: 16px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    transition: opacity .2s, transform .2s;
+  }
+  #banner.mini .banner-details-row {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .banner-description { flex: 1; min-width: 0; }
+  .banner-description h2 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 3px;
+  }
+  .banner-description p {
+    font-size: 13px;
+    color: rgba(255,255,255,.85);
+    line-height: 1.45;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .banner-meta {
+    display: flex;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-item .label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+  }
+  .meta-item .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,.9);
+  }
+  .priority-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .priority-badge.high   { background: var(--red-100);    color: var(--red-600); }
+  .priority-badge.medium { background: var(--amber-100);  color: var(--amber-600); }
+  .priority-badge.low    { background: var(--green-100);  color: var(--green-600); }
+
+
+  /* ─── PAGE LAYOUT ─────────────────────────────────────────── */
+  #page {
+    padding-top: var(--banner-h-full);
+    transition: padding-top .28s cubic-bezier(.4,0,.2,1);
+    display: grid;
+    grid-template-columns: 1fr var(--sidebar-w);
+    align-items: flex-start;
+  }
+  #page.mini { padding-top: var(--banner-h-mini); }
+
+  /* ─── MAIN CONTENT ─────────────────────────────────────────── */
+  #main {
+    padding: 24px 28px 80px;
+    min-width: 0;
+  }
+
+  /* ─── TAB PANELS ─────────────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── RIGHT SIDEBAR ────────────────────────────────────────── */
+  #sidebar {
+    position: sticky;
+    top: calc(var(--banner-h-full) + 16px);
+    align-self: flex-start;
+    height: calc(100vh - var(--banner-h-full) - 32px);
+    overflow-y: auto;
+    background: #fff;
+    border-left: 1px solid var(--slate-200);
+    padding: 10px 0 24px;
+    transition: top .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1);
+    scrollbar-width: thin;
+    scrollbar-color: var(--slate-200) transparent;
+  }
+  #page.mini #sidebar {
+    top: calc(var(--banner-h-mini) + 16px);
+    height: calc(100vh - var(--banner-h-mini) - 32px);
+  }
+  #sidebar::-webkit-scrollbar { width: 5px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 99px; }
+
+  /* ─── ACCORDION NAV ─────────────────────────────────────────── */
+  .acc-item {
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .acc-item:last-child { border-bottom: none; }
+
+  .acc-trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px 0 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-700);
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background .15s, color .15s, border-color .15s;
+    gap: 8px;
+  }
+  .acc-trigger:hover { background: var(--slate-50); color: var(--slate-800); }
+  .acc-trigger.active {
+    background: var(--blue-50);
+    color: var(--blue-600);
+    border-left-color: var(--blue-600);
+  }
+  .acc-trigger .acc-label { flex: 1; }
+  .acc-chevron {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s cubic-bezier(.4,0,.2,1);
+    color: var(--slate-400);
+  }
+  .acc-trigger.active .acc-chevron { transform: rotate(90deg); color: var(--blue-500); }
+
+  .acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .2s cubic-bezier(.4,0,.2,1);
+  }
+  .acc-body.open { max-height: 400px; }
+
+  /* sub-links */
+  .nav-link {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px 0 30px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+    text-decoration: none;
+    position: relative;
+    white-space: nowrap;
+  }
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    width: 5px;
+    height: 1px;
+    background: var(--slate-300);
+  }
+  .nav-link:hover { background: var(--slate-50); color: var(--slate-800); }
+  .nav-link.active {
+    color: var(--blue-600);
+    font-weight: 600;
+  }
+  .nav-link.active::before { background: var(--blue-500); }
+  .nav-link-count {
+    margin-left: auto;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 99px;
+  }
+  .nav-link.active .nav-link-count {
+    background: var(--blue-100);
+    color: var(--blue-600);
+  }
+
+  /* ─── SECTION GROUPS ──────────────────────────────────────── */
+  .section-anchor {
+    display: block;
+    /* scroll-margin-top is set via JS as it depends on banner state */
+    scroll-margin-top: calc(var(--banner-h-full) + 16px);
+  }
+  .content-block { margin-bottom: 24px; }
+
+  /* ─── GRID LAYOUTS ────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+  .grid-2 > * { min-width: 0; }
+
+  /* ─── CARDS ───────────────────────────────────────────────── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--slate-100);
+    background: var(--slate-50);
+    gap: 10px;
+  }
+  .card-header h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .card-header h3 .icon { font-size: 15px; }
+  .card-header .card-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background .15s;
+  }
+  .btn-sm.primary   { background: var(--blue-600); color: #fff; }
+  .btn-sm.primary:hover { background: var(--blue-700); }
+  .btn-sm.secondary { background: var(--slate-100); color: var(--slate-700); border: 1px solid var(--slate-200); }
+  .btn-sm.secondary:hover { background: var(--slate-200); }
+  .card-body { padding: 16px 18px; flex: 1; }
+
+  /* ─── FIELD GRID ─────────────────────────────────────────── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px 20px;
+  }
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .field .f-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+  }
+  .field .f-value {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--slate-800);
+  }
+  .field .f-value a { color: var(--blue-600); text-decoration: none; }
+  .field .f-value a:hover { text-decoration: underline; }
+
+  /* ─── DATE TIMELINE ───────────────────────────────────────── */
+  .date-timeline { display: flex; flex-direction: column; gap: 0; }
+  .date-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--slate-100);
+    transition: opacity 0.5s ease, max-height 0.4s ease 0.4s;
+    max-height: 200px;
+    overflow: hidden;
+  }
+  .date-item:last-child { border-bottom: none; }
+  .date-item.fading-out { opacity: 0; max-height: 0; margin: 0; padding: 0; pointer-events: none; }
+  .date-item .d-label.done-text { text-decoration: line-through; color: var(--slate-400); }
+  .date-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .date-dot.done    { background: var(--green-600); }
+  .date-dot.current { background: var(--blue-600); box-shadow: 0 0 0 3px var(--blue-100); }
+  .date-dot.future  { background: var(--slate-300); }
+  .date-dot.overdue { background: var(--red-600); }
+  .date-info { flex: 1; min-width: 0; }
+  .date-info .d-label { font-size: 12px; font-weight: 600; color: var(--slate-700); }
+  .date-info .d-value { font-size: 12px; color: var(--slate-500); }
+  .date-info .d-overdue { color: var(--red-600); font-weight: 600; }
+
+  /* ─── TASKS ───────────────────────────────────────────────── */
+  .card-body:has(.task-list) {
+    display: flex;
+    flex-direction: column;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+  .card-body:has(.milestone-track) {
+    max-height: 520px;
+    overflow-y: auto;
+  }
+  .task-list {
+    display: flex; flex-direction: column; gap: 0;
+    flex: 1;
+    min-height: 0;
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--slate-200) transparent;
+  }
+  .task-list::-webkit-scrollbar { width: 5px; }
+  .task-list::-webkit-scrollbar-track { background: transparent; }
+  .task-list::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 99px; }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--slate-100);
+    flex-shrink: 0;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-item { transition: opacity 0.65s ease, transform 0.65s ease, max-height 0.4s ease 0.65s, padding 0.4s ease 0.65s, margin 0.4s ease 0.65s; max-height: 200px; }
+  .task-item.fading-out { opacity: 0; transform: translateX(-100%); max-height: 0; overflow: hidden; margin: 0; padding: 0; pointer-events: none; }
+  .task-item.completed-task.hidden { display: none; }
+  .task-item.assignee-hidden { display: none; }
+  .task-check {
+    width: 24px; height: 24px;
+    border: 2px solid var(--slate-300);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+    background: #fff;
+  }
+  .task-check:hover { border-color: var(--green-600); box-shadow: 0 0 0 3px var(--green-100); }
+  .task-check.done { border-color: var(--green-600); background: var(--green-600); }
+  .task-check.done::after {
+    content: '✓';
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .btn-toggle-completed {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--slate-200);
+    background: var(--slate-100);
+    color: var(--slate-600);
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .btn-toggle-completed:hover { background: var(--slate-200); }
+  .btn-toggle-completed.hiding {
+    background: var(--amber-100);
+    color: var(--amber-600);
+    border-color: var(--amber-100);
+  }
+  .task-info { flex: 1; min-width: 0; }
+  .task-info .t-name { font-size: 13px; font-weight: 500; color: var(--slate-800); }
+  .task-info .t-name.done-text { text-decoration: line-through; color: var(--slate-400); }
+  .task-info .t-meta {
+    font-size: 11.5px;
+    color: var(--slate-500);
+    display: flex;
+    gap: 10px;
+    margin-top: 1px;
+  }
+  .task-info .t-meta span.overdue { color: var(--red-600); font-weight: 600; }
+  .task-info .t-meta .t-assignee::before { content: '👤'; margin-right: 3px; font-style: normal; }
+  .task-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .task-badge.high   { background: var(--red-100);   color: var(--red-600); }
+  .task-badge.medium { background: var(--amber-100); color: var(--amber-600); }
+  .task-badge.low    { background: var(--green-100); color: var(--green-600); }
+  .task-view-btn {
+    background: none; border: none; cursor: pointer; padding: 2px 4px;
+    color: var(--slate-400); font-size: 14px; line-height: 1;
+    flex-shrink: 0; border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .task-view-btn:hover { color: var(--blue-600); background: var(--blue-50); }
+
+  /* ─── MILESTONES ──────────────────────────────────────────── */
+  .milestone-track {
+    overflow-x: auto;
+  }
+  .milestone-inner {
+    position: relative;
+    padding: 8px 0;
+    min-width: max-content;
+  }
+  .milestone-line {
+    position: absolute;
+    top: 26px;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: var(--slate-200);
+    z-index: 0;
+  }
+  .milestone-progress {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: var(--blue-500);
+    border-radius: 2px;
+  }
+  .milestones-row {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .milestone-node { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 80px; }
+  @keyframes node-complete-pop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.5); box-shadow: 0 0 0 6px rgba(22,163,74,0.25); }
+    65%  { transform: scale(0.88); }
+    85%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .milestone-node.node-complete .m-circle {
+    animation: node-complete-pop 0.55s cubic-bezier(.36,.07,.19,.97) forwards;
+  }
+  .date-item.ms-done.ms-hidden { display: none; }
+  .m-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--slate-300);
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .m-circle.done    { border-color: var(--green-600); background: var(--green-600); color: #fff; }
+  .m-circle.current { border-color: var(--blue-600); background: var(--blue-600); color: #fff; box-shadow: 0 0 0 4px var(--blue-100); }
+  .m-circle.future  { border-color: var(--slate-300); color: var(--slate-400); }
+  .m-label { font-size: 11px; font-weight: 600; color: var(--slate-600); text-align: center; max-width: 80px; }
+  .m-date  { font-size: 10.5px; color: var(--slate-400); }
+
+  /* ─── NOTES ───────────────────────────────────────────────── */
+  .note-list {
+    display: flex; flex-direction: column; gap: 12px;
+    max-height: 30vh; overflow-y: auto;
+    padding-right: 4px;
+  }
+  .note-list::-webkit-scrollbar { width: 4px; }
+  .note-list::-webkit-scrollbar-track { background: transparent; }
+  .note-list::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 99px; }
+  .note-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .note-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .avatar.blue   { background: var(--blue-600); }
+  .avatar.purple { background: var(--purple-600); }
+  .avatar.green  { background: var(--green-600); }
+  .avatar.amber  { background: var(--amber-600, #d97706); }
+  .avatar.red    { background: var(--red-600); }
+  .note-time   { font-size: 11.5px; color: var(--slate-400); }
+  .note-author { font-size: 12.5px; font-weight: 600; color: var(--slate-700); }
+  .note-priority { margin-left: auto; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--red-100); color: var(--red-600); }
+  .note-view-btn {
+    background: none; border: none; cursor: pointer; padding: 2px 4px;
+    color: var(--slate-400); font-size: 14px; line-height: 1;
+    flex-shrink: 0; border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .note-view-btn:hover { color: var(--blue-600); background: var(--blue-50); }
+  .note-body   { padding: 10px 12px; font-size: 13px; color: var(--slate-700); line-height: 1.5; }
+  .note-tag {
+    display: inline-block;
+    background: var(--blue-50);
+    color: var(--blue-600);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* ─── MEETINGS ────────────────────────────────────────────── */
+  .meeting-list { display: flex; flex-direction: column; gap: 0; }
+  .meeting-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .meeting-item:last-child { border-bottom: none; }
+  .meeting-item.past-hidden { display: none; }
+  .meeting-item.past { opacity: .55; }
+  .meeting-item.past .meeting-date-box {
+    background: var(--slate-50);
+    border-color: var(--slate-200);
+  }
+  .meeting-item.past .m-month { color: var(--slate-500); }
+  .meeting-item.past .m-day   { color: var(--slate-600); }
+  .meeting-item.past .mt-title { color: var(--slate-500); }
+  .meeting-item.past:hover { opacity: .75; }
+  .meeting-date-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--blue-50);
+    border: 1px solid var(--blue-100);
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-width: 50px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+  }
+  button.meeting-date-box { font-family: inherit; }
+  .meeting-date-box:hover { background: var(--blue-100); border-color: var(--blue-300); box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+  .meeting-date-box .m-month { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--blue-600); }
+  .meeting-date-box .m-day   { font-size: 20px; font-weight: 800; color: var(--blue-900); line-height: 1; }
+  .meeting-info { flex: 1; min-width: 0; }
+  .meeting-info .mt-title { font-size: 13.5px; font-weight: 600; color: var(--slate-800); }
+  .meeting-info .mt-meta  { font-size: 12px; color: var(--slate-500); margin-top: 2px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .meeting-type-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .meeting-type-badge.formal   { background: var(--blue-100);   color: var(--blue-600); }
+  .meeting-type-badge.informal { background: var(--slate-100); color: var(--slate-600); }
+  .meeting-type-badge.upcoming { background: var(--amber-100); color: var(--amber-600); }
+
+  /* ─── ATTACHMENTS ─────────────────────────────────────────── */
+  .attachment-list { display: flex; flex-direction: column; gap: 0; }
+  .attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .attachment-item:last-child { border-bottom: none; }
+  .file-icon-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: var(--blue-50);
+    border: 1px solid var(--blue-100);
+    border-radius: 8px;
+    padding: 6px 8px;
+    min-width: 48px;
+    flex-shrink: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+  }
+  .file-icon-btn:hover {
+    background: var(--blue-100);
+    border-color: var(--blue-300);
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  }
+  .file-icon-btn .fi-emoji { font-size: 20px; line-height: 1; }
+  .file-icon-btn .fi-ext {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    color: var(--blue-600); letter-spacing: .04em;
+  }
+  .attach-info { flex: 1; min-width: 0; }
+  .attach-info .a-name { font-size: 13px; font-weight: 600; color: var(--slate-800); }
+  .attach-info .a-meta { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .attach-dl {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue-600);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: background .12s;
+    flex-shrink: 0;
+  }
+  .attach-dl:hover { background: var(--blue-50); }
+
+  /* ─── ATTACHMENT TAGS ─────────────────────────────────────── */
+  .a-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .a-tag {
+    display: inline-block;
+    padding: 1px 7px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+    background: var(--slate-100); color: var(--slate-600);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .a-tag:hover { background: var(--blue-50); color: var(--blue-600); }
+
+  /* ─── ATTACHMENT SEARCH / SUGGESTIONS ────────────────────── */
+  #attachSearchWrap { position: relative; flex: 1; max-width: 280px; }
+  .attach-suggestions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    z-index: 300;
+    overflow: hidden;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .attach-suggestions.open { display: block; }
+  .attach-suggestion-item {
+    padding: 8px 12px;
+    font-size: 12.5px;
+    color: var(--slate-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .1s;
+  }
+  .attach-suggestion-item:hover { background: var(--blue-50); color: var(--blue-600); }
+  .sug-prefix,
+  .contact-suggestion-item .sug-prefix,
+  .attach-suggestion-item .sug-prefix,
+  .term-suggestion-item .sug-prefix {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .05em; text-transform: uppercase;
+    color: var(--slate-400); min-width: 28px; flex-shrink: 0;
+  }
+
+  /* ─── ATTACHMENT INLINE EDIT ─────────────────────────────── */
+  .attach-edit-btn {
+    background: none; border: none; cursor: pointer; padding: 4px 6px;
+    color: var(--slate-400); font-size: 13px; line-height: 1;
+    flex-shrink: 0; border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .attach-edit-btn:hover { color: var(--blue-600); background: var(--blue-50); }
+
+  .attachment-item.editing {
+    background: var(--blue-50);
+    border-radius: 8px;
+    align-items: flex-start;
+    padding: 12px 10px;
+    margin: 2px -10px;
+  }
+  .a-name-input {
+    width: 100%; padding: 5px 8px;
+    border: 1.5px solid var(--blue-500); border-radius: 6px;
+    font-size: 13px; font-weight: 600; color: var(--slate-800);
+    font-family: var(--font); background: #fff; outline: none;
+  }
+  .a-name-input:focus { box-shadow: 0 0 0 3px rgba(59,130,196,0.15); }
+
+  .tag-editor {
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+    padding: 4px 6px; border: 1.5px solid var(--blue-500); border-radius: 6px;
+    background: #fff; min-height: 32px; cursor: text; margin-top: 5px;
+  }
+  .tag-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 5px 1px 7px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+    background: var(--blue-100); color: var(--blue-700);
+  }
+  .tag-chip-remove {
+    background: none; border: none; cursor: pointer; padding: 0;
+    font-size: 14px; line-height: 1; color: var(--blue-400);
+    display: flex; align-items: center; transition: color .12s;
+  }
+  .tag-chip-remove:hover { color: var(--red-600); }
+  .tag-add-input {
+    border: none; outline: none; background: transparent;
+    font-size: 12px; color: var(--slate-700);
+    font-family: var(--font); min-width: 80px; flex: 1;
+  }
+  .tag-add-input::placeholder { color: var(--slate-400); }
+  .attach-edit-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* ─── ATTACHMENT VIEW MODAL ───────────────────────────────── */
+  .attach-view-btn {
+    font-size: 12px; font-weight: 600; color: var(--slate-500);
+    cursor: pointer; background: none; border: none;
+    padding: 4px 10px; border-radius: 6px; flex-shrink: 0;
+    transition: background .12s, color .12s;
+  }
+  .attach-view-btn:hover { background: var(--slate-100); color: var(--slate-700); }
+
+  #attachModal .modal { max-width: 560px; }
+  .attach-modal-file { display: flex; align-items: center; gap: 12px; }
+  .attach-modal-icon {
+    width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .attach-modal-name { font-size: 14px; font-weight: 700; color: var(--slate-800); word-break: break-all; }
+  .attach-modal-meta { font-size: 11.5px; color: var(--slate-500); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .attach-preview {
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    border-radius: 8px; min-height: 180px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; padding: 20px;
+  }
+  .preview-lines { display: flex; flex-direction: column; gap: 7px; width: 100%; }
+  .preview-line { height: 8px; background: var(--slate-200); border-radius: 4px; }
+  .preview-line.short { width: 45%; }
+  .preview-line.med   { width: 72%; }
+  .preview-line.long  { width: 100%; }
+  .preview-line.title { height: 13px; width: 60%; margin-bottom: 6px; background: var(--slate-300); }
+  .preview-caption { font-size: 11px; color: var(--slate-400); margin-top: 4px; }
+  .preview-table { width: 100%; border-collapse: collapse; }
+  .preview-table td {
+    border: 1px solid var(--slate-200); padding: 5px 10px;
+    font-size: 11px; color: var(--slate-600);
+  }
+  .preview-table tr:first-child td {
+    background: var(--slate-100); font-weight: 700; color: var(--slate-700);
+  }
+
+  /* ─── CONTACTS ────────────────────────────────────────────── */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .contact-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: box-shadow .15s;
+  }
+  .contact-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .avatar-lg {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .avatar-lg.teal   { background: #0d9488; }
+  .avatar-lg.orange { background: #ea580c; }
+  .avatar-lg.blue   { background: var(--blue-600); }
+  .avatar-lg.indigo { background: #4f46e5; }
+  /* contact search */
+  .contact-search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+    flex: 1; max-width: 280px;
+  }
+  .contact-search:focus-within { border-color: var(--blue-500); box-shadow: 0 0 0 3px var(--blue-50); }
+  .contact-search .search-icon { font-size: 13px; color: var(--slate-400); flex-shrink: 0; }
+  .contact-search input {
+    border: none; outline: none; background: transparent;
+    font-size: 13px; color: var(--slate-800); width: 100%;
+    font-family: var(--font);
+  }
+  .contact-search input::placeholder { color: var(--slate-400); }
+
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-info .c-name  { font-size: 13px; font-weight: 700; color: var(--slate-800); }
+  .contact-info .c-role  { font-size: 11.5px; color: var(--slate-500); }
+  .contact-info .c-badges {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin: 5px 0 7px;
+  }
+  .c-badge {
+    display: inline-block;
+    padding: 1px 7px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+  }
+  .c-badge.type  { background: var(--blue-50);    color: var(--blue-600); }
+  .c-badge.group { background: var(--purple-100); color: var(--purple-600); }
+  .contact-info .c-detail {
+    font-size: 11.5px;
+    color: var(--slate-600);
+    display: flex; align-items: center; gap: 5px;
+    margin-top: 3px;
+  }
+
+  /* ─── MEMBERS ─────────────────────────────────────────────── */
+  .member-table { width: 100%; border-collapse: collapse; }
+  .member-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    padding: 0 12px 8px;
+    border-bottom: 1px solid var(--slate-200);
+  }
+  .member-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--slate-700);
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: middle;
+  }
+  .member-table tr:last-child td { border-bottom: none; }
+  .member-table tr:hover td { background: var(--slate-50); }
+
+  /* ─── COMMS ───────────────────────────────────────────────── */
+  .comm-list { display: flex; flex-direction: column; gap: 0; }
+  .comm-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .comm-item:last-child { border-bottom: none; }
+  .comm-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .comm-icon.email  { background: var(--blue-50);   color: var(--blue-600); }
+  .comm-icon.phone  { background: var(--green-100); color: var(--green-600); }
+  .comm-icon.letter { background: var(--amber-100); color: var(--amber-600); }
+  .comm-icon.portal { background: var(--purple-100); color: var(--purple-600); }
+  .comm-info { flex: 1; min-width: 0; }
+  .comm-info .co-subject { font-size: 13px; font-weight: 600; color: var(--slate-800); }
+  .comm-info .co-meta { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .comm-dir {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .comm-dir.inbound  { background: var(--blue-100); color: var(--blue-600); }
+  .comm-dir.outbound { background: var(--green-100); color: var(--green-600); }
+
+  /* ─── TERMS ───────────────────────────────────────────────── */
+  .terms-list { display: flex; flex-direction: column; gap: 0; max-height: 480px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--slate-200) transparent; }
+  .terms-list::-webkit-scrollbar { width: 5px; }
+  .terms-list::-webkit-scrollbar-track { background: transparent; }
+  .terms-list::-webkit-scrollbar-thumb { background: var(--slate-200); border-radius: 99px; }
+  .term-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--slate-100); }
+  .term-item:last-child { border-bottom: none; }
+  .term-item.term-hidden { display: none; }
+  .term-info { flex: 1; min-width: 0; }
+  .tr-title { font-size: 13px; font-weight: 600; color: var(--slate-800); }
+  .tr-meta { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .tr-category { display: inline-flex; align-self: flex-start; font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 7px; background: var(--blue-50); color: var(--blue-600); }
+  .tr-details { font-size: 12px; color: var(--slate-500); line-height: 1.4; }
+  /* reset category container in edit mode so the select fills the row */
+  .term-item.editing .tr-category { display: block; background: none; color: inherit; padding: 0; border-radius: 0; align-self: unset; }
+  .tr-amount { font-size: 12px; font-weight: 600; color: var(--slate-600); background: var(--slate-100); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; }
+  .tr-amount:empty { display: none; }
+  /* status badges */
+  .term-status { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
+  .term-status.included     { background: var(--green-100); color: var(--green-600); }
+  .term-status.negotiating  { background: var(--amber-100); color: var(--amber-600); }
+  .term-status.not-included { background: var(--slate-100); color: var(--slate-500); }
+  /* term search */
+  #termSearchWrap { position: relative; flex: 1; max-width: 280px; }
+  .term-suggestions { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid var(--slate-200); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); z-index: 300; overflow: hidden; max-height: 220px; overflow-y: auto; }
+  .term-suggestions.open { display: block; }
+  .term-suggestion-item { padding: 8px 12px; font-size: 12.5px; color: var(--slate-700); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .1s; }
+  .term-suggestion-item:hover { background: var(--blue-50); color: var(--blue-600); }
+  /* inline edit */
+  .item-edit-btn { background: none; border: none; cursor: pointer; padding: 4px 6px; color: var(--slate-400); font-size: 13px; line-height: 1; flex-shrink: 0; border-radius: 4px; transition: color .15s, background .15s; }
+  .item-edit-btn:hover { color: var(--blue-600); background: var(--blue-50); }
+  .term-item.editing { background: var(--blue-50); border-radius: 8px; padding: 12px 10px; margin: 2px -10px; align-items: flex-start; }
+  .term-input, .term-select { font-size: 12.5px; border: 1px solid var(--slate-200); border-radius: 6px; padding: 4px 8px; background: #fff; color: var(--slate-800); outline: none; transition: border-color .15s; }
+  .term-input:focus, .term-select:focus { border-color: var(--blue-400); }
+  .term-input.tr-title-input { font-weight: 600; width: 100%; }
+  .term-textarea { display: block; font-size: 12px; border: 1px solid var(--slate-200); border-radius: 6px; padding: 4px 8px; background: #fff; color: var(--slate-500); width: 100%; resize: vertical; min-height: 52px; outline: none; transition: border-color .15s; }
+  .term-textarea:focus { border-color: var(--blue-400); }
+  .term-item.editing .tr-category-select { display: block; width: 100%; }
+  .term-edit-row { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; align-items: center; }
+  .term-edit-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* ─── RESOLUTION ──────────────────────────────────────────── */
+  .resolution-banner {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .resolution-banner .res-icon { font-size: 28px; }
+  .resolution-banner .res-info .res-title { font-size: 14px; font-weight: 700; color: var(--amber-600); }
+  .resolution-banner .res-info .res-desc  { font-size: 13px; color: var(--slate-700); margin-top: 3px; }
+
+  /* ─── PROGRESS BAR ────────────────────────────────────────── */
+  .progress-wrap { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .progress-bar { flex: 1; height: 6px; background: var(--slate-100); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue-500); border-radius: 99px; }
+  .progress-pct { font-size: 12px; font-weight: 700; color: var(--slate-600); }
+
+  /* ─── SCHEDULE NOTE ───────────────────────────────────────── */
+  .schedule-note {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--blue-50);
+    border: 1px solid var(--blue-100);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--blue-700);
+    font-weight: 500;
+  }
+
+  /* ─── SCROLL TO TOP ───────────────────────────────────────── */
+  #scroll-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--blue-700);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 50;
+  }
+  #scroll-top.visible { opacity: 1; pointer-events: all; }
+  #scroll-top:hover { background: var(--blue-600); }
+
+  /* ─── TOAST ───────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--slate-800);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    z-index: 999;
+    pointer-events: none;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s;
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ─── MODAL ───────────────────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,39,68,0.5);
+    z-index: 600;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+    transform: translateY(20px);
+    transition: transform .22s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .modal-header h3 { font-size: 15px; font-weight: 700; color: var(--slate-800); display: flex; align-items: center; gap: 8px; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 7px; border: none;
+    background: var(--slate-100); color: var(--slate-500);
+    font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .modal-close:hover { background: var(--slate-200); }
+  .modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field label { font-size: 12px; font-weight: 700; color: var(--slate-600); letter-spacing: .03em; }
+  .form-field input, .form-field select, .form-field textarea {
+    padding: 9px 12px; border: 1.5px solid var(--slate-200); border-radius: 8px;
+    font-size: 13.5px; color: var(--slate-800); font-family: var(--font);
+    background: #fff; transition: border-color .15s, box-shadow .15s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none; border-color: var(--blue-500); box-shadow: 0 0 0 3px var(--blue-50);
+  }
+  .form-field textarea { resize: vertical; min-height: 72px; }
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 14px 20px; border-top: 1px solid var(--slate-100);
+  }
+  .btn-md {
+    padding: 8px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; border: none; transition: background .15s;
+  }
+  .btn-md.primary   { background: var(--blue-600); color: #fff; }
+  .btn-md.primary:hover { background: var(--blue-700); }
+  .btn-md.secondary { background: var(--slate-100); color: var(--slate-700); border: 1px solid var(--slate-200); }
+  .btn-md.secondary:hover { background: var(--slate-200); }
+
+  .ms-status-select {
+    margin-left: auto; flex-shrink: 0;
+    padding: 2px 20px 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 600;
+    cursor: pointer; border: 1px solid; transition: background .15s, color .15s, border-color .15s;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 6px center;
+    font-family: inherit;
+  }
+  .ms-status-select.status-future  { border-color: var(--slate-300);  background-color: transparent;        color: var(--slate-500); }
+  .ms-status-select.status-current { border-color: var(--blue-500);   background-color: var(--blue-50);     color: var(--blue-600); }
+  .ms-status-select.status-done    { border-color: var(--green-600);  background-color: var(--green-100);   color: var(--green-600); }
+
+  /* ─── HISTORY ─────────────────────────────────────────────── */
+  .history-list { display: flex; flex-direction: column; }
+  .history-item {
+    display: flex; gap: 0;
+    padding: 0 20px;
+  }
+  .history-item.hidden { display: none; }
+  .history-left {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0; width: 44px; padding-top: 16px;
+  }
+  .history-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff;
+    flex-shrink: 0; z-index: 1;
+  }
+  .history-line {
+    width: 2px; flex: 1; background: var(--slate-100);
+    margin-top: 6px; min-height: 16px;
+  }
+  .history-item:last-child .history-line { display: none; }
+  .history-content {
+    flex: 1; padding: 14px 0 18px 14px;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .history-item:last-child .history-content { border-bottom: none; }
+  .history-header {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 5px;
+  }
+  .history-user { font-size: 13px; font-weight: 700; color: var(--slate-800); }
+  .history-time { font-size: 11.5px; color: var(--slate-400); margin-left: auto; }
+  .history-desc { font-size: 13px; color: var(--slate-600); line-height: 1.45; }
+  .history-desc strong { color: var(--slate-800); }
+  .history-fields {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 7px; padding: 4px 10px;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    border-radius: 6px; font-size: 12px;
+  }
+  .hf-label { font-weight: 700; color: var(--slate-500); }
+  .hf-old { color: var(--slate-400); text-decoration: line-through; }
+  .hf-arrow { color: var(--slate-300); }
+  .hf-new { font-weight: 600; color: var(--green-600); }
+  .hf-disputed { color: var(--red-600) !important; }
+
+  .history-badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 4px; font-size: 11px; font-weight: 700;
+  }
+  .history-badge.created { background: var(--blue-100);   color: var(--blue-600); }
+  .history-badge.updated { background: var(--amber-100);  color: var(--amber-600); }
+  .history-badge.added   { background: var(--green-100);  color: var(--green-600); }
+  .history-badge.status  { background: var(--purple-100); color: var(--purple-600); }
+  .history-badge.deleted { background: var(--red-100);    color: var(--red-600); }
+
+  @media (max-width: 960px) {
+    #page { grid-template-columns: 1fr; }
+    #sidebar { display: none; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .banner-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BANNER
+════════════════════════════════════════════════════════════ -->
+<header id="banner">
+  <div class="banner-inner">
+
+    <div class="banner-mini-row">
+      <span class="case-id-badge">CASE-2024-0847</span>
+      <span class="case-name">Johnson v. Pacific Industries — Workplace Injury Dispute</span>
+      <span class="status-pill active"><span class="dot"></span>Active</span>
+
+      <div class="actions-wrap">
+        <button type="button" class="btn-actions" id="actionsBtn" onclick="toggleActions(event)">
+          Actions
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="actions-menu" id="actionsMenu">
+          <div class="actions-menu-section">
+            <div class="actions-menu-label">Add Entry</div>
+            <a href="#" onclick="toast('Add Note modal would open'); return false;"><span class="mi">📝</span> Add Note</a>
+            <a href="#" onclick="toast('Add Contact modal would open'); return false;"><span class="mi">👤</span> Add Contact</a>
+            <a href="#" onclick="toast('Add Meeting modal would open'); return false;"><span class="mi">📅</span> Add Meeting</a>
+            <a href="#" onclick="toast('Add Task modal would open'); return false;"><span class="mi">✅</span> Add Task</a>
+            <a href="#" onclick="openMilestoneModal(); return false;"><span class="mi">🏁</span> Add Milestone</a>
+            <a href="#" onclick="toast('Log Communication modal would open'); return false;"><span class="mi">💬</span> Log Communication</a>
+          </div>
+          <div class="actions-menu-section">
+            <div class="actions-menu-label">Case Management</div>
+            <a href="#" onclick="toast('Update Case Details modal would open'); return false;"><span class="mi">✏️</span> Update Case Details</a>
+            <a href="#" onclick="toast('Reassign Case modal would open'); return false;"><span class="mi">🔀</span> Reassign Case</a>
+            <a href="#" onclick="toast('Escalate Case modal would open'); return false;"><span class="mi">⬆️</span> Escalate Case</a>
+          </div>
+          <div class="actions-menu-section">
+            <div class="actions-menu-label">Resolution</div>
+            <a href="#" onclick="toast('Record Resolution modal would open'); return false;"><span class="mi">🏆</span> Record Resolution</a>
+            <a href="#" onclick="toast('Close Case modal would open'); return false;"><span class="mi">🔒</span> Close Case</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner-collapse-clip">
+    <div class="banner-details-row">
+      <div class="banner-description">
+        <h2>Case Description</h2>
+        <p>Workplace injury sustained on 14 March 2024 resulting in fractures to the left wrist and forearm. Claimant was operating a forklift when the load shifted unexpectedly. Liability is contested by employer citing alleged procedural breach.</p>
+      </div>
+
+      <div class="banner-meta">
+        <div class="meta-item"><span class="label">Case Type</span><span class="value">Workers Compensation</span></div>
+        <div class="meta-item"><span class="label">Priority</span><span class="value"><span class="priority-badge high">High</span></span></div>
+        <div class="meta-item"><span class="label">Opened</span><span class="value">18 Mar 2024</span></div>
+        <div class="meta-item"><span class="label">Due Date</span><span class="value">30 Jun 2025</span></div>
+        <div class="meta-item"><span class="label">Case Manager</span><span class="value">Sarah Mitchell</span></div>
+        <div class="meta-item"><span class="label">Last Updated</span><span class="value">2 May 2025</span></div>
+      </div>
+    </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE (main + right sidebar)
+════════════════════════════════════════════════════════════ -->
+<div id="page">
+
+<main id="main">
+
+  <!-- ══════════════════════════════
+       TAB 1: OVERVIEW
+  ══════════════════════════════ -->
+  <div class="tab-panel active" id="tab-overview">
+
+    <!-- Case Details (full width) -->
+    <div class="content-block">
+      <div id="case-details" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">📁</span> Case Details</h3>
+          <div class="card-actions">
+            <button type="button" class="btn-sm secondary" onclick="toast('Edit case details')">Edit</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><span class="f-label">Case Number</span><span class="f-value">CASE-2024-0847</span></div>
+            <div class="field"><span class="f-label">Case Type</span><span class="f-value">Workers Compensation</span></div>
+            <div class="field"><span class="f-label">Category</span><span class="f-value">Workplace Injury</span></div>
+            <div class="field"><span class="f-label">Sub-category</span><span class="f-value">Forklift Incident</span></div>
+            <div class="field"><span class="f-label">Status</span><span class="f-value"><span class="status-pill active"><span class="dot"></span>Active</span></span></div>
+            <div class="field"><span class="f-label">Priority</span><span class="f-value"><span class="priority-badge high">High</span></span></div>
+            <div class="field"><span class="f-label">Case Manager</span><span class="f-value"><a href="#">Sarah Mitchell</a></span></div>
+            <div class="field"><span class="f-label">Team</span><span class="f-value">Industrial Claims</span></div>
+            <div class="field"><span class="f-label">Claim Value</span><span class="f-value">$148,500</span></div>
+            <div class="field"><span class="f-label">Insurer</span><span class="f-value">Pacific Mutual</span></div>
+            <div class="field" style="grid-column: span 2;"><span class="f-label">Internal Reference</span><span class="f-value">IM-WC-2024-0847 / File Ref: 2024/03/847</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Dates + Resolution (2 cols) -->
+    <div class="grid-2 content-block">
+      <div>
+        <div id="key-dates" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">📅</span> Key Dates</h3>
+            <div class="card-actions">
+              <button type="button" class="btn-sm secondary" onclick="toast('Edit dates')">Edit</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="date-timeline">
+              <div class="date-item"><div class="date-dot done"></div><div class="date-info"><div class="d-label">Incident Date</div><div class="d-value">14 March 2024</div></div></div>
+              <div class="date-item"><div class="date-dot done"></div><div class="date-info"><div class="d-label">Case Opened</div><div class="d-value">18 March 2024</div></div></div>
+              <div class="date-item"><div class="date-dot done"></div><div class="date-info"><div class="d-label">Initial Assessment</div><div class="d-value">25 March 2024</div></div></div>
+              <div class="date-item"><div class="date-dot done"></div><div class="date-info"><div class="d-label">Liability Decision</div><div class="d-value">12 April 2024</div></div></div>
+              <div class="date-item"><div class="date-dot current"></div><div class="date-info"><div class="d-label">Conciliation Hearing</div><div class="d-value">22 May 2025 — <em>Scheduled</em></div></div></div>
+              <div class="date-item"><div class="date-dot overdue"></div><div class="date-info"><div class="d-label">Medical Report Due</div><div class="d-value d-overdue">1 May 2025 — Overdue (6 days)</div></div></div>
+              <div class="date-item"><div class="date-dot future"></div><div class="date-info"><div class="d-label">Target Resolution</div><div class="d-value">30 June 2025</div></div></div>
+              <div class="date-item"><div class="date-dot future"></div><div class="date-info"><div class="d-label">Statutory Limitation</div><div class="d-value">14 March 2028</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="resolution" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">🏆</span> Resolution</h3>
+            <div class="card-actions">
+              <button type="button" class="btn-sm primary" onclick="toast('Record Resolution modal would open')">+ Record Resolution</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="resolution-banner">
+              <span class="res-icon">⏳</span>
+              <div class="res-info">
+                <div class="res-title">Resolution Pending</div>
+                <div class="res-desc">This case has not yet been resolved. Conciliation hearing scheduled for 22 May 2025. Target resolution date is 30 June 2025.</div>
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field"><span class="f-label">Resolution Type</span><span class="f-value" style="color:var(--slate-400);">Not yet determined</span></div>
+              <div class="field"><span class="f-label">Settlement Amount</span><span class="f-value" style="color:var(--slate-400);">—</span></div>
+              <div class="field"><span class="f-label">Resolution Date</span><span class="f-value" style="color:var(--slate-400);">—</span></div>
+              <div class="field"><span class="f-label">Resolved By</span><span class="f-value" style="color:var(--slate-400);">—</span></div>
+              <div class="field" style="grid-column: span 2;"><span class="f-label">Resolution Notes</span><span class="f-value" style="color:var(--slate-400);">No resolution notes recorded.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks + Milestones (2 cols) -->
+    <div class="grid-2 content-block">
+      <div>
+        <div id="tasks" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">✅</span> Tasks</h3>
+            <div class="card-actions">
+              <span id="task-count" style="font-size:12px;color:var(--slate-400);">5 of 8 complete</span>
+              <div class="contact-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="taskAssigneeSearch" placeholder="Filter by assignee…" oninput="filterTasks(this.value)">
+              </div>
+              <button type="button" class="btn-toggle-completed" id="toggleCompletedBtn" onclick="toggleCompleted()">
+                <span id="toggleCompletedIcon">👁</span> <span id="toggleCompletedText">Hide completed</span>
+              </button>
+              <button type="button" class="btn-sm primary" onclick="toast('Add Task modal would open')">+ Add</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="progress-wrap" style="margin-bottom:12px;">
+              <div class="progress-bar"><div class="progress-fill" id="task-progress-fill" style="width:62%"></div></div>
+              <span class="progress-pct" id="task-progress-pct">62%</span>
+            </div>
+            <div class="task-list" id="taskList">
+<div class="task-item {#query.ActionedCSS}">
+  <div id="CA-Task-{#query.Ordinal}" class="task-check {#query.TAskCheckCSS}" onclick="toggleTask(this)"></div>
+  <div class="task-info">
+    <div class="t-name {#query.TAskCheckCSS}-text">Obtain incident report from employer</div>
+    <div class="t-meta">
+      <span>Due: {#query.Deadline}</span>
+      <span class="t-assignee">{#query.AssignedTo}</span>
+    </div>
+  </div>
+  <span class="task-badge high">{#query.HighPriority}</span>
+  <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+</div>
+
+              <div class="task-item completed-task"><div class="task-check done" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name done-text">Request medical records from treating GP</div>
+                  <div class="t-meta"><span>Due: 1 Apr 2024</span><span class="t-assignee">S. Mitchell</span></div>
+                </div>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item completed-task"><div class="task-check done" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name done-text">Arrange independent medical examination</div>
+                  <div class="t-meta"><span>Due: 15 Apr 2024</span><span class="t-assignee">S. Mitchell</span></div>
+                </div><span class="task-badge high">High</span>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item completed-task"><div class="task-check done" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name done-text">File initial WorkCover notification</div>
+                  <div class="t-meta"><span>Due: 20 Mar 2024</span><span class="t-assignee">S. Mitchell</span></div>
+                </div>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item completed-task"><div class="task-check done" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name done-text">Confirm wage records with employer</div>
+                  <div class="t-meta"><span>Due: 28 Apr 2025</span><span class="t-assignee">S. Mitchell</span></div>
+                </div>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name">Follow up overdue medical report from Dr. Rao</div>
+                  <div class="t-meta"><span class="overdue">Due: 1 May 2025 — Overdue</span><span class="t-assignee">S. Mitchell</span></div>
+                </div><span class="task-badge high">High</span>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name">Prepare conciliation brief</div>
+                  <div class="t-meta"><span>Due: 15 May 2025</span><span class="t-assignee">R. Kim</span></div>
+                </div><span class="task-badge high">High</span>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div>
+                <div class="task-info"><div class="t-name">Review employer's liability submissions</div>
+                  <div class="t-meta"><span>Due: 18 May 2025</span><span class="t-assignee">S. Mitchell</span></div>
+                </div>
+                <button type="button" class="task-view-btn" onclick="openTask(this)" title="View task">👁</button>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="milestones" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">🏁</span> Milestones <span id="milestone-count" style="font-size:12px;font-weight:400;color:var(--slate-400);margin-left:4px;"></span></h3>
+            <div class="card-actions">
+              <button type="button" class="btn-toggle-completed" id="toggleMsDoneBtn" onclick="toggleMsDone()"><span>👁</span> <span id="toggleMsDoneText">Show completed</span></button>
+              <button type="button" class="btn-sm primary" onclick="openMilestoneModal()">+ Add</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="milestone-track" style="margin-bottom:20px;">
+              <div class="milestone-inner">
+                <div class="milestone-line">
+                  <div class="milestone-progress" id="milestone-progress-bar" style="width:0%"></div>
+                </div>
+                <div class="milestones-row" id="milestone-nodes"></div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--slate-100);padding-top:14px;">
+              <div style="font-size:12px;font-weight:700;color:var(--slate-500);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">Milestone Log</div>
+              <div class="date-timeline" id="milestone-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts (full width) -->
+    <div class="content-block">
+      <div id="contacts" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">👤</span> Contacts</h3>
+          <div class="card-actions">
+            <div class="contact-search">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="contactSearch" placeholder="Search by type, role or group…" oninput="filterContacts(this.value)">
+            </div>
+            <button type="button" class="btn-sm primary" onclick="toast('Add Contact modal would open')">+ Add Contact</button>
+          </div>
+        </div>
+        <div class="card-body">
+<div class="contact-grid" id="contactGrid">
+
+   
+            <div class="contact-card"
+              data-name="Michael Johnson"
+              data-type="Individual"
+              data-role="Claimant"
+              data-group="Claimant Party">
+              <div class="avatar-lg blue">MJ</div>
+              <div class="contact-info">
+                <div class="c-name">Michael Johnson</div>
+                <div class="c-role">Claimant</div>
+                <div class="c-badges">
+                  <span class="c-badge type">Individual</span>
+                  <span class="c-badge group">Claimant Party</span>
+                </div>
+                <div class="c-detail">📞 0412 345 678</div>
+                <div class="c-detail">✉️ m.johnson@email.com</div>
+              </div>
+            </div>
+            <div class="contact-card"
+              data-name="Rebecca Kim"
+              data-type="Legal Representative"
+              data-role="Claimant's Solicitor"
+              data-group="Claimant Party">
+              <div class="avatar-lg teal">RK</div>
+              <div class="contact-info">
+                <div class="c-name">Rebecca Kim</div>
+                <div class="c-role">Claimant's Solicitor</div>
+                <div class="c-badges">
+                  <span class="c-badge type">Legal Representative</span>
+                  <span class="c-badge group">Claimant Party</span>
+                </div>
+                <div class="c-detail">📞 03 9812 3456</div>
+                <div class="c-detail">✉️ rkim@austlaw.com.au</div>
+              </div>
+            </div>
+            <div class="contact-card"
+              data-name="Tom Whitfield"
+              data-type="Organisation"
+              data-role="Respondent"
+              data-group="Respondent Party">
+              <div class="avatar-lg orange">TW</div>
+              <div class="contact-info">
+                <div class="c-name">Tom Whitfield</div>
+                <div class="c-role">Respondent (Employer)</div>
+                <div class="c-badges">
+                  <span class="c-badge type">Organisation</span>
+                  <span class="c-badge group">Respondent Party</span>
+                </div>
+                <div class="c-detail">📞 03 9654 7800</div>
+                <div class="c-detail">✉️ t.whitfield@pacific-ind.com</div>
+              </div>
+            </div>
+            <div class="contact-card"
+              data-name="Dr. Anita Rao"
+              data-type="Individual"
+              data-role="Medical Assessor"
+              data-group="Expert Witnesses">
+              <div class="avatar-lg indigo">DR</div>
+              <div class="contact-info">
+                <div class="c-name">Dr. Anita Rao</div>
+                <div class="c-role">Medical Assessor</div>
+                <div class="c-badges">
+                  <span class="c-badge type">Individual</span>
+                  <span class="c-badge group">Expert Witnesses</span>
+                </div>
+                <div class="c-detail">📞 03 9721 4500</div>
+                <div class="c-detail">✉️ a.rao@medassist.com.au</div>
+              </div>
+            </div>
+
+            
+          </div>
+          <p id="contactNoResults" style="display:none;text-align:center;padding:24px;font-size:13px;color:var(--slate-400);">No contacts match your search.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#tab-overview -->
+
+
+  <!-- ══════════════════════════════
+       TAB 2: ACTIVITY
+  ══════════════════════════════ -->
+  <div class="tab-panel" id="tab-activity">
+
+    <!-- Attachments + Meetings (2 cols) -->
+    <div class="grid-2 content-block">
+      <div>
+        <div id="attachments" class="section-anchor"></div>
+        <div class="card">
+
+          <div class="card-header">
+            <h3><span class="icon">📎</span> Attachments</h3>
+            <div class="card-actions">
+              <div id="attachSearchWrap">
+                <div class="contact-search">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="attachSearch" placeholder="Search files or tags…" oninput="filterAttachments(this.value)" autocomplete="off">
+                </div>
+                <div class="attach-suggestions" id="attachSuggestions"></div>
+              </div>
+              <button type="button" class="btn-sm primary" onclick="toast('File upload dialog would open')">+ Upload</button>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="attachment-list">
+
+              <div class="attachment-item" data-name="Incident_Report_PacificInd.pdf" data-tags="Incident Report,Employer">
+                <button type="button" class="file-icon-btn" onclick="viewAttachment(this)" title="View attachment">
+                  <span class="fi-emoji">📄</span><span class="fi-ext">PDF</span>
+                </button>
+                <div class="attach-info">
+                  <div class="a-name">Incident_Report_PacificInd.pdf</div>
+                  <div class="a-meta"><span>1.2 MB</span><span>Uploaded by T. Whitfield</span><span>20 Mar 2024</span></div>
+                  <div class="a-tags"><span class="a-tag">Incident Report</span><span class="a-tag">Employer</span></div>
+                </div>
+                <button type="button" class="attach-view-btn" onclick="viewAttachment(this)">View</button>
+                <!-- TODO: hook up download attachment to flowz -->
+                <button type="button" class="attach-dl" onclick="toast('Downloading Incident_Report_PacificInd.pdf…')">Download</button>
+                <button type="button" class="attach-edit-btn" onclick="editAttachment(this)" title="Edit filename and tags">✏️</button>
+              </div>
+
+              <div class="attachment-item" data-name="Wage_Certificate_2024.xlsx" data-tags="Wages,Evidence">
+                <button type="button" class="file-icon-btn" onclick="viewAttachment(this)" title="View attachment">
+                  <span class="fi-emoji">📊</span><span class="fi-ext">XLSX</span>
+                </button>
+                <div class="attach-info">
+                  <div class="a-name">Wage_Certificate_2024.xlsx</div>
+                  <div class="a-meta"><span>340 KB</span><span>Uploaded by T. Whitfield</span><span>28 Apr 2025</span></div>
+                  <div class="a-tags"><span class="a-tag">Wages</span><span class="a-tag">Evidence</span></div>
+                </div>
+                <button type="button" class="attach-view-btn" onclick="viewAttachment(this)">View</button>
+                <!-- TODO: hook up download attachment to flowz -->
+                <button type="button" class="attach-dl" onclick="toast('Downloading Wage_Certificate_2024.xlsx…')">Download</button>
+                <button type="button" class="attach-edit-btn" onclick="editAttachment(this)" title="Edit filename and tags">✏️</button>
+              </div>
+
+              <div class="attachment-item" data-name="IME_Report_DrRao.pdf" data-tags="Medical,IME">
+                <button type="button" class="file-icon-btn" onclick="viewAttachment(this)" title="View attachment">
+                  <span class="fi-emoji">📄</span><span class="fi-ext">PDF</span>
+                </button>
+                <div class="attach-info">
+                  <div class="a-name">IME_Report_DrRao.pdf</div>
+                  <div class="a-meta"><span>2.8 MB</span><span>Uploaded by Dr. A. Rao</span><span>5 Apr 2025</span></div>
+                  <div class="a-tags"><span class="a-tag">Medical</span><span class="a-tag">IME</span></div>
+                </div>
+                <button type="button" class="attach-view-btn" onclick="viewAttachment(this)">View</button>
+                <!-- TODO: hook up download attachment to flowz -->
+                <button type="button" class="attach-dl" onclick="toast('Downloading IME_Report_DrRao.pdf…')">Download</button>
+                <button type="button" class="attach-edit-btn" onclick="editAttachment(this)" title="Edit filename and tags">✏️</button>
+              </div>
+
+              <div class="attachment-item" data-name="Conciliation_Brief_Draft.docx" data-tags="Conciliation,Draft">
+                <button type="button" class="file-icon-btn" onclick="viewAttachment(this)" title="View attachment">
+                  <span class="fi-emoji">📝</span><span class="fi-ext">DOCX</span>
+                </button>
+                <div class="attach-info">
+                  <div class="a-name">Conciliation_Brief_Draft.docx</div>
+                  <div class="a-meta"><span>890 KB</span><span>Uploaded by S. Mitchell</span><span>3 May 2025</span></div>
+                  <div class="a-tags"><span class="a-tag">Conciliation</span><span class="a-tag">Draft</span></div>
+                </div>
+                <button type="button" class="attach-view-btn" onclick="viewAttachment(this)">View</button>
+                <!-- TODO: hook up download attachment to flowz -->
+                <button type="button" class="attach-dl" onclick="toast('Downloading Conciliation_Brief_Draft.docx…')">Download</button>
+                <button type="button" class="attach-edit-btn" onclick="editAttachment(this)" title="Edit filename and tags">✏️</button>
+              </div>
+
+            </div>
+            <p id="attachNoResults" style="display:none;text-align:center;padding:24px;font-size:13px;color:var(--slate-400);">No attachments match your search.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
+        <div id="meetings" class="section-anchor"></div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">📅</span> Meetings</h3>
+            <div class="card-actions">
+              <button type="button" class="btn-toggle-completed hiding" id="togglePastMeetingsBtn" onclick="togglePastMeetings()">
+                <span id="togglePastMeetingsText">Show past</span>
+              </button>
+              <button type="button" class="btn-sm primary" onclick="toast('Add Meeting modal would open')">+ Add Meeting</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="meeting-list">
+
+              <div class="meeting-item" data-date="2025-05-22">
+                <button type="button" class="meeting-date-box" onclick="openMeeting(this)">
+                  <div class="m-month">MAY</div>
+                  <div class="m-day">22</div>
+                </button>
+                <div class="meeting-info">
+                  <div class="mt-title">Conciliation Hearing — VOCAT</div>
+                  <div class="mt-meta">
+                    <span>10:00am – 1:00pm</span>
+                    <span>Level 3, 570 Bourke St</span>
+                    <span class="meeting-type-badge upcoming">Upcoming</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="meeting-item" data-date="2026-06-14">
+                <button type="button" class="meeting-date-box" onclick="openMeeting(this)">
+                  <div class="m-month">APR</div>
+                  <div class="m-day">14</div>
+                </button>
+                <div class="meeting-info">
+                  <div class="mt-title">Case Review — Internal</div>
+                  <div class="mt-meta">
+                    <span>2:00pm – 3:00pm</span>
+                    <span>Video call</span>
+                    <span class="meeting-type-badge informal">Informal</span>
+                  </div>
+                </div>
+              </div>
+              <div class="meeting-item" data-date="2025-03-25">
+                <button type="button" class="meeting-date-box" onclick="openMeeting(this)">
+                  <div class="m-month">MAR</div>
+                  <div class="m-day">25</div>
+                </button>
+                <div class="meeting-info">
+                  <div class="mt-title">Initial Assessment Meeting</div>
+                  <div class="mt-meta">
+                    <span>9:00am – 10:30am</span>
+                    <span>In person — claimant's solicitor's office</span>
+                    <span class="meeting-type-badge formal">Formal</span>
+                  </div>
+                </div>
+              </div>
+              <div class="meeting-item" data-date="2025-03-19">
+                <button type="button" class="meeting-date-box" onclick="openMeeting(this)">
+                  <div class="m-month">MAR</div>
+                  <div class="m-day">19</div>
+                </button>
+                <div class="meeting-info">
+                  <div class="mt-title">Intake Call — Michael Johnson</div>
+                  <div class="mt-meta">
+                    <span>11:00am – 11:45am</span>
+                    <span>Phone call</span>
+                    <span class="meeting-type-badge informal">Informal</span>
+                  </div>
+                </div>
+              </div>
+
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes (full width) -->
+    <div class="content-block">
+      <div id="notes" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">📝</span> Notes</h3>
+          <div class="card-actions">
+            <div class="contact-search">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="noteSearch" placeholder="Search notes…" oninput="filterNotes(this.value)">
+            </div>
+            <button type="button" class="btn-sm primary" onclick="toast('Add Note modal would open')">+ Add Note</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="note-list" id="noteList">
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar blue">SM</div>
+                <span class="note-time">2 May 2025, 10:22am</span>
+                <span class="note-author">Sarah Mitchell</span>
+                <span class="note-priority">High</span>
+              </div>
+              <div class="note-body">
+                Called Dr. Rao's office regarding overdue medical report. Reception confirmed report is being finalised and will be sent by end of week. Follow-up call booked for 9 May if not received.
+                <div><span class="note-tag">Medical</span> <span class="note-tag">Action Required</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar purple">RK</div>
+                <span class="note-time">28 Apr 2025, 3:07pm</span>
+                <span class="note-author">Rebecca Kim</span>
+              </div>
+              <div class="note-body">
+                Received updated wage certificate from claimant's employer. Attached to file. Wage calculation to be revised based on new figures — current estimate increases from $142k to $148.5k.
+                <div><span class="note-tag">Financial</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar green">JD</div>
+                <span class="note-time">15 Apr 2025, 9:45am</span>
+                <span class="note-author">James Driscoll</span>
+                <span class="note-priority">High</span>
+              </div>
+              <div class="note-body">
+                Reviewed employer's liability submissions. Employer is relying on alleged breach of site safety procedure #SWP-14. Claimant's account contradicts this — he was not made aware of the updated procedure prior to incident.
+                <div><span class="note-tag">Legal</span> <span class="note-tag">Liability</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar blue">SM</div>
+                <span class="note-time">10 Apr 2025, 2:15pm</span>
+                <span class="note-author">Sarah Mitchell</span>
+              </div>
+              <div class="note-body">
+                Claimant attended follow-up appointment with treating GP. Restrictions remain unchanged — no heavy lifting, limited standing. Certificate of capacity extended for a further 4 weeks.
+                <div><span class="note-tag">Medical</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar amber">TW</div>
+                <span class="note-time">3 Apr 2025, 11:30am</span>
+                <span class="note-author">Tom Whitfield</span>
+              </div>
+              <div class="note-body">
+                Spoke with claimant regarding return to work plan. Claimant is willing to consider suitable duties from mid-May pending medical clearance. Coordinator to liaise with employer on available roles.
+                <div><span class="note-tag">RTW</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar purple">RK</div>
+                <span class="note-time">25 Mar 2025, 4:50pm</span>
+                <span class="note-author">Rebecca Kim</span>
+                <span class="note-priority">High</span>
+              </div>
+              <div class="note-body">
+                IME report received from Dr. Steinberg. Findings partially support ongoing incapacity but suggest claimant could perform sedentary duties. Report contradicts treating GP on several points — requires legal review before filing.
+                <div><span class="note-tag">Medical</span> <span class="note-tag">Legal</span> <span class="note-tag">Action Required</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar green">JD</div>
+                <span class="note-time">18 Mar 2025, 9:00am</span>
+                <span class="note-author">James Driscoll</span>
+              </div>
+              <div class="note-body">
+                Initial case review completed. Liability is being contested by the employer on the basis of contributory negligence. Recommend obtaining independent witness statements before conciliation.
+                <div><span class="note-tag">Legal</span> <span class="note-tag">Liability</span></div>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <div class="note-header"><button type="button" class="note-view-btn" onclick="openNoteModal(this)" title="View note">👁</button>
+                <div class="avatar red">LP</div>
+                <span class="note-time">12 Mar 2025, 1:20pm</span>
+                <span class="note-author">Lisa Park</span>
+              </div>
+              <div class="note-body">
+                Claimant reported increased pain levels following physiotherapy session. Treating physio has recommended a temporary pause in active rehabilitation and referral to pain specialist.
+                <div><span class="note-tag">Medical</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Communications (full width) -->
+    <div class="content-block">
+      <div id="communications" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">✉️</span> Communications</h3>
+          <div class="card-actions">
+            <button type="button" class="btn-sm primary" onclick="toast('Log Communication modal would open')">+ Log</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="comm-list">
+            <div class="comm-item">
+              <div class="comm-icon email">✉️</div>
+              <div class="comm-info">
+                <div class="co-subject">Conciliation date confirmation</div>
+                <div class="co-meta"><span>2 May 2025</span><span>S. Mitchell → R. Kim</span><span>Email</span></div>
+              </div>
+              <span class="comm-dir outbound">Outbound</span>
+            </div>
+            <div class="comm-item">
+              <div class="comm-icon email">✉️</div>
+              <div class="comm-info">
+                <div class="co-subject">Updated wage certificate attached</div>
+                <div class="co-meta"><span>28 Apr 2025</span><span>T. Whitfield → S. Mitchell</span><span>Email</span></div>
+              </div>
+              <span class="comm-dir inbound">Inbound</span>
+            </div>
+            <div class="comm-item">
+              <div class="comm-icon phone">📞</div>
+              <div class="comm-info">
+                <div class="co-subject">Call re: medical report status</div>
+                <div class="co-meta"><span>2 May 2025</span><span>S. Mitchell → Dr. Rao's office</span><span>Phone</span></div>
+              </div>
+              <span class="comm-dir outbound">Outbound</span>
+            </div>
+            <div class="comm-item">
+              <div class="comm-icon letter">📄</div>
+              <div class="comm-info">
+                <div class="co-subject">Formal liability dispute response</div>
+                <div class="co-meta"><span>20 Apr 2025</span><span>Pacific Industries Legal → R. Kim</span><span>Formal Letter</span></div>
+              </div>
+              <span class="comm-dir inbound">Inbound</span>
+            </div>
+            <div class="comm-item">
+              <div class="comm-icon portal">🌐</div>
+              <div class="comm-info">
+                <div class="co-subject">IME report submission via portal</div>
+                <div class="co-meta"><span>5 Apr 2025</span><span>MedAssist Portal</span><span>Portal</span></div>
+              </div>
+              <span class="comm-dir inbound">Inbound</span>
+            </div>
+            <div class="comm-item">
+              <div class="comm-icon email">✉️</div>
+              <div class="comm-info">
+                <div class="co-subject">Request for medical records</div>
+                <div class="co-meta"><span>22 Mar 2025</span><span>S. Mitchell → Dr. Rao</span><span>Email</span></div>
+              </div>
+              <span class="comm-dir outbound">Outbound</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#tab-activity -->
+
+
+  <!-- ══════════════════════════════
+       TAB 3: COVERAGE
+  ══════════════════════════════ -->
+  <div class="tab-panel" id="tab-coverage">
+
+    <!-- Demographics (full width) -->
+    <div class="content-block">
+      <div id="demographics" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">👤</span> Claimant Demographics</h3>
+          <div class="card-actions">
+            <button type="button" class="btn-sm secondary" onclick="toast('Edit demographics')">Edit</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><span class="f-label">Full Name</span><span class="f-value">Michael Johnson</span></div>
+            <div class="field"><span class="f-label">Date of Birth</span><span class="f-value">12 June 1982 (Age: 43)</span></div>
+            <div class="field"><span class="f-label">Gender</span><span class="f-value">Male</span></div>
+            <div class="field"><span class="f-label">Phone</span><span class="f-value">0412 345 678</span></div>
+            <div class="field"><span class="f-label">Email</span><span class="f-value"><a href="#">m.johnson@email.com</a></span></div>
+            <div class="field"><span class="f-label">Occupation</span><span class="f-value">Forklift Operator</span></div>
+            <div class="field"><span class="f-label">Employer</span><span class="f-value">Pacific Industries Pty Ltd</span></div>
+            <div class="field"><span class="f-label">Employment Start</span><span class="f-value">3 February 2019</span></div>
+            <div class="field"><span class="f-label">Employment Status</span><span class="f-value"><span class="status-pill pending">On Leave (Injury)</span></span></div>
+            <div class="field"><span class="f-label">Medicare No.</span><span class="f-value" style="color:var(--slate-400);font-style:italic;">On file — restricted</span></div>
+            <div class="field" style="grid-column: span 2;"><span class="f-label">Address</span><span class="f-value">14 Ironbark Close, Dandenong VIC 3175</span></div>
+            <div class="field" style="grid-column: span 2;"><span class="f-label">Emergency Contact</span><span class="f-value">Claire Johnson (Spouse) — 0413 987 654</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Covered (full width) -->
+    <div class="content-block">
+      <div id="members" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">🛡️</span> Members Covered</h3>
+          <div class="card-actions">
+            <button type="button" class="btn-sm secondary" onclick="toast('Add Member modal would open')">+ Add Member</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Member ID</th><th>Relationship</th><th>Date of Birth</th><th>Policy / Cover</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Michael Johnson</strong></td><td>MEM-00491</td><td>Primary Member</td><td>12 Jun 1982</td><td>Industrial Workers Policy #IWP-2024-0041</td>
+                <td><span class="status-pill active" style="font-size:11px;"><span class="dot"></span>Active</span></td>
+              </tr>
+              <tr>
+                <td>Claire Johnson</td><td>MEM-00492</td><td>Spouse</td><td>3 Nov 1985</td><td>Industrial Workers Policy #IWP-2024-0041</td>
+                <td><span class="status-pill active" style="font-size:11px;"><span class="dot"></span>Active</span></td>
+              </tr>
+              <tr>
+                <td>Liam Johnson</td><td>MEM-00493</td><td>Dependent Child</td><td>7 Aug 2010</td><td>Industrial Workers Policy #IWP-2024-0041</td>
+                <td><span class="status-pill active" style="font-size:11px;"><span class="dot"></span>Active</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#tab-coverage -->
+
+
+  <!-- ══════════════════════════════
+       TAB 4: TERMS & SCHEDULE
+  ══════════════════════════════ -->
+  <div class="tab-panel" id="tab-terms-schedule">
+
+    <div class="grid-2 content-block">
+
+      <!-- Terms / Clauses -->
+      <div>
+        <div id="terms" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">⚖️</span> Terms &amp; Clauses Covered</h3>
+            <div class="card-actions">
+              <div id="termSearchWrap">
+                <div class="contact-search">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="termSearch" placeholder="Search terms…" oninput="filterTerms(this.value)" autocomplete="off">
+                </div>
+                <div class="term-suggestions" id="termSuggestions"></div>
+              </div>
+              <button type="button" class="btn-sm secondary" onclick="toast('Add Term/Clause modal would open')">+ Add</button>
+              <button type="button" class="btn-sm secondary" onclick="toast('Remove Term/Clause modal would open')">− Remove</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="terms-list">
+
+              <div class="term-item"
+                   data-term="Annual Leave Loading"
+                   data-category="Leave"
+                   data-amount="17.5"
+                   data-status="included"
+                   data-details="17.5% leave loading payable on all annual leave taken, in addition to ordinary time rate."
+                   data-ordinal="TRM-001">
+                <div class="term-info">
+                  <div class="tr-title">Annual Leave Loading</div>
+                  <div class="tr-meta">
+                    <span class="tr-category">Leave</span>
+                    <span class="tr-details">17.5% leave loading payable on all annual leave taken, in addition to ordinary time rate.</span>
+                  </div>
+                </div>
+                <span class="tr-amount">17.50</span>
+                <span class="term-status included">Included</span>
+                <button type="button" class="item-edit-btn" onclick="editTerm(this)" title="Edit term">✏️</button>
+              </div>
+
+              <div class="term-item"
+                   data-term="Superannuation Contribution Rate"
+                   data-category="Superannuation"
+                   data-amount="11.5"
+                   data-status="included"
+                   data-details="Employer to contribute 11.5% of ordinary time earnings to nominated compliant superannuation fund."
+                   data-ordinal="TRM-002">
+                <div class="term-info">
+                  <div class="tr-title">Superannuation Contribution Rate</div>
+                  <div class="tr-meta">
+                    <span class="tr-category">Superannuation</span>
+                    <span class="tr-details">Employer to contribute 11.5% of ordinary time earnings to nominated compliant superannuation fund.</span>
+                  </div>
+                </div>
+                <span class="tr-amount">11.50</span>
+                <span class="term-status included">Included</span>
+                <button type="button" class="item-edit-btn" onclick="editTerm(this)" title="Edit term">✏️</button>
+              </div>
+
+              <div class="term-item"
+                   data-term="Overtime Rate — Weekday"
+                   data-category="General"
+                   data-amount=""
+                   data-status="negotiating"
+                   data-details="Rate for weekday overtime beyond 38 ordinary hours. Union seeking time-and-a-half for first 2 hours, double-time thereafter."
+                   data-ordinal="TRM-003">
+                <div class="term-info">
+                  <div class="tr-title">Overtime Rate — Weekday</div>
+                  <div class="tr-meta">
+                    <span class="tr-category">General</span>
+                    <span class="tr-details">Rate for weekday overtime beyond 38 ordinary hours. Union seeking time-and-a-half for first 2 hours, double-time thereafter.</span>
+                  </div>
+                </div>
+                <span class="term-status negotiating">Negotiating</span>
+                <button type="button" class="item-edit-btn" onclick="editTerm(this)" title="Edit term">✏️</button>
+              </div>
+
+              <div class="term-item"
+                   data-term="Carer's Leave"
+                   data-category="Leave"
+                   data-amount=""
+                   data-status="included"
+                   data-details="10 days paid personal/carer's leave per year as per the Fair Work Act 2009, s.96."
+                   data-ordinal="TRM-004">
+                <div class="term-info">
+                  <div class="tr-title">Carer's Leave</div>
+                  <div class="tr-meta">
+                    <span class="tr-category">Leave</span>
+                    <span class="tr-details">10 days paid personal/carer's leave per year as per the Fair Work Act 2009, s.96.</span>
+                  </div>
+                </div>
+                <span class="term-status included">Included</span>
+                <button type="button" class="item-edit-btn" onclick="editTerm(this)" title="Edit term">✏️</button>
+              </div>
+
+              <div class="term-item"
+                   data-term="Salary Sacrifice Arrangement"
+                   data-category="Superannuation"
+                   data-amount=""
+                   data-status="not-included"
+                   data-details="Employee-initiated salary sacrifice to super fund above SGC rate. Employer has declined to administer in this agreement."
+                   data-ordinal="TRM-005">
+                <div class="term-info">
+                  <div class="tr-title">Salary Sacrifice Arrangement</div>
+                  <div class="tr-meta">
+                    <span class="tr-category">Superannuation</span>
+                    <span class="tr-details">Employee-initiated salary sacrifice to super fund above SGC rate. Employer has declined to administer in this agreement.</span>
+                  </div>
+                </div>
+                <span class="term-status not-included">Not Included</span>
+                <button type="button" class="item-edit-btn" onclick="editTerm(this)" title="Edit term">✏️</button>
+              </div>
+
+            </div>
+            <p id="termNoResults" style="display:none;text-align:center;padding:24px;font-size:13px;color:var(--slate-400);">No terms match your search.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div>
+        <div id="schedule" class="section-anchor"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3><span class="icon">🗓</span> Schedule</h3>
+            <div class="card-actions">
+              <button type="button" class="btn-sm secondary" onclick="toast('Edit schedule')">Edit</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="date-timeline">
+              <div class="date-item">
+                <div class="date-dot done"></div>
+                <div class="date-info">
+                  <div class="d-label">Liability Determination</div>
+                  <div class="d-value">12 Apr 2024 — Completed</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot done"></div>
+                <div class="date-info">
+                  <div class="d-label">Weekly Compensation Commenced</div>
+                  <div class="d-value">25 Mar 2024 — $1,840/week</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot done"></div>
+                <div class="date-info">
+                  <div class="d-label">IME Examination</div>
+                  <div class="d-value">28 Mar 2025 — Completed</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot current"></div>
+                <div class="date-info">
+                  <div class="d-label">Conciliation Hearing</div>
+                  <div class="d-value">22 May 2025 — Scheduled</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot overdue"></div>
+                <div class="date-info">
+                  <div class="d-label">Medical Report Finalised</div>
+                  <div class="d-value d-overdue">Est. 9 May 2025 — Pending (overdue)</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot future"></div>
+                <div class="date-info">
+                  <div class="d-label">Settlement Negotiation</div>
+                  <div class="d-value">Est. Jun 2025 — Pending</div>
+                </div>
+              </div>
+              <div class="date-item">
+                <div class="date-dot future"></div>
+                <div class="date-info">
+                  <div class="d-label">Final Payment / Closure</div>
+                  <div class="d-value">Est. Jul 2025 — Pending</div>
+                </div>
+              </div>
+            </div>
+            <div class="schedule-note">
+              💰 Weekly payments: <strong>$1,840/wk</strong> — Next payment: <strong>12 May 2025</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /#tab-terms-schedule -->
+
+  <!-- ── HISTORY TAB ────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-history">
+
+    <div class="content-block">
+      <div id="history" class="section-anchor"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon">🕓</span> Change History</h3>
+          <div class="card-actions">
+            <div class="contact-search" style="max-width:240px;">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="historySearch" placeholder="Filter by user, field or action…" oninput="filterHistory(this.value)">
+            </div>
+            <select id="historyFilter" onchange="filterHistory(document.getElementById('historySearch').value)" style="padding:5px 10px;border:1.5px solid var(--slate-200);border-radius:8px;font-size:12.5px;color:var(--slate-700);background:#fff;cursor:pointer;">
+              <option value="">All types</option>
+              <option value="created">Created</option>
+              <option value="updated">Updated</option>
+              <option value="added">Added</option>
+              <option value="status">Status change</option>
+              <option value="deleted">Deleted</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="history-list" id="historyList">
+
+            <div class="history-item" data-type="updated" data-text="task completed follow up overdue medical report sarah mitchell">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--blue-600);">SM</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Sarah Mitchell</span>
+                  <span class="history-badge updated">Updated</span>
+                  <span class="history-time">2 May 2025, 10:35am</span>
+                </div>
+                <div class="history-desc">Marked task <strong>"Follow up overdue medical report from Dr. Rao"</strong> as complete</div>
+                <div class="history-fields">
+                  <span class="hf-label">Status</span>
+                  <span class="hf-old">Open</span>
+                  <span class="hf-arrow">→</span>
+                  <span class="hf-new">Complete</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="added" data-text="note added sarah mitchell medical overdue">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--blue-600);">SM</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Sarah Mitchell</span>
+                  <span class="history-badge added">Added</span>
+                  <span class="history-time">2 May 2025, 10:22am</span>
+                </div>
+                <div class="history-desc">Added note — <em>"Called Dr. Rao's office regarding overdue medical report…"</em></div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="updated" data-text="claim value updated tom whitfield wage certificate">
+              <div class="history-left">
+                <div class="history-avatar" style="background:#ea580c;">TW</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Tom Whitfield</span>
+                  <span class="history-badge updated">Updated</span>
+                  <span class="history-time">28 Apr 2025, 3:15pm</span>
+                </div>
+                <div class="history-desc">Updated case field <strong>Claim Value</strong></div>
+                <div class="history-fields">
+                  <span class="hf-label">Claim Value</span>
+                  <span class="hf-old">$142,000</span>
+                  <span class="hf-arrow">→</span>
+                  <span class="hf-new">$148,500</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="added" data-text="attachment uploaded wage certificate tom whitfield">
+              <div class="history-left">
+                <div class="history-avatar" style="background:#ea580c;">TW</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Tom Whitfield</span>
+                  <span class="history-badge added">Added</span>
+                  <span class="history-time">28 Apr 2025, 3:07pm</span>
+                </div>
+                <div class="history-desc">Uploaded attachment <strong>Wage_Certificate_2024.xlsx</strong> (340 KB)</div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="updated" data-text="terms clause 14b status updated disputed james driscoll">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--green-600);">JD</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">James Driscoll</span>
+                  <span class="history-badge updated">Updated</span>
+                  <span class="history-time">15 Apr 2025, 10:02am</span>
+                </div>
+                <div class="history-desc">Updated term status — <strong>Clause 14(b) Policy IWP-2024-0041</strong></div>
+                <div class="history-fields">
+                  <span class="hf-label">Status</span>
+                  <span class="hf-old">Pending</span>
+                  <span class="hf-arrow">→</span>
+                  <span class="hf-new hf-disputed">Disputed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="added" data-text="attachment ime report uploaded dr rao medassist">
+              <div class="history-left">
+                <div class="history-avatar" style="background:#4f46e5;">DR</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Dr. Anita Rao</span>
+                  <span class="history-badge added">Added</span>
+                  <span class="history-time">5 Apr 2025, 2:44pm</span>
+                </div>
+                <div class="history-desc">Uploaded attachment <strong>IME_Report_DrRao.pdf</strong> via MedAssist Portal (2.8 MB)</div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="added" data-text="milestone conciliation hearing added sarah mitchell">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--blue-600);">SM</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Sarah Mitchell</span>
+                  <span class="history-badge added">Added</span>
+                  <span class="history-time">2 Apr 2025, 9:18am</span>
+                </div>
+                <div class="history-desc">Added milestone <strong>"Conciliation Hearing"</strong> — scheduled 22 May 2025</div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="status" data-text="priority updated high sarah mitchell">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--blue-600);">SM</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Sarah Mitchell</span>
+                  <span class="history-badge status">Status change</span>
+                  <span class="history-time">20 Mar 2024, 11:05am</span>
+                </div>
+                <div class="history-desc">Updated case priority</div>
+                <div class="history-fields">
+                  <span class="hf-label">Priority</span>
+                  <span class="hf-old">Medium</span>
+                  <span class="hf-arrow">→</span>
+                  <span class="hf-new" style="color:var(--red-600);font-weight:700;">High</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="added" data-text="contact dr anita rao added medical assessor sarah mitchell">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--blue-600);">SM</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">Sarah Mitchell</span>
+                  <span class="history-badge added">Added</span>
+                  <span class="history-time">19 Mar 2024, 4:30pm</span>
+                </div>
+                <div class="history-desc">Added contact <strong>Dr. Anita Rao</strong> — Medical Assessor, Expert Witnesses</div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="updated" data-text="case manager assigned sarah mitchell">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--slate-500);">SYS</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">System</span>
+                  <span class="history-badge updated">Updated</span>
+                  <span class="history-time">18 Mar 2024, 2:11pm</span>
+                </div>
+                <div class="history-desc">Case assigned to <strong>Sarah Mitchell</strong> — Industrial Claims team</div>
+                <div class="history-fields">
+                  <span class="hf-label">Case Manager</span>
+                  <span class="hf-old">Unassigned</span>
+                  <span class="hf-arrow">→</span>
+                  <span class="hf-new">Sarah Mitchell</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-item" data-type="created" data-text="case created opened system sarah mitchell johnson pacific">
+              <div class="history-left">
+                <div class="history-avatar" style="background:var(--slate-500);">SYS</div>
+                <div class="history-line"></div>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-user">System</span>
+                  <span class="history-badge created">Created</span>
+                  <span class="history-time">18 Mar 2024, 9:00am</span>
+                </div>
+                <div class="history-desc">Case <strong>CASE-2024-0847</strong> created — Johnson v. Pacific Industries, Workers Compensation</div>
+              </div>
+            </div>
+
+          </div>
+          <p id="historyNoResults" style="display:none;text-align:center;padding:32px;font-size:13px;color:var(--slate-400);">No history entries match your filter.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#tab-history -->
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     RIGHT SIDEBAR — accordion nav
+════════════════════════════════════════════════════════════ -->
+<aside id="sidebar">
+
+  <!-- Overview -->
+  <div class="acc-item">
+    <button type="button" class="acc-trigger active" data-panel="overview" onclick="accOpen('overview')">
+      <span class="acc-label">Overview</span>
+      <span class="acc-chevron"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="acc-body open" id="acc-body-overview">
+      <a class="nav-link active" data-panel="overview" data-target="case-details">Case Details</a>
+      <a class="nav-link" data-panel="overview" data-target="key-dates">Key Dates</a>
+      <a class="nav-link" data-panel="overview" data-target="resolution">Resolution</a>
+      <a class="nav-link" data-panel="overview" data-target="tasks">Tasks <span class="nav-link-count">8</span></a>
+      <a class="nav-link" data-panel="overview" data-target="milestones">Milestones <span class="nav-link-count" id="nav-ms-count">5</span></a>
+      <a class="nav-link" data-panel="overview" data-target="contacts">Contacts <span class="nav-link-count">4</span></a>
+    </div>
+  </div>
+
+  <!-- Activity -->
+  <div class="acc-item">
+    <button type="button" class="acc-trigger" data-panel="activity" onclick="accOpen('activity')">
+      <span class="acc-label">Activity</span>
+      <span class="acc-chevron"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="acc-body" id="acc-body-activity">
+      <a class="nav-link" data-panel="activity" data-target="attachments">Attachments <span class="nav-link-count">4</span></a>
+      <a class="nav-link" data-panel="activity" data-target="meetings">Meetings <span class="nav-link-count">4</span></a>
+      <a class="nav-link" data-panel="activity" data-target="notes">Notes <span class="nav-link-count">3</span></a>
+      <a class="nav-link" data-panel="activity" data-target="communications">Communications <span class="nav-link-count">6</span></a>
+    </div>
+  </div>
+
+  <!-- Coverage -->
+  <div class="acc-item">
+    <button type="button" class="acc-trigger" data-panel="coverage" onclick="accOpen('coverage')">
+      <span class="acc-label">Coverage</span>
+      <span class="acc-chevron"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="acc-body" id="acc-body-coverage">
+      <a class="nav-link" data-panel="coverage" data-target="demographics">Demographics</a>
+      <a class="nav-link" data-panel="coverage" data-target="members">Members Covered <span class="nav-link-count">3</span></a>
+    </div>
+  </div>
+
+  <!-- Terms & Schedule -->
+  <div class="acc-item">
+    <button type="button" class="acc-trigger" data-panel="terms-schedule" onclick="accOpen('terms-schedule')">
+      <span class="acc-label">Terms &amp; Schedule</span>
+      <span class="acc-chevron"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="acc-body" id="acc-body-terms-schedule">
+      <a class="nav-link" data-panel="terms-schedule" data-target="terms">Terms / Clauses <span class="nav-link-count">5</span></a>
+      <a class="nav-link" data-panel="terms-schedule" data-target="schedule">Schedule</a>
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <button type="button" class="acc-trigger" data-panel="history" onclick="accOpen('history')">
+      <span class="acc-label">History</span>
+      <span class="acc-chevron"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </button>
+    <div class="acc-body" id="acc-body-history">
+      <a class="nav-link" data-panel="history" data-target="history">Change Log <span class="nav-link-count">11</span></a>
+    </div>
+  </div>
+
+</aside>
+
+</div><!-- /#page -->
+
+<!-- Scroll to top -->
+<button type="button" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Note Detail Modal -->
+<div class="modal-overlay" id="noteModal" onclick="closeNoteModal(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+        <div id="noteModal-avatar" class="avatar"></div>
+        <div>
+          <div id="noteModal-author" style="font-size:13px;font-weight:600;color:var(--slate-800);"></div>
+          <div id="noteModal-time" style="font-size:11.5px;color:var(--slate-400);"></div>
+        </div>
+        <span id="noteModal-priority" class="note-priority" style="display:none;">High</span>
+      </div>
+      <button type="button" class="modal-close" onclick="document.getElementById('noteModal').classList.remove('open')" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="noteModal-body" style="font-size:13px;color:var(--slate-700);line-height:1.6;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Milestone Modal -->
+<div class="modal-overlay" id="milestoneModal" onclick="closeMilestoneModal(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h3 id="modal-title">🏁 Add Milestone</h3>
+      <button type="button" class="modal-close" onclick="closeMilestoneModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label for="ms-name">Milestone name <span style="color:var(--red-600)">*</span></label>
+        <input type="text" id="ms-name" placeholder="e.g. Mediation Session" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="ms-date">Date <span style="color:var(--red-600)">*</span></label>
+          <input type="date" id="ms-date">
+        </div>
+        <div class="form-field">
+          <label for="ms-status">Status</label>
+          <select id="ms-status">
+            <option value="future">Upcoming</option>
+            <option value="current">In Progress</option>
+            <option value="done">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="ms-notes">Notes <span style="color:var(--slate-400);font-weight:400;">(optional)</span></label>
+        <textarea id="ms-notes" placeholder="Any relevant context for this milestone…"></textarea>
+      </div>
+      <div id="ms-error" style="display:none;color:var(--red-600);font-size:12.5px;font-weight:600;padding:6px 10px;background:var(--red-100);border-radius:6px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-md secondary" onclick="closeMilestoneModal()">Cancel</button>
+      <button type="button" class="btn-md primary" onclick="saveMilestone()">Add Milestone</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Attachment view modal ───────────────────────────────── -->
+<div class="modal-overlay" id="attachModal" onclick="closeAttachModal(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="attach-modal-file">
+        <div class="attach-modal-icon" id="attachModal-icon">📄</div>
+        <div>
+          <div class="attach-modal-name" id="attachModal-name"></div>
+          <div class="attach-modal-meta" id="attachModal-meta"></div>
+        </div>
+      </div>
+      <button type="button" class="modal-close" onclick="document.getElementById('attachModal').classList.remove('open')" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="attachModal-tags" class="a-tags" style="margin-bottom:6px;"></div>
+      <div class="attach-preview" id="attachModal-preview"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-md secondary" onclick="document.getElementById('attachModal').classList.remove('open')">Close</button>
+      <button type="button" class="btn-md primary" id="attachModal-dl">⬇ Download</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const banner    = document.getElementById('banner');
+  const page      = document.getElementById('page');
+  const scrollTop = document.getElementById('scroll-top');
+
+  // ── Panel / accordion state ───────────────────────────────
+  let activePanel = 'overview';
+
+  const PANEL_SECTIONS = {
+    'overview':       ['case-details', 'key-dates', 'resolution', 'tasks', 'milestones', 'contacts'],
+    'activity':       ['notes', 'meetings', 'attachments', 'communications'],
+    'coverage':       ['demographics', 'members'],
+    'terms-schedule': ['terms', 'schedule'],
+  };
+
+  // Open an accordion item and show its content panel (closes all others)
+  function accOpen(panelId) {
+    if (panelId === activePanel) return; // already open — do nothing
+    activePanel = panelId;
+
+    // Accordion triggers
+    document.querySelectorAll('.acc-trigger').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.panel === panelId);
+    });
+
+    // Accordion bodies
+    document.querySelectorAll('.acc-body').forEach(body => {
+      body.classList.toggle('open', body.id === 'acc-body-' + panelId);
+    });
+
+    // Content panels
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + panelId);
+    });
+
+    // Reset scroll-spy: activate first sub-link
+    document.querySelectorAll('#acc-body-' + panelId + ' .nav-link')
+      .forEach((a, i) => a.classList.toggle('active', i === 0));
+
+    // Scroll content to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Banner collapse on scroll + scroll-spy ───────────────
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const isMini = y > 60;
+
+    banner.classList.toggle('mini', isMini);
+    page.classList.toggle('mini', isMini);
+    scrollTop.classList.toggle('visible', y > 200);
+
+    // scroll-spy: track sections in the active panel
+    const bannerH = isMini ? 56 : 148;
+    const offset  = bannerH + 20;
+    const sections = PANEL_SECTIONS[activePanel] || [];
+
+    let current = sections[0];
+    for (const id of sections) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (el.getBoundingClientRect().top - offset <= 0) current = id;
+    }
+
+    document.querySelectorAll('#acc-body-' + activePanel + ' .nav-link').forEach(a => {
+      a.classList.toggle('active', a.dataset.target === current);
+    });
+  }, { passive: true });
+
+  // ── Sub-link click: smooth-scroll to section ─────────────
+  document.querySelectorAll('#sidebar .nav-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const targetId  = a.dataset.target;
+      const panelId   = a.dataset.panel;
+      if (panelId && panelId !== activePanel) {
+        accOpen(panelId);
+        setTimeout(() => scrollToSection(targetId), 50);
+      } else {
+        scrollToSection(targetId);
+      }
+    });
+  });
+
+  function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const bannerH = banner.classList.contains('mini') ? 56 : 148;
+    const offset  = bannerH + 12;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  // ── Actions dropdown ──────────────────────────────────────
+  function toggleActions(e) {
+    e.stopPropagation();
+    const btn  = document.getElementById('actionsBtn');
+    const menu = document.getElementById('actionsMenu');
+    const open = menu.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+  document.addEventListener('click', () => {
+    document.getElementById('actionsMenu').classList.remove('open');
+    document.getElementById('actionsBtn').classList.remove('open');
+  });
+
+  // ── Tasks ─────────────────────────────────────────────────
+  function toggleTask(el) {
+    const item = el.closest('.task-item');
+    el.classList.toggle('done');
+    const nameEl = item.querySelector('.t-name');
+    if (nameEl) nameEl.classList.toggle('done-text');
+    const isDone = el.classList.contains('done');
+    item.classList.toggle('completed-task', isDone);
+    if (isDone && hidingCompleted) {
+      item.classList.add('fading-out');
+      setTimeout(() => {
+        item.classList.add('hidden');
+        item.classList.remove('fading-out');
+      }, 1100);
+    }
+    if (isDone) {
+      const rect = el.getBoundingClientRect();
+      confetti({
+        particleCount: 80,
+        spread:        60,
+        startVelocity: 28,
+        decay:         0.92,
+        origin: {
+          x: (rect.left + rect.width  / 2) / window.innerWidth,
+          y: (rect.top  + rect.height / 2) / window.innerHeight
+        }
+      });
+    }
+    updateTaskCount();
+    toast(isDone ? 'Task marked complete' : 'Task reopened');
+  }
+
+  let hidingCompleted = true;
+  function toggleCompleted() {
+    hidingCompleted = !hidingCompleted;
+    const btn = document.getElementById('toggleCompletedBtn');
+    const txt = document.getElementById('toggleCompletedText');
+    document.querySelectorAll('.task-item.completed-task').forEach(el => {
+      el.classList.toggle('hidden', hidingCompleted);
+    });
+    btn.classList.toggle('hiding', hidingCompleted);
+    txt.textContent = hidingCompleted ? 'Show completed' : 'Hide completed';
+  }
+
+  function filterHistory(query) {
+    const q = query.toLowerCase().trim();
+    const type = document.getElementById('historyFilter').value;
+    const items = document.querySelectorAll('#historyList .history-item');
+    let visible = 0;
+    items.forEach(item => {
+      const matchesType = !type || item.dataset.type === type;
+      const matchesText = !q || item.dataset.text.includes(q);
+      const show = matchesType && matchesText;
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    document.getElementById('historyNoResults').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function filterNotes(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#noteList .note-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = !q || text.includes(q) ? '' : 'none';
+    });
+  }
+
+  function filterTasks(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#taskList .task-item').forEach(item => {
+      const assignee = item.querySelector('.t-assignee');
+      const match = !q || (assignee && assignee.textContent.toLowerCase().includes(q));
+      item.classList.toggle('assignee-hidden', !match);
+    });
+  }
+
+  function filterContacts(query) {
+    const q = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('#contactGrid .contact-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const searchable = [
+        card.dataset.name,
+        card.dataset.type,
+        card.dataset.role,
+        card.dataset.group
+      ].join(' ').toLowerCase();
+      const show = !q || searchable.includes(q);
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('contactNoResults').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function updateTaskCount() {
+    const all  = document.querySelectorAll('#taskList .task-item').length;
+    const done = document.querySelectorAll('#taskList .task-item .task-check.done').length;
+    const el = document.getElementById('task-count');
+    if (el) el.textContent = done + ' of ' + all + ' complete';
+    const pct = all ? Math.round((done / all) * 100) : 0;
+    const fill = document.getElementById('task-progress-fill');
+    const pctEl = document.getElementById('task-progress-pct');
+    if (fill)  fill.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+  }
+
+  // ── Milestone data & rendering ───────────────────────────
+  let milestones = [
+    { id: 1,  label: 'Case Opened',               date: '2024-03-18', status: 'done',    notes: '' },
+    { id: 2,  label: 'Initial Assessment',         date: '2024-03-25', status: 'done',    notes: '' },
+    { id: 3,  label: 'Liability Decision',         date: '2024-04-12', status: 'done',    notes: 'Liability contested by employer' },
+    { id: 4,  label: 'Bargaining Notice Filed',    date: '2024-05-01', status: 'done',    notes: '' },
+    { id: 5,  label: 'First Bargaining Meeting',   date: '2024-06-10', status: 'done',    notes: 'Attended by 12 union reps' },
+    { id: 6,  label: 'Union Proposal Submitted',   date: '2024-07-22', status: 'done',    notes: 'Wages, conditions and dispute resolution included' },
+    { id: 7,  label: 'Employer Counter-Proposal',  date: '2024-09-05', status: 'done',    notes: 'Significant gaps on wages and hours' },
+    { id: 8,  label: 'Good Faith Order Issued',    date: '2024-11-14', status: 'done',    notes: 'FWC ordered resumption of bargaining' },
+    { id: 9,  label: 'Expert Determination',       date: '2025-02-20', status: 'done',    notes: 'Determination received' },
+    { id: 10, label: 'Conciliation Hearing',       date: '2025-05-22', status: 'current', notes: 'In Progress' },
+    { id: 11, label: 'Draft Agreement Review',     date: '2025-07-15', status: 'future',  notes: 'Target: July 2025' },
+    { id: 12, label: 'Member Vote',                date: '2025-08-20', status: 'future',  notes: '' },
+    { id: 13, label: 'Final Resolution',           date: '2025-09-30', status: 'future',  notes: 'Target: September 2025' },
+  ];
+  let nextMilestoneId = 14;
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function fmtShort(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  }
+
+  function renderMilestones() {
+    const sorted    = [...milestones].sort((a, b) => a.date.localeCompare(b.date));
+    const total     = sorted.length;
+    const doneCount = sorted.filter(m => m.status === 'done').length;
+    const pct = total > 1 ? Math.round((doneCount / (total - 1)) * 100) : (doneCount ? 100 : 0);
+
+    document.getElementById('milestone-progress-bar').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('milestone-count').textContent = doneCount + ' of ' + total + ' complete';
+    const navMs = document.getElementById('nav-ms-count');
+    if (navMs) navMs.textContent = total;
+
+    const nodesEl = document.getElementById('milestone-nodes');
+    nodesEl.innerHTML = sorted.map((m, i) => {
+      const circleContent = m.status === 'done' ? '✓' : m.status === 'current' ? '⚡' : (i + 1);
+      const shortLabel    = m.label.length > 14 ? m.label.slice(0, 13) + '…' : m.label;
+      return `<div class="milestone-node" data-id="${m.id}" title="${m.label}">
+        <div class="m-circle ${m.status}">${circleContent}</div>
+        <div class="m-label">${shortLabel}</div>
+        <div class="m-date">${fmtShort(m.date)}</div>
+      </div>`;
+    }).join('');
+
+    const logEl = document.getElementById('milestone-log');
+    logEl.innerHTML = sorted.map(m => {
+      const statusLabel = m.status === 'done' ? 'Completed'
+                        : m.status === 'current' ? 'In Progress' : 'Upcoming';
+      const valueText = m.notes
+        ? `${fmtDate(m.date)} — ${m.notes}`
+        : `${fmtDate(m.date)} — ${statusLabel}`;
+      const doneClass   = m.status === 'done' ? ' ms-done' : '';
+      const hiddenClass = m.status === 'done' && hidingMsDone ? ' ms-hidden' : '';
+      return `<div class="date-item${doneClass}${hiddenClass}" id="milestone-${m.id}">
+        <div class="date-dot ${m.status}"></div>
+        <div class="date-info">
+          <div class="d-label">${m.label}</div>
+          <div class="d-value">${valueText}</div>
+        </div>
+        <select class="ms-status-select status-${m.status}" onchange="setMilestoneStatus(${m.id}, this.value)">
+          <option value="future"  ${m.status === 'future'  ? 'selected' : ''}>Not Started</option>
+          <option value="current" ${m.status === 'current' ? 'selected' : ''}>In Progress</option>
+          <option value="done"    ${m.status === 'done'    ? 'selected' : ''}>Complete</option>
+        </select>
+      </div>`;
+    }).join('');
+  }
+
+  let hidingMsDone = true;
+  function toggleMsDone() {
+    hidingMsDone = !hidingMsDone;
+    const btn = document.getElementById('toggleMsDoneBtn');
+    const txt = document.getElementById('toggleMsDoneText');
+    document.querySelectorAll('#milestone-log .date-item.ms-done').forEach(el => {
+      el.classList.toggle('ms-hidden', hidingMsDone);
+    });
+    btn.classList.toggle('hiding', hidingMsDone);
+    txt.textContent = hidingMsDone ? 'Show completed' : 'Hide completed';
+  }
+
+  function setMilestoneStatus(id, newStatus) {
+    const m = milestones.find(x => x.id === id);
+    if (!m) return;
+    const label   = m.label;
+    const labels  = { future: 'Not Started', current: 'In Progress', done: 'Complete' };
+    m.status = newStatus;
+    if (newStatus === 'done' && (!m.notes || m.notes === 'In Progress')) m.notes = 'Completed';
+    if (newStatus === 'current') m.notes = 'In Progress';
+    if (newStatus === 'future')  m.notes = '';
+
+    if (newStatus === 'done') {
+      const selectEl = document.getElementById('milestone-' + id)?.querySelector('.ms-status-select');
+      if (selectEl) {
+        const rect = selectEl.getBoundingClientRect();
+        confetti({
+          particleCount: 80,
+          spread:        60,
+          startVelocity: 28,
+          decay:         0.92,
+          origin: {
+            x: (rect.left + rect.width  / 2) / window.innerWidth,
+            y: (rect.top  + rect.height / 2) / window.innerHeight
+          }
+        });
+      }
+    }
+
+    if (newStatus === 'done' && hidingMsDone) {
+      const el = document.getElementById('milestone-' + id);
+      if (el) {
+        el.querySelector('.d-label')?.classList.add('done-text');
+        el.classList.add('fading-out');
+        animateMilestoneNode(id); // node is still in DOM — animate before re-render
+        setTimeout(() => { renderMilestones(); }, 850);
+      }
+    } else {
+      renderMilestones();
+      if (newStatus === 'done') animateMilestoneNode(id); // animate after re-render
+    }
+    toast(`"${label}" set to ${labels[newStatus]}`);
+  }
+
+  function animateMilestoneNode(id) {
+    const node = document.querySelector(`#milestone-nodes .milestone-node[data-id="${id}"]`);
+    if (!node) return;
+    node.classList.remove('node-complete');
+    void node.offsetWidth; // force reflow so re-adding the class restarts the animation
+    node.classList.add('node-complete');
+  }
+
+  // ── Modal ─────────────────────────────────────────────────
+  function openMilestoneModal() {
+    document.getElementById('ms-name').value   = '';
+    document.getElementById('ms-date').value   = '';
+    document.getElementById('ms-status').value = 'future';
+    document.getElementById('ms-notes').value  = '';
+    document.getElementById('ms-error').style.display = 'none';
+    document.getElementById('milestoneModal').classList.add('open');
+    setTimeout(() => document.getElementById('ms-name').focus(), 50);
+    document.getElementById('actionsMenu').classList.remove('open');
+    document.getElementById('actionsBtn').classList.remove('open');
+  }
+  // ── Meetings past/future filter ──────────────────────────
+  let hidingPastMeetings = true;
+
+  function applyMeetingFilter() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    document.querySelectorAll('.meeting-item[data-date]').forEach(item => {
+      const isPast = new Date(item.dataset.date) < today;
+      item.classList.toggle('past', isPast);
+      item.classList.toggle('past-hidden', isPast && hidingPastMeetings);
+    });
+  }
+
+  function togglePastMeetings() {
+    hidingPastMeetings = !hidingPastMeetings;
+    applyMeetingFilter();
+    const btn = document.getElementById('togglePastMeetingsBtn');
+    const txt = document.getElementById('togglePastMeetingsText');
+    btn.classList.toggle('hiding', hidingPastMeetings);
+    txt.textContent = hidingPastMeetings ? 'Show past' : 'Hide past';
+  }
+
+  // ── Task view button ──────────────────────────────────────
+  function openTask(btn) {
+    const item     = btn.closest('.task-item');
+    const name     = item.querySelector('.t-name')?.textContent || '';
+    const due      = item.querySelector('.t-meta span:first-child')?.textContent || '';
+    const assignee = item.querySelector('.t-assignee')?.textContent || '';
+    const badge    = item.querySelector('.task-badge')?.textContent || '';
+    const done     = item.querySelector('.task-check')?.classList.contains('done');
+    toast(name + ' · ' + due + (assignee ? ' · ' + assignee : '') + (badge ? ' · ' + badge : '') + (done ? ' · Completed' : ''));
+  }
+
+  // ── Meeting calendar button ───────────────────────────────
+  function openMeeting(btn) {
+    const item    = btn.closest('.meeting-item');
+    const title   = item.querySelector('.mt-title')?.textContent || '';
+    const metaEl  = item.querySelector('.mt-meta');
+    const meta    = metaEl ? Array.from(metaEl.querySelectorAll('span')).map(s => s.textContent).join(' · ') : '';
+    toast(title + (meta ? ' — ' + meta : ''));
+  }
+
+  // ── Note detail modal ─────────────────────────────────────
+  function openNoteModal(btn) {
+    const card   = btn.closest('.note-card');
+    const header = card.querySelector('.note-header');
+
+    const avatarEl   = header.querySelector('.avatar');
+    const authorEl   = header.querySelector('.note-author');
+    const timeEl     = header.querySelector('.note-time');
+    const priorityEl = header.querySelector('.note-priority');
+    const bodyEl     = card.querySelector('.note-body');
+
+    const modalAvatar = document.getElementById('noteModal-avatar');
+    modalAvatar.textContent = avatarEl.textContent;
+    modalAvatar.className   = avatarEl.className;
+
+    document.getElementById('noteModal-author').textContent = authorEl ? authorEl.textContent : '';
+    document.getElementById('noteModal-time').textContent   = timeEl   ? timeEl.textContent   : '';
+
+    const modalPriority = document.getElementById('noteModal-priority');
+    if (priorityEl) {
+      modalPriority.textContent    = priorityEl.textContent;
+      modalPriority.style.display  = '';
+    } else {
+      modalPriority.style.display = 'none';
+    }
+
+    document.getElementById('noteModal-body').innerHTML = bodyEl ? bodyEl.innerHTML : '';
+    document.getElementById('noteModal').classList.add('open');
+  }
+
+  function closeNoteModal(e) {
+    if (e && e.target !== document.getElementById('noteModal')) return;
+    document.getElementById('noteModal').classList.remove('open');
+  }
+
+  function closeMilestoneModal(e) {
+    if (e && e.target !== document.getElementById('milestoneModal')) return;
+    document.getElementById('milestoneModal').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.getElementById('milestoneModal').classList.remove('open');
+      document.getElementById('noteModal').classList.remove('open');
+      document.getElementById('attachModal').classList.remove('open');
+    }
+  });
+
+  function saveMilestone() {
+    const name   = document.getElementById('ms-name').value.trim();
+    const date   = document.getElementById('ms-date').value;
+    const status = document.getElementById('ms-status').value;
+    const notes  = document.getElementById('ms-notes').value.trim();
+    const errEl  = document.getElementById('ms-error');
+
+    if (!name) {
+      errEl.textContent = 'Please enter a milestone name.';
+      errEl.style.display = 'block';
+      document.getElementById('ms-name').focus();
+      return;
+    }
+    if (!date) {
+      errEl.textContent = 'Please select a date.';
+      errEl.style.display = 'block';
+      document.getElementById('ms-date').focus();
+      return;
+    }
+    errEl.style.display = 'none';
+
+    milestones.push({ id: nextMilestoneId++, label: name, date, status, notes });
+    renderMilestones();
+    document.getElementById('milestoneModal').classList.remove('open');
+    toast(`Milestone "${name}" added`);
+  }
+
+  // ── Attachment view modal ────────────────────────────────────
+  const ATTACH_PREVIEWS = {
+    pdf: () => `
+      <div class="preview-lines">
+        <div class="preview-line title"></div>
+        <div class="preview-line long"></div><div class="preview-line med"></div>
+        <div class="preview-line long"></div><div class="preview-line short"></div>
+        <div class="preview-line long"></div><div class="preview-line med"></div>
+        <div class="preview-line long"></div>
+      </div>
+      <span class="preview-caption">PDF document — open to view full content</span>`,
+
+    xlsx: () => `
+      <table class="preview-table">
+        <tr><td>Column A</td><td>Column B</td><td>Column C</td><td>Column D</td></tr>
+        <tr><td>Row 1</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Row 2</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Row 3</td><td>—</td><td>—</td><td>—</td></tr>
+      </table>
+      <span class="preview-caption">Spreadsheet — open to view full content</span>`,
+
+    docx: () => `
+      <div class="preview-lines">
+        <div class="preview-line title"></div>
+        <div class="preview-line long"></div><div class="preview-line long"></div>
+        <div class="preview-line med"></div><div class="preview-line long"></div>
+        <div class="preview-line long"></div><div class="preview-line short"></div>
+        <div class="preview-line long"></div>
+      </div>
+      <span class="preview-caption">Word document — open to view full content</span>`,
+
+    default: () => `<span style="font-size:36px;opacity:.4;">📎</span>
+      <span class="preview-caption">No preview available for this file type</span>`,
+  };
+
+  // TODO: hook up view attachment to flowz
+  function viewAttachment(btn) {
+    const item = btn.closest('.attachment-item');
+    const name = item.dataset.name || item.querySelector('.a-name')?.textContent || 'File';
+    const tags = (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    const icon = item.querySelector('.fi-emoji')?.textContent?.trim() || '📄';
+    const ext  = name.split('.').pop().toLowerCase();
+
+    document.getElementById('attachModal-icon').textContent = icon;
+    document.getElementById('attachModal-name').textContent = name;
+    document.getElementById('attachModal-meta').innerHTML =
+      Array.from(item.querySelectorAll('.a-meta span'))
+        .map(s => `<span>${s.textContent}</span>`).join('');
+
+    const tagsEl = document.getElementById('attachModal-tags');
+    tagsEl.innerHTML     = tags.map(t => `<span class="a-tag">${t}</span>`).join('');
+    tagsEl.style.display = tags.length ? '' : 'none';
+
+    const builder = ATTACH_PREVIEWS[ext] || ATTACH_PREVIEWS.default;
+    document.getElementById('attachModal-preview').innerHTML = builder();
+
+    // TODO: hook up download attachment to flowz
+    document.getElementById('attachModal-dl').onclick = () => toast(`Downloading ${name}…`);
+    document.getElementById('attachModal').classList.add('open');
+  }
+
+  function closeAttachModal(e) {
+    if (e && e.target !== document.getElementById('attachModal')) return;
+    document.getElementById('attachModal').classList.remove('open');
+  }
+
+  // ── Attachment inline edit ───────────────────────────────────
+  function editAttachment(btn) {
+    const item   = btn.closest('.attachment-item');
+    const nameEl = item.querySelector('.a-name');
+    const tagsEl = item.querySelector('.a-tags');
+    const dlBtn  = item.querySelector('.attach-dl');
+
+    item.classList.add('editing');
+
+    // Filename → input
+    nameEl.innerHTML = `<input type="text" class="a-name-input" value="${(item.dataset.name || '').replace(/"/g, '&quot;')}" placeholder="Filename">`;
+
+    // Tags → chip editor
+    const currentTags = (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    tagsEl.innerHTML  = buildTagEditor(currentTags);
+
+    // Save / Cancel buttons
+    const actions = document.createElement('div');
+    actions.className = 'attach-edit-actions';
+    actions.innerHTML = `
+      <button type="button" class="btn-sm primary"   onclick="saveAttachment(this)">Save</button>
+      <button type="button" class="btn-sm secondary" onclick="cancelAttachment(this)">Cancel</button>`;
+    item.querySelector('.attach-info').appendChild(actions);
+
+    // Hide icon, View, Download and Edit buttons while editing
+    item.querySelector('.file-icon-btn').style.display  = 'none';
+    item.querySelector('.attach-view-btn').style.display = 'none';
+    dlBtn.style.display = 'none';
+    btn.style.display   = 'none';
+
+    // Focus filename
+    nameEl.querySelector('.a-name-input')?.focus();
+
+    // Wire tag-add-input: Enter or comma adds a chip, Backspace removes last chip
+    const tagInput = tagsEl.querySelector('.tag-add-input');
+    if (tagInput) {
+      tagInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val = tagInput.value.trim().replace(/,$/, '');
+          if (val) { addTagChip(tagsEl, val); tagInput.value = ''; }
+        }
+        if (e.key === 'Backspace' && !tagInput.value) {
+          const chips = tagsEl.querySelectorAll('.tag-chip');
+          chips[chips.length - 1]?.remove();
+        }
+      });
+      tagsEl.querySelector('.tag-editor')?.addEventListener('click', () => tagInput.focus());
+    }
+  }
+
+  function buildTagEditor(tags) {
+    const chips = tags.map(t =>
+      `<span class="tag-chip">${t}<button type="button" class="tag-chip-remove" onclick="this.closest('.tag-chip').remove()" title="Remove">×</button></span>`
+    ).join('');
+    return `<div class="tag-editor">${chips}<input type="text" class="tag-add-input" placeholder="Add tag, press Enter…"></div>`;
+  }
+
+  function addTagChip(tagsEl, value) {
+    const editor = tagsEl.querySelector('.tag-editor');
+    const input  = tagsEl.querySelector('.tag-add-input');
+    const chip   = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${value}<button type="button" class="tag-chip-remove" onclick="this.closest('.tag-chip').remove()" title="Remove">×</button>`;
+    editor.insertBefore(chip, input);
+  }
+
+  // TODO: wire up Edit attachment title to flowz
+  function saveAttachment(btn) {
+    const item    = btn.closest('.attachment-item');
+    const newName = item.querySelector('.a-name-input')?.value.trim() || item.dataset.name;
+    const chips   = item.querySelectorAll('.tag-chip');
+    const newTags = Array.from(chips)
+      .map(c => c.childNodes[0]?.textContent?.trim())
+      .filter(Boolean);
+
+    // Persist to data attributes so search stays in sync
+    item.dataset.name = newName;
+    item.dataset.tags = newTags.join(',');
+
+    exitAttachmentEdit(item, newName, newTags);
+    toast('Attachment updated');
+  }
+
+  function cancelAttachment(btn) {
+    const item = btn.closest('.attachment-item');
+    exitAttachmentEdit(
+      item,
+      item.dataset.name,
+      (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean)
+    );
+  }
+
+  function exitAttachmentEdit(item, name, tags) {
+    item.classList.remove('editing');
+
+    item.querySelector('.a-name').textContent = name;
+    item.querySelector('.a-tags').innerHTML   = tags.map(t => `<span class="a-tag">${t}</span>`).join('');
+    item.querySelector('.attach-edit-actions')?.remove();
+
+    item.querySelector('.file-icon-btn').style.display   = '';
+    item.querySelector('.attach-view-btn').style.display = '';
+    item.querySelector('.attach-dl').style.display       = '';
+    item.querySelector('.attach-edit-btn').style.display = '';
+
+    // Refresh search results against updated data
+    filterAttachments(document.getElementById('attachSearch')?.value || '');
+  }
+
+  // ── Attachment search & suggestions ──────────────────────────
+  function filterAttachments(query) {
+    const q = query.toLowerCase().trim();
+    const items = document.querySelectorAll('.attachment-list .attachment-item');
+    let visible = 0;
+    items.forEach(item => {
+      const searchable = [
+        item.dataset.name  || '',
+        item.dataset.tags  || '',
+      ].join(' ').toLowerCase();
+      const show = !q || searchable.includes(q);
+      item.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const noRes = document.getElementById('attachNoResults');
+    if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+    buildAttachmentSuggestions(query);
+  }
+
+  function buildAttachmentSuggestions(query) {
+    const sugEl = document.getElementById('attachSuggestions');
+    if (!sugEl) return;
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('.attachment-list .attachment-item').forEach(item => {
+      const name = item.dataset.name || '';
+      if (name) {
+        const label = `File: ${name}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix: 'File', value: name, label });
+        }
+      }
+      const tags = (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+      tags.forEach(tag => {
+        const label = `Tag: ${tag}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix: 'Tag', value: tag, label });
+        }
+      });
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="attach-suggestion-item" onmousedown="applyAttachmentSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyAttachmentSuggestion(label) {
+    const input = document.getElementById('attachSearch');
+    if (input) { input.value = label; filterAttachments(label); }
+    document.getElementById('attachSuggestions')?.classList.remove('open');
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#attachSearchWrap')) {
+      document.getElementById('attachSuggestions')?.classList.remove('open');
+    }
+    if (!e.target.closest('#termSearchWrap')) {
+      document.getElementById('termSuggestions')?.classList.remove('open');
+    }
+  });
+  document.getElementById('attachSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.getElementById('attachSuggestions')?.classList.remove('open');
+      e.target.blur();
+    }
+  });
+  document.getElementById('termSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.getElementById('termSuggestions')?.classList.remove('open');
+      e.target.blur();
+    }
+  });
+
+  // ── Terms search & suggestions ───────────────────────────────
+  function filterTerms(query) {
+    const q = query.toLowerCase().trim();
+    const items = document.querySelectorAll('.terms-list .term-item');
+    let visible = 0;
+
+    // Support prefixed queries: "term: …", "category: …", "status: …"
+    let field = null, fieldQ = q;
+    if (q.startsWith('term:'))     { field = 'term';     fieldQ = q.slice(5).trim(); }
+    else if (q.startsWith('category:')) { field = 'category'; fieldQ = q.slice(9).trim(); }
+    else if (q.startsWith('status:'))   { field = 'status';   fieldQ = q.slice(7).trim(); }
+
+    items.forEach(item => {
+      let show;
+      if (!q) {
+        show = true;
+      } else if (field) {
+        show = (item.dataset[field] || '').toLowerCase().includes(fieldQ);
+      } else {
+        const searchable = [
+          item.dataset.term     || '',
+          item.dataset.category || '',
+          item.dataset.status   || '',
+          item.dataset.details  || '',
+        ].join(' ').toLowerCase();
+        show = searchable.includes(q);
+      }
+      item.classList.toggle('term-hidden', !show);
+      if (show) visible++;
+    });
+
+    const noRes = document.getElementById('termNoResults');
+    if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+    buildTermSuggestions(query);
+  }
+
+  function buildTermSuggestions(query) {
+    const sugEl = document.getElementById('termSuggestions');
+    if (!sugEl) return;
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('.terms-list .term-item').forEach(item => {
+      const addSug = (prefix, value) => {
+        if (!value) return;
+        const label = `${prefix}: ${value}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix, value, label });
+        }
+      };
+      addSug('Term',     item.dataset.term);
+      addSug('Category', item.dataset.category);
+      addSug('Status',   item.dataset.status);
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="term-suggestion-item" onmousedown="applyTermSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyTermSuggestion(label) {
+    const input = document.getElementById('termSearch');
+    if (input) { input.value = label; filterTerms(label); }
+    document.getElementById('termSuggestions')?.classList.remove('open');
+  }
+
+  // ── Term inline edit ─────────────────────────────────────────
+  function editTerm(btn) {
+    const item       = btn.closest('.term-item');
+    const titleEl    = item.querySelector('.tr-title');
+    const categoryEl = item.querySelector('.tr-category');
+    const detailsEl  = item.querySelector('.tr-details');
+    const amountEl   = item.querySelector('.tr-amount');
+    const statusEl   = item.querySelector('.term-status');
+
+    item.classList.add('editing');
+
+    // Title → input
+    titleEl.innerHTML = `<input type="text" class="term-input tr-title-input" value="${(item.dataset.term || '').replace(/"/g, '&quot;')}" placeholder="Term name">`;
+
+    // Category → select
+    const catVal = item.dataset.category || 'General';
+    categoryEl.innerHTML = `<select class="term-select tr-category-select">
+      <option value="General"${catVal === 'General' ? ' selected' : ''}>General</option>
+      <option value="Leave"${catVal === 'Leave' ? ' selected' : ''}>Leave</option>
+      <option value="Superannuation"${catVal === 'Superannuation' ? ' selected' : ''}>Superannuation</option>
+    </select>`;
+
+    // Details → textarea
+    detailsEl.innerHTML = `<textarea class="term-textarea tr-details-input" placeholder="Details / comment">${(item.dataset.details || '').replace(/</g, '&lt;')}</textarea>`;
+
+    // Amount + Status row inside .term-info
+    const editRow = document.createElement('div');
+    editRow.className = 'term-edit-row';
+    const statusVal = item.dataset.status || 'included';
+    editRow.innerHTML = `
+      <label style="font-size:11px;color:var(--slate-500);">Amount:</label>
+      <input type="number" class="term-input tr-amount-input" style="width:80px" value="${(item.dataset.amount || '').replace(/"/g, '&quot;')}" placeholder="0.00" step="0.01">
+      <label style="font-size:11px;color:var(--slate-500);">Status:</label>
+      <select class="term-select tr-status-select">
+        <option value="included"${statusVal === 'included' ? ' selected' : ''}>Included</option>
+        <option value="negotiating"${statusVal === 'negotiating' ? ' selected' : ''}>Negotiating</option>
+        <option value="not-included"${statusVal === 'not-included' ? ' selected' : ''}>Not Included</option>
+      </select>`;
+    item.querySelector('.term-info').appendChild(editRow);
+
+    // Save / Cancel actions
+    const actions = document.createElement('div');
+    actions.className = 'term-edit-actions';
+    actions.innerHTML = `
+      <button type="button" class="btn-sm primary"   onclick="saveTerm(this)">Save</button>
+      <button type="button" class="btn-sm secondary" onclick="cancelTerm(this)">Cancel</button>`;
+    item.querySelector('.term-info').appendChild(actions);
+
+    // Hide badges and edit button
+    if (amountEl)  amountEl.style.display  = 'none';
+    if (statusEl)  statusEl.style.display  = 'none';
+    btn.style.display = 'none';
+
+    // Focus title
+    titleEl.querySelector('.tr-title-input')?.focus();
+  }
+
+  function saveTerm(btn) {
+    const item     = btn.closest('.term-item');
+    const term     = item.querySelector('.tr-title-input')?.value.trim()    || item.dataset.term;
+    const category = item.querySelector('.tr-category-select')?.value       || item.dataset.category;
+    const amount   = item.querySelector('.tr-amount-input')?.value.trim()   || '';
+    const status   = item.querySelector('.tr-status-select')?.value         || item.dataset.status;
+    const details  = item.querySelector('.tr-details-input')?.value.trim()  || '';
+
+    item.dataset.term     = term;
+    item.dataset.category = category;
+    item.dataset.amount   = amount;
+    item.dataset.status   = status;
+    item.dataset.details  = details;
+
+    exitTermEdit(item, term, category, amount, status, details);
+    filterTerms(document.getElementById('termSearch')?.value || '');
+    toast('Term updated');
+  }
+
+  function cancelTerm(btn) {
+    const item = btn.closest('.term-item');
+    exitTermEdit(
+      item,
+      item.dataset.term,
+      item.dataset.category,
+      item.dataset.amount,
+      item.dataset.status,
+      item.dataset.details
+    );
+  }
+
+  function exitTermEdit(item, term, category, amount, status, details) {
+    item.classList.remove('editing');
+
+    // Restore title
+    item.querySelector('.tr-title').textContent = term;
+
+    // Restore category
+    item.querySelector('.tr-category').textContent = category;
+
+    // Restore details
+    item.querySelector('.tr-details').textContent = details;
+
+    // Remove edit rows
+    item.querySelector('.term-edit-actions')?.remove();
+    item.querySelector('.term-edit-row')?.remove();
+
+    // Restore / update amount badge
+    const amountEl = item.querySelector('.tr-amount');
+    if (amountEl) {
+      if (amount) {
+        amountEl.textContent    = parseFloat(amount).toFixed(2);
+        amountEl.style.display  = '';
+      } else {
+        amountEl.style.display  = 'none';
+      }
+    }
+
+    // Restore / update status badge
+    const statusEl = item.querySelector('.term-status');
+    if (statusEl) {
+      statusEl.className = `term-status ${status}`;
+      const labels = { included: 'Included', negotiating: 'Negotiating', 'not-included': 'Not Included' };
+      statusEl.textContent = labels[status] || status;
+      statusEl.style.display = '';
+    }
+
+    // Re-show edit button
+    const editBtn = item.querySelector('.item-edit-btn');
+    if (editBtn) editBtn.style.display = '';
+  }
+
+  renderMilestones();
+
+  // apply default hide-past-meetings state on load
+  applyMeetingFilter();
+
+  // apply default hide-completed state on load
+  document.querySelectorAll('.task-item.completed-task').forEach(el => el.classList.add('hidden'));
+  const _tcBtn = document.getElementById('toggleCompletedBtn');
+  const _tcTxt = document.getElementById('toggleCompletedText');
+  if (_tcBtn) _tcBtn.classList.add('hiding');
+  if (_tcTxt) _tcTxt.textContent = 'Show completed';
+
+  // ── Toast ─────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>

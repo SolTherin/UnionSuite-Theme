@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Sleeping / cursor-aware logo (F2 + F3)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+/* ── The mascot ─────────────────────────────────────────────────────────── */
+.ms { display: block; }
+.ms-card    { fill: var(--brand-100); stroke: var(--brand-800); stroke-width: 4; }
+.ms-clip    { fill: none; stroke: var(--brand-800); stroke-width: 4; stroke-linecap: round; }
+.ms-eye-bg  { fill: var(--white); stroke: var(--brand-800); stroke-width: 3; }
+.ms-pupil   { fill: var(--brand-900); }
+.ms-lid     { fill: var(--brand-100); }
+.ms-lid-line{ fill: none; stroke: var(--brand-800); stroke-width: 3; stroke-linecap: round; }
+.ms-mouth   { fill: none; stroke: var(--brand-800); stroke-width: 3.5; stroke-linecap: round; }
+.ms-stripe  { fill: var(--accent-600); }
+
+/* Pupils: fast follow, but eased, so it reads as looking rather than jittering. */
+.ms-pupils { transition: transform .18s cubic-bezier(.22,.61,.36,1); }
+
+/* Lids. Closing is slow (a doze). Waking is immediate — see the design note. */
+.ms-lids { transform: translateY(-36px); transition: transform 120ms cubic-bezier(.3,0,.2,1); }
+.ms.is-asleep .ms-lids { transform: translateY(0); transition: transform 1500ms cubic-bezier(.4,0,.5,1); }
+.ms.is-asleep .ms-pupils { transform: translate(0,0) !important; }
+/* The socket ring fades out behind a closed lid, or the shut eye reads as a
+   circle with a line through it rather than as a closed eye. */
+.ms-eye-bg { transition: stroke-opacity 120ms linear; }
+.ms.is-asleep .ms-eye-bg { stroke-opacity: 0; transition: stroke-opacity 900ms linear; }
+
+/* A sleeping mascot breathes, very slightly. */
+.ms.is-asleep .ms-body { animation: ms-breathe 4.2s ease-in-out infinite; }
+@keyframes ms-breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(1.6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-pupils, .ms-lids { transition: none; }
+  .ms.is-asleep .ms-body { animation: none; }
+}
+
+/* ── Demo furniture ─────────────────────────────────────────────────────── */
+.eg-lab {
+  display: grid; grid-template-columns: 260px 1fr; gap: var(--space-6); align-items: center;
+}
+@media (max-width: 768px) { .eg-lab { grid-template-columns: 1fr; } }
+.eg-lab__stage {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--space-6); display: grid; place-items: center;
+}
+.eg-lab__stage .ms { width: 190px; height: auto; }
+
+.eg-readout { font-family: var(--face-mono); font-size: var(--fs-sm); color: var(--text-base); }
+.eg-readout dl { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--space-3); margin: 0; }
+.eg-readout dt { color: var(--text-faint); }
+.eg-readout dd { margin: 0; color: var(--text-strong); }
+.eg-badge {
+  display: inline-block; padding: 1px 8px; border-radius: var(--radius-pill);
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-semi);
+  background: var(--success-bg); color: var(--success);
+}
+.eg-badge[data-state="asleep"] { background: var(--info-bg); color: var(--info); }
+
+.eg-field { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-sm); color: var(--text-base); }
+.eg-field select {
+  font-family: var(--font-ui); font-size: var(--fs-sm); padding: 4px 8px;
+  border: 1px solid var(--neutral-300); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-strong);
+}
+
+/* ── Staff taskbar, for real-size context ───────────────────────────────── */
+.eg-bar {
+  background: var(--bg-inverse); color: var(--text-inverse);
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: 0 var(--page-gutter); height: var(--header-h);
+}
+.eg-bar__brand { display: flex; align-items: center; gap: var(--space-2); }
+.eg-bar__brand .ms { width: 34px; height: auto; }
+.eg-bar__wordmark {
+  font-family: var(--font-display); font-size: var(--fs-md); font-weight: var(--fw-bold);
+  letter-spacing: -.01em;
+}
+.eg-bar__nav { display: flex; gap: var(--space-4); margin-left: var(--space-4); }
+.eg-bar__nav a {
+  color: rgba(255,255,255,.82); text-decoration: none;
+  font-family: var(--font-ui); font-size: var(--fs-sm);
+}
+.eg-bar__nav a:hover { color: #fff; }
+.eg-bar__spacer { margin-left: auto; }
+.eg-bar__user {
+  width: 30px; height: 30px; border-radius: var(--radius-pill);
+  background: var(--accent-600); color: var(--brand-900);
+  display: grid; place-items: center;
+  font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: var(--fw-bold);
+}
+/* In the bar the mascot is 34px — the eyes have to survive that. */
+.eg-bar .ms-card { fill: rgba(255,255,255,.92); stroke: none; }
+.eg-bar .ms-lid  { fill: rgba(255,255,255,.92); }
+.eg-bar .ms-clip, .eg-bar .ms-lid-line, .eg-bar .ms-mouth { stroke: var(--brand-900); }
+.eg-bar .ms-eye-bg { stroke-width: 0; }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · F2 + F3</p>
+    <h1>The logo that looks at you, then falls asleep</h1>
+    <p>Two ideas from the register built as <strong>one component with two states</strong>, which
+       is the point: a mark that blinks and a mark that tracks the cursor are the same mark, and
+       designing them separately means they fight over the same eyes.</p>
+    <p>Move your pointer anywhere on this page. Stop moving it for the idle delay below and the
+       mascot dozes off. Touch it, click, type, scroll — it wakes instantly.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag" data-risk="watch">Blocked on: a mascot mark</span>
+      <span class="mk-tag">Off on touch · paused when tab hidden</span>
+    </div>
+  </header>
+
+  <section class="mk-stage">
+    <div class="mk-controls">
+      <span class="mk-btn" style="cursor:default;background:transparent;border-color:transparent;padding-left:0">Idle delay</span>
+      <label class="eg-field" style="color:#cfd6dc">
+        <select id="egDelay">
+          <option value="6000" selected>6 seconds (demo)</option>
+          <option value="20000">20 seconds</option>
+          <option value="300000">5 minutes (proposed default)</option>
+        </select>
+      </label>
+      <button class="mk-btn" type="button" id="egSleep">Force sleep now</button>
+      <button class="mk-btn" type="button" id="egTrack" aria-pressed="true">Cursor tracking: on</button>
+    </div>
+
+    <div class="mk-frame">
+      <div class="eg-lab">
+        <div class="eg-lab__stage">
+          <!-- mascot: a membership card with a face. The product's own object. -->
+          <svg class="ms" data-mascot viewBox="0 0 200 180" role="img" aria-label="Union Suite mascot">
+            <g class="ms-body">
+              <path class="ms-clip" d="M100 6v18"/>
+              <rect class="ms-card" x="34" y="24" width="132" height="140" rx="24"/>
+              <rect class="ms-stripe" x="34" y="140" width="132" height="10"/>
+              <path class="ms-stripe" d="M142 150h24v-2a22 22 0 0 1-22 22h-2z" opacity="0"/>
+              <!-- eyes -->
+              <g>
+                <clipPath id="clipL"><circle cx="76" cy="80" r="17"/></clipPath>
+                <clipPath id="clipR"><circle cx="124" cy="80" r="17"/></clipPath>
+                <circle class="ms-eye-bg" cx="76" cy="80" r="17"/>
+                <circle class="ms-eye-bg" cx="124" cy="80" r="17"/>
+                <g class="ms-pupils">
+                  <circle class="ms-pupil" cx="76" cy="80" r="7"/>
+                  <circle class="ms-pupil" cx="124" cy="80" r="7"/>
+                </g>
+                <!-- The clip must sit OUTSIDE the transformed group: put it on the
+                     same node that moves and the mask travels with the lid, which
+                     leaves the crease line hovering above the eye as an eyebrow. -->
+                <g clip-path="url(#clipL)">
+                  <g class="ms-lids">
+                    <rect class="ms-lid" x="57" y="46" width="38" height="52"/>
+                    <path class="ms-lid-line" d="M60 80h32"/>
+                  </g>
+                </g>
+                <g clip-path="url(#clipR)">
+                  <g class="ms-lids">
+                    <rect class="ms-lid" x="105" y="46" width="38" height="52"/>
+                    <path class="ms-lid-line" d="M108 80h32"/>
+                  </g>
+                </g>
+              </g>
+              <!-- mouth -->
+              <path class="ms-mouth" d="M86 116q14 10 28 0"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="eg-readout">
+          <dl>
+            <dt>state</dt><dd><span class="eg-badge" id="egState" data-state="awake">awake</span></dd>
+            <dt>idle for</dt><dd id="egIdle">0.0s</dd>
+            <dt>wakes on</dt><dd>pointermove · keydown · scroll · click · focus</dd>
+            <dt>pointer</dt><dd id="egPointer">—</dd>
+            <dt>tab</dt><dd id="egVis">visible</dd>
+          </dl>
+          <p style="margin-top:var(--space-4);font-family:var(--font-body);font-size:var(--fs-sm);color:var(--text-muted)">
+            The mascot is a membership card with a face — the product's own object rather than a
+            borrowed animal. It gives F4 (the long-press hand-drawn swap) something to swap
+            <em>to</em>, and it gives the 31 October ghost somewhere to live.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mk-note"><strong>Design note — the asymmetry is the whole thing.</strong> Closing
+       takes 1.5 seconds; waking takes 120 milliseconds. A logo that is even a fifth of a second
+       slow to wake does not read as sleepy, it reads as a frozen page — and a staff member who
+       thinks the CRM has hung will start clicking things. Slow out, instant in, always.</p>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">At real size, in the staff taskbar <span>34px. Same component, same state.</span></p>
+    <div class="mk-frame mk-frame--flush">
+      <div class="eg-bar">
+        <div class="eg-bar__brand">
+          <svg class="ms" data-mascot viewBox="0 0 200 180" role="img" aria-label="Home">
+            <g class="ms-body">
+              <path class="ms-clip" d="M100 6v18"/>
+              <rect class="ms-card" x="34" y="24" width="132" height="140" rx="24"/>
+              <g>
+                <clipPath id="clipL2"><circle cx="76" cy="80" r="17"/></clipPath>
+                <clipPath id="clipR2"><circle cx="124" cy="80" r="17"/></clipPath>
+                <circle class="ms-eye-bg" cx="76" cy="80" r="17"/>
+                <circle class="ms-eye-bg" cx="124" cy="80" r="17"/>
+                <g class="ms-pupils">
+                  <circle class="ms-pupil" cx="76" cy="80" r="8"/>
+                  <circle class="ms-pupil" cx="124" cy="80" r="8"/>
+                </g>
+                <g clip-path="url(#clipL2)"><g class="ms-lids"><rect class="ms-lid" x="57" y="46" width="38" height="52"/><path class="ms-lid-line" d="M60 80h32"/></g></g>
+                <g clip-path="url(#clipR2)"><g class="ms-lids"><rect class="ms-lid" x="105" y="46" width="38" height="52"/><path class="ms-lid-line" d="M108 80h32"/></g></g>
+              </g>
+              <path class="ms-mouth" d="M86 116q14 10 28 0"/>
+            </g>
+          </svg>
+          <span class="eg-bar__wordmark">Union Suite</span>
+        </div>
+        <nav class="eg-bar__nav">
+          <a href="#">Dashboard</a><a href="#">Members</a><a href="#">Queries</a>
+          <a href="#">Events</a><a href="#">Finance</a>
+        </nav>
+        <span class="eg-bar__spacer"></span>
+        <span class="eg-bar__user" aria-hidden="true">JD</span>
+      </div>
+    </div>
+    <p class="mk-note"><strong>The size test is the real test.</strong> At 34px the mouth and the
+       card stripe stop reading and the eyes do all the work — which is why the eyes are
+       oversized relative to a realistic card. If a mark's eyes disappear in the taskbar, it
+       cannot carry either of these eggs and the idea dies at the art stage, not the code stage.</p>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">Constraints this mockup implements</p>
+    <div class="mk-frame">
+      <div class="us-panel"><div class="us-panel__body" style="font-size:var(--fs-sm)">
+        <ul style="margin:0;padding-left:1.2em;display:grid;gap:10px">
+          <li><strong>Throttled through <code>requestAnimationFrame</code>.</strong> One transform
+              write per frame at most, no matter how fast the pointer moves. Listeners are
+              <code>passive</code>.</li>
+          <li><strong>Paused when the tab is hidden.</strong> Watch the "tab" readout — switch tabs
+              and come back. No animation frames are requested in the background, and the idle
+              clock does not accrue while nobody is looking.</li>
+          <li><strong>Off on touch.</strong> There is no cursor to follow, and a pointer event from
+              a finger would make the eyes jump to wherever the last tap was and freeze there.</li>
+          <li><strong>The idle timer does not touch the session.</strong> It is a local
+              <code>setTimeout</code> that renders eyelids. It must never be mistaken for, or
+              wired into, the iMIS session-timeout warning — those are the user's actual
+              session and this is a cartoon.</li>
+          <li><strong>Reduced motion.</strong> Transitions drop out entirely; the mascot still
+              opens and closes its eyes, it just does it instantly. The egg degrades to a state
+              change rather than disappearing.</li>
+        </ul>
+      </div></div>
+    </div>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var marks    = Array.prototype.slice.call(document.querySelectorAll('[data-mascot]'));
+  var stateEl  = document.getElementById('egState');
+  var idleEl   = document.getElementById('egIdle');
+  var ptrEl    = document.getElementById('egPointer');
+  var visEl    = document.getElementById('egVis');
+  var delaySel = document.getElementById('egDelay');
+  var sleepBtn = document.getElementById('egSleep');
+  var trackBtn = document.getElementById('egTrack');
+
+  var MAX_OFFSET = 6;            /* pupil travel, in SVG units */
+  var idleDelay  = parseInt(delaySel.value, 10);
+  var tracking   = true;
+  var asleep     = false;
+  var idleTimer  = null;
+  var lastInput  = Date.now();
+  var pending    = null;
+  var isTouch    = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+  function setAsleep(next) {
+    if (asleep === next) { return; }
+    asleep = next;
+    marks.forEach(function (m) { m.classList.toggle('is-asleep', asleep); });
+    stateEl.textContent = asleep ? 'asleep' : 'awake';
+    stateEl.setAttribute('data-state', asleep ? 'asleep' : 'awake');
+  }
+
+  function armIdle() {
+    clearTimeout(idleTimer);
+    if (document.hidden) { return; }          /* no dozing while nobody can see it */
+    idleTimer = setTimeout(function () { setAsleep(true); }, idleDelay);
+  }
+
+  /* Any real input wakes it, immediately and unconditionally. */
+  function wake() {
+    lastInput = Date.now();
+    setAsleep(false);
+    armIdle();
+  }
+
+  function lookAt(x, y) {
+    marks.forEach(function (svg) {
+      var pupils = svg.querySelector('.ms-pupils');
+      if (!pupils) { return; }
+      var box = svg.getBoundingClientRect();
+      if (!box.width) { return; }
+      var cx = box.left + box.width / 2;
+      var cy = box.top + box.height * 0.45;     /* eyes sit above centre */
+      var dx = x - cx;
+      var dy = y - cy;
+      var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      /* Ease off with distance so a far-away cursor does not peg the eyes. */
+      var pull = Math.min(1, dist / 420);
+      var ox = (dx / dist) * MAX_OFFSET * pull;
+      var oy = (dy / dist) * MAX_OFFSET * pull;
+      pupils.style.transform = 'translate(' + ox.toFixed(2) + 'px,' + oy.toFixed(2) + 'px)';
+    });
+  }
+
+  function onMove(e) {
+    wake();
+    ptrEl.textContent = Math.round(e.clientX) + ', ' + Math.round(e.clientY);
+    if (!tracking || isTouch || document.hidden) { return; }
+    if (pending) { return; }                    /* rAF throttle: one write per frame */
+    pending = requestAnimationFrame(function () {
+      pending = null;
+      lookAt(e.clientX, e.clientY);
+    });
+  }
+
+  window.addEventListener('pointermove', onMove, { passive: true });
+  ['keydown', 'scroll', 'click', 'focusin'].forEach(function (evt) {
+    window.addEventListener(evt, wake, { passive: true });
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    visEl.textContent = document.hidden ? 'hidden — paused' : 'visible';
+    if (document.hidden) {
+      clearTimeout(idleTimer);
+      if (pending) { cancelAnimationFrame(pending); pending = null; }
+    } else {
+      wake();
+    }
+  });
+
+  delaySel.addEventListener('change', function () {
+    idleDelay = parseInt(delaySel.value, 10);
+    wake();
+  });
+
+  sleepBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    clearTimeout(idleTimer);
+    setAsleep(true);
+  });
+
+  trackBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    tracking = !tracking;
+    trackBtn.setAttribute('aria-pressed', String(tracking));
+    trackBtn.textContent = 'Cursor tracking: ' + (tracking ? 'on' : 'off');
+    if (!tracking) {
+      marks.forEach(function (svg) {
+        var p = svg.querySelector('.ms-pupils');
+        if (p) { p.style.transform = 'translate(0,0)'; }
+      });
+    }
+  });
+
+  /* readout */
+  setInterval(function () {
+    idleEl.textContent = ((Date.now() - lastInput) / 1000).toFixed(1) + 's';
+  }, 100);
+
+  if (isTouch) {
+    tracking = false;
+    trackBtn.setAttribute('aria-pressed', 'false');
+    trackBtn.textContent = 'Cursor tracking: off (touch device)';
+    trackBtn.disabled = true;
+    ptrEl.textContent = 'touch — tracking disabled';
+  }
+
+  armIdle();
+}());
+</script>
+</body>
+</html>

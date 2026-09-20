@@ -1,0 +1,158 @@
+/* User-supplied CSS Loaders variants, scoped to this comparison only. */
+.section-loader-bars,.section-loader-squares{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;display:block;position:relative;box-sizing:border-box;flex:none}
+.section-loader-bars{width:calc(48 * var(--size));height:calc(48 * var(--size));margin:calc(20 * var(--size)) auto}
+.section-loader-bars::before,.section-loader-bars::after{content:'';position:absolute;top:50%;left:50%;width:calc(48 * var(--size));height:calc(4 * var(--size));margin:calc(-2 * var(--size)) 0 0 calc(-24 * var(--size));border-radius:calc(2 * var(--size));box-sizing:border-box}
+.section-loader-bars::before{background:var(--color-1);animation:section-loader-cw 1.4s linear infinite}
+.section-loader-bars::after{background:var(--color-2);animation:section-loader-ccw 1.4s linear infinite}
+@keyframes section-loader-cw{to{transform:rotate(360deg)}}
+@keyframes section-loader-ccw{to{transform:rotate(-360deg)}}
+/* Two 32px borders occupy 64px. Reserve that actual footprint. */
+.section-loader-squares{width:calc(64 * var(--size));height:calc(64 * var(--size))}
+.section-loader-squares::before,.section-loader-squares::after{content:'';display:block;width:0;height:0;border:calc(32 * var(--size)) solid transparent;border-top-color:var(--color-1);position:absolute;left:0;top:0;animation:section-loader-weld 2s infinite ease-in}
+.section-loader-squares::before{border-color:transparent transparent transparent var(--color-2);animation-delay:.5s}
+@keyframes section-loader-weld{0%,25%{transform:rotate(0deg)}50%,75%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+.loader-stage{height:136px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px}.loader-stage .us-button-spinner{width:28px;height:28px;border-width:3px;color:var(--text-link)}
+@media(prefers-reduced-motion:reduce){.section-loader-bars::before,.section-loader-bars::after,.section-loader-squares::before,.section-loader-squares::after{animation:none}.section-loader-bars::before{transform:rotate(45deg)}.section-loader-bars::after{transform:rotate(-45deg)}}
+
+/* User-supplied spinning squares; names isolated from other loaders. */
+.section-loader-spinning-squares{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;display:block;flex:none;animation:section-squares-rotate 2s infinite;height:calc(50 * var(--size));width:calc(50 * var(--size))}
+.section-loader-spinning-squares::before,.section-loader-spinning-squares::after{content:'';display:block;height:calc(20 * var(--size));width:calc(20 * var(--size))}
+.section-loader-spinning-squares::before{animation:section-squares-box1 2s infinite;background-color:var(--color-1);box-shadow:calc(30 * var(--size)) 0 0 var(--color-2);margin-bottom:calc(10 * var(--size))}
+.section-loader-spinning-squares::after{animation:section-squares-box2 2s infinite;background-color:var(--color-2);box-shadow:calc(30 * var(--size)) 0 0 var(--color-1)}
+@keyframes section-squares-rotate{0%{transform:rotate(0deg) scale(.8)}50%{transform:rotate(360deg) scale(1.2)}100%{transform:rotate(720deg) scale(.8)}}
+@keyframes section-squares-box1{0%{box-shadow:calc(30 * var(--size)) 0 0 var(--color-2)}50%{box-shadow:0 0 0 var(--color-2);margin-bottom:0;transform:translate(calc(15 * var(--size)),calc(15 * var(--size)))}100%{box-shadow:calc(30 * var(--size)) 0 0 var(--color-2);margin-bottom:calc(10 * var(--size))}}
+@keyframes section-squares-box2{0%{box-shadow:calc(30 * var(--size)) 0 0 var(--color-1)}50%{box-shadow:0 0 0 var(--color-1);margin-top:calc(-20 * var(--size));transform:translate(calc(15 * var(--size)),calc(15 * var(--size)))}100%{box-shadow:calc(30 * var(--size)) 0 0 var(--color-1);margin-top:0}}
+@media(prefers-reduced-motion:reduce){.section-loader-spinning-squares,.section-loader-spinning-squares::before,.section-loader-spinning-squares::after{animation:none}}
+#loader-options .comparison{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){#loader-options .comparison{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){#loader-options .comparison{grid-template-columns:1fr}}
+
+/* User-supplied expanding squares with fade-out; comparison only. */
+.section-loader-fading-squares{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;width:calc(48 * var(--size));height:calc(48 * var(--size));display:inline-block;position:relative;flex:none}
+.section-loader-fading-squares::after,.section-loader-fading-squares::before{content:'';box-sizing:border-box;width:calc(48 * var(--size));height:calc(48 * var(--size));border:calc(4 * var(--size)) solid var(--color-1);position:absolute;left:0;top:0;animation:section-squares-fade 2s ease-in-out infinite}
+.section-loader-fading-squares::after{border-color:var(--color-2);animation-delay:1s}
+@keyframes section-squares-fade{0%{transform:scale(0);opacity:1}100%{transform:scale(1);opacity:0}}
+@media(prefers-reduced-motion:reduce){.section-loader-fading-squares::before,.section-loader-fading-squares::after{animation:none;opacity:1}.section-loader-fading-squares::after{transform:scale(.65)}}
+
+/* User-supplied 3D circle. Undefined spinner-wiggle omitted deliberately. */
+.section-loader-circle-3d{--color-1:var(--brand-100);--color-2:transparent;--color-3:var(--brand-600);--color-4:var(--accent);--size:1px;position:relative;margin:auto;box-sizing:border-box;width:calc(120 * var(--size));height:calc(120 * var(--size));flex:none;border-radius:50%;border:calc(4 * var(--size)) solid var(--color-1);transform-origin:50% 50%;transform:perspective(calc(200 * var(--size))) rotateX(66deg)}
+.section-loader-circle-3d::before,.section-loader-circle-3d::after{content:'';position:absolute;inset:calc(-4 * var(--size));border-radius:50%;box-sizing:border-box;border:calc(4 * var(--size)) solid var(--color-2);animation:section-circle3d-spin 1.2s cubic-bezier(.6,.2,0,.8) infinite,section-circle3d-fade 1.2s linear infinite}
+.section-loader-circle-3d::before{border-top-color:var(--color-3)}
+.section-loader-circle-3d::after{border-top-color:var(--color-4);animation-delay:.4s}
+@keyframes section-circle3d-spin{100%{transform:rotate(360deg)}}
+@keyframes section-circle3d-fade{25%,75%{opacity:.1}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.section-loader-circle-3d::before,.section-loader-circle-3d::after{animation:none;opacity:1}.section-loader-circle-3d::after{transform:rotate(180deg)}}
+/* Keep the larger circle grouped with its label inside the loading overlay. */
+.loading-wait .section-loader-circle-3d{margin:0}
+
+/* User-supplied concentric spinning circles; comparison only. */
+.section-loader-spinning-circles{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;width:calc(48 * var(--size));height:calc(48 * var(--size));border-radius:50%;display:inline-block;position:relative;flex:none;border:calc(3 * var(--size)) solid;border-color:var(--color-1) var(--color-1) transparent transparent;box-sizing:border-box;animation:section-circles-forward 1.428571s linear infinite}
+.section-loader-spinning-circles::after,.section-loader-spinning-circles::before{content:'';box-sizing:border-box;position:absolute;left:0;right:0;top:0;bottom:0;margin:auto;border:calc(3 * var(--size)) solid;border-color:transparent transparent var(--color-2) var(--color-2);width:calc(40 * var(--size));height:calc(40 * var(--size));border-radius:50%;animation:section-circles-back .714286s linear infinite;transform-origin:center center}
+.section-loader-spinning-circles::before{width:calc(32 * var(--size));height:calc(32 * var(--size));border-color:var(--color-1) var(--color-1) transparent transparent;animation:section-circles-forward 2.142857s linear infinite}
+@keyframes section-circles-forward{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes section-circles-back{0%{transform:rotate(0deg)}100%{transform:rotate(-360deg)}}
+@media(prefers-reduced-motion:reduce){.section-loader-spinning-circles,.section-loader-spinning-circles::before,.section-loader-spinning-circles::after{animation:none}}
+
+/* Three independent rings: 5, 3 and 1 turns per 6s; opposite-side alignment at 3s. */
+.section-loader-aligning-rings{--size:1px;--color-1:var(--brand-600);--color-2:var(--accent);--color-3:var(--brand-800);position:relative;display:inline-block;width:calc(48 * var(--size));height:calc(48 * var(--size));flex:none}
+.section-loader-aligning-rings > i{position:absolute;inset:0;box-sizing:border-box;border:calc(3 * var(--size)) solid var(--color-1);border-radius:50%;clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%);animation:section-align-turn 1.2s linear infinite}
+.section-loader-aligning-rings > i:nth-child(2){inset:calc(8 * var(--size));border-color:var(--color-2);animation-duration:2s}
+.section-loader-aligning-rings > i:nth-child(3){inset:calc(16 * var(--size));border-color:var(--color-3);animation-duration:6s}
+@keyframes section-align-turn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+@media(prefers-reduced-motion:reduce){.section-loader-aligning-rings > i{animation:none;clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}}
+
+/* User-supplied crossed 3D rings; unused rotate/rotateccw keyframes omitted. */
+.section-loader-crossed-rings{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;display:block;position:relative;flex:none;transform:rotateZ(45deg);perspective:calc(1000 * var(--size));border-radius:50%;width:calc(48 * var(--size));height:calc(48 * var(--size));color:var(--color-1);font-size:calc(16 * var(--size))}
+.section-loader-crossed-rings::before,.section-loader-crossed-rings::after{content:'';display:block;position:absolute;top:0;left:0;width:inherit;height:inherit;border-radius:50%;transform:rotateX(70deg);animation:section-crossed-spin 1s linear infinite}
+.section-loader-crossed-rings::after{color:var(--color-2);transform:rotateY(70deg);animation-delay:.4s}
+@keyframes section-crossed-spin{0%,100%{box-shadow:.2em 0 0 0 currentColor}12%{box-shadow:.2em .2em 0 0 currentColor}25%{box-shadow:0 .2em 0 0 currentColor}37%{box-shadow:-.2em .2em 0 0 currentColor}50%{box-shadow:-.2em 0 0 0 currentColor}62%{box-shadow:-.2em -.2em 0 0 currentColor}75%{box-shadow:0 -.2em 0 0 currentColor}87%{box-shadow:.2em -.2em 0 0 currentColor}}
+@media(prefers-reduced-motion:reduce){.section-loader-crossed-rings::before,.section-loader-crossed-rings::after{animation:none;box-shadow:.2em 0 0 0 currentColor}}
+
+/* User-supplied rotating, merging dots; comparison only. */
+.section-loader-orbit-dots{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;width:calc(48 * var(--size));height:calc(48 * var(--size));display:block;margin:calc(15 * var(--size)) auto;position:relative;flex:none;color:var(--color-1);box-sizing:border-box;animation:section-orbit-turn 1s linear infinite}
+.section-loader-orbit-dots::after,.section-loader-orbit-dots::before{content:'';box-sizing:border-box;position:absolute;width:calc(24 * var(--size));height:calc(24 * var(--size));top:50%;left:50%;transform:scale(.5) translate(0,0);background-color:var(--color-1);border-radius:50%;animation:section-orbit-merge 1s infinite ease-in-out}
+.section-loader-orbit-dots::before{background-color:var(--color-2);transform:scale(.5) translate(calc(-48 * var(--size)),calc(-48 * var(--size)))}
+@keyframes section-orbit-turn{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes section-orbit-merge{50%{transform:scale(1) translate(-50%,-50%)}}
+@media(prefers-reduced-motion:reduce){.section-loader-orbit-dots,.section-loader-orbit-dots::before,.section-loader-orbit-dots::after{animation:none}}
+.loading-wait .section-loader-orbit-dots{margin:0}
+
+/* User-supplied bouncing square; names and colours scoped to the comparison. */
+.section-loader-bouncing-square{--color-1:var(--text-strong);--color-2:var(--brand-600);--size:1px;display:block;flex:none;width:calc(48 * var(--size));height:calc(48 * var(--size));margin:auto;position:relative}
+.section-loader-bouncing-square::before{content:'';width:calc(48 * var(--size));height:calc(5 * var(--size));background:var(--color-1);opacity:.25;position:absolute;top:calc(60 * var(--size));left:0;border-radius:50%;animation:section-bounce-shadow .5s linear infinite}
+.section-loader-bouncing-square::after{content:'';width:100%;height:100%;background:var(--color-2);animation:section-bounce-square .5s linear infinite;position:absolute;top:0;left:0;border-radius:calc(4 * var(--size))}
+@keyframes section-bounce-square{17%{border-bottom-right-radius:calc(3 * var(--size))}25%{transform:translateY(calc(9 * var(--size))) rotate(22.5deg)}50%{transform:translateY(calc(18 * var(--size))) scale(1,.9) rotate(45deg);border-bottom-right-radius:calc(40 * var(--size))}75%{transform:translateY(calc(9 * var(--size))) rotate(67.5deg)}100%{transform:translateY(0) rotate(90deg)}}
+@keyframes section-bounce-shadow{0%,100%{transform:scale(1,1)}50%{transform:scale(1.2,1)}}
+/* Reserve extra space below the square for its bounce and shadow. */
+.loading-wait .section-loader-bouncing-square{margin:0 0 calc(24 * var(--size))}
+@media(prefers-reduced-motion:reduce){.section-loader-bouncing-square::before,.section-loader-bouncing-square::after{animation:none}}
+
+/* User-supplied splitting blocks; preserve content-box border geometry. */
+.section-loader-splitting-blocks{--color-1:var(--brand-600);--size:1px;display:block;flex:none;position:relative;width:calc(48 * var(--size));height:calc(48 * var(--size));box-sizing:content-box}
+/* Each layer has two halves hinged at its outside edges. */
+.section-loader-splitting-blocks > i{position:absolute;inset:0 auto auto 0;width:calc(48 * var(--size));height:calc(24 * var(--size));animation:section-blocks-travel 2s linear infinite}
+.section-loader-splitting-blocks > i > b{position:absolute;top:0;width:calc(24 * var(--size));height:calc(24 * var(--size));background:var(--color-1);animation:section-blocks-hinge 2s linear infinite}
+.section-loader-splitting-blocks > i > b:first-child{left:0;transform-origin:left center}
+.section-loader-splitting-blocks > i > b:last-child{right:0;transform-origin:right center;animation-name:section-blocks-hinge-right}
+.section-loader-splitting-blocks > i:nth-child(2),.section-loader-splitting-blocks > i:nth-child(2) > b{animation-delay:-1s}
+@keyframes section-blocks-travel{0%,16.6667%,83.3333%,100%{transform:translateY(0)}33.3333%,50%,66.6667%{transform:translateY(calc(24 * var(--size)))}}
+@keyframes section-blocks-hinge{0%{transform:rotate(0deg)}16.6667%,33.3333%{transform:rotate(-180deg)}50%,100%{transform:rotate(-360deg)}}
+@keyframes section-blocks-hinge-right{0%{transform:rotate(0deg)}16.6667%,33.3333%{transform:rotate(180deg)}50%,100%{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.section-loader-splitting-blocks > i,.section-loader-splitting-blocks > i > b{animation:none}.section-loader-splitting-blocks > i:nth-child(2){transform:translateY(calc(24 * var(--size)))}}
+
+/* User-supplied rotating triangle halves; comparison only. */
+.section-loader-separating-triangles{--color-1:var(--brand-600);--color-2:var(--accent);--size:1px;display:block;flex:none;width:calc(48 * var(--size));height:calc(48 * var(--size));position:relative;animation:section-triangles-turn 4s linear infinite}
+.section-loader-separating-triangles::before,.section-loader-separating-triangles::after{content:'';display:block;width:0;height:0;border:calc(24 * var(--size)) solid;border-color:transparent transparent var(--color-1) var(--color-1);position:absolute;left:0;top:0;animation:section-triangles-out 1s infinite ease-in}
+.section-loader-separating-triangles::before{left:calc(-1 * var(--size));top:calc(1 * var(--size));border-color:var(--color-2) var(--color-2) transparent transparent;animation-name:section-triangles-back}
+@keyframes section-triangles-turn{100%{transform:rotate(360deg)}}
+@keyframes section-triangles-out{0%,15%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(-50%,50%) rotate(180deg)}100%{transform:translate(0%,0%) rotate(180deg)}}
+@keyframes section-triangles-back{0%,15%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(50%,-50%) rotate(180deg)}100%{transform:translate(0%,0%) rotate(180deg)}}
+.loading-wait .section-loader-separating-triangles{margin:24px}
+@media(prefers-reduced-motion:reduce){.section-loader-separating-triangles,.section-loader-separating-triangles::before,.section-loader-separating-triangles::after{animation:none}}
+
+/* Three split-motion studies, preserving the original 48px footprint. */
+.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i,
+.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i > b{animation-duration:2.8s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i:nth-child(2),
+.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i:nth-child(2) > b{animation-delay:-1.4s}
+/* Diagonal: move apart with a small tilt, rather than a full flip. */
+.section-loader-splitting-blocks.split-diagonal > i > b:first-child{animation-name:split-diagonal-left;transform-origin:center}
+.section-loader-splitting-blocks.split-diagonal > i > b:last-child{animation-name:split-diagonal-right;transform-origin:center}
+@keyframes split-diagonal-left{0%,50%,100%{transform:translate(0,0) rotate(0deg)}16.6667%,33.3333%{transform:translate(calc(-24 * var(--size)),calc(-4 * var(--size))) rotate(-12deg)}}
+@keyframes split-diagonal-right{0%,50%,100%{transform:translate(0,0) rotate(0deg)}16.6667%,33.3333%{transform:translate(calc(24 * var(--size)),calc(4 * var(--size))) rotate(12deg)}}
+/* Staggered: left leads, right follows; both close before the next handoff. */
+.section-loader-splitting-blocks.split-staggered > i > b:first-child{animation-name:split-stagger-left}
+.section-loader-splitting-blocks.split-staggered > i > b:last-child{animation-name:split-stagger-right}
+@keyframes split-stagger-left{0%{transform:rotate(0deg)}16%,30%{transform:rotate(-180deg)}44%,100%{transform:rotate(-360deg)}}
+@keyframes split-stagger-right{0%,7%{transform:rotate(0deg)}24%,37%{transform:rotate(180deg)}50%,100%{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i,.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i > b{animation:none}}
+
+@media(prefers-reduced-motion:reduce){.section-loader-splitting-blocks:is(.split-soft,.split-diagonal,.split-staggered,.split-crossed) > i > b:is(:first-child,:last-child){animation:none}}
+
+/* Staggered crossover: each half lands on the other side of the lower row.
+   The equal-colour halves reset ownership only while joined, so the loop stays seamless. */
+.section-loader-splitting-blocks.split-crossed > i > b:first-child{animation-name:split-cross-left}
+.section-loader-splitting-blocks.split-crossed > i > b:last-child{animation-name:split-cross-right}
+@keyframes split-cross-left{0%{transform:translate(0,0) rotate(0deg)}16%{transform:translate(0,0) rotate(-180deg)}30%{transform:translate(calc(12 * var(--size)),calc(-10 * var(--size))) rotate(-270deg)}44%,100%{transform:translate(calc(24 * var(--size)),0) rotate(-360deg)}}
+@keyframes split-cross-right{0%,7%{transform:translate(0,0) rotate(0deg)}24%{transform:translate(0,0) rotate(180deg)}37%{transform:translate(calc(-12 * var(--size)),calc(10 * var(--size))) rotate(270deg)}50%,100%{transform:translate(calc(-24 * var(--size)),0) rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.section-loader-splitting-blocks.split-crossed > i > b:is(:first-child,:last-child){animation:none}}
+
+/* Playful reassembly: irregular pieces, two near-misses, then a clean fit.
+   Deterministic choreography keeps timing testable and the loop seamless. */
+.section-loader-reassembly{--size:1px;--color-1:var(--brand-600);position:relative;display:block;flex:none;width:calc(48 * var(--size));height:calc(48 * var(--size));animation:reassembly-celebrate 6.72s cubic-bezier(.45,0,.2,1) infinite}
+.section-loader-reassembly > i{position:absolute;inset:0;background:var(--color-1);animation-duration:6.72s;animation-timing-function:cubic-bezier(.45,0,.2,1);animation-iteration-count:infinite;will-change:transform}
+.section-loader-reassembly > i:nth-child(1){clip-path:polygon(0 0,56.25% 0,45.8333% 52.0833%,0 60.4167%);transform-origin:24% 26%;animation-name:reassembly-piece-1}
+.section-loader-reassembly > i:nth-child(2){clip-path:polygon(56.25% 0,100% 0,100% 41.6667%,45.8333% 52.0833%);transform-origin:76% 24%;animation-name:reassembly-piece-2}
+.section-loader-reassembly > i:nth-child(3){clip-path:polygon(100% 41.6667%,100% 100%,39.5833% 100%,45.8333% 52.0833%);transform-origin:75% 76%;animation-name:reassembly-piece-3}
+.section-loader-reassembly > i:nth-child(4){clip-path:polygon(39.5833% 100%,0 100%,0 60.4167%,45.8333% 52.0833%);transform-origin:23% 78%;animation-name:reassembly-piece-4}
+@keyframes reassembly-piece-1{0%,7.14286%,57.14286%,100%{transform:translate(0,0) rotate(0deg)}13.09524%{transform:translate(calc(-17 * var(--size)),calc(-16 * var(--size))) rotate(-95deg)}19.04762%,26.19048%{transform:translate(calc(7 * var(--size)),calc(4 * var(--size))) rotate(20deg)}32.14286%{transform:translate(calc(-12 * var(--size)),calc(-19 * var(--size))) rotate(-135deg)}38.09524%,45.2381%{transform:translate(calc(2 * var(--size)),calc(-3 * var(--size))) rotate(8deg)}51.19048%{transform:translate(calc(-15 * var(--size)),calc(-9 * var(--size))) rotate(75deg)}}
+@keyframes reassembly-piece-2{0%,7.14286%,57.14286%,100%{transform:translate(0,0) rotate(0deg)}13.09524%{transform:translate(calc(16 * var(--size)),calc(-14 * var(--size))) rotate(100deg)}19.04762%,26.19048%{transform:translate(calc(-7 * var(--size)),calc(6 * var(--size))) rotate(-25deg)}32.14286%{transform:translate(calc(10 * var(--size)),calc(-19 * var(--size))) rotate(140deg)}38.09524%,45.2381%{transform:translate(calc(-2 * var(--size)),calc(3 * var(--size))) rotate(-7deg)}51.19048%{transform:translate(calc(16 * var(--size)),calc(-11 * var(--size))) rotate(-65deg)}}
+@keyframes reassembly-piece-3{0%,7.14286%,57.14286%,100%{transform:translate(0,0) rotate(0deg)}13.09524%{transform:translate(calc(17 * var(--size)),calc(15 * var(--size))) rotate(-110deg)}19.04762%,26.19048%{transform:translate(calc(-4 * var(--size)),calc(-7 * var(--size))) rotate(18deg)}32.14286%{transform:translate(calc(20 * var(--size)),calc(9 * var(--size))) rotate(-145deg)}38.09524%,45.2381%{transform:translate(calc(-3 * var(--size)),calc(-1 * var(--size))) rotate(7deg)}51.19048%{transform:translate(calc(14 * var(--size)),calc(15 * var(--size))) rotate(95deg)}}
+@keyframes reassembly-piece-4{0%,7.14286%,57.14286%,100%{transform:translate(0,0) rotate(0deg)}13.09524%{transform:translate(calc(-16 * var(--size)),calc(16 * var(--size))) rotate(90deg)}19.04762%,26.19048%{transform:translate(calc(6 * var(--size)),calc(-5 * var(--size))) rotate(-22deg)}32.14286%{transform:translate(calc(-8 * var(--size)),calc(20 * var(--size))) rotate(130deg)}38.09524%,45.2381%{transform:translate(calc(3 * var(--size)),calc(2 * var(--size))) rotate(-9deg)}51.19048%{transform:translate(calc(-14 * var(--size)),calc(14 * var(--size))) rotate(-85deg)}}
+@keyframes reassembly-celebrate{0%,67.85714%{transform:rotate(0deg);animation-timing-function:cubic-bezier(.42,0,.58,1)}79.7619%,100%{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.section-loader-reassembly,.section-loader-reassembly > i:nth-child(n){animation:none;transform:none;will-change:auto}}
+
+/* Two-colour comparison: opposite pieces use the brand accent. */
+.section-loader-reassembly.reassembly-duotone{--color-2:var(--accent)}
+.section-loader-reassembly.reassembly-duotone > i:nth-child(2),.section-loader-reassembly.reassembly-duotone > i:nth-child(4){background:var(--color-2)}

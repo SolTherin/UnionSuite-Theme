@@ -1,0 +1,57 @@
+<!-- Offline sample of the captured Query Menu / single-table RadGrid structure.
+     iMIS generates these wrappers on real pages. Do not paste this fixture over
+     a live query. IQA-example.js simulates only the data controls in this guide. -->
+<style>
+  body{margin:0;padding:18px;background:var(--bg-page);color:var(--text-base);font:14px/1.5 var(--font-ui);height:auto}
+  .fixture-note{font-size:12px;margin:0 0 16px}.fixture-actions{display:flex;gap:4px;white-space:nowrap}.fixture-status{font-size:12px;min-height:20px;margin:12px 0}
+  .fixture-pager{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px}.fixture-pager label{font-size:12px;font-weight:400;margin:0}.fixture-pager select{width:auto;min-width:64px}.fixture-pager a{padding:4px 8px;display:inline-block}
+  dialog{width:min(440px,calc(100% - 32px));border:1px solid var(--border);border-radius:var(--radius);padding:24px;color:var(--text-base);background:var(--bg-surface)}dialog::backdrop{background:rgb(0 0 0 / .25)}dialog h2{margin:0 0 12px;font-size:20px;color:var(--text-strong)}dialog p{white-space:pre-line}.fixture-title{font-size:13px;font-weight:600}
+  @media(max-width:540px){body{padding:12px}}
+  /* Preview-only geometry normally supplied by the ASP.NET Calendar WebResource. */
+  #sample-calendar-preview{width:280px}.fixture-legacy-calendar .ajax__calendar_container{padding:8px}.fixture-legacy-calendar .ajax__calendar_header{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:10px}.fixture-legacy-calendar .ajax__calendar_title{padding:4px}.fixture-legacy-calendar table{width:100%;border-collapse:collapse}.fixture-legacy-calendar th,.fixture-legacy-calendar td{padding:1px;text-align:center}.fixture-legacy-calendar .ajax__calendar_day{display:block;box-sizing:border-box;width:26px;height:26px;text-align:center;padding:3px;border:1px solid transparent}.fixture-legacy-calendar .ajax__calendar_today{display:block;margin-top:8px;padding:4px;text-align:center}
+</style>
+<p class="fixture-note">Dummy IQA · 12 fictional records. Find, sorting, paging and CSV export run locally in this example. Filters and Expand use the real shared theme JS.</p>
+<form id="sample-form">
+ <div class="ContentItemContainer">
+  <div class="us-report us-report-expandable us-action-demo-add-note us-action-demo-view-history" id="sample-report">
+   <div class="panel panel-default">
+    <div class="panel-heading"><h2 class="panel-title">Member follow-up</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div id="sample_ContentPanel">
+     <div class="ClearFix"><div id="sample_UpdateProgress1" hidden><div class="NotPrinted ProgressDiv Interior"><span>Loading</span></div></div><div id="sample_SelectContainer"><label for="sample_querySelectDropdown">Query</label><select id="sample_querySelectDropdown"><option value="all">All members</option><option value="review">Members requiring review</option></select></div></div>
+     <div id="sample_ListerPanel"><div data-gridid="sample-grid" id="sample-data">
+      <div class="panel FilterPanel" id="sample_DataSourcePanel"><div id="sample_ParametersContainer"><div>
+       <div class="PanelField"><label for="sample-name">Member name</label><div class="PanelFieldValue"><input id="sample-name" type="text" placeholder="Try Alex or Jordan"></div></div>
+       <div class="PanelField"><label for="sample-status">Status</label><div class="PanelFieldValue"><select id="sample-status"><option value="">All statuses</option><option>Active</option><option>Review required</option></select></div></div>
+       <div class="PanelField"><span class="Label">Join Date Between</span><div class="PanelFieldValue">
+        <table class="GridFilterCalendar"><tbody><tr>
+         <td nowrap="nowrap"><span class="CalendarInput"><input type="text" id="sample-date-from" class="StylesDateText" value="4/09/2026" style="min-width:0;width:7em;"><input type="image" data-sample-calendar="sample-date-from" alt="Use calendar for start date" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M2 3h12v11H2zM2 6h12M5 1v4M11 1v4M5 9h1m2 0h1m2 0h1M5 12h1m2 0h1' fill='none' stroke='%23006f94'/%3E%3C/svg%3E"></span><label for="sample-date-from" class="screen-reader-text">Join date between</label></td>
+         <td nowrap="nowrap"><span class="PanelFieldLabelFont AddPaddingLeft AddPaddingRight">and</span></td>
+         <td nowrap="nowrap"><span class="CalendarInput"><input type="text" id="sample-date-to" class="StylesDateText" value="30/09/2026" style="min-width:0;width:7em;"><input type="image" data-sample-calendar="sample-date-to" alt="Use calendar for end date" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M2 3h12v11H2zM2 6h12M5 1v4M11 1v4M5 9h1m2 0h1m2 0h1M5 12h1m2 0h1' fill='none' stroke='%23006f94'/%3E%3C/svg%3E"></span><label for="sample-date-to" class="screen-reader-text">Join date and</label></td>
+        </tr></tbody></table>
+       </div></div>
+       <input type="button" class="TextButton" id="sample_SubmitButton" value="Find">
+      </div></div></div>
+      <div id="sample_GridPanel1">
+       <div class="GridTitlePanel"><div id="sample_TopRightPanel"><div class="btn-group">
+        <button type="button" class="TextButton btn dropdown-toggle" aria-expanded="false">Export <span class="caret"></span></button>
+        <ul class="dropdown-menu" hidden><li><a id="sample_btnExportCsv" href="#export">CSV — sample data</a></li></ul>
+       </div></div></div>
+       <div class="RadGrid RadGrid_MetroTouch" id="sample-grid">
+        <table class="rgMasterTable"><caption class="sr-only">Fictional members for the theme usage guide</caption>
+         <thead><tr><th scope="col" class="rgHeader">Member ID</th><th scope="col" class="rgHeader" aria-sort="ascending"><a href="#sort" data-sort="name" onclick="Telerik.Web.UI.Grid.Sort(this, 'name'); return false;">Member</a></th><th scope="col" class="rgHeader"><a href="#sort" data-sort="branch" onclick="Telerik.Web.UI.Grid.Sort(this, 'branch'); return false;">Branch</a></th><th scope="col" class="rgHeader"><a href="#sort" data-sort="status" onclick="Telerik.Web.UI.Grid.Sort(this, 'status'); return false;">Status</a></th><th scope="col" class="rgHeader">Actions</th></tr></thead>
+         <tbody id="sample-rows">{{IQA_ROWS}}</tbody>
+         <tfoot><tr class="rgPager"><td colspan="5"><div class="fixture-pager"><span id="sample-count"></span><span class="rgNumPart"><a href="#previous" id="sample-prev" aria-label="Previous sample page">Previous</a><span id="sample-page"></span><a href="#next" id="sample-next" aria-label="Next sample page">Next</a></span><label>Page size <select id="sample-page-size" class="PageSizeDropDown"><option>5</option><option>10</option><option>20</option></select></label></div></td></tr></tfoot>
+        </table>
+       </div>
+      </div>
+     </div></div>
+    </div></div></div>
+   </div>
+  </div>
+ </div>
+</form>
+<p id="sample-result" class="fixture-status" role="status">Showing sample data. No live records are connected.</p>
+<dialog id="sample-details"><h2 id="sample-details-title">Sample record</h2><p id="sample-details-text"></p><button type="button" class="TextButton" id="sample-details-close">Close</button></dialog>
+<dialog id="sample-calendar-preview" aria-label="Legacy calendar styling example"><p class="fixture-note">Appearance example — native iMIS provides calendar navigation and date selection.</p><div class="ajax__calendar fixture-legacy-calendar"><div class="ajax__calendar_container"><div class="ajax__calendar_header"><span class="ajax__calendar_prev" aria-hidden="true">‹</span><span class="ajax__calendar_title">September 2026</span><span class="ajax__calendar_next" aria-hidden="true">›</span></div><table aria-label="Calendar appearance example"><thead><tr><th class="ajax__calendar_dayname">Su</th><th class="ajax__calendar_dayname">Mo</th><th class="ajax__calendar_dayname">Tu</th><th class="ajax__calendar_dayname">We</th><th class="ajax__calendar_dayname">Th</th><th class="ajax__calendar_dayname">Fr</th><th class="ajax__calendar_dayname">Sa</th></tr></thead><tbody><tr><td class="ajax__calendar_other"><span class="ajax__calendar_day">30</span></td><td class="ajax__calendar_other"><span class="ajax__calendar_day">31</span></td><td><span class="ajax__calendar_day">1</span></td><td><span class="ajax__calendar_day">2</span></td><td><span class="ajax__calendar_day">3</span></td><td class="ajax__calendar_active"><span class="ajax__calendar_day">4</span></td><td><span class="ajax__calendar_day">5</span></td></tr><tr><td><span class="ajax__calendar_day">6</span></td><td><span class="ajax__calendar_day">7</span></td><td><span class="ajax__calendar_day">8</span></td><td><span class="ajax__calendar_day">9</span></td><td><span class="ajax__calendar_day">10</span></td><td><span class="ajax__calendar_day">11</span></td><td><span class="ajax__calendar_day">12</span></td></tr></tbody></table><span class="ajax__calendar_today">Today: 9 September 2026</span></div></div><p><button type="button" class="TextButton" id="sample-calendar-close">Close example</button></p></dialog>
+
+

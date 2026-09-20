@@ -1,0 +1,1754 @@
+<!-- LEGACY STANDALONE IQA TRIAL — retained as the approved reference.
+The maintained theme implementation is now THeme/UnionSuite/zUnionSuite.css
+and THeme/UnionSuite/zUnionSuite.js. See THeme/UnionSuite/README.md for setup.
+Remove this full style/script embed from pages using the theme implementation.
+Do not load both versions together. Future changes belong in the theme files.
+-->
+<style>
+/* Contact Search IQA trial — replace the previous embed with this entire file,
+   including BOTH the style and script sections.
+   Query Menu CSS class: SearchContactsClass (without a leading dot).
+   Add us-filters-collapsible to enable the filter toggle (initially expanded).
+   Also add us-filters-collapsed to start collapsed instead.
+   Add us-report-expandable for the full-window report button.
+   Scoped to the captured Query Menu wrapper; does not change the theme files.
+   Revision: grouped utilities, animated filters and full-window report mode.
+   Query-set selectors are detected by markup.
+   Adjust these local variables first. Fallbacks work without the token sheet. */
+.SearchContactsClass {
+  --iqa-surface: var(--bg-surface, #ffffff);
+  --iqa-header: var(--bg-subtle, #f8fafc);
+  --iqa-table-head: var(--bg-sunken, #e2e8f0);
+  --iqa-border: var(--border, #e2e8f0);
+  --iqa-divider: var(--bg-sunken, #f1f5f9);
+  --iqa-text: var(--text-base, #334155);
+  --iqa-title: var(--text-strong, #334155);
+  --iqa-muted: var(--text-muted, #475569);
+  --iqa-link: var(--text-link, #006f94);
+  --iqa-link-hover: var(--text-link-hover, #00506a);
+  --iqa-selected: var(--brand-100, #d0e4ea);
+  --iqa-sort-bg: var(--brand-50, #eaf4f7);
+  --iqa-input-border: var(--border-strong, #94a3b8);
+  --iqa-font: var(--font-ui, "Inter", system-ui, -apple-system, sans-serif);
+  --iqa-radius: 12px;
+  --iqa-inset: 18px;
+  --iqa-expanded-inset: clamp(12px, 2vw, 24px);
+  --iqa-row-padding: 10px 12px;
+  --iqa-filter-min: 180px;
+  --iqa-filter-bottom: 12px;
+  --iqa-action-height: 36px;
+  --iqa-multi-max-height: 90px;
+  min-width: 0;
+  color: var(--iqa-text);
+  font-family: var(--iqa-font);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Only the outer panel is a card. Keep overflow visible for native menus. */
+.SearchContactsClass > .panel {
+  margin: 0 0 18px;
+  padding: 0;
+  min-width: 0;
+  border: 1px solid var(--iqa-border);
+  border-radius: var(--iqa-radius);
+  background: var(--iqa-surface);
+  box-shadow: none;
+  overflow: visible;
+}
+.SearchContactsClass > .panel > .panel-heading {
+  margin: 0;
+  padding: 14px var(--iqa-inset);
+  border: 0;
+  border-bottom: 1px solid var(--iqa-divider);
+  border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
+  background: var(--iqa-header);
+  color: var(--iqa-title);
+  box-shadow: none;
+}
+.SearchContactsClass > .panel > .panel-heading .panel-title {
+  margin: 0;
+  padding: 0;
+  color: var(--iqa-title);
+  font-family: var(--iqa-font);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.SearchContactsClass > .panel > .panel-heading:has(+ .panel-description) {
+  padding-bottom: 4px;
+  border-bottom: 0;
+}
+.SearchContactsClass > .panel > .panel-description {
+  margin: 0;
+  padding: 0 var(--iqa-inset) 14px;
+  border: 0;
+  border-bottom: 1px solid var(--iqa-divider);
+  background: var(--iqa-header);
+  color: var(--iqa-muted);
+  font-family: var(--iqa-font);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.SearchContactsClass > .panel > .panel-description > :is(div, p) { margin: 0; }
+/* iMIS emits whitespace in an untitled heading. Preserve headers with controls. */
+.SearchContactsClass > .panel > .panel-heading:not(:has(*)) { display: none; }
+.SearchContactsClass > .panel > .panel-heading:not(:has(*)) + .panel-description {
+  padding-top: 14px;
+  border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
+}
+.SearchContactsClass > .panel > .panel-body-container,
+.SearchContactsClass > .panel > .panel-body-container > .panel-body {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Query-set selector: a white row with an inset divider above the filters.
+   Use stable ID suffixes, not the iPart's generated prefix or label text.
+   Keep the native select, option groups and onchange handler unchanged.
+   A single-query iPart without this select receives no additional row. */
+.SearchContactsClass [id$="_SelectContainer"]:has(> select[id$="_querySelectDropdown"]) {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  float: none;
+  clear: both;
+  width: calc(100% - var(--iqa-inset) - var(--iqa-inset));
+  min-width: 0;
+  max-width: none;
+  margin: 0 var(--iqa-inset);
+  /* Override iMIS Bootstrap padding utilities on this container only. */
+  padding: 14px 0 !important;
+  border: 0;
+  border-bottom: 1px solid var(--iqa-border);
+  border-radius: 0;
+  background: var(--iqa-surface);
+  box-shadow: none;
+}
+/* Once this query's filters are hidden, its selector meets the table header
+   directly. Restore the divider automatically as the filters expand. */
+.SearchContactsClass [id$="_ContentPanel"]:has(> [id$="_ListerPanel"] > [data-gridid] > [data-us-iqa-filter-region][hidden]) > .ClearFix > [id$="_SelectContainer"]:has(> select[id$="_querySelectDropdown"]) {
+  border-bottom-width: 0;
+}
+.SearchContactsClass [id$="_SelectContainer"]:has(> select[id$="_querySelectDropdown"]) > label {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--iqa-title);
+  font: 600 13px/1.5 var(--iqa-font);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.SearchContactsClass [id$="_SelectContainer"] > select[id$="_querySelectDropdown"] {
+  box-sizing: border-box;
+  flex: 0 1 28rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--iqa-input-border);
+  border-radius: 6px;
+  background-color: var(--iqa-surface);
+  color: var(--iqa-title);
+  font: 400 13px/1.5 var(--iqa-font);
+  box-shadow: none;
+}
+
+/* Added only after the script has attached a working toggle. */
+.SearchContactsClass [data-us-iqa-filter-region][hidden] {
+  display: none !important;
+}
+/* Clip only during the short transition. Expanded dropdowns remain unclipped. */
+.SearchContactsClass [data-us-iqa-filter-animating] {
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.SearchContactsClass .GridTitlePanel[data-us-iqa-empty-toolbar] {
+  display: none !important;
+}
+.SearchContactsClass > .panel > .panel-heading[data-us-iqa-filter-heading] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.SearchContactsClass > .panel > .panel-heading[data-us-iqa-filter-heading] .panel-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.SearchContactsClass .us-iqa-filter-tools {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px var(--iqa-inset);
+}
+.SearchContactsClass .us-iqa-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline-start: auto;
+}
+.SearchContactsClass .us-iqa-custom-actions,
+.SearchContactsClass .us-iqa-report-utilities {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.SearchContactsClass .us-iqa-custom-actions {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.SearchContactsClass .us-iqa-custom-actions:empty { display: none; }
+.SearchContactsClass .us-iqa-report-utilities:empty { display: none; }
+.SearchContactsClass .us-iqa-filter-tools:has(.us-iqa-custom-actions:empty):has(.us-iqa-report-utilities:empty) {
+  display: none;
+}
+.SearchContactsClass .us-iqa-report-utilities {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+.SearchContactsClass .us-panel-actions .us-panel-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: 600 12px/1.5 var(--iqa-font);
+  text-transform: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+.SearchContactsClass .us-panel-actions .us-panel-action--button {
+  border-color: var(--iqa-link);
+  background: var(--iqa-link);
+  color: var(--iqa-surface);
+}
+.SearchContactsClass .us-panel-actions .us-panel-action--button:hover {
+  background: var(--iqa-link-hover);
+  border-color: var(--iqa-link-hover);
+}
+.SearchContactsClass .us-panel-actions .us-panel-action--text {
+  background: transparent;
+  color: var(--iqa-link);
+  text-underline-offset: .2em;
+}
+.SearchContactsClass .us-panel-actions .us-panel-action--text:hover {
+  color: var(--iqa-link-hover);
+  text-decoration: underline;
+}
+.SearchContactsClass .us-iqa-native-export {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.SearchContactsClass .us-iqa-native-export .dropdown-menu {
+  color: var(--iqa-text);
+  font: 400 13px/1.5 var(--iqa-font);
+  text-transform: none;
+}
+.SearchContactsClass .us-iqa-filter-toggle {
+  appearance: none;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 7px 10px;
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--iqa-link);
+  font: 600 12px/1.5 var(--iqa-font);
+  text-transform: none;
+  text-decoration: none;
+  text-underline-offset: .2em;
+  cursor: pointer;
+  box-shadow: none;
+}
+.SearchContactsClass .us-iqa-filter-toggle:hover {
+  background: transparent;
+  border-color: transparent;
+  color: var(--iqa-link-hover);
+  text-decoration: underline;
+}
+
+/* Search filters: a compact responsive form, without a nested card. */
+.SearchContactsClass .panel.FilterPanel {
+  margin: 0;
+  padding: 16px var(--iqa-inset) var(--iqa-filter-bottom);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.SearchContactsClass .FilterPanel [id$="_ParametersContainer"] > div:has(> .PanelField) {
+  display: grid;
+  /* At most six fields across; reduce automatically with the available width.
+     80px accounts for five 16px column gaps. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(var(--iqa-filter-min), calc((100% - 80px) / 6))), 1fr));
+  gap: 12px 16px;
+  align-items: start;
+}
+.SearchContactsClass .FilterPanel .PanelField {
+  float: none;
+  clear: none;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  align-self: start;
+}
+.SearchContactsClass .FilterPanel .PanelField > label {
+  display: block;
+  float: none;
+  width: auto;
+  margin: 0 0 5px;
+  padding: 0;
+  color: var(--iqa-muted);
+  font-family: var(--iqa-font);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+}
+.SearchContactsClass .FilterPanel .PanelFieldValue {
+  float: none;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+.SearchContactsClass .FilterPanel .PanelFieldValue :is(input[type="text"], select):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .chosen-container *)) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--iqa-input-border);
+  border-radius: 6px;
+  background-color: var(--iqa-surface);
+  color: var(--iqa-text);
+  font: 13px/1.5 var(--iqa-font);
+  box-shadow: none;
+}
+
+/* Chosen renders the multi-select after page load. Only its chip tray scrolls;
+   the sibling results dropdown and its parent remain free to open normally. */
+.SearchContactsClass .FilterPanel .PanelFieldValue .chosen-container-multi {
+  /* Chosen writes a fixed inline width (173px in the supplied live HTML). */
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  font: 13px/1.5 var(--iqa-font);
+  vertical-align: top;
+  overflow: visible;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  max-height: var(--iqa-multi-max-height);
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--iqa-input-border);
+  border-radius: 6px;
+  background: var(--iqa-surface);
+  box-shadow: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices > .search-choice {
+  float: none;
+  max-width: 100%;
+  margin: 0;
+  padding: 3px 24px 3px 8px;
+  border: 1px solid var(--iqa-border);
+  border-radius: 4px;
+  background: var(--iqa-header);
+  color: var(--iqa-text);
+  font: 12px/16px var(--iqa-font);
+  box-shadow: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices > .search-choice .search-choice-close {
+  top: 5px;
+  right: 5px;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices > .search-choice.search-choice-focus {
+  /* Keep Chosen's keyboard highlight before removing a chip with Backspace. */
+  border-color: var(--iqa-link);
+  background: var(--iqa-selected);
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices > .search-choice.search-choice-disabled {
+  color: var(--iqa-muted);
+  opacity: .65;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices > .search-field {
+  float: none;
+  flex: 1 0 30px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-choices .chosen-search-input {
+  /* Preserve Chosen's dynamic input width and native chip-removal behaviour. */
+  max-width: 100%;
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  color: var(--iqa-text);
+  font: 13px/24px var(--iqa-font);
+}
+.SearchContactsClass .FilterPanel .chosen-container-active .chosen-choices {
+  border-color: var(--iqa-link);
+  box-shadow: none;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi:focus-within .chosen-choices {
+  outline: 2px solid var(--iqa-link);
+  outline-offset: 2px;
+}
+.SearchContactsClass .FilterPanel .chosen-container-multi .chosen-search-input:focus-visible {
+  outline: none;
+}
+
+/* Find and Export only; no generic submit/button rules hit Telerik controls. */
+.SearchContactsClass .FilterPanel .TextButton,
+.SearchContactsClass .GridTitlePanel .TextButton,
+.SearchContactsClass .us-iqa-native-export > .TextButton {
+  box-sizing: border-box;
+  min-height: var(--iqa-action-height);
+  margin: 0;
+  padding: 7px 14px;
+  border: 1px solid var(--iqa-link);
+  border-radius: 6px;
+  background: var(--iqa-link);
+  color: var(--iqa-surface);
+  font: 600 12px/1.5 var(--iqa-font);
+  text-transform: none;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: none;
+  cursor: pointer;
+}
+.SearchContactsClass .FilterPanel [id$="_ParametersContainer"] > div > input.TextButton[id$="_SubmitButton"] {
+  /* Reserve a complete final row so growing chips cannot shift this action. */
+  grid-column: 1 / -1;
+  justify-self: start;
+  align-self: start;
+  margin-top: 4px;
+}
+.SearchContactsClass .GridTitlePanel .TextButton,
+.SearchContactsClass .us-iqa-native-export > .TextButton {
+  border-color: var(--iqa-border);
+  background: var(--iqa-surface);
+  color: var(--iqa-text);
+}
+.SearchContactsClass .FilterPanel .TextButton:hover:not(:disabled) {
+  background: var(--iqa-link-hover);
+  border-color: var(--iqa-link-hover);
+}
+.SearchContactsClass .GridTitlePanel .TextButton:hover:not(:disabled),
+.SearchContactsClass .us-iqa-native-export > .TextButton:hover:not(:disabled) {
+  background: var(--iqa-header);
+  border-color: var(--iqa-input-border);
+}
+.SearchContactsClass .FilterPanel .TextButton:disabled { opacity: .6; cursor: wait; }
+.SearchContactsClass .GridTitlePanel {
+  margin: 0;
+  padding: 10px var(--iqa-inset);
+  border: 0;
+  background: transparent;
+}
+.SearchContactsClass .GridTitlePanel::after { content: ""; display: table; clear: both; }
+.SearchContactsClass .GridTitlePanel .btn-group {
+  /* Remove inline baseline space so the Export toolbar matches Find's height. */
+  display: flex;
+  align-items: center;
+}
+
+/* Easy Edit inserts a separate, inline-floated source-query link. Keep this
+   expanded toolbar in normal flow so wrapping never overlaps the Find row.
+   Flex layout ignores the children's native floats without changing the DOM. */
+.SearchContactsClass .GridTitlePanel:has(> [id$="_EditSourceQuery"]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+.SearchContactsClass .GridTitlePanel:has(> [id$="_EditSourceQuery"]) > .Title {
+  margin-inline-end: auto;
+}
+.SearchContactsClass .GridTitlePanel > [id$="_EditSourceQuery"] {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--iqa-action-height);
+  margin-inline-end: 12px;
+}
+.SearchContactsClass .GridTitlePanel:has(> [id$="_EditSourceQuery"]) > [id$="_TopRightPanel"] {
+  flex: 0 0 auto;
+}
+
+/* Without header enhancement, Export is in the next wrapper after the filters.
+   Float only its compact toolbar back into the reserved Find row. The offset
+   depends on the shared button height and bottom padding, not filter height.
+   Native wrappers, postback controls and keyboard order stay in place.
+   With a title, left-hand controls or Easy Edit link, keep normal toolbar flow. */
+.SearchContactsClass .FilterPanel:not([hidden]):has([id$="_ParametersContainer"] > div > input.TextButton[id$="_SubmitButton"]) + [id$="_GridPanel1"] > .GridTitlePanel:not([data-us-iqa-export-relocated]):not(:has(> .Title:not(:empty), > .FloatLeft > *, > [id$="_EditSourceQuery"])) {
+  float: right;
+  clear: none;
+  width: auto;
+  max-width: calc(100% - var(--iqa-inset) - var(--iqa-inset) - 100px);
+  min-height: var(--iqa-action-height);
+  margin: calc(0px - var(--iqa-action-height) - var(--iqa-filter-bottom)) var(--iqa-inset) var(--iqa-filter-bottom) 0;
+  padding: 0;
+}
+
+/* Native results table: no rules for the pager's nested tables or combo cells. */
+.SearchContactsClass .us-iqa-report-utilities .us-iqa-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--iqa-text);
+  /* Keep the native Export text node intact while displaying only its icon. */
+  font-size: 0;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: none;
+}
+.SearchContactsClass .us-iqa-report-utilities .us-iqa-icon-button:hover:not(:disabled) {
+  background: var(--iqa-table-head);
+  border-color: transparent;
+  color: var(--iqa-title);
+  text-decoration: none;
+}
+.SearchContactsClass .us-iqa-report-utilities .us-iqa-icon-button[aria-expanded="true"] {
+  background: var(--iqa-sort-bg);
+  color: var(--iqa-link);
+}
+.SearchContactsClass .us-iqa-icon-button > .caret,
+.SearchContactsClass .us-iqa-icon-button::after { display: none; }
+.SearchContactsClass .us-iqa-icon-button > svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+/* Optional expanded report. JS retains the actual controls in the same form.
+   Keep the shell below native dialogs and leave dropdown overflow visible. */
+/* The site's floating preferences tab overlaps the pinned pager on hover.
+   Hide only that tab for the lifetime of an expanded report. */
+body:has(.SearchContactsClass[data-us-iqa-expanded]) .cc-revoke {
+  display: none !important;
+}
+.SearchContactsClass[data-us-iqa-expanded] {
+  position: fixed !important;
+  inset: 0 auto auto 0;
+  z-index: calc(var(--z-modal, 1040) - 1);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none !important;
+  max-height: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--iqa-surface);
+}
+.SearchContactsClass[data-us-iqa-expanded] > .panel {
+  /* Inset content within each surface; keep the surfaces themselves full width.
+     Define this on the panel so it also works with the portal's saved tokens. */
+  --iqa-inset: var(--iqa-expanded-inset);
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.SearchContactsClass[data-us-iqa-expanded] > .panel > .panel-heading {
+  border-radius: 0;
+}
+.SearchContactsClass[data-us-iqa-expanded] [data-us-iqa-fill] {
+  /* iMIS sets display:block inline on ListerPanel. Every wrapper between the
+     viewport and data scroller must remain flex or the table grows unbounded.
+     Scope this override to the temporary expanded path only. */
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  height: auto;
+  float: none;
+}
+.SearchContactsClass[data-us-iqa-expanded] [data-us-iqa-fill] > :not([data-us-iqa-fill]):not(.us-iqa-data-scroll) {
+  flex: 0 0 auto;
+}
+.SearchContactsClass[data-us-iqa-expanded] > .panel[data-us-iqa-fill] { height: 100%; }
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll {
+  position: relative;
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 80px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable {
+  min-width: var(--us-iqa-table-width, 100%);
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--iqa-table-head);
+}
+/* Match the outer cell text to the report heading without narrowing the table
+   or its header/row backgrounds. Interior column spacing stays unchanged. */
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > thead > tr > :first-child,
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > tbody > tr > td:first-child {
+  padding-inline-start: var(--iqa-inset);
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > thead > tr > :last-child,
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > tbody > tr > td:last-child {
+  padding-inline-end: var(--iqa-inset);
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-pinned-pager {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--iqa-border);
+  border-collapse: collapse;
+  background: var(--iqa-header);
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-pinned-pager > tbody > .rgPager > td { padding: 0; }
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-pinned-pager .rgPagerCell {
+  padding-inline: var(--iqa-inset);
+}
+/* Only oversized filter areas scroll, leaving room for the data and pager on
+   short screens. The normal expanded filter area still permits dropdowns. */
+.SearchContactsClass[data-us-iqa-expanded] [data-us-iqa-filter-overflow] {
+  max-height: var(--us-iqa-filter-limit, 40vh);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.SearchContactsClass[data-us-iqa-window-animating] {
+  overflow: hidden;
+  /* Geometry is animated through WAAPI; no cloned controls or screenshot. */
+  will-change: top, left, width, height;
+}
+.SearchContactsClass .us-iqa-report-utilities .us-iqa-expand-toggle { order: 1; cursor: pointer; }
+.SearchContactsClass .us-iqa-report-utilities .us-iqa-expand-toggle[aria-pressed="true"] {
+  color: var(--iqa-link);
+  background: var(--iqa-sort-bg);
+}
+.SearchContactsClass .us-iqa-data-scroll:focus-visible {
+  outline: 2px solid var(--iqa-link);
+  outline-offset: -2px;
+}
+
+.SearchContactsClass .RadGrid {
+  clear: both;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--iqa-text);
+  font-family: var(--iqa-font);
+  font-size: 13px;
+}
+.SearchContactsClass .RadGrid .rgMasterTable {
+  width: 100%;
+  border: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: transparent;
+  color: var(--iqa-text);
+  font-family: var(--iqa-font);
+  font-size: 13px;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader {
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--iqa-border);
+  background: var(--iqa-table-head);
+  color: var(--iqa-muted);
+  font: 700 11px/1.5 var(--iqa-font);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: normal;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader > :is(a, span[onclick]) {
+  /* Orion declares sort-link colour important; keep it in the header palette. */
+  color: var(--iqa-muted) !important;
+  font: inherit;
+  text-decoration: none;
+}
+/* Native sort state follows whichever column is selected after each refresh. */
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:is(.rgSorted, [aria-sort="ascending"], [aria-sort="descending"]) {
+  background: var(--iqa-sort-bg);
+  color: var(--iqa-link);
+  box-shadow: inset 0 -2px 0 var(--iqa-link);
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:is(.rgSorted, [aria-sort="ascending"], [aria-sort="descending"]) > :is(a, span[onclick]) {
+  color: var(--iqa-link) !important;
+}
+/* Stretch the original Telerik sort link over its whole header cell. Keeping
+   that native link preserves its postback, keyboard and modifier-key behavior;
+   there is no additional click handler to accidentally sort a second time.
+   Scope to the actual Grid.Sort links, leaving other header controls alone. */
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]) {
+  --iqa-sort-icon-inset: 12px;
+  /* Lucide ArrowUpDown, ArrowUp and ArrowDown; license below the style block. */
+  --iqa-sort-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21 16-4 4-4-4M17 20V4m-14 4 4-4 4 4M7 4v16'/%3E%3C/svg%3E");
+  position: relative;
+  padding-inline-end: calc(var(--iqa-sort-icon-inset) + 24px);
+  vertical-align: middle;
+  cursor: pointer;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader > a[onclick*="Telerik.Web.UI.Grid.Sort("] {
+  /* Orion positions its old triangle relative to this link; undo that so the
+     stretched hit area uses the cell as its containing block. */
+  position: static;
+  display: inline;
+  padding: 0;
+  color: inherit !important;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader > a[onclick*="Telerik.Web.UI.Grid.Sort("]::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  visibility: visible;
+  transform: none;
+  cursor: pointer;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]) > :is(.rgSortAsc, .rgSortDesc) {
+  /* The native link performs the same sort; remove its duplicate arrow control
+     from presentation and the tab order without deleting the server control. */
+  display: none !important;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("])::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: var(--iqa-sort-icon-inset);
+  top: 50%;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  background-color: currentColor;
+  -webkit-mask: var(--iqa-sort-glyph) center / contain no-repeat;
+  mask: var(--iqa-sort-glyph) center / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]):is([aria-sort="ascending"], :has(> .rgSortAsc)) {
+  --iqa-sort-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 7-7 7 7M12 19V5'/%3E%3C/svg%3E");
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]):is([aria-sort="descending"], :has(> .rgSortDesc)) {
+  --iqa-sort-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14m7-7-7 7-7-7'/%3E%3C/svg%3E");
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]):is(:hover, :focus-within) {
+  background: var(--iqa-sort-bg);
+  color: var(--iqa-link);
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]):not(:is(.rgSorted, [aria-sort="ascending"], [aria-sort="descending"])):is(:hover, :focus-within) {
+  /* Hover previews the sort color, but only the active sort has an underline. */
+  box-shadow: none;
+  border-bottom-color: transparent;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]):is(:hover, :focus-within, .rgSorted, [aria-sort="ascending"], [aria-sort="descending"])::after {
+  opacity: 1;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader > a[onclick*="Telerik.Web.UI.Grid.Sort("]:focus-visible {
+  outline: none;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > thead > tr > .rgHeader:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]:focus-visible) {
+  outline: 2px solid var(--iqa-link);
+  outline-offset: -2px;
+}
+.SearchContactsClass[data-us-iqa-expanded] .us-iqa-data-scroll > .rgMasterTable > thead > tr > .rgHeader:last-child:has(> a[onclick*="Telerik.Web.UI.Grid.Sort("]) {
+  --iqa-sort-icon-inset: var(--iqa-inset);
+}
+.SearchContactsClass .RadGrid .rgMasterTable > tbody > :is(.rgRow, .rgAltRow) > td {
+  padding: var(--iqa-row-padding);
+  border: 0;
+  border-bottom: 1px solid var(--iqa-divider);
+  background: var(--iqa-surface);
+  color: var(--iqa-text);
+  font: 400 13px/1.5 var(--iqa-font);
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > tbody > :is(.rgRow, .rgAltRow):hover:not(:where(.rgSelectedRow)) > td {
+  background: var(--iqa-header);
+}
+.SearchContactsClass .RadGrid .rgMasterTable > tbody > .rgSelectedRow > td {
+  background: var(--iqa-selected);
+  color: var(--iqa-title);
+}
+.SearchContactsClass .RadGrid .rgMasterTable > tbody > :is(.rgRow, .rgAltRow) > td > a:not(:where(.TextButton, .btn, .aspNetDisabled)) {
+  color: var(--iqa-link);
+  text-decoration: none;
+}
+.SearchContactsClass .RadGrid .rgMasterTable > tbody > :is(.rgRow, .rgAltRow) > td > a:hover:not(:where(.TextButton, .btn, .aspNetDisabled)) {
+  color: var(--iqa-link-hover);
+  text-decoration: underline;
+}
+
+/* Pager surface: keep native control dimensions and dropdown visibility. */
+.SearchContactsClass .RadGrid .rgPager {
+  background: var(--iqa-header);
+  color: var(--iqa-muted);
+}
+.SearchContactsClass .RadGrid .rgPagerCell {
+  padding: 10px 12px;
+  border: 0;
+  color: var(--iqa-muted);
+  font-family: var(--iqa-font);
+  font-size: 12px;
+}
+.SearchContactsClass :is(a, button, input, select):focus-visible:not(:where(.PageSizeDropDown *)) {
+  outline: 2px solid var(--iqa-link);
+  outline-offset: 2px;
+}
+
+/* Page size is one composite control, not a standalone text field.
+   Remove the inner input's outline/glow; draw focus inside the complete
+   67px native control. Do not clip the wrapper or its opening dropdown. */
+.SearchContactsClass .RadGrid .PageSizeDropDown .rcbInput,
+.SearchContactsClass .RadGrid .PageSizeDropDown .rcbInput:focus {
+  border-color: transparent;
+  border-radius: 0;
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
+.SearchContactsClass .RadGrid .PageSizeDropDown:focus-within {
+  outline: 2px solid var(--iqa-title);
+  outline-offset: -2px;
+}
+@media (max-width: 600px) {
+  .SearchContactsClass { --iqa-inset: 12px; --iqa-row-padding: 8px; }
+  .SearchContactsClass [id$="_SelectContainer"]:has(> select[id$="_querySelectDropdown"]) > label,
+  .SearchContactsClass [id$="_SelectContainer"] > select[id$="_querySelectDropdown"] {
+    flex-basis: 100%;
+  }
+  .SearchContactsClass .FilterPanel [id$="_ParametersContainer"] > div:has(> .PanelField) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+</style>
+<script>
+/* Embedded icons: Lucide v1.8.0 (Funnel, Download, Maximize, Minimize,
+   ArrowUpDown, ArrowUp and ArrowDown).
+ISC License
+
+Copyright (c) 2026 Lucide Icons and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+---
+
+The following Lucide icons are derived from the Feather project:
+
+airplay, alert-circle, alert-octagon, alert-triangle, aperture, arrow-down-circle, arrow-down-left, arrow-down-right, arrow-down, arrow-left-circle, arrow-left, arrow-right-circle, arrow-right, arrow-up-circle, arrow-up-left, arrow-up-right, arrow-up, at-sign, calendar, cast, check, chevron-down, chevron-left, chevron-right, chevron-up, chevrons-down, chevrons-left, chevrons-right, chevrons-up, circle, clipboard, clock, code, columns, command, compass, corner-down-left, corner-down-right, corner-left-down, corner-left-up, corner-right-down, corner-right-up, corner-up-left, corner-up-right, crosshair, database, divide-circle, divide-square, dollar-sign, download, external-link, feather, frown, hash, headphones, help-circle, info, italic, key, layout, life-buoy, link-2, link, loader, lock, log-in, log-out, maximize, meh, minimize, minimize-2, minus-circle, minus-square, minus, monitor, moon, more-horizontal, more-vertical, move, music, navigation-2, navigation, octagon, pause-circle, percent, plus-circle, plus-square, plus, power, radio, rss, search, server, share, shopping-bag, sidebar, smartphone, smile, square, table-2, tablet, target, terminal, trash-2, trash, triangle, tv, type, upload, x-circle, x-octagon, x-square, x, zoom-in, zoom-out
+
+The MIT License (MIT) (for the icons listed above)
+
+Copyright (c) 2013-present Cole Bemis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+/* Optional filter disclosure and grouped header utilities for the IQA trial.
+   iPart CSS class examples:
+     SearchContactsClass us-filters-collapsible
+     SearchContactsClass us-filters-collapsible us-filters-collapsed
+     SearchContactsClass us-filters-collapsible us-report-expandable
+   The last class controls INITIAL state only. User choices survive refreshes
+   in this browser tab. A different query or initial-state class resets that
+   preference. No filter values are stored, cleared, cloned or disabled.
+   Export is moved as one native dropdown, not copied. Its original slot is
+   restored before an AJAX replacement so iMIS can dispose/update it normally. */
+(function () {
+  "use strict";
+
+  // A Content HTML embed may execute again after an iMIS partial postback.
+  if (window.UnionSuiteIqaFilters) {
+    window.UnionSuiteIqaFilters.refresh();
+    return;
+  }
+
+  var scope = ".SearchContactsClass";
+  var filterSelector = ".FilterPanel[id$='_DataSourcePanel'], .FilterPanelHorizontal[id$='_DataSourcePanel']";
+  var entries = new Map();
+  var states = new Map();
+  var timer = null;
+  var application = null;
+  var requestManager = null;
+  var filterDuration = 180; // Milliseconds; set to 0 to disable animation.
+  var windowDuration = 240; // Grow/shrink duration; reduced motion skips both.
+  var expanded = null;
+  var expandedKey = "UnionSuite.iqaExpanded.v1:" + window.location.pathname;
+  var expandedIntent = null;
+  try { expandedIntent = JSON.parse(window.sessionStorage.getItem(expandedKey)); } catch (_) {}
+  var reducedMotion = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
+  // Exact paths from bundled Lucide v1.8.0 Funnel, Download, Maximize, Minimize.
+  function icon(name) {
+    var paths = ({ filter: [
+      "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"
+    ], download: ["M12 15V3", "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "m7 10 5 5 5-5"],
+    expand: ["M8 3H5a2 2 0 0 0-2 2v3", "M21 8V5a2 2 0 0 0-2-2h-3", "M3 16v3a2 2 0 0 0 2 2h3", "M16 21h3a2 2 0 0 0 2-2v-3"],
+    restore: ["M8 3v3a2 2 0 0 1-2 2H3", "M21 8h-3a2 2 0 0 1-2-2V3", "M3 16h3a2 2 0 0 1 2 2v3", "M16 21v-3a2 2 0 0 1 2-2h3"] })[name];
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    Object.entries({
+      viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+      "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round",
+      "aria-hidden": "true", focusable: "false"
+    }).forEach(function (attribute) { svg.setAttribute(attribute[0], attribute[1]); });
+    paths.forEach(function (data) {
+      var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", data);
+      svg.appendChild(path);
+    });
+    return svg;
+  }
+
+  function belongsTo(wrapper, element) {
+    return element.closest(".SearchContactsClass") === wrapper &&
+      element.closest(".ContentItemContainer") === wrapper.closest(".ContentItemContainer");
+  }
+
+  function storageKey(filter) {
+    return "UnionSuite.iqaFilters.v1:" + window.location.pathname + ":" + filter.id;
+  }
+
+  function saveState(entry) {
+    states.set(entry.key, entry.state);
+    try {
+      window.sessionStorage.setItem(entry.key, JSON.stringify(entry.state));
+    } catch (_) {
+      // The in-memory preference still works if browser storage is unavailable.
+    }
+  }
+
+  function getState(wrapper, filter) {
+    var selector = Array.from(wrapper.querySelectorAll("select[id$='_querySelectDropdown']"))
+      .find(function (element) { return belongsTo(wrapper, element); });
+    var query = selector ? selector.value : "";
+    var initialCollapsed = wrapper.classList.contains("us-filters-collapsed");
+    var key = storageKey(filter);
+    var previous = states.get(key);
+    if (!previous) {
+      try { previous = JSON.parse(window.sessionStorage.getItem(key)); } catch (_) {}
+    }
+    if (previous && previous.query === query &&
+        previous.initialCollapsed === initialCollapsed &&
+        typeof previous.collapsed === "boolean") {
+      return previous;
+    }
+    return { query: query, initialCollapsed: initialCollapsed, collapsed: initialCollapsed };
+  }
+
+  function hasError(entry) {
+    if (!entry.filter) return false;
+    if (entry.filter.querySelector("[aria-invalid='true']")) return true;
+    return Array.from(window.Page_Validators || []).some(function (validator) {
+      if (validator.enabled === false || validator.isvalid !== false) return false;
+      var control = document.getElementById(validator.controltovalidate);
+      return entry.filter.contains(validator) || (control && entry.filter.contains(control));
+    });
+  }
+
+  function finishTransition(entry) {
+    if (!entry.filter) return;
+    var animation = entry.animation;
+    entry.animation = null;
+    if (animation) animation.cancel();
+    entry.filter.hidden = entry.state.collapsed;
+    entry.filter.inert = entry.originalInert;
+    entry.filter.removeAttribute("data-us-iqa-filter-animating");
+    if (expanded && expanded.entry === entry) fitExpandedFilters(expanded);
+  }
+
+  function frame(filter) {
+    var style = window.getComputedStyle(filter);
+    return {
+      height: filter.getBoundingClientRect().height + "px",
+      paddingTop: style.paddingTop, paddingBottom: style.paddingBottom,
+      marginTop: style.marginTop, marginBottom: style.marginBottom,
+      borderTopWidth: style.borderTopWidth, borderBottomWidth: style.borderBottomWidth,
+      opacity: style.opacity
+    };
+  }
+
+  function render(entry, animate) {
+    if (!entry.filter) return;
+    var collapsed = entry.state.collapsed;
+    if (collapsed && entry.filter.contains(document.activeElement)) entry.button.focus();
+    entry.button.setAttribute("aria-expanded", String(!collapsed));
+    var label = collapsed ? "Show filters" : "Hide filters";
+    entry.button.setAttribute("aria-label", label);
+    entry.button.title = label;
+    if (!animate || !entry.filter.animate || filterDuration <= 0 ||
+        (reducedMotion && reducedMotion.matches) ||
+        (!entry.animation && entry.filter.hidden === collapsed)) {
+      finishTransition(entry);
+      return;
+    }
+    var zero = {
+      height: "0px", paddingTop: "0px", paddingBottom: "0px",
+      marginTop: "0px", marginBottom: "0px",
+      borderTopWidth: "0px", borderBottomWidth: "0px", opacity: "0"
+    };
+    // Capture the current visual size before cancelling an in-flight toggle,
+    // so rapid clicks reverse smoothly instead of jumping to an endpoint.
+    var start = entry.filter.hidden ? zero : frame(entry.filter);
+    if (entry.animation) entry.animation.cancel();
+    entry.animation = null;
+    entry.filter.hidden = false;
+    entry.filter.setAttribute("data-us-iqa-filter-animating", "");
+    var end = collapsed ? zero : frame(entry.filter);
+    entry.filter.inert = true;
+    try {
+      var animation = entry.filter.animate([start, end], {
+        duration: filterDuration, easing: "cubic-bezier(.2, 0, 0, 1)", fill: "both"
+      });
+      entry.animation = animation;
+      animation.onfinish = function () {
+        if (entry.animation === animation) finishTransition(entry);
+      };
+    } catch (_) {
+      finishTransition(entry);
+    }
+  }
+
+  function expandForError(entry) {
+    if (entry.filter && entry.state.collapsed && hasError(entry)) {
+      entry.state.collapsed = false;
+      render(entry);
+      saveState(entry);
+    }
+  }
+
+  function restoreExport(entry) {
+    var moved = entry.exportControl;
+    if (!moved) return;
+    moved.icon.remove();
+    moved.button.classList.remove("us-iqa-icon-button");
+    ["title", "aria-label"].forEach(function (name) {
+      if (moved.labels[name] === null) moved.button.removeAttribute(name);
+      else moved.button.setAttribute(name, moved.labels[name]);
+    });
+    moved.group.classList.remove("us-iqa-native-export");
+    if (moved.slot.isConnected) {
+      moved.slot.replaceWith(moved.group);
+    } else {
+      // The original source was replaced without a pageLoading notification.
+      // Discard the old moved control; reconciliation will find the new one.
+      moved.group.remove();
+      moved.slot.remove();
+    }
+    moved.toolbar.removeAttribute("data-us-iqa-export-relocated");
+    moved.toolbar.removeAttribute("data-us-iqa-empty-toolbar");
+    entry.exportControl = null;
+  }
+
+  function syncExport(entry) {
+    var moved = entry.exportControl;
+    if (moved && (!moved.slot.isConnected || !moved.group.isConnected)) {
+      restoreExport(entry);
+      moved = null;
+    }
+    if (!moved) {
+      var gridPanel = Array.from(entry.grid.children).find(function (child) {
+        return child.id.endsWith("_GridPanel1");
+      });
+      if (!gridPanel) return;
+      var toolbar = Array.from(gridPanel.children).find(function (child) {
+        return child.classList.contains("GridTitlePanel");
+      });
+      if (!toolbar) return;
+      var right = Array.from(toolbar.children).find(function (child) {
+        return child.id.endsWith("_TopRightPanel");
+      });
+      var groups = right ? Array.from(right.querySelectorAll(".btn-group")).filter(function (group) {
+        return group.querySelector("button.dropdown-toggle") &&
+          group.querySelector(".dropdown-menu a[id*='_btnExport']");
+      }) : [];
+      if (groups.length !== 1) return;
+      var group = groups[0];
+      if (group.closest("form") !== entry.actions.closest("form")) return;
+      var slot = document.createComment("UnionSuite native Export slot");
+      group.before(slot);
+      entry.utilities.appendChild(group);
+      group.classList.add("us-iqa-native-export");
+      var button = group.querySelector("button.dropdown-toggle");
+      var labels = { title: button.getAttribute("title"), "aria-label": button.getAttribute("aria-label") };
+      var download = icon("download");
+      button.appendChild(download);
+      button.classList.add("us-iqa-icon-button");
+      button.setAttribute("aria-label", "Export options");
+      button.title = "Export options";
+      moved = { group: group, slot: slot, toolbar: toolbar, button: button, labels: labels, icon: download };
+      entry.exportControl = moved;
+    }
+    moved.toolbar.setAttribute("data-us-iqa-export-relocated", "");
+    // Empty nested wrappers/whitespace should not retain a blank toolbar row.
+    // Keep native titles, Easy Edit and any other useful controls visible.
+    var empty = !moved.toolbar.textContent.trim() && !moved.toolbar.querySelector(
+      "a, button, input:not([type='hidden']), select, textarea, img, svg, [role='button']"
+    );
+    moved.toolbar.toggleAttribute("data-us-iqa-empty-toolbar", empty);
+  }
+
+  function rememberExpanded(value) {
+    expandedIntent = value;
+    try {
+      if (value) window.sessionStorage.setItem(expandedKey, JSON.stringify(value));
+      else window.sessionStorage.removeItem(expandedKey);
+    } catch (_) {}
+  }
+
+  function reportId(entry) { return entry.grid.id || entry.grid.getAttribute("data-gridid"); }
+
+  function expandedStructure(entry) {
+    if (expanded && expanded.entry === entry) return expanded.structure;
+    var grids = Array.from(entry.grid.querySelectorAll(".RadGrid")).filter(function (grid) {
+      return belongsTo(entry.wrapper, grid);
+    });
+    if (grids.length !== 1) return null;
+    var grid = grids[0];
+    // This adapter is for the captured non-virtualized, single-table RadGrid.
+    // Do not restructure grids that already use Telerik's split scrolling DOM.
+    var tables = Array.from(grid.children).filter(function (child) { return child.matches("table.rgMasterTable"); });
+    if (tables.length !== 1 || !entry.wrapper.closest("form")) return null;
+    var table = tables[0];
+    var pager = table.tFoot && Array.from(table.tFoot.rows).find(function (row) { return row.matches(".rgPager"); });
+    return { grid: grid, table: table, pager: pager || null };
+  }
+
+  function paintExpandButton(entry) {
+    if (!entry.expandButton) return;
+    var active = Boolean(expanded && expanded.entry === entry);
+    var label = active ? "Restore report size (Escape)" : "Expand report";
+    entry.expandButton.setAttribute("aria-label", label);
+    entry.expandButton.setAttribute("aria-pressed", String(active));
+    entry.expandButton.title = label;
+    entry.expandButton.replaceChildren(icon(active ? "restore" : "expand"));
+  }
+
+  function syncExpandable(entry) {
+    var enabled = entry.wrapper.classList.contains("us-report-expandable");
+    if (!enabled) {
+      if (expanded && expanded.entry === entry) releaseExpanded(false, true);
+      if (entry.expandButton) entry.expandButton.remove();
+      entry.expandButton = null;
+      return;
+    }
+    if (!entry.expandButton) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "us-iqa-icon-button us-iqa-expand-toggle";
+      button.setAttribute("aria-controls", entry.grid.id);
+      button.addEventListener("click", function () {
+        if (expanded && expanded.entry === entry && expanded.phase !== "closing") closeExpanded(true);
+        else openExpanded(entry, true);
+      });
+      entry.utilities.appendChild(button);
+      entry.expandButton = button;
+    }
+    paintExpandButton(entry);
+    entry.expandButton.disabled = !expandedStructure(entry);
+    if (entry.expandButton.disabled) {
+      entry.expandButton.title = "Expand is unavailable for this grid layout";
+      entry.expandButton.setAttribute("aria-label", entry.expandButton.title);
+    }
+  }
+
+  function temporaryStyle(mode, element, name, value) {
+    if (!mode.styles.some(function (saved) { return saved.element === element && saved.name === name; })) {
+      mode.styles.push({ element: element, name: name, value: element.style.getPropertyValue(name), priority: element.style.getPropertyPriority(name) });
+    }
+    element.style.setProperty(name, value);
+  }
+
+  function clipRect(rect) {
+    var width = document.documentElement.clientWidth;
+    var height = window.innerHeight;
+    var left = Math.max(0, Math.min(rect.left, width - 1));
+    var top = Math.max(0, Math.min(rect.top, height - 1));
+    return { left: left, top: top, width: Math.max(1, Math.min(rect.left + rect.width, width) - left), height: Math.max(1, Math.min(rect.top + rect.height, height) - top) };
+  }
+
+  function visibleRect(element) {
+    return clipRect(element.getBoundingClientRect());
+  }
+
+  function returnRect(original, fallback) {
+    var rect = original && original.returnRect;
+    if (!rect || ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0) return fallback;
+    // Copy the saved viewport rectangle; never use the portaled placeholder's
+    // current position as the destination of the shrink animation.
+    return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  }
+
+  function viewportRect() {
+    return { left: 0, top: 0, width: document.documentElement.clientWidth, height: window.innerHeight };
+  }
+
+  function rectFrame(rect) {
+    return { left: rect.left + "px", top: rect.top + "px", width: rect.width + "px", height: rect.height + "px" };
+  }
+
+  function settleWindow(mode) {
+    if (expanded !== mode) return;
+    if (mode.animation) mode.animation.cancel();
+    mode.animation = null;
+    mode.entry.wrapper.removeAttribute("data-us-iqa-window-animating");
+    if (mode.phase === "closing") releaseExpanded(false, true);
+    else {
+      mode.phase = "open";
+      fitExpandedFilters(mode);
+    }
+  }
+
+  function animateWindow(mode, from, to, closing, animate) {
+    if (mode.animation) mode.animation.cancel();
+    mode.animation = null;
+    mode.phase = closing ? "closing" : "opening";
+    if (!animate || !mode.entry.wrapper.animate || windowDuration <= 0 || (reducedMotion && reducedMotion.matches)) {
+      settleWindow(mode);
+      return;
+    }
+    mode.entry.wrapper.setAttribute("data-us-iqa-window-animating", "");
+    try {
+      var animation = mode.entry.wrapper.animate([rectFrame(from), rectFrame(to)], {
+        duration: windowDuration, easing: "cubic-bezier(.2, 0, 0, 1)", fill: "both"
+      });
+      mode.animation = animation;
+      animation.onfinish = function () { if (mode.animation === animation) settleWindow(mode); };
+    } catch (_) { settleWindow(mode); }
+  }
+
+  function fitExpandedFilters(mode) {
+    if (expanded !== mode || mode.phase !== "open") return;
+    var filter = mode.nativeFilter;
+    if (!filter || filter.hidden) return;
+    var parameters = filter.querySelector("[id$='_ParametersContainer']");
+    var height = parameters ? parameters.getBoundingClientRect().height + 48 : filter.scrollHeight;
+    var fixedHeight = mode.structure.grid.getBoundingClientRect().top - filter.getBoundingClientRect().height;
+    var footerHeight = mode.footer ? mode.footer.getBoundingClientRect().height : 0;
+    var limit = Math.max(64, Math.min(window.innerHeight * .4, window.innerHeight - fixedHeight - footerHeight - 100));
+    temporaryStyle(mode, filter, "--us-iqa-filter-limit", limit + "px");
+    filter.toggleAttribute("data-us-iqa-filter-overflow", height > limit);
+  }
+
+  function pointPagerUp(mode) {
+    if (!mode.structure.pager || !window.$find) return;
+    var ui = window.Telerik && window.Telerik.Web && window.Telerik.Web.UI;
+    var up = ui && ui.jSlideDirection && ui.jSlideDirection.Up;
+    if (up === undefined) return;
+    mode.structure.pager.querySelectorAll(".PageSizeDropDown[id]").forEach(function (element) {
+      var combo = window.$find(element.id);
+      if (!combo || !combo.get_slideDirection || !combo.set_slideDirection) return;
+      if (combo.hideDropDown) combo.hideDropDown();
+      mode.combos.push({ control: combo, direction: combo.get_slideDirection() });
+      combo.set_slideDirection(up);
+    });
+  }
+
+  function openExpanded(entry, animate) {
+    if (!entry.wrapper.classList.contains("us-report-expandable")) return;
+    if (expanded && expanded.entry === entry) {
+      if (expanded.phase === "closing") animateWindow(expanded, visibleRect(entry.wrapper), viewportRect(), false, animate);
+      return;
+    }
+    var structure = expandedStructure(entry);
+    if (!structure) return;
+    if (expanded) releaseExpanded(false, false);
+    finishTransition(entry);
+    var wrapper = entry.wrapper;
+    var original = expandedIntent && expandedIntent.id === reportId(entry) ? expandedIntent : null;
+    if (original) window.scrollTo({ left: original.x, top: original.y, behavior: "instant" });
+    var rect = wrapper.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    var from = visibleRect(wrapper);
+    var mode = {
+      entry: entry, structure: structure, styles: [], fill: [], combos: [],
+      animation: null, phase: "opening", footer: null, pagerSlot: null,
+      focus: document.activeElement, x: original ? original.x : window.scrollX,
+      y: original ? original.y : window.scrollY, returnRect: returnRect(original, from),
+      nativeFilter: entry.grid.querySelector(filterSelector)
+    };
+    expanded = mode;
+    try {
+      // Moving the original report must not make browser scroll anchoring
+      // reposition the page behind the expanding/shrinking overlay.
+      temporaryStyle(mode, document.documentElement, "overflow-anchor", "none");
+      // Keep the original layout space and page scroll while escaping ancestor
+      // clipping/transforms. The native ASP.NET form remains the form owner.
+      mode.slot = document.createElement("div");
+      mode.slot.setAttribute("aria-hidden", "true");
+      mode.slot.style.height = rect.height + "px";
+      var computed = window.getComputedStyle(wrapper);
+      mode.slot.style.margin = computed.margin;
+      wrapper.before(mode.slot);
+      // Preserve tokens inherited from page/zone classes after portal placement.
+      Array.from(computed).filter(function (name) { return name.indexOf("--") === 0; }).forEach(function (name) {
+        temporaryStyle(mode, wrapper, name, computed.getPropertyValue(name));
+      });
+      var tableWidth = structure.table.getBoundingClientRect().width;
+      var gutter = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+      if (gutter) {
+        var padding = parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
+        temporaryStyle(mode, document.body, "padding-right", padding + gutter + "px");
+      }
+      wrapper.closest("form").appendChild(wrapper);
+      mode.portaled = true;
+      wrapper.setAttribute("data-us-iqa-expanded", "");
+      [document.documentElement, document.body].forEach(function (element) {
+        temporaryStyle(mode, element, "overflow", "hidden");
+      });
+      var node = structure.grid;
+      while (node && node !== wrapper) {
+        node.setAttribute("data-us-iqa-fill", "");
+        mode.fill.push(node);
+        node = node.parentElement;
+      }
+      mode.scroll = document.createElement("div");
+      mode.scroll.className = "us-iqa-data-scroll";
+      mode.scroll.tabIndex = 0;
+      mode.scroll.setAttribute("role", "region");
+      var title = entry.header && entry.header.querySelector(".panel-title");
+      mode.scroll.setAttribute("aria-label", (title ? title.textContent.trim() : "Report") + " data");
+      mode.scroll.style.setProperty("--us-iqa-table-width", Math.ceil(tableWidth) + "px");
+      structure.table.before(mode.scroll);
+      mode.scroll.appendChild(structure.table);
+      if (structure.pager) {
+        mode.pagerSlot = document.createComment("UnionSuite native pager slot");
+        structure.pager.before(mode.pagerSlot);
+        mode.footer = document.createElement("table");
+        mode.footer.className = "us-iqa-pinned-pager";
+        mode.footer.setAttribute("role", "presentation");
+        var body = document.createElement("tbody");
+        mode.footer.appendChild(body);
+        body.appendChild(structure.pager);
+        structure.grid.appendChild(mode.footer);
+      }
+      pointPagerUp(mode);
+      if (window.ResizeObserver) {
+        mode.resize = new ResizeObserver(function () { fitExpandedFilters(mode); });
+        mode.resize.observe(wrapper);
+        if (mode.nativeFilter) {
+          var parameters = mode.nativeFilter.querySelector("[id$='_ParametersContainer']");
+          if (parameters) mode.resize.observe(parameters);
+        }
+      }
+      rememberExpanded({ id: reportId(entry), x: mode.x, y: mode.y, returnRect: mode.returnRect });
+      paintExpandButton(entry);
+      if (entry.expandButton) entry.expandButton.focus({ preventScroll: true });
+      window.scrollTo({ left: mode.x, top: mode.y, behavior: "instant" });
+      animateWindow(mode, from, viewportRect(), false, animate);
+    } catch (error) {
+      releaseExpanded(false, true);
+      window.console.warn("UnionSuite: report expansion restored after an integration error.", error);
+    }
+  }
+
+  function releaseExpanded(preserve, focus) {
+    var mode = expanded;
+    if (!mode) return;
+    expanded = null;
+    if (!preserve) rememberExpanded(null);
+    if (mode.animation) mode.animation.cancel();
+    if (mode.resize) mode.resize.disconnect();
+    mode.combos.forEach(function (saved) {
+      try {
+        if (saved.control.hideDropDown) saved.control.hideDropDown();
+        saved.control.set_slideDirection(saved.direction);
+      } catch (_) {} // A separately disposed Telerik control needs no restoration.
+    });
+    if (mode.pagerSlot && mode.pagerSlot.parentNode) mode.pagerSlot.replaceWith(mode.structure.pager);
+    if (mode.footer) mode.footer.remove();
+    if (mode.scroll && mode.scroll.parentNode) mode.scroll.replaceWith(mode.structure.table);
+    mode.fill.forEach(function (element) { element.removeAttribute("data-us-iqa-fill"); });
+    if (mode.nativeFilter) mode.nativeFilter.removeAttribute("data-us-iqa-filter-overflow");
+    var wrapper = mode.entry.wrapper;
+    wrapper.removeAttribute("data-us-iqa-expanded");
+    wrapper.removeAttribute("data-us-iqa-window-animating");
+    mode.styles.reverse().forEach(function (saved) {
+      if (saved.value) saved.element.style.setProperty(saved.name, saved.value, saved.priority);
+      else saved.element.style.removeProperty(saved.name);
+    });
+    if (mode.slot && mode.slot.isConnected) mode.slot.replaceWith(wrapper);
+    else if (mode.portaled) wrapper.remove(); // Do not resurrect a removed iPart.
+    paintExpandButton(mode.entry);
+    window.scrollTo({ left: mode.x, top: mode.y, behavior: "instant" });
+    if (focus) {
+      var target = mode.focus && mode.focus.isConnected ? mode.focus : mode.entry.expandButton;
+      if (target && target.isConnected) target.focus({ preventScroll: true });
+    }
+  }
+
+  function closeExpanded(animate) {
+    if (!expanded) return;
+    var mode = expanded;
+    // Align the underlying page first, while the full-window report covers it.
+    // The captured rectangle is the reverse of the original grow animation;
+    // a placeholder shifted below the viewport must not pull it downwards.
+    window.scrollTo({ left: mode.x, top: mode.y, behavior: "instant" });
+    var target = clipRect(mode.returnRect);
+    animateWindow(mode, visibleRect(mode.entry.wrapper), target, true, animate);
+  }
+
+  function beforeAjaxUpdate() {
+    // ASP.NET must see the original tree before disposing UpdatePanel content.
+    if (expanded) releaseExpanded(true, false);
+    entries.forEach(function (entry) {
+      finishTransition(entry);
+      restoreExport(entry);
+    });
+  }
+
+  function dispose(entry, preserveActions) {
+    if (expanded && expanded.entry === entry) releaseExpanded(true, false);
+    if (entry.observer) entry.observer.disconnect();
+    finishTransition(entry);
+    restoreExport(entry);
+    entry.utilities.remove();
+    if (!preserveActions) entry.actions.remove();
+    if (entry.tools) entry.tools.remove();
+    if (entry.header && !preserveActions) entry.header.removeAttribute("data-us-iqa-filter-heading");
+    if (entry.filter) {
+      entry.filter.hidden = false;
+      entry.filter.removeAttribute("data-us-iqa-filter-region");
+    }
+  }
+
+  function attach(wrapper, filter, header, grid, retainedActions) {
+    var actions = retainedActions || document.createElement("div");
+    actions.className = "us-iqa-report-actions us-panel-actions";
+    var customActions = actions.querySelector("[data-us-panel-actions-slot]");
+    if (!customActions) {
+      customActions = document.createElement("div");
+      customActions.className = "us-iqa-custom-actions";
+      customActions.setAttribute("data-us-panel-actions-slot", "");
+      actions.appendChild(customActions);
+    }
+    var utilities = document.createElement("div");
+    utilities.className = "us-iqa-report-utilities";
+    actions.appendChild(utilities);
+    var button = filter ? document.createElement("button") : null;
+    if (button) {
+      button.type = "button";
+      button.className = "us-iqa-filter-toggle us-iqa-icon-button";
+      button.setAttribute("aria-controls", filter.id);
+      button.setAttribute("data-us-iqa-filter-toggle", "");
+      button.appendChild(icon("filter"));
+      utilities.appendChild(button);
+    }
+    var entry = {
+      wrapper: wrapper, filter: filter, header: header, button: button, grid: grid,
+      actions: actions, customActions: customActions, utilities: utilities,
+      exportControl: null, expandButton: null, animation: null, originalInert: filter ? filter.inert : false,
+      tools: null, observer: null, key: filter ? storageKey(filter) : null,
+      state: filter ? getState(wrapper, filter) : null
+    };
+    if (button) button.addEventListener("click", function () {
+      entry.state.collapsed = !entry.state.collapsed;
+      if (hasError(entry)) entry.state.collapsed = false;
+      render(entry, true);
+      saveState(entry);
+    });
+    if (header) {
+      header.appendChild(actions);
+      header.setAttribute("data-us-iqa-filter-heading", "");
+    } else {
+      // Untitled reports group both utilities in one persistent compact row.
+      entry.tools = document.createElement("div");
+      entry.tools.className = "us-iqa-filter-tools";
+      entry.tools.appendChild(actions);
+      (filter || grid).before(entry.tools);
+    }
+    if (filter) filter.setAttribute("data-us-iqa-filter-region", "");
+    if (hasError(entry)) entry.state.collapsed = false;
+    render(entry);
+    if (filter) saveState(entry);
+    syncExport(entry);
+    syncExpandable(entry);
+    if (filter && window.MutationObserver) {
+      // Web Forms validators update spans without an AJAX refresh. Observe
+      // this filter region only, and never wrap/replace Page_ClientValidate.
+      entry.observer = new MutationObserver(function () { expandForError(entry); });
+      entry.observer.observe(filter, {
+        subtree: true, childList: true, attributes: true,
+        attributeFilter: ["aria-invalid", "style", "class"]
+      });
+    }
+    return entry;
+  }
+
+  function reconcile() {
+    timer = null;
+    attachAjax();
+    if (expanded && !expanded.slot.isConnected) releaseExpanded(false, false);
+    if (expanded && (!expanded.structure.grid.isConnected || !expanded.structure.table.isConnected || !expanded.scroll.isConnected)) {
+      releaseExpanded(true, false);
+    }
+    entries.forEach(function (entry, wrapper) {
+      if (!wrapper.isConnected || !wrapper.matches(scope)) {
+        dispose(entry);
+        entries.delete(wrapper);
+      }
+    });
+    document.querySelectorAll(scope).forEach(function (wrapper) {
+      var panel = Array.from(wrapper.children).find(function (child) {
+        return child.classList.contains("panel");
+      });
+      var grids = panel ? Array.from(panel.querySelectorAll("[data-gridid]")).filter(function (grid) {
+        return belongsTo(wrapper, grid);
+      }) : [];
+      var grid = grids.length === 1 ? grids[0] : null;
+      var filters = grid && wrapper.classList.contains("us-filters-collapsible") ?
+        Array.from(grid.querySelectorAll(filterSelector)).filter(function (filter) {
+        var parameters = filter.querySelector("[id$='_ParametersContainer']");
+        // Only native Query Menu filters with actual input fields are supported.
+        return belongsTo(wrapper, filter) && filter.parentElement.hasAttribute("data-gridid") &&
+          parameters && parameters.querySelector(
+            "select, textarea, input:not([type='hidden']):not([type='submit']):not([type='button'])"
+          ) && filter.style.display !== "none" &&
+          (!filter.hidden || filter.hasAttribute("data-us-iqa-filter-region"));
+      }) : [];
+      var filter = filters.length === 1 ? filters[0] : null;
+      var header = panel && Array.from(panel.children).find(function (child) {
+        var title = child.querySelector(".panel-title");
+        return child.classList.contains("panel-heading") && title && title.textContent.trim();
+      });
+      var entry = entries.get(wrapper);
+      var retainedActions = null;
+      if (entry && (entry.filter !== filter || entry.header !== header || entry.grid !== grid ||
+          !entry.actions.isConnected || (entry.button && !entry.button.isConnected))) {
+        // Preserve registered custom controls when only the query/filter body
+        // refreshes. Their native nodes and click handlers stay in the header.
+        if (grid && header && entry.header === header && entry.actions.isConnected) {
+          retainedActions = entry.actions;
+        }
+        dispose(entry, Boolean(retainedActions));
+        entries.delete(wrapper);
+        entry = null;
+      }
+      if (!grid) return;
+      if (!entry) {
+        entry = attach(wrapper, filter, header, grid, retainedActions);
+        entries.set(wrapper, entry);
+      } else {
+        if (filter) entry.state = getState(wrapper, filter);
+        if (hasError(entry)) entry.state.collapsed = false;
+        render(entry);
+        if (filter) saveState(entry);
+        syncExport(entry);
+        syncExpandable(entry);
+      }
+      // A central action registry can populate this slot idempotently.
+      // Business handlers and URLs must come from that verified registry.
+      document.dispatchEvent(new CustomEvent("us:panel-actions-ready", {
+        detail: { wrapper: wrapper, container: entry.customActions }
+      }));
+    });
+    // Query selection, sorting and paging can replace the body or the entire
+    // iPart. Re-enter using its stable grid ID, without an entrance animation.
+    if (!expanded && expandedIntent) {
+      var pending = Array.from(entries.values()).find(function (entry) {
+        return reportId(entry) === expandedIntent.id;
+      });
+      if (pending && pending.wrapper.classList.contains("us-report-expandable")) openExpanded(pending, false);
+      else rememberExpanded(null);
+    }
+  }
+
+  function schedule() {
+    if (timer === null) timer = window.setTimeout(reconcile, 0);
+  }
+
+  function attachAjax() {
+    var sys = window.Sys;
+    if (!sys) return;
+    if (sys.Application && sys.Application !== application && sys.Application.add_load) {
+      application = sys.Application;
+      application.add_load(schedule);
+    }
+    if (sys.WebForms && sys.WebForms.PageRequestManager) {
+      var manager = sys.WebForms.PageRequestManager.getInstance();
+      if (manager && manager !== requestManager && manager.add_endRequest) {
+        requestManager = manager;
+        if (manager.add_pageLoading) manager.add_pageLoading(beforeAjaxUpdate);
+        requestManager.add_endRequest(schedule);
+      }
+    }
+  }
+
+  // Browser validation can fire while required inputs are collapsed.
+  document.addEventListener("invalid", function (event) {
+    entries.forEach(function (entry) {
+      if (entry.filter && entry.filter.contains(event.target)) {
+        entry.state.collapsed = false;
+        render(entry);
+        saveState(entry);
+      }
+    });
+  }, true);
+
+  // Check Web Forms validation after native click handlers have completed,
+  // including handlers that cancel their own event after a validation error.
+  document.addEventListener("click", function () {
+    window.setTimeout(function () { entries.forEach(expandForError); }, 0);
+  }, true);
+
+  function visibleElement(element) {
+    return Boolean(element.getClientRects().length) && window.getComputedStyle(element).visibility !== "hidden";
+  }
+
+  function nativePopupOpen() {
+    return Array.from(document.querySelectorAll(
+      ".RadWindow, .rwWindow, .modal.show, .modal.in, [role='dialog'][aria-modal='true'], " +
+      ".RadComboBoxDropDown, .chosen-with-drop .chosen-drop, .us-iqa-native-export.open .dropdown-menu, " +
+      ".us-iqa-native-export.show .dropdown-menu"
+    )).some(visibleElement);
+  }
+
+  // Give an open native menu/dialog first use of Escape, even if its handler
+  // closes the menu before our bubbling listener runs.
+  var escapeFromPopup = false;
+  document.addEventListener("keydown", function (event) {
+    if (expanded && event.key === "Escape") escapeFromPopup = nativePopupOpen() || event.target.matches("select");
+  }, true);
+  document.addEventListener("keydown", function (event) {
+    if (!expanded || event.defaultPrevented) return;
+    if (event.key === "Escape" && !escapeFromPopup) {
+      event.preventDefault();
+      closeExpanded(true);
+    } else if (event.key === "Tab" && !nativePopupOpen()) {
+      var wrapper = expanded.entry.wrapper;
+      var controls = Array.from(wrapper.querySelectorAll(
+        "a[href], button, input:not([type='hidden']), select, textarea, [tabindex]"
+      )).filter(function (control) { return !control.disabled && control.tabIndex >= 0 && !control.closest("[inert]") && visibleElement(control); });
+      var first = controls[0];
+      var last = controls[controls.length - 1];
+      if (first && (!wrapper.contains(document.activeElement) ||
+          (event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus({ preventScroll: true });
+      }
+    }
+  });
+  window.addEventListener("resize", function () {
+    if (expanded) settleWindow(expanded);
+  });
+  window.addEventListener("pagehide", beforeAjaxUpdate);
+  window.addEventListener("pageshow", schedule);
+
+  window.UnionSuiteIqaFilters = {
+    refresh: function () { attachAjax(); schedule(); },
+    getActionSlot: function (wrapper) {
+      var entry = entries.get(wrapper);
+      return entry ? entry.customActions : null;
+    },
+    restoreReport: function () { closeExpanded(true); }
+  };
+  if (reducedMotion && reducedMotion.addEventListener) {
+    reducedMotion.addEventListener("change", function () {
+      if (reducedMotion.matches) {
+        entries.forEach(finishTransition);
+        if (expanded) settleWindow(expanded);
+      }
+    });
+  }
+  attachAjax();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", schedule, { once: true });
+  } else {
+    schedule();
+  }
+  window.addEventListener("load", function () { attachAjax(); schedule(); }, { once: true });
+})();
+</script>

@@ -1,0 +1,39 @@
+
+/* Trial only. Shared-token fallbacks preserve standalone rendering. */
+#injected-taskbar,#tb-search-dropdown{
+ --bg:var(--bg-subtle,#f6f7f8);--surface:var(--bg-surface,#fff);
+ --border:var(--border-strong,#9da3ac);--text:var(--text-base,#535966);
+ --text-muted:#66717b;--primary:var(--brand-800,#00394b);
+ --selected-bg:var(--brand-50,#edf6f8);
+ font-family:var(--font-ui,Arial,sans-serif)
+}
+#injected-taskbar .tb-input,#injected-taskbar .tb-search-input{
+ box-sizing:border-box;height:36px;padding:0 10px;border:1px solid var(--border);
+ border-radius:6px;background:var(--surface);font-size:13px
+}
+#injected-taskbar .tb-btn{box-sizing:border-box;height:36px;border:1px solid var(--primary);border-radius:6px;background:var(--primary);color:#fff;min-width:48px}
+#injected-taskbar .tb-btn:hover:not(:disabled){background:#fff;color:var(--primary)}
+#injected-taskbar .tb-btn:active:not(:disabled){transform:none;background:var(--selected-bg);box-shadow:inset 0 2px 4px #0003}
+#injected-taskbar .tb-btn:disabled{opacity:.55;background:var(--primary)}
+#injected-taskbar :is(input,button):focus-visible{outline:2px solid #007fa3;outline-offset:2px}
+#tb-search-dropdown{width:420px;max-width:calc(100vw - 32px);min-width:0;border-radius:6px;border:1px solid #d5dadd;box-shadow:0 6px 18px #00394b20}
+#tb-search-dropdown .tb-dd-body{max-height:410px;overflow:auto;overscroll-behavior:contain}
+#tb-search-dropdown .tb-dd-item{padding:12px 14px;border-bottom-color:#e4e7e9}
+#tb-search-dropdown .tb-dd-item:hover{background:var(--selected-bg)}
+#tb-search-dropdown .tb-dd-item:focus-visible{background:var(--selected-bg);outline:2px solid #007fa3;outline-offset:-2px}
+#tb-search-dropdown .tb-dd-name{font-size:14px;color:#00394b}
+#tb-search-dropdown .tb-dd-meta{font-size:12px;line-height:1.5;margin-top:3px}
+#tb-search-dropdown .tb-dd-id{background:#f0f3f5;color:#535966;font-weight:500}
+#tb-search-dropdown .tb-dd-match strong{background:var(--accent-100,#ffe8d6);color:var(--text-on-accent,#00394b)}
+#tb-search-dropdown .tb-dd-msg{padding:28px 16px;min-height:80px;box-sizing:border-box}
+.demo-ring{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:taskbar-demo-spin .8s linear infinite;vertical-align:middle}
+@keyframes taskbar-demo-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.demo-ring{animation:none}}
+
+#tb-search-dropdown .tb-dd-kind{display:flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;border-radius:6px;background:#edf6f8;color:#006f8b}
+#tb-search-dropdown .tb-dd-kind.organisation{background:#fff1e4;color:#7a450c}
+#tb-search-dropdown .tb-dd-kind svg{width:20px;height:20px}
+#tb-search-dropdown .tb-dd-info{flex:1;min-width:0}
+
+#tb-search-dropdown .tb-dd-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:112px}
+#tb-search-dropdown .tb-dd-loading .section-loader-spinning-circles{--brand-600:#007fa3;--accent:#ff9947;--size:.75px}

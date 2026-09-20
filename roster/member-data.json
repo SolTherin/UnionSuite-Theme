@@ -1,0 +1,3416 @@
+{
+    "$type": "Asi.Soa.Core.DataContracts.PagedResult`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], Asi.Contracts",
+    "Items": {
+        "$type": "System.Collections.Generic.List`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], mscorlib",
+        "$values": [
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "288"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "100000"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Maverick Mitchell"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-05-21T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 288
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "247"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "100002"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Ezra Miller"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-19T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103908"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 247
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "275"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "100010"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Wyatt Williams"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-03-15T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Accountant"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-11-16T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 275
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "276"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "100014"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Nathan Perez"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-03-15T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Business Analyst"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103908"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-11-16T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 276
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "283"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "100020"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Mason Richardson"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-03-25T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103908"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 283
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "163"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "101012"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Ryan Smith"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 2"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-10-30T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 163
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "287"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "102576"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Henry Smith"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 3"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-04-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Business Analyst"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-04-29T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 287
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "22"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "103885"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Tony Fin Stark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 3"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2023-07-19T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 22
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "240"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "103885"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Tony Fin Stark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 3"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Accountant"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 240
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "23"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "103886"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Ned Over Stark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 3"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2024-12-18T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 23
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "24"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "103887"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Stacey Unfin Stark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2024-06-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 24
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "180"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104016"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Mr. Rafael Nadal"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-11-07T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103908"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-02-15T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 180
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "179"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104016"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Mr. Rafael Nadal"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-11-09T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Test"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-02-15T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 179
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "258"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104016"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Mr. Rafael Nadal"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-02-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 258
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "181"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104022"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Carlos Alcaraz"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-09T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 181
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "209"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104023"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Lewis Hamilton"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Business Analyst"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2025-12-17T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 209
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "211"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104023"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Lewis Hamilton"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "test"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 211
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "183"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104024"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Max Verstappen"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-04T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 183
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "184"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104026"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Michael Schumacher"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-03T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 184
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "193"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104028"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Charles Leclerc"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 193
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "186"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104028"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Charles Leclerc"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-04T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Data Analyst"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 186
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "198"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104038"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Tony Stark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-18T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 198
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "199"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104039"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Taylor Swift"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 3"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-18T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 199
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "200"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104040"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "PRD Test"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-17T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2025-12-16T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 200
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "234"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104065"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "PRD FOR EVER AFTER NANDOS"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-22T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103991"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 234
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "235"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104066"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Merry Christmas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-23T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 235
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "237"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104068"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "PRD Test"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-23T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 237
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "239"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104070"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Test Dropdown"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-23T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 239
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "244"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104074"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Test SA Join"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-13T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-01-13T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 244
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "245"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104074"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Test SA Join"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-13T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 245
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "249"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104081"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Newpay Payer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-29T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "IT Support"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 249
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "289"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104100"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Testboy Slim"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-06-02T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Administration/Office Manager"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 289
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "285"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104102"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Alice Mark"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "1970-01-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Admin"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "23301"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 285
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "290"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "104125"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Kimi Antonelli"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 1"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-06-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Business Analyst"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 290
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "252"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "18211"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Mr. Jacobs P. Johnson"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 2"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Finished"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2026-01-05T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title",
+                            "Value": "Accountant"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate",
+                            "Value": "2026-02-01T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 252
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "177"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "194"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "MANAGER Manager"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-11-22T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 177
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "21"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "21255"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Ms. Lois Anderson"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category",
+                            "Value": "Billing Category 2"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2024-03-19T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": true
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Primary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 21
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "566",
+                "PrimaryParentEntityTypeName": "Standalone",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Standalone",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "212"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Contact ID",
+                            "Value": "23283"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "FULL_NAME",
+                            "Value": "Andrew O Newnham"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Type",
+                            "Value": "Regular Member - SL"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Category"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Member Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "JobStatus",
+                            "Value": "Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "StartDate",
+                            "Value": "2025-12-18T00:00:00"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "PrimaryJob",
+                            "Value": {
+                                "$type": "System.Boolean",
+                                "$value": false
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Job Link Type",
+                            "Value": "Secondary"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Position Title"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Workplace",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "EndDate"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Ordinal",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 212
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "Offset": 0,
+    "Limit": 100,
+    "Count": 38,
+    "TotalCount": 38,
+    "NextPageLink": null,
+    "HasNext": false,
+    "NextOffset": 0
+}

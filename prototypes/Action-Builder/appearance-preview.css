@@ -1,0 +1,26 @@
+/* Neutral swatch for the selected appearance; the control uses shared CSS. */
+html,
+body {
+  min-height: 0;
+  margin: 0;
+  background: var(--bg-surface);
+}
+
+#appearance-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 94px;
+  padding: 24px;
+}
+
+#appearance-stage .us-command {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#appearance-stage .us-actions__item {
+  width: 260px;
+}

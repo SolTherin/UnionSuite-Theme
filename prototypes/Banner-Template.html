@@ -1,0 +1,87 @@
+<!--
+REUSABLE BANNER HTML — paste into the banner content iPart's HTML/template.
+For record data, replace bracketed placeholders with your IQA fields.
+For a static dashboard, replace them with literal text and omit unused facts.
+iPart CSS class: us-banner us-banner-collapsible
+Optional page CSS class for full width: us-banner-page
+Load zUnionSuite.css and zUnionSuite.js from the shared theme.
+The separate banner embed is only a generated legacy fallback.
+
+Delete either whole OPTIONAL div to omit Actions or tabs. No other edits or
+classes are needed when omitting them. Keep Actions inside the summary and
+tabs AFTER the details so both remain visible in the compact state.
+
+Action commands and tabs below are disabled placeholders. Enable an action
+only when it has a verified handler, or replace it with an anchor to a real URL.
+Tab content integration is planned in Banner-Tabs-Plan.md. The tab group key
+"record" and tab keys are editable, stable names; they are not display labels.
+-->
+<header class="us-banner__surface">
+  <div class="us-banner__summary">
+    <div class="us-banner__identity">
+      <span class="us-banner__eyebrow">[Record type] · [Record ID]</span>
+      <h1 class="us-banner__title">[Record name]</h1>
+      <p class="us-banner__subtitle">[Supporting record information]</p>
+    </div>
+
+    <div class="us-banner__status">
+      <span class="us-banner__badge">[Record status]</span>
+    </div>
+
+    <!-- OPTIONAL ACTIONS: delete this complete div when not needed. -->
+    <div class="us-banner__actions">
+      <details class="us-banner__action-menu">
+        <summary class="us-banner__action">
+          Actions
+          <svg class="us-banner__chevron" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+            <path d="m2 4 4 4 4-4"></path>
+          </svg>
+        </summary>
+        <div class="us-banner__menu-panel">
+          <div class="us-banner__menu-group">
+            <p class="us-banner__menu-label">Record</p>
+            <button type="button" class="us-banner__menu-item" disabled>Edit record</button>
+            <button type="button" class="us-banner__menu-item" disabled>Add note</button>
+            <button type="button" class="us-banner__menu-item" disabled>Create task</button>
+          </div>
+          <div class="us-banner__menu-group">
+            <p class="us-banner__menu-label">Communication</p>
+            <button type="button" class="us-banner__menu-item" disabled>Send email</button>
+            <button type="button" class="us-banner__menu-item" disabled>Log call</button>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="us-banner__details">
+    <dl class="us-banner__facts">
+      <div class="us-banner__fact">
+        <dt>[Fact label 1]</dt>
+        <dd>[Fact value 1]</dd>
+      </div>
+      <div class="us-banner__fact">
+        <dt>[Fact label 2]</dt>
+        <dd>[Fact value 2]</dd>
+      </div>
+      <div class="us-banner__fact">
+        <dt>[Fact label 3]</dt>
+        <dd>[Fact value 3]</dd>
+      </div>
+      <div class="us-banner__fact">
+        <dt>[Fact label 4]</dt>
+        <dd>[Fact value 4]</dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- OPTIONAL TABS: delete this complete div when not needed. -->
+  <div class="us-banner__nav" data-us-tabs="record">
+    <div class="us-banner__tabs" role="group" aria-label="Record sections">
+      <button type="button" class="us-banner__tab is-active" data-us-tab="overview" aria-current="true" disabled>Overview</button>
+      <button type="button" class="us-banner__tab" data-us-tab="activity" disabled>Activity</button>
+      <button type="button" class="us-banner__tab" data-us-tab="tasks" disabled>Tasks</button>
+      <button type="button" class="us-banner__tab" data-us-tab="documents" disabled>Documents</button>
+    </div>
+  </div>
+</header>

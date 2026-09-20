@@ -1,0 +1,188 @@
+/* SUPERSEDED STUDY: the current six-option comparison loads Tab-Display-Options.css.
+   Retained as the earlier contact-prototype direction; not loaded in the guide or theme.
+   Standalone CCO tab proposal. TRIAL ONLY: not loaded by the shared theme.
+   Visual reference: crm-contact-Prototype.html .sidebar/.nav-item/.sub-tab-btn.
+   Apply .us-cco-tabs to the native .cco.tabs-wrapper in this fixture only.
+   Only the direct tab strip is styled; nested Address tabs stay independent.
+   Native iMIS/Telerik owns selection, content loading and postbacks in production.
+   Prerequisites: native Orion CSS and UnionSuite tokens, followed by this CSS. */
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel {
+  width: auto;
+  padding: 4px;
+  border: 0;
+  overflow: visible;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI {
+  display: block;
+  flex: 0 0 auto;
+  float: none;
+  margin: 0;
+  padding: 0;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink {
+  display: flex;
+  align-items: center;
+  position: relative;
+  float: none;
+  min-height: 32px;
+  margin: 0;
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-base);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: none;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink :is(.rtsOut, .rtsIn, .rtsTxt) {
+  display: block;
+  float: none;
+  padding: 0;
+  background: none;
+  line-height: inherit;
+  text-align: inherit;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:hover {
+  background: var(--bg-surface);
+  border-color: var(--brand-600);
+  color: var(--brand-600);
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:active {
+  background: var(--brand-100);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .12);
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-inverse);
+  font-weight: var(--fw-semi);
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected:hover {
+  background: var(--brand-700);
+  border-color: var(--brand-700);
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+.cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:is(.rtsDisabled, [aria-disabled="true"]) {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-faint);
+  opacity: .65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-horizontal > .RadTabStrip {
+  margin: 0 0 var(--space-2);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 0;
+  align-items: stretch;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel {
+  height: 100%;
+  padding: 10px 0;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadMultiPage {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  padding: var(--space-5) var(--space-6);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL {
+  flex-direction: column;
+  gap: 0;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 12px 9px 14px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--neutral-700);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:hover {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+  background: var(--brand-50);
+  border-left-color: var(--brand-600);
+  color: var(--brand-600);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:active {
+  background: var(--brand-100);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .12);
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:focus-visible {
+  outline-offset: -3px;
+}
+.cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:is(.rtsDisabled, [aria-disabled="true"]) {
+  background: transparent;
+  border-left-color: transparent;
+  color: var(--text-faint);
+  box-shadow: none;
+}
+@media (max-width: 600px) {
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical { display: block; }
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical {
+    margin-bottom: var(--space-5);
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel {
+    padding: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL { flex-direction: row; flex-wrap: nowrap; }
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink { white-space: nowrap; }
+  .cco.tabs-wrapper.us-cco-tabs.tabs-vertical > .RadMultiPage { padding: 0; }
+}
+@media (forced-colors: active) {
+  .cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+    outline: 1px solid Highlight;
+    outline-offset: -2px;
+  }
+  .cco.tabs-wrapper.us-cco-tabs > :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 1px;
+  }
+}

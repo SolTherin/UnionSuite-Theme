@@ -1,0 +1,27 @@
+const assert=require('node:assert/strict'),{chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{const p=await b.newPage({viewport:{width:1300,height:950}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('https://switcher.test/**',r=>r.fulfill({contentType:'text/html',body:require('./section-tabs-example.cjs').documentHtml()}));await p.goto('https://switcher.test/home');await p.waitForTimeout(100);
+const tab=(group,key)=>p.locator('[data-us-tabs="'+group+'"] [data-us-tab="'+key+'"]');
+assert.equal(await p.locator('.us-tabset-member:visible').count(),1);
+await tab('member','finance').click();
+await p.evaluate(()=>{history.pushState({},'', '?cco-tab=people');UnionSuiteSections.refresh();});await p.waitForTimeout(100);
+assert.equal(await tab('member','finance').getAttribute('aria-selected'),'true','CCO query changes preserve outer selection');
+await tab('member','overview').click();
+await p.evaluate(()=>{
+ const panel=document.querySelector('.us-tabset-member.us-tab-finance');
+ const row=document.createElement('div');row.className='row';row.id='finance-row';
+ row.innerHTML='<div class="col-sm-12"><div class="ContentItemContainer"><div class="WebPartZone"><div class="iMIS-WebPart"><div class="ContentItemContainer"></div></div></div></div></div>';
+ panel.before(row);row.querySelector('.iMIS-WebPart > .ContentItemContainer').append(panel);
+});await p.waitForTimeout(100);
+assert.equal(await p.locator('#finance-row').isVisible(),false,'empty native row collapses');
+await tab('member','finance').click();assert.equal(await p.locator('#finance-row').isVisible(),true,'active row restores');
+await p.evaluate(()=>{const text=document.createElement('p');text.textContent='Always visible';document.querySelector('#finance-row').append(text);});await p.waitForTimeout(100);
+await tab('member','overview').click();assert.equal(await p.locator('#finance-row').isVisible(),true,'unmarked sibling retains row');
+await p.locator('input').fill('Kept');await tab('member','notes').click();await p.locator('textarea').fill('Draft');await tab('member','overview').click();assert.equal(await p.locator('input').inputValue(),'Kept');
+await tab('contact','addresses').click();await tab('member','finance').click();await tab('member','overview').click();assert.equal(await tab('contact','addresses').getAttribute('aria-selected'),'true');
+await tab('member','overview').press('ArrowRight');assert.equal(await tab('member','overview').getAttribute('aria-selected'),'true');await p.keyboard.press('Enter');assert.equal(await tab('member','finance').getAttribute('aria-selected'),'true');
+await p.evaluate(()=>{const n=document.querySelector('.us-tabset-member.us-tab-finance');const r=n.cloneNode(true);n.replaceWith(r);});await p.waitForTimeout(100);assert.equal(await tab('member','finance').getAttribute('aria-selected'),'true');
+await p.evaluate(()=>{document.querySelector('[data-us-tabs="member"]').remove()});await p.waitForTimeout(100);assert.equal(await p.locator('.us-tabset-member:visible').count(),3);
+await p.evaluate(()=>{document.body.classList.add('EasyEdit')});await p.waitForTimeout(100);assert.equal(await p.locator('.us-tabset-contact:visible').count(),2);
+assert.deepEqual(errors,[]);console.log('Passed: nested groups, values retained, manual keyboard activation, replacement, menu removal and Easy Edit fallback.');
+await p.setContent(require('./section-tabs-example.cjs').documentHtml());await p.waitForTimeout(100);await p.screenshot({path:'.tmp-iqa-integration/section-switcher.png'});await p.setViewportSize({width:390,height:844});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth),390);
+console.log('Mobile overflow passed.');}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

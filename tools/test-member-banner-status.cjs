@@ -1,0 +1,23 @@
+const fs=require('fs'),assert=require('node:assert/strict'),{chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});
+try{
+ const p=await b.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ const header='<header class="us-banner__surface us-banner__surface--member" data-us-status-colour="#FFFFFF"><span class="us-banner__badge us-banner__badge--member-status"></span></header>';
+ await p.setContent('<style>'+fs.readFileSync('THeme/UnionSuite/zUnionSuite.css','utf8')+'</style><div class="ContentItemContainer"><div class="us-banner">'+header+'</div></div><div class="ContentItemContainer"><div class="us-report-no-styling"><div class="us-banner">'+header+'</div></div></div>');
+ await p.addScriptTag({content:fs.readFileSync('THeme/UnionSuite/zUnionSuite.js','utf8')});
+ await p.waitForTimeout(120);
+ const hs=p.locator('.us-banner__surface--member');
+ assert.equal(await hs.first().evaluate(n=>n.style.getPropertyValue('--member-status-colour')),'#767676');
+ assert.equal(await hs.nth(1).evaluate(n=>n.style.getPropertyValue('--member-status-colour')),'');
+ assert.equal(await hs.first().textContent(),'Status unavailable');
+ await hs.first().evaluate(n=>n.setAttribute('data-us-status-colour','#D58A10'));
+ await p.waitForTimeout(100);
+ assert.equal(await hs.first().evaluate(n=>n.style.getPropertyValue('--member-status-colour')),'#A46A0C');
+ await hs.first().evaluate(n=>{const replacement=n.cloneNode(true);replacement.removeAttribute('style');replacement.setAttribute('data-us-status-colour','bad');n.replaceWith(replacement);});
+ await p.waitForTimeout(100);
+ assert.equal(await hs.first().evaluate(n=>n.style.getPropertyValue('--member-status-colour')),'#596579');
+ await hs.first().evaluate(n=>n.parentElement.classList.add('us-banner--compact'));
+ assert.equal(await hs.first().locator('span').evaluate(n=>getComputedStyle(n).paddingTop),'3px');
+ assert.deepEqual(errors,[]);
+ console.log('Passed member status: wrapped iPart, opt-out, empty label, white contrast, colour change, partial replacement, invalid fallback and compact padding.');
+}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

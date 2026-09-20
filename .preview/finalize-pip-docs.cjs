@@ -1,0 +1,12 @@
+const fs=require('node:fs');
+const file='THeme/UnionSuite/docs/Usage-Guide.source.html';
+let source=fs.readFileSync(file,'utf8');
+source=source.replace('Management shortcuts are generated immediately before Quick Search, separated by a vertical divider:', 'Management shortcuts are generated before Pip’s reserved section and Quick Search, with vertical dividers between the sections:');
+source=source.replace('Leaving the page, hiding it or tearing down the taskbar cancels the visit and its timers/listeners.', 'Leaving the page, hiding it or tearing down the taskbar cancels the visit and its animation timers. Teardown also removes the listeners.');
+const start=source.indexOf('    <p>Implemented standalone replacement:');
+const end=source.indexOf('</p>',start)+4;
+if(start<0)throw Error('Taskbar introduction missing');
+source=source.slice(0,start)+'    <p>Implemented standalone replacement: <code>Scripts/UnionSuiteTaskbar.js</code> supplies management shortcuts, Pip’s daily greeting, Quick Search with recent searches and records, Full Search, and the optional appearance switch. The separate Go to ID control has been removed. Quick Search retains request cancellation, keyboard result navigation, mobile search and lifecycle cleanup. Component styles live in <code>zUnionSuite.css</code>; dark colours and appearance-switch styling live in the last-loaded <code>zzDarkMode.css</code>.</p>'+source.slice(end);
+fs.writeFileSync(file,source);
+const index='references/index.html';
+fs.writeFileSync(index,fs.readFileSync(index,'utf8').replace('Rebuilt taskbar</a> — standalone script with fictional search responses.', 'Taskbar and Pip’s daily greeting</a> — dedicated mascot section beside the shortcuts, replay/reload controls and fictional search responses.'));

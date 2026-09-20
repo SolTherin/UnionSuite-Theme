@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Task-age celebration (G1)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+/* ── Task list ──────────────────────────────────────────────────────────── */
+.eg-task {
+  display: grid;
+  grid-template-columns: 28px 1fr 140px 120px 108px;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--card-pad-x);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  position: relative;
+  transition: opacity .3s ease, background-color .3s ease;
+}
+.eg-task:last-of-type { border-bottom: 0; }
+@media (max-width: 768px) {
+  .eg-task { grid-template-columns: 28px 1fr auto; }
+  .eg-task__opened, .eg-task__age { display: none; }
+}
+.eg-task__title { font-weight: var(--fw-semi); color: var(--text-strong); }
+.eg-task__title small { display: block; font-weight: var(--fw-normal); color: var(--text-muted); font-size: var(--fs-xs); }
+.eg-task__opened { font-family: var(--face-mono); font-size: var(--fs-xs); color: var(--text-muted); }
+.eg-task__age {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-medium);
+  padding: 2px 8px; border-radius: var(--radius-pill); justify-self: start;
+  background: var(--bg-sunken); color: var(--text-muted);
+}
+.eg-task__age[data-tier="2"] { background: var(--info-bg);    color: var(--info); }
+.eg-task__age[data-tier="3"] { background: var(--warning-bg); color: var(--warning); }
+.eg-task[data-done="true"] { opacity: .45; background: var(--bg-subtle); }
+.eg-task[data-done="true"] .eg-task__title { text-decoration: line-through; }
+
+.eg-check {
+  width: 20px; height: 20px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--neutral-400); background: var(--bg-surface);
+  cursor: pointer; display: grid; place-items: center; padding: 0;
+}
+.eg-check:hover { border-color: var(--brand-600); }
+.eg-check:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.eg-check svg { width: 13px; height: 13px; stroke: var(--white); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.eg-task[data-done="true"] .eg-check { background: var(--success); border-color: var(--success); }
+.eg-task[data-done="true"] .eg-check svg { opacity: 1; }
+
+.eg-do {
+  font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: var(--fw-medium);
+  padding: 5px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid var(--neutral-300); background: var(--bg-surface); color: var(--text-base);
+  justify-self: end;
+}
+.eg-do:hover { border-color: var(--brand-600); color: var(--text-link); }
+.eg-do:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.eg-do[disabled] { opacity: .4; cursor: default; }
+
+/* ── Tier 1: the ring. Tier 2 adds a few particles. Tier 3 goes properly. ── */
+.eg-ring {
+  position: absolute; left: 8px; top: 50%; width: 20px; height: 20px;
+  margin-top: -10px; border-radius: 50%; pointer-events: none;
+  border: 2px solid var(--success); opacity: 0;
+}
+.eg-ring.is-on { animation: eg-ring .55s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes eg-ring {
+  0%   { opacity: .9; transform: scale(.6); }
+  100% { opacity: 0;  transform: scale(2.6); }
+}
+
+/* Confetti layer sits above the row, never inside the scroll flow. */
+.eg-confetti { position: fixed; inset: 0; pointer-events: none; z-index: var(--z-modal); overflow: hidden; }
+.eg-bit {
+  position: absolute; width: 8px; height: 10px; border-radius: 1px;
+  will-change: transform, opacity;
+  animation: eg-fly var(--dur, 1100ms) cubic-bezier(.15,.6,.4,1) forwards;
+}
+@keyframes eg-fly {
+  0%   { opacity: 1; transform: translate(0,0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); }
+}
+
+/* ── The toast ──────────────────────────────────────────────────────────── */
+.eg-toasts {
+  position: fixed; right: 20px; bottom: 20px; z-index: var(--z-modal);
+  display: grid; gap: var(--space-2); justify-items: end;
+}
+.eg-toast {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--success);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  padding: var(--space-3) var(--space-4);
+  max-width: 340px;
+  animation: eg-toast-in .28s cubic-bezier(.2,.7,.3,1) both;
+}
+.eg-toast[data-tier="3"] { border-left-color: var(--accent-600); }
+.eg-toast.is-out { animation: eg-toast-out .3s ease forwards; }
+@keyframes eg-toast-in  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes eg-toast-out { to { opacity: 0; transform: translateY(6px); } }
+.eg-toast__mark { flex: none; font-size: var(--fs-md); line-height: 1.2; }
+.eg-toast__line { margin: 0; font-family: var(--font-display); font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--text-strong); }
+.eg-toast__sub  { margin: 2px 0 0; font-size: var(--fs-xs); color: var(--text-muted); }
+
+/* Reduced motion — simulated here with a class so it can be demonstrated,
+   and enforced for real by the media query below. */
+.rm .eg-bit, .rm .eg-ring { display: none !important; }
+.rm .eg-toast { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .eg-bit, .eg-ring { display: none !important; }
+  .eg-toast { animation: none; }
+}
+
+.eg-bulkbar {
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+  padding: var(--space-2) var(--card-pad-x);
+  background: var(--bg-sunken); border-bottom: 1px solid var(--border);
+  font-size: var(--fs-xs); color: var(--text-muted);
+}
+.eg-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.eg-table th, .eg-table td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+.eg-table th { font-family: var(--font-ui); font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint); font-weight: var(--fw-semi); }
+.eg-table td:first-child { font-family: var(--face-mono); color: var(--text-strong); white-space: nowrap; }
+.eg-table tr:last-child td { border-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · G1</p>
+    <h1>Celebration scaled to how long it sat open</h1>
+    <p>The only egg in the register that fires on <strong>success</strong> rather than on
+       absence — everything else decorates a moment when nothing is happening, and this one
+       lands in the middle of someone finishing a piece of work.</p>
+    <p>Complete the tasks below. Each one is a different age, and the reward scales with it.
+       Then try the bulk close, which deliberately does nothing at all.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag" data-risk="watch">Tone: congratulate the closer, not indict the org</span>
+      <span class="mk-tag">Suppressed in bulk operations</span>
+    </div>
+  </header>
+
+  <section class="mk-stage">
+    <div class="mk-controls">
+      <button class="mk-btn" type="button" id="egReset">Reset list</button>
+      <button class="mk-btn" type="button" id="egRm" aria-pressed="false">Simulate reduced motion: off</button>
+    </div>
+
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head">
+          <h3 class="us-panel__title">My tasks</h3>
+          <span style="font-family:var(--font-ui);font-size:var(--fs-xs);color:var(--text-muted)">Metro North · Open</span>
+        </div>
+        <div class="eg-bulkbar">
+          <span id="egBulkCount">4 open</span>
+          <button class="eg-do" type="button" id="egBulk">Close all as resolved</button>
+          <span style="color:var(--text-faint)">← bulk action: no celebration, by design</span>
+        </div>
+        <div id="egList"></div>
+      </div>
+    </div>
+
+    <p class="mk-note"><strong>Design note — the tiers are about proportion, not volume.</strong>
+       If a two-day task got confetti, the 412-day one would have nowhere left to go. The
+       ordinary case has to stay almost silent for the rare case to mean anything, which is why
+       tier 1 is a tick and a ring that lasts half a second.</p>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">The tier table <span>Config, like the tenure tiers in 03.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head"><h3 class="us-panel__title">delight.completion.tiers</h3></div>
+        <table class="eg-table">
+          <thead><tr><th>Age when closed</th><th>Reward</th><th>Says</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 7 days</td><td>Tick + ring</td><td>Nothing</td><td>The overwhelming majority. Deliberately unremarkable.</td></tr>
+            <tr><td>7–89 days</td><td>Tick + ring + toast</td><td>"Done. Open 5 weeks."</td><td>Factual, no adjectives.</td></tr>
+            <tr><td>90–364 days</td><td>Small burst</td><td>"Opened 128 days ago. Closed today."</td><td>~14 particles.</td></tr>
+            <tr><td>365 days +</td><td>Full confetti</td><td>"Opened 412 days ago. Closed today."</td><td>~46 particles. The rare one.</td></tr>
+            <tr><td>Any, in a bulk action</td><td>None</td><td>Nothing</td><td>Forty bursts at once is a poker machine.</td></tr>
+            <tr><td>Opened before <code>date_floor</code></td><td>Drops to tier 1</td><td>No age claimed</td><td>Migration defaults produce "opened 9,432 days ago".</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">What the copy is carefully not saying</p>
+    <div class="mk-frame">
+      <div class="us-panel"><div class="us-panel__body" style="font-size:var(--fs-sm)">
+        <p style="margin:0 0 var(--space-3)">"Opened 412 days ago" reads two ways: <em>well done,
+           you cleared something ancient</em>, or <em>this organisation ignored a member for over
+           a year</em>. The person closing it is very often not the person who let it sit.</p>
+        <div style="display:grid;gap:var(--space-2);grid-template-columns:1fr 1fr">
+          <div style="background:var(--success-bg);border-radius:var(--radius-sm);padding:var(--space-3)">
+            <p style="margin:0 0 4px;font-family:var(--font-ui);font-size:var(--fs-2xs);font-weight:var(--fw-semi);text-transform:uppercase;letter-spacing:.06em;color:var(--success)">Works</p>
+            <p style="margin:0;color:var(--text-strong)">"Opened 412 days ago. Closed today."</p>
+            <p style="margin:4px 0 0;color:var(--text-muted);font-size:var(--fs-xs)">Two facts, no verdict.</p>
+          </div>
+          <div style="background:var(--danger-bg);border-radius:var(--radius-sm);padding:var(--space-3)">
+            <p style="margin:0 0 4px;font-family:var(--font-ui);font-size:var(--fs-2xs);font-weight:var(--fw-semi);text-transform:uppercase;letter-spacing:.06em;color:var(--danger)">Doesn't</p>
+            <p style="margin:0;color:var(--text-strong)">"Finally! Only took 412 days."</p>
+            <p style="margin:4px 0 0;color:var(--text-muted);font-size:var(--fs-xs)">Now it is about the delay, and the delay has an owner.</p>
+          </div>
+        </div>
+        <p style="margin:var(--space-4) 0 0;color:var(--text-muted)">The number also stays out of
+           reports, dashboard tiles and exports. In a toast it is a moment; in a column header it
+           is a metric someone gets asked about in a team meeting.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+
+<div class="eg-confetti" id="egConfetti" aria-hidden="true"></div>
+<div class="eg-toasts" id="egToasts" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TASKS = [
+    { id: 't1', title: 'Return call — direct debit query',   who: 'Daniel Tran · M104812',      days: 2 },
+    { id: 't2', title: 'Update delegate details',            who: 'Aisha Zhang · M100968',      days: 38 },
+    { id: 't3', title: 'Chase signed membership form',       who: 'Tom Papadopoulos · M100694', days: 128 },
+    { id: 't4', title: 'Resolve duplicate record',           who: 'Mary O\'Brien · M000914',    days: 412 }
+  ];
+
+  var COLOURS = ['var(--accent-600)', 'var(--teal-400)', 'var(--status-green-fill)',
+                 'var(--status-purple)', 'var(--accent-500)', 'var(--teal-600)'];
+
+  var list     = document.getElementById('egList');
+  var confetti = document.getElementById('egConfetti');
+  var toasts   = document.getElementById('egToasts');
+  var bulkBtn  = document.getElementById('egBulk');
+  var bulkCt   = document.getElementById('egBulkCount');
+  var resetBtn = document.getElementById('egReset');
+  var rmBtn    = document.getElementById('egRm');
+
+  /* Tier from age. The floor check lives here too: an implausible age is a
+     migration artefact, not an achievement, so it drops to the quiet tier. */
+  var DATE_FLOOR_DAYS = 20000;         /* ~55 years: nothing real is older */
+  function tierFor(days) {
+    if (days > DATE_FLOOR_DAYS) { return 1; }
+    if (days >= 365) { return 4; }
+    if (days >= 90)  { return 3; }
+    if (days >= 7)   { return 2; }
+    return 1;
+  }
+
+  function ageLabel(days) {
+    if (days < 7)   { return days + 'd'; }
+    if (days < 90)  { return Math.round(days / 7) + 'w'; }
+    if (days < 365) { return Math.round(days / 30) + 'mo'; }
+    return (days / 365).toFixed(1) + 'y';
+  }
+
+  function render() {
+    list.innerHTML = '';
+    TASKS.forEach(function (t) {
+      var tier = tierFor(t.days);
+      var row = document.createElement('div');
+      row.className = 'eg-task';
+      row.setAttribute('data-done', 'false');
+      row.setAttribute('data-id', t.id);
+      row.innerHTML =
+        '<button class="eg-check" type="button" aria-label="Complete ' + t.title + '">' +
+          '<svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg></button>' +
+        '<span class="eg-task__title">' + t.title + '<small>' + t.who + '</small></span>' +
+        '<span class="eg-task__opened">Opened ' + t.days + 'd ago</span>' +
+        '<span class="eg-task__age" data-tier="' + (tier >= 4 ? 3 : tier >= 3 ? 2 : 1) + '">' + ageLabel(t.days) + ' open</span>' +
+        '<button class="eg-do" type="button">Complete</button>' +
+        '<span class="eg-ring"></span>';
+      list.appendChild(row);
+
+      function done(e) {
+        e.preventDefault();
+        complete(row, t, false);
+      }
+      row.querySelector('.eg-check').addEventListener('click', done);
+      row.querySelector('.eg-do').addEventListener('click', done);
+    });
+    updateCount();
+  }
+
+  function updateCount() {
+    var open = list.querySelectorAll('.eg-task[data-done="false"]').length;
+    bulkCt.textContent = open + ' open';
+    bulkBtn.disabled = open === 0;
+  }
+
+  function complete(row, task, isBulk) {
+    if (row.getAttribute('data-done') === 'true') { return; }
+    row.setAttribute('data-done', 'true');
+    row.querySelector('.eg-do').disabled = true;
+    updateCount();
+
+    /* Bulk is where this egg does the most good by doing nothing. */
+    if (isBulk) { return; }
+
+    var tier = tierFor(task.days);
+
+    var ring = row.querySelector('.eg-ring');
+    ring.classList.remove('is-on');
+    void ring.offsetWidth;                        /* restart the animation */
+    ring.classList.add('is-on');
+
+    if (tier >= 3) { burst(row, tier === 4 ? 46 : 14); }
+    if (tier >= 2) { toast(task, tier); }
+  }
+
+  function burst(row, count) {
+    if (document.body.classList.contains('rm')) { return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    var box = row.getBoundingClientRect();
+    var ox  = box.left + 24;
+    var oy  = box.top + box.height / 2;
+    var i;
+    for (i = 0; i < count; i++) {
+      var bit = document.createElement('span');
+      var ang = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      var mag = 70 + Math.random() * 190;
+      bit.className = 'eg-bit';
+      bit.style.left = ox + 'px';
+      bit.style.top  = oy + 'px';
+      bit.style.background = COLOURS[i % COLOURS.length];
+      bit.style.setProperty('--dx',  (Math.cos(ang) * mag).toFixed(1) + 'px');
+      bit.style.setProperty('--dy',  (Math.sin(ang) * mag + 120).toFixed(1) + 'px');
+      bit.style.setProperty('--rot', Math.round(Math.random() * 900 - 450) + 'deg');
+      bit.style.setProperty('--dur', (900 + Math.random() * 600).toFixed(0) + 'ms');
+      confetti.appendChild(bit);
+      /* Clean up on the animation's own event, not a guessed timeout. */
+      bit.addEventListener('animationend', function () { this.remove(); });
+    }
+  }
+
+  function toast(task, tier) {
+    var el = document.createElement('div');
+    el.className = 'eg-toast';
+    el.setAttribute('data-tier', tier >= 4 ? '3' : '2');
+
+    var line, sub;
+    if (tier === 4) {
+      line = 'Opened ' + task.days.toLocaleString() + ' days ago. Closed today.';
+      sub  = task.title;
+    } else if (tier === 3) {
+      line = 'Opened ' + task.days + ' days ago. Closed today.';
+      sub  = task.title;
+    } else {
+      line = 'Done. Open ' + Math.round(task.days / 7) + ' weeks.';
+      sub  = task.title;
+    }
+
+    el.innerHTML = '<span class="eg-toast__mark" aria-hidden="true">' +
+                   (tier === 4 ? '🎉' : tier === 3 ? '✦' : '✓') + '</span>' +
+                   '<span><p class="eg-toast__line">' + line + '</p>' +
+                   '<p class="eg-toast__sub">' + sub + '</p></span>';
+    toasts.appendChild(el);
+
+    setTimeout(function () {
+      el.classList.add('is-out');
+      setTimeout(function () { el.remove(); }, 320);
+    }, tier === 4 ? 5200 : 3600);
+  }
+
+  bulkBtn.addEventListener('click', function () {
+    Array.prototype.forEach.call(list.querySelectorAll('.eg-task[data-done="false"]'), function (row) {
+      var t = TASKS.filter(function (x) { return x.id === row.getAttribute('data-id'); })[0];
+      complete(row, t, true);
+    });
+    var el = document.createElement('div');
+    el.className = 'eg-toast';
+    el.style.borderLeftColor = 'var(--neutral-400)';
+    el.innerHTML = '<span class="eg-toast__mark" aria-hidden="true">✓</span>' +
+                   '<span><p class="eg-toast__line">4 tasks closed.</p>' +
+                   '<p class="eg-toast__sub">No celebration — bulk actions are suppressed.</p></span>';
+    toasts.appendChild(el);
+    setTimeout(function () { el.classList.add('is-out'); setTimeout(function(){ el.remove(); }, 320); }, 3600);
+  });
+
+  resetBtn.addEventListener('click', render);
+
+  rmBtn.addEventListener('click', function () {
+    var on = document.body.classList.toggle('rm');
+    rmBtn.setAttribute('aria-pressed', String(on));
+    rmBtn.textContent = 'Simulate reduced motion: ' + (on ? 'on' : 'off');
+  });
+
+  render();
+}());
+</script>
+</body>
+</html>

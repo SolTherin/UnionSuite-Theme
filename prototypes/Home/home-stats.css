@@ -1,0 +1,10 @@
+/* Preview page layout only. Card styling belongs to the shared theme.
+   On the installed page, use RiSE's Bootstrap 12 / 12 / 8+4 / 8+4 rows. */
+.home-stats{min-width:0}
+.home-stats > .us-membership-heading{margin-bottom:20px}
+.home-stats > .us-membership[data-us-membership="summary"]{margin-bottom:24px}
+.home-stats-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;align-items:stretch}
+.home-stats-grid > *{min-width:0}
+.home-stats-footnote{margin:18px 0 0;color:var(--text-muted);font:12px/1.6 var(--font-ui)}
+.home-stats-native > .row{margin-bottom:24px}
+@media(max-width:780px){.home-stats-grid{grid-template-columns:minmax(0,1fr)}}

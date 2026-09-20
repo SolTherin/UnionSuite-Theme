@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Mockup harness — Easter egg mockups
+   ==========================================================================
+   Frame chrome only. Deliberately NOT the product's visual language, so a
+   reviewer can never mistake the frame for the thing being reviewed.
+   The mocked UI inside .mk-stage uses real theme tokens; everything with a
+   .mk- prefix is scaffolding and ships nowhere.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: var(--fs-base, 14px);
+  line-height: var(--lh-base, 1.5);
+  color: var(--text-base, #545962);
+  background: #151a1e;
+}
+
+.mk-shell { max-width: 1080px; margin: 0 auto; padding: 32px 20px 96px; }
+
+.mk-head { color: #cfd6dc; margin-bottom: 28px; }
+.mk-kicker {
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: #6fb9d4; margin: 0 0 6px;
+}
+.mk-head h1 {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 26px; line-height: 1.2; font-weight: 700;
+  color: #fff; margin: 0 0 10px;
+}
+.mk-head p { margin: 0 0 6px; max-width: 68ch; color: #9fa9b2; font-size: 13px; }
+.mk-head a { color: #6fb9d4; }
+
+.mk-meta {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+}
+.mk-tag {
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  background: rgba(111, 185, 212, .12); color: #8ecbe2;
+  border: 1px solid rgba(111, 185, 212, .25);
+}
+.mk-tag[data-risk="low"]  { background: rgba(104,189,73,.12); color: #9ddd80; border-color: rgba(104,189,73,.28); }
+.mk-tag[data-risk="watch"]{ background: rgba(255,153,71,.12); color: #ffc08a; border-color: rgba(255,153,71,.3); }
+
+/* Stage — a labelled slab holding one mocked state. */
+.mk-stage { margin-top: 26px; }
+.mk-label {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin: 0 0 8px;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px; font-weight: 600; color: #cfd6dc;
+}
+.mk-label span { font-weight: 400; color: #79838c; }
+.mk-frame {
+  background: var(--bg-page, #eeeeef);
+  border-radius: 10px;
+  padding: var(--page-gutter, 20px);
+  border: 1px solid #2a3238;
+  overflow: hidden;
+}
+.mk-frame--flush { padding: 0; }
+
+.mk-note {
+  margin: 10px 0 0; font-size: 12px; color: #79838c; max-width: 74ch;
+}
+.mk-note strong { color: #b6c0c8; font-weight: 600; }
+
+.mk-controls {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin: 0 0 12px;
+}
+.mk-btn {
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  background: #232b31; color: #cfd6dc; border: 1px solid #38424a;
+}
+.mk-btn:hover { background: #2c353c; }
+.mk-btn[aria-pressed="true"] { background: #6fb9d4; color: #10171b; border-color: #6fb9d4; }
+.mk-btn:focus-visible { outline: 2px solid #6fb9d4; outline-offset: 2px; }
+
+.mk-divider { height: 1px; background: #262e34; border: 0; margin: 40px 0 0; }
+
+/* ── Product-ish primitives, using real tokens ───────────────────────────── */
+.us-panel {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border, #e2e5e9);
+  border-radius: var(--radius, 8px);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,27,35,.07));
+}
+.us-panel__head {
+  padding: var(--space-3, 12px) var(--card-pad-x, 18px);
+  border-bottom: 1px solid var(--border, #e2e5e9);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.us-panel__title {
+  margin: 0; font-family: var(--font-display, sans-serif);
+  font-size: var(--fs-md, 16px); font-weight: 600; color: var(--text-strong, #1c2024);
+}
+.us-panel__body { padding: var(--card-pad-y, 16px) var(--card-pad-x, 18px); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}

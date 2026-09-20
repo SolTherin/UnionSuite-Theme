@@ -1,0 +1,33 @@
+/* Reference page layout only. Native/shared theme CSS owns list appearance. */
+html{height:auto}body{margin:0;padding:32px;background:var(--bg-page);color:var(--text-base);font:14px/1.5 var(--font-ui);height:auto}
+.list-reference{max-width:1240px;margin:auto}
+.list-reference__intro{margin-bottom:28px;max-width:740px}
+.list-reference__intro h1{font:600 28px/1.2 var(--font-display);color:var(--text-strong);margin:0 0 12px;text-transform:none}
+.list-reference__eyebrow{font:600 11px var(--font-ui);letter-spacing:.1em;color:var(--text-muted);margin:0 0 10px}
+.list-reference__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:32px}
+.list-reference__example{min-width:0}
+.list-reference__example > h2{font:600 18px/1.3 var(--font-display);color:var(--text-strong);margin:0 0 6px;padding:0;border:0}
+.list-reference__description{font-size:13px;margin:0 0 10px;color:var(--text-muted)}
+.list-reference__recipe{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.list-reference__recipe button:focus-visible,.list-reference details summary:focus-visible{outline:2px solid var(--border-focus);outline-offset:3px}
+.list-reference details{margin-top:12px}.list-reference summary{color:var(--text-link);cursor:pointer;padding:8px 0}
+.list-reference .list-reference__common{margin:0 0 24px;padding:0 0 12px;border-bottom:1px solid var(--border)}
+.list-reference table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;margin:12px 0 18px}
+.list-reference th,.list-reference td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.list-reference th:first-child{width:36%}.list-reference thead th{background:var(--bg-subtle);color:var(--text-strong)}
+.list-reference .query-fields-wrap{overflow:auto;margin:16px 0;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface)}
+.list-reference .query-fields-table{min-width:560px;margin:0}.list-reference .query-fields-table th:first-child{width:23%}.list-reference .query-fields-table th:nth-child(2){width:12%}.list-reference .query-fields-table th:nth-child(3){width:40%}
+.list-reference .query-fields-table small{display:block;font-weight:400;margin-top:6px}.list-reference .query-fields-table code{white-space:normal}
+.list-reference .query-fields-wrap:focus-visible{outline:2px solid var(--border-focus);outline-offset:3px}
+@media print{.list-reference .query-fields-wrap{overflow:visible}.list-reference .query-fields-table{min-width:0}}
+.list-reference .snippet-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--text-muted)}
+.list-reference .snippet-bar + pre{margin-top:8px}
+.list-reference code{overflow-wrap:anywhere}.list-reference .TextButton{white-space:normal;max-width:100%}
+.list-reference pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px}
+.list-reference__more{margin-top:40px;padding-top:28px;border-top:1px solid var(--border)}
+.list-reference__more > h2{font-size:20px;color:var(--text-strong);margin:0 0 8px}
+.list-reference__native{max-width:560px}.list-reference__native .panel{margin-bottom:0}
+.list-reference__status{position:fixed;right:20px;bottom:20px;z-index:2000;max-width:calc(100% - 40px);padding:12px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);box-shadow:var(--shadow-sm);color:var(--text-strong)}
+.list-reference__status:empty{display:none}
+@media(max-width:760px){body{padding:20px}.list-reference__grid{grid-template-columns:minmax(0,1fr);gap:28px}.list-reference__intro h1{font-size:24px}}
+@media print{.list-reference__recipe button,.list-reference__status{display:none}body{padding:0;background:white}.list-reference__grid{display:block}.list-reference__example{break-inside:avoid;margin-bottom:24px}}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Error pages (F1)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+/* ── The error page itself ──────────────────────────────────────────────── */
+.eg-error {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  text-align: center;
+}
+.eg-error__code {
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 var(--space-2);
+}
+.eg-error__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-tight);
+  font-weight: var(--fw-bold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-3);
+}
+.eg-error__body {
+  font-size: var(--fs-md);
+  color: var(--text-base);
+  margin: 0 auto var(--space-6);
+  max-width: 46ch;
+}
+.eg-error__actions { display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap; }
+.eg-btn {
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--brand-600);
+  background: var(--brand-600);
+  color: var(--white);
+  text-decoration: none;
+  cursor: pointer;
+}
+.eg-btn:hover { background: var(--brand-700); border-color: var(--brand-700); }
+.eg-btn--ghost { background: transparent; color: var(--text-link); }
+.eg-btn--ghost:hover { background: var(--brand-50); color: var(--text-link-hover); }
+.eg-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.eg-error__ref {
+  margin: var(--space-6) 0 0;
+  font-family: var(--face-mono);
+  font-size: var(--fs-2xs);
+  color: var(--text-faint);
+}
+
+/* ── The scene. Order matters: art sits BELOW the message, never above. ─── */
+.eg-scene { margin: var(--space-6) auto 0; max-width: 620px; }
+.eg-scene svg { display: block; width: 100%; height: auto; }
+
+/* Warehouse palette — deliberately desaturated so it reads as background art */
+.wh-line   { stroke: var(--neutral-300); stroke-width: 2; fill: none; }
+.wh-faint  { stroke: var(--neutral-200); stroke-width: 2; fill: none; }
+.wh-fill   { fill: var(--neutral-100); }
+.wh-floor  { stroke: var(--neutral-200); stroke-width: 2; }
+
+.fk-body   { fill: var(--accent-600); }
+.fk-dark   { fill: var(--brand-900); }
+.fk-line   { stroke: var(--brand-900); stroke-width: 2; fill: none; stroke-linecap: round; }
+
+/* Forklift wanders right, pauses, wanders back. 26s round trip: slow enough
+   that it reads as ambient, not as something demanding attention. */
+.fk-rig { animation: fk-drive 26s ease-in-out infinite; }
+@keyframes fk-drive {
+  0%   { transform: translateX(40px)  scaleX(1); }
+  38%  { transform: translateX(430px) scaleX(1); }
+  46%  { transform: translateX(430px) scaleX(1); }
+  50%  { transform: translateX(430px) scaleX(-1); }
+  54%  { transform: translateX(430px) scaleX(-1); }
+  92%  { transform: translateX(40px)  scaleX(-1); }
+  96%  { transform: translateX(40px)  scaleX(-1); }
+  100% { transform: translateX(40px)  scaleX(1); }
+}
+.fk-wheel { animation: fk-roll 1.4s linear infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes fk-roll { to { transform: rotate(360deg); } }
+
+.fk-hop { animation: fk-bob 1.1s ease-in-out infinite; }
+@keyframes fk-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.2px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fk-rig { transform: translateX(190px); }
+}
+
+/* 500 — one small, still object. No character, no motion. */
+.eg-plug { margin: var(--space-6) auto 0; max-width: 180px; opacity: .8; }
+.eg-plug svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · F1</p>
+    <h1>Error pages — the tone ladder</h1>
+    <p>The idea was a lost forklift wandering an empty warehouse. The thing worth
+       testing here is not the forklift, it is the <strong>ladder</strong>: how much
+       charm each severity level can carry before it starts working against the user.</p>
+    <p>Rule applied throughout — the error text is primary and fully legible, and the
+       art sits <em>below</em> it. A user hitting an error needs to know what broke and
+       what to do next.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag">No workflow path</span>
+      <span class="mk-tag">Real theme tokens</span>
+    </div>
+  </header>
+
+  <!-- ── 404 ─────────────────────────────────────────────────────────────── -->
+  <section class="mk-stage">
+    <p class="mk-label">404 — wrong URL <span>Playful. Nobody's work is at risk; nothing has failed.</span></p>
+    <div class="mk-frame">
+      <div class="eg-error">
+        <p class="eg-error__code">Error 404</p>
+        <h2 class="eg-error__title">That page isn't here</h2>
+        <p class="eg-error__body">The link may be out of date, or the record may have been
+           merged or deleted. Nothing has gone wrong with your work.</p>
+        <div class="eg-error__actions">
+          <a class="eg-btn" href="#">Back to dashboard</a>
+          <a class="eg-btn eg-btn--ghost" href="#">Search members</a>
+        </div>
+
+        <div class="eg-scene" aria-hidden="true">
+          <svg viewBox="0 0 620 240" role="img">
+            <!-- racking, receding -->
+            <g class="wh-faint">
+              <path d="M60 40v150M150 40v150M60 40h90M60 90h90M60 140h90M60 190h90"/>
+              <path d="M470 40v150M560 40v150M470 40h90M470 90h90M470 140h90M470 190h90"/>
+            </g>
+            <g class="wh-line" opacity=".55">
+              <path d="M245 95v95M375 95v95M245 95h130M245 140h130M245 190h130"/>
+            </g>
+            <!-- one lonely pallet on an otherwise empty rack -->
+            <rect class="wh-fill" x="262" y="112" width="44" height="26" rx="2"/>
+            <rect x="262" y="112" width="44" height="26" rx="2" class="wh-line"/>
+            <!-- floor -->
+            <line class="wh-floor" x1="0" y1="210" x2="620" y2="210"/>
+            <line class="wh-floor" x1="0" y1="222" x2="620" y2="222" opacity=".45" stroke-dasharray="14 20"/>
+
+            <!-- forklift -->
+            <g class="fk-rig">
+              <g class="fk-hop" transform="translate(0,0)">
+                <!-- mast + forks -->
+                <path class="fk-line" d="M66 150V96M74 150V96"/>
+                <path class="fk-line" d="M66 176h34M66 176v-8"/>
+                <!-- body -->
+                <path class="fk-body" d="M18 152h44v34H18a6 6 0 0 1-6-6v-22a6 6 0 0 1 6-6z"/>
+                <!-- cab -->
+                <path class="fk-line" d="M22 152v-30h30v30M22 122h30"/>
+                <!-- driver, small and abstract -->
+                <circle class="fk-dark" cx="38" cy="138" r="5"/>
+                <path class="fk-dark" d="M31 152a7 7 0 0 1 14 0z"/>
+                <!-- wheels -->
+                <g><circle class="fk-dark fk-wheel" cx="26" cy="192" r="10"/></g>
+                <g><circle class="fk-dark fk-wheel" cx="56" cy="192" r="8"/></g>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <p class="eg-error__ref">ref 7f2c1a · 14 Sep 2026 22:41</p>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> The forklift carries nothing and the
+       racking is empty except for one pallet — that is the joke, and it needs no caption.
+       26-second round trip, so it reads as ambient. Under
+       <code>prefers-reduced-motion</code> the forklift simply parks mid-scene; the drawing
+       still works, and nothing moves.</p>
+  </section>
+
+  <!-- ── 500 ─────────────────────────────────────────────────────────────── -->
+  <section class="mk-stage">
+    <p class="mk-label">500 — something actually failed <span>Dry. One still object, no character, no motion.</span></p>
+    <div class="mk-frame">
+      <div class="eg-error">
+        <p class="eg-error__code">Error 500</p>
+        <h2 class="eg-error__title">Something went wrong at our end</h2>
+        <p class="eg-error__body">This has been logged. If you were part-way through
+           something, your last saved change is safe — check the record before redoing work.</p>
+        <div class="eg-error__actions">
+          <button class="eg-btn" type="button">Try again</button>
+          <a class="eg-btn eg-btn--ghost" href="#">Contact support</a>
+        </div>
+
+        <div class="eg-plug" aria-hidden="true">
+          <svg viewBox="0 0 180 60" role="img">
+            <g class="wh-line" stroke-linecap="round">
+              <path d="M8 30h46"/>
+              <path d="M54 22v16"/>
+              <path d="M172 30h-46"/>
+              <path d="M126 22v16"/>
+              <path d="M62 26h4M62 34h4"/>
+            </g>
+            <rect class="wh-fill" x="108" y="20" width="18" height="20" rx="3"/>
+            <rect x="108" y="20" width="18" height="20" rx="3" class="wh-line"/>
+          </svg>
+        </div>
+
+        <p class="eg-error__ref">ref 4b90de · 14 Sep 2026 22:41 · logged</p>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> The charm drops a rung. No animation,
+       no character — just an unplugged cable, at 80% opacity, small. Someone hitting a 500
+       mid-task is not in the mood, and a cheerful mascot here would read as the system not
+       taking its own failure seriously.</p>
+  </section>
+
+  <!-- ── 403 ─────────────────────────────────────────────────────────────── -->
+  <section class="mk-stage">
+    <p class="mk-label">403 — permission denied <span>No art at all. The ladder bottoms out.</span></p>
+    <div class="mk-frame">
+      <div class="eg-error">
+        <p class="eg-error__code">Access denied</p>
+        <h2 class="eg-error__title">You don't have access to this record</h2>
+        <p class="eg-error__body">Your role doesn't include access to financial records.
+           If you need it, your system administrator can add it.</p>
+        <div class="eg-error__actions">
+          <a class="eg-btn" href="#">Back to dashboard</a>
+          <a class="eg-btn eg-btn--ghost" href="#">Request access</a>
+        </div>
+        <p class="eg-error__ref">ref 91aa07 · role: Membership Officer</p>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> Deliberately empty. A permission refusal
+       can be a sensitive moment — the user may have been told they had access, or may be
+       about to ask a colleague why they don't. Any illustration here reads as the system
+       being pleased with itself. The absence is the design decision worth reviewing.</p>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+</body>
+</html>

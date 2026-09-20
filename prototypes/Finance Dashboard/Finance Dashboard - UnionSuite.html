@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UnionSuite finance dashboard styling trial with fictional payment data.">
+  <title>Finance Dashboard · UnionSuite prototype</title>
+  <link rel="stylesheet" href="../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../THeme/UnionSuite/Tabler.css">
+  <link rel="stylesheet" href="../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="finance-unionsuite.css">
+  <link rel="stylesheet" href="../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../THeme/UnionSuite-Client/Override.css">
+  <script src="../../THeme/UnionSuite/zUnionSuite.js" defer></script>
+  <script src="finance-unionsuite.js" defer></script>
+</head>
+<body class="us-finance">
+  <a class="us-finance-skip" href="#finance-main">Skip to finance dashboard</a>
+  <div class="us-finance-shell">
+    <nav class="us-finance-breadcrumb" aria-label="Breadcrumb">
+      <button class="TextButton LinkButton" type="button" data-action="overview"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Finance</button>
+      <span aria-hidden="true">/</span><span id="finance-context" aria-current="page">Overview</span>
+      <span class="us-finance-trial">Styling trial <span aria-hidden="true">·</span> Sample data</span>
+    </nav>
+    <main id="finance-main" tabindex="-1"></main>
+    <footer class="us-finance-footer">Fictional sample data · Snapshot 6 July 2026 · Retry actions simulate a queue in this page only. Reload to reset.</footer>
+  </div>
+  <div id="finance-notice" class="us-finance-toast" role="status" aria-live="polite" hidden></div>
+  <noscript><p>This interactive prototype needs JavaScript enabled.</p></noscript>
+</body>
+</html>

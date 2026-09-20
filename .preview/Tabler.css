@@ -1,0 +1,25 @@
+/* ==========================================================================
+   Tabler Icons 3.31.0 — https://tabler.io/icons  (MIT)
+
+   iMIS auto-links every .css in the theme ROOT and does not scan subfolders,
+   so this shim is what actually loads the icon set. Keep it here; keep the
+   font next to its own stylesheet in Tabler/.
+
+   The path is relative to THIS FILE, deliberately. An absolute
+   /App_Themes/<name>/… path breaks the moment the theme folder is renamed —
+   which is exactly what had happened to FontAwesome.6.7.2.css.
+
+   Only the .woff2 is shipped. Every browser iMIS supports reads woff2; the
+   .woff and .ttf fallbacks are another 3.4 MB for browsers that predate 2016.
+
+   USAGE:  <i class="ti ti-home"></i>          (or ti-users, ti-briefcase, …)
+   Browse the set at https://tabler.io/icons
+
+   Icons inherit font-size and currentColor, so they follow the theme tokens:
+   a client rebrand in zUnionStyling.css recolours them with everything else.
+
+   LICENCE: MIT, (c) 2020-2026 Pawel Kuna. Full text in Tabler/LICENSE — it must
+   stay with these files wherever the theme is copied.
+   ========================================================================== */
+
+@import url("Tabler/tabler-icons.min.css");

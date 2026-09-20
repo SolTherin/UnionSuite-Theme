@@ -1,0 +1,10 @@
+/* Preview page layout and controls only. No banner component overrides. */
+body.status-final{margin:0;background:var(--bg-page);color:var(--text-base);font-family:var(--font-ui)}
+.member-preview-shell{padding:0 24px}
+.member-preview-content{padding:32px 0;min-height:150vh}
+.member-preview-content p{max-width:75ch}
+.member-preview-content .controls{display:flex;flex-wrap:wrap;align-items:end;gap:16px;padding:20px;border:1px solid var(--border);background:var(--bg-surface)}
+.member-preview-content .controls label{display:flex;flex-direction:column;gap:6px}
+.member-preview-content .controls input,.member-preview-content .controls select{max-width:100%}
+.member-preview-content #feedback{flex-basis:100%}
+.member-preview-content #action-feedback{min-height:24px;margin-top:24px}

@@ -1,0 +1,1475 @@
+{
+    "$type": "Asi.Soa.Core.DataContracts.PagedResult`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], Asi.Contracts",
+    "Items": {
+        "$type": "System.Collections.Generic.List`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], mscorlib",
+        "$values": [
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "101"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "101"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "101"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Prodigy Makers International 2"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "101"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Prodigy Makers International 2"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/101/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103841"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103841"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103842"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103842"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103842"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Stark Enterprise - Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Test Employer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 1
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103907/103842/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103907"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103907"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Test Employer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Test Employer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103907/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103908"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103908"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103908"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Test Work Place"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": "103986"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103986"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Qantas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 1
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103986/103908/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103957"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103957"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103957"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Department for Education"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103957"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Department for Education"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103957/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103986"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103986"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103986"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Qantas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103986"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Qantas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103986/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103987"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103987"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103987"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Qantas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103987"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Qantas"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103987/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103988"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103988"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Department of Edu Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 1
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/103988/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103989"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103989"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103989"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Department of Edu Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103989"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Department of Edu Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103989/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103990"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103990"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Department of Edu Melb"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103990"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Department of Edu Melb"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103990/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103991"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103991"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103991"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Department of Edu Melb"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103991"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Department of Edu Melb"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103991/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103992"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103992"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103992"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103992"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103992/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103993"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103993"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103993"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103993"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103993/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103994"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103994"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103994"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103994"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103994/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103995"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103995"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103995"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103995"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Uni Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103995/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103996"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103996"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103996"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "RMIT"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103996"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "RMIT"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103996/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103997"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103997"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103997"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "RMIT Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": "103989"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103989"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Department of Edu Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 1
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103989/103997/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103998"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103998"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103998"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "NewGuy"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103998"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "NewGuy"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 0
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103998/"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                "PrimaryParentEntityTypeName": "Party",
+                "Identity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "i4u_UT_CompanyHierarchy",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103999"
+                        ]
+                    }
+                },
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103999"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103999"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Name",
+                            "Value": "MyJob"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "CO_ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103907"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Test Employer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Org_Code",
+                            "Value": ""
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Depth",
+                            "Value": {
+                                "$type": "System.Int32",
+                                "$value": 1
+                            }
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103907/103999/"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "Offset": 0,
+    "Limit": 20,
+    "Count": 20,
+    "TotalCount": 317,
+    "NextPageLink": null,
+    "HasNext": true,
+    "NextOffset": 20
+}

@@ -1,0 +1,2813 @@
+<style>
+    /* ── Section flash on nav click ─────────────────────────── */
+    @keyframes section-flash {
+    0%   { box-shadow: none; }
+    25%  { box-shadow: 0 0 0 3px var(--blue-400, #60a5fa); }
+    50%  { box-shadow: none; }
+    75%  { box-shadow: 0 0 0 3px var(--blue-400, #60a5fa); }
+    100% { box-shadow: none; }
+    }
+    .section-flash {
+    animation: section-flash 0.7s ease-in-out;
+    border-radius: 8px;
+    }
+    /* ── Equal-height cards: pass flex height through CMS wrappers ── */
+    .row { display: flex; flex-wrap: wrap; }
+    .col-sm-6 {
+    display: flex;
+    flex-direction: column;
+    }
+    .col-sm-6 > .ContentItemContainer,
+    .col-sm-6 > .ContentItemContainer > .WebPartZone,
+    .col-sm-6 > .ContentItemContainer > .WebPartZone > .iMIS-WebPart,
+    .col-sm-6 > .ContentItemContainer > .WebPartZone > .iMIS-WebPart > .ContentItemContainer,
+    .col-sm-6 > .ContentItemContainer > .WebPartZone > .iMIS-WebPart > .ContentItemContainer > div,
+    .col-sm-6 > .ContentItemContainer > .WebPartZone > .iMIS-WebPart > .ContentItemContainer > div > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    }
+    .col-sm-6 .card {
+    flex: 1;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script>
+  // ── Deferred DOM references (assigned in initDOM) ─────────
+  let banner, page, scrollTop;
+
+  const testMode      = new URLSearchParams(window.location.search).get('TestMode') === 'True';
+  const clientContext = JSON.parse(document.getElementById('__ClientContext')?.value || '{}');
+
+  // ── Date parser — handles dd/MM/yyyy and ISO formats ─────
+  function parseDate(str) {
+    if (!str) return null;
+    const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    const d = dmy
+      ? new Date(`${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`)
+      : new Date(str);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // ── Panel / accordion state ───────────────────────────────
+  let activePanel = 'overview';
+
+  const PANEL_SECTIONS = {
+    'overview':       ['case-details', 'key-dates', 'resolution', 'tasks', 'milestones', 'contacts'],
+    'activity':       ['notes', 'meetings', 'attachments', 'communications'],
+    'coverage':       ['demographics', 'members'],
+    'terms-schedule': ['terms', 'schedule'],
+  };
+
+  // Open an accordion item and show its content panel (closes all others)
+  function accOpen(panelId) {
+    if (panelId === activePanel) return;
+    activePanel = panelId;
+    sessionStorage.setItem('activePanel', panelId);
+
+    document.querySelectorAll('.acc-trigger').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.panel === panelId);
+    });
+
+    document.querySelectorAll('.acc-body').forEach(body => {
+      body.classList.toggle('open', body.id === 'acc-body-' + panelId);
+    });
+
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + panelId);
+    });
+
+    document.querySelectorAll('#acc-body-' + panelId + ' .nav-link')
+      .forEach((a, i) => a.classList.toggle('active', i === 0));
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const bannerH = banner?.classList.contains('mini') ? 56 : 148;
+    const offset  = bannerH + 12;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+
+    // Flash the card that follows the anchor
+    const card = el.nextElementSibling;
+    if (card) {
+      card.classList.remove('section-flash');
+      void card.offsetWidth; // force reflow to restart animation
+      card.classList.add('section-flash');
+      card.addEventListener('animationend', () => card.classList.remove('section-flash'), { once: true });
+    }
+  }
+
+  // ── Actions dropdown ──────────────────────────────────────
+  function toggleActions(e) {
+    e.stopPropagation();
+    const btn  = document.getElementById('actionsBtn');
+    const menu = document.getElementById('actionsMenu');
+    const open = menu.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+
+
+  
+
+// ----- Action Dropdown Functions ----- //
+
+function CA_AddNotePopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_CreateNote?AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Note',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_AddAttachmentPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_AddAttachment?AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add Attachment',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_AddContactsMemberPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_ManageContacts?AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Manage Contacts',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				CA_syncContactCards();
+			},
+			null
+	);
+}
+
+function CA_syncContactCards() {
+	const token           = document.querySelector('#__RequestVerificationToken')?.value;
+	const domain          = window.location.origin;
+	const agreementOrdinal = FindURLParameter('AgreementNum');
+	const grid            = document.getElementById('contactGrid');
+	if (!grid) return;
+
+	setTimeout(() => {
+		fetch(`${domain}/api/i4u_UT_CA_Contacts?AgreementOrdinal=${agreementOrdinal}`, {
+			method: 'GET',
+			headers: { 'RequestVerificationToken': token }
+		})
+		.then(res => {
+			if (!res.ok) throw new Error(`CA_syncContactCards failed: ${res.status}`);
+			return res.json();
+		})
+		.then(data => {
+			const items = (data?.Items?.['$values'] ?? []).slice(0, 100);
+
+			// Build a map of ordinal → parsed contact from the API response
+			const apiContacts = new Map();
+			items.forEach(item => {
+				const props = item?.Properties?.['$values'];
+				if (!props) return;
+
+				const get = name => {
+					const prop = props.find(p => p.Name === name);
+					const val  = prop?.Value;
+					return (val !== null && val !== undefined && typeof val === 'object' ? val['$value'] : val) ?? '';
+				};
+
+				const ordinal = String(get('Ordinal'));
+				apiContacts.set(ordinal, {
+					ordinal,
+					name:  get('ContactName'),
+					role:  get('ContactRole'),
+					type:  get('ContactType'),
+					group: get('ContactGroup'),
+					phone: get('ContactPhone'),
+					email: get('ContactEmail'),
+				});
+			});
+
+			// Remove cards no longer in the API response
+			grid.querySelectorAll('.contact-card[data-ordinal]').forEach(card => {
+				if (!apiContacts.has(card.dataset.ordinal)) card.remove();
+			});
+
+			// Add cards not yet in the DOM
+			const existingOrdinals = new Set(
+				Array.from(grid.querySelectorAll('.contact-card[data-ordinal]'))
+					.map(card => card.dataset.ordinal)
+			);
+
+			apiContacts.forEach(({ ordinal, name, role, type, group, phone, email }) => {
+				if (existingOrdinals.has(ordinal)) return;
+
+				const card = document.createElement('div');
+				card.className       = 'contact-card';
+				card.dataset.name    = name;
+				card.dataset.type    = type;
+				card.dataset.role    = role;
+				card.dataset.group   = group;
+				card.dataset.ordinal = ordinal;
+				card.innerHTML = `
+					<div class="contact-info">
+						<div class="c-name">${name}</div>
+						<div class="c-role">${role}</div>
+						<div class="c-badges">
+							<span class="c-badge type">${type}</span>
+							<span class="c-badge group">${group}</span>
+						</div>
+						<div class="c-detail">📞 ${phone}</div>
+						<div class="c-detail">✉️ ${email}</div>
+					</div>
+					<button type="button" class="item-edit-btn" title="Edit contact" onclick="CA_EditContactPopupFn('${ordinal}')">
+						<em class="fas fa-pen"></em>
+					</button>`;
+
+				grid.appendChild(card);
+			});
+		})
+		.catch(err => console.error('CA_syncContactCards:', err));
+	}, 1000);
+}
+
+function CA_ScheduleMeetingPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_CreateMeeting?AgreementID=' + FindURLParameter("AgreementID")+ '&AgreementOrdinal=' + FindURLParameter("AgreementNum"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Schedule Meeting',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementMeeting input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_AddTaskPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_CreateTask?Task=true&AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Task',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementTasks input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_AddMilestonePopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_CreateTask?Milestones=true&AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Milestone',  // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				CA_reloadMilestones();
+			},
+			null
+	);
+
+}
+
+
+  // ── Update Category on the related Note record ──────────
+  /*
+   * CA_updateMilestoneNoteCategory(milestoneOrdinal)
+   * ─────────────────────────────────────────────────────────
+   * After editing a milestone, sets Category = 'Milestones'
+   * on the corresponding Zen_CloudFiles_Notes record so the
+   * note is correctly classified.
+   */
+  function CA_updateMilestoneNoteCategory(milestoneOrdinal) {
+    const token  = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain = window.location.origin;
+
+    fetch(`${domain}/api/Zen_CloudFiles_Notes/${milestoneOrdinal}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type':             'application/json',
+        'RequestVerificationToken': token
+      },
+      body: JSON.stringify({
+        '$type':          'Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts',
+        'EntityTypeName': 'Zen_CloudFiles_Notes',
+        'Properties': {
+          '$type':   'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts',
+          '$values': [
+            {
+              '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts',
+              'Name':  'Ordinal',
+              'Value': milestoneOrdinal
+            },
+            {
+              '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts',
+              'Name':  'Category',
+              'Value': 'Milestones'
+            }
+          ]
+        }
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`CA_updateMilestoneNoteCategory failed: ${res.status}`);
+    })
+    .catch(err => console.error('CA_updateMilestoneNoteCategory:', err));
+  }
+
+  // ── Generic template-driven list reload ──────────────────
+  /*
+   * CA_reloadList(queryId, targetSelector, postReloadFn)
+   * ─────────────────────────────────────────────────────────
+   * Generic reload function that:
+   *   1. Fetches the HTML template definition from the Config IQA
+   *      using the DocumentVersionKey (queryId)
+   *   2. Fetches the IQA data path via the DocumentSummary API
+   *   3. Fetches the live data using AgreementNum as parameter
+   *   4. Renders each row by replacing {#query.FieldName} tokens
+   *      in the template with HTML-escaped, date-formatted values
+   *   5. Calls postReloadFn (optional) when done
+   *
+   * Parameters:
+   *   queryId        — DocumentVersionKey GUID of the query template
+   *   targetSelector — CSS selector for the container to clear & repopulate
+   *   postReloadFn   — optional callback (e.g. re-apply filters, update counts)
+   */
+  async function CA_reloadList(queryId, targetSelector, postReloadFn) {
+    const token        = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain       = window.location.origin;
+    const agreementNum = FindURLParameter('AgreementNum');
+    const target       = document.querySelector(targetSelector);
+
+    if (!target) { console.error(`CA_reloadList: target "${targetSelector}" not found`); return; }
+
+    // Encode special HTML characters to prevent XSS when injecting values into innerHTML
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Convert ISO datetime strings (2026-05-22T16:00:00) to dd/MM/yyyy
+    function formatIfDate(val) {
+      if (typeof val !== 'string') return val;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val)) {
+        const d = new Date(val);
+        if (!isNaN(d)) {
+          return String(d.getDate()).padStart(2, '0') + '/' +
+                 String(d.getMonth() + 1).padStart(2, '0') + '/' +
+                 d.getFullYear();
+        }
+      }
+      return val;
+    }
+
+    try {
+      // Step 1: Fetch template definition and IQA path in parallel
+      const configQuery = encodeURIComponent('$/_i4u_/SandBox/CA/Config - Query Template Definitions');
+
+      const [templateRes, summaryRes] = await Promise.all([
+        fetch(`${domain}/api/iqa?queryname=${configQuery}&parameter=${queryId}`, {
+          method: 'GET',
+          headers: { 'RequestVerificationToken': token }
+        }),
+        fetch(`${domain}/api/DocumentSummary/_execute`, {
+          method: 'POST',
+          headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            '$type': 'Asi.Soa.Core.DataContracts.GenericExecuteRequest, Asi.Contracts',
+            'OperationName': 'FindByVersionId',
+            'EntityTypeName': 'DocumentSummary',
+            'Parameters': {
+              '$type': 'System.Collections.ObjectModel.Collection`1[[System.Object, mscorlib]], mscorlib',
+              '$values': [{ '$type': 'System.String', '$value': queryId }]
+            },
+            'ParameterTypeName': {
+              '$type': 'System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib',
+              '$values': ['System.String']
+            },
+            'UseJson': false
+          })
+        })
+      ]);
+
+      if (!templateRes.ok) throw new Error(`Template fetch failed: ${templateRes.status}`);
+      if (!summaryRes.ok)  throw new Error(`DocumentSummary fetch failed: ${summaryRes.status}`);
+
+      const [templateData, summaryData] = await Promise.all([templateRes.json(), summaryRes.json()]);
+
+      const templateProps = templateData?.Items?.['$values']?.[0]?.Properties?.['$values'] ?? [];
+      const templateDefRaw = templateProps.find(p => p.Name === 'QueryTemplateDefinition')?.Value ?? '';
+
+      // If iMIS returns the value as a typed object { $type, $value }, unwrap it
+      const templateDef = (templateDefRaw && typeof templateDefRaw === 'object')
+        ? String(templateDefRaw['$value'] ?? '')
+        : String(templateDefRaw);
+
+      const iqaPath = summaryData?.Result?.Path;
+
+      if (!templateDef) throw new Error('CA_reloadList: QueryTemplateDefinition not found');
+      if (!iqaPath)     throw new Error('CA_reloadList: IQA path not found');
+
+      // Step 2: Fetch the live data
+      const dataRes = await fetch(
+        `${domain}/api/iqa?queryname=${encodeURIComponent(iqaPath)}&parameter=${agreementNum}`,
+        { method: 'GET', headers: { 'RequestVerificationToken': token } }
+      );
+
+      if (!dataRes.ok) throw new Error(`Data fetch failed: ${dataRes.status}`);
+      const items = (await dataRes.json())?.Items?.['$values'] ?? [];
+
+      // Step 3: Render — substitute {#query.FieldName} tokens with escaped, formatted values
+      target.innerHTML = '';
+
+      // Normalise HTML-entity-encoded curly braces that iMIS may store in
+      // the template definition (&#123; → {  and  &#125; → })
+      const normalisedTemplate = templateDef
+        .replace(/&#123;/g, '{')
+        .replace(/&#125;/g, '}');
+
+      // ── Token replacement ────────────────────────────────────
+      // IMPORTANT: Do NOT use a regex literal containing {#query. here.
+      // iMIS's template engine scans the JS source file for {#query.xxx}
+      // patterns and corrupts any regex literal that contains that sequence
+      // (even escaped as \{), silently breaking the regex at runtime.
+      //
+      // Build the open-token string from concatenated parts so iMIS never
+      // sees the full sequence in this source file, and use split-based
+      // replacement instead of a regex.
+      const openToken = '{' + '#query.'; // split prevents iMIS source-scan detection
+
+      items.forEach(item => {
+        const props = item?.Properties?.['$values'] ?? [];
+
+        // Null-prototype map prevents prototype pollution from unexpected field names
+        const values = Object.create(null);
+        props.forEach(p => {
+          const raw = p.Value;
+          const str = (raw === null || raw === undefined) ? ''
+            : (typeof raw === 'object' ? String(raw['$value'] ?? '') : String(raw));
+          values[p.Name.toLowerCase()] = formatIfDate(str);
+        });
+
+        const segments = normalisedTemplate.split(openToken);
+        let html = segments[0];
+        for (let s = 1; s < segments.length; s++) {
+          const seg      = segments[s];
+          const closeIdx = seg.indexOf('}');
+          if (closeIdx === -1) {
+            html += openToken + seg;
+          } else {
+            html += escapeHtml(values[seg.substring(0, closeIdx).toLowerCase()] ?? '')
+                  + seg.substring(closeIdx + 1);
+          }
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        if (wrapper.firstChild) target.appendChild(wrapper.firstChild);
+      });
+
+      // Step 4: Post-reload callback (re-apply filters, update counts, etc.)
+      if (typeof postReloadFn === 'function') postReloadFn();
+
+    } catch (err) {
+      console.error('CA_reloadList:', err);
+    } finally {
+    }
+  }
+
+
+  // ── Reload milestones from API after popup close ─────────
+  /*
+   * CA_reloadMilestones(milestoneOrdinal)
+   * ─────────────────────────────────────────────────────────
+   * Fetches the latest milestone data from the IQA API and
+   * rebuilds #milestone-log in the DOM.
+   *
+   * Parameters:
+   *   milestoneOrdinal — optional. When provided (ViewMilestone),
+   *                      passed as a second &parameter to filter
+   *                      to a specific milestone. Omit for
+   *                      AddMilestone to reload all milestones.
+   */
+  function CA_reloadMilestones(milestoneOrdinal) {
+    const token        = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain       = window.location.origin;
+    const agreementNum = FindURLParameter('AgreementNum');
+    const log          = document.getElementById('milestone-log');
+    if (!log) return;
+
+    // TODO: review IQA path before deploying to production
+    const queryName = encodeURIComponent('$/_i4u_/SandBox/CA/Query Template - Manage Agreement - Milestones API');
+    let url = `${domain}/api/iqa?queryname=${queryName}&parameter=${agreementNum}`;
+    if (milestoneOrdinal) url += `&parameter=${milestoneOrdinal}`;
+
+    // Wait 1 second for the DB to reflect the popup's changes before fetching
+    setTimeout(() => {
+      fetch(url, {
+        method: 'GET',
+        headers: { 'RequestVerificationToken': token }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`CA_reloadMilestones failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const items = data?.Items?.['$values'] ?? [];
+
+        log.innerHTML = '';
+
+        items.forEach(item => {
+          const props = item?.Properties?.['$values'];
+          if (!props) return;
+
+          const get = name => {
+            const prop = props.find(p => p.Name === name);
+            const val  = prop?.Value;
+            if (val === null || val === undefined) return '';
+            return typeof val === 'object' ? val['$value'] : val;
+          };
+
+          const ordinal   = get('Ordinal');
+          const label     = get('Note') || 'Milestone';
+          const statusCSS = get('StatusCSS') || 'future';
+          const deadline  = get('Deadline');
+
+          const displayDate = deadline ? (() => {
+            const d = parseDate(deadline);
+            return d ? d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) : deadline;
+          })() : '—';
+
+          const el = document.createElement('div');
+          el.className  = 'date-item';
+          el.id         = `milestone-${ordinal}`;
+          el.dataset.status = statusCSS;
+          if (statusCSS === 'done') el.classList.add('ms-done');
+          if (statusCSS === 'done' && hidingMsDone) el.classList.add('ms-hidden');
+
+          el.innerHTML = `
+            <div class="date-dot ${statusCSS}"></div>
+            <div class="date-info">
+              <div class="d-label${statusCSS === 'done' ? ' done-text' : ''}">${label}</div>
+              <div class="d-value">${displayDate} —
+                <select class="ms-status-select status-${statusCSS}" onchange="CA_setMilestoneStatus('${ordinal}', this.value)">
+                  <option value="future">Not Started</option>
+                  <option value="current">In Progress</option>
+                  <option value="done">Complete</option>
+                </select>
+              </div>
+            </div>`;
+
+          // Sync select to current status
+          el.querySelector('.ms-status-select').value = statusCSS;
+
+          log.appendChild(el);
+        });
+
+        refreshMilestoneStats();
+      })
+      .catch(err => console.error('CA_reloadMilestones:', err));
+    }, 1000);
+  }
+
+
+function CA_EditAgreementPopupFn(section) {
+
+  var AppendURL = '';
+
+  if (section) {
+    // param is empty string, 0, false, null, or undefined
+    AppendURL = '&Section=' +section;
+  }
+
+	ShowDialog_NoReturnValue(
+			'/Agreements_EditAgreement?AgreementID=' + FindURLParameter("AgreementID") + AppendURL,
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Edit Agreement Details',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				//jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+
+function CA_CloneAgreementFn() {
+
+	window.location.href = window.location.protocol + '//' + window.location.host + '/_i4u_/Core/Collective_Agreements/Navigation/Create-Agreement.aspx?AgreementID=' + FindURLParameter("AgreementID");
+}
+
+
+
+function CA_EmailTeamPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_EmailContacts?AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Email Negotiating Team',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementEmails input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_EmailMembersPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_SMSContacts?AgreementID=' + FindURLParameter("AgreementID"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Email Members',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementEmails input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+
+
+function CA_EditContactPopupFn(ordinal) {
+
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Collective_Agreements/Contact/Edit-Contact-Information.aspx?ID=' + ordinal,
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Edit Contact',       // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {         // What happens on popup close
+				CA_reloadContactCard(ordinal);
+			},
+			null
+	);
+
+}
+
+function CA_reloadContactCard(ordinal) {
+	const cardEl = document.querySelector(`.contact-card[data-ordinal="${ordinal}"]`);
+	if (!cardEl) return;
+	const token  = document.querySelector('#__RequestVerificationToken')?.value;
+	const domain = window.location.origin;
+
+	cardEl.classList.add('loading');
+
+	setTimeout(() => {
+		fetch(`${domain}/api/i4u_UT_CA_Contacts?Ordinal=${ordinal}`, {
+			method: 'GET',
+			headers: { 'RequestVerificationToken': token }
+		})
+		.then(res => {
+			if (!res.ok) throw new Error(`CA_reloadContactCard failed: ${res.status}`);
+			return res.json();
+		})
+		.then(data => {
+			const props = data?.Items?.['$values']?.[0]?.Properties?.['$values'];
+			if (!props) { cardEl.classList.remove('loading'); return; }
+
+			const get = name => {
+				const prop = props.find(p => p.Name === name);
+				const val  = prop?.Value;
+				return (val !== null && val !== undefined && typeof val === 'object' ? val['$value'] : val) ?? '';
+			};
+
+			const name  = get('ContactName');
+			const role  = get('ContactRole');
+			const type  = get('ContactType');
+			const group = get('ContactGroup');
+			const phone = get('ContactPhone');
+			const email = get('ContactEmail');
+
+			// Update data attributes (keeps filtering in sync)
+			cardEl.dataset.name  = name;
+			cardEl.dataset.type  = type;
+			cardEl.dataset.role  = role;
+			cardEl.dataset.group = group;
+
+			// Update displayed content
+			const info = cardEl.querySelector('.contact-info');
+			if (!info) return;
+			const q = sel => info.querySelector(sel);
+
+			if (q('.c-name'))        q('.c-name').textContent        = name;
+			if (q('.c-role'))        q('.c-role').textContent        = role;
+			if (q('.c-badge.type'))  q('.c-badge.type').textContent  = type;
+			if (q('.c-badge.group')) q('.c-badge.group').textContent = group;
+
+			const details = info.querySelectorAll('.c-detail');
+			if (details[0]) details[0].textContent = '📞 ' + phone;
+			if (details[1]) details[1].textContent = '✉️ ' + email;
+
+			cardEl.classList.remove('loading');
+		})
+		.catch(err => {
+			console.error('CA_reloadContactCard:', err);
+			cardEl.classList.remove('loading');
+		});
+	}, 1000);
+}
+
+
+
+// ----- Section Add Functions ----- //
+
+// Toggle Task
+// Action Milestone
+// Download Attachment
+// View Attachment
+
+
+
+function CA_ViewNotePopupFn(noteOrdinal) {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Zidebar/NoteDetails.aspx?NoteOrdinal='+noteOrdinal+'&AgreementID=' + FindURLParameter('AgreementID'),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Note',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_ViewTaskPopupFn(noteOrdinal) {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Zidebar/NoteDetails.aspx?NoteOrdinal='+noteOrdinal +'&AgreementID=' + FindURLParameter('AgreementID')+'&Task=true',
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Note',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+
+// TODO: Review and combine the two CA_ViewMilestonePopupFn implementations below.
+// The commented-out version used /Agreements_CreateTask and called CA_updateMilestoneNoteCategory
+// + CA_reloadMilestones on close. Determine whether those on-close actions are still needed.
+//
+// function CA_ViewMilestonePopupFn(milestoneOrdinal) {
+// 	ShowDialog_NoReturnValue(
+// 		'/Agreements_CreateTask?Milestones=true&AgreementID=' + FindURLParameter("AgreementID") + '&MilestoneOrdinal=' + milestoneOrdinal,
+// 		null,
+// 		'90%',
+// 		'90%',
+// 		'Edit Milestone',
+// 		null,
+// 		'E',
+// 		null,
+// 		null,
+// 		false,
+// 		false,
+// 		function () {
+// 			CA_updateMilestoneNoteCategory(milestoneOrdinal);
+// 			CA_reloadMilestones(milestoneOrdinal);
+// 		},
+// 		null
+// 	);
+// }
+
+function CA_ViewMilestonePopupFn(noteOrdinal) {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Zidebar/NoteDetails.aspx?NoteOrdinal='+noteOrdinal +'&AgreementID=' + FindURLParameter('AgreementID')+'&Milestones=true',
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add New Note',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementNotes input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+
+function CA_ViewMeetingPopupFn(meetingOrdinal) {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/Agreements_EditMeeting?AgreementID=' + FindURLParameter("AgreementID") + '&AgreementOrdinal=' + FindURLParameter("AgreementNum") + '&MeetingOrdinal=' + meetingOrdinal,
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Edit Meeting',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementMeeting input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+function CA_AddTermsPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx?&AgreementOrdinal=' + FindURLParameter("AgreementNum"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Add Term',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				jQuery('.IQATerms input[id*="ResultsGrid_RefreshButton"]').first().click();
+			},
+			null
+	);
+
+}
+
+function CA_EditTermPopupFn(TermOrdinal) {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx?&AgreementOrdinal=' + FindURLParameter("AgreementNum") +'&TermOrdinal=' + TermOrdinal,
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Update Term',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				jQuery('.IQATerms input[id*="ResultsGrid_RefreshButton"]').first().click();
+			},
+			null
+	);
+
+}
+
+
+function CA_RemoveTermsPopupFn() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Collective_Agreements/v2/Delete_Terms.aspx?AgreementID=' + FindURLParameter("AgreementID") + '&AgreementOrdinal=' + FindURLParameter("AgreementNum"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Remove Terms',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				jQuery('.IQATerms input[id*="ResultsGrid_RefreshButton"]').first().click();
+			},
+			null
+	);
+
+}
+
+
+
+
+function CA_EditCoverageRules() {
+
+	// popup dialogue
+	ShowDialog_NoReturnValue(
+			'/_i4u_/Core/Collective_Agreements/v2/Coverage.aspx?AgreementID=' + FindURLParameter("AgreementID") + '&AgreementNum=' + FindURLParameter("AgreementNum"),
+			null,
+			'90%',                // Popup width
+			'90%',                // Popup height
+			'Edit Coverage Rules',        // Popup title
+			null,
+			'E',
+			null,
+			null,
+			false,
+			false,
+			function () {        // What happens on popup close
+				//window.location.reload(true);
+				jQuery('.AgreementCoveredMembers input[id*="ResultsGrid_RefreshButton"]').first().click();        // Refreshes Query Menu IQA with ipart class 'PayGroupIQA' (postback on iqa, doesn't reload the page)
+			},
+			null
+	);
+	
+}
+
+
+
+
+
+
+
+
+
+  // ── Generic item status API call ─────────────────────────
+  /*
+   * CA_saveItemStatus(id, action, noteType)
+   * ─────────────────────────────────────────────────────────────
+   * Generic three-step function for saving a task or milestone
+   * status change via CloudToolz.
+   *
+   * Parameters:
+   *   id       — the Task or Milestone record ID (SeqN / Ordinal)
+   *   action   — status string sent to CloudToolz
+   *              Tasks:      'Complete' | 'Not Complete'
+   *              Milestones: 'Complete' | 'In Progress' | 'Not Complete'
+   *   noteType — record type string: 'Task' | 'Milestone'
+   *
+   * Flow:
+   *   1. GET  iMIS IQA  → resolve the CloudToolz base URL
+   *   2. POST iMIS /api/ZenTokens → store a short-lived auth token
+   *      that CloudToolz will verify on the next request
+   *   3. POST CloudToolz /ca/complete-task → submit the status change
+   */
+  function CA_saveItemStatus(id, action, noteType) {
+    const token  = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain = window.location.origin;
+
+    // ── Step 1: Resolve the CloudToolz base URL from iMIS IQA ──
+    fetch(`${domain}/api/iqa?queryname=$/ZENTSO/Security/CloudToolzUrl`, {
+      method: 'GET',
+      headers: { 'RequestVerificationToken': token }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`IQA request failed: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const cloudToolzUrl = data?.Items?.['$values']?.[0]?.Properties?.['$values']?.[0]?.Value?.replace(/\/$/, '');
+      if (!cloudToolzUrl) throw new Error('CloudToolz URL not found in IQA response');
+
+      // ── Step 2: Store a ZenToken in iMIS ───────────────────
+      // CloudToolz validates requests by reading this token back
+      // from iMIS. Must be posted before calling CloudToolz.
+      return fetch(`${domain}/api/ZenTokens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':             'application/json',
+          'RequestVerificationToken': token
+        },
+        body: JSON.stringify({
+          '$type':          'Asi.Soa.Core.DataContracts.GenericEntityData,Asi.Contracts',
+          'EntityTypeName': 'ZenTokens',
+          'Properties': {
+            '$type':   'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection,Asi.Contracts',
+            '$values': [
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'PartyId',                 'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'ID',                      'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'SelectedPartyId',          'Value': clientContext.selectedPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'RequestVerificationToken', 'Value': token },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'UtcUnixTimeStamp',         'Value': Date.now() }
+            ]
+          }
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`ZenTokens request failed: ${res.status}`);
+        return cloudToolzUrl; // pass URL through to step 3
+      });
+    })
+    .then(cloudToolzUrl => {
+      // ── Step 3: Submit the status change to CloudToolz ─────
+      return fetch(`${cloudToolzUrl}/ca/complete-task`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':             'application/json',
+          'RequestVerificationToken': token,
+          'SelectedPartyId':          clientContext.selectedPartyId,
+          'LoggedInPartyId':          clientContext.loggedInPartyId,
+          'WebsiteKey':               gWebsiteKey
+        },
+        body: JSON.stringify({ TaskID: id, Action: action, NoteType: noteType })
+      });
+    })
+    .then(res => {
+      if (res && !res.ok) throw new Error(`complete-task failed: ${res.status}`);
+    })
+    .catch(err => {
+      console.error('CA_saveItemStatus:', err);
+    });
+  }
+
+  // ── Tasks ─────────────────────────────────────────────────
+  function toggleTask(el) {
+    const item   = el.closest('.task-item');
+    const taskId = el.dataset.seqn;
+    el.classList.toggle('done');
+    const nameEl = item.querySelector('.t-name');
+    if (nameEl) nameEl.classList.toggle('done-text');
+    const isDone = el.classList.contains('done');
+    item.classList.toggle('completed-task', isDone);
+    if (isDone && hidingCompleted) {
+      item.classList.add('fading-out');
+      setTimeout(() => {
+        item.classList.add('hidden');
+        item.classList.remove('fading-out');
+      }, 1100);
+    }
+    if (isDone) {
+      const rect = el.getBoundingClientRect();
+      confetti({
+        particleCount: 80,
+        spread:        60,
+        startVelocity: 28,
+        decay:         0.92,
+        origin: {
+          x: (rect.left + rect.width  / 2) / window.innerWidth,
+          y: (rect.top  + rect.height / 2) / window.innerHeight
+        }
+      });
+    }
+    updateTaskCount();
+    toast(isDone ? 'Task marked complete' : 'Task reopened');
+    if (taskId) CA_saveItemStatus(taskId, isDone ? 'Complete' : 'Not Complete', 'Task');
+  }
+
+  let hidingCompleted = true;
+  function toggleCompleted() {
+    hidingCompleted = !hidingCompleted;
+    const btn = document.getElementById('toggleCompletedBtn');
+    const txt = document.getElementById('toggleCompletedText');
+    document.querySelectorAll('.task-item.completed-task').forEach(el => {
+      el.classList.toggle('hidden', hidingCompleted);
+    });
+    btn.classList.toggle('hiding', hidingCompleted);
+    txt.textContent = hidingCompleted ? 'Show completed' : 'Hide completed';
+  }
+
+  function filterHistory(query) {
+    const q = query.toLowerCase().trim();
+    const type = document.getElementById('historyFilter').value;
+    const items = document.querySelectorAll('#historyList .history-item');
+    let visible = 0;
+    items.forEach(item => {
+      const matchesType = !type || item.dataset.type === type;
+      const matchesText = !q || item.dataset.text.includes(q);
+      const show = matchesType && matchesText;
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    document.getElementById('historyNoResults').style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  function filterNotes(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#noteList .note-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = !q || text.includes(q) ? '' : 'none';
+    });
+  }
+
+  function filterTasks(query) {
+    const q = query.toLowerCase().trim();
+    const items = document.querySelectorAll('#taskList .task-item');
+    let visible = 0;
+    items.forEach(item => {
+      const assignee = item.querySelector('.t-assignee')?.textContent.toLowerCase() || '';
+      const priority = item.querySelector('.task-badge')?.textContent.toLowerCase() || '';
+      const searchable = [
+        assignee,
+        priority,
+        assignee ? `assignee: ${assignee}` : '',
+        priority ? `priority: ${priority}` : '',
+      ].join(' ');
+      const match = !q || searchable.includes(q);
+      item.classList.toggle('task-hidden', !match);
+      if (match) visible++;
+    });
+    const noRes = document.getElementById('taskNoResults');
+    if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+    buildTaskSuggestions(query);
+  }
+
+  function buildTaskSuggestions(query) {
+    const sugEl = document.getElementById('taskSuggestions');
+    if (!sugEl) return;
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('#taskList .task-item').forEach(item => {
+      [
+        { prefix: 'Assignee', value: item.querySelector('.t-assignee')?.textContent.trim() },
+        { prefix: 'Priority', value: item.querySelector('.task-badge')?.textContent.trim().replace(/ Priority$/i, '') || undefined },
+      ].forEach(({ prefix, value }) => {
+        if (!value) return;
+        const label = `${prefix}: ${value}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix, value, label });
+        }
+      });
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="task-suggestion-item" onmousedown="applyTaskSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyTaskSuggestion(label) {
+    const input = document.getElementById('taskSearch');
+    if (input) { input.value = label; filterTasks(label); }
+    document.getElementById('taskSuggestions')?.classList.remove('open');
+  }
+
+  function filterContacts(query) {
+    const q = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('#contactGrid .contact-card');
+    let visible = 0;
+    cards.forEach(card => {
+      // Use badge text for type/role/group — these display the formatted value
+      // which may differ from the raw data-* attribute stored by iMIS
+      const typeDisplay  = card.querySelector('.c-badge.type')?.textContent.trim()  || card.dataset.type  || '';
+      const groupDisplay = card.querySelector('.c-badge.group')?.textContent.trim() || card.dataset.group || '';
+      const roleDisplay  = card.querySelector('.c-role')?.textContent.trim()        || card.dataset.role  || '';
+      const nameDisplay  = card.dataset.name || '';
+      const searchable = [
+        nameDisplay,
+        typeDisplay,
+        roleDisplay,
+        groupDisplay,
+        nameDisplay  ? `name: ${nameDisplay}`   : '',
+        typeDisplay  ? `type: ${typeDisplay}`   : '',
+        roleDisplay  ? `role: ${roleDisplay}`   : '',
+        groupDisplay ? `group: ${groupDisplay}` : '',
+      ].join(' ').toLowerCase();
+      const show = !q || searchable.includes(q);
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('contactNoResults').style.display = visible === 0 ? 'block' : 'none';
+    buildContactSuggestions(query);
+  }
+
+  function buildContactSuggestions(query) {
+    let sugEl = document.getElementById('contactSuggestions');
+    if (!sugEl) {
+      const wrap = document.getElementById('contactSearchWrap');
+      if (!wrap) return;
+      sugEl = document.createElement('div');
+      sugEl.className = 'contact-suggestions';
+      sugEl.id = 'contactSuggestions';
+      wrap.appendChild(sugEl);
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#contactSearchWrap')) sugEl.classList.remove('open');
+      });
+      document.getElementById('contactSearch')?.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { sugEl.classList.remove('open'); e.target.blur(); }
+      });
+    }
+
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('#contactGrid .contact-card').forEach(card => {
+      [
+        { prefix: 'Name',  value: card.dataset.name },
+        { prefix: 'Type',  value: card.querySelector('.c-badge.type')?.textContent.trim()  || card.dataset.type  },
+        { prefix: 'Role',  value: card.querySelector('.c-role')?.textContent.trim()        || card.dataset.role  },
+        { prefix: 'Group', value: card.querySelector('.c-badge.group')?.textContent.trim() || card.dataset.group },
+      ].forEach(({ prefix, value }) => {
+        if (!value) return;
+        const label = `${prefix}: ${value}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix, value, label });
+        }
+      });
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="contact-suggestion-item" onmousedown="applyContactSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyContactSuggestion(label) {
+    const input = document.getElementById('contactSearch');
+    if (input) { input.value = label; filterContacts(label); }
+    document.getElementById('contactSuggestions')?.classList.remove('open');
+  }
+
+  // ── Attachment search & filter ────────────────────────────
+  function filterAttachments(query) {
+    const q = query.toLowerCase().trim();
+    const items = document.querySelectorAll('.attachment-list .attachment-item');
+    let visible = 0;
+    items.forEach(item => {
+      const searchable = [item.dataset.name || '', item.dataset.tags || ''].join(' ').toLowerCase();
+      const show = !q || searchable.includes(q);
+      item.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const noRes = document.getElementById('attachNoResults');
+    if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+    buildAttachmentSuggestions(query);
+  }
+
+  function buildAttachmentSuggestions(query) {
+    const sugEl = document.getElementById('attachSuggestions');
+    if (!sugEl) return;
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('.attachment-list .attachment-item').forEach(item => {
+      const name = item.dataset.name || '';
+      if (name) {
+        const label = `File: ${name}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix: 'File', value: name, label });
+        }
+      }
+      const tags = (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+      tags.forEach(tag => {
+        const label = `Tag: ${tag}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix: 'Tag', value: tag, label });
+        }
+      });
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="attach-suggestion-item" onmousedown="applyAttachmentSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyAttachmentSuggestion(label) {
+    const input = document.getElementById('attachSearch');
+    if (input) { input.value = label; filterAttachments(label); }
+    document.getElementById('attachSuggestions')?.classList.remove('open');
+  }
+
+  // ── Terms search & filter ─────────────────────────────────
+  function filterTerms(query) {
+    const q = query.toLowerCase().trim();
+    const items = document.querySelectorAll('.terms-list .term-item');
+    let visible = 0;
+
+    // Support prefixed queries: "term: …", "category: …", "status: …"
+    let field = null, fieldQ = q;
+    if      (q.startsWith('term:'))     { field = 'term';     fieldQ = q.slice(5).trim(); }
+    else if (q.startsWith('category:')) { field = 'category'; fieldQ = q.slice(9).trim(); }
+    else if (q.startsWith('status:'))   { field = 'status';   fieldQ = q.slice(7).trim(); }
+
+    items.forEach(item => {
+      let show;
+      if (!q) {
+        show = true;
+      } else if (field) {
+        show = (item.dataset[field] || '').toLowerCase().includes(fieldQ);
+      } else {
+        const searchable = [
+          item.dataset.term     || '',
+          item.dataset.category || '',
+          item.dataset.status   || '',
+          item.dataset.details  || '',
+        ].join(' ').toLowerCase();
+        show = searchable.includes(q);
+      }
+      item.classList.toggle('term-hidden', !show);
+      if (show) visible++;
+    });
+
+    const noRes = document.getElementById('termNoResults');
+    if (noRes) noRes.style.display = visible === 0 ? 'block' : 'none';
+    buildTermSuggestions(query);
+  }
+
+  function buildTermSuggestions(query) {
+    const sugEl = document.getElementById('termSuggestions');
+    if (!sugEl) return;
+    const q = query.toLowerCase().trim();
+    if (!q) { sugEl.classList.remove('open'); return; }
+
+    const seen = new Set();
+    const suggestions = [];
+
+    document.querySelectorAll('.terms-list .term-item').forEach(item => {
+      const addSug = (prefix, value) => {
+        if (!value) return;
+        const label = `${prefix}: ${value}`;
+        const key   = label.toLowerCase();
+        if (!seen.has(key) && key.includes(q)) {
+          seen.add(key);
+          suggestions.push({ prefix, value, label });
+        }
+      };
+      addSug('Term',     item.dataset.term);
+      addSug('Category', item.dataset.category);
+      addSug('Status',   item.dataset.status);
+    });
+
+    if (!suggestions.length) { sugEl.classList.remove('open'); return; }
+
+    sugEl.innerHTML = suggestions.map(({ prefix, value, label }) =>
+      `<div class="term-suggestion-item" onmousedown="applyTermSuggestion('${label.replace(/'/g, "\\'")}')">
+        <span class="sug-prefix">${prefix}</span>${value}
+      </div>`
+    ).join('');
+    sugEl.classList.add('open');
+  }
+
+  function applyTermSuggestion(label) {
+    const input = document.getElementById('termSearch');
+    if (input) { input.value = label; filterTerms(label); }
+    document.getElementById('termSuggestions')?.classList.remove('open');
+  }
+
+  // ── Term inline edit ──────────────────────────────────────
+  function editTerm(btn) {
+    const item       = btn.closest('.term-item');
+    const titleEl    = item.querySelector('.tr-title');
+    const categoryEl = item.querySelector('.tr-category');
+    const detailsEl  = item.querySelector('.tr-details');
+    const amountEl   = item.querySelector('.tr-amount');
+    const statusEl   = item.querySelector('.term-status');
+
+    item.classList.add('editing');
+
+    // Title → input
+    titleEl.innerHTML = `<input type="text" class="term-input tr-title-input" value="${(item.dataset.term || '').replace(/"/g, '&quot;')}" placeholder="Term name">`;
+
+    // Category → select
+    const catVal = item.dataset.category || 'General';
+    categoryEl.innerHTML = `<select class="term-select tr-category-select">
+      <option value="General"${catVal === 'General' ? ' selected' : ''}>General</option>
+      <option value="Leave"${catVal === 'Leave' ? ' selected' : ''}>Leave</option>
+      <option value="Superannuation"${catVal === 'Superannuation' ? ' selected' : ''}>Superannuation</option>
+    </select>`;
+
+    // Details → textarea
+    detailsEl.innerHTML = `<textarea class="term-textarea tr-details-input" placeholder="Details / comment">${(item.dataset.details || '').replace(/</g, '&lt;')}</textarea>`;
+
+    // Amount + Status row
+    const editRow = document.createElement('div');
+    editRow.className = 'term-edit-row';
+    const statusVal = item.dataset.status || 'included';
+    editRow.innerHTML = `
+      <label style="font-size:11px;color:var(--slate-500);">Amount:</label>
+      <input type="number" class="term-input tr-amount-input" style="width:80px" value="${(item.dataset.amount || '').replace(/"/g, '&quot;')}" placeholder="0.00" step="0.01">
+      <label style="font-size:11px;color:var(--slate-500);">Status:</label>
+      <select class="term-select tr-status-select">
+        <option value="included"${statusVal === 'included' ? ' selected' : ''}>Included</option>
+        <option value="negotiating"${statusVal === 'negotiating' ? ' selected' : ''}>Negotiating</option>
+        <option value="not-included"${statusVal === 'not-included' ? ' selected' : ''}>Not Included</option>
+      </select>`;
+    item.querySelector('.term-info').appendChild(editRow);
+
+    // Save / Cancel
+    const actions = document.createElement('div');
+    actions.className = 'term-edit-actions';
+    actions.innerHTML = `
+      <button type="button" class="btn-sm primary"   onclick="saveTerm(this)">Save</button>
+      <button type="button" class="btn-sm secondary" onclick="cancelTerm(this)">Cancel</button>`;
+    item.querySelector('.term-info').appendChild(actions);
+
+    // Hide badges and edit button
+    if (amountEl) amountEl.style.display = 'none';
+    if (statusEl) statusEl.style.display = 'none';
+    btn.style.display = 'none';
+
+    titleEl.querySelector('.tr-title-input')?.focus();
+  }
+
+  function saveTerm(btn) {
+    const item     = btn.closest('.term-item');
+    const term     = item.querySelector('.tr-title-input')?.value.trim()   || item.dataset.term;
+    const category = item.querySelector('.tr-category-select')?.value      || item.dataset.category;
+    const amount   = item.querySelector('.tr-amount-input')?.value.trim()  || '';
+    const status   = item.querySelector('.tr-status-select')?.value        || item.dataset.status;
+    const details  = item.querySelector('.tr-details-input')?.value.trim() || '';
+
+    item.dataset.term     = term;
+    item.dataset.category = category;
+    item.dataset.amount   = amount;
+    item.dataset.status   = status;
+    item.dataset.details  = details;
+
+    exitTermEdit(item, term, category, amount, status, details);
+    filterTerms(document.getElementById('termSearch')?.value || '');
+    toast('Term updated');
+  }
+
+  function cancelTerm(btn) {
+    const item = btn.closest('.term-item');
+    exitTermEdit(
+      item,
+      item.dataset.term,
+      item.dataset.category,
+      item.dataset.amount,
+      item.dataset.status,
+      item.dataset.details
+    );
+  }
+
+  function exitTermEdit(item, term, category, amount, status, details) {
+    item.classList.remove('editing');
+
+    item.querySelector('.tr-title').textContent    = term;
+    item.querySelector('.tr-category').textContent = category;
+    item.querySelector('.tr-details').textContent  = details;
+
+    item.querySelector('.term-edit-actions')?.remove();
+    item.querySelector('.term-edit-row')?.remove();
+
+    const amountEl = item.querySelector('.tr-amount');
+    if (amountEl) {
+      amountEl.textContent   = amount ? parseFloat(amount).toFixed(2) : '';
+      amountEl.style.display = amount ? '' : 'none';
+    }
+
+    const statusEl = item.querySelector('.term-status');
+    if (statusEl) {
+      statusEl.className   = `term-status ${status}`;
+      const labels = { included: 'Included', negotiating: 'Negotiating', 'not-included': 'Not Included' };
+      statusEl.textContent = labels[status] || status;
+      statusEl.style.display = '';
+    }
+
+    const editBtn = item.querySelector('.item-edit-btn');
+    if (editBtn) editBtn.style.display = '';
+  }
+
+  // ── Attachment download ───────────────────────────────────
+  function triggerBase64Download(base64, filename) {
+    // Use a data: URL directly — Firefox ignores the download attribute on
+    // blob: URLs and opens the file inline instead. data: URLs are respected.
+    const a   = document.createElement('a');
+    a.href     = `data:application/octet-stream;base64,${base64}`;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function downloadAttachment(btn) {
+    const item = btn.closest('.attachment-item');
+    downloadAttachmentById(item?.dataset.uniqueid, item?.dataset.name || 'file', item?.dataset.ordinal, item?.dataset.branch, btn);
+  }
+
+  // TODO: Check flow sandbox IQA
+  function downloadAttachmentById(uniqueId, name, ordinal, branch, btnEl) {
+    if (!uniqueId) { toast('Download failed: no file ID'); return; }
+
+    // Show loading state on the button
+    if (btnEl) {
+      btnEl._origHTML = btnEl.innerHTML;
+      btnEl.innerHTML = '<em class="fa-solid fa-spinner fa-spin"></em> Downloading…';
+      btnEl.classList.add('loading');
+    }
+
+    const token  = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain = window.location.origin;
+
+    // ── Step 1: Resolve the CloudToolz base URL from iMIS IQA ──
+    fetch(`${domain}/api/iqa?queryname=$/ZENTSO/Security/CloudToolzUrl`, {
+      method: 'GET',
+      headers: { 'RequestVerificationToken': token }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`IQA request failed: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const cloudToolzUrl = data?.Items?.['$values']?.[0]?.Properties?.['$values']?.[0]?.Value?.replace(/\/$/, '');
+      if (!cloudToolzUrl) throw new Error('CloudToolz URL not found in IQA response');
+
+      // ── Step 2: Store a ZenToken in iMIS ───────────────────
+      return fetch(`${domain}/api/ZenTokens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':             'application/json',
+          'RequestVerificationToken': token
+        },
+        body: JSON.stringify({
+          '$type':          'Asi.Soa.Core.DataContracts.GenericEntityData,Asi.Contracts',
+          'EntityTypeName': 'ZenTokens',
+          'Properties': {
+            '$type':   'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection,Asi.Contracts',
+            '$values': [
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'PartyId',                 'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'ID',                      'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'SelectedPartyId',          'Value': clientContext.selectedPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'RequestVerificationToken', 'Value': token },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'UtcUnixTimeStamp',         'Value': Date.now() }
+            ]
+          }
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`ZenTokens request failed: ${res.status}`);
+        return cloudToolzUrl;
+      });
+    })
+    .then(cloudToolzUrl => {
+      // ── Step 3: GET from CloudToolz download endpoint ───────
+      return fetch(`${cloudToolzUrl}/flowz/sharepoint/download?uniqueid=${encodeURIComponent(uniqueId)}&branch=${encodeURIComponent(branch)}&delordinal=${encodeURIComponent(ordinal)}`, {
+        method: 'GET',
+        headers: {
+          'RequestVerificationToken': token,
+          'SelectedPartyId':          clientContext.selectedPartyId,
+          'LoggedInPartyId':          clientContext.loggedInPartyId,
+          'WebsiteKey':               gWebsiteKey
+        }
+      });
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`download failed: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const base64   = data?.Base64string;
+      const filename = data?.FileName || name;
+      if (!base64) throw new Error('No file data in response');
+      triggerBase64Download(base64, filename);
+      toast(`Downloaded ${filename}`);
+    })
+    .catch(err => {
+      console.error('downloadAttachment:', err);
+      toast('Download failed');
+    })
+    .finally(() => {
+      if (btnEl) {
+        btnEl.innerHTML = btnEl._origHTML;
+        btnEl.classList.remove('loading');
+        delete btnEl._origHTML;
+      }
+    });
+  }
+
+  // ── Attachment view modal (placeholder) ───────────────────
+  // TODO: hook up view attachment to flowz
+  function viewAttachment(btn) {
+    const item = btn.closest('.attachment-item');
+    const name = item.dataset.name || item.querySelector('.a-name')?.textContent || 'File';
+    const tags = (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+    const icon = item.querySelector('.fi-emoji')?.textContent?.trim() || '📄';
+
+    document.getElementById('attachModal-icon').textContent = icon;
+    document.getElementById('attachModal-name').textContent = name;
+    document.getElementById('attachModal-meta').innerHTML =
+      Array.from(item.querySelectorAll('.a-meta span')).map(s => `<span>${s.textContent}</span>`).join('');
+
+    const tagsEl = document.getElementById('attachModal-tags');
+    tagsEl.innerHTML = tags.map(t => `<span class="a-tag">${t}</span>`).join('');
+    tagsEl.style.display = tags.length ? '' : 'none';
+
+    const modalDlBtn = document.getElementById('attachModal-dl');
+    modalDlBtn.onclick = () => downloadAttachmentById(item.dataset.uniqueid, name, item.dataset.ordinal, item.dataset.branch, modalDlBtn);
+
+    document.getElementById('attachModal').classList.add('open');
+  }
+
+  function closeAttachModal(e) {
+    if (e && e.target !== document.getElementById('attachModal')) return;
+    document.getElementById('attachModal').classList.remove('open');
+  }
+
+  // ── Attachment tag API ────────────────────────────────────
+  let _attachTagCache = null;
+
+  // TODO: move IQA path to correct folder when finalising this module
+  function loadAttachmentTags() {
+    if (_attachTagCache) return Promise.resolve(_attachTagCache);
+    const token     = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain    = window.location.origin;
+    const queryName = encodeURIComponent('$/_i4u_/SandBox/CA/ZenFileTags');
+    return fetch(`${domain}/api/iqa?queryname=${queryName}`, {
+      method: 'GET',
+      headers: { 'RequestVerificationToken': token }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`loadAttachmentTags failed: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const items = data?.Items?.['$values'] ?? [];
+      _attachTagCache = items.map(item => {
+        const props = item?.Properties?.['$values'];
+        if (!props) return null;
+        const getVal = name => {
+          const prop = props.find(p => p.Name === name);
+          const val  = prop?.Value;
+          if (val === null || val === undefined) return null;
+          return typeof val === 'object' ? val['$value'] : val;
+        };
+        const ordinal = getVal('Ordinal');
+        const tagName = getVal('TagName');
+        return tagName ? { ordinal, tagName } : null;
+      }).filter(Boolean);
+      return _attachTagCache;
+    })
+    .catch(err => {
+      console.warn('loadAttachmentTags:', err);
+      return [];
+    });
+  }
+
+  function wireTagSuggestions(tagsEl, input) {
+    const sugEl = document.createElement('div');
+    sugEl.className = 'tag-suggestions';
+    tagsEl.appendChild(sugEl);
+
+    function showSuggestions() {
+      const q       = input.value.trim().toLowerCase();
+      const allTags = _attachTagCache || [];
+
+      const existing = new Set(
+        Array.from(tagsEl.querySelectorAll('.tag-chip'))
+          .map(c => c.childNodes[0]?.textContent?.trim().toLowerCase())
+      );
+
+      const matches = allTags
+        .filter(t => !q || t.tagName.toLowerCase().includes(q))
+        .filter(t => !existing.has(t.tagName.toLowerCase()))
+        .slice(0, 8);
+
+      if (!matches.length) { sugEl.classList.remove('open'); return; }
+
+      sugEl.innerHTML = matches.map(({ ordinal, tagName }) =>
+        `<div class="tag-suggestion-item" onmousedown="pickTagSuggestion(this, ${ordinal}, '${tagName.replace(/'/g, "\\'")}')">
+          ${tagName}
+        </div>`
+      ).join('');
+      sugEl.classList.add('open');
+    }
+
+    // Show all on focus, filter as user types
+    input.addEventListener('focus', showSuggestions);
+    input.addEventListener('input', showSuggestions);
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => sugEl.classList.remove('open'), 150);
+    });
+  }
+
+  function pickTagSuggestion(el, ordinal, tagName) {
+    const tagsEl = el.closest('.a-tags');
+    const input  = tagsEl?.querySelector('.tag-add-input');
+    if (!tagsEl || !input) return;
+    addTagChip(tagsEl, tagName, ordinal);
+    input.value = '';
+    el.closest('.tag-suggestions').classList.remove('open');
+    input.focus();
+  }
+
+  // ── Attachment inline edit ────────────────────────────────
+  function editAttachment(btn) {
+    const item   = btn.closest('.attachment-item');
+    const nameEl = item.querySelector('.a-name');
+    const tagsEl = item.querySelector('.a-tags');
+    const dlBtn  = item.querySelector('.attach-dl');
+
+    item.classList.add('editing');
+    nameEl.innerHTML = `<input type="text" class="a-name-input" value="${(item.dataset.name || '').replace(/"/g, '&quot;')}" placeholder="Filename">`;
+
+    const currentTags     = (item.dataset.tags        || '').split(',').map(t => t.trim()).filter(Boolean);
+    const currentOrdinals = (item.dataset.tagordinals || '').split(',').map(o => o.trim()).filter(Boolean);
+    tagsEl.innerHTML = buildTagEditor(currentTags, currentOrdinals);
+
+    const actions = document.createElement('div');
+    actions.className = 'attach-edit-actions';
+    actions.innerHTML = `
+      <button type="button" class="btn-sm primary"   onclick="saveAttachment(this)">Save</button>
+      <button type="button" class="btn-sm secondary" onclick="cancelAttachment(this)">Cancel</button>`;
+    item.querySelector('.attach-info').appendChild(actions);
+
+    item.querySelector('.file-icon-btn').style.display  = 'none';
+    item.querySelector('.attach-view-btn').style.display = 'none';
+    dlBtn.style.display = 'none';
+    btn.style.display   = 'none';
+
+    nameEl.querySelector('.a-name-input')?.focus();
+
+    const tagInput = tagsEl.querySelector('.tag-add-input');
+    if (tagInput) {
+      tagInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val   = tagInput.value.trim().replace(/,$/, '');
+          const found = (_attachTagCache || []).find(t => t.tagName.toLowerCase() === val.toLowerCase());
+          if (found) { addTagChip(tagsEl, found.tagName, found.ordinal); tagInput.value = ''; }
+        }
+        if (e.key === 'Backspace' && !tagInput.value) {
+          const chips = tagsEl.querySelectorAll('.tag-chip');
+          chips[chips.length - 1]?.remove();
+        }
+      });
+      tagsEl.querySelector('.tag-editor')?.addEventListener('click', () => tagInput.focus());
+
+      // Wire tag autocomplete — fetch is deferred until first keystroke
+      wireTagSuggestions(tagsEl, tagInput);
+    }
+  }
+
+  function buildTagEditor(tagNames, tagOrdinals) {
+    // tagNames and tagOrdinals come directly from data-tags / data-tagordinals —
+    // no cache lookup needed; ordinals are already provided by the template.
+    const chips = tagNames.map((name, i) => {
+      const ordinal = tagOrdinals?.[i] ?? '';
+      return `<span class="tag-chip" data-ordinal="${ordinal}">${name}<button type="button" class="tag-chip-remove" onclick="this.closest('.tag-chip').remove()" title="Remove">×</button></span>`;
+    }).join('');
+    return `<div class="tag-editor">${chips}<input type="text" class="tag-add-input" placeholder="Add tag…"></div>`;
+  }
+
+  function addTagChip(tagsEl, tagName, ordinal) {
+    const editor = tagsEl.querySelector('.tag-editor');
+    const input  = tagsEl.querySelector('.tag-add-input');
+    const chip   = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.dataset.ordinal = ordinal ?? '';
+    chip.innerHTML = `${tagName}<button type="button" class="tag-chip-remove" onclick="this.closest('.tag-chip').remove()" title="Remove">×</button>`;
+    editor.insertBefore(chip, input);
+  }
+
+  // TODO: wire up Edit attachment title to flowz
+  function saveAttachment(btn) {
+    const item          = btn.closest('.attachment-item');
+    const newName       = item.querySelector('.a-name-input')?.value.trim() || item.dataset.name;
+    // Deduplicate chips by ordinal so the same tag can never appear twice in
+    // NewTagOrdinals.  Chips without an ordinal (new tags not yet in the DB)
+    // carry no ordinal value and are always kept regardless.
+    const seenOrdinals = new Set();
+    const chips = Array.from(item.querySelectorAll('.tag-chip')).filter(c => {
+      const ord = c.dataset.ordinal;
+      if (!ord) return true;              // no ordinal — new/unsaved tag, always keep
+      if (seenOrdinals.has(ord)) return false; // duplicate — discard
+      seenOrdinals.add(ord);
+      return true;
+    });
+    const newTagNames        = chips.map(c => c.childNodes[0]?.textContent?.trim()).filter(Boolean);
+    const newTagOrdinals     = chips.map(c => c.dataset.ordinal).filter(Boolean);
+    const originalOrdinals   = [...new Set((item.dataset.tagordinals || '').split(',').map(o => o.trim()).filter(Boolean))];
+    const removedTagOrdinals = originalOrdinals.filter(o => !newTagOrdinals.includes(o));
+    const fileOrdinal        = item.dataset.ordinal;
+
+    item.dataset.name        = newName;
+    item.dataset.tags        = newTagNames.join(',');
+    item.dataset.tagOrdinals = newTagOrdinals.join(',');
+
+    exitAttachmentEdit(item, newName, newTagNames);
+    toast('Attachment updated');
+
+    // ── POST to CloudToolz /ca/update-attachment ──────────────
+    // Follows the same three-step auth flow as CA_saveItemStatus:
+    //   1. GET IQA  → resolve CloudToolz base URL
+    //   2. POST /api/ZenTokens → store short-lived auth token
+    //   3. POST CloudToolz /ca/update-attachment → submit changes
+    const token  = document.querySelector('#__RequestVerificationToken')?.value;
+    const domain = window.location.origin;
+
+    fetch(`${domain}/api/iqa?queryname=$/ZENTSO/Security/CloudToolzUrl`, {
+      method: 'GET',
+      headers: { 'RequestVerificationToken': token }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`IQA request failed: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const cloudToolzUrl = data?.Items?.['$values']?.[0]?.Properties?.['$values']?.[0]?.Value?.replace(/\/$/, '');
+      if (!cloudToolzUrl) throw new Error('CloudToolz URL not found in IQA response');
+
+      return fetch(`${domain}/api/ZenTokens`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':             'application/json',
+          'RequestVerificationToken': token
+        },
+        body: JSON.stringify({
+          '$type':          'Asi.Soa.Core.DataContracts.GenericEntityData,Asi.Contracts',
+          'EntityTypeName': 'ZenTokens',
+          'Properties': {
+            '$type':   'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection,Asi.Contracts',
+            '$values': [
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'PartyId',                 'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'ID',                      'Value': clientContext.loggedInPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'SelectedPartyId',          'Value': clientContext.selectedPartyId },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'RequestVerificationToken', 'Value': token },
+              { '$type': 'Asi.Soa.Core.DataContracts.GenericPropertyData,Asi.Contracts', 'Name': 'UtcUnixTimeStamp',         'Value': Date.now() }
+            ]
+          }
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(`ZenTokens request failed: ${res.status}`);
+        return cloudToolzUrl;
+      });
+    })
+    .then(cloudToolzUrl => {
+      return fetch(`${cloudToolzUrl}/ca/update-attachment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':             'application/json',
+          'RequestVerificationToken': token,
+          'SelectedPartyId':          clientContext.selectedPartyId,
+          'LoggedInPartyId':          clientContext.loggedInPartyId,
+          'WebsiteKey':               gWebsiteKey
+        },
+        body: JSON.stringify({
+          FileOrdinal:         fileOrdinal,
+          FileName:            newName,
+          NewTagOrdinals:      newTagOrdinals.join(','),     // CSV — tags added or retained
+          RemovedTagOrdinals:  removedTagOrdinals.join(',')  // CSV — tags removed since last save
+        })
+      });
+    })
+    .then(res => {
+      if (res && !res.ok) throw new Error(`update-attachment failed: ${res.status}`);
+    })
+    .catch(err => console.error('saveAttachment (CloudToolz):', err));
+  }
+
+  function cancelAttachment(btn) {
+    const item = btn.closest('.attachment-item');
+    exitAttachmentEdit(item, item.dataset.name, (item.dataset.tags || '').split(',').map(t => t.trim()).filter(Boolean));
+  }
+
+  function exitAttachmentEdit(item, name, tags) {
+    item.classList.remove('editing');
+    item.querySelector('.a-name').textContent = name;
+    item.querySelector('.a-tags').innerHTML   = tags.map(t => `<span class="a-tag">${t}</span>`).join('');
+    item.querySelector('.attach-edit-actions')?.remove();
+    item.querySelector('.file-icon-btn').style.display   = '';
+    item.querySelector('.attach-view-btn').style.display = '';
+    item.querySelector('.attach-dl').style.display       = '';
+    item.querySelector('.item-edit-btn').style.display = '';
+    filterAttachments(document.getElementById('attachSearch')?.value || '');
+  }
+
+  function updateTaskCount() {
+    const all  = document.querySelectorAll('#taskList .task-item').length;
+    const done = document.querySelectorAll('#taskList .task-item .task-check.done').length;
+    const el = document.getElementById('task-count');
+    if (el) el.textContent = done + ' of ' + all + ' complete';
+    const pct = all ? Math.round((done / all) * 100) : 0;
+    const fill = document.getElementById('task-progress-fill');
+    const pctEl = document.getElementById('task-progress-pct');
+    if (fill)  fill.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+  }
+
+  // ── Milestones are rendered from the DB via renderMilestonesFromTemplate() ──
+
+   let hidingMsDone = true;
+
+  function toggleMsDone() {
+    hidingMsDone = !hidingMsDone;
+    const btn = document.getElementById('toggleMsDoneBtn');
+    const txt = document.getElementById('toggleMsDoneText');
+    document.querySelectorAll('#milestone-log .date-item.ms-done').forEach(el => {
+      el.classList.toggle('ms-hidden', hidingMsDone);
+    });
+    btn.classList.toggle('hiding', hidingMsDone);
+    txt.textContent = hidingMsDone ? 'Show completed' : 'Hide completed';
+  }
+
+  function CA_setMilestoneStatus(id, newStatus) {
+    const el = document.getElementById('milestone-' + id);
+    if (!el) return;
+    const label   = el.querySelector('.d-label')?.textContent?.trim() || 'Milestone';
+    const dot     = el.querySelector('.date-dot');
+    const select  = el.querySelector('.ms-status-select');
+
+    // ── Visual feedback (optimistic) ──────────────────────────
+    if (dot)    dot.className = `date-dot ${newStatus}`;
+    if (select) select.className = `ms-status-select status-${newStatus}`;
+
+    const isDone = newStatus === 'done';
+    el.querySelector('.d-label')?.classList.toggle('done-text', isDone);
+
+    if (isDone) {
+      el.classList.add('ms-done');
+    } else {
+      el.classList.remove('ms-done');
+      el.classList.remove('ms-hidden');
+    }
+
+    if (isDone) {
+      const rect = select?.getBoundingClientRect();
+      if (rect) confetti({
+        particleCount: 80,
+        spread:        60,
+        startVelocity: 28,
+        decay:         0.92,
+        origin: {
+          x: (rect.left + rect.width  / 2) / window.innerWidth,
+          y: (rect.top  + rect.height / 2) / window.innerHeight
+        }
+      });
+    }
+
+    if (isDone && hidingMsDone) {
+      el.classList.add('fading-out');
+      animateMilestoneNode(id);
+      setTimeout(() => {
+        el.classList.add('ms-hidden');
+        el.classList.remove('fading-out');
+        toast(`"${label}" marked as complete`);
+      }, 850);
+    }
+
+    refreshMilestoneStats();
+    if (isDone) animateMilestoneNode(id);
+
+    // ── API ───────────────────────────────────────────────────
+    CA_saveItemStatus(id, newStatus, 'Milestone');
+  }
+
+  function animateMilestoneNode(id) {
+    const node = document.querySelector(`#milestone-nodes .milestone-node[data-id="${id}"]`);
+    if (!node) return;
+    node.classList.remove('node-complete');
+    void node.offsetWidth; // force reflow to restart animation if triggered twice
+    node.classList.add('node-complete');
+  }
+
+
+
+// ── Meetings past/future filter ──────────────────────────
+  let hidingPastMeetings = true;
+
+  function applyMeetingFilter() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    document.querySelectorAll('.meeting-item[data-date]').forEach(item => {
+      const isPast = (parseDate(item.dataset.date) ?? new Date(0)) < today;
+      item.classList.toggle('past', isPast);
+      item.classList.toggle('past-hidden', isPast && hidingPastMeetings);
+    });
+  }
+
+  function togglePastMeetings() {
+    hidingPastMeetings = !hidingPastMeetings;
+    applyMeetingFilter();
+    const btn = document.getElementById('togglePastMeetingsBtn');
+    const txt = document.getElementById('togglePastMeetingsText');
+    btn.classList.toggle('hiding', hidingPastMeetings);
+    txt.textContent = hidingPastMeetings ? 'Show past' : 'Hide past';
+  }
+
+  
+
+  // ── Modal ─────────────────────────────────────────────────
+  function openMilestoneModal() {
+    document.getElementById('ms-name').value   = '';
+    document.getElementById('ms-date').value   = '';
+    document.getElementById('ms-status').value = 'future';
+    document.getElementById('ms-notes').value  = '';
+    document.getElementById('ms-error').style.display = 'none';
+    document.getElementById('milestoneModal').classList.add('open');
+    setTimeout(() => document.getElementById('ms-name').focus(), 50);
+    document.getElementById('actionsMenu').classList.remove('open');
+    document.getElementById('actionsBtn').classList.remove('open');
+  }
+  function closeMilestoneModal(e) {
+    if (e && e.target !== document.getElementById('milestoneModal')) return;
+    document.getElementById('milestoneModal').classList.remove('open');
+  }
+
+  function saveMilestone() {
+    const name   = document.getElementById('ms-name').value.trim();
+    const date   = document.getElementById('ms-date').value;
+    const status = document.getElementById('ms-status').value;
+    const notes  = document.getElementById('ms-notes').value.trim();
+    const errEl  = document.getElementById('ms-error');
+
+    if (!name) {
+      errEl.textContent = 'Please enter a milestone name.';
+      errEl.style.display = 'block';
+      document.getElementById('ms-name').focus();
+      return;
+    }
+    if (!date) {
+      errEl.textContent = 'Please select a date.';
+      errEl.style.display = 'block';
+      document.getElementById('ms-date').focus();
+      return;
+    }
+    errEl.style.display = 'none';
+
+    // Milestone saving is handled via CA_AddMilestonePopupFn() — no local array
+    document.getElementById('milestoneModal').classList.remove('open');
+    CA_AddMilestonePopupFn();
+    toast(`Milestone "${name}" added`);
+  }
+
+  // ── Toast ─────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // ── Tasks transform ──────────────────────────────────────
+  function renderTasks() {
+    // ── Original DOM-clone method (kept for rollback) ────────
+    // const source = document.querySelector('.RawTemplate.Tasks');
+    // const target = document.getElementById('taskList');
+    // if (!source) { console.warn('renderTasks: .RawTemplate.Tasks not found'); return; }
+    // if (!target) { console.warn('renderTasks: #taskList not found'); return; }
+    // const clone = source.cloneNode(true);
+    // clone.querySelectorAll('script').forEach(s => s.remove());
+    // target.appendChild(clone);
+    // if (!testMode) source.innerHTML = '';
+
+    // ── API-driven method via CA_reloadList ──────────────────
+    CA_reloadList(
+      '40BC959A-6B56-4319-B7BD-71376DE45DBF', // Query Template - Manage Agreement - Tasks
+      '#taskList',
+      () => {
+        // Hide completed tasks on load and set button state
+        document.querySelectorAll('#taskList .task-item.completed-task').forEach(el => el.classList.add('hidden'));
+        const _tcBtn = document.getElementById('toggleCompletedBtn');
+        const _tcTxt = document.getElementById('toggleCompletedText');
+        if (_tcBtn) _tcBtn.classList.add('hiding');
+        if (_tcTxt) _tcTxt.textContent = 'Show completed';
+        updateTaskCount();
+      }
+    );
+  }
+
+  // ── Notes transform ──────────────────────────────────────
+  function renderNotes() {
+    const source = document.querySelector('.RawTemplate.Notes');
+    const target = document.querySelector('.card-body .note-list');
+
+    if (!source) { console.warn('renderNotes: .RawTemplate.Notes not found'); return; }
+    if (!target) { console.warn('renderNotes: .card-body .note-list not found'); return; }
+
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script').forEach(s => s.remove());
+    target.appendChild(clone);
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Meetings transform ───────────────────────────────────
+  function renderMeetings() {
+    const source = document.querySelector('.RawTemplate.Meetings');
+    const target = document.querySelector('.card-body .meeting-list');
+
+    if (!source) { console.warn('renderMeetings: .RawTemplate.Meetings not found'); return; }
+    if (!target) { console.warn('renderMeetings: .card-body .meeting-list not found'); return; }
+
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script').forEach(s => s.remove());
+    target.appendChild(clone);
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Attachments transform ────────────────────────────────
+  function renderAttachments() {
+    const source = document.querySelector('.RawTemplate.Attachments');
+    const target = document.querySelector('.card-body .attachment-list');
+
+    if (!source) { console.warn('renderAttachments: .RawTemplate.Attachments not found'); return; }
+    if (!target) { console.warn('renderAttachments: .card-body .attachment-list not found'); return; }
+
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script').forEach(s => s.remove());
+    target.appendChild(clone);
+    if (!testMode) source.innerHTML = '';
+
+    // Parse CSV tags from data-tags into individual tag spans
+    target.querySelectorAll('.attachment-item[data-tags]').forEach(item => {
+      const tags = item.dataset.tags.split(',').map(t => t.trim()).filter(Boolean);
+      const tagsEl = item.querySelector('.a-tags');
+      if (tagsEl) tagsEl.innerHTML = tags.map(t => `<span class="a-tag">${t}</span>`).join('');
+    });
+  }
+
+  // ── Terms transform ──────────────────────────────────────
+  function renderTerms() {
+    const source = document.querySelector('.RawTemplate.Terms');
+    const target = document.querySelector('.terms-list');
+
+    if (!source) { console.warn('renderTerms: .RawTemplate.Terms not found'); return; }
+    if (!target) { console.warn('renderTerms: .terms-list not found'); return; }
+
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script').forEach(s => s.remove());
+    target.appendChild(clone);
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Contacts transform ───────────────────────────────────
+  function renderContacts() {
+    const source = document.querySelector('.RawTemplate.Contacts');
+    const target = document.getElementById('contactGrid');
+
+    if (!source) { console.warn('renderContacts: .RawTemplate.Contacts not found'); return; }
+    if (!target) { console.warn('renderContacts: #contactGrid not found'); return; }
+
+    source.querySelectorAll('.contact-card').forEach(card => {
+      const clone = card.cloneNode(true);
+      clone.querySelectorAll('script').forEach(s => s.remove());
+      target.appendChild(clone);
+    });
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Milestone stats: nodes, progress bar, count ──────────
+  function refreshMilestoneStats() {
+    const log = document.getElementById('milestone-log');
+    if (!log) return;
+
+    const allItems = log.querySelectorAll('.date-item');
+    const total    = allItems.length;
+    const done     = log.querySelectorAll('.date-dot.done').length;
+    const pct      = total > 1 ? Math.round((done / (total - 1)) * 100) : (done ? 100 : 0);
+
+    const bar = document.getElementById('milestone-progress-bar');
+    if (bar) bar.style.width = Math.min(pct, 100) + '%';
+
+    const count = document.getElementById('milestone-count');
+    if (count) count.textContent = done + ' of ' + total + ' complete';
+
+    const navCount = document.getElementById('nav-ms-count');
+    if (navCount) navCount.textContent = total;
+
+    const nodesEl = document.getElementById('milestone-nodes');
+    if (nodesEl) {
+      nodesEl.innerHTML = Array.from(allItems).map((item, i) => {
+        const dot    = item.querySelector('.date-dot');
+        const status = dot ? (dot.classList.contains('done') ? 'done' : dot.classList.contains('current') ? 'current' : 'future') : 'future';
+        const label  = (item.querySelector('.d-label') || {}).textContent || '';
+        const dateRaw = ((item.querySelector('.d-value') || {}).textContent || '').split('—')[0].trim();
+        const shortLabel = label.length > 14 ? label.slice(0, 13) + '…' : label;
+        const circleContent = status === 'done' ? '✓' : status === 'current' ? '⚡' : (i + 1);
+        return `<div class="milestone-node" data-id="${item.id.replace('milestone-', '')}" title="${label}">
+          <div class="m-circle ${status}">${circleContent}</div>
+          <div class="m-label">${shortLabel}</div>
+          <div class="m-date">${dateRaw}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ── Milestones transform ─────────────────────────────────
+  function renderMilestonesFromTemplate() {
+    const source = document.querySelector('.RawTemplate.Milestones');
+    const target = document.getElementById('milestone-log');
+
+    if (!source) { console.warn('renderMilestonesFromTemplate: .RawTemplate.Milestones not found'); return; }
+    if (!target) { console.warn('renderMilestonesFromTemplate: #milestone-log not found'); return; }
+
+    const clone = source.cloneNode(true);
+    clone.querySelectorAll('script').forEach(s => s.remove());
+    target.appendChild(clone);
+    if (!testMode) source.innerHTML = '';
+
+    // Sync each select's value from data-status (set by query template)
+    // Also stamp ms-done on any completed items that the template didn't already mark
+    target.querySelectorAll('.date-item[data-status]').forEach(item => {
+      const status = item.dataset.status;
+      const select = item.querySelector('.ms-status-select');
+      if (select && status) select.value = status;
+      if (status === 'done') item.classList.add('ms-done');
+    });
+
+    refreshMilestoneStats();
+  }
+
+  // ── Key dates transform ───────────────────────────────────
+  function renderKeyDates(sourceSelector, targetSelector) {
+    const source = document.querySelector(sourceSelector);
+    const target = document.querySelector(targetSelector);
+
+    if (!source) { console.warn('renderKeyDates: source not found —', sourceSelector); return; }
+    if (!target) { console.warn('renderKeyDates: target not found —', targetSelector); return; }
+
+    const items = source.querySelectorAll('.summary-display-item');
+
+    if (!items.length) { console.warn('renderKeyDates: no .summary-display-item elements found'); return; }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const fields = Array.from(items).map(item => {
+      const label = item.querySelector('.Label');
+      const value = item.querySelector('.PanelFieldValue > span');
+      return {
+        label: label ? label.textContent.trim() : '',
+        value: value ? value.textContent.trim() : ''
+      };
+    }).filter(f => f.label);
+
+    const list = document.createElement('div');
+    list.className = 'date-list';
+
+    fields.forEach(({ label, value }) => {
+      const parsed = parseDate(value);
+      const isDate = parsed !== null;
+
+      let status = 'future';
+      let displayValue = value || '—';
+
+      if (isDate) {
+        status = parsed < today ? 'done' : parsed.getTime() === today.getTime() ? 'current' : 'future';
+        displayValue = parsed.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      const row = document.createElement('div');
+      row.className = 'date-item';
+      row.innerHTML = `
+        <div class="date-dot ${status}"></div>
+        <div class="date-info">
+          <div class="d-label">${label}</div>
+          <div class="d-value">${displayValue}</div>
+        </div>`;
+
+      list.appendChild(row);
+    });
+
+    target.innerHTML = '';
+    target.appendChild(list);
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Resolution transform ─────────────────────────────────
+  function renderResolution(sourceSelector, targetSelector) {
+    const source = document.querySelector(sourceSelector);
+    const target = document.querySelector(targetSelector);
+
+    if (!source) { console.warn('renderResolution: source not found —', sourceSelector); return; }
+    if (!target) { console.warn('renderResolution: target not found —', targetSelector); return; }
+
+    const items = source.querySelectorAll('.summary-display-item');
+
+    if (!items.length) { console.warn('renderResolution: no .summary-display-item elements found'); return; }
+
+    const fields = Array.from(items).map(item => {
+      const label = item.querySelector('.Label');
+      const value = item.querySelector('.PanelFieldValue > span');
+      return {
+        label: label ? label.textContent.trim() : '',
+        value: value ? value.textContent.trim() : ''
+      };
+    }).filter(f => f.label);
+
+    target.innerHTML = '';
+
+    // Separate the Status field from the rest
+    const statusField = fields.find(f => f.label.toLowerCase() === 'status');
+    const otherFields = fields.filter(f => f.label.toLowerCase() !== 'status');
+
+    // Status banner — only shown when there is a value
+    if (statusField && statusField.value) {
+      const v = statusField.value.toLowerCase();
+      const isComplete = /resolv|complet|approv|finalis|finaliz|signed|ratified|closed|active/.test(v);
+      const isActive   = /progress|active|current|open|new|negotiat|pending/.test(v);
+      const category   = isComplete ? 'complete' : isActive ? 'active' : 'neutral';
+
+      const icon    = isComplete ? '✅' : isActive ? '📋' : 'ℹ️';
+      const summary = isComplete
+        ? 'This agreement has been finalised.'
+        : 'This agreement has not yet been finalised.';
+
+      const banner = document.createElement('div');
+      banner.className = `resolution-status-banner status-${category}`;
+      banner.innerHTML = `
+        <span class="rsb-icon">${icon}</span>
+        <div class="rsb-content">
+          <div class="rsb-title">${statusField.value}</div>
+          <div class="rsb-summary">${summary}</div>
+        </div>`;
+      target.appendChild(banner);
+    }
+
+    // Remaining fields as a field-grid
+    if (otherFields.length) {
+      const grid = document.createElement('div');
+      grid.className = 'field-grid';
+
+      otherFields.forEach(({ label, value }) => {
+        const field = document.createElement('div');
+        field.className = 'field';
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'f-label';
+        labelEl.textContent = label;
+
+        const valueEl = document.createElement('span');
+        valueEl.className = 'f-value';
+        valueEl.textContent = value || '—';
+
+        field.appendChild(labelEl);
+        field.appendChild(valueEl);
+        grid.appendChild(field);
+      });
+
+      target.appendChild(grid);
+    }
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Agreement details transform ───────────────────────────
+  function renderAgreementDetails(sourceSelector, targetSelector) {
+    const source = document.querySelector(sourceSelector);
+    const target = document.querySelector(targetSelector);
+
+    if (!source) { console.warn('renderAgreementDetails: source not found —', sourceSelector); return; }
+    if (!target) { console.warn('renderAgreementDetails: target not found —', targetSelector); return; }
+
+    const items = source.querySelectorAll('.summary-display-item');
+
+    if (!items.length) { console.warn('renderAgreementDetails: no .summary-display-item elements found'); return; }
+
+    const fields = Array.from(items).map(item => {
+      const label = item.querySelector('.Label');
+      const value = item.querySelector('.PanelFieldValue > span');
+      return {
+        label: label ? label.textContent.trim() : '',
+        value: value ? value.textContent.trim() : ''
+      };
+    }).filter(f => f.label);
+
+    const grid = document.createElement('div');
+    grid.className = 'field-grid';
+
+    fields.forEach(({ label, value }) => {
+      const field = document.createElement('div');
+      field.className = 'field';
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'f-label';
+      labelEl.textContent = label;
+
+      const valueEl = document.createElement('span');
+      valueEl.className = 'f-value';
+      valueEl.textContent = value || '—';
+
+      field.appendChild(labelEl);
+      field.appendChild(valueEl);
+      grid.appendChild(field);
+    });
+
+    target.innerHTML = '';
+    target.appendChild(grid);
+    if (!testMode) source.innerHTML = '';
+  }
+
+  // ── Side nav renderer ────────────────────────────────────
+  const PANEL_LABELS = {
+    'overview':       'Overview',
+    'activity':       'Activity',
+    'coverage':       'Coverage',
+    'terms-schedule': 'Terms & Schedule',
+    'history':        'History',
+  };
+
+  function renderSideNav() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) { console.warn('renderSideNav: #sidebar not found'); return; }
+
+    // Group section anchors by tab panel, preserving DOM order
+    const panelMap = new Map();
+
+    document.querySelectorAll('.section-anchor[id]').forEach(anchor => {
+      const tabPanel = anchor.closest('.tab-panel');
+      if (!tabPanel) return;
+
+      const panelId = tabPanel.id.replace(/^tab-/, '');
+      if (!panelMap.has(panelId)) panelMap.set(panelId, []);
+
+      const label = anchor.id.split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      panelMap.get(panelId).push({ id: anchor.id, label });
+    });
+
+    // Clear and rebuild sidebar
+    sidebar.innerHTML = '';
+
+    panelMap.forEach((links, panelId) => {
+      const isActive = panelId === activePanel;
+      const panelLabel = PANEL_LABELS[panelId] ||
+        panelId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+      const item = document.createElement('div');
+      item.className = 'acc-item';
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'acc-trigger' + (isActive ? ' active' : '');
+      trigger.dataset.panel = panelId;
+      trigger.setAttribute('onclick', 'accOpen(this.dataset.panel)');
+      trigger.innerHTML = `${panelLabel} <span class="chevron"></span>`;
+
+      const body = document.createElement('div');
+      body.className = 'acc-body' + (isActive ? ' open' : '');
+      body.id = 'acc-body-' + panelId;
+      body.innerHTML = links.map(({ id, label }, i) =>
+        `<a class="nav-link${isActive && i === 0 ? ' active' : ''}" data-panel="${panelId}" data-target="${id}">${label}</a>`
+      ).join('');
+
+      item.appendChild(trigger);
+      item.appendChild(body);
+      sidebar.appendChild(item);
+    });
+  }
+
+  // ── DOM-ready initialisation ──────────────────────────────
+  function initDOM() {
+    banner    = document.getElementById('banner');
+    page      = document.getElementById('page');
+    scrollTop = document.getElementById('scroll-top');
+
+    // Unhide raw data div in test mode
+    if (testMode) {
+      document.getElementById('data-div')?.style.setProperty('display', 'block', 'important');
+    }
+
+    // Restore last active panel from session
+    const savedPanel = sessionStorage.getItem('activePanel');
+    if (savedPanel) activePanel = savedPanel;
+
+    // Build sidebar nav from .section-anchor elements before attaching listeners
+    renderSideNav();
+
+    // Sync tab panels to the active panel (nav is handled by renderSideNav)
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + activePanel);
+    });
+
+    // Banner collapse on scroll + scroll-spy
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      const isMini = y > 60;
+
+      if (banner)    banner.classList.toggle('mini', isMini);
+      if (page)      page.classList.toggle('mini', isMini);
+      if (scrollTop) scrollTop.classList.toggle('visible', y > 200);
+
+      const bannerH = isMini ? 56 : 148;
+      const offset  = bannerH + 20;
+      const sections = PANEL_SECTIONS[activePanel] || [];
+
+      let current = sections[0];
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (el.getBoundingClientRect().top - offset <= 0) current = id;
+      }
+
+      document.querySelectorAll('#acc-body-' + activePanel + ' .nav-link').forEach(a => {
+        a.classList.toggle('active', a.dataset.target === current);
+      });
+    }, { passive: true });
+
+    // Sub-link click: smooth-scroll to section
+    document.querySelectorAll('#sidebar .nav-link').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const targetId = a.dataset.target;
+        const panelId  = a.dataset.panel;
+        if (panelId && panelId !== activePanel) {
+          accOpen(panelId);
+          setTimeout(() => scrollToSection(targetId), 50);
+        } else {
+          scrollToSection(targetId);
+        }
+      });
+    });
+
+    // Actions dropdown: close on outside click
+    document.addEventListener('click', () => {
+      document.getElementById('actionsMenu').classList.remove('open');
+      document.getElementById('actionsBtn').classList.remove('open');
+    });
+
+    // Contact suggestions: create dropdown and wire up close behaviour
+    const contactSearchWrap = document.getElementById('contactSearchWrap');
+    if (contactSearchWrap) {
+      const sug = document.createElement('div');
+      sug.className = 'contact-suggestions';
+      sug.id = 'contactSuggestions';
+      contactSearchWrap.appendChild(sug);
+
+      // Close on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#contactSearchWrap')) sug.classList.remove('open');
+      });
+
+      // Close on Escape
+      document.getElementById('contactSearch')?.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { sug.classList.remove('open'); e.target.blur(); }
+      });
+    }
+
+    // Attachment suggestions: create dropdown and wire up close behaviour
+    const attachSearchWrap = document.getElementById('attachSearchWrap');
+    if (attachSearchWrap) {
+      const attachSug = document.createElement('div');
+      attachSug.className = 'attach-suggestions';
+      attachSug.id = 'attachSuggestions';
+      attachSearchWrap.appendChild(attachSug);
+
+      // Close on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#attachSearchWrap')) attachSug.classList.remove('open');
+      });
+
+      // Close on Escape
+      document.getElementById('attachSearch')?.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { attachSug.classList.remove('open'); e.target.blur(); }
+      });
+    }
+
+    // Term suggestions: create dropdown and wire up close behaviour
+    const termSearchWrap = document.getElementById('termSearchWrap');
+    if (termSearchWrap) {
+      const termSug = document.createElement('div');
+      termSug.className = 'term-suggestions';
+      termSug.id = 'termSuggestions';
+      termSearchWrap.appendChild(termSug);
+
+      // Close on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#termSearchWrap')) termSug.classList.remove('open');
+      });
+
+      // Close on Escape
+      document.getElementById('termSearch')?.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { termSug.classList.remove('open'); e.target.blur(); }
+      });
+    }
+
+    // Task suggestions: create dropdown and wire up close behaviour
+    const taskSearchWrap = document.getElementById('taskSearchWrap');
+    if (taskSearchWrap) {
+      const taskSug = document.createElement('div');
+      taskSug.className = 'task-suggestions';
+      taskSug.id = 'taskSuggestions';
+      taskSearchWrap.appendChild(taskSug);
+
+      const taskSearchInput = document.getElementById('taskSearch');
+
+      // Filter tasks on input
+      taskSearchInput?.addEventListener('input', e => filterTasks(e.target.value));
+
+      // Close on outside click
+      document.addEventListener('click', e => {
+        if (!e.target.closest('#taskSearchWrap')) taskSug.classList.remove('open');
+      });
+
+      // Close on Escape
+      taskSearchInput?.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { taskSug.classList.remove('open'); e.target.blur(); }
+      });
+    }
+
+    // Modal: close on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('milestoneModal')?.classList.remove('open');
+        document.getElementById('attachModal')?.classList.remove('open');
+      }
+    });
+
+    // Initial renders
+    /*renderMilestones(); */
+
+      // apply default hide-past-meetings state on load
+    applyMeetingFilter();
+
+    renderAgreementDetails(
+      '.RawData.AgreementDetails',
+      '.agreement-details-placeholder.card-body'
+    );
+
+    renderKeyDates(
+    '.RawData.KeyDates',
+    '.key-dates-placeholder.card-body'
+
+    );
+
+    renderResolution(
+      '.RawData.Resolution',
+      '.resolution-placeholder.card-body'
+    );
+
+
+    renderTasks();
+    // Note: hide-completed state and updateTaskCount() are now handled inside
+    // renderTasks() → CA_reloadList() postReloadFn callback (async)
+
+    renderMilestonesFromTemplate();
+
+    // Hide completed milestones on load, matching the default hidingMsDone = true state
+    document.querySelectorAll('#milestone-log .date-item.ms-done').forEach(el => el.classList.add('ms-hidden'));
+    const _msDoneBtn = document.getElementById('toggleMsDoneBtn');
+    const _msDoneTxt = document.getElementById('toggleMsDoneText');
+    if (_msDoneBtn) _msDoneBtn.classList.add('hiding');
+    if (_msDoneTxt) _msDoneTxt.textContent = 'Show completed';
+
+    renderContacts();
+    renderAttachments();
+    renderMeetings();
+    renderNotes();
+    renderTerms();
+
+    // Pre-load attachment tags so the edit autocomplete is instant
+    loadAttachmentTags();
+
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDOM);
+  } else {
+    initDOM();
+  }
+
+</script>

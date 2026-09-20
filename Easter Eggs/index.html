@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Easter egg mockups — contact sheet</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+.ix { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4); margin-top: var(--space-6); }
+.ix-card {
+  display: block; text-decoration: none; color: inherit;
+  background: #1c2328; border: 1px solid #2a3238; border-radius: 10px;
+  overflow: hidden; transition: border-color .15s ease, transform .15s ease;
+}
+.ix-card:hover { border-color: #6fb9d4; transform: translateY(-2px); }
+.ix-card:focus-visible { outline: 2px solid #6fb9d4; outline-offset: 3px; }
+.ix-thumb { background: var(--bg-page); padding: var(--space-4); display: grid; place-items: center; min-height: 132px; }
+.ix-thumb svg { display: block; width: 100%; height: auto; max-width: 210px; }
+.ix-meta { padding: var(--space-3) var(--space-4) var(--space-4); }
+.ix-ref { font-family: var(--face-mono); font-size: 11px; color: #6fb9d4; margin: 0 0 4px; }
+.ix-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.ix-desc { font-size: 12px; color: #8d979f; margin: 0; line-height: 1.5; }
+
+.t-line { stroke: var(--neutral-400); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.t-soft { stroke: var(--neutral-300); stroke-width: 2; fill: none; }
+.t-fill { fill: var(--neutral-100); }
+.t-acc  { fill: var(--accent-600); }
+.t-brand{ fill: var(--brand-100); stroke: var(--brand-800); stroke-width: 3; }
+.t-dark { fill: var(--brand-900); }
+.t-text { fill: var(--text-strong); font-family: var(--font-display); font-size: 13px; font-weight: 600; }
+.t-mute { fill: var(--text-faint); font-family: var(--font-ui); font-size: 9px; }
+
+.ix-links { margin-top: var(--space-6); font-size: 13px; color: #9fa9b2; }
+.ix-links a { color: #6fb9d4; }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Staff membership system / CRM</p>
+    <h1>Easter egg mockups</h1>
+    <p>Seven of the ideas from the register, built as working HTML against the real theme
+       tokens in <code>tokens/tokens.css</code>. Each page shows the egg in context, the
+       states around it, and the design note explaining what would make it fail.</p>
+    <p>Open any card. Nothing here is wired into the product.</p>
+    <div class="mk-meta">
+      <span class="mk-tag">7 of ~32 ideas</span>
+      <span class="mk-tag">Real tokens, real type scale</span>
+      <span class="mk-tag">Nothing shipped</span>
+    </div>
+  </header>
+
+  <div class="ix">
+
+    <a class="ix-card" href="01-error-pages.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <g class="t-soft"><path d="M18 20v70M58 20v70M18 20h40M18 55h40M18 90h40M152 20v70M192 20v70M152 20h40M152 55h40M152 90h40"/></g>
+          <line class="t-soft" x1="0" y1="100" x2="210" y2="100"/>
+          <g transform="translate(71 -25) scale(.62)">
+            <path class="t-line" d="M66 150V96M74 150V96M66 176h34M66 176v-8"/>
+            <path class="t-acc" d="M18 152h44v34H18a6 6 0 0 1-6-6v-22a6 6 0 0 1 6-6z"/>
+            <path class="t-line" d="M22 152v-30h30v30M22 122h30"/>
+            <circle class="t-dark" cx="26" cy="192" r="10"/><circle class="t-dark" cx="56" cy="192" r="8"/>
+          </g>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">01 · F1</p>
+        <h2 class="ix-title">Error pages — the tone ladder</h2>
+        <p class="ix-desc">404 with a wandering forklift, 500 with one still object, 403 with
+           no art at all. The charm recedes as the severity rises.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="02-search-magic-words.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <rect class="t-fill" x="14" y="20" width="182" height="26" rx="4"/>
+          <rect x="14" y="20" width="182" height="26" rx="4" class="t-line"/>
+          <text class="t-mute" x="26" y="37" style="font-family:var(--face-mono);font-size:11px">sudo</text>
+          <rect class="t-fill" x="14" y="56" width="182" height="50" rx="4"/>
+          <rect x="14" y="56" width="182" height="50" rx="4" class="t-soft"/>
+          <text class="t-text" x="105" y="80" text-anchor="middle">You are not that</text>
+          <text class="t-text" x="105" y="96" text-anchor="middle">kind of admin.</text>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">02 · B — interactive</p>
+        <h2 class="ix-title">Search — the magic word dictionary</h2>
+        <p class="ix-desc">Live. Eleven terms across three different mechanisms, plus the
+           rules that stop an egg ever suppressing a real result.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="03-tenure-marker.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <circle cx="42" cy="60" r="22" class="t-brand"/>
+          <text class="t-text" x="74" y="52" style="font-size:15px">Mary O'Brien</text>
+          <text class="t-mute" x="74" y="68">MEMBER SINCE</text>
+          <text class="t-text" x="74" y="86" style="font-size:12px;font-weight:400">11 June 1974</text>
+          <g transform="translate(150 74)" fill="#c08a1e">
+            <path d="M2.4 6.3a1 1 0 0 1 1.5-.3L6.6 8 9.1 3.6a1 1 0 0 1 1.8 0L13.4 8l2.7-2a1 1 0 0 1 1.6 1L16 14.4a1 1 0 0 1-1 .8H5a1 1 0 0 1-1-.8L2.3 7a1 1 0 0 1 .1-.7z"/>
+            <rect x="4.6" y="16" width="10.8" height="1.8" rx=".9"/>
+          </g>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">03 · A1–A4</p>
+        <h2 class="ix-title">The tenure marker</h2>
+        <p class="ix-desc">Sparkle at 20 years, crown at 50, "they were here before us" for
+           pre-migration records, "Nope. Never." on a lifetime expiry.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="04-empty-states.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <g class="t-line" transform="translate(8 12) scale(.86)">
+            <path d="M22 96V22M178 96V22"/>
+            <path class="t-fill" d="M22 34c26 6 40 8 78 8s52-2 78-8c-8 34-38 52-78 52S30 68 22 34z"/>
+            <path d="M22 34c26 6 40 8 78 8s52-2 78-8M22 34c-8 34 38 52 78 52s86-18 78-52"/>
+          </g>
+          <text class="t-text" x="105" y="112" text-anchor="middle">Nothing to approve.</text>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">04 · C1–C3</p>
+        <h2 class="ix-title">Empty states</h2>
+        <p class="ix-desc">The hammock, the empty chairs, and the three-way gate that keeps
+           a joke off the top of a silent load failure.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="05-idle-logo.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <g transform="translate(72 -8) scale(.62)">
+            <path d="M100 6v18" fill="none" stroke="var(--brand-800)" stroke-width="4" stroke-linecap="round"/>
+            <rect class="t-brand" x="34" y="24" width="132" height="140" rx="24" stroke-width="4"/>
+            <rect class="t-acc" x="34" y="140" width="132" height="10"/>
+            <circle cx="76" cy="80" r="17" fill="#fff" stroke="var(--brand-800)" stroke-width="3"/>
+            <circle cx="124" cy="80" r="17" fill="#fff" stroke="var(--brand-800)" stroke-width="3"/>
+            <circle class="t-dark" cx="80" cy="83" r="7"/><circle class="t-dark" cx="128" cy="83" r="7"/>
+            <path d="M86 116q14 10 28 0" fill="none" stroke="var(--brand-800)" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">05 · F2 + F3 — interactive</p>
+        <h2 class="ix-title">The logo that looks at you</h2>
+        <p class="ix-desc">Live. Cursor tracking and the idle doze as one component, with a
+           state readout and the constraints made visible.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="06-task-age-celebration.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <circle cx="46" cy="60" r="18" fill="var(--status-green)"/>
+          <path d="M38 60.5 44 66.5 55 54" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <g>
+            <rect class="t-acc"  x="92"  y="28" width="8" height="10" rx="1" transform="rotate(-18 96 33)"/>
+            <rect x="118" y="20" width="8" height="10" rx="1" fill="var(--teal-400)" transform="rotate(24 122 25)"/>
+            <rect x="146" y="34" width="8" height="10" rx="1" fill="var(--status-purple)" transform="rotate(-32 150 39)"/>
+            <rect x="106" y="52" width="8" height="10" rx="1" fill="var(--status-green-fill)" transform="rotate(12 110 57)"/>
+            <rect x="164" y="58" width="8" height="10" rx="1" fill="var(--accent-500)" transform="rotate(-8 168 63)"/>
+            <rect x="132" y="62" width="8" height="10" rx="1" fill="var(--teal-600)" transform="rotate(40 136 67)"/>
+          </g>
+          <text class="t-text" x="128" y="98" text-anchor="middle" style="font-size:12px">Opened 412 days ago.</text>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">06 · G1 — interactive</p>
+        <h2 class="ix-title">Celebration scaled to task age</h2>
+        <p class="ix-desc">Live. Four tiers from a quiet tick to full confetti, the bulk-close
+           suppression, and the copy that congratulates without indicting.</p>
+      </div>
+    </a>
+
+    <a class="ix-card" href="07-do-not-click.html">
+      <div class="ix-thumb">
+        <svg viewBox="0 0 210 120" aria-hidden="true">
+          <defs>
+            <pattern id="hz" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="16" fill="var(--status-amber-bg)"/>
+              <rect x="8" width="8" height="16" fill="var(--white)"/>
+            </pattern>
+          </defs>
+          <rect x="46" y="42" width="118" height="36" rx="5" fill="url(#hz)" stroke="var(--status-amber)" stroke-width="1.8" stroke-dasharray="5 4"/>
+          <text x="105" y="65" text-anchor="middle" fill="var(--status-amber)" style="font-family:var(--face-mono);font-size:13px">Do not click</text>
+          <circle cx="30" cy="30" r="4" fill="var(--accent-600)"/>
+          <circle cx="182" cy="34" r="4" fill="var(--teal-400)"/>
+          <circle cx="26" cy="92" r="4" fill="var(--status-purple)"/>
+          <circle cx="186" cy="90" r="4" fill="var(--status-green-fill)"/>
+        </svg>
+      </div>
+      <div class="ix-meta">
+        <p class="ix-ref">07 · H1 — interactive</p>
+        <h2 class="ix-title">The "do not click" button</h2>
+        <p class="ix-desc">Live. The safe placement, the same button somewhere it must never
+           go, and the conflict with phishing training spelled out.</p>
+      </div>
+    </a>
+
+  </div>
+
+  <p class="ix-links">The full register, including the ideas not mocked up and the ones
+     recommended for cutting: <a href="EASTER-EGG-IDEAS.md">EASTER-EGG-IDEAS.md</a></p>
+
+  <hr class="mk-divider">
+</div>
+</body>
+</html>

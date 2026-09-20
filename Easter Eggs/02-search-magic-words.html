@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Search magic words (B)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+.eg-search { max-width: 720px; }
+.eg-search__bar { display: flex; gap: var(--space-2); }
+.eg-search__input {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  color: var(--text-strong);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+.eg-search__input:focus-visible { outline: none; border-color: var(--border-focus); box-shadow: var(--focus-ring); }
+.eg-search__go {
+  font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: var(--fw-medium);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--brand-600); background: var(--brand-600); color: var(--white);
+  border-radius: var(--radius-sm); cursor: pointer;
+}
+.eg-search__go:hover { background: var(--brand-700); border-color: var(--brand-700); }
+.eg-search__go:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.eg-results { margin-top: var(--space-4); }
+.eg-results__count {
+  font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+/* The aside. Small, quiet, sits beside the count — never replaces results. */
+.eg-aside {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--brand-50);
+  border-left: 3px solid var(--brand-400, var(--teal-400));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--fs-sm);
+  color: var(--text-base);
+  animation: eg-fade .28s ease-out both;
+}
+.eg-aside__mark { flex: none; color: var(--brand-600); font-size: var(--fs-md); line-height: 1.2; }
+.eg-aside p { margin: 0; }
+.eg-aside a { color: var(--text-link); }
+@keyframes eg-fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+
+.eg-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 110px 96px;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--card-pad-x);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+.eg-row:last-child { border-bottom: 0; }
+.eg-row__name { font-weight: var(--fw-semi); color: var(--text-link); }
+.eg-row__meta { color: var(--text-muted); font-family: var(--face-mono); font-size: var(--fs-xs); }
+.eg-pill {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-medium);
+  padding: 2px 8px; border-radius: var(--radius-pill);
+  background: var(--success-bg); color: var(--success); justify-self: start;
+}
+.eg-pill[data-state="lapsed"] { background: var(--warning-bg); color: var(--warning); }
+
+/* Zero-result state */
+.eg-zero { padding: var(--space-8) var(--card-pad-x); text-align: center; }
+.eg-zero__line {
+  font-family: var(--font-display); font-size: var(--fs-lg); font-weight: var(--fw-semi);
+  color: var(--text-strong); margin: 0 0 var(--space-2);
+}
+.eg-zero__sub { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
+.eg-zero__sub a { color: var(--text-link); }
+.eg-zero--egg .eg-zero__line { animation: eg-fade .3s ease-out both; }
+
+.eg-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-3); }
+.eg-chip {
+  font-family: var(--face-mono); font-size: var(--fs-xs);
+  padding: 4px 10px; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--bg-surface); border: 1px solid var(--neutral-300); color: var(--text-base);
+}
+.eg-chip:hover { border-color: var(--brand-600); color: var(--text-link); }
+.eg-chip[data-kind="ii"]  { border-style: dashed; }
+.eg-chip[data-kind="iii"] { border-style: dotted; }
+.eg-chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.eg-key { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-2); font-size: 11px; color: var(--text-faint); font-family: var(--font-ui); }
+.eg-key b { font-weight: var(--fw-semi); color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · B</p>
+    <h1>Search — the magic word dictionary</h1>
+    <p>The richest surface, because staff discover these themselves and tell each other.
+       It is also the one that needs the most mechanical care: the listed ideas are
+       <strong>three different behaviours</strong> wearing one coat, and mixing them up is
+       how you end up suppressing a real result.</p>
+    <p>Type a term or click a chip. Everything below is live.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag" data-risk="watch">Needs per-client word vetting</span>
+      <span class="mk-tag">Dictionary lives in config</span>
+    </div>
+  </header>
+
+  <section class="mk-stage">
+    <p class="mk-label">Live demo <span>Solid chip = zero-result response · dashed = count aside · dotted = query-shaped aside</span></p>
+    <div class="mk-frame">
+      <div class="eg-search">
+        <form class="eg-search__bar" id="egForm" role="search">
+          <input class="eg-search__input" id="egInput" type="search" placeholder="Search members, organisations, events…" aria-label="Search members" autocomplete="off">
+          <button class="eg-search__go" type="submit">Search</button>
+        </form>
+
+        <div class="eg-chips" id="egChips"></div>
+        <div class="eg-key">
+          <span><b>B-i</b> zero-result response</span>
+          <span><b>B-ii</b> result-count aside</span>
+          <span><b>B-iii</b> query-shaped aside</span>
+        </div>
+
+        <div class="eg-results" id="egResults" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Try a normal search too</strong> — <code>nguyen</code>,
+       <code>smith</code>, or anything else. The point of the mockup is that ordinary
+       searching is completely untouched.</p>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">Rules the mockup encodes</p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__body" style="font-size:var(--fs-sm); color:var(--text-base);">
+          <ol style="margin:0; padding-left:1.2em; display:grid; gap:10px;">
+            <li><strong>Nothing is ever suppressed.</strong> In B-ii and B-iii the results
+                render exactly as normal and the line is additive. Only B-i changes anything,
+                and only in a state that is empty anyway.</li>
+            <li><strong>Whole-string match, case and whitespace insensitive.</strong>
+                <code>help</code> is an egg; <code>help desk officer</code> is a real search
+                and behaves like one. Try both.</li>
+            <li><strong><code>*</code> never runs.</strong> A literal wildcard over the member
+                table is genuinely expensive, and a joke printed over a thirty-second spinner
+                is not a joke. It is intercepted before the query, and offers the paged
+                "browse all members" path instead.</li>
+            <li><strong>The count threshold is the design question, not the copy.</strong>
+                "Good luck" at 87 results is funny; at 9 it is confusing. Here it fires above
+                50 on a plain two-word personal name. Search <code>john smith</code> versus
+                <code>mary o'brien</code> to see the threshold work.</li>
+            <li><strong><code>me</code> is quietly useful as well as funny</strong> — the line
+                carries a link to your own staff record. That is the version people will
+                actually use, which is what turns an egg into a feature.</li>
+            <li><strong><code>overtime</code> is not in the dictionary.</strong> A union
+                membership system winking about unpaid hours is the wrong joke in this
+                building. Cut at the register stage, recorded here so it is not
+                re-suggested later.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Dictionary. In production this is theme config, not code. ───────────
+     kind: 'zero'  → replaces the zero-result line (only when truly 0 results)
+           'count' → aside shown alongside results, gated on a count rule
+           'shape' → aside shown regardless of count                        */
+  var DICTIONARY = {
+    'nobody':     { kind: 'zero',  line: 'Excellent news: 0 results.' },
+    'sudo':       { kind: 'zero',  line: 'You are not that kind of admin.' },
+    'coffee':     { kind: 'zero',  line: 'Essential staff resource. Not currently indexed.' },
+    'asdf':       { kind: 'zero',  line: 'A respected member of every database.' },
+    'help':       { kind: 'zero',  line: 'That bad, huh?',
+                    sub: 'The real one is in <a href="#">Help &amp; guides</a>, and it is genuinely quite good.' },
+    'friday':     { kind: 'zero',  line: function () {
+                      return new Date().getDay() === 5 ? 'It actually is!' : 'Nearly there.';
+                    } },
+    'everyone':   { kind: 'count', line: "That's going to be a long list.", force: 4812 },
+    '*':          { kind: 'count', line: 'Ah. The nuclear option.', intercept: true,
+                    sub: 'Nothing was run. <a href="#">Browse all members</a> goes through the paged path.' },
+    'me':         { kind: 'shape', line: 'Looking for yourself?',
+                    sub: 'Your record: <a href="#">Driscoll, James — staff</a>' },
+    'test':       { kind: 'shape', line: "We know what you're doing." }
+  };
+
+  var COUNT_ASIDE_THRESHOLD = 50;
+
+  /* ── A small fake index ─────────────────────────────────────────────── */
+  var SURNAMES = ['Smith','Nguyen','O\'Brien','Kaur','Papadopoulos','Wilson','Tran','Mareko','Zhang','Costa'];
+  var FIRSTS   = ['John','Mary','Aisha','Daniel','Sione','Priya','Tom','Grace','Hamid','Ruby'];
+  var STATES   = ['Financial','Financial','Financial','Lapsed'];
+
+  function makeRows(seedName, n) {
+    var rows = [], i;
+    for (i = 0; i < Math.min(n, 6); i++) {
+      var first = seedName.first || FIRSTS[(i * 3) % FIRSTS.length];
+      var last  = seedName.last  || SURNAMES[(i * 7) % SURNAMES.length];
+      rows.push({
+        name: last + ', ' + first,
+        id: 'M' + (100420 + i * 137),
+        since: 1974 + ((i * 11) % 48),
+        state: STATES[i % STATES.length]
+      });
+    }
+    return rows;
+  }
+
+  /* Pretend result counts for ordinary searches, so the demo has texture. */
+  function fakeCount(q) {
+    if (!q) return 0;
+    var known = { 'john smith': 87, 'smith': 214, 'nguyen': 143, "mary o'brien": 9, 'test': 3 };
+    if (known[q] !== undefined) return known[q];
+    if (q.length < 3) return 0;
+    /* deterministic pseudo-count so repeat searches are stable */
+    var h = 0, i;
+    for (i = 0; i < q.length; i++) { h = (h * 31 + q.charCodeAt(i)) % 97; }
+    return h < 12 ? 0 : h;
+  }
+
+  function isTwoWordName(q) { return /^[a-z']+ [a-z']+$/.test(q); }
+
+  var form    = document.getElementById('egForm');
+  var input   = document.getElementById('egInput');
+  var results = document.getElementById('egResults');
+  var chipBox = document.getElementById('egChips');
+
+  /* chips */
+  var kindClass = { zero: 'i', count: 'ii', shape: 'iii' };
+  Object.keys(DICTIONARY).concat(['john smith', "mary o'brien", 'help desk officer']).forEach(function (term) {
+    var entry = DICTIONARY[term];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'eg-chip';
+    b.textContent = term;
+    if (entry) { b.setAttribute('data-kind', kindClass[entry.kind]); }
+    b.addEventListener('click', function () { input.value = term; run(term); });
+    chipBox.appendChild(b);
+  });
+
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
+
+  function asideHTML(line, sub) {
+    return '<div class="eg-aside"><span class="eg-aside__mark" aria-hidden="true">✦</span><p>' +
+           line + (sub ? '<br><span style="color:var(--text-muted)">' + sub + '</span>' : '') +
+           '</p></div>';
+  }
+
+  function rowsHTML(rows, total) {
+    var html = '<div class="us-panel"><div class="us-panel__head"><h3 class="us-panel__title">Members</h3></div>';
+    rows.forEach(function (r) {
+      html += '<div class="eg-row">' +
+              '<span class="eg-row__name">' + esc(r.name) + '</span>' +
+              '<span class="eg-row__meta">' + r.id + '</span>' +
+              '<span class="eg-row__meta">Since ' + r.since + '</span>' +
+              '<span class="eg-pill" data-state="' + (r.state === 'Lapsed' ? 'lapsed' : 'financial') + '">' + r.state + '</span>' +
+              '</div>';
+    });
+    if (total > rows.length) {
+      html += '<div class="eg-row" style="border-top:1px solid var(--border);color:var(--text-faint);grid-template-columns:1fr">' +
+              '<span>… and ' + (total - rows.length).toLocaleString() + ' more</span></div>';
+    }
+    return html + '</div>';
+  }
+
+  function run(raw) {
+    var q = String(raw || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!q) { results.innerHTML = ''; return; }
+
+    var entry = DICTIONARY[q];                    /* whole-string match only */
+    /* B-i words are only ever eggs because the real query genuinely returns
+       nothing. The mockup has to honour that or it would be demonstrating a
+       behaviour the product will never actually reach. */
+    var count = entry && entry.force !== undefined ? entry.force
+              : (entry && (entry.intercept || entry.kind === 'zero')) ? 0
+              : fakeCount(q);
+
+    var html = '';
+
+    /* B-ii / B-iii — aside above the count, results untouched below */
+    if (entry && entry.kind === 'count') {
+      if (entry.intercept) {
+        html += asideHTML(entry.line, entry.sub);
+        html += '<p class="eg-results__count">No query was run.</p>';
+        results.innerHTML = html;
+        return;
+      }
+      html += asideHTML(entry.line, entry.sub);
+    } else if (entry && entry.kind === 'shape') {
+      html += asideHTML(entry.line, entry.sub);
+    } else if (!entry && count > COUNT_ASIDE_THRESHOLD && isTwoWordName(q)) {
+      /* the generic "very common name" rule — not a dictionary word at all */
+      html += asideHTML('Good luck.');
+    }
+
+    if (count === 0) {
+      var line = entry && entry.kind === 'zero'
+        ? (typeof entry.line === 'function' ? entry.line() : entry.line)
+        : 'No results';
+      var sub = entry && entry.kind === 'zero' && entry.sub
+        ? entry.sub
+        : 'Check the spelling, or try a member ID.';
+      html += '<div class="us-panel"><div class="eg-zero' + (entry ? ' eg-zero--egg' : '') + '">' +
+              '<p class="eg-zero__line">' + line + '</p>' +
+              '<p class="eg-zero__sub">' + sub + '</p></div></div>';
+    } else {
+      var parts = q.split(' ');
+      var seed = isTwoWordName(q)
+        ? { first: parts[0][0].toUpperCase() + parts[0].slice(1), last: parts[1][0].toUpperCase() + parts[1].slice(1) }
+        : {};
+      html += '<p class="eg-results__count">' + count.toLocaleString() + ' result' + (count === 1 ? '' : 's') + '</p>';
+      html += rowsHTML(makeRows(seed, count), count);
+    }
+
+    results.innerHTML = html;
+  }
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); run(input.value); });
+  run('john smith');
+  input.value = 'john smith';
+}());
+</script>
+</body>
+</html>

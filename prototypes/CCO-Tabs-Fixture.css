@@ -1,0 +1,74 @@
+/* Offline fixture only. Minimal Telerik layout reconstruction; the generator
+   loads the real Orion tab overrides after this foundation. No server scripts. */
+* { box-sizing: border-box; }
+html { background: #eeeeef; }
+body { margin: 0; padding: 24px 20px; color: #545962; font: 15px/1.5 "Open Sans", "Helvetica Neue", Arial, sans-serif; }
+a { color: #006f94; text-decoration: none; }
+.rtsUL { list-style: none; padding: 0; margin: 0; }
+.rtsUL::after { content: ""; display: table; clear: both; }
+.rtsLI { float: left; }
+.rtsLink { display: block; white-space: nowrap; }
+.rtsOut, .rtsIn, .rtsTxt { display: block; }
+.rtsIn { padding: 0 10px; }
+.RadTabStripVertical .rtsLI { float: none; }
+.RadTabStripVertical > .rtsLevel { height: 100%; }
+.RadMultiPage { min-width: 0; }
+@media (min-width: 768px) {
+  .tabs-wrapper.tabs-left { display: grid; grid-template-columns: auto minmax(60%, 100%); }
+}
+/* Content is intentionally identical in both columns, with fictional values. */
+[hidden] { display: none !important; }
+h2 { margin: 0 0 14px; font-size: 20px; font-weight: 500; line-height: 1.4; }
+.demo-content { padding-top: 18px; }
+.tabs-vertical > .RadMultiPage > .rmpView > .demo-content { padding-top: 8px; }
+.demo-block + .demo-block { margin-top: 34px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th { text-align: left; background: #f8f8f9; font-weight: 600; }
+th, td { padding: 12px; border-bottom: 1px solid #e2e5e9; }
+td { background: white; }
+.query { max-width: 370px; padding-bottom: 16px; }
+label { display: block; margin-bottom: 4px; }
+input, select { width: 100%; min-width: 0; height: 34px; padding: 5px 9px; border: 1px solid #9aa1aa; border-radius: 5px; background: white; color: #545962; font: inherit; }
+.fields { border-top: 1px solid #e2e5e9; padding-top: 16px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px 20px; }
+.find { margin-top: 10px; padding: 8px 15px; border: 0; border-radius: 4px; background: #ff9947; color: #002632; font: inherit; cursor: pointer; }
+.find:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #006f94; outline-offset: 2px; }
+.hint { margin: 8px 0 0; font-size: 14px; color: #6b7580; }
+.address-text { padding-top: 28px; }
+.nested-note { font-size: 12px; margin: 10px 0 0; color: #6b7580; }
+.placeholder { min-height: 230px; }
+.placeholder p { max-width: 50ch; }
+.selection-caption { display: none; }
+.address-text { font-size: 14px; }
+.address-text strong { display: block; margin-bottom: 5px; color: #003a4c; }
+.demo-status { display: inline-block; padding: 3px 8px; background: #ffe8d6; color: #002632; border-radius: 4px; font-size: 12px; }
+.standalone-demo { margin-top: 32px; padding-top: 24px; border-top: 1px solid #c8ccd2; }
+.standalone-demo > .ContentTabbedDisplay { margin-top: 14px; }
+@media (max-width: 520px) {
+  body { padding: 18px 12px; }
+  .fields { grid-template-columns: 1fr; }
+}
+/* Menu swatches are layout previews, not production responsive overrides. */
+body.menu-swatch { padding: 14px; background: #fff; }
+.menu-swatch .demo-content { display: none; }
+.menu-swatch .selection-caption { display: block; margin: 0; padding: 12px 4px 0; font: 12px/1.5 system-ui; color: #6b7580; }
+.menu-swatch.us-tab-study .tabs-wrapper.tabs-vertical { display: block; max-width: 280px; margin: auto; }
+.menu-swatch.us-tab-study .tabs-wrapper > .RadMultiPage { padding: 0; background: transparent; border: 0; }
+.menu-swatch.us-tab-study .RadTabStripVertical > .rtsLevel { overflow: visible; }
+.menu-swatch.us-tab-study .RadTabStripVertical > .rtsLevel > .rtsUL { flex-direction: column; }
+.menu-swatch.us-tab-study .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink { white-space: normal; }
+/* V4/V5 swatches include a slice of the adjacent panel to show the open right edge. */
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .tabs-wrapper.tabs-vertical { display: grid; grid-template-columns: minmax(0,1fr) 22px; }
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .RadTabStripVertical {
+  --rail-pad: 4px 0 4px 4px; --tab-radius: 7px 0 0 7px; --active-shadow: inset 4px 0 0 var(--accent);
+  border: 0; border-right: 1px solid var(--open-border);
+}
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .RadTabStripVertical > .rtsLevel > .rtsUL { flex-wrap: nowrap; }
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+  width: calc(100% + 1px); margin-right: -1px; margin-bottom: 0;
+  border-right-color: var(--open-surface); border-bottom-color: var(--active-border);
+}
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .tabs-wrapper.tabs-vertical > .RadMultiPage {
+  background: var(--open-surface); border: 1px solid var(--open-border); border-left: 0; padding: 0;
+}
+.menu-swatch.us-tab-study:is(.us-tabs-v4, .us-tabs-v5) .selection-caption { display: none; }
+.menu-swatch.us-tab-study.us-tabs-v5 .RadTabStripVertical { --rail-bg: var(--bg-sunken); --fade-direction: to right; }

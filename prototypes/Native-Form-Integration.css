@@ -1,0 +1,65 @@
+/* Preview only: preserve native layout/width/visibility and widget mechanics. */
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)){box-sizing:border-box;max-width:100%;height:36px;min-height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg-surface);color:var(--text-base);font:13px/20px var(--font-ui);box-shadow:none}
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)):hover:not(:disabled):not([readonly]){border-color:var(--brand-600)}
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)):focus{outline:2px solid var(--brand-600);outline-offset:2px;border-color:var(--brand-600);box-shadow:none}
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)):disabled{background:var(--neutral-300);color:var(--text-strong);cursor:not-allowed;opacity:1}
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *))[readonly]{background:var(--neutral-200);color:var(--text-strong)}
+.us-native-form-preview .PanelFieldValue > :is(input:not([type=checkbox],[type=radio],[type=button],[type=submit],[type=reset],[type=hidden],[type=image]),select,textarea):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *))[aria-invalid=true]{border-color:var(--danger)}
+.us-native-form-preview .PanelFieldValue > :is(textarea,select[multiple]):not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)){height:auto;min-height:108px}
+.us-native-form-preview .PanelFieldValue > textarea:not(:where(.us-report *, .SearchContactsClass *, .RadGrid *, .RadComboBox *, .RadInput *, .RadPicker *, .RadEditor *, .RadSplitter *, .RadUpload *, .RadAsyncUpload *, .chosen-container *)){resize:vertical}
+.us-native-form-preview .PanelFieldValue > input[type=date]{position:relative;padding-right:44px}
+.us-native-form-preview .PanelFieldValue > textarea{height:auto;min-height:100px;padding:7px 10px}
+.us-native-form-preview .RadComboBox .rcbInner,.us-native-form-preview .RadUpload .ruFakeInput{border-color:var(--border-strong);border-radius:6px;background-color:var(--bg-surface);color:var(--text-base)}
+.us-native-form-preview .RadComboBox:focus-within .rcbInner,.us-native-form-preview .RadUpload:focus-within .ruFakeInput{border-color:var(--brand-600);outline:2px solid var(--brand-600);outline-offset:2px}
+
+/* Captured organisation autocomplete: one border, owned by the wrapper. */
+.us-native-form-preview .RadComboBox .rcbInner.rcbToggleButtonHidden{display:block;box-sizing:border-box;border:1px solid var(--border-strong);padding:0;min-height:36px}
+.us-native-form-preview .RadComboBox .rcbInner.rcbToggleButtonHidden > .rcbInput{display:block;box-sizing:border-box;width:100%;min-width:0;height:34px;margin:0;padding:0 10px;border:0;border-radius:inherit;box-shadow:none;background:transparent;color:var(--text-base);font:13px/1.5 var(--font-ui)}
+.us-native-form-preview .RadComboBox .rcbInner.rcbToggleButtonHidden > .rcbInput:focus{outline:none;box-shadow:none}
+
+.us-native-form-preview .PanelFieldValue > select[multiple]{height:auto;min-height:72px;padding:7px 10px}
+
+/* Address editor proposal: deprecated contact fields and consistent widths. */
+.us-native-form-preview .PanelField:has(input:is([id$="_AddressEdit_TextPhone"],[id$="_AddressEdit_TextFax"],[id$="_AddressEdit_TextEmail"])){display:none!important}
+.us-native-form-preview :is(input,select,textarea)[id*="_AddressEdit_"]:not([type=hidden],[type=button],[type=submit],[type=checkbox],[type=radio],.rcbInput),
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"]{width:280px!important;max-width:100%;box-sizing:border-box}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbInner{display:flex;align-items:stretch;box-sizing:border-box;width:100%;min-height:36px;padding:0;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg-surface)}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbInput{flex:1;min-width:0;width:0;height:34px;margin:0;padding:0 10px;border:0;border-radius:6px 0 0 6px;background:transparent;box-shadow:none;font:13px/20px var(--font-ui);color:var(--text-base)}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbInput:focus{outline:none}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbActionButton{position:static;flex:0 0 34px;width:34px;margin:0;padding:0;border:0;border-left:1px solid var(--border);border-radius:0 6px 6px 0;background:var(--bg-subtle);color:var(--text-link)}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbButtonText{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .p-icon{display:none}
+.us-native-form-preview .RadComboBox[id$="_AddressEdit_SelectAddressStatus"] .rcbActionButton::after{content:'';display:inline-block;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+
+/* Theme upload layout study; scoped to this native editor only. */
+.us-native-form-preview .EmptyMasterContentPanel:has([id$="_AppThemeEditControl_UploadPanel"]){height:auto!important;overflow:visible!important}
+.us-native-form-preview [id$="_AppThemeEditControl_ForceFormPostbackUpdatePanel"]{max-width:560px;margin:0 auto}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"]{margin:16px 0 0;border:0;box-shadow:none}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .panel-body{padding:0}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelField{display:block;float:none;width:100%;margin:0 0 16px;padding:0;white-space:normal!important}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelField > label{display:block;float:none;width:auto;margin:0 0 6px;padding:0}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelFieldValue{display:block;float:none;min-width:0;width:100%;margin:0;padding:0}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelFieldValue > :is(input[type=text],select){width:100%}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .panel-body > span:has(input[type=checkbox]){display:flex;gap:8px;align-items:center;margin:0 0 20px}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .panel-body > span:has(input[type=checkbox]) label{margin:0;font-weight:400}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelField:has(.RadUpload){padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--bg-subtle)}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .RadUpload{width:100%;margin:8px 0 12px}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .ruInputs{list-style:none;margin:0;padding:0}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .ruFileWrap{display:block;width:100%;height:auto}
+/* Offline preview uses the real chooser because Telerik runtime is absent. */
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] :is(.ruFakeInput,.ruBrowse,.ruClear){display:none}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .ruFileInput{position:static;display:block;width:100%;max-width:100%;height:auto;opacity:1;font:13px/1.5 var(--font-ui);color:var(--text-base)}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .ruFileInput::file-selector-button{padding:8px 12px;margin-right:10px;border:1px solid var(--brand-800);border-radius:6px;background:var(--brand-800);color:var(--text-inverse);cursor:pointer}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] [id$="Label"]:is([id$="_AllowedFileTypesLabel"],[id$="_MaxFileSizeLabel"]){font-size:12px;color:var(--text-muted)}
+.us-native-form-preview [id$="_AppThemeEditControl_ForceFormPostbackUpdatePanel"] > .CommandBar{display:flex;gap:8px;justify-content:flex-end;margin:4px 0 0;padding:16px 0 0;border-top:1px solid var(--border)}
+.us-native-form-preview [id$="_AppThemeEditControl_ForceFormPostbackUpdatePanel"] > .CommandBar > input{margin:0}
+
+.us-native-form-preview .PanelField:has(.RadUpload){position:relative}
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .PanelField.is-file-dragover{background:var(--brand-50);border:1px dashed var(--brand-600);outline:2px solid var(--brand-600);outline-offset:2px}
+.us-native-form-preview .PanelField.is-file-dragover::after{content:'Drop ZIP file here';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--brand-50);color:var(--brand-800);font-weight:600;pointer-events:none}
+.us-native-form-preview .upload-preview-status{margin:10px 0 0;font-size:12px;color:var(--text-muted)}
+
+/* File chooser surface contrasts gently with the surrounding upload panel. */
+.us-native-form-preview [id$="_AppThemeEditControl_UploadPanel"] .ruFileInput{padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface)}
+
+.us-native-form-preview .upload-preview-status{display:block;clear:both;margin:8px 0 0}

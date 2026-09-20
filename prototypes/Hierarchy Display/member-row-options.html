@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member row — compaction options</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/tabler-icons.min.css">
+<style>
+  :root {
+    --bg:          #f4f6f9;
+    --surface:     #ffffff;
+    --border:      #dde1e7;
+    --text:        #1a1f2e;
+    --text-muted:  #6b7280;
+    --primary:     #2563eb;
+    --radius:      10px;
+    --shadow:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: var(--bg); color: var(--text); line-height: 1.5; }
+  .app { max-width: 760px; margin: 0 auto; padding: 28px 16px 80px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .lede { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+
+  .opt { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px 20px; margin-bottom: 20px; }
+  .opt-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .opt-num { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--primary); }
+  .opt-title { font-size: 16px; font-weight: 600; }
+  .opt-desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; }
+  .opt-metric { font-size: 11px; font-weight: 600; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; }
+  .demo { background: var(--bg); border: 1px dashed var(--border); border-radius: 8px; padding: 10px; }
+
+  /* Shared bits */
+  .ic-star { color: #d97706; flex-shrink: 0; }
+  .ic-dim  { color: var(--text-muted); flex-shrink: 0; }
+  .badge-muted { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* ============ OPTION 0: CURRENT (baseline) ============ */
+  .v-current .roster-row { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: 8px; padding: 8px 12px; margin: 4px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .v-current .m-name { font-weight: 600; }
+  .v-current .m-title { color: var(--text-muted); font-size: 13px; }
+  .v-current .m-id { margin-left: auto; font-family: monospace; font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+  .v-current .m-meta { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 5px; margin-left: 24px; margin-top: -2px; }
+  .v-current .m-chip { font-size: 10px; line-height: 1.5; padding: 0 5px; border-radius: 3px; white-space: nowrap; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .v-current .m-chip-active { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+  .v-current .m-chip-warn   { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+
+  /* ============ OPTION 1: TIGHTEN SPACING ============ */
+  .v-tight .roster-row { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: 7px; padding: 4px 10px; margin: 2px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; line-height: 1.35; }
+  .v-tight .m-name { font-weight: 600; font-size: 13px; }
+  .v-tight .m-title { color: var(--text-muted); font-size: 12px; }
+  .v-tight .m-id { margin-left: auto; font-family: monospace; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .v-tight .m-meta { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-left: 22px; margin-top: 0; }
+  .v-tight .m-chip { font-size: 9.5px; line-height: 1.45; padding: 0 5px; border-radius: 3px; white-space: nowrap; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .v-tight .m-chip-active { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+  .v-tight .m-chip-warn   { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+
+  /* ============ OPTION 2: DROP CARD CHROME ============ */
+  .v-list .list { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .v-list .roster-row { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: 7px; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+  .v-list .roster-row:last-child { border-bottom: none; }
+  .v-list .roster-row:hover { background: var(--bg); }
+  .v-list .m-name { font-weight: 600; font-size: 13px; }
+  .v-list .m-title { color: var(--text-muted); font-size: 12px; }
+  .v-list .m-id { margin-left: auto; font-family: monospace; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+  .v-list .m-meta { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-left: 22px; }
+  .v-list .m-chip { font-size: 9.5px; line-height: 1.45; padding: 0 5px; border-radius: 3px; white-space: nowrap; background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .v-list .m-chip-active { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+  .v-list .m-chip-warn   { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+
+  /* ============ OPTION 3: SINGLE LINE ============ */
+  .v-single .roster-row { display: flex; align-items: center; min-width: 0; gap: 8px; padding: 6px 12px; margin: 2px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; }
+  .v-single .m-name { font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .v-single .m-title { color: var(--text-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .v-single .sep { color: var(--border); flex-shrink: 0; }
+  .v-single .m-inline { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+  .v-single .m-inline.active { color: #15803d; font-weight: 600; }
+  .v-single .m-inline.warn   { color: #b45309; font-weight: 600; }
+  .v-single .m-id { margin-left: auto; font-family: monospace; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ============ OPTION 4: TABLE ============ */
+  .v-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .v-table thead th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-muted); padding: 6px 10px; border-bottom: 1.5px solid var(--border); white-space: nowrap; }
+  .v-table tbody td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .v-table tbody tr:last-child td { border-bottom: none; }
+  .v-table tbody tr:hover { background: var(--bg); }
+  .v-table .t-name { font-weight: 600; white-space: nowrap; }
+  .v-table .t-id { font-family: monospace; font-size: 10px; color: var(--text-muted); }
+  .v-table .t-status.active { color: #15803d; font-weight: 600; }
+  .v-table .t-status.warn   { color: #b45309; font-weight: 600; }
+  .v-table .t-star { width: 1px; padding-right: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Member row — compaction options</h1>
+  <p class="lede">Same five members, same information, four layouts. Baseline shown first for reference.</p>
+
+  <!-- BASELINE -->
+  <div class="opt">
+    <div class="opt-head"><span class="opt-num">Current</span><span class="opt-title">Baseline</span><span class="opt-metric">~58px / row</span></div>
+    <div class="opt-desc">What's live now: two-line bordered card.</div>
+    <div class="demo v-current" id="v-current"></div>
+  </div>
+
+  <!-- OPTION 1 -->
+  <div class="opt">
+    <div class="opt-head"><span class="opt-num">Option 1</span><span class="opt-title">Tighten spacing</span><span class="opt-metric">~50px / row · -19%</span></div>
+    <div class="opt-desc">Same two-line card, reduced padding, margins, and font sizes. Lowest risk.</div>
+    <div class="demo v-tight" id="v-tight"></div>
+  </div>
+
+  <!-- OPTION 2 -->
+  <div class="opt">
+    <div class="opt-head"><span class="opt-num">Option 2</span><span class="opt-title">Drop card chrome</span><span class="opt-metric">~55px / row · -11%</span></div>
+    <div class="opt-desc">No per-row borders — one bordered list with thin dividers and hover highlight. Note: saves the least on its own, since the two-line height (not the border) dominates. Best combined with Option 1's tightening.</div>
+    <div class="demo v-list"><div class="list" id="v-list"></div></div>
+  </div>
+
+  <!-- OPTION 3 -->
+  <div class="opt">
+    <div class="opt-head"><span class="opt-num">Option 3</span><span class="opt-title">Single line</span><span class="opt-metric">~35px / row · -44%</span></div>
+    <div class="opt-desc">Everything on one line as plain text. Densest card option, but truncates on narrow widths.</div>
+    <div class="demo v-single" id="v-single"></div>
+  </div>
+
+  <!-- OPTION 4 -->
+  <div class="opt">
+    <div class="opt-head"><span class="opt-num">Option 4</span><span class="opt-title">Table layout</span><span class="opt-metric">~29px / row · -53%</span></div>
+    <div class="opt-desc">Aligned columns. Most compact and most scannable; biggest visual change from cards.</div>
+    <div class="demo v-table" id="v-table"></div>
+  </div>
+</div>
+
+<script>
+const sample = [
+  { primary:true,  name:"Maya Rodriguez",   title:"VP of Engineering",       type:"Regular Member",   cat:"Cat 1", status:"A - Active",    state:"active" },
+  { primary:false, name:"Robert Thompson",  title:"Chief Operations Officer",type:"Regular Member",   cat:"Cat 1", status:"L - Lapsed",    state:"warn"   },
+  { primary:true,  name:"Amanda Foster",    title:"Training Program Manager",type:"Student Member",   cat:"Cat 3", status:"A - Active",    state:"active" },
+  { primary:false, name:"David Williamson", title:"Client Services Director",type:"Associate Member", cat:"Cat 3", status:"G - Grace",     state:"warn"   },
+  { primary:true,  name:"Christopher Hayes",title:"Principal Consultant",    type:"Life Member",      category:"Cat 1", cat:"Cat 1", status:"F - Financial", state:"active" },
+];
+const star = p => p ? '<i class="ti ti-star ic-star"></i>' : '<i class="ti ti-user ic-dim"></i>';
+const chipCls = s => s==="active" ? "m-chip-active" : s==="warn" ? "m-chip-warn" : "";
+
+// Current + Tight + List share the same two-line markup
+function twoLine(m){
+  return `<div class="roster-row">
+    ${star(m.primary)}<span class="m-name">${m.name}</span>
+    <span class="m-title">${m.title}</span>
+    <span class="m-id">${"M-10"+(10+sample.indexOf(m))}</span>
+    <div class="m-meta">
+      <span class="m-chip">${m.type}</span>
+      <span class="m-chip">${m.cat}</span>
+      <span class="m-chip ${chipCls(m.state)}">${m.status}</span>
+    </div>
+  </div>`;
+}
+document.getElementById("v-current").innerHTML = sample.map(twoLine).join("");
+document.getElementById("v-tight").innerHTML   = sample.map(twoLine).join("");
+document.getElementById("v-list").innerHTML    = sample.map(twoLine).join("");
+
+// Single line
+document.getElementById("v-single").innerHTML = sample.map((m,i)=>`
+  <div class="roster-row">
+    ${star(m.primary)}<span class="m-name">${m.name}</span>
+    <span class="sep">·</span><span class="m-title">${m.title}</span>
+    <span class="sep">·</span><span class="m-inline">${m.type}</span>
+    <span class="sep">·</span><span class="m-inline">${m.cat}</span>
+    <span class="sep">·</span><span class="m-inline ${m.state}">${m.status}</span>
+    <span class="m-id">M-10${10+i}</span>
+  </div>`).join("");
+
+// Table
+document.getElementById("v-table").innerHTML = `
+  <table>
+    <thead><tr><th class="t-star"></th><th>Name</th><th>Title</th><th>Type</th><th>Cat</th><th>Status</th><th>ID</th></tr></thead>
+    <tbody>
+      ${sample.map((m,i)=>`<tr>
+        <td class="t-star">${star(m.primary)}</td>
+        <td class="t-name">${m.name}</td>
+        <td>${m.title}</td>
+        <td>${m.type}</td>
+        <td>${m.cat}</td>
+        <td class="t-status ${m.state}">${m.status}</td>
+        <td class="t-id">M-10${10+i}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table>`;
+</script>
+</body>
+</html>

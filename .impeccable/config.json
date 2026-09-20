@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "open sans",
+        "createdAt": "2026-09-05T05:38:28.572Z",
+        "reason": "user confirmed: chose option A, native iMIS palette and typography govern. These are Orion's own faces, imported identically by 99-Orion.css; diverging would split the type system from every un-themed iMIS screen."
+      },
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-09-05T05:38:28.782Z",
+        "reason": "user confirmed: chose option A, native iMIS palette and typography govern. These are Orion's own faces, imported identically by 99-Orion.css; diverging would split the type system from every un-themed iMIS screen."
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-09-05T05:38:28.971Z",
+        "reason": "user confirmed: chose option A, native iMIS palette and typography govern. These are Orion's own faces, imported identically by 99-Orion.css; diverging would split the type system from every un-themed iMIS screen."
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "UT-theme.css"
+        ],
+        "createdAt": "2026-09-05T05:50:17.291Z",
+        "reason": "Not authored here: .callout-gradient-text and .callout2-gradient-text are Orion's own classes (Orion-99.css lines 469/474), reproduced verbatim except that the literals are swapped for tokens so a client rebrand recolours them too. Deleting them would hand the callouts back to Orion's hardcoded cyan/orange and break the per-client story."
+      }
+    ]
+  }
+}

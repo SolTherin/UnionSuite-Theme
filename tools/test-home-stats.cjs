@@ -1,0 +1,46 @@
+const path=require('node:path'),assert=require('node:assert/strict'),fs=require('node:fs');
+const {pathToFileURL}=require('node:url'),{chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
+(async()=>{
+  const browser=await chromium.launch({channel:'msedge',headless:true});
+  try{
+    const page=await browser.newPage({viewport:{width:1440,height:1200}}),errors=[];
+    page.on('pageerror',error=>errors.push(error.message));
+    await page.route('http**/*',route=>route.abort());
+    await page.goto(pathToFileURL(path.resolve('references/Home-Preview.html')).href);
+    await page.waitForTimeout(200);
+    assert.equal(await page.evaluate(()=>window.__membershipExampleCalls.length),0,'hidden Stats makes no queries');
+    await page.getByRole('tab',{name:'Stats',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('[data-us-membership="summary"]').dataset.usMembershipState==='ready');
+    await page.locator('[data-us-membership="categories"]').scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>document.querySelectorAll('[data-us-membership-state="ready"]').length===4);
+    assert.deepEqual(await page.locator('.us-membership__metric > strong').allTextContents(),['83,084','7,227','8','1']);
+    assert.match(await page.locator('.us-membership__metric > p').nth(2).innerText(),/\+7 \(\+700.0%\)\s*vs 1–13 Aug/);
+    assert.match(await page.locator('.us-membership__metric > p').nth(3).innerText(),/0 \(0.0%\)\s*vs 1–13 Aug/);
+    assert.equal(await page.locator('.us-membership__metric > p').first().innerText(),'Current membership');
+    assert.equal(await page.evaluate(()=>window.__membershipExampleCalls.length),8,'four cards share eight distinct requests');
+    assert.deepEqual(await page.locator('.us-membership__legend dd').allTextContents(),['7,227','55,241','20,616']);
+    assert.equal(await page.locator('.us-membership__legend dt').last().innerText(),'(empty)');
+    assert.deepEqual(await page.locator('[data-us-membership="groups"] tfoot td').allTextContents(),['83,084','8','1','+7']);
+    assert.equal(await page.locator('[data-us-membership="groups"] tbody tr').last().locator('td').first().innerText(),'80,699');
+    assert.deepEqual(await page.locator('.us-membership__bars dd').evaluateAll(nodes=>nodes.map(n=>n.firstChild.textContent)),['83,080','2','1','1']);
+    assert(await page.locator('.us-membership__donut').evaluate(n=>getComputedStyle(n).backgroundImage.startsWith('conic-gradient')),'chart tokens resolve');
+    assert(await page.getByText('Membership history coming soon').isVisible());
+    assert.equal(await page.locator('.home-stats select,.home-stats a,.home-stats-chart').count(),0,'no drilldowns, selectors or fake trend');
+    await page.getByRole('tab',{name:'Tasks',exact:true}).click();
+    assert.equal(await page.locator('.home-stats').isVisible(),false);
+    await page.getByRole('tab',{name:'Stats',exact:true}).click();
+    await page.waitForTimeout(180);
+    assert.equal(await page.evaluate(()=>window.__membershipExampleCalls.length),8,'tab revisits reuse results');
+    const bottoms=await page.locator('.home-stats-grid > .us-membership').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().bottom));
+    assert(Math.abs(bottoms[0]-bottoms[1])<1&&Math.abs(bottoms[2]-bottoms[3])<1,'both prototype pairs have matching bottoms');
+    await page.evaluate(()=>scrollTo(0,0));
+    fs.mkdirSync('.preview',{recursive:true});
+    await page.screenshot({path:'.preview/home-stats-desktop.png',fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no page overflow on mobile');
+    assert(await page.locator('.us-membership__table-scroll').evaluate(n=>n.scrollWidth>n.clientWidth),'wide table scrolls within card');
+    await page.screenshot({path:'.preview/home-stats-mobile.png',fullPage:true});
+    assert.deepEqual(errors,[]);
+    console.log('PASS home Stats: verified counts, reconciliation, lazy queries, cache, placeholder, responsive layout.');
+  }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

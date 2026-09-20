@@ -1,0 +1,47 @@
+<!-- Source template. Build inlines local CSS/JS to match the native HubForms editor pattern. -->
+<style>{{CONFIG_CSS}}</style>
+<div class="us-cco-config ng-non-bindable" data-us-cco-config>
+  <fieldset>
+    <legend>UnionSuite CCO settings - sandbox trial</legend>
+    <label>Find a content folder
+      <input data-folder-search type="search" autocomplete="off" placeholder="Filepath contains...">
+      <small>Search by part of the folder path, or choose Find folders with a blank search to browse the first 20 results.</small>
+    </label>
+    <button type="button" data-find-folders>Find folders</button>
+    <p data-folder-search-status role="status" aria-live="polite"></p>
+    <ul data-folder-search-results aria-label="Matching content folders"></ul>
+    <label>Folder document-version key
+      <input data-setting="folderDocumentVersionId" type="text" aria-required="true" autocomplete="off" spellcheck="false">
+      <small>Use the folder's DocumentVersionId from iMIS. A path or DocumentId cannot replace it.</small>
+    </label>
+    <label>Folder path label
+      <input data-setting="folderPathLabel" type="text" maxlength="500">
+      <small>Optional label for authors; requests use the key above.</small>
+    </label>
+    <label>Collection caption <input data-setting="caption" type="text" maxlength="120"></label>
+    <label>Tab URL parameter <input data-setting="urlParameter" type="text" maxlength="60" placeholder="Directory">
+      <small>Optional. Blank keeps the automatic placement parameter. Use a unique name for each CCO on the page.</small>
+    </label>
+    <label>Tab URL value
+      <select data-setting="urlValue"><option value="name">Tab name (default) - Directory=About</option><option value="key">Document key (stable)</option><option value="number">Tab number - Directory=1</option></select>
+      <small>Chooses the value written when a tab is clicked. Names use dashes for spaces: Directory=Notes-and-Interactions. Incoming links accept keys, names (spaces or dashes) and 1-based tab numbers. Ambiguous names use document keys when writing links.</small>
+    </label>
+    <label>Initial page document-version key
+      <input data-setting="initialDocumentVersionId" type="text" autocomplete="off" spellcheck="false">
+      <small>Optional. Leave blank to select the first available page sorted by Name. A valid tab deep link takes priority.</small>
+    </label>
+    <label>Background loading
+      <select data-setting="preload"><option value="off">Off - selected page only</option><option value="sequential-idle">Trial - preload sequentially after the selected page</option></select>
+    </label>
+    <label>Tab layout
+      <select data-setting="orientation"><option value="vertical">Vertical - theme CCO sidebar</option><option value="horizontal">Horizontal - theme tabs</option></select>
+      <small>Uses the installed UnionSuite theme. Vertical tabs become a horizontal strip on narrow screens.</small>
+    </label>
+    <label><input data-setting="popupBridge" type="checkbox"> Trial - open supported dialogs in the parent viewport</label>
+    <p>The content preview route and permissions require live validation for each intended role. Nested folders are omitted. Retained pages keep their own forms and search state.</p>
+    <button type="button" data-check-folder>Check folder contents</button>
+    <p data-config-status role="status" aria-live="polite">Waiting for the native JsonSettings field...</p>
+    <ol data-folder-results></ol>
+  </fieldset>
+</div>
+<script data-cfasync="false">{{CONFIG_JS}}</script>

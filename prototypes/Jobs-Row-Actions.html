@@ -1,0 +1,13 @@
+<!-- Inner controls for the existing SQL-generated Edit/Delete columns.
+     Literal example values below are NOT Query Template substitutions.
+     Retain your SQL's existing eligibility rule for emitting Delete.
+     data-id = member/party ID; data-seqn = stored job ordinal;
+     data-workplace = workplace ID (required for Edit).
+     Emit/HTML-encode these values from the row. Do not use ROW_NUMBER as a key.
+     Load zUnionSuite.js and Scripts/ActionDefinitions.js once in the theme.
+     Remove the previous onclick and any other handler for the converted control.
+     No generated td, iPart wrapper or DOM ID is required by the action registry. -->
+<button type="button" class="us-action-jobs-edit"
+        data-id="103885" data-seqn="22" data-workplace="103842">Edit job</button>
+<button type="button" class="us-action-jobs-delete"
+        data-id="103885" data-seqn="22">Delete job</button>

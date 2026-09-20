@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — The "do not click" button (H1)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+/* ── About screen (the safe placement) ──────────────────────────────────── */
+.eg-about { padding: var(--space-8) var(--card-pad-x); text-align: center; position: relative; }
+.eg-about__logo {
+  width: 52px; height: 52px; margin: 0 auto var(--space-4);
+  border-radius: var(--radius-lg); background: var(--brand-800);
+  display: grid; place-items: center;
+}
+.eg-about__logo svg { width: 30px; height: 30px; }
+.eg-about__name {
+  font-family: var(--font-display); font-size: var(--fs-xl); font-weight: var(--fw-bold);
+  color: var(--text-strong); margin: 0 0 4px;
+}
+.eg-about__ver { font-family: var(--face-mono); font-size: var(--fs-xs); color: var(--text-muted); margin: 0 0 var(--space-6); }
+.eg-about__grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3); max-width: 560px; margin: 0 auto;
+  text-align: left;
+}
+.eg-about__cell {
+  background: var(--bg-subtle); border-radius: var(--radius-sm); padding: var(--space-3);
+}
+.eg-about__cell dt {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-semi);
+  letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px;
+}
+.eg-about__cell dd { margin: 0; font-size: var(--fs-sm); color: var(--text-base); font-family: var(--face-mono); }
+
+/* ── The planted button ─────────────────────────────────────────────────── */
+.eg-slot { min-height: 86px; display: grid; place-items: center; margin-top: var(--space-6); }
+
+.eg-dnc {
+  position: relative;
+  font-family: var(--face-mono);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  /* Deliberately NOT the primary button style. The joke depends on it looking
+     planted rather than official — see the note below. */
+  background: repeating-linear-gradient(45deg, var(--warning-bg) 0 8px, var(--bg-surface) 8px 16px);
+  border: 1.5px dashed var(--warning);
+  color: var(--warning);
+  animation: eg-appear .5s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes eg-appear { from { opacity: 0; transform: scale(.9) translateY(6px); } to { opacity: 1; transform: none; } }
+.eg-dnc:hover { animation: eg-tempt .4s ease-in-out infinite; }
+@keyframes eg-tempt {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-1.1deg); }
+  75%      { transform: rotate(1.1deg); }
+}
+.eg-dnc:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.eg-dnc.is-going { animation: eg-pop .3s cubic-bezier(.4,0,.9,.4) forwards; pointer-events: none; }
+@keyframes eg-pop { to { opacity: 0; transform: scale(.55); } }
+
+.eg-reward { text-align: center; animation: eg-reward-in .45s cubic-bezier(.2,.7,.3,1) both; }
+.eg-reward__line {
+  font-family: var(--font-display); font-size: var(--fs-xl); font-weight: var(--fw-bold);
+  color: var(--text-strong); margin: 0 0 var(--space-2);
+}
+.eg-reward__sub { margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
+@keyframes eg-reward-in { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+
+.eg-burst { position: fixed; inset: 0; pointer-events: none; z-index: var(--z-modal); overflow: hidden; }
+.eg-spark {
+  position: absolute; width: 7px; height: 7px; border-radius: 50%;
+  animation: eg-spark var(--dur, 800ms) cubic-bezier(.1,.6,.4,1) forwards;
+}
+@keyframes eg-spark {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eg-dnc, .eg-reward { animation: none; }
+  .eg-dnc:hover { animation: none; }
+  .eg-spark { display: none !important; }
+}
+.rm .eg-spark { display: none !important; }
+.rm .eg-dnc:hover { animation: none; }
+
+/* ── The "never here" contrast ──────────────────────────────────────────── */
+.eg-record {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--card-pad-y) var(--card-pad-x);
+}
+.eg-record__top { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.eg-avatar {
+  width: 40px; height: 40px; border-radius: var(--radius-pill); background: var(--brand-100);
+  color: var(--brand-800); display: grid; place-items: center;
+  font-family: var(--font-display); font-size: var(--fs-sm); font-weight: var(--fw-bold);
+}
+.eg-record__name { margin: 0; font-family: var(--font-display); font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--text-strong); }
+.eg-record__sub { margin: 0; font-size: var(--fs-xs); color: var(--text-muted); font-family: var(--face-mono); }
+.eg-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+.eg-btn {
+  font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: var(--fw-medium);
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+  border: 1px solid var(--brand-600); background: var(--brand-600); color: var(--white);
+}
+.eg-btn--ghost { background: transparent; color: var(--text-link); }
+.eg-btn--danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.eg-ghostbtn {
+  font-family: var(--face-mono); font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-5); border-radius: var(--radius-sm);
+  background: repeating-linear-gradient(45deg, var(--danger-bg) 0 8px, var(--bg-surface) 8px 16px);
+  border: 1.5px dashed var(--danger); color: var(--danger);
+  opacity: .85;
+}
+.eg-verdict {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-3); padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm); font-size: var(--fs-sm);
+}
+.eg-verdict[data-ok="no"]  { background: var(--danger-bg);  color: var(--text-strong); }
+.eg-verdict[data-ok="yes"] { background: var(--success-bg); color: var(--text-strong); }
+.eg-verdict b { font-family: var(--font-ui); font-size: var(--fs-2xs); letter-spacing: .06em; text-transform: uppercase; }
+.eg-verdict[data-ok="no"] b  { color: var(--danger); }
+.eg-verdict[data-ok="yes"] b { color: var(--success); }
+
+.eg-seen {
+  font-family: var(--face-mono); font-size: var(--fs-xs); color: var(--text-faint);
+  margin-top: var(--space-4);
+}
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · H1</p>
+    <h1>The "do not click" button</h1>
+    <p>The highest-risk idea in the register, and the only one that <strong>plants a control
+       that isn't really there</strong>. Everything else decorates a state the product already
+       produces; this one adds a thing, and to a staff member an unexplained button in a CRM is
+       indistinguishable from a bug until they click it.</p>
+    <p>So the mockup is really about <em>placement</em>. Click the button. Then look at the
+       second panel, which is the same button somewhere it must never go.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="watch">Risk: highest in the register</span>
+      <span class="mk-tag" data-risk="watch">Conflicts with phishing training</span>
+      <span class="mk-tag">Once per user, ever</span>
+    </div>
+  </header>
+
+  <section class="mk-stage">
+    <div class="mk-controls">
+      <button class="mk-btn" type="button" id="egPlant">Plant it again</button>
+      <button class="mk-btn" type="button" id="egRm" aria-pressed="false">Simulate reduced motion: off</button>
+    </div>
+
+    <p class="mk-label">Safe placement — the About screen <span>Non-transactional. Nothing here can change a member, a payment or a status.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="eg-about">
+          <div class="eg-about__logo">
+            <svg viewBox="0 0 200 180" aria-hidden="true">
+              <rect x="34" y="24" width="132" height="140" rx="24" fill="rgba(255,255,255,.94)"/>
+              <circle cx="76" cy="80" r="16" fill="var(--brand-900)"/>
+              <circle cx="124" cy="80" r="16" fill="var(--brand-900)"/>
+              <path d="M86 116q14 10 28 0" fill="none" stroke="var(--brand-900)" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h2 class="eg-about__name">Union Suite</h2>
+          <p class="eg-about__ver">Theme 4.2.1 · iMIS 2017.x · build 8f21c0a</p>
+
+          <div class="eg-about__grid">
+            <dl class="eg-about__cell"><dt>Instance</dt><dd>metro-north-prod</dd></dl>
+            <dl class="eg-about__cell"><dt>Last deployed</dt><dd>2026-09-08</dd></dl>
+            <dl class="eg-about__cell"><dt>Support</dt><dd>servicedesk@</dd></dl>
+          </div>
+
+          <div class="eg-slot" id="egSlot"></div>
+          <p class="eg-seen" id="egSeen">delight.h1.seen = false</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mk-note"><strong>Why it is styled like that.</strong> Hazard stripes and a dashed
+       border, not the primary button treatment. The joke only works if it reads as
+       <em>planted</em> — a thing that has wandered in. A "do not click" button wearing the
+       product's real primary styling is genuinely indistinguishable from a control of record,
+       and that is the version that generates a support ticket instead of a smile.</p>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">Never here — a member record <span>Same button, wrong room.</span></p>
+    <div class="mk-frame">
+      <div class="eg-record">
+        <div class="eg-record__top">
+          <span class="eg-avatar" aria-hidden="true">MO</span>
+          <div>
+            <p class="eg-record__name">Mary O'Brien</p>
+            <p class="eg-record__sub">M000914 · Life member · editing</p>
+          </div>
+        </div>
+        <div class="eg-actions">
+          <button class="eg-btn" type="button" disabled>Save changes</button>
+          <button class="eg-btn eg-btn--ghost" type="button" disabled>Cancel</button>
+          <button class="eg-btn eg-btn--danger" type="button" disabled>Delete record</button>
+          <span class="eg-ghostbtn" aria-hidden="true">Do not click</span>
+        </div>
+        <p class="eg-verdict" data-ok="no"><b>Never</b>
+           <span>A joke button sitting beside "Delete record" on a live member. Even if it does
+           nothing, the user cannot know that before clicking, and the thing next to it is
+           irreversible.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mk-stage">
+    <p class="mk-label">The conflict worth raising before anyone builds this</p>
+    <div class="mk-frame">
+      <div class="us-panel"><div class="us-panel__body" style="font-size:var(--fs-sm);color:var(--text-base)">
+        <p style="margin:0 0 var(--space-3)">Organisations run phishing simulations and tell
+           staff, in as many words, <em>do not click unexpected things</em>. This egg rewards
+           someone for clicking an unexpected button, in the same building, on the same week.
+           The person who reports it to IT as suspicious is the person who did exactly what
+           they were trained to do — and they will feel silly, which is the opposite of the
+           intended effect.</p>
+        <p style="margin:0 0 var(--space-3)">Three things make that manageable, and they are
+           all design decisions rather than code:</p>
+        <ol style="margin:0 0 var(--space-4);padding-left:1.2em;display:grid;gap:8px">
+          <li><strong>The payoff carries the reassurance.</strong> "Nothing happened. Nothing
+              was going to." is the second line for a reason — it answers the only question the
+              user actually has.</li>
+          <li><strong>It confesses that it is deliberate.</strong> The moment it resolves, the
+              user knows a person put it there. An egg that stays mysterious here is an egg
+              that gets logged as an incident.</li>
+          <li><strong>The service desk is told it exists.</strong> The first ticket will be
+              "there is a strange button on the About page", and somebody should already have
+              the answer rather than opening an investigation.</li>
+        </ol>
+        <div class="eg-verdict" data-ok="yes"><b>Recommendation</b>
+          <span>Ship it on the About screen, once per user, exactly as mocked. That keeps the
+          delight and removes every version of "did I just break something?"</span></div>
+      </div></div>
+    </div>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+
+<div class="eg-burst" id="egBurst" aria-hidden="true"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var slot   = document.getElementById('egSlot');
+  var seenEl = document.getElementById('egSeen');
+  var burst  = document.getElementById('egBurst');
+  var plant  = document.getElementById('egPlant');
+  var rmBtn  = document.getElementById('egRm');
+
+  var COLOURS = ['var(--accent-600)', 'var(--teal-400)', 'var(--status-green-fill)',
+                 'var(--accent-500)', 'var(--status-purple)'];
+
+  function sparks(el) {
+    if (document.body.classList.contains('rm')) { return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    var box = el.getBoundingClientRect();
+    var cx = box.left + box.width / 2;
+    var cy = box.top + box.height / 2;
+    var i, n = 26;
+    for (i = 0; i < n; i++) {
+      var s = document.createElement('span');
+      var ang = (Math.PI * 2 * i) / n + Math.random() * .4;
+      var mag = 50 + Math.random() * 130;
+      s.className = 'eg-spark';
+      s.style.left = cx + 'px';
+      s.style.top  = cy + 'px';
+      s.style.background = COLOURS[i % COLOURS.length];
+      s.style.setProperty('--dx', (Math.cos(ang) * mag).toFixed(1) + 'px');
+      s.style.setProperty('--dy', (Math.sin(ang) * mag).toFixed(1) + 'px');
+      s.style.setProperty('--dur', (650 + Math.random() * 450).toFixed(0) + 'ms');
+      burst.appendChild(s);
+      s.addEventListener('animationend', function () { this.remove(); });
+    }
+  }
+
+  function reward() {
+    var box = document.createElement('div');
+    box.className = 'eg-reward';
+    box.setAttribute('role', 'status');
+    box.innerHTML = '<p class="eg-reward__line">You rebel. I like you.</p>' +
+                    '<p class="eg-reward__sub">Nothing happened. Nothing was going to.</p>';
+    slot.innerHTML = '';
+    slot.appendChild(box);
+    seenEl.textContent = 'delight.h1.seen = true   // never shown to this user again';
+  }
+
+  function makeButton() {
+    slot.innerHTML = '';
+    seenEl.textContent = 'delight.h1.seen = false';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'eg-dnc';
+    b.textContent = 'Do not click';
+    b.addEventListener('click', function () {
+      /* It does nothing. No request, no navigation, no state change —
+         it shows a message and deletes itself. */
+      sparks(b);
+      b.classList.add('is-going');
+      setTimeout(reward, 260);
+    });
+    slot.appendChild(b);
+  }
+
+  plant.addEventListener('click', makeButton);
+
+  rmBtn.addEventListener('click', function () {
+    var on = document.body.classList.toggle('rm');
+    rmBtn.setAttribute('aria-pressed', String(on));
+    rmBtn.textContent = 'Simulate reduced motion: ' + (on ? 'on' : 'off');
+  });
+
+  /* Appears a beat after the page settles, the way it would in the product. */
+  setTimeout(makeButton, 700);
+}());
+</script>
+</body>
+</html>

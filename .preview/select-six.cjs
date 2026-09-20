@@ -1,0 +1,6 @@
+const fs=require('fs'),p='tools/build-tab-family-comparison.cjs';let s=fs.readFileSync(p,'utf8');
+s=s.replace("const explorations=variations.map",`const selectedSix='<section class="exploration selected-six" id="selected-six"><div class="caption"><small>Selected direction — option 6</small><h2>Option 6 · compact selection</h2><p>Original segmented shape with inset shading while pressed. Matching banner tabs use neutral selection without a coloured accent.</p></div><div class="contexts">'+context('banner','six-banner')+context('horizontal','six-h')+context('vertical','six-v')+'</div></section>';\nconst explorations=variations.map`);
+s=s.replace('<p class="jump"><strong>Accent exploration:</strong>','<p class="jump"><a href="#selected-six"><strong>Selected: option 6 in context</strong></a><br><strong>Archived accent exploration:</strong>');
+s=s.replace('<div class="comparison">'+String.fromCharCode(36)+'{cards.map',''+String.fromCharCode(36)+'{selectedSix}<details><summary>Earlier comparisons and alternatives</summary><div class="comparison">'+String.fromCharCode(36)+'{cards.map');
+s=s.replace(String.fromCharCode(36)+'{explorations}<aside>',String.fromCharCode(36)+'{explorations}</details><aside>');
+fs.writeFileSync(p,s);

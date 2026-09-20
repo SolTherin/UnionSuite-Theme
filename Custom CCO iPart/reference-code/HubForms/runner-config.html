@@ -1,0 +1,279 @@
+<!--
+  HubForms runner — Client-based Content Type configuration page (production).
+
+  Host this file on an iMIS-server-reachable CDN (R2 or equivalent) and set its
+  direct URL as the Content Type's "URL to configure content items". It lists the
+  published, active forms from i4u_UT_Form and stores ONLY the stable FormID GUID
+  in iMIS's #JsonSettings field. The Pages /embed/ runner resolves that setting at
+  runtime. No viewer-facing ?formId= exists — selection is config-only, by design.
+
+  Definition + deploy steps: infra/iparts/README.md.
+-->
+<style>
+  .hubforms-p15-config {
+    margin: 12px 0;
+    color: #1f2937;
+    font:
+      14px/1.45 -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
+  }
+  .hubforms-p15-config * {
+    box-sizing: border-box;
+  }
+  .hubforms-p15-config fieldset {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+  }
+  .hubforms-p15-config legend,
+  .hubforms-p15-config label {
+    font-weight: 600;
+  }
+  .hubforms-p15-config select {
+    width: min(100%, 560px);
+    margin-top: 6px;
+    padding: 7px 9px;
+  }
+  .hubforms-p15-config .hf-config-status {
+    margin: 8px 0 0;
+    color: #475569;
+  }
+  .hubforms-p15-config .hf-config-error {
+    color: #b91c1c;
+  }
+  .hubforms-p15-config .hf-config-context {
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+</style>
+
+<div class="hubforms-p15-config">
+  <fieldset>
+    <legend>HubForms settings</legend>
+    <label>
+      Published form
+      <br />
+      <select class="hf-form-select" disabled>
+        <option value="">Loading published forms...</option>
+      </select>
+    </label>
+    <p class="hf-config-status" role="status">Loading forms from iMIS...</p>
+    <div class="hf-config-context"></div>
+  </fieldset>
+</div>
+
+<script>
+  (function (bootScript) {
+    'use strict';
+
+    var mount = bootScript && bootScript.previousElementSibling;
+    if (!mount || !mount.classList.contains('hubforms-p15-config')) return;
+    if (mount.getAttribute('data-config-started') === 'true') return;
+    mount.setAttribute('data-config-started', 'true');
+
+    var PREFIX = '[HubForms config]';
+    var select = mount.querySelector('.hf-form-select');
+    var status = mount.querySelector('.hf-config-status');
+    var context = mount.querySelector('.hf-config-context');
+    var query = new URLSearchParams(window.location.search);
+    var contentItemKey = query.get('ContentItemKey') || '';
+    var contentKey = query.get('ContentKey') || '';
+    var settings = {};
+    var hookedButtons = [];
+
+    function token() {
+      var byId = document.getElementById('__RequestVerificationToken');
+      var byName = document.querySelector('input[name="__RequestVerificationToken"]');
+      return (byId && byId.value) || (byName && byName.value) || '';
+    }
+
+    function unwrap(value) {
+      return value && typeof value === 'object' && '$value' in value ? value.$value : value;
+    }
+
+    function prop(item, name) {
+      var properties = item && item.Properties && item.Properties['$values'];
+      if (!Array.isArray(properties)) return null;
+      for (var index = 0; index < properties.length; index += 1) {
+        if (properties[index] && properties[index].Name === name) {
+          return unwrap(properties[index].Value);
+        }
+      }
+      return null;
+    }
+
+    function readSettings() {
+      var field = document.getElementById('JsonSettings');
+      var raw = field && 'value' in field ? field.value : '';
+      if (!raw) return {};
+      try {
+        var parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch (_) {
+        status.className = 'hf-config-status hf-config-error';
+        status.textContent =
+          'The existing JsonSettings value is invalid JSON; it was not overwritten.';
+        return null;
+      }
+    }
+
+    function storeSelection() {
+      var field = document.getElementById('JsonSettings');
+      if (!field || !('value' in field) || settings === null) return false;
+      var value = select.value || '';
+      if (value) settings.formId = value;
+      else delete settings.formId;
+      // Form names can change. Persist only the stable external identifier.
+      delete settings.formName;
+      field.value = JSON.stringify(settings);
+      var selected = select.options[select.selectedIndex];
+      var nameField = document.getElementById(
+        'ctl01_TemplateBody_ContentEditorChildControl_ContentItemName_TextField',
+      );
+      if (nameField && value && selected) nameField.value = selected.text;
+      console.log(PREFIX, 'stored selection', {
+        formId: value,
+        contentItemKey: contentItemKey,
+        contentKey: contentKey,
+      });
+      return true;
+    }
+
+    function hookSaveButtons() {
+      ['ctl01_SaveButton', 'ctl01_SaveAndCloseButton'].forEach(function (id) {
+        var button = document.getElementById(id);
+        if (!button || hookedButtons.indexOf(button) !== -1) return;
+        button.addEventListener('click', storeSelection, true);
+        hookedButtons.push(button);
+      });
+    }
+
+    function validGuid(value) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        String(value || ''),
+      );
+    }
+
+    function availableForms(body) {
+      var items = body && body.Items;
+      if (items && !Array.isArray(items)) items = items['$values'];
+      if (!Array.isArray(items) && Array.isArray(body)) items = body;
+      if (!Array.isArray(items)) return [];
+      var forms = items.map(function (item) {
+        return {
+          formId: String(prop(item, 'FormID') || ''),
+          name: String(prop(item, 'Name') || ''),
+          status: String(prop(item, 'Status') || ''),
+          releaseId: String(prop(item, 'CurrentReleaseVersionID') || ''),
+        };
+      });
+      var counts = forms.reduce(function (result, form) {
+        if (validGuid(form.formId)) result[form.formId] = (result[form.formId] || 0) + 1;
+        return result;
+      }, {});
+      return forms
+        .filter(function (form) {
+          return (
+            validGuid(form.formId) &&
+            form.name &&
+            form.status === 'Active' &&
+            form.releaseId &&
+            counts[form.formId] === 1
+          );
+        })
+        .sort(function (left, right) {
+          return left.name.localeCompare(right.name);
+        });
+    }
+
+    function renderForms(forms) {
+      var configured = settings && settings.formId ? String(settings.formId) : '';
+      select.textContent = '';
+      select.appendChild(new Option('-- Select a published form --', ''));
+      forms.forEach(function (form) {
+        select.appendChild(new Option(form.name, form.formId));
+      });
+      if (
+        configured &&
+        !forms.some(function (form) {
+          return form.formId === configured;
+        })
+      ) {
+        select.appendChild(
+          new Option('Previously selected form (currently unavailable)', configured),
+        );
+      }
+      select.value = configured;
+      select.disabled = false;
+      status.className = 'hf-config-status';
+      status.textContent = forms.length
+        ? forms.length + ' published form' + (forms.length === 1 ? '' : 's') + ' available.'
+        : 'No published, active forms are currently available.';
+    }
+
+    async function fetchAllForms() {
+      var items = [];
+      var offset = 0;
+      for (var page = 0; page < 100; page += 1) {
+        var response = await fetch('/api/i4u_UT_Form?Limit=200&Offset=' + offset, {
+          credentials: 'same-origin',
+          headers: token()
+            ? { RequestVerificationToken: token(), Accept: 'application/json' }
+            : { Accept: 'application/json' },
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        var body = await response.json();
+        var pageItems = body && body.Items;
+        if (pageItems && !Array.isArray(pageItems)) pageItems = pageItems['$values'];
+        if (!Array.isArray(pageItems) && Array.isArray(body)) pageItems = body;
+        if (Array.isArray(pageItems)) items = items.concat(pageItems);
+        if (!body || !body.HasNext) break;
+        var nextOffset = Number(body.NextOffset);
+        if (!isFinite(nextOffset) || nextOffset <= offset) {
+          throw new Error('invalid pagination response');
+        }
+        offset = nextOffset;
+      }
+      return { Items: { $values: items } };
+    }
+
+    function initialise() {
+      hookSaveButtons();
+      if (settings !== null && Object.keys(settings).length === 0) settings = readSettings();
+    }
+
+    context.textContent =
+      'ContentItemKey: ' +
+      (contentItemKey || 'not supplied') +
+      ' | ContentKey: ' +
+      (contentKey || 'not supplied');
+    settings = readSettings();
+    hookSaveButtons();
+    select.addEventListener('change', storeSelection);
+
+    if (window.Sys && window.Sys.Application && window.Sys.Application.add_load) {
+      window.Sys.Application.add_load(initialise);
+    }
+
+    fetchAllForms()
+      .then(function (body) {
+        renderForms(availableForms(body));
+        console.log(PREFIX, 'form selector ready', {
+          available: select.options.length - 1,
+          configuredFormId: settings && settings.formId ? String(settings.formId) : '',
+        });
+      })
+      .catch(function (error) {
+        select.textContent = '';
+        select.appendChild(new Option('Unable to load forms', ''));
+        status.className = 'hf-config-status hf-config-error';
+        status.textContent = 'Could not load the published-form list (' + error.message + ').';
+        console.warn(PREFIX, 'form list failed', error);
+      });
+  })(document.currentScript);
+</script>

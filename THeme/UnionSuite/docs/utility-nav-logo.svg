@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60">
+  <rect x="0" y="10" width="40" height="40" rx="8" fill="#003a4c"/>
+  <path d="M11 21v13a9 9 0 0 0 18 0V21" fill="none" stroke="#fff" stroke-width="4"/>
+  <text x="52" y="32" fill="#003a4c" font-family="Arial,sans-serif" font-size="20" font-weight="700">Client logo</text>
+  <text x="52" y="47" fill="#545962" font-family="Arial,sans-serif" font-size="10">OFFLINE SAMPLE</text>
+</svg>

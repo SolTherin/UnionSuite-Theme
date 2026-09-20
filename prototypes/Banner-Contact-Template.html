@@ -1,0 +1,30 @@
+<!-- Query Template Display iPart. CSS class: us-banner us-banner-collapsible
+     Optional page CSS class: us-banner-page
+     Load zUnionSuite.css and zUnionSuite.js from the shared theme.
+     The separate banner embed is only a generated legacy fallback.
+     Replace bracketed placeholders using this query's field substitution.
+     Return one row for the current record. Brackets are not IQA syntax.
+     Quick Actions requires the site popup functions. Optional tabs are in Banner-Template.html.
+     StatusColour must return #RRGGBB; StatusDescription is plain text. Rename these IQA aliases as needed. -->
+<header class="us-banner__surface us-banner__surface--member" data-us-status-colour="{#query.StatusColour}">
+  <div class="us-banner__summary">
+    <div class="us-banner__identity">
+      <span class="us-banner__eyebrow">Contact · [Contact ID]</span>
+      <h1 class="us-banner__title">[Full name]</h1>
+      <p class="us-banner__subtitle">[Member type] · Member since [Join date]</p>
+    </div>
+    <div class="us-banner__status">
+      <span class="us-banner__badge us-banner__badge--member-status">{#query.StatusDescription}</span>
+    </div>
+    <div class="us-banner__actions"><div class="us-actions"><button type="button" class="us-actions__toggle">Quick Actions</button><ul class="us-actions__list"><li class="dropdown-header">Communication</li><li><button type="button" class="us-actions__item us-action-member-email">Email Member</button></li><li><button type="button" class="us-actions__item us-action-member-sms">SMS Member</button></li><li class="divider"></li><li class="dropdown-header">Member records</li><li><button type="button" class="us-actions__item us-action-member-add-note">Add Note</button></li><li><button type="button" class="us-actions__item us-action-member-add-job">Add New Job</button></li></ul></div></div>
+  </div>
+  <div class="us-banner__details">
+    <dl class="us-banner__facts">
+      <div class="us-banner__fact"><dt>Email</dt><dd>[Email address]</dd></div>
+      <div class="us-banner__fact"><dt>Mobile</dt><dd>[Mobile number]</dd></div>
+      <div class="us-banner__fact"><dt>Employer</dt><dd>[Employer name]</dd></div>
+      <div class="us-banner__fact"><dt>Branch</dt><dd>[Branch name]</dd></div>
+      <div class="us-banner__fact"><dt>Organiser</dt><dd>[Organiser name]</dd></div>
+    </dl>
+  </div>
+</header>

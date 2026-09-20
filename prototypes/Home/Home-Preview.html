@@ -1,0 +1,44 @@
+<!-- Prototype source. Generated iMIS wrappers below are fixtures, not author templates. -->
+<div class="home-preview-tools" aria-label="Prototype controls">
+  <span><strong>Home page</strong> <span class="home-preview-tag">Layout trial · sample data</span></span>
+  <button type="button" id="empty-preview" aria-pressed="false">Preview empty tasks</button>
+</div>
+<main class="home-layout" id="home-main">
+  {{WELCOME}}
+  <div class="home-section-navigation us-section-navigation"><div class="us-section-tabs" data-us-tabs="home" data-us-tab-adapter="page-sections" aria-label="Home sections">
+    <button type="button" data-us-tab="tasks" class="is-active">Tasks</button>
+    <button type="button" data-us-tab="search">Search</button>
+    <button type="button" data-us-tab="stats">Stats</button>
+  </div></div>
+  <div class="home-columns us-tab-panel us-tabset-home us-tab-tasks">
+    <div class="home-work">
+      <div class="ContentItemContainer home-attention-host">{{ATTENTION}}</div>
+      <div class="ContentItemContainer home-task-host">
+      <div id="home-task-ipart" class="us-query-search us-task-completed-filter us-action-home-add-task">
+      <section class="panel home-panel home-tasks" aria-labelledby="tasks-title" aria-describedby="tasks-description">
+        <div class="panel-heading home-panel-heading">
+          <h2 class="panel-title" id="tasks-title">My tasks</h2>
+        </div>
+        <p class="home-task-description" id="tasks-description">Your outstanding tasks and those completed in the last 30 days.</p>
+        <div class="panel-body-container home-task-results home-scroll-frame">
+          <div id="task-results" class="panel-body home-scroll-area" role="region" aria-label="Task results" tabindex="0">
+            <div class="QueryTemplateSet home-task-list" id="task-list">{{TASKS}}</div>
+            <div class="home-empty" id="task-empty" hidden><span class="home-empty-icon" id="task-empty-icon" aria-hidden="true">✓</span><h3 id="task-empty-title">You’re all caught up.</h3><p id="task-empty-description">You have no outstanding tasks.</p></div>
+          </div>
+        </div>
+        <div class="home-task-footer"><span id="task-footer-count" role="status" aria-live="polite" aria-atomic="true">5 outstanding, 2 overdue</span><button type="button" class="home-text-button" id="all-tasks">View all tasks <span aria-hidden="true">→</span></button></div>
+      </section>
+      </div>
+      </div>
+    </div>
+    <aside class="home-bulletin" aria-label="Staff Bulletin">{{BULLETIN}}</aside>
+  </div>
+  <section class="home-panel home-preview-placeholder us-tab-panel us-tabset-home us-tab-search"><h2>Search</h2><p>The live page contains the custom CCO search here. Search data and the CCO are not connected in this offline layout preview.</p></section>
+  {{STATS}}
+</main>
+<dialog class="home-dialog" id="home-dialog" aria-labelledby="dialog-title">
+  <div class="home-dialog-heading"><div><span class="home-dialog-caption" id="dialog-caption">Sample task</span><h2 id="dialog-title"></h2></div><button type="button" class="home-dialog-close" aria-label="Close dialog">×</button></div>
+  <div id="dialog-content"></div>
+  <div class="home-dialog-footer"><button type="button" class="TextButton home-dialog-close">Close</button><button type="button" class="TextButton PrimaryButton" id="complete-task" hidden>Mark complete</button></div>
+</dialog>
+<p class="home-status" id="home-status" role="status"></p>

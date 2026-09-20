@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Empty states (C1, C2)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+.eg-empty {
+  padding: var(--space-8) var(--card-pad-x);
+  text-align: center;
+}
+.eg-empty__art { margin: 0 auto var(--space-4); max-width: 200px; }
+.eg-empty__art svg { display: block; width: 100%; height: auto; }
+.eg-empty__line {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semi);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-2);
+}
+.eg-empty__sub { margin: 0 auto; max-width: 42ch; font-size: var(--fs-sm); color: var(--text-muted); }
+.eg-empty__sub a { color: var(--text-link); }
+
+.eg-empty__actions { display: flex; gap: var(--space-2); justify-content: center; margin-top: var(--space-4); flex-wrap: wrap; }
+.eg-btn {
+  font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: var(--fw-medium);
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid var(--neutral-300); background: var(--bg-surface); color: var(--text-base);
+}
+.eg-btn:hover { border-color: var(--brand-600); color: var(--text-link); }
+.eg-btn--primary { background: var(--brand-600); border-color: var(--brand-600); color: var(--white); }
+.eg-btn--primary:hover { background: var(--brand-700); border-color: var(--brand-700); color: var(--white); }
+.eg-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Art palette — background weight, never competing with the line. */
+.art-line { stroke: var(--neutral-400); stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.art-soft { stroke: var(--neutral-300); stroke-width: 2; fill: none; stroke-linecap: round; }
+.art-fill { fill: var(--neutral-100); }
+
+/* Hammock sways once every 6s — slow enough to be peripheral. */
+.art-sling { transform-origin: 100px 34px; animation: eg-sway 6s ease-in-out infinite; }
+@keyframes eg-sway {
+  0%, 100% { transform: rotate(-.9deg); }
+  50%      { transform: rotate(.9deg); }
+}
+@media (prefers-reduced-motion: reduce) { .art-sling { animation: none; } }
+
+/* ── Error and pre-filter states, for contrast ──────────────────────────── */
+.eg-state-error .eg-empty__line { color: var(--danger); }
+.eg-alert {
+  display: flex; gap: var(--space-3); align-items: flex-start;
+  margin: 0; padding: var(--space-3) var(--card-pad-x);
+  background: var(--danger-bg); border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm); color: var(--text-strong); text-align: left;
+}
+.eg-alert__icon { flex: none; color: var(--danger); font-weight: var(--fw-bold); }
+
+.eg-compare { display: grid; gap: var(--space-4); grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1024px) { .eg-compare { grid-template-columns: 1fr; } }
+.eg-compare .eg-empty { padding: var(--space-6) var(--space-4); }
+.eg-compare .eg-empty__art { max-width: 120px; }
+.eg-compare .eg-empty__line { font-size: var(--fs-md); }
+.eg-verdict {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-semi);
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: var(--space-2) var(--card-pad-x); border-top: 1px solid var(--border);
+}
+.eg-verdict[data-fires="yes"] { background: var(--success-bg); color: var(--success); }
+.eg-verdict[data-fires="no"]  { background: var(--bg-sunken); color: var(--text-muted); }
+
+/* Repeat-query aside (C3) */
+.eg-aside {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  margin: 0 0 var(--space-3); padding: var(--space-2) var(--space-3);
+  background: var(--brand-50); border-left: 3px solid var(--teal-400);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--fs-sm); color: var(--text-base);
+}
+.eg-aside p { margin: 0; }
+.eg-aside code { font-family: var(--face-mono); font-size: var(--fs-xs); }
+.eg-strike { text-decoration: line-through; color: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · C1, C2, C3</p>
+    <h1>Empty states</h1>
+    <p>Two eggs that replace a state the product already has and nobody enjoys. The design
+       work here is almost entirely in the <strong>gating</strong>, not the drawing: an empty
+       state and a broken state look identical to a component and completely different to a
+       person.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag" data-risk="watch">Must distinguish empty from broken</span>
+      <span class="mk-tag">Copy-led, reuses existing states</span>
+    </div>
+  </header>
+
+  <!-- C1 -->
+  <section class="mk-stage">
+    <p class="mk-label">C1 — approvals queue, genuinely clear <span>The state you want people to reach.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head">
+          <h3 class="us-panel__title">My approvals</h3>
+          <span style="font-family:var(--font-ui);font-size:var(--fs-xs);color:var(--text-muted)">All branches · This week</span>
+        </div>
+        <div class="eg-empty">
+          <div class="eg-empty__art" aria-hidden="true">
+            <svg viewBox="0 0 200 110" role="img">
+              <!-- posts -->
+              <path class="art-line" d="M22 96V22M178 96V22"/>
+              <path class="art-soft" d="M10 96h24M166 96h24"/>
+              <!-- sling -->
+              <g class="art-sling">
+                <path class="art-line" d="M22 34c26 6 40 8 78 8s52-2 78-8"/>
+                <path class="art-fill" d="M22 34c26 6 40 8 78 8s52-2 78-8c-8 34-38 52-78 52S30 68 22 34z"/>
+                <path class="art-line" d="M22 34c-8 34 38 52 78 52s86-18 78-52"/>
+                <path class="art-soft" d="M46 44c-3 14-1 22 4 28M78 50c-3 16-2 24 2 30M122 50c3 16 2 24-2 30M154 44c3 14 1 22-4 28"/>
+              </g>
+            </svg>
+          </div>
+          <p class="eg-empty__line">Nothing to approve. Suspicious.</p>
+          <p class="eg-empty__sub">Your queue is clear. Items arrive here when a branch officer
+             submits a membership change, a refund, or a bulk update.</p>
+          <div class="eg-empty__actions">
+            <button class="eg-btn" type="button">View all branches</button>
+            <button class="eg-btn" type="button">Approval history</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> The explanatory subtitle stays. The joke
+       replaces "No items", not the information — a new starter seeing this screen on day one
+       still needs to learn what lands in the queue and why. The hammock sways once every six
+       seconds and stops entirely under <code>prefers-reduced-motion</code>.</p>
+  </section>
+
+  <!-- C2 -->
+  <section class="mk-stage">
+    <p class="mk-label">C2 — query returns 0 members <span>Empty chairs. One left slightly askew.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head">
+          <h3 class="us-panel__title">Query results — Lapsed, Metro North, 90+ days</h3>
+          <span style="font-family:var(--font-ui);font-size:var(--fs-xs);color:var(--text-muted)">0 members</span>
+        </div>
+        <div class="eg-empty">
+          <div class="eg-empty__art" aria-hidden="true">
+            <svg viewBox="0 0 220 110" role="img">
+              <g class="art-line">
+                <!-- chair 1 -->
+                <path d="M18 92V62h30v30M18 62V30M48 62V30M18 34h30"/>
+                <!-- chair 2 -->
+                <path d="M68 92V62h30v30M68 62V30M98 62V30M68 34h30"/>
+                <!-- chair 3, nudged out of line -->
+                <g transform="translate(122 4) rotate(-7 15 46)">
+                  <path d="M0 88V58h30v30M0 58V26M30 58V26M0 30h30"/>
+                </g>
+                <!-- chair 4 -->
+                <path d="M174 92V62h30v30M174 62V30M204 62V30M174 34h30"/>
+              </g>
+              <line class="art-soft" x1="6" y1="96" x2="214" y2="96"/>
+            </svg>
+          </div>
+          <p class="eg-empty__line">Nobody's here.</p>
+          <p class="eg-empty__sub">The query ran and matched no members. That may be the right
+             answer — or the filters may be narrower than you intended.</p>
+          <div class="eg-empty__actions">
+            <button class="eg-btn eg-btn--primary" type="button">Edit filters</button>
+            <button class="eg-btn" type="button">Run without date range</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> One chair pushed out of line is the whole
+       illustration — it implies someone <em>was</em> here, which is a better joke than four
+       tidy chairs and costs nothing. The subtitle does real work: "that may be the right
+       answer" is the sentence that stops a staff member concluding the data is missing.</p>
+  </section>
+
+  <!-- The gate -->
+  <section class="mk-stage">
+    <p class="mk-label">The gate — three states a component cannot tell apart on its own</p>
+    <div class="eg-compare">
+
+      <div>
+        <div class="mk-frame mk-frame--flush">
+          <div class="us-panel" style="border:0;border-radius:10px 10px 0 0;box-shadow:none">
+            <div class="eg-empty">
+              <div class="eg-empty__art" aria-hidden="true">
+                <svg viewBox="0 0 220 110"><g class="art-line"><path d="M18 92V62h30v30M18 62V30M48 62V30M18 34h30"/><path d="M68 92V62h30v30M68 62V30M98 62V30M68 34h30"/><g transform="translate(122 4) rotate(-7 15 46)"><path d="M0 88V58h30v30M0 58V26M30 58V26M0 30h30"/></g><path d="M174 92V62h30v30M174 62V30M204 62V30M174 34h30"/></g><line class="art-soft" x1="6" y1="96" x2="214" y2="96"/></svg>
+              </div>
+              <p class="eg-empty__line">Nobody's here.</p>
+              <p class="eg-empty__sub">Query ran, 0 matched.</p>
+            </div>
+            <p class="eg-verdict" data-fires="yes">Egg fires — genuinely empty</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mk-frame mk-frame--flush">
+          <div class="us-panel eg-state-error" style="border:0;border-radius:10px 10px 0 0;box-shadow:none">
+            <p class="eg-alert"><span class="eg-alert__icon" aria-hidden="true">!</span>
+               <span>The query timed out after 30 seconds. No results were returned — this is
+               not the same as no matches.</span></p>
+            <div class="eg-empty">
+              <p class="eg-empty__line">Couldn't run this query</p>
+              <p class="eg-empty__sub">Try again, or narrow the date range. <a href="#">Report this</a></p>
+            </div>
+            <p class="eg-verdict" data-fires="no">Egg suppressed — load failed</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mk-frame mk-frame--flush">
+          <div class="us-panel" style="border:0;border-radius:10px 10px 0 0;box-shadow:none">
+            <div class="eg-empty">
+              <p class="eg-empty__line" style="color:var(--text-muted);font-weight:var(--fw-normal)">Choose filters to begin</p>
+              <p class="eg-empty__sub">Pick a branch, status or date range, then run the query.</p>
+            </div>
+            <p class="eg-verdict" data-fires="no">Egg suppressed — nothing run yet</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="mk-note"><strong>This is the actual risk in the category.</strong> A joke printed
+       on top of a silent load failure tells a staff member there is no work when there is —
+       and they will believe it, because the system sounded confident. The egg needs a positive
+       signal that a query <em>completed and returned zero</em>; absence of rows is not that
+       signal. If the component cannot tell the three apart reliably, it renders the plain
+       state and no egg at all.</p>
+  </section>
+
+  <!-- C3 -->
+  <section class="mk-stage">
+    <p class="mk-label">C3 — same query run repeatedly <span>Recorded with the copy changed. Read the note.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head">
+          <h3 class="us-panel__title">Query results — Pending direct debit returns</h3>
+          <span style="font-family:var(--font-ui);font-size:var(--fs-xs);color:var(--text-muted)">Run 4 of 4 · 3 members</span>
+        </div>
+        <div class="us-panel__body">
+          <div class="eg-aside">
+            <span aria-hidden="true" style="color:var(--brand-600)">✦</span>
+            <p><span class="eg-strike">Still the same.</span> &nbsp;→&nbsp; <strong>Same as it was.</strong></p>
+          </div>
+          <p style="margin:0;font-size:var(--fs-sm);color:var(--text-muted)">
+            (Results would render here as normal.)</p>
+        </div>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Why the copy changed.</strong> Staff re-run a query precisely
+       <em>because</em> they expect the answer to change — a payment to land, an import to
+       finish, an approval to clear. <em>"Still the same"</em> asserts that nothing changed. If
+       three rows became three different rows, the system has just told a confident lie to
+       someone concentrating. <em>"Same as it was"</em> is said about the page, claims nothing
+       about the data, and keeps the joke. Either that, or compare a hash of the result set
+       rather than the count — but the copy fix is free. Cap it at the third or fourth
+       identical run, once per session, then never again.</p>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+const fs = require('node:fs');
+const {frameDocument} = require('./taskbar-preview.cjs');
+const esc = s => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+function frame(before) {
+  let doc = frameDocument().replace('</style>', '#demo-taskbar-status{margin-top:290px}'+(before?'.us-taskbar__result-kind{display:none}':'')+'</style>');
+  doc = doc.replace('</body>', `<script>function showExample(){const input=document.querySelector('#us-taskbar-search');if(!input)return;input.value='Morgan';input.dispatchEvent(new Event('input',{bubbles:true}));}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',showExample);else showExample();</script></body>`);
+  return '<iframe title="'+(before?'Before: no record icons':'After: company and person icons')+'" srcdoc="'+esc(doc)+'"></iframe>';
+}
+fs.writeFileSync('references/Taskbar-Result-Icons.html', '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Taskbar result icons</title><style>body{margin:32px auto;padding:0 24px;max-width:1400px;font:15px/1.6 system-ui;color:#243746;background:#f4f6f7}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}iframe{box-sizing:border-box;width:100%;height:520px;border:1px solid #d6dfe3;border-radius:10px;background:white}h1{margin-bottom:8px}h2{font-size:19px}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style><a href="index.html">All references</a><h1>Taskbar search result icons</h1><p>Building = company record; person = individual record. Both examples run the actual taskbar script with fictional API responses, including wrapped true/false COMPANY_RECORD values. Search Morgan or example.com. Navigation is inactive.</p><div class="grid"><section><h2>Before · without icons</h2>'+frame(true)+'</section><section><h2>After · company and person icons</h2>'+frame(false)+'</section></div></html>');
+console.log('Built references/Taskbar-Result-Icons.html');

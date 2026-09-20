@@ -1,0 +1,331 @@
+<!-- Source template. Build inlines local CSS/JS to match the native HubForms editor pattern. -->
+<style>/* Isolated trial component. Consume UnionSuite semantic tokens; no global theme overrides. */
+.us-cco, .us-cco-config { color: var(--text-base, #545962); font: 14px/1.5 var(--font-ui, system-ui, sans-serif); }
+.us-cco *, .us-cco-config * { box-sizing: border-box; }
+.us-cco [hidden], .us-cco-config [hidden] { display: none !important; }
+.us-cco { min-width: 0; background: var(--bg-surface, #fff); }
+.us-cco__heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 16px 12px; }
+.us-cco__caption { margin: 0; color: var(--text-strong, #1c2024); font: 600 18px/1.4 var(--font-ui, system-ui, sans-serif); }
+.us-cco__tabs { display: flex; gap: 4px; overflow-x: auto; padding: 4px 16px 0; border-bottom: 1px solid var(--border, #e2e5e9); }
+.us-cco .us-cco__tab { flex: 0 0 auto; min-height: 44px; margin: 0; padding: 10px 16px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--text-base, #545962); font: inherit; cursor: pointer; border-radius: 0; }
+.us-cco .us-cco__tab:hover { background: var(--bg-subtle, #f8f9fa); color: var(--text-strong, #1c2024); }
+.us-cco .us-cco__tab[aria-selected=true] { color: var(--brand-700, #00506a); border-bottom-color: var(--brand-600, #006f94); background: var(--brand-50, #eef6f9); font-weight: 600; }
+.us-cco :is(button,a):focus-visible, .us-cco-config :is(button,a,input,select):focus-visible { outline: 2px solid var(--border-focus, #006f94); outline-offset: 2px; }
+.us-cco__status, .us-cco__note { margin: 0; padding: 10px 16px; }
+.us-cco__status { min-height: 41px; }
+.us-cco__note { color: var(--text-muted, #545962); font-size: 12px; }
+.us-cco__error { color: var(--danger, #a42620); }
+.us-cco__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 16px; align-items: center; padding: 8px 16px; background: var(--bg-subtle, #f8f9fa); border-block: 1px solid var(--border, #e2e5e9); }
+.us-cco__link { color: var(--text-link, #006f94); text-underline-offset: 3px; }
+.us-cco .us-cco__button, .us-cco-config button { min-height: 36px; padding: 6px 12px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; background: var(--bg-surface, #fff); color: var(--brand-700, #00506a); font: inherit; cursor: pointer; }
+.us-cco .us-cco__button:hover, .us-cco-config button:hover { background: var(--brand-50, #eef6f9); }
+.us-cco__frame { display: block; width: 100%; height: var(--us-cco-frame-height, 75vh); min-height: 360px; border: 0; background: var(--bg-surface, #fff); }
+.us-cco-config { max-width: 800px; margin: 16px 0; }
+.us-cco-config fieldset { border: 1px solid var(--border, #e2e5e9); border-radius: 6px; padding: 20px; }
+.us-cco-config legend { font-weight: 600; color: var(--text-strong, #1c2024); padding: 0 6px; }
+.us-cco-config label { display: block; margin: 0 0 16px; font-weight: 600; }
+.us-cco-config :is(input:not([type=checkbox]),select) { display: block; width: 100%; margin-top: 6px; min-height: 40px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; padding: 8px; font: inherit; background: var(--bg-surface, #fff); color: var(--text-strong, #1c2024); }
+.us-cco-config small { display: block; font-weight: 400; margin-top: 4px; }
+.us-cco-config [data-folder-results] { padding-left: 20px; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .us-cco__heading { padding: 12px; } .us-cco__tabs { padding-inline: 8px; } .us-cco .us-cco__tab { padding-inline: 12px; } }
+@media (prefers-reduced-motion: reduce) { .us-cco *, .us-cco-config * { scroll-behavior: auto; transition: none; animation: none; } }
+</style>
+<div class="us-cco-config" data-us-cco-config>
+  <fieldset>
+    <legend>UnionSuite CCO settings — sandbox trial</legend>
+    <label>Folder document-version key
+      <input data-setting="folderDocumentVersionId" type="text" required autocomplete="off" spellcheck="false">
+      <small>Use the folder's DocumentVersionId from iMIS. A path or DocumentId cannot replace it.</small>
+    </label>
+    <label>Folder path label
+      <input data-setting="folderPathLabel" type="text" maxlength="500">
+      <small>Optional label for authors; requests use the key above.</small>
+    </label>
+    <label>Collection caption <input data-setting="caption" type="text" maxlength="120"></label>
+    <label>Initial page document-version key
+      <input data-setting="initialDocumentVersionId" type="text" autocomplete="off" spellcheck="false">
+      <small>Optional. Leave blank to select the first available page sorted by Name. A valid tab deep link takes priority.</small>
+    </label>
+    <label>Background loading
+      <select data-setting="preload"><option value="off">Off — selected page only</option><option value="sequential-idle">Trial — preload sequentially after the selected page</option></select>
+    </label>
+    <label><input data-setting="popupBridge" type="checkbox"> Trial — open supported dialogs in the parent viewport</label>
+    <p>The content preview route and permissions require live validation for each intended role. Nested folders are omitted. Retained pages keep their own forms and search state.</p>
+    <button type="button" data-check-folder>Check folder contents</button>
+    <p data-config-status role="status" aria-live="polite">Waiting for the native JsonSettings field…</p>
+    <ol data-folder-results></ol>
+  </fieldset>
+</div>
+<script data-cfasync="false">/* UnionSuite CCO 0.1.0 — generated sandbox trial */
+(() => {
+'use strict';
+// src/contracts.js
+// iMIS wrappers shared by the runtime and the native JsonSettings editor.
+function unwrap(value) {
+  return value && typeof value === 'object' && '$value' in value ? value.$value : value;
+}
+
+function objectValue(value, label = 'value') {
+  value = unwrap(value);
+  if (typeof value === 'string') {
+    try { value = JSON.parse(value); } catch { throw new Error(`${label} is invalid JSON.`); }
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object.`);
+  return value;
+}
+
+function collection(value, label) {
+  const rows = unwrap(value)?.$values ?? unwrap(value);
+  if (!Array.isArray(rows)) throw new Error(`Unexpected ${label} response.`);
+  return rows;
+}
+
+function property(record, name) {
+  if (record[name] !== undefined) return unwrap(record[name]);
+  const props = record.Properties?.$values ?? record.Properties;
+  return Array.isArray(props) ? unwrap(props.find(p => p.Name === name)?.Value) : undefined;
+}
+
+function guid(value, label = 'Key') {
+  value = unwrap(value);
+  if (typeof value !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value) || /^0{8}(?:-0{4}){3}-0{12}$/.test(value)) {
+    throw new Error(`${label} must be a non-empty GUID. Check iMIS token substitution and configuration.`);
+  }
+  return value.toLowerCase();
+}
+
+function placementIdentity(contentKey, contentItemKey) {
+  return { contentKey: guid(contentKey, 'ContentKey'), contentItemKey: guid(contentItemKey, 'ContentItemKey') };
+}
+
+function placementId(identity) {
+  return `${identity.contentKey.replaceAll('-', '')}-${identity.contentItemKey.replaceAll('-', '')}`;
+}
+
+function verifiedPlacement(body, identity) {
+  const envelope = objectValue(body, 'ContentItem');
+  const rows = envelope.Items !== undefined ? collection(envelope.Items, 'ContentItem list') : [envelope];
+  const matches = rows.filter(row => {
+    const record = objectValue(row, 'ContentItem row');
+    const data = record.Data === undefined ? {} : objectValue(record.Data, 'ContentItem Data');
+    // Reject conflicts between direct, Data and property-bag identities; never trust a filter alone.
+    return [['ContentKey', identity.contentKey], ['ContentItemKey', identity.contentItemKey]].every(([name, expected]) => {
+      const values = [data, record].flatMap(owner => {
+        const props = owner.Properties?.$values ?? owner.Properties;
+        return [unwrap(owner[name]), ...(Array.isArray(props) ? props.filter(p => p.Name === name).map(p => unwrap(p.Value)) : [])];
+      }).filter(v => v !== undefined);
+      return values.length > 0 && values.every(v => typeof v === 'string' && v.toLowerCase() === expected);
+    });
+  });
+  if (matches.length !== 1) throw new Error('Configuration lookup did not return exactly one matching ContentKey + ContentItemKey placement.');
+  return objectValue(matches[0]);
+}
+
+function placementSettings(row) {
+  const data = row.Data === undefined ? {} : objectValue(row.Data);
+  for (const owner of [data, row]) {
+    for (const name of ['JsonSettings', 'Settings']) {
+      const candidate = property(owner, name);
+      if (candidate !== undefined && candidate !== null && candidate !== '') return objectValue(candidate, name);
+    }
+  }
+  throw new Error('No JsonSettings configuration was found. Configure this UnionSuite CCO placement.');
+}
+
+function validateConfig(input) {
+  const value = objectValue(input, 'JsonSettings');
+  if (value.schemaVersion !== 1) throw new Error('Unsupported or missing CCO schemaVersion. Reopen the configuration editor.');
+  const textSetting = (key, fallback, max) => {
+    const text = value[key] ?? fallback;
+    if (typeof text !== 'string' || text.length > max) throw new Error(`Invalid ${key}.`);
+    return text.trim();
+  };
+  const preload = value.preload ?? 'off';
+  if (!['off', 'sequential-idle'].includes(preload)) throw new Error('Unsupported preload policy.');
+  if (value.popupBridge !== undefined && typeof value.popupBridge !== 'boolean') throw new Error('popupBridge must be true or false.');
+  if (value.orientation !== undefined && value.orientation !== 'horizontal') throw new Error('Only horizontal tabs are currently supported.');
+  return {
+    schemaVersion: 1,
+    folderDocumentVersionId: guid(value.folderDocumentVersionId, 'Folder document-version key'),
+    folderPathLabel: textSetting('folderPathLabel', '', 500),
+    caption: textSetting('caption', 'Content pages', 120) || 'Content pages',
+    initialDocumentVersionId: value.initialDocumentVersionId ? guid(value.initialDocumentVersionId, 'Initial page key') : '',
+    orientation: 'horizontal', preload, popupBridge: value.popupBridge ?? false
+  };
+}
+
+function mergeConfig(existing, edits) {
+  const original = objectValue(existing, 'Existing JsonSettings');
+  if (original.schemaVersion !== undefined && original.schemaVersion !== 1) throw new Error('Unsupported existing schemaVersion. It was not overwritten.');
+  return { ...original, ...validateConfig({ ...original, ...edits, schemaVersion: 1 }) };
+}
+
+// src/api.js
+
+function webRoot(win) {
+  const root = String(win.gWebRoot || '').replace(/\/+$/, '');
+  const url = new URL(root || '/', win.location.origin);
+  if (url.origin !== win.location.origin || url.search || url.hash) throw new Error('The iMIS web root must be same-origin.');
+  return url.pathname.replace(/\/+$/, '');
+}
+
+function createApi(win) {
+  return async (method, path, payload, signal) => {
+    const controller = new win.AbortController();
+    const abort = () => controller.abort();
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) controller.abort();
+    const timeout = win.setTimeout(() => controller.abort(new Error('The iMIS request timed out after 30 seconds.')), 30000);
+    try {
+      const token = win.document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const response = await win.fetch(`${webRoot(win)}/api/${path}`, {
+        method, signal: controller.signal, credentials: 'same-origin', cache: 'no-store', redirect: 'error',
+        headers: { Accept: 'application/json', ...(token ? { RequestVerificationToken: token } : {}), ...(payload === undefined ? {} : { 'Content-Type': 'application/json' }) },
+        ...(payload === undefined ? {} : { body: JSON.stringify(payload) })
+      });
+      if (!response.ok) throw new Error(`iMIS request failed (HTTP ${response.status}). Check access and session status.`);
+      let result;
+      try { result = await response.json(); } catch { throw new Error('iMIS returned an unexpected non-JSON response. Check session status.'); }
+      if (unwrap(result?.IsSuccessStatusCode) === false || unwrap(result?.IsValid) === false) throw new Error('iMIS reported that the requested operation failed.');
+      return result;
+    } finally {
+      win.clearTimeout(timeout);
+      signal?.removeEventListener('abort', abort);
+    }
+  };
+}
+
+// src/documents.js
+
+function folderRequest(folderVersionKey) {
+  return {
+    $type: 'Asi.Soa.Core.DataContracts.GenericExecuteRequest, Asi.Contracts',
+    OperationName: 'FindDocumentsInFolder', EntityTypeName: 'Document',
+    Parameters: {
+      $type: 'System.Collections.ObjectModel.Collection`1[[System.Object, mscorlib]], mscorlib',
+      $values: [guid(folderVersionKey, 'Folder document-version key'), { $type: 'System.String[], mscorlib', $values: ['CON', 'CFL'] }, { $type: 'System.Boolean', $value: true }]
+    },
+    ParameterTypeName: {
+      $type: 'System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib',
+      $values: ['System.String', 'System.String[]', 'System.Boolean']
+    }
+  };
+}
+
+function folderPages(body) {
+  if (unwrap(body?.IsSuccessStatusCode) === false) throw new Error('iMIS could not list this folder.');
+  const rows = collection(body?.Result !== undefined ? body.Result : body, 'folder');
+  const pages = [], seen = new Set();
+  let folders = 0, excluded = 0;
+  for (const value of rows) {
+    const row = objectValue(value, 'Folder row');
+    const type = property(row, 'DocumentTypeId');
+    if (type === 'CFL') { folders++; continue; } // Deliberately no traversal; cycles cannot recurse.
+    if (type !== 'CON') throw new Error('Folder listing contains an unexpected document type.');
+    const id = guid(property(row, 'DocumentVersionId'), 'Page document-version key');
+    if (seen.has(id)) throw new Error('Folder listing contains duplicate page document-version keys.');
+    seen.add(id);
+    const name = property(row, 'Name'), alternate = property(row, 'AlternateName');
+    if (typeof name !== 'string' || !name.trim() || (alternate != null && typeof alternate !== 'string')) throw new Error('Folder listing contains an invalid page name.');
+    const statusValue = property(row, 'Status');
+    const status = unwrap(statusValue?.Name ?? statusValue?.Description ?? statusValue);
+    // Known explicit non-published records fail closed. Unknown status shapes need a live contract.
+    if (status !== undefined && status !== null && status !== '' && status !== 'Published') { excluded++; continue; }
+    if (property(row, 'IsPublished') === false || property(row, 'IsDeleted') === true || property(row, 'IsAuthorized') === false) { excluded++; continue; }
+    pages.push({ id, name: name.trim(), caption: alternate?.trim() || name.trim() });
+  }
+  pages.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }) || a.id.localeCompare(b.id));
+  return { pages, folders, excluded };
+}
+
+// src/config.js
+
+function installEditor(win) {
+  if (win.UnionSuiteCCOEditor) { win.UnionSuiteCCOEditor.scan(); return; }
+  const doc = win.document, entries = new Map();
+  function attach(mount) {
+    const events = new win.AbortController();
+    const status = mount.querySelector('[data-config-status]');
+    const fields = [...mount.querySelectorAll('[data-setting]')];
+    let request, loadedField, loadedValue, invalid = false;
+    function message(text, error = false) { if (status.textContent !== text) status.textContent = text; status.classList.toggle('us-cco__error', error); }
+    function field() {
+      const matches = doc.querySelectorAll('#JsonSettings');
+      if (matches.length !== 1 || !('value' in matches[0])) throw new Error('The native JsonSettings editor field is missing or ambiguous. Open this through the iMIS Content Type editor.');
+      return matches[0];
+    }
+    function read(native) { return native.value ? objectValue(native.value, 'Existing JsonSettings') : {}; }
+    function hydrate() {
+      try {
+        const native = field();
+        if (native === loadedField && native.value === loadedValue) return;
+        const saved = read(native);
+        if (saved.schemaVersion !== undefined && saved.schemaVersion !== 1) throw new Error('This configuration uses an unsupported schemaVersion. It was not overwritten.');
+        for (const input of fields) {
+          const value = saved[input.dataset.setting];
+          if (input.type === 'checkbox') input.checked = value === true;
+          else input.value = value ?? (input.dataset.setting === 'preload' ? 'off' : input.dataset.setting === 'caption' ? 'Content pages' : '');
+        }
+        loadedField = native; loadedValue = native.value; invalid = false;
+        message('Settings load from this placement. Use the native Save or Save & Close button to persist them.');
+      } catch (error) { invalid = true; message(error.message, true); }
+    }
+    function edits() {
+      return Object.fromEntries(fields.map(input => [input.dataset.setting, input.type === 'checkbox' ? input.checked : input.value.trim()]));
+    }
+    function store(report = true) {
+      try {
+        if (invalid) throw new Error('Existing settings could not be read safely. Reopen the editor before saving.');
+        const native = field();
+        const value = mergeConfig(read(native), edits()); // Preserve unrelated settings, including last-minute native edits.
+        native.value = JSON.stringify(value);
+        loadedField = native; loadedValue = native.value;
+        if (report) message('Settings prepared. Use native Save or Save & Close to persist them in iMIS.');
+        return true;
+      } catch (error) { message(error.message, true); return false; }
+    }
+    function guardSave(event) {
+      if (!store() && event) { event.preventDefault(); event.stopImmediatePropagation(); fields.find(input => input.dataset.setting === 'folderDocumentVersionId')?.focus(); }
+    }
+    doc.addEventListener('click', event => {
+      if (event.target.closest?.('#ctl01_SaveButton, #ctl01_SaveAndCloseButton')) guardSave(event);
+    }, { capture: true, signal: events.signal });
+    doc.addEventListener('submit', guardSave, { capture: true, signal: events.signal });
+    mount.addEventListener('change', () => store(), { signal: events.signal });
+    mount.querySelector('[data-check-folder]').addEventListener('click', async () => {
+      request?.abort(); request = new win.AbortController();
+      const list = mount.querySelector('[data-folder-results]');
+      list.replaceChildren();
+      try {
+        const config = validateConfig({ ...edits(), schemaVersion: 1 });
+        message('Checking immediate folder children…');
+        const result = folderPages(await createApi(win)('POST', 'Document/_execute', folderRequest(config.folderDocumentVersionId), request.signal));
+        if (!mount.isConnected) return;
+        for (const page of result.pages) {
+          const li = doc.createElement('li'); li.textContent = `${page.caption} — ${page.id}`; list.append(li);
+        }
+        message(`${result.pages.length} content pages returned; ${result.folders} nested folders omitted; ${result.excluded} unavailable pages omitted. This does not verify access for other roles.`);
+      } catch (error) { if (error.name !== 'AbortError') message(error.message, true); }
+    }, { signal: events.signal });
+    hydrate();
+    return { hydrate, dispose() { request?.abort(); events.abort(); } };
+  }
+  function scan() {
+    for (const [mount, entry] of entries) if (!mount.isConnected) { entry.dispose(); entries.delete(mount); }
+    for (const mount of doc.querySelectorAll('[data-us-cco-config]')) if (!entries.has(mount)) {
+      if (entries.size) { const text = 'Only one CCO configuration editor can use the native JsonSettings field at a time.'; if (mount.textContent !== text) mount.textContent = text; continue; }
+      entries.set(mount, attach(mount));
+    }
+    for (const entry of entries.values()) entry.hydrate();
+  }
+  const observer = new win.MutationObserver(scan);
+  observer.observe(doc.documentElement, { childList: true, subtree: true });
+  const app = win.Sys?.Application;
+  app?.add_load?.(scan);
+  win.UnionSuiteCCOEditor = { scan, dispose() { observer.disconnect(); app?.remove_load?.(scan); for (const entry of entries.values()) entry.dispose(); entries.clear(); delete win.UnionSuiteCCOEditor; } };
+  scan();
+}
+
+installEditor(window);
+})();
+</script>

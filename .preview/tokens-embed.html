@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="zUnionSuite.css"><link rel="stylesheet" href="zzClientSpecific.css"></head><body style="margin:0;background:#eeeeef"><div class="ContentItemContainer"><div class="panel"><div class="panel-body"><!-- =========================================================================
+     DESIGN TOKEN TEST SHEET  -  embeddable fragment  (seeded model)
+
+     Paste this whole block into an HTML iPart. No doctype, head or body tags,
+     no script, no on-handlers, no external links, no HTML entities.
+
+     Defines no tokens of its own - every value comes from the theme.
+     A client edits five seeds; the rest derives.
+     ========================================================================= -->
+
+<style>
+.tk{ font-family:var(--face-body); font-size:var(--fs-base); line-height:1.5;
+     color:var(--text-base); background:var(--bg-page); padding:var(--space-6); }
+.tk *,.tk *::before,.tk *::after{ box-sizing:border-box; }
+.tk h1{ font-family:var(--face-display); font-size:var(--fs-2xl); font-weight:600;
+        color:var(--text-strong); margin:0 0 var(--space-2); text-transform:none; }
+.tk h2{ font-family:var(--face-display); font-size:var(--fs-lg); font-weight:600;
+        color:var(--text-strong); margin:var(--space-8) 0 var(--space-3);
+        text-transform:none; border-bottom:1px solid var(--border);
+        padding-bottom:var(--space-2); }
+.tk .lede{ color:var(--text-muted); max-width:70ch; margin:0 0 var(--space-2); }
+
+.tk-card{ background:var(--bg-surface); border:1px solid var(--border);
+          border-radius:var(--radius); box-shadow:var(--shadow-sm);
+          padding:var(--card-pad-y) var(--card-pad-x); margin-bottom:var(--space-4); }
+
+.tk-ramp{ display:flex; flex-wrap:wrap; gap:var(--space-2); }
+.tk-sw{ width:118px; }
+.tk-seed .tk-chip{ height:72px; border:2px solid var(--brand-600); }
+.tk-chip{ height:56px; border-radius:var(--radius-sm);
+          border:1px solid rgba(0,27,35,.10); }
+.tk-name{ font-family:var(--face-ui); font-size:var(--fs-2xs); font-weight:600;
+          color:var(--text-strong); margin-top:var(--space-1); }
+.tk-val{ font-family:var(--face-ui); font-size:var(--fs-2xs); color:var(--text-faint); }
+
+.tk-tbl{ width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
+.tk-tbl th{ text-align:left; font-size:var(--fs-2xs); text-transform:uppercase;
+            letter-spacing:.05em; color:var(--text-faint); font-weight:700;
+            padding:var(--space-2); border-bottom:1px solid var(--border); }
+.tk-tbl td{ padding:var(--space-2); border-bottom:1px solid var(--neutral-100);
+            vertical-align:middle; }
+.tk-pass{ color:var(--status-green); font-weight:600; }
+.tk-part{ color:var(--status-amber); font-weight:600; }
+.tk-fail{ color:var(--status-red); font-weight:600; }
+
+.tk-two{ display:flex; gap:var(--space-3); flex-wrap:wrap; }
+.tk-two > div{ flex:1 1 260px; padding:var(--space-4); border-radius:var(--radius); }
+.tk-onwhite{ background:var(--white); border:1px solid var(--border); }
+.tk-onpage{ background:var(--page); border:1px solid var(--border); }
+.tk-ondark{ background:var(--brand-900); }
+
+.tk-space{ display:flex; align-items:flex-end; gap:var(--space-3); }
+.tk-space div{ background:var(--brand-600); width:34px; border-radius:2px; }
+
+.tk-radii{ display:flex; gap:var(--space-3); flex-wrap:wrap; }
+.tk-radii div{ width:88px; height:60px; background:var(--brand-100);
+               border:1px solid var(--brand-600); display:flex;
+               align-items:center; justify-content:center;
+               font-family:var(--face-ui); font-size:var(--fs-2xs);
+               color:var(--brand-800); }
+
+.tk-shadows{ display:flex; gap:var(--space-5); flex-wrap:wrap; }
+.tk-shadows div{ width:150px; height:70px; background:var(--white);
+                 border-radius:var(--radius); display:flex; align-items:center;
+                 justify-content:center; font-family:var(--face-ui);
+                 font-size:var(--fs-2xs); color:var(--text-faint); }
+
+.tk-type div{ margin-bottom:var(--space-2); color:var(--text-strong); }
+.tk-type span{ font-family:var(--face-ui); font-size:var(--fs-2xs);
+               color:var(--text-faint); margin-left:var(--space-3); }
+
+.tk-status{ display:flex; gap:var(--space-3); flex-wrap:wrap; }
+.tk-status div{ padding:var(--space-2) var(--space-4); border-radius:var(--radius-sm);
+                font-size:var(--fs-sm); font-weight:600; }
+</style>
+
+<div class="tk">
+
+  <h1>Design tokens</h1>
+  <p class="lede">Defaults are iMIS Orion's own palette, measured from
+  <strong>99-Orion.css</strong>. Contrast figures are measured against both
+  grounds a staff page actually has: card white and the page ground
+  <strong>#eeeeef</strong>.</p>
+
+  <p class="lede"><strong>Captions show Orion's reference value, not the live one.</strong>
+  If a swatch does not match its caption, a client rebrand is active — which is
+  exactly what you want to see when testing one.</p>
+
+  <h2>Seeds — the five values a client edits</h2>
+  <p class="lede">Everything below this section is derived from these five with
+  <strong>color-mix()</strong>. Change these and the whole palette moves. Status
+  colours are deliberately excluded: a brand should not change what danger looks like.</p>
+  <div class="tk-card"><div class="tk-ramp">
+    <div class="tk-sw tk-seed"><div class="tk-chip" style="background:var(--seed-primary)"></div><div class="tk-name">seed-primary</div><div class="tk-val">the brand</div></div>
+    <div class="tk-sw tk-seed"><div class="tk-chip" style="background:var(--seed-primary-light)"></div><div class="tk-name">seed-primary-light</div><div class="tk-val">top of the ramp</div></div>
+    <div class="tk-sw tk-seed"><div class="tk-chip" style="background:var(--seed-accent)"></div><div class="tk-name">seed-accent</div><div class="tk-val">the accent</div></div>
+    <div class="tk-sw tk-seed"><div class="tk-chip" style="background:var(--seed-accent-alt)"></div><div class="tk-name">seed-accent-alt</div><div class="tk-val">secondary accent</div></div>
+    <div class="tk-sw tk-seed"><div class="tk-chip" style="background:var(--seed-neutral)"></div><div class="tk-name">seed-neutral</div><div class="tk-val">the grey hue</div></div>
+  </div></div>
+
+  <h2>Primary ramp — Orion teal</h2>
+  <p class="lede">Derived from seed-primary and seed-primary-light. Median distance from Orion's real values is 2 RGB units; the loosest is teal-500 at 14, which is imperceptible.</p>
+  <div class="tk-card"><div class="tk-ramp">
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-950)"></div><div class="tk-name">teal-950</div><div class="tk-val">Orion #001b23</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-900)"></div><div class="tk-name">teal-900</div><div class="tk-val">Orion #002632</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-800)"></div><div class="tk-name">teal-800</div><div class="tk-val">Orion #003a4c</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-700)"></div><div class="tk-name">teal-700</div><div class="tk-val">Orion #00506a</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-600)"></div><div class="tk-name">teal-600</div><div class="tk-val">Orion #006f94</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-500)"></div><div class="tk-name">teal-500</div><div class="tk-val">Orion #007ea8</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-400)"></div><div class="tk-name">teal-400</div><div class="tk-val">Orion #3fb5d9</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-300)"></div><div class="tk-name">teal-300</div><div class="tk-val">Orion #5acbf8</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-100)"></div><div class="tk-name">teal-100</div><div class="tk-val">Orion #d0e4ea</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--teal-50)"></div><div class="tk-name">teal-50</div><div class="tk-val">Orion #eef6f9</div></div>
+  </div></div>
+
+  <h2>Accent ramp — Orion orange</h2>
+  <p class="lede">#ff9947 is the most-used colour in Orion, 73 uses. It is a
+  fill, not a text colour: 2.12 on white. Text on it must be
+  <strong>--brand-900</strong>, which measures 7.48.</p>
+  <div class="tk-card"><div class="tk-ramp">
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--accent-700)"></div><div class="tk-name">accent-700</div><div class="tk-val">#e07a1f hover</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--accent-600)"></div><div class="tk-name">accent-600</div><div class="tk-val">Orion #ff9947</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--accent-500)"></div><div class="tk-name">accent-500</div><div class="tk-val">Orion #ff734f</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--accent-100)"></div><div class="tk-name">accent-100</div><div class="tk-val">Orion #ffe8d6</div></div>
+  </div></div>
+
+  <h2>Neutral ramp</h2>
+  <p class="lede">All ten stops derived from seed-neutral. These were hand-picked before, so deriving them is strictly better: the ramp is now consistent and follows a client's grey.</p>
+  <div class="tk-card"><div class="tk-ramp">
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-900)"></div><div class="tk-name">neutral-900</div><div class="tk-val">Orion #1c2024</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-800)"></div><div class="tk-name">neutral-800</div><div class="tk-val">Orion #2b3036</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-700)"></div><div class="tk-name">neutral-700</div><div class="tk-val">Orion #3d434b</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-600)"></div><div class="tk-name">neutral-600</div><div class="tk-val">Orion #545962</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-500)"></div><div class="tk-name">neutral-500</div><div class="tk-val">Orion #6b7580</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-400)"></div><div class="tk-name">neutral-400</div><div class="tk-val">Orion #9aa1aa</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-300)"></div><div class="tk-name">neutral-300</div><div class="tk-val">Orion #c8ccd2</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-200)"></div><div class="tk-name">neutral-200</div><div class="tk-val">Orion #e2e5e9</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-100)"></div><div class="tk-name">neutral-100</div><div class="tk-val">Orion #f1f3f5</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--neutral-50)"></div><div class="tk-name">neutral-50</div><div class="tk-val">Orion #f8f9fa</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--page)"></div><div class="tk-name">page</div><div class="tk-val">ground</div></div>
+    <div class="tk-sw"><div class="tk-chip" style="background:var(--white)"></div><div class="tk-name">white</div><div class="tk-val">card</div></div>
+  </div></div>
+
+  <h2>Text contrast — measured on both grounds</h2>
+  <p class="lede">The page ground is #eeeeef, not white. A colour that passes on
+  a card can fail on the page behind it. This is why --text-muted uses
+  neutral-600 rather than neutral-500.</p>
+  <div class="tk-card">
+    <table class="tk-tbl">
+      <tr><th>Token</th><th>Value</th><th>on white</th><th>on page</th><th>Verdict</th></tr>
+      <tr><td>neutral-900</td><td>#1c2024</td><td>16.39</td><td>14.13</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>neutral-800</td><td>#2b3036</td><td>13.30</td><td>11.47</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>neutral-700</td><td>#3d434b</td><td>9.99</td><td>8.61</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>neutral-600</td><td>#545962</td><td>7.04</td><td>6.07</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>neutral-500</td><td>#6b7580</td><td>4.69</td><td>4.04</td><td class="tk-part">card only</td></tr>
+      <tr><td>teal-600</td><td>#006f94</td><td>5.67</td><td>4.89</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>teal-500</td><td>#007ea8</td><td>4.62</td><td>3.98</td><td class="tk-part">card only</td></tr>
+      <tr><td>teal-300</td><td>#5acbf8</td><td>1.85</td><td>1.60</td><td class="tk-fail">never text</td></tr>
+      <tr><td>accent-600</td><td>#ff9947</td><td>2.12</td><td>1.83</td><td class="tk-fail">never text</td></tr>
+      <tr><td>status-red</td><td>#d03528</td><td>4.97</td><td>4.29</td><td class="tk-part">card only</td></tr>
+      <tr><td>status-green</td><td>#3f7a2a</td><td>5.21</td><td>4.50</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>status-amber</td><td>#a35a00</td><td>5.22</td><td>4.51</td><td class="tk-pass">safe on both</td></tr>
+      <tr><td>status-purple</td><td>#413d6b</td><td>9.98</td><td>8.61</td><td class="tk-pass">safe on both</td></tr>
+    </table>
+  </div>
+
+  <h2>The same text on three grounds</h2>
+  <div class="tk-two">
+    <div class="tk-onwhite">
+      <div style="color:var(--text-strong);font-weight:600">Strong on card</div>
+      <div style="color:var(--text-base)">Base body text on a card surface</div>
+      <div style="color:var(--text-faint);font-size:var(--fs-sm)">Faint — card only</div>
+      <div style="color:var(--text-link)">A link on a card</div>
+    </div>
+    <div class="tk-onpage">
+      <div style="color:var(--text-strong);font-weight:600">Strong on page</div>
+      <div style="color:var(--text-base)">Base body text on the page ground</div>
+      <div style="color:var(--text-faint);font-size:var(--fs-sm)">Faint — fails here, 4.04</div>
+      <div style="color:var(--text-link)">A link on the page ground</div>
+    </div>
+    <div class="tk-ondark">
+      <div style="color:var(--text-inverse);font-weight:600">Strong on dark</div>
+      <div style="color:rgba(255,255,255,.82)">Base body text on brand-900</div>
+      <div style="color:rgba(255,255,255,.55);font-size:var(--fs-sm)">Faint on dark</div>
+      <div style="color:var(--accent)">Accent on dark — 7.48</div>
+    </div>
+  </div>
+
+  <h2>Status</h2>
+  <div class="tk-card"><div class="tk-status">
+    <div style="background:var(--status-green-bg);color:var(--status-green)">Success 5.21</div>
+    <div style="background:var(--status-amber-bg);color:var(--status-amber)">Warning 5.22</div>
+    <div style="background:var(--status-red-bg);color:var(--status-red)">Danger 4.97</div>
+    <div style="background:var(--status-info-bg);color:var(--status-info)">Info 5.67</div>
+    <div style="background:var(--status-purple-bg);color:var(--status-purple)">Purple 9.98</div>
+    <div style="background:var(--accent-600);color:var(--text-on-accent)">On accent 7.48</div>
+  </div></div>
+
+  <h2>Type scale — 8 sizes, down from 10</h2>
+  <div class="tk-card tk-type">
+    <div style="font-size:var(--fs-2xl);font-family:var(--face-display);font-weight:600">Display 28px<span>--fs-2xl</span></div>
+    <div style="font-size:var(--fs-xl);font-family:var(--face-display);font-weight:600">Heading 22px<span>--fs-xl</span></div>
+    <div style="font-size:var(--fs-lg);font-weight:600">Subhead 18px<span>--fs-lg</span></div>
+    <div style="font-size:var(--fs-md)">Large body 16px<span>--fs-md</span></div>
+    <div style="font-size:var(--fs-base)">Body 14px — the most used size in UT_Staff.css<span>--fs-base</span></div>
+    <div style="font-size:var(--fs-sm)">Small 13px<span>--fs-sm</span></div>
+    <div style="font-size:var(--fs-xs)">Caption 12px<span>--fs-xs</span></div>
+    <div style="font-size:var(--fs-2xs)">Micro 11px<span>--fs-2xs</span></div>
+  </div>
+
+  <h2>Faces</h2>
+  <div class="tk-card">
+    <div style="font-family:var(--face-body);font-size:var(--fs-md)">Open Sans — body. Orion's own.</div>
+    <div style="font-family:var(--face-display);font-size:var(--fs-md)">Red Hat Display — headings. Orion's own.</div>
+    <div style="font-family:var(--face-ui);font-size:var(--fs-md)">Inter — UI labels, numerals.</div>
+  </div>
+
+  <h2>Spacing — 4px scale</h2>
+  <div class="tk-card"><div class="tk-space">
+    <div style="height:4px"></div><div style="height:8px"></div><div style="height:12px"></div>
+    <div style="height:16px"></div><div style="height:20px"></div><div style="height:24px"></div>
+    <div style="height:32px"></div>
+  </div>
+  <div class="tk-val" style="margin-top:var(--space-2)">4 · 8 · 12 · 16 · 20 · 24 · 32    replaces 5, 10, 15, 30</div>
+  </div>
+
+  <h2>Radii — 4 values, down from 7</h2>
+  <div class="tk-card"><div class="tk-radii">
+    <div style="border-radius:var(--radius-sm)">sm 4</div>
+    <div style="border-radius:var(--radius)">base 8</div>
+    <div style="border-radius:var(--radius-lg)">lg 12</div>
+    <div style="border-radius:var(--radius-pill)">pill</div>
+  </div></div>
+
+  <h2>Shadows — 3, tinted with the brand dark</h2>
+  <div class="tk-card" style="background:var(--bg-subtle)"><div class="tk-shadows">
+    <div style="box-shadow:var(--shadow-sm)">shadow-sm</div>
+    <div style="box-shadow:var(--shadow)">shadow</div>
+    <div style="box-shadow:var(--shadow-lg)">shadow-lg</div>
+  </div></div>
+
+  <h2>Rebrand check</h2>
+  <p class="lede">Everything above is driven by the five seeds. Add this to the client sheet and reload: brand, accent, links, borders and dark surfaces should all move; the status row should not. The second block shows how to pin a single derived stop back to an exact value.</p>
+  <div class="tk-card">
+    <pre style="margin:0;font-family:var(--face-mono, monospace);font-size:var(--fs-sm);color:var(--text-base)">:root {
+  --seed-primary:       #4a2f7a;
+  --seed-primary-light: #b39ddb;
+  --seed-accent:        #d4a017;
+  --seed-accent-alt:    #e0704f;
+  --seed-neutral:       #5b5560;
+}
+
+/* pin one derived stop, if a client insists */
+:root { --teal-500: #007ea8; }</pre>
+  </div>
+
+</div>
+</div></div></div></body></html>

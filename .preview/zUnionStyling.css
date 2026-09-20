@@ -1,0 +1,65 @@
+/* ==========================================================================
+   zUnionStyling.css — per-client overrides
+
+   DEPLOYS AS:  App_Themes/Orion-UT-v2/zUnionStyling.css
+
+   Loads LAST, after zAdditionalStyling.css (the UT theme). Anything set here
+   wins. That is the whole point: the theme ships one complete system, and a
+   client tenant changes it from this file without ever forking the theme.
+
+   FOR THIS PROJECT THIS FILE IS INTENTIONALLY EMPTY.
+   Union Innovation Hub uses the theme defaults, which are iMIS Orion's own
+   palette. Do not add rules here to fix something that belongs in the theme —
+   if a rule would be right for every client, it goes in zAdditionalStyling.css.
+
+   TO REBRAND FOR A CLIENT: uncomment the :root block below and change the
+   values you need. Override Tier 1 primitives only. Never override Tier 2
+   semantics (--brand-*, --nav-*, --text-*, --success…) — they resolve from
+   Tier 1 on their own, and pinning them breaks that.
+   ========================================================================== */
+
+/* The complete Tier 1 surface, at its current defaults. Copy what you need.
+
+:root {
+    --teal-950:          #001b23;
+    --teal-900:          #002632;
+    --teal-800:          #003a4c;
+    --teal-700:          #00506a;
+    --teal-600:          #006f94;
+    --teal-500:          #007ea8;
+    --teal-400:          #3fb5d9;
+    --teal-300:          #5acbf8;
+    --teal-100:          #d0e4ea;
+    --teal-50:           #eef6f9;
+    --accent-700:        #e07a1f;
+    --accent-600:        #ff9947;
+    --accent-500:        #ff734f;
+    --accent-100:        #ffe8d6;
+    --neutral-900:       #0f172a;
+    --neutral-800:       #1e293b;
+    --neutral-700:       #334155;
+    --neutral-600:       #475569;
+    --neutral-500:       #64748b;
+    --neutral-400:       #94a3b8;
+    --neutral-300:       #cbd5e1;
+    --neutral-200:       #e2e8f0;
+    --neutral-100:       #f1f5f9;
+    --neutral-50:        #f8fafc;
+    --status-green:      #3f7a2a;
+    --status-green-fill: #68bd49;
+    --status-green-bg:   #e8f4e2;
+    --status-amber:      #a35a00;
+    --status-amber-fill: #ff9947;
+    --status-amber-bg:   #fdefe0;
+    --status-red:        #d03528;
+    --status-red-bg:     #fbe4e2;
+    --status-info:       #006f94;
+    --status-info-bg:    #e4f0f4;
+    --status-purple:     #413d6b;
+    --status-purple-bg:  #e6e5ef;
+    --face-body:         "Open Sans", "Helvetica Neue", Arial, sans-serif;
+    --face-ui:           "Inter", system-ui, -apple-system, sans-serif;
+    --face-display:      "Red Hat Display", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+
+*/

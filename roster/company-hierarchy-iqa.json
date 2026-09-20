@@ -1,0 +1,255 @@
+{
+    "$type": "Asi.Soa.Core.DataContracts.PagedResult`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], Asi.Contracts",
+    "Items": {
+        "$type": "System.Collections.Generic.List`1[[Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts]], mscorlib",
+        "$values": [
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "574",
+                "PrimaryParentEntityTypeName": "Party",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "129"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "129"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "COMPANY",
+                            "Value": "American Academy for the Gifted"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Company Type",
+                            "Value": "Workplace"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/129/"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ORG_CODE",
+                            "Value": "ORG1"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "574",
+                "PrimaryParentEntityTypeName": "Party",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103988"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103988"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "COMPANY",
+                            "Value": "Department of Edu Melbourne"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Company Type",
+                            "Value": "Workplace"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/103988/"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ORG_CODE",
+                            "Value": "DEMO"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "574",
+                "PrimaryParentEntityTypeName": "Party",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "103841"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "COMPANY",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Company Type",
+                            "Value": "Employer"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ORG_CODE",
+                            "Value": "DEMO"
+                        }
+                    ]
+                }
+            },
+            {
+                "$type": "Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts",
+                "EntityTypeName": "574",
+                "PrimaryParentEntityTypeName": "Party",
+                "PrimaryParentIdentity": {
+                    "$type": "Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts",
+                    "EntityTypeName": "Party",
+                    "IdentityElements": {
+                        "$type": "System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib",
+                        "$values": [
+                            "23301"
+                        ]
+                    }
+                },
+                "Properties": {
+                    "$type": "Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts",
+                    "$values": [
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ID",
+                            "Value": "23301"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "COMPANY",
+                            "Value": "TestOrg7"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Company Type",
+                            "Value": "Workplace"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Status",
+                            "Value": "A - Active"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "RootName",
+                            "Value": "Stark Enterprise"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Root_ID",
+                            "Value": "103841"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "Sort",
+                            "Value": "/103841/23301/"
+                        },
+                        {
+                            "$type": "Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts",
+                            "Name": "ORG_CODE",
+                            "Value": "DEMO"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "Offset": 0,
+    "Limit": 100,
+    "Count": 4,
+    "TotalCount": 4,
+    "NextPageLink": null,
+    "HasNext": false,
+    "NextOffset": 0
+}

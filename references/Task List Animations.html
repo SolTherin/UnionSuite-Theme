@@ -1,0 +1,306 @@
+<meta charset="utf-8">
+<title>Checkboxes — day &amp; night</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body {
+    width: 1600px; height: 1200px;
+    font-family: "Epilogue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #stage { position: relative; width: 1600px; height: 1200px; display: flex; }
+
+  .side {
+    position: relative; width: 800px; height: 1200px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .side.dark  { background: linear-gradient(180deg, #101012 0%, #08080A 100%); }
+  .side.light { background: #F5F3ED; }
+  .side .grain {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/png;base64,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");
+  }
+  .side.dark  .grain { opacity: .16; }
+  .side.light .grain { opacity: .07; mix-blend-mode: multiply; }
+  .side .wash { position: absolute; inset: 0; pointer-events: none; }
+  .side.dark  .wash { background: radial-gradient(60% 45% at 50% 50%, rgba(120,90,255,.07), transparent 70%); }
+  .side.light .wash { background: none; }
+
+  .list {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 30px;
+    transform: scale(1.6);
+  }
+
+  /* ---- row ------------------------------------------------------------- */
+  .row { position: relative; height: 32px; overflow: hidden; }
+  .box {
+    position: absolute; left: 0; top: 0; width: 32px; height: 32px;
+    border-radius: 10px; overflow: hidden;
+  }
+  .box .ring {
+    position: absolute; inset: 0; border-radius: inherit;
+    border: 2px solid var(--edge); box-sizing: border-box;
+  }
+  .fill { position: absolute; left: -7px; right: -7px; top: 0; height: 128px; opacity: 0; }
+  .side.dark  .fill {
+    background: linear-gradient(180deg, #4C2BD9 0%, #6F3AE6 22%, #4356E8 46%,
+                                        #2B87E0 70%, #17BFC9 88%, #12D3A8 100%);
+  }
+  .side.light .fill {
+    background: linear-gradient(180deg, #FFC24A 0%, #FF9257 22%, #FF6E86 46%,
+                                        #E060C6 70%, #7FC85C 88%, #34C878 100%);
+  }
+  .check, .ghost {
+    position: absolute; left: 0; top: 0; width: 32px; height: 32px; pointer-events: none;
+  }
+  .check path, .ghost path {
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .check path { stroke: var(--mark); }
+  .ghost path { stroke: var(--edge); stroke-dashoffset: 0; }
+  .ghost { opacity: 0; }
+
+  .label {
+    position: absolute; left: 43px; bottom: 4px;
+    font-size: 18px; line-height: 1.2; white-space: pre; color: var(--ink);
+  }
+  .strike {
+    position: absolute; left: 43px; top: 16.5px; height: 1px; width: 1px;
+    background: var(--ink); opacity: 0;
+  }
+  .side.dark  .strike { box-shadow: 0 1px 2px rgba(0,0,0,.9); }
+  .side.light .strike { box-shadow: none; }
+
+  .side.dark  { --ink: #ffffff; --edge: #ffffff; --mark: #ffffff; }
+  .side.light { --ink: #4D352D; --edge: #6E4D43; --mark: #ffffff; }
+
+  /* ---- particles ------------------------------------------------------- */
+  .petals { position: absolute; inset: 0; pointer-events: none; z-index: 9; }
+  .petals > div { position: absolute; will-change: transform, opacity; }
+</style>
+
+<div id="stage">
+  <div class="side dark"  id="sideDark"><div class="wash"></div><div class="grain"></div>
+    <div class="list" id="listDark"></div><div class="petals" id="pDark"></div></div>
+  <div class="side light" id="sideLight"><div class="wash"></div><div class="grain"></div>
+    <div class="list" id="listLight"></div><div class="petals" id="pLight"></div></div>
+</div>
+
+<script>
+const SHAPES = {"leaf": "<path d=\"M12 2C17 7 20 13 12 22 4 13 7 7 12 2Z\" fill=\"{c}\"/>\n<path d=\"M12 5.5V19.5\" stroke=\"{d}\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\".55\"/>", "flower": "<ellipse cx=\"12\" cy=\"6.4\" rx=\"3.5\" ry=\"5.2\" fill=\"{c}\" transform=\"rotate(0 12 12)\"/><ellipse cx=\"12\" cy=\"6.4\" rx=\"3.5\" ry=\"5.2\" fill=\"{c}\" transform=\"rotate(72 12 12)\"/><ellipse cx=\"12\" cy=\"6.4\" rx=\"3.5\" ry=\"5.2\" fill=\"{c}\" transform=\"rotate(144 12 12)\"/><ellipse cx=\"12\" cy=\"6.4\" rx=\"3.5\" ry=\"5.2\" fill=\"{c}\" transform=\"rotate(216 12 12)\"/><ellipse cx=\"12\" cy=\"6.4\" rx=\"3.5\" ry=\"5.2\" fill=\"{c}\" transform=\"rotate(288 12 12)\"/><circle cx=\"12\" cy=\"12\" r=\"2.6\" fill=\"{d}\"/>", "star": "<path d=\"M12 1.6 14.7 9 22.4 9.4 16.4 14.2 18.4 21.7 12 17.4 5.6 21.7 7.6 14.2 1.6 9.4 9.3 9Z\" fill=\"{c}\"/>", "sparkle": "<path d=\"M12 1C13 8 16 11 23 12 16 13 13 16 12 23 11 16 8 13 1 12 8 11 11 8 12 1Z\" fill=\"{c}\"/>", "moon": "<path d=\"M15.2 2.2A10 10 0 1 0 15.2 21.8 11.6 11.6 0 0 1 15.2 2.2Z\" fill=\"{c}\"/>", "bat": "<path d=\"M9.7 6.9 9.1 4.3 11.2 6.3ZM14.3 6.9 14.9 4.3 12.8 6.3Z\" fill=\"{c}\"/>\n<path d=\"M12 8.2C10.6 6.6 9.2 6.2 8.2 7.2 6.7 5.6 4.2 5 2.1 6.1 3.1 7.6 3.1 9.6 2.6 11.2 4.7 10.6 6.2 11.2 7.2 12.7 8.2 11.6 9.7 11.6 10.7 12.7L12 15.2 13.3 12.7C14.3 11.6 15.8 11.6 16.8 12.7 17.8 11.2 19.3 10.6 21.4 11.2 20.9 9.6 20.9 7.6 21.9 6.1 19.8 5 17.3 5.6 15.8 7.2 14.8 6.2 13.4 6.6 12 8.2Z\" fill=\"{c}\"/>", "unicorn": "<path d=\"M10.1 6.7 12.0 0.6 13.5 7.5Z\" fill=\"{d}\"/>\n<path d=\"M2.2 12.4C2.6 10.9 4.4 10.2 6.4 9.8 7.7 9 8.9 8.1 10 6.9L13.3 7.7C14.1 6 15.5 5.4 16.4 5.9 16.2 7.6 15.7 9.2 14.8 10.3 16.4 12.9 17.1 15.8 17.5 18.8L18 22.2 10.6 22.2C10.2 19.4 9.2 17.2 7.4 15.8 6 14.7 4 14.3 2.9 13.6 2.4 13.3 2.2 12.9 2.2 12.4Z\" fill=\"{c}\"/>\n<path d=\"M14.8 10.3C17.6 9.6 19.4 11.4 19.3 14 18.2 12.6 16.6 12.1 15.4 12.4ZM16.4 14.1C18.5 14.3 19.6 16.1 19.2 18.2 18.4 16.6 17.4 15.6 16.2 15.4Z\" fill=\"{d}\" opacity=\".9\"/>\n<circle cx=\"10.3\" cy=\"10.1\" r=\".8\" fill=\"{d}\" opacity=\".75\"/>\n<circle cx=\"3.7\" cy=\"12.2\" r=\".55\" fill=\"{d}\" opacity=\".6\"/>"};
+const MARK = '<svg viewBox="0 0 32 32"><path d="M 9.5 16 L 14 20.5 L 23 11.5" pathLength="1"/></svg>';
+
+const ROWS = {
+  dark: ["Wished on a questionable star",
+         "Howled at the moon. Politely.",
+         "Went full creature of the night"],
+  light:["Went outside. Touched grass.",
+         "Kept the plant alive. Barely.",
+         "Believed something ridiculous"],
+};
+
+/* Dark checks top-to-bottom, then each light row takes over from its
+   opposite number — light on, dark off, one pair at a time. */
+const LOOP = 10.0;
+const SCHED = {
+  dark:  [{ on: 0.80, off: 3.60, kind: "star"    },
+          { on: 1.60, off: 4.60, kind: "moon"    },
+          { on: 2.40, off: 5.60, kind: "bat"     }],
+  light: [{ on: 3.60, off: 7.60, kind: "leaf"    },
+          { on: 4.60, off: 7.90, kind: "flower"  },
+          { on: 5.60, off: 8.20, kind: "unicorn" }],
+};
+const EVENTS = [];
+for (const side of ["dark", "light"])
+  SCHED[side].forEach((e, row) => EVENTS.push({ side, row, t: e.on, kind: e.kind }));
+
+const PALETTE = {
+  leaf:    [["#4FA85C","#2C6B36"],["#79C167","#3A7A44"],["#2F8B45","#1D5A2C"],["#9AD07A","#4A8C50"]],
+  flower:  [["#FF6B8A","#FFE9A3"],["#FF9F5A","#FFF0C0"],["#E86BD8","#FFE9A3"],["#FFC24A","#FFF6D8"]],
+  unicorn: [["#F0A3D4","#FFC94A"],["#BFA2EE","#FFC94A"],["#8FD8EA","#FFC94A"],["#F7C7E4","#F0A93C"]],
+  star:    [["#FFFFFF","#FFF3C4"],["#FFF3C4","#fff"],["#CFE3FF","#fff"],["#FFE9A3","#fff"]],
+  moon:    [["#FFE39A","#fff"],["#E8ECF5","#fff"],["#FFD98A","#fff"],["#CFE3FF","#fff"]],
+  bat:     [["#9A93C8","#9A93C8"],["#7C75AE","#7C75AE"],["#B3ACDC","#B3ACDC"],["#6E689A","#6E689A"]],
+};
+/* stars mix in four-point sparkles so the burst isn't uniform */
+const GLYPH = k => k === "star" ? ["star","sparkle"] : [k];
+
+/* deterministic RNG so every capture of frame N is identical */
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a += 0x6D2B79F5; let x = a;
+    x = Math.imul(x ^ x >>> 15, x | 1); x ^= x + Math.imul(x ^ x >>> 7, x | 61);
+    return ((x ^ x >>> 14) >>> 0) / 4294967296; };
+}
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const eOut = t => 1 - Math.pow(1 - t, 3);
+const eInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+const TAU = Math.PI * 2;
+
+/* ---- build the two lists ---------------------------------------------- */
+const CELLS = {};
+for (const side of ["dark", "light"]) {
+  const list = document.getElementById(side === "dark" ? "listDark" : "listLight");
+  CELLS[side] = ROWS[side].map(text => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML =
+      '<div class="box"><div class="fill"></div><div class="check">' + MARK + '</div>'
+      + '<div class="ring"></div></div>'
+      + '<div class="ghost">' + MARK + '</div>'
+      + '<div class="label"></div><div class="strike"></div>';
+    row.querySelector(".label").textContent = text;
+    list.appendChild(row);
+    return {
+      row, box: row.querySelector(".box"), ring: row.querySelector(".ring"),
+      fill: row.querySelector(".fill"), mark: row.querySelector(".check path"),
+      ghost: row.querySelector(".ghost"), label: row.querySelector(".label"),
+      strike: row.querySelector(".strike"),
+    };
+  });
+}
+/* size each row to its own text, so the strike line stops at the last word */
+function measure() {
+  for (const side of ["dark", "light"]) CELLS[side].forEach(c => {
+    const w = c.label.getBoundingClientRect().width / 1.6;
+    c.row.style.width = (43 + w + 2) + "px";
+    c.target = w;
+  });
+}
+
+/* ---- particles --------------------------------------------------------- */
+const LAYERS = { dark: document.getElementById("pDark"), light: document.getElementById("pLight") };
+const SIDE_RECT = { dark: document.getElementById("sideDark").getBoundingClientRect(),
+                    light: document.getElementById("sideLight").getBoundingClientRect() };
+const PARTS = [];
+function buildParticles() {
+  EVENTS.forEach((ev, ei) => {
+    const cell = CELLS[ev.side][ev.row];
+    const r = cell.box.getBoundingClientRect(), sr = SIDE_RECT[ev.side];
+    const ox = r.left + r.width / 2 - sr.left, oy = r.top + r.height / 2 - sr.top;
+    const glyphs = GLYPH(ev.kind), pal = PALETTE[ev.kind];
+    const n = ev.kind === "unicorn" ? 10 : 15;
+    const rand = rng(1000 + ei * 97);
+    for (let i = 0; i < n; i++) {
+      const g = glyphs[Math.floor(rand() * glyphs.length)];
+      const [c, d] = pal[Math.floor(rand() * pal.length)];
+      const size = (ev.kind === "unicorn" ? 42 : ev.kind === "star" ? 26 : 32)
+                 + rand() * (ev.kind === "star" ? 18 : 24);
+      const el = document.createElement("div");
+      el.style.width = el.style.height = size + "px";
+      el.innerHTML = '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24">'
+                   + SHAPES[g].replaceAll("{c}", c).replaceAll("{d}", d) + '</svg>';
+      el.style.left = (ox - size / 2) + "px";
+      el.style.top  = (oy - size / 2) + "px";
+      el.style.display = "none";
+      LAYERS[ev.side].appendChild(el);
+      PARTS.push({
+        el, kind: ev.kind, t0: ev.t + rand() * 0.16,
+        life: ({ leaf: 1.9, flower: 1.35, unicorn: 1.8, star: 1.05, moon: 1.7, bat: 1.6 })[ev.kind]
+              * (0.82 + rand() * 0.36),
+        ang: (-148 + Math.pow(rand(), 0.8) * 128) * Math.PI / 180,
+        dist: 72 + rand() * (ev.kind === "star" ? 78 : 108),
+        spin: (rand() < .5 ? -1 : 1) * (60 + rand() * 320),
+        wob: rand() * TAU, seed: rand(),
+      });
+    }
+  });
+}
+
+function drawParticle(p, t) {
+  const age = (t - p.t0) / p.life;
+  if (age < 0 || age > 1) { p.el.style.display = "none"; return; }
+  p.el.style.display = "block";
+  const e = eOut(age);
+  let x = Math.cos(p.ang) * p.dist * e;
+  let y = Math.sin(p.ang) * p.dist * e;
+  let sc = 1, rot = p.spin * age, op = 1;
+
+  switch (p.kind) {
+    case "leaf":                                   // flutters down
+      x += Math.sin(age * TAU * 1.6 + p.wob) * 20;
+      y += 215 * age * age; rot = p.spin * 1.6 * age; break;
+    case "flower":                                 // pops, then falls
+      y += 185 * age * age; sc = 0.25 + eOut(Math.min(1, age * 4)) * 0.85; break;
+    case "unicorn":                                // floats, gentle bob
+      y += 58 * age * age - Math.sin(age * TAU + p.wob) * 12;
+      rot = p.spin * 0.22 * age; sc = 0.3 + eOut(Math.min(1, age * 3.5)) * 0.8; break;
+    case "star":                                   // fast twinkle
+      y += 100 * age * age;
+      sc = (0.2 + eOut(Math.min(1, age * 5)) * 0.9)
+         * (0.78 + 0.3 * Math.abs(Math.sin(age * TAU * 3 + p.wob)));
+      rot = p.spin * 0.5 * age; break;
+    case "moon":                                   // slow rise
+      y -= 48 * age; rot = p.spin * 0.3 * age;
+      sc = 0.3 + eOut(Math.min(1, age * 3)) * 0.8; break;
+    case "bat":                                    // erratic, flapping
+      x += Math.sin(age * TAU * 2.1 + p.wob) * 32;
+      y += Math.sin(age * TAU * 3.4 + p.wob * 2) * 26 - 38 * age;
+      rot = Math.sin(age * TAU * 1.3 + p.wob) * 26;
+      sc = 0.3 + eOut(Math.min(1, age * 4)) * 0.8; break;
+  }
+  if (p.kind !== "flower" && p.kind !== "leaf") { /* scale set above */ }
+  else if (p.kind === "leaf") sc = 0.3 + eOut(Math.min(1, age * 4)) * 0.85;
+
+  op = age < .12 ? age / .12 : 1 - eInOut(clamp01((age - .58) / .42));
+  const flap = p.kind === "bat"
+    ? " scaleX(" + (0.35 + 0.65 * Math.abs(Math.sin(age * TAU * 7 + p.wob))).toFixed(3) + ")" : "";
+  p.el.style.opacity = op.toFixed(3);
+  p.el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) rotate("
+                       + rot.toFixed(1) + "deg) scale(" + sc.toFixed(3) + ")" + flap;
+}
+
+/* ---- per-row state ------------------------------------------------------ */
+function drawRow(cell, tOn, tOff, t) {
+  const on = (d, lag = 0) => eInOut(clamp01((t - tOn - lag) / d));
+  const of = (d, lag = 0) => eInOut(clamp01((t - tOff - lag) / d));
+
+  // Unchecking is staged, not a straight reverse: the mark retracts along its
+  // own path first, then the fill drops away and the strike pulls back.
+  const fast = on(0.20)       * (1 - of(0.28, 0.10));   // fill in / border out
+  const mark = on(0.30, 0.02) * (1 - of(0.24));         // checkmark draw
+  const slow = on(0.50)       * (1 - of(0.30, 0.06));   // gradient + strike
+  // a squish + faint preview just before the tap lands, standing in for a cursor
+  const hov = eInOut(clamp01((t - (tOn - 0.34)) / 0.18)) * (t < tOn ? 1 : 0);
+  // small settle bounce as it releases
+  const u = clamp01((t - tOff) / 0.36);
+  const bounce = (u > 0 && u < 1) ? Math.sin(u * Math.PI) : 0;
+
+  const s = 32 - 4 * hov;
+  cell.box.style.width = cell.box.style.height = s + "px";
+  cell.box.style.left = cell.box.style.top = ((32 - s) / 2) + "px";
+  cell.box.style.borderRadius = (10 - 2 * hov) + "px";
+  cell.box.style.transform = "scale(" + (1 - 0.10 * bounce).toFixed(4) + ")";
+  cell.ring.style.borderWidth = (2 * (1 - fast)) + "px";
+  cell.ghost.style.opacity = (0.3 * hov).toFixed(3);
+
+  cell.fill.style.opacity = fast.toFixed(3);
+  cell.fill.style.top = (-96 * slow) + "px";
+  cell.mark.style.strokeDashoffset = (1 - mark).toFixed(3);
+  cell.label.style.opacity = (1 - 0.5 * fast).toFixed(3);
+  cell.strike.style.width = (1 + (cell.target - 1) * slow) + "px";
+  cell.strike.style.opacity = slow.toFixed(3);
+}
+
+function renderAt(t) {
+  t = ((t % LOOP) + LOOP) % LOOP;
+  for (const side of ["dark", "light"])
+    SCHED[side].forEach((e, row) => drawRow(CELLS[side][row], e.on, e.off, t));
+  for (const p of PARTS) drawParticle(p, t);
+}
+
+window.CAPTURE = false;
+document.fonts.ready.then(() => {
+  measure(); buildParticles(); renderAt(0);
+  const t0 = performance.now();
+  (function loop(now) {
+    if (!window.CAPTURE) renderAt((now - t0) / 1000);
+    requestAnimationFrame(loop);
+  })(t0);
+  window.READY = true;
+});
+</script>

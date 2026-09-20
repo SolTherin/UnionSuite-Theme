@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-us-color-scheme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recents workshop — UnionSuite</title>
+  <style>/* SHARED_STYLES */
+/* RECENTS_STYLES */</style>
+</head>
+<body class="ws-frame recents-workshop">
+  <header class="recents-intro">
+    <a href="Taskbar-Workshop.html">← Taskbar comparison</a>
+    <h1>Recents layout workshop</h1>
+    <p>Approved Recents popup for Option C, available separately for inspection.</p>
+  </header>
+  <section class="recents-controls" aria-label="Preview settings">
+    <label>Appearance<select id="recents-scheme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <label>Popup width<select id="recents-width"><option value="620">Current · 620px</option><option value="420" selected>Narrow · 420px</option><option value="800">Wide · 800px</option></select></label>
+    <button type="button" class="ws-feature-button" id="reopen-recents">Open Recents</button>
+  </section>
+  <main class="recents-stage">
+  <section id="ws-recents" class="ws-popover ws-recents" role="dialog" aria-labelledby="recents-heading">
+    <header class="ws-popover-heading"><div><h2 id="recents-heading">Recently modified</h2><p>Pick up where the work left off.</p></div><button type="button" class="ws-icon-button" data-close="recents" aria-label="Close Recents"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+    <div class="ws-recents-toolbar"><div class="ws-segmented" role="group" aria-label="Recents scope"><button type="button" data-scope="mine" aria-pressed="true">Mine</button><button type="button" data-scope="sitewide" aria-pressed="false">Sitewide</button></div><span id="recents-count">Last 10 of each type</span></div>
+    <div id="recents-results" class="ws-recents-columns"></div>
+    <footer class="ws-popover-footer"><span>Sorted by last modified</span><button type="button" id="refresh-recents"><i class="ti ti-refresh" aria-hidden="true"></i><span class="us-button-spinner" aria-hidden="true" hidden></span> Refresh</button></footer>
+  </section>
+  </main>
+  <p class="recents-note" id="recents-status" role="status">Fictional data · Navigation is simulated · Layout changes here are separate from the taskbar.</p>
+  <script>/* RECENTS_SCRIPT */</script>
+</body>
+</html>

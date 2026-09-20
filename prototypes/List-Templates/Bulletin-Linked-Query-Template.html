@@ -1,0 +1,12 @@
+<!-- Query Template field: one result only. iPart CSS class: us-staff-bulletin.
+     Add AlertUrl to the query output. Use an empty string for unlinked records.
+     iMIS creates all outer panel, list, card and card-body wrappers. -->
+<div class="BulletinCard">
+  <h3>{#query.DocumentName}</h3>
+  <em>{#query.FirstName} {#query.LastName} - {#query.CreatedOn}</em>
+  <div class="us-list__body">{#query.DocumentBody noencode}</div>
+  <a class="us-bulletin__link" href="{#query.AlertUrl}"
+     aria-label="Read more: {#query.DocumentName}">
+    Read more <span aria-hidden="true">→</span>
+  </a>
+</div>

@@ -1,0 +1,390 @@
+<div id="pip-mascot-demo" aria-label="Pip v2, a taskbar mascot concept">
+  <style>
+    #pip-mascot-demo {
+      --pip-surface: light-dark(#f6f8f7, #202827);
+      --pip-bar: light-dark(#ffffff, #283230);
+      --pip-ink: light-dark(#263c37, #e2ede8);
+      --pip-muted: light-dark(#64756e, #aebeb6);
+      --pip-line: light-dark(#dce5df, #414e48);
+      --pip-accent: light-dark(#245e4b, #a6dcc2);
+      --pip-tint: light-dark(#e6efe9, #364b40);
+      --pip-fur: light-dark(#a3d6be, #a5d4c0);
+      --pip-fur-edge: light-dark(#7db59d, #77ab93);
+      --pip-fur-light: light-dark(#cdeedd, #c9ead9);
+      --pip-ear: light-dark(#f3d9d0, #edd0c6);
+      --pip-ear-deep: light-dark(#e9bfb3, #dfb2a6);
+      --pip-face: light-dark(#2c3f3a, #22322d);
+      --pip-nose: light-dark(#3b5450, #2e4541);
+      --pip-blush: light-dark(#f0a9a4, #e59d99);
+      --pip-shine: light-dark(#ffffff, #f7fbf9);
+      --pip-shadow: light-dark(#203c3526, #07100c55);
+      color: var(--pip-ink);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      width: 100%;
+    }
+    #pip-mascot-demo * { box-sizing: border-box; }
+    #pip-mascot-demo .pip-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    #pip-mascot-demo .pip-name { display:block; font-weight:500; }
+    #pip-mascot-demo .pip-subtitle { display:block; color:var(--pip-muted); margin-top:3px; }
+    #pip-mascot-demo .pip-replay { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid var(--pip-line); border-radius:9px; background:var(--pip-bar); color:var(--pip-ink); font:inherit; cursor:pointer; }
+    #pip-mascot-demo .pip-replay:hover { background:var(--pip-tint); }
+    #pip-mascot-demo .pip-product { border:1px solid var(--pip-line); border-radius:14px; overflow:hidden; background:var(--pip-surface); }
+    #pip-mascot-demo .pip-stage { height:272px; position:relative; overflow:hidden; }
+    #pip-mascot-demo .pip-watermark { position:absolute; left:22px; top:20px; color:var(--pip-muted); display:flex; align-items:center; gap:8px; }
+    #pip-mascot-demo .pip-visitor { position:absolute; bottom:0; right:14%; width:190px; height:225px; }
+    #pip-mascot-demo .pip-cutout { position:absolute; inset:0; overflow:hidden; }
+
+    /* The character button slides up through the cutout. The bottom 40px sits behind the taskbar. */
+    #pip-mascot-demo .pip-character { position:absolute; bottom:-40px; left:10px; width:170px; height:170px; background:none; border:0; padding:0; cursor:pointer; transform:translateY(178px); visibility:hidden; transition:transform 500ms ease-in, visibility 0s linear 500ms; -webkit-tap-highlight-color:transparent; border-radius:50% 50% 0 0; }
+    #pip-mascot-demo .pip-character:disabled { cursor:default; }
+    #pip-mascot-demo .pip-character:focus-visible { outline:2px solid var(--pip-accent); outline-offset:4px; }
+    #pip-mascot-demo[data-phase="peek"] .pip-character { transform:translateY(52px) rotate(-6deg); visibility:visible; transition:transform 620ms cubic-bezier(.3,1.25,.5,1), visibility 0s; }
+    #pip-mascot-demo[data-phase="visit"] .pip-character { transform:translateY(0) rotate(0); visibility:visible; transition:transform 720ms cubic-bezier(.34,1.5,.42,1), visibility 0s; }
+    #pip-mascot-demo[data-phase="leaving"] .pip-character { transform:translateY(178px) rotate(3deg); visibility:visible; transition:transform 640ms cubic-bezier(.55,-.38,.78,.22), visibility 0s; }
+
+    /* SVG layers: creature = landing squash + wave bounce, figure = idle breathing. */
+    #pip-mascot-demo .pip-creature { display:block; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 6px 8px var(--pip-shadow)); transform-origin:50% 100%; }
+    #pip-mascot-demo .pip-figure, #pip-mascot-demo .pip-head, #pip-mascot-demo .pip-ear, #pip-mascot-demo .pip-eyes, #pip-mascot-demo .pip-eye, #pip-mascot-demo .pip-arm, #pip-mascot-demo .pip-tuft, #pip-mascot-demo .pip-nose-group { transform-box:view-box; }
+    #pip-mascot-demo .pip-figure { transform-origin:85px 130px; }
+    #pip-mascot-demo[data-phase="visit"] .pip-creature { animation:pip-land 720ms cubic-bezier(.3,1.4,.5,1) both; }
+    #pip-mascot-demo[data-phase="visit"] .pip-figure { animation:pip-breathe 3.6s ease-in-out 720ms infinite; }
+
+    /* Fur and features */
+    #pip-mascot-demo .pip-fur { fill:url(#pipv2-fur); }
+    #pip-mascot-demo .pip-fur-flat { fill:var(--pip-fur); }
+    #pip-mascot-demo .pip-fur-light { fill:var(--pip-fur-light); }
+    #pip-mascot-demo .pip-fur-shade { fill:var(--pip-fur-edge); }
+    #pip-mascot-demo .pip-ear-inner { fill:var(--pip-ear); }
+    #pip-mascot-demo .pip-ear-deep { fill:var(--pip-ear-deep); }
+    #pip-mascot-demo .pip-face-fill { fill:var(--pip-face); }
+    #pip-mascot-demo .pip-face-stroke { fill:none; stroke:var(--pip-face); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+    #pip-mascot-demo .pip-nose { fill:var(--pip-nose); }
+    #pip-mascot-demo .pip-shine { fill:var(--pip-shine); }
+    #pip-mascot-demo .pip-blush { fill:var(--pip-blush); opacity:.72; transition:opacity 300ms; }
+    #pip-mascot-demo .pip-sheen { fill:var(--pip-shine); opacity:.15; }
+
+    #pip-mascot-demo .pip-head { transform-origin:85px 112px; transform:rotate(calc(-3deg + var(--pip-turn, 0deg))); transition:transform 320ms cubic-bezier(.3,1.2,.5,1); }
+    #pip-mascot-demo .pip-ear-left { transform-origin:50px 60px; transition:transform 260ms cubic-bezier(.3,1.4,.5,1); }
+    #pip-mascot-demo .pip-ear-right { transform-origin:120px 60px; transition:transform 260ms cubic-bezier(.3,1.4,.5,1); }
+    #pip-mascot-demo .pip-eyes { transform:translate(var(--pip-gaze-x, 0px), var(--pip-gaze-y, 0px)); transition:transform 170ms ease-out; }
+    #pip-mascot-demo .pip-eye { transform-box:fill-box; transform-origin:center; }
+    #pip-mascot-demo .pip-eye-happy, #pip-mascot-demo .pip-mouth-open { opacity:0; transition:opacity 120ms; }
+    #pip-mascot-demo .pip-eye-open, #pip-mascot-demo .pip-mouth-smile { opacity:1; transition:opacity 120ms; }
+    #pip-mascot-demo .pip-arm-right { transform-origin:131px 160px; }
+    #pip-mascot-demo .pip-arm-left { transform-origin:39px 160px; }
+
+    /* Peek: eyes glance left and right before popping up */
+    #pip-mascot-demo[data-phase="peek"] .pip-eyes { animation:pip-glance 1.3s ease-in-out 120ms both; }
+
+    /* Hover: ears perk, eyes widen a touch */
+    #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-left { transform:scale(1.07) rotate(-5deg); }
+    #pip-mascot-demo .pip-character:not(:disabled):hover .pip-ear-right { transform:scale(1.07) rotate(5deg); }
+    #pip-mascot-demo .pip-character:not(:disabled):hover .pip-blush { opacity:.9; }
+
+    /* Blink and ear twitch, scheduled from script */
+    #pip-mascot-demo.is-blinking .pip-eye-open { animation:pip-blink 190ms ease-in-out both; }
+    #pip-mascot-demo.is-twitching .pip-ear-left { animation:pip-ear-twitch 420ms ease-in-out; }
+
+    /* Wave: one 2s take, arm lifts, rocks five times, and settles */
+    #pip-mascot-demo.is-waving .pip-arm-right { animation:pip-wave 2000ms ease-in-out both; }
+    #pip-mascot-demo.is-waving .pip-creature { animation:pip-bounce 2000ms ease-in-out both; }
+    #pip-mascot-demo.is-waving .pip-head { transform:rotate(calc(5deg + var(--pip-turn, 0deg))); }
+    #pip-mascot-demo.is-waving .pip-ear-right { animation:pip-ear-wiggle 520ms ease-in-out 3; }
+    #pip-mascot-demo.is-waving .pip-eye-open, #pip-mascot-demo.is-waving .pip-mouth-smile { opacity:0; }
+    #pip-mascot-demo.is-waving .pip-eye-happy, #pip-mascot-demo.is-waving .pip-mouth-open { opacity:1; }
+    #pip-mascot-demo.is-waving .pip-blush { opacity:.95; }
+
+    /* Little blob variant from the design controls */
+    #pip-mascot-demo[data-shape="blob"] .pip-ear, #pip-mascot-demo[data-shape="blob"] .pip-tuft, #pip-mascot-demo[data-shape="blob"] .pip-cheek-fluff, #pip-mascot-demo[data-shape="blob"] .pip-muzzle { display:none; }
+    #pip-mascot-demo[data-shape="blob"] .pip-nose-group { transform:translate(0, 6px) scale(.34); transform-origin:85px 81px; }
+    #pip-mascot-demo[data-shape="blob"] .pip-mouth { transform:translate(0, 3px); }
+
+    #pip-mascot-demo .pip-taskbar { position:relative; background:var(--pip-bar); border-top:1px solid var(--pip-line); display:flex; align-items:center; gap:5px; padding:12px 16px; min-height:61px; }
+    #pip-mascot-demo .pip-task { display:flex; align-items:center; gap:8px; padding:8px 10px; color:var(--pip-muted); border-radius:7px; }
+    #pip-mascot-demo .pip-task-current { color:var(--pip-accent); background:var(--pip-tint); }
+    #pip-mascot-demo .pip-avatar { margin-left:auto; border:1px solid var(--pip-line); background:var(--pip-surface); border-radius:50%; width:32px; height:32px; display:grid; place-items:center; color:var(--pip-muted); }
+    #pip-mascot-demo .pip-footer { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px; color:var(--pip-muted); }
+
+    @keyframes pip-land { 0% { transform:scale(1.04, .9); } 45% { transform:scale(.96, 1.07); } 75% { transform:scale(1.02, .98); } 100% { transform:scale(1, 1); } }
+    @keyframes pip-breathe { 0%, 100% { transform:scale(1, 1); } 50% { transform:scale(1.014, .984) translateY(.6px); } }
+    @keyframes pip-glance { 0%, 100% { transform:translate(0, 0); } 25% { transform:translate(-3.5px, -.5px); } 65% { transform:translate(3.5px, -.5px); } }
+    @keyframes pip-blink { 0%, 100% { transform:scaleY(1); } 40%, 60% { transform:scaleY(.06); } }
+    @keyframes pip-ear-twitch { 0%, 100% { transform:rotate(0); } 30% { transform:rotate(-9deg) scale(1.04); } 60% { transform:rotate(4deg); } }
+    @keyframes pip-ear-wiggle { 0%, 100% { transform:rotate(0); } 50% { transform:rotate(9deg) scale(1.05); } }
+    @keyframes pip-wave {
+      0% { transform:translate(0, 0) rotate(0); }
+      12% { transform:translate(22px, -36px) rotate(2deg); }
+      22% { transform:translate(22px, -36px) rotate(28deg); }
+      32% { transform:translate(22px, -36px) rotate(2deg); }
+      42% { transform:translate(22px, -36px) rotate(28deg); }
+      52% { transform:translate(22px, -36px) rotate(2deg); }
+      62% { transform:translate(22px, -36px) rotate(28deg); }
+      72% { transform:translate(22px, -36px) rotate(2deg); }
+      82% { transform:translate(22px, -36px) rotate(22deg); }
+      90% { transform:translate(22px, -36px) rotate(2deg); }
+      100% { transform:translate(0, 0) rotate(0); }
+    }
+    @keyframes pip-bounce {
+      0%, 100% { transform:translateY(0) scale(1, 1); }
+      12% { transform:translateY(-4px) scale(.98, 1.03); }
+      22%, 42%, 62% { transform:translateY(-2px) scale(.99, 1.015); }
+      32%, 52%, 72% { transform:translateY(0) scale(1.005, .995); }
+      90% { transform:translateY(-1px) scale(1, 1); }
+    }
+
+    @media (max-width:440px) {
+      #pip-mascot-demo .pip-stage { height:254px; }
+      #pip-mascot-demo .pip-visitor { right:7%; }
+      #pip-mascot-demo .pip-taskbar { padding:10px 8px; gap:2px; }
+      #pip-mascot-demo .pip-task { gap:5px; padding:8px 6px; }
+      #pip-mascot-demo .pip-avatar { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      #pip-mascot-demo .pip-character, #pip-mascot-demo .pip-head, #pip-mascot-demo .pip-ear, #pip-mascot-demo .pip-eyes { transition:none; }
+      #pip-mascot-demo .pip-creature, #pip-mascot-demo .pip-figure, #pip-mascot-demo .pip-eyes, #pip-mascot-demo .pip-eye-open, #pip-mascot-demo .pip-ear, #pip-mascot-demo .pip-arm-right { animation:none !important; }
+      #pip-mascot-demo.is-waving .pip-arm-right { transform:translate(22px, -36px) rotate(6deg); }
+    }
+  </style>
+  <div class="pip-heading">
+    <div><span class="pip-name">Meet Pip</span><span class="pip-subtitle">A tiny taskbar visitor, version two</span></div>
+    <button type="button" class="pip-replay"><i data-lucide="rotate-ccw" aria-hidden="true"></i>Replay visit</button>
+  </div>
+  <div class="pip-product">
+    <div class="pip-stage">
+      <div class="pip-watermark"><i data-lucide="layers-2" aria-hidden="true"></i>UnionSuite</div>
+      <div class="pip-visitor" aria-label="Mascot appearance">
+        <div class="pip-cutout">
+          <button type="button" class="pip-character" aria-label="Make Pip wave" disabled>
+            <svg class="pip-creature" viewBox="0 0 170 170" aria-hidden="true" focusable="false">
+              <defs>
+                <radialGradient id="pipv2-fur" gradientUnits="userSpaceOnUse" cx="62" cy="38" r="118">
+                  <stop offset="0" style="stop-color:var(--pip-fur-light)"/>
+                  <stop offset=".42" style="stop-color:var(--pip-fur)"/>
+                  <stop offset="1" style="stop-color:var(--pip-fur-edge)"/>
+                </radialGradient>
+                <filter id="pipv2-soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.8"/></filter>
+              </defs>
+              <g class="pip-figure">
+                <!-- Ears sit behind the head; fluff circles share the fur gradient so they merge seamlessly -->
+                <g class="pip-ear pip-ear-left">
+                  <circle class="pip-fur" cx="31" cy="42" r="29"/>
+                  <circle class="pip-ear-inner" cx="34" cy="44" r="14.5"/>
+                  <circle class="pip-ear-deep" cx="36.5" cy="46.5" r="8"/>
+                </g>
+                <g class="pip-ear pip-ear-right">
+                  <circle class="pip-fur" cx="139" cy="42" r="29"/>
+                  <circle class="pip-ear-inner" cx="136" cy="44" r="14.5"/>
+                  <circle class="pip-ear-deep" cx="133.5" cy="46.5" r="8"/>
+                </g>
+                <!-- Body and belly -->
+                <g class="pip-body">
+                  <ellipse class="pip-fur" cx="85" cy="152" rx="46" ry="42"/>
+                  <ellipse class="pip-fur-light" cx="85" cy="157" rx="30" ry="27" opacity=".9"/>
+                  <ellipse class="pip-fur-shade" cx="85" cy="117" rx="38" ry="7" opacity=".28"/>
+                </g>
+                <!-- Left arm rests on the taskbar edge, fingers curled over it -->
+                <g class="pip-arm pip-arm-left">
+                  <rect class="pip-fur" x="31" y="126" width="16" height="34" rx="8"/>
+                  <circle class="pip-fur-flat" cx="40" cy="120" r="4.6"/><circle class="pip-fur-flat" cx="48" cy="118" r="4.6"/><circle class="pip-fur-flat" cx="56" cy="120" r="4.6"/>
+                  <circle class="pip-fur" cx="48" cy="126" r="11"/>
+                </g>
+                <!-- Head -->
+                <g class="pip-head">
+                  <g class="pip-cheek-fluff">
+                    <ellipse class="pip-fur" cx="38" cy="92" rx="13" ry="17"/>
+                    <ellipse class="pip-fur" cx="132" cy="92" rx="13" ry="17"/>
+                  </g>
+                  <ellipse class="pip-fur" cx="85" cy="72" rx="56" ry="50"/>
+                  <ellipse class="pip-sheen" cx="60" cy="42" rx="16" ry="8" transform="rotate(-22 60 42)"/>
+                  <g class="pip-tuft">
+                    <ellipse class="pip-fur-light" cx="76" cy="24" rx="4.2" ry="8" transform="rotate(-32 76 24)"/>
+                    <ellipse class="pip-fur-light" cx="86" cy="19" rx="4.4" ry="9" transform="rotate(-4 86 19)"/>
+                    <ellipse class="pip-fur-light" cx="96" cy="24" rx="4.2" ry="8" transform="rotate(30 96 24)"/>
+                  </g>
+                  <ellipse class="pip-fur-light pip-muzzle" cx="85" cy="93" rx="21" ry="12.5" opacity=".75"/>
+                  <ellipse class="pip-blush" cx="49" cy="91" rx="8.5" ry="5.5" filter="url(#pipv2-soft)"/>
+                  <ellipse class="pip-blush" cx="121" cy="91" rx="8.5" ry="5.5" filter="url(#pipv2-soft)"/>
+                  <g class="pip-eyes">
+                    <g class="pip-eye pip-eye-open">
+                      <ellipse class="pip-face-fill" cx="62" cy="74" rx="8.5" ry="10.5"/>
+                      <ellipse class="pip-shine" cx="65" cy="69.5" rx="3.4" ry="3.8"/>
+                      <circle class="pip-shine" cx="59" cy="79" r="1.6" opacity=".85"/>
+                    </g>
+                    <g class="pip-eye pip-eye-open">
+                      <ellipse class="pip-face-fill" cx="108" cy="74" rx="8.5" ry="10.5"/>
+                      <ellipse class="pip-shine" cx="111" cy="69.5" rx="3.4" ry="3.8"/>
+                      <circle class="pip-shine" cx="105" cy="79" r="1.6" opacity=".85"/>
+                    </g>
+                    <path class="pip-face-stroke pip-eye-happy" d="M53 78 Q62 66 71 78" style="stroke-width:3.2"/>
+                    <path class="pip-face-stroke pip-eye-happy" d="M99 78 Q108 66 117 78" style="stroke-width:3.2"/>
+                  </g>
+                  <g class="pip-nose-group">
+                    <rect class="pip-nose" x="73" y="68" width="24" height="27" rx="11.5"/>
+                    <ellipse class="pip-shine" cx="80" cy="75" rx="4.6" ry="2.7" opacity=".16"/>
+                  </g>
+                  <g class="pip-mouth">
+                    <path class="pip-face-stroke pip-mouth-smile" d="M78 101 Q85 107.5 92 101"/>
+                    <path class="pip-face-fill pip-mouth-open" d="M76 100 Q85 114 94 100 Z"/>
+                  </g>
+                </g>
+                <!-- Right arm is in front of the head so the raised paw passes the cheek -->
+                <g class="pip-arm pip-arm-right">
+                  <rect class="pip-fur" x="123" y="126" width="16" height="34" rx="8"/>
+                  <circle class="pip-fur-flat" cx="114" cy="120" r="4.6"/><circle class="pip-fur-flat" cx="122" cy="118" r="4.6"/><circle class="pip-fur-flat" cx="130" cy="120" r="4.6"/>
+                  <circle class="pip-fur" cx="122" cy="126" r="11"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="pip-taskbar" aria-label="Taskbar context">
+      <span class="pip-task pip-task-current"><i data-lucide="house" aria-hidden="true"></i>Home</span>
+      <span class="pip-task"><i data-lucide="users" aria-hidden="true"></i>Contacts</span>
+      <span class="pip-task"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Reports</span>
+      <span class="pip-avatar" aria-label="James">J</span>
+    </div>
+  </div>
+  <div class="pip-footer"><span class="pip-status" role="status" aria-live="polite">A little visitor is on the way.</span><span>Interactive concept</span></div>
+  <script>
+    (() => {
+      const root = document.getElementById('pip-mascot-demo');
+      const character = root.querySelector('.pip-character');
+      const replay = root.querySelector('.pip-replay');
+      const status = root.querySelector('.pip-status');
+      const visitor = root.querySelector('.pip-visitor');
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const settings = { shape:'koala', palette:'sage', size:100 };
+      let sequence = [];
+      let departure = null;
+      let reaction = null;
+      let blinkTimer = null;
+      let twitchTimer = null;
+      let started = false;
+      let disposed = false;
+      const rand = (min, max) => min + Math.random() * (max - min);
+      function later(fn, ms) { const id = setTimeout(() => { if (!disposed) fn(); }, ms); sequence.push(id); }
+      function clearIdle() { clearTimeout(blinkTimer); clearTimeout(twitchTimer); blinkTimer = twitchTimer = null; }
+      function clearSequence() { sequence.forEach(clearTimeout); sequence = []; clearTimeout(departure); clearTimeout(reaction); clearIdle(); }
+      function resetExpression() { root.classList.remove('is-blinking', 'is-waving', 'is-twitching'); }
+      function phase(value) { root.dataset.phase = value; character.disabled = value !== 'visit'; }
+      function visiting() { return root.dataset.phase === 'visit'; }
+
+      /* Idle life: irregular blinks (sometimes doubled) and the odd ear twitch while visiting. */
+      function pulse(className, ms) {
+        root.classList.remove(className);
+        void character.offsetWidth;
+        root.classList.add(className);
+        later(() => root.classList.remove(className), ms);
+      }
+      function blink() { if (!visiting() || motion.matches) return; pulse('is-blinking', 230); }
+      function scheduleBlink() {
+        clearTimeout(blinkTimer);
+        blinkTimer = setTimeout(() => {
+          if (disposed || !visiting()) return;
+          blink();
+          if (Math.random() < .25) later(blink, 290);
+          scheduleBlink();
+        }, rand(2400, 5200));
+      }
+      function scheduleTwitch() {
+        clearTimeout(twitchTimer);
+        twitchTimer = setTimeout(() => {
+          if (disposed || !visiting()) return;
+          if (!motion.matches && !root.classList.contains('is-waving')) pulse('is-twitching', 460);
+          scheduleTwitch();
+        }, rand(4500, 8500));
+      }
+
+      function leave() {
+        if (document.activeElement === character) { departure = setTimeout(leave, 2000); return; }
+        clearIdle();
+        phase(motion.matches ? 'away' : 'leaving');
+        status.textContent = 'Pip has wandered off.';
+        departure = setTimeout(() => { phase('away'); resetExpression(); }, 700);
+      }
+      function planDeparture(ms) { clearTimeout(departure); departure = setTimeout(leave, ms); }
+      function visit() {
+        started = true;
+        clearSequence();
+        resetExpression();
+        phase('away');
+        status.textContent = 'A little visitor is on the way.';
+        later(() => phase(motion.matches ? 'visit' : 'peek'), 350);
+        later(() => {
+          phase('visit');
+          status.textContent = 'Pip is visiting. Click to make him wave.';
+          planDeparture(11000);
+          scheduleBlink();
+          scheduleTwitch();
+        }, motion.matches ? 350 : 1900);
+        later(() => { if (!root.classList.contains('is-waving')) wave(); }, 2750);
+      }
+      function wave() {
+        clearTimeout(reaction);
+        root.classList.remove('is-waving', 'is-blinking', 'is-twitching');
+        void character.offsetWidth;
+        root.classList.add('is-waving');
+        reaction = setTimeout(() => root.classList.remove('is-waving'), 2000);
+      }
+      function greet() {
+        if (!visiting()) return;
+        wave();
+        status.textContent = 'Pip waves hello.';
+        planDeparture(7000);
+      }
+      replay.addEventListener('click', visit);
+      character.addEventListener('click', greet);
+
+      /* Eyes follow the pointer and the head turns a little with them. */
+      root.addEventListener('pointermove', (event) => {
+        if (!visiting() || motion.matches || event.pointerType === 'touch') return;
+        const bounds = character.getBoundingClientRect();
+        const dx = (event.clientX - bounds.left - bounds.width / 2) / 80;
+        const dy = (event.clientY - bounds.top - 70) / 110;
+        const x = Math.max(-3, Math.min(3, dx));
+        const y = Math.max(-2, Math.min(2.5, dy));
+        root.style.setProperty('--pip-gaze-x', x.toFixed(2) + 'px');
+        root.style.setProperty('--pip-gaze-y', y.toFixed(2) + 'px');
+        root.style.setProperty('--pip-turn', (x * 1.4).toFixed(2) + 'deg');
+      });
+      root.addEventListener('pointerleave', () => {
+        root.style.setProperty('--pip-gaze-x', '0px');
+        root.style.setProperty('--pip-gaze-y', '0px');
+        root.style.setProperty('--pip-turn', '0deg');
+      });
+
+      const palettes = {
+        sage:['#a3d6be', '#a5d4c0', '#7db59d', '#77ab93', '#cdeedd', '#c9ead9'],
+        lilac:['#c9bceb', '#c7b9e8', '#a596cb', '#a596cb', '#e6dff6', '#e1d9f4'],
+        peach:['#f0c4a6', '#efc1a2', '#d29d83', '#d29d83', '#fbe1cd', '#f9dbc5']
+      };
+      function renderDesign() {
+        root.dataset.shape = settings.shape;
+        const p = palettes[settings.palette] || palettes.sage;
+        root.style.setProperty('--pip-fur', `light-dark(${p[0]}, ${p[1]})`);
+        root.style.setProperty('--pip-fur-edge', `light-dark(${p[2]}, ${p[3]})`);
+        root.style.setProperty('--pip-fur-light', `light-dark(${p[4]}, ${p[5]})`);
+        visitor.style.transform = `scale(${settings.size / 100})`;
+        visitor.style.transformOrigin = '50% 100%';
+      }
+      renderDesign();
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container:visitor, onChange:renderDesign });
+        tweak.addSelect(settings, 'shape', { label:'Character', options:[{label:'Koala',value:'koala'},{label:'Little blob',value:'blob'}] });
+        tweak.addSelect(settings, 'palette', { label:'Colour', options:[{label:'Sage',value:'sage'},{label:'Lilac',value:'lilac'},{label:'Peach',value:'peach'}] });
+        tweak.addSlider(settings, 'size', { label:'Size', min:85, max:110, step:5, unit:'%' });
+      }
+      phase('away');
+      let observer;
+      if ('IntersectionObserver' in window) {
+        observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting) && !started) { visit(); observer.disconnect(); }
+        }, { threshold:0.3 });
+        observer.observe(root);
+      } else { visit(); }
+      window.addEventListener('pagehide', () => { disposed = true; clearSequence(); observer?.disconnect(); }, {once:true});
+    })();
+  </script>
+</div>

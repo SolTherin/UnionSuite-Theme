@@ -1,0 +1,27 @@
+{
+  "name": "unionsuite-cco-ipart",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "package:upload": "node tools/package-upload.mjs",
+    "test:upload": "node tests/upload-package.cjs",
+    "test:editor-save": "node tests/editor-save.cjs",
+    "test:navigation": "node tests/navigation.cjs",
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs --check",
+    "test": "node --test tests/contracts.test.mjs",
+    "test:browser": "node tests/browser.cjs",
+    "test:guide": "node tools/check-guide.cjs",
+    "preview": "node tools/preview.cjs",
+    "test:theme": "node tests/theme.cjs",
+    "test:folder-search": "node tests/folder-search.cjs",
+    "test:tab-loading": "node tests/tab-loading.cjs",
+    "test:visible-loading": "node tests/visible-loading.cjs",
+    "test:custom-urls": "node tests/custom-urls.cjs",
+    "test:url-aliases": "node tests/url-aliases.cjs",
+    "test:frame-size": "node tests/frame-size.cjs",
+    "test:frame-width": "node tests/frame-width.cjs",
+    "test:frame-shell": "node tests/frame-shell.cjs"
+  }
+}

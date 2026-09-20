@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Tenure marker (A1–A4)</title>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="_harness.css">
+<style>
+/* ── Record header ──────────────────────────────────────────────────────── */
+.eg-record {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: var(--card-pad-y) var(--card-pad-x);
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+}
+@media (max-width: 576px) {
+  .eg-record { grid-template-columns: 48px 1fr; }
+  .eg-record__status { grid-column: 2; justify-self: start; }
+}
+.eg-avatar {
+  width: 56px; height: 56px; border-radius: var(--radius-pill);
+  background: var(--brand-100); color: var(--brand-800);
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-size: var(--fs-lg); font-weight: var(--fw-bold);
+}
+.eg-record__name {
+  margin: 0 0 2px;
+  font-family: var(--font-display); font-size: var(--fs-xl);
+  font-weight: var(--fw-bold); color: var(--text-strong); line-height: var(--lh-tight);
+}
+.eg-facts { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: var(--space-2) 0 0; padding: 0; }
+.eg-fact { margin: 0; }
+.eg-fact dt {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-semi);
+  letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 1px;
+}
+.eg-fact dd { margin: 0; font-size: var(--fs-sm); color: var(--text-base); }
+.eg-record__status {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); font-weight: var(--fw-medium);
+  padding: 3px 10px; border-radius: var(--radius-pill);
+  background: var(--success-bg); color: var(--success);
+}
+
+/* ── The tenure marker itself ───────────────────────────────────────────── */
+.eg-tenure {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 0; background: none; padding: 0; margin: 0 0 0 4px;
+  font: inherit; color: inherit; cursor: help;
+  position: relative;
+}
+.eg-tenure__mark { font-size: var(--fs-sm); line-height: 1; }
+.eg-tenure__mark svg { display: block; width: 15px; height: 15px; }
+
+/* Tier 1 — 20 years. A sparkle, warm-toned, gently breathing. */
+.eg-tenure[data-tier="20"] .eg-tenure__mark { color: var(--accent-600); animation: eg-twinkle 5.5s ease-in-out infinite; }
+@keyframes eg-twinkle {
+  0%, 88%, 100% { opacity: .85; transform: scale(1); }
+  93%           { opacity: 1;   transform: scale(1.18); }
+}
+/* Tier 2 — 50 years. A small gold crown. Still. Dignity, not sparkle. */
+.eg-tenure[data-tier="50"] .eg-tenure__mark { color: #c08a1e; }
+/* Special case — join date precedes the CRM's own earliest record. */
+.eg-tenure[data-tier="pre"] .eg-tenure__mark { color: var(--brand-600); }
+
+/* Tooltip. Hover AND focus, because a keyboard user gets the joke too. */
+.eg-tip {
+  position: absolute; left: 50%; bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(3px);
+  background: var(--brand-900); color: var(--white);
+  font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: var(--fw-medium);
+  padding: 5px 10px; border-radius: var(--radius-sm); white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .16s ease, transform .16s ease;
+  z-index: var(--z-tooltip); box-shadow: var(--shadow);
+}
+.eg-tip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--brand-900);
+}
+.eg-tenure:hover .eg-tip,
+.eg-tenure:focus-visible .eg-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.eg-tenure:focus-visible { outline: none; }
+.eg-tenure:focus-visible .eg-tenure__mark { box-shadow: var(--focus-ring); border-radius: 3px; }
+
+/* Lifetime expiry — the cheapest win in the register. */
+.eg-lifetime { border-bottom: 1px dotted var(--neutral-400); cursor: help; position: relative; display: inline-block; }
+.eg-lifetime:hover .eg-tip, .eg-lifetime:focus-visible .eg-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.eg-lifetime:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 2px; }
+
+/* ── Tier config table ──────────────────────────────────────────────────── */
+.eg-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.eg-table th, .eg-table td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+.eg-table th {
+  font-family: var(--font-ui); font-size: var(--fs-2xs); text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-faint); font-weight: var(--fw-semi);
+}
+.eg-table td:first-child { font-family: var(--face-mono); color: var(--text-strong); white-space: nowrap; }
+.eg-table tr:last-child td { border-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="mk-shell">
+
+  <header class="mk-head">
+    <p class="mk-kicker">Easter egg mockup · A1–A4</p>
+    <h1>The tenure marker</h1>
+    <p>Four ideas from the register — the 20-year sparkle, the pre-CRM line, the 50-year
+       crown and the lifetime expiry tooltip — built as <strong>one component with a tier
+       table</strong>, not four features. Nothing interrupts, nothing pops, and every marker
+       is a hover away from explaining itself.</p>
+    <p>Hover or tab to each marker. The keyboard path matters: a marker that only reveals
+       itself to a mouse is decoration to everyone else.</p>
+    <div class="mk-meta">
+      <span class="mk-tag" data-risk="low">Risk: low</span>
+      <span class="mk-tag" data-risk="watch">Blocked on: trustworthy join dates</span>
+      <span class="mk-tag">Warm about members, per tonal rule 2</span>
+    </div>
+  </header>
+
+  <!-- Tier 0 -->
+  <section class="mk-stage">
+    <p class="mk-label">No tier — 8 years <span>The default. Most records look like this and nothing is added.</span></p>
+    <div class="mk-frame">
+      <div class="eg-record">
+        <div class="eg-avatar" aria-hidden="true">DT</div>
+        <div>
+          <h2 class="eg-record__name">Daniel Tran</h2>
+          <dl class="eg-facts">
+            <div class="eg-fact"><dt>Member ID</dt><dd>M104812</dd></div>
+            <div class="eg-fact"><dt>Member since</dt><dd>14 March 2018</dd></div>
+            <div class="eg-fact"><dt>Expires</dt><dd>30 June 2027</dd></div>
+            <div class="eg-fact"><dt>Branch</dt><dd>Metro North</dd></div>
+          </dl>
+        </div>
+        <span class="eg-record__status">Financial</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tier 20 -->
+  <section class="mk-stage">
+    <p class="mk-label">Tier 1 — 20+ years <span>A sparkle. Breathes once every 5.5s, so you notice it on the second look.</span></p>
+    <div class="mk-frame">
+      <div class="eg-record">
+        <div class="eg-avatar" aria-hidden="true">PK</div>
+        <div>
+          <h2 class="eg-record__name">Priya Kaur</h2>
+          <dl class="eg-facts">
+            <div class="eg-fact"><dt>Member ID</dt><dd>M041207</dd></div>
+            <div class="eg-fact"><dt>Member since</dt>
+              <dd>2 September 2003
+                <button class="eg-tenure" data-tier="20" type="button" aria-describedby="tip20">
+                  <span class="eg-tenure__mark" aria-hidden="true">✨</span>
+                  <span class="eg-tip" role="tooltip" id="tip20">A true original. 23 years.</span>
+                </button>
+              </dd>
+            </div>
+            <div class="eg-fact"><dt>Expires</dt><dd>30 June 2027</dd></div>
+            <div class="eg-fact"><dt>Branch</dt><dd>Western</dd></div>
+          </dl>
+        </div>
+        <span class="eg-record__status">Financial</span>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Design note.</strong> The tooltip carries the joke <em>and</em>
+       the fact — "23 years" is information a staff member on a call actually wants, which is
+       what stops this being pure decoration.</p>
+  </section>
+
+  <!-- Tier 50 -->
+  <section class="mk-stage">
+    <p class="mk-label">Tier 2 — 50 years <span>A gold crown. Deliberately still: dignity, not sparkle.</span></p>
+    <div class="mk-frame">
+      <div class="eg-record">
+        <div class="eg-avatar" aria-hidden="true">MO</div>
+        <div>
+          <h2 class="eg-record__name">Mary O'Brien</h2>
+          <dl class="eg-facts">
+            <div class="eg-fact"><dt>Member ID</dt><dd>M000914</dd></div>
+            <div class="eg-fact"><dt>Member since</dt>
+              <dd>11 June 1974
+                <button class="eg-tenure" data-tier="50" type="button" aria-describedby="tip50">
+                  <span class="eg-tenure__mark" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.4 6.3a1 1 0 0 1 1.5-.3L6.6 8 9.1 3.6a1 1 0 0 1 1.8 0L13.4 8l2.7-2a1 1 0 0 1 1.6 1L16 14.4a1 1 0 0 1-1 .8H5a1 1 0 0 1-1-.8L2.3 7a1 1 0 0 1 .1-.7z"/><rect x="4.6" y="16" width="10.8" height="1.8" rx=".9"/></svg>
+                  </span>
+                  <span class="eg-tip" role="tooltip" id="tip50">52 years a member.</span>
+                </button>
+              </dd>
+            </div>
+            <div class="eg-fact"><dt>Expires</dt>
+              <dd><span class="eg-lifetime" tabindex="0" role="button" aria-describedby="tipLife">Lifetime
+                <span class="eg-tip" role="tooltip" id="tipLife">Nope. Never.</span>
+              </span></dd>
+            </div>
+            <div class="eg-fact"><dt>Branch</dt><dd>Inner South</dd></div>
+          </dl>
+        </div>
+        <span class="eg-record__status">Life member</span>
+      </div>
+    </div>
+    <p class="mk-note"><strong>Two markers on one record</strong> — the crown and the
+       lifetime-expiry tooltip (<em>"Nope. Never."</em>). Hover the dotted "Lifetime". This is
+       the cheapest item in the whole register: a tooltip on a field that otherwise says
+       nothing, factually correct, and it makes the record feel written rather than generated.</p>
+  </section>
+
+  <!-- Pre-CRM -->
+  <section class="mk-stage">
+    <p class="mk-label">Special case — join date precedes the CRM's earliest record</p>
+    <div class="mk-frame">
+      <div class="eg-record">
+        <div class="eg-avatar" aria-hidden="true">SM</div>
+        <div>
+          <h2 class="eg-record__name">Sione Mareko</h2>
+          <dl class="eg-facts">
+            <div class="eg-fact"><dt>Member ID</dt><dd>M000021</dd></div>
+            <div class="eg-fact"><dt>Member since</dt>
+              <dd>3 February 1969
+                <button class="eg-tenure" data-tier="pre" type="button" aria-describedby="tipPre">
+                  <span class="eg-tenure__mark" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10" cy="10" r="7.2"/><path d="M10 5.8V10l2.8 2"/></svg>
+                  </span>
+                  <span class="eg-tip" role="tooltip" id="tipPre">They were here before us.</span>
+                </button>
+              </dd>
+            </div>
+            <div class="eg-fact"><dt>Expires</dt>
+              <dd><span class="eg-lifetime" tabindex="0" role="button" aria-describedby="tipLife2">Lifetime
+                <span class="eg-tip" role="tooltip" id="tipLife2">Nope. Never.</span>
+              </span></dd>
+            </div>
+            <div class="eg-fact"><dt>Branch</dt><dd>Port</dd></div>
+          </dl>
+        </div>
+        <span class="eg-record__status">Life member</span>
+      </div>
+    </div>
+    <p class="mk-note"><strong>This is the one that can misfire.</strong> "Before the CRM
+       existed" in practice means "before the migration cut-off", and migrations are where
+       join dates go to die. A record defaulted to 01/01/1900, or a blank coerced to epoch,
+       would earn this marker — on exactly the records staff trust least. Gate it on a
+       plausible date window (see the floor below), and consider whether the honest version
+       is a data-quality flag wearing a joke.</p>
+  </section>
+
+  <!-- Config -->
+  <section class="mk-stage">
+    <p class="mk-label">The tier table <span>Config, not code — thresholds differ by client.</span></p>
+    <div class="mk-frame">
+      <div class="us-panel">
+        <div class="us-panel__head"><h3 class="us-panel__title">delight.tenure.tiers</h3></div>
+        <table class="eg-table">
+          <thead><tr><th>Threshold</th><th>Marker</th><th>Tooltip</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 20 years</td><td>—</td><td>—</td><td>The default, and most records.</td></tr>
+            <tr><td>≥ 20 years</td><td>✨</td><td>A true original. <em>n</em> years.</td><td>Animated; one twinkle per 5.5s.</td></tr>
+            <tr><td>≥ 50 years</td><td>Crown</td><td><em>n</em> years a member.</td><td>Static. Replaces the sparkle, never both.</td></tr>
+            <tr><td>&lt; earliest CRM record</td><td>Clock</td><td>They were here before us.</td><td>Only inside the plausible window.</td></tr>
+            <tr><td><code>date_floor</code></td><td>—</td><td>—</td><td>Earliest trustworthy join date. Below this, no marker at all — the date is probably migration noise.</td></tr>
+            <tr><td>Expiry = lifetime</td><td>Dotted underline</td><td>Nope. Never.</td><td>Independent of tenure tier.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="mk-note">20 and 50 are defaults, not truths. A union founded in 1990 has a very
+       different idea of "a true original" than one founded in 1902 — which is why the
+       thresholds belong in per-client config and the copy does not hard-code a number.</p>
+  </section>
+
+  <hr class="mk-divider">
+</div>
+</body>
+</html>

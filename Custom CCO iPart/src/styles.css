@@ -1,0 +1,61 @@
+/* Isolated trial component. Consume UnionSuite semantic tokens; no global theme overrides. */
+.us-cco, .us-cco-config { color: var(--text-base, #545962); font: 14px/1.5 var(--font-ui, system-ui, sans-serif); }
+.us-cco *, .us-cco-config * { box-sizing: border-box; }
+.us-cco [hidden], .us-cco-config [hidden] { display: none !important; }
+.us-cco { position: relative; min-width: 0; min-height: var(--us-cco-min-height, 480px); background: var(--bg-surface, #fff); }
+.us-cco__panel { position: relative; min-height: var(--us-cco-min-height, 480px); }
+.us-cco iframe.us-cco__frame { width: 100%; min-width: 0; max-width: 100%; min-height: var(--us-cco-min-height, 480px) !important; flex-shrink: 0; }
+.us-cco .us-cco__loader { position: absolute; z-index: 2; top: 180px; left: calc(50% - 24px); pointer-events: none; }
+.us-cco:not([aria-busy="true"]) > .us-cco__loader,
+.us-cco__panel:not([aria-busy="true"]) > .us-cco__loader { display: none; }
+/* Let the surrounding page show through behind horizontal tabs only. */
+.us-cco:has(> .tabs-horizontal),
+.us-cco > .tabs-horizontal,
+.us-cco > .tabs-horizontal > .RadTabStrip,
+.us-cco > .tabs-horizontal > .RadTabStrip > .rtsLevel,
+.us-cco > .tabs-horizontal > .RadTabStrip > .rtsLevel > .rtsUL { background: transparent; }
+.us-cco :is(button,a):focus-visible, .us-cco-config :is(button,a,input,select):focus-visible { outline: 2px solid var(--border-focus, #006f94); outline-offset: 2px; }
+.us-cco__status, .us-cco__note { margin: 0; padding: 10px 16px; }
+.us-cco__status { min-height: 41px; }
+.us-cco__note { color: var(--text-muted, #545962); font-size: 12px; }
+.us-cco__error { color: var(--danger, #a42620); }
+.us-cco .us-cco__button, .us-cco-config button { min-height: 36px; padding: 6px 12px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; background: var(--bg-surface, #fff); color: var(--brand-700, #00506a); font: inherit; cursor: pointer; }
+.us-cco .us-cco__button:hover, .us-cco-config button:hover { background: var(--brand-50, #eef6f9); }
+/* The initial viewport is replaced with the child's measured content height. */
+.us-cco__frame { display: block; height: var(--us-cco-frame-height, var(--us-cco-min-height, 480px)); border: 0; background: var(--bg-surface, #fff); }
+.us-cco-config { max-width: 800px; margin: 16px 0; }
+.us-cco-config [data-folder-search-results] { list-style: none; padding: 0; max-height: 300px; overflow: auto; }
+.us-cco-config [data-folder-search-results] button { width: 100%; text-align: left; overflow-wrap: anywhere; margin-bottom: 4px; }
+.us-cco-config fieldset { border: 1px solid var(--border, #e2e5e9); border-radius: 6px; padding: 20px; }
+.us-cco-config legend { font-weight: 600; color: var(--text-strong, #1c2024); padding: 0 6px; }
+.us-cco-config label { display: block; margin: 0 0 16px; font-weight: 600; }
+.us-cco-config :is(input:not([type=checkbox]),select) { display: block; width: 100%; margin-top: 6px; min-height: 40px; border: 1px solid var(--border-strong, #9aa1aa); border-radius: 4px; padding: 8px; font: inherit; background: var(--bg-surface, #fff); color: var(--text-strong, #1c2024); }
+.us-cco-config small { display: block; font-weight: 400; margin-top: 4px; }
+.us-cco-config [data-folder-results] { padding-left: 20px; overflow-wrap: anywhere; }
+
+/* Native navigation is owned by the installed UnionSuite theme. */
+.us-cco__panel { display: flex; flex-direction: column; min-width: 0; }
+.us-cco__frame { order: 0; }
+.us-cco__actions { order: 1; display: flex; justify-content: flex-end; margin-top: 12px; }
+.us-cco__refresh > svg { flex: none; pointer-events: none; }
+/* Page editor buttons are siblings of the native tabs, not nested controls.
+   Keep their visual states in the shared icon-button theme. */
+.us-cco .us-cco__tabs > .rtsLI { position: relative; }
+:root .us-cco .us-cco__tabs.rtsUL > .rtsLI.us-cco__tab-editable > .us-cco__tab.rtsLink {
+  padding-inline-end: 44px; min-height: 44px; white-space: normal; overflow-wrap: anywhere;
+}
+/* Keep the native loading slot immediately before the separate edit target.
+   Reserve it even while idle so horizontal captions do not jump on loading. */
+:root .us-cco .us-cco__tabs.rtsUL > .rtsLI.us-cco__tab-editable > .us-cco__tab.rtsLink .rtsTxt { padding-inline-end: 20px; }
+:root .us-cco .us-cco__tabs.rtsUL > .rtsLI.us-cco__tab-editable > .us-cco__tab.rtsLink > .us-tab-loading-spinner { inset-inline-end: 44px; }
+.us-cco .us-cco__tabs > .rtsLI > .us-cco__edit {
+  position: absolute; z-index: 2; right: 4px; top: 50%; transform: translateY(-50%); margin: 0;
+}
+.us-cco__edit > svg { flex: none; pointer-events: none; }
+@media (pointer: coarse) {
+  :root .us-cco .us-cco__tabs.rtsUL > .rtsLI.us-cco__tab-editable > .us-cco__tab.rtsLink { padding-inline-end: 52px; min-height: 52px; }
+  :root .us-cco .us-cco__tabs.rtsUL > .rtsLI.us-cco__tab-editable > .us-cco__tab.rtsLink > .us-tab-loading-spinner { inset-inline-end: 52px; }
+}
+.us-cco__options { padding: 8px 16px; }
+.us-cco summary { cursor: pointer; font-size: 12px; color: var(--text-muted, #545962); }
+.us-cco__sr-only { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

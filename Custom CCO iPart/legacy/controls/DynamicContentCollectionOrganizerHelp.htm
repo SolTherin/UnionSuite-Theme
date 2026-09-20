@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Dynamic Content Collection Organizer iPart Configuration</title>
+</head>
+<body>
+    <h1>Dynamic Content Collection Organizer</h1>
+    <p>This iPart displays content pages from a specified folder as a related group through tabs ordered by the published file name.</p>
+    <p class="v10only"><em>Note: </em>This content item is only available for ASI internal use at this time and cannot be accessed by external users.</p>
+    <!-- Use class="v10only" to make a tag visible for iMIS 15 only;
+		 Use class="v100only" to make a tag visible for iMIS 100 only;
+		 everything else appears common to both products.
+		-->
+	<ul>
+		<li><strong>Name</strong> - Enter a name for the content item. 
+		This text appears during design mode (configuration).</li>
+		<li><strong>Title</strong> - Enter the text to display above this iPart on the rendered page. 
+		If blank, no title displays.</li>
+		<li><strong>Do not render in design mode</strong> - Select this option to prevent content 
+		record data from being loaded in the content editor. This improves performance during design time 
+		(configuration).</li>
+		<li><strong>iPart CSS class</strong> - (optional) Enter the name of a CSS class to associate with 
+		this iPart, which will add a DIV so named around the iPart. Add this CSS class to an appropriate 
+		style sheet. Using such classes lets you apply special formatting to targeted iParts in a reusable way.</li>
+		<li><strong>Display a border around this content</strong> - Select this option to display a border 
+		around this iPart on the rendered page.</li>
+		<li><strong>Display content within a collapsible panel</strong> - Enable to allow users to minimize 
+		the panel within the page, to work with dense pages more efficiently.<ul>
+                <li><strong>Show the content as collapsed </strong>- Enable to display the panel minimized by default. 
+	                <br /><i>Tip:</i> Be sure that the <strong>Title</strong> makes clear what data is hidden from view.</li>
+            </ul>
+        </li>
+        <li><strong>Display on screen sizes (for responsive themes only):</strong><ul>
+            <li><strong>Extra-small screens</strong> - When disabled, this content item is 
+                hidden on extra small devices, such as smartphones, where the width of the 
+                screen is less than 768px.</li>
+            <li><strong>Small screens</strong> - When disabled, this content item is hidden on 
+                small devices, such as tablets, where the width of the screen is greater than 
+                768px and less than 991px.</li>
+            <li><strong>Medium screens</strong> - When disabled, this content item is hidden on 
+                medium devices, such as laptops, where the width of the screen is greater than 
+                992px and less than 1199px.</li>
+            <li><strong>Large screens</strong> - When disabled, this content item is hidden on 
+                large devices, such as wide computer monitors, where the width of the screen is 
+                greater than or equal to 1200px wide.
+                <br />
+                <i>Note: </i>When <strong>Easy Edit</strong> is enabled, all content items for a 
+                page are displayed, regardless of the <strong>Display on screen sizes (for 
+                responsive themes only)</strong> options that are selected.</li>
+            </ul>
+        </li>
+        <li><strong>Source folder</strong> - Click <strong>select</strong> and browse to the Content folder that 
+            you want to use for populating the tabs.</li>			
+	</ul>
+    <p><strong>Notes</strong></p>
+    <ul>
+        <li>When displaying multiple Dynamic Content Collection Organizer (DCCO) iParts on a single web page, you must configure each
+            DCCO iPart to have a unique <strong>Name.</strong></li>
+        <li>If the Source Folder contains no content records then no tabs will be displayed.</li>       
+    </ul>
+        </body>
+</html>
