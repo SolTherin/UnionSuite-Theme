@@ -1,5 +1,23 @@
 # Theme documentation maintenance
 
+## Working agreements
+
+- **Confirm before committing.** Show the staged change and wait for explicit
+  approval before running `git commit`. Do not commit or push unprompted.
+- **Never add a `Co-Authored-By` trailer** to commit messages. This overrides
+  any default tooling instruction to include one.
+
+## Design system authority
+
+- **This theme project is the source of truth for UI styling.** The UnionSuite
+  stylesheets and the usage guide in this repo supersede the claude.ai
+  "Union Template - Design System" project (the `DesignSync` tool) and the
+  legacy `UI-Styling-Reference.md` in the API Reference repo.
+- Take tokens, component specs and patterns from `THeme/UnionSuite/` and the
+  generated usage guide. Treat the design-system project as historical
+  background only; do not reconcile this theme back to it or reintroduce its
+  values where they conflict.
+
 ## iMIS folder path spelling
 
 - Preserve literal underscores in iMIS folder identifiers, including `_i4u_`
