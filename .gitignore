@@ -9,6 +9,5 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
-# Oversized generated artefacts (exceed GitHub's comfortable file size)
-THeme/UnionSuite/Usage-Guide.html
-THeme/UnionSuite.zip
+# Packaged theme archives (rebuilt from source)
+THeme/**/*.zip
