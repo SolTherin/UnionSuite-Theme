@@ -1,7 +1,7 @@
 const fs=require('fs');
 const read=p=>fs.readFileSync(p,'utf8');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-const css=(read('Native CSS/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')+'\n'+read('THeme/UnionSuite/zUnionSuite.css')).replace(/@import[^;]+;/g,'').replace(/url\([^)]*\)/g,url=>url.includes('data:image/svg+xml')?url:'none');
+const css=(read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')+'\n'+read('THeme/UnionSuite/zUnionSuite.css')).replace(/@import[^;]+;/g,'').replace(/url\([^)]*\)/g,url=>url.includes('data:image/svg+xml')?url:'none');
 const nativeSource=read('THeme/UnionSuite/zUnionSuite.css');
 const trial=nativeSource.slice(nativeSource.indexOf('*/',nativeSource.indexOf('/* US-NATIVE-FORMS:START'))+2,nativeSource.indexOf('/* US-NATIVE-FORMS:END */'));
 const fallback=read('prototypes/Native-Form-Integration.css').split('\n').filter(l=>l.includes('.ruFileInput')||l.includes(':is(.ruFakeInput,.ruBrowse,.ruClear)')||l.includes('.ruFileWrap')||l.includes('.EmptyMasterContentPanel:has')||l.includes('upload-preview-status')).join('\n').replaceAll('[id$="_AppThemeEditControl_UploadPanel"]',':is([id$="_AppThemeEditControl_UploadPanel"],[id$="_ImporterControlPanel"] [id$="_FileUploadPanel"])');

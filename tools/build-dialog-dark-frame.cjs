@@ -1,7 +1,7 @@
 // Reproduce the reported classic table-based Bootstrap window and white resize rails.
 const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
-let html=require('./dialog-chrome-example.cjs').documentHtml();
+let html=require('../THeme/UnionSuite/guides/usage/build/dialog-chrome-example.cjs').documentHtml();
 html=html.replace('<html lang="en"','<html data-us-color-scheme="dark" lang="en"');
 html=html.replace('class="RadWindow RadWindow_Bootstrap"','class="RadWindow RadWindow_Bootstrap rwNormalWindow rwTransparentWindow"');
 html=html.replace('<td class="rwTitlebar">','<td class="rwCorner rwTopLeft">&nbsp;</td><td class="rwTitlebar">');

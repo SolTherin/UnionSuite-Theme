@@ -6,6 +6,17 @@ Union Innovation Hub. Start with the
 instructions, branding, class placement, templates and troubleshooting.
 It opens directly in a browser and can be shared as one offline HTML file.
 
+Maintained documentation, templates, examples and guide builders now live together
+in [guides/usage](THeme/UnionSuite/guides/usage/README.md), the documentation source
+of truth. Generated guides and comparison pages are built locally and ignored by
+Git. After checkout, run `node tools/build-theme-usage.cjs` to create the guide.
+The smaller index/topic-page publication format is planned separately.
+
+Current design work follows the [prototype lifecycle](prototypes/README.md):
+tracked WIP → tracked approved designs → production theme and maintained guide.
+Only superseded research moves into ignored `archive/`. The accepted taskbar,
+palette and Recents design is retained in [approved/taskbar](prototypes/approved/taskbar/README.md).
+
 ## Current feature status
 
 | Feature | Status | Maintained source |
@@ -13,11 +24,11 @@ It opens directly in a browser and can be shared as one offline HTML file.
 | Five brand seeds, palette ramps, semantic tokens and live editor | Theme tokens; guide editor updates every preview, with hex input/reset/CSS download | `THeme/UnionSuite/zUnionSuite.css`; client overrides in `zzClientSpecific.css` |
 | Existing native buttons (`TextButton`, `btn` and native variants) | Token colour mapping in shared theme; native layout and handlers retained | `zUnionSuite.css`; inventory and limits in `THEME-BUTTONS.md` |
 | Action icons and compact row actions | Tabler children on native buttons; optional `us-icon-button` modifier and hover/focus tooltips | `zUnionSuite.css` and `zUnionSuite.js`; recipes in the usage guide |
-| Visual author handbook | 20 native-button recipes, 25 action meanings, banner previews and dummy IQA; click-to-copy classes and exact placement | `THeme/UnionSuite/Usage-Guide.html`; maintained sources in `docs/` and `tools/` |
+| Visual author handbook | Native-button recipes, action meanings, banner previews and dummy IQA; click-to-copy classes and exact placement | `THeme/UnionSuite/guides/usage/`; generated as `THeme/UnionSuite/Usage-Guide.html` |
 | IQA Query Menu presentation, filter disclosure, native Export and expanded view | In shared theme; deployment must be verified on the target site | `THeme/UnionSuite/zUnionSuite.css` and `zUnionSuite.js` |
 | Static and current-record banner styling | In shared theme, with separate page-layout and component sections | `THeme/UnionSuite/zUnionSuite.css` |
-| Sticky/condensing banner behaviour and Actions disclosure | In shared theme JS | `THeme/UnionSuite/zUnionSuite.js`; generated legacy fallbacks remain in `prototypes/` |
-| Banner tabs row | Visual template available; switcher deferred for a later session. Direct zone switching first, CCO separately | `prototypes/Banner-Template.html`, `Banner-Tabs-Plan.md` and `TODO.md` |
+| Sticky/condensing banner behaviour and Actions disclosure | In shared theme JS | `THeme/UnionSuite/zUnionSuite.js`; generated legacy fallbacks in `guides/usage/examples/` |
+| Banner tabs row | Visual template available; switcher deferred for a later session. Direct zone switching first, CCO separately | `THeme/UnionSuite/guides/usage/templates/Banner-Template.html`, `Banner-Tabs-Plan.md` and `TODO.md` |
 | Report action slot and button/text-link styling | In shared theme | `zUnionSuite.js` and `zUnionSuite.css` |
 | Named business-action registry and combined activity feed | Planned | `THEME-PANEL-ACTIONS.md` and `THEME-ACTIVITY-FEED.md` |
 
@@ -37,23 +48,23 @@ colour tokens, size/group utilities, specialised controls and known gaps.
 | [Project TODO](TODO.md) | Deferred work, agreed scope and implementation checklist for the next session |
 | [Theme Usage Guide](THeme/UnionSuite/Usage-Guide.html) | Content authors: visual examples, click-to-copy classes, exact placement, branding preview, templates, dummy IQA and troubleshooting |
 | [Theme README](THeme/UnionSuite/README.md) | Implementers: shared assets, deployment and report APIs |
-| [Guide maintenance](THeme/UnionSuite/docs/README.md) | Maintainers: source files, generation and verification |
+| [Guide maintenance](THeme/UnionSuite/guides/usage/source/README.md) | Maintainers: source files, generation and verification |
 | [Product context](PRODUCT.md) | Project scope, users, constraints and current artifacts |
 | [iMIS CMS structure](IMIS-CMS-STRUCTURE.md) | Verified page/zone/iPart wrappers, native configuration and HTML entry points |
 | [Theme inventory](THEME-INVENTORY.md) | Native component families and implementation status |
 | [Theme findings](THEME-FINDINGS.md) | Historical measured cascade findings and integration pitfalls |
 | [Staff styling consolidation](UTSTAFF-CONSOLIDATION.md) | Legacy component duplication and migration work |
-| [Banner guide](prototypes/Banner-README.md) | Banner installation, modes, slots, tokens and lifecycle |
-| [Banner tab plan](prototypes/Banner-Tabs-Plan.md) | Preferred page-zone adapter for lightweight dashboards and separate CCO option |
+| [Banner guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md) | Banner installation, modes, slots, tokens and lifecycle |
+| [Banner tab plan](prototypes/wip/banner-tabs/Banner-Tabs-Plan.md) | Preferred page-zone adapter for lightweight dashboards and separate CCO option |
 | [Panel actions and IQA reports](THEME-PANEL-ACTIONS.md) | Implemented report utilities plus the planned business-action registry |
 | [Activity-feed plan](THEME-ACTIVITY-FEED.md) | Proposed source grouping, metadata and assembly |
 | [Enhancement integration plan](THEME-ENHANCEMENTS-INTEGRATION-PLAN.md) | Approved Option C taskbar/bookmarks/palette/Recents design, proposed single script loader and feature/file ownership; production integration is planned |
 
 ## Templates and previews
 
-- [Static dashboard banner](prototypes/Banner-Dashboard-Template.html) — Content HTML.
-- [Contact banner](prototypes/Banner-Contact-Template.html) — one current-record Query Template Display result; replace bracketed placeholders with actual fields.
-- [Complete banner template](prototypes/Banner-Template.html) — adaptable to Agreement, Contact or Staff; removable Actions and tabs divs.
+- [Static dashboard banner](THeme/UnionSuite/guides/usage/templates/Banner-Dashboard-Template.html) — Content HTML.
+- [Contact banner](THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html) — one current-record Query Template Display result; replace bracketed placeholders with actual fields.
+- [Complete banner template](THeme/UnionSuite/guides/usage/templates/Banner-Template.html) — adaptable to Agreement, Contact or Staff; removable Actions and tabs divs.
 - [Banner preview](references/Banner-Preview.html) — generated local example with scrolling and optional-block controls.
 - [Contact prototype](prototypes/crm-contact-Prototype.html), [staff dashboard prototype](prototypes/Staff-Task-Dashboard.html), and [agreement prototype](prototypes/Agreement%20Management/Agreement-Management-Prototype.html) — design references, not automatically installed theme features.
 
@@ -68,7 +79,7 @@ Menu and apply its documented iPart classes.
 
 Update the guide and relevant implementation notes in the same change as a
 feature, class, template, token or installation change. Edit
-`THeme/UnionSuite/docs/Usage-Guide.source.html` for prose; the generator imports
+`THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html` for prose; the generator imports
 tokens and banner code from their maintained sources. Do not hand-edit the
 generated guide or banner preview.
 
@@ -77,10 +88,11 @@ From the project root:
 ```text
 node tools/build-theme-usage.cjs
 node tools/build-theme-usage.cjs --check
+node tools/check-usage-sources.cjs
 ```
 
 When banner assets or the complete banner template change, first run
-`node .preview/build-banner-preview.cjs` to update the preview and synchronize
+`node THeme/UnionSuite/guides/usage/build/build-banner-preview.cjs` to update the preview and synchronize
 the generated compatibility files from shared theme JS. These are maintainer-only generation commands;
 opening the guide and deploying the finished theme assets need no build tools.
 

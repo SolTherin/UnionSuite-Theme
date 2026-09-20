@@ -1,0 +1,25 @@
+# Design lifecycle
+
+Keep current ideas and accepted implementation specifications in Git. The
+maintained guide and implemented author templates live in
+`THeme/UnionSuite/guides/usage/`.
+
+| Stage | Location | Exit condition |
+|---|---|---|
+| Work in progress | `wip/` | A direction is approved or the experiment is abandoned |
+| Approved, awaiting implementation | `approved/` | Behaviour is implemented, tested and documented |
+| Implemented | Production theme plus `guides/usage/` | Ongoing maintenance belongs to these canonical sources |
+| Superseded research | Repository-root `archive/` | Ignored by Git; retain locally only if useful |
+
+Approval moves a design to `approved/`, not to the archive. Each active design
+should record its status, source files, preview/build command, acceptance decisions
+and implementation-plan link. Ignore generated captures and obsolete alternatives,
+not the only copy of an accepted requirement.
+
+Option C taskbar, palette and Recents sources are in `approved/taskbar/`.
+Other legacy locations remain tracked pending explicit classification. Do not
+bulk-archive a folder merely because its name says prototype or comparison.
+
+Archiving a previously tracked file requires removing it from the Git index as
+well as adding an ignore rule. This does not remove its earlier committed history.
+No commit or push is performed without explicit approval.

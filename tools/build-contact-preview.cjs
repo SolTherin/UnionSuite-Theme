@@ -2,14 +2,14 @@
 const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..'), read=file=>fs.readFileSync(path.join(root,file),'utf8').replace(/\r\n/g,'\n');
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const {delegates,organisers}=require('../THeme/UnionSuite/docs/contact-records.cjs');
-const template=read('prototypes/List-Templates/Contacts-Query-Template.html');
+const {delegates,organisers}=require('../THeme/UnionSuite/guides/usage/source/contact-records.cjs');
+const template=read('THeme/UnionSuite/guides/usage/templates/List-Templates/Contacts-Query-Template.html');
 function contact(record,index,id){
  const html=template.replace(/\{#query\.(\w+)\}/g,(_,field)=>{if(!Object.hasOwn(record,field))throw Error('Missing contact alias '+field);return esc(record[field]);});
  return '<section data-item="'+id+'-'+index+'"><div class="QueryTemplateItem">'+html+'</div></section>';
 }
 function panel(id,title,description,rows){return `<div class="ContentItemContainer"><div class="us-query-search us-list-scroll"><div class="panel"><div class="panel-heading Distinguish"><h2 class="panel-title">${title}</h2></div><div class="panel-description"><div>${description}</div></div><div class="panel-body-container"><div class="panel-body" role="region" aria-label="${title}"><div id="${id}" class="QueryTemplateSet simplePaginateList">${rows.map((row,i)=>contact(row,i,id)).join('')}</div></div></div></div></div></div>`}
-const native=['Native CSS/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'');
+const native=['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'');
 const tabler=read('THeme/UnionSuite/Tabler/tabler-icons.min.css');
 const font=fs.readFileSync(path.join(root,'THeme/UnionSuite/Tabler/fonts/tabler-icons.woff2')).toString('base64');
 const icons=`@font-face{font-family:tabler-icons;src:url(data:font/woff2;base64,${font}) format('woff2');font-display:block}.ti{font-family:tabler-icons!important;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none;line-height:1;display:inline-block;-webkit-font-smoothing:antialiased}`+['building','mail','phone','x'].map(name=>tabler.match(new RegExp('\\.ti-'+name+':before\\{[^}]+\\}'))[0]).join('');

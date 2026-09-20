@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('../.tmp-iqa-integration/node_modules/playwright');
-const example = require('./page-layout-example.cjs');
+const example = require('../THeme/UnionSuite/guides/usage/build/page-layout-example.cjs');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const block = /\/\* US-PAGE-LAYOUT-GUTTERS:START \*\/[\s\S]*?\/\* US-PAGE-LAYOUT-GUTTERS:END \*\//;

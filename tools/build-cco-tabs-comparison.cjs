@@ -1,2 +1,2 @@
 // Stable entry point for the expanded tab display comparison.
-require('./build-tab-display-options.cjs');
+require('../THeme/UnionSuite/guides/usage/build/build-tab-display-options.cjs');

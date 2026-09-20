@@ -28,7 +28,7 @@ function childPage(index) {
   try {
     const context = await browser.newContext({ viewport:{ width:1280, height:900 } });
     const css = {
-      '/native.css':fs.readFileSync(path.resolve(__dirname, '../../Native CSS/10-UltraWaveResponsive.css'), 'utf8'),
+      '/native.css':fs.readFileSync(path.resolve(__dirname, '../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'), 'utf8'),
       '/orion.css':fs.readFileSync(path.resolve(__dirname, '../../THeme/UnionSuite/99-Orion.css'), 'utf8')
     };
     let loads = 0;

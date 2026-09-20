@@ -137,10 +137,10 @@ The documentation describes client HTML/JS deployment via iPartSource ZIP files 
 Existing related files:
 - THeme/UnionSuite/zUnionSuite.css — UnionSuite tokens/components, V5/H2 styling.
 - THeme/UnionSuite/zUnionSuite.js — native tabs, sticky sidebar and shared behaviours. Preserve native adapters.
-- THeme/UnionSuite/docs/Usage-Guide.source.html and generated Usage-Guide.html.
+- THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html and generated Usage-Guide.html.
 - references/CCO-Tabs-Comparison.html — existing visual alternatives.
-- prototypes/Banner-Tabs-Plan.md — separate deferred zone-switching proposal; do not treat it as the selected architecture for this iPart.
-- tools/build-theme-usage.cjs — usage guide build/check.
+- prototypes/wip/banner-tabs/Banner-Tabs-Plan.md — separate deferred zone-switching proposal; do not treat it as the selected architecture for this iPart.
+- THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs — usage guide build/check.
 
 Follow current stylesheet ownership: project-owned native foundation in THeme/UnionSuite/99-Orion.css; UnionSuite additions/tokens in zUnionSuite.css; client differences in THeme/UnionSuite-Client/Override.css. Do not duplicate production CSS into generated reference pages.
 

@@ -7,7 +7,7 @@ const clientConfig=read('THeme/UnionSuite-Client/Config.js');
 const header=read('C:/Users/James/.codex/attachments/b5b0a160-c0ae-4956-85b7-f6d9ff1afe92/pasted-text.txt')
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'')
   .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*')/gi,'');
-const css=['Native CSS/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css','THeme/UnionSuite-Client/Override.css','THeme/UnionSuite/zzDarkMode.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace('/images/Hub/UHUB_Logo.png','data:image/svg+xml,'+encodeURIComponent(read('THeme/UnionSuite/docs/utility-nav-logo.svg')));
+const css=['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css','THeme/UnionSuite-Client/Override.css','THeme/UnionSuite/zzDarkMode.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace('/images/Hub/UHUB_Logo.png','data:image/svg+xml,'+encodeURIComponent(read('THeme/UnionSuite/guides/usage/source/utility-nav-logo.svg')));
 const fixture='<!doctype html><html><head><style>'+css+'\nbody{margin:0}main{padding:32px}</style></head><body><div class="wrapper SVG-enabled">'+header+'<main>Header placement check</main></div><input type="hidden" id="__ClientContext"></body></html>';
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});

@@ -21,7 +21,7 @@ now lives in `zUnionSuite.css`, in separate page-layout and component sections.
 The existing separate script supplies sticky/condensing modes and Actions
 disclosure; its compatibility embed now contains no CSS. Tab switching remains
 deferred. See the
-[banner implementation guide](prototypes/Banner-README.md). The measured findings
+[banner implementation guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md). The measured findings
 below remain historical evidence, not a list of today's implemented features.
 
 ---

@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const {pathToFileURL} = require('node:url');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
-const core = require('../prototypes/Action-Builder/builder-core.js');
+const core = require('../THeme/UnionSuite/guides/usage/examples/Action-Builder/builder-core.js');
 
 function compile(model) {
   let definition;

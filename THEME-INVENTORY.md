@@ -1,7 +1,7 @@
 # Element inventory — what the native CSS actually styles
 
 Extracted from `Native CSS/Orion-99.css` (1,030 rule blocks, 563 classes) and
-`Native CSS/10-UltraWaveResponsive.css` (3,831 blocks, 2,678 classes) by
+`THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css` (3,831 blocks, 2,678 classes) by
 parsing selectors and weighting each class by how many declarations target it.
 Presence checked against the captured `Orion page.html`.
 
@@ -418,9 +418,9 @@ gutters. All styling is now in `THeme/UnionSuite/zUnionSuite.css`, with page-lay
 and component rules kept separate. Interaction still uses the existing banner
 script; the legacy-named embed is now behaviour only. The native profile-banner
 selectors above are a different component family. See the
-[banner usage guide](prototypes/Banner-README.md).
+[banner usage guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md).
 
-The [complete template](prototypes/Banner-Template.html) includes an optional
+The [complete template](THeme/UnionSuite/guides/usage/templates/Banner-Template.html) includes an optional
 Actions disclosure inside the summary and tabs after the details. Delete either
 whole div to omit it. Both remain visible when compact. Dropdown behaviour is
 implemented; sample commands are disabled until connected to verified handlers.
@@ -428,8 +428,8 @@ Tabs supply presentation only. Direct zone switching is the preferred planned
 adapter for lightweight dashboards, with multiple zones per tab and shared zones
 remaining visible. CCO integration remains a separate option. Zone titles and
 grid space must follow visibility; hiding a zone does not defer its initial IQA.
-Separate [dashboard](prototypes/Banner-Dashboard-Template.html) and
-[Contact](prototypes/Banner-Contact-Template.html) templates provide simpler
+Separate [dashboard](THeme/UnionSuite/guides/usage/templates/Banner-Dashboard-Template.html) and
+[Contact](THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html) templates provide simpler
 starting points. The standalone guide embeds these maintained sources rather
 than carrying independently edited copies.
 

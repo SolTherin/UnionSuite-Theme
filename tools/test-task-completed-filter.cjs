@@ -1,7 +1,7 @@
 // Behavioural coverage for independent task/query filters in native iPart wrappers.
 const fs = require('node:fs'), assert = require('node:assert/strict');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
-const css = ['Native CSS/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n').replace(/@import\s+[^;]+;/g,'');
+const css = ['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(f=>fs.readFileSync(f,'utf8')).join('\n').replace(/@import\s+[^;]+;/g,'');
 const script = fs.readFileSync('THeme/UnionSuite/zUnionSuite.js','utf8').split('/* US-BANNER-BEHAVIOUR:START */')[0];
 const rows = (cards=true) => [
   ['open','Alex outstanding','false'],['done','Alex actioned',' TRUE '],

@@ -615,8 +615,8 @@ their shared header slot and button/text-link styling only.
 
 The banner supports both Query Template Display (one current-record result)
 and Content HTML (static content), using the same template HTML and classes.
-See the [banner usage guide](prototypes/Banner-README.md) and
-[behaviour-only embed](prototypes/Banner-Shared-Styles.html). All banner CSS is
+See the [banner usage guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md) and
+[behaviour-only embed](THeme/UnionSuite/guides/usage/examples/Banner-Shared-Styles.html). All banner CSS is
 now in `THeme/UnionSuite/zUnionSuite.css`, in separate page-layout and component
 sections. Sticky/collapse and Actions are now in `zUnionSuite.js`, sharing the
 report include. Deploy and load the updated theme assets, retire old standalone
@@ -642,12 +642,12 @@ of the page grid's nesting. The full-width CSS adapter still targets the
 captured top-level `col-sm-12` layout. Native columns supply the half-gutter via
 `--bs-gutter-x`; other content retains its padding automatically.
 
-The [copy/paste banner template](prototypes/Banner-Template.html) now includes
+The [copy/paste banner template](THeme/UnionSuite/guides/usage/templates/Banner-Template.html) now includes
 optional `us-banner__actions` and `us-banner__nav` HTML blocks. Delete either
 complete div to omit it; no extra iPart class is required. The Actions
 disclosure is implemented, while individual command handlers still need
 verified integrations. Tab styling is implemented, with content switching
-planned in [Banner-Tabs-Plan.md](prototypes/Banner-Tabs-Plan.md). The proposed
+planned in [Banner-Tabs-Plan.md](prototypes/wip/banner-tabs/Banner-Tabs-Plan.md). The proposed
 zone/CCO source classes and tab mappings there are not active theme features yet.
 
 For lightweight dashboards, the owner prefers tabs tied to ordinary page zones:
@@ -675,22 +675,22 @@ and `us-banner__*` classes belong inside authored template HTML. The supported
 prefix is `us-`; `ut-banner-sticky` is not an alias. Runtime classes and markers
 are script-owned and are not author settings.
 
-The template library includes the [complete banner](prototypes/Banner-Template.html),
-[static dashboard](prototypes/Banner-Dashboard-Template.html) and
-[Contact](prototypes/Banner-Contact-Template.html). Bracketed values in the latter
+The template library includes the [complete banner](THeme/UnionSuite/guides/usage/templates/Banner-Template.html),
+[static dashboard](THeme/UnionSuite/guides/usage/templates/Banner-Dashboard-Template.html) and
+[Contact](THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html). Bracketed values in the latter
 are author placeholders; replace them with the actual query field substitutions.
 The shared script and generated legacy fallbacks contain no record-specific data. Query Menu reports
 continue to use native configuration and HTML rather than a replacement grid.
 
-Edit guide prose in `THeme/UnionSuite/docs/Usage-Guide.source.html` and keep these
+Edit guide prose in `THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html` and keep these
 structural notes current when a verified wrapper or authoring contract changes.
-Run `node tools/build-theme-usage.cjs` and then the same command with `--check`.
+Run `node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs` and then the same command with `--check`.
 The generator imports tokens and banner snippets from their maintained sources;
 The five-seed editor injects validated overrides into the guide and all
 component previews, including the combined banner/button/report sample. Copy or
 download its CSS for the client stylesheet; edits do not write files. The build
 does not infer documentation for newly introduced behaviour. See
-[the maintenance workflow](THeme/UnionSuite/docs/README.md).
+[the maintenance workflow](THeme/UnionSuite/guides/usage/source/README.md).
 
 ## 21. Outer row gutter gotcha
 

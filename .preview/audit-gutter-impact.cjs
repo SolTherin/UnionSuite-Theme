@@ -2,11 +2,11 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const native=read('Native CSS/10-UltraWaveResponsive.css'),orion=read('THeme/UnionSuite/99-Orion.css'),shared=read('THeme/UnionSuite/zUnionSuite.css');
+const native=read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'),orion=read('THeme/UnionSuite/99-Orion.css'),shared=read('THeme/UnionSuite/zUnionSuite.css');
 const styles=g=>[native,orion.replace('--bs-gutter-x: 40px;','--bs-gutter-x: '+g+'px;'),shared,read('THeme/UnionSuite-Client/Branding.css'),read('THeme/UnionSuite-Client/Override.css')].join('\n').replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'');
 const wrap=content=>'<div class="ContentItemContainer"><div class="WebPartZone"><div class="iMIS-WebPart"><div class="ContentItemContainer">'+content+'</div></div></div></div>';
 const banner='<div class="us-banner us-banner-collapsible"><header class="us-banner__surface"><div class="us-banner__summary"><div class="us-banner__identity"><h1 class="us-banner__title">Sample member</h1></div></div><div class="us-banner__details">Member details</div></header></div>';
-const summary=read('prototypes/List-Templates/Tasks-Query-Template.html').replaceAll('{#query.TaskTitle}','Sample task').replaceAll('{#query.MemberName}','Example member').replaceAll('{#query.DueDate}','18 September 2026');
+const summary=read('THeme/UnionSuite/guides/usage/templates/List-Templates/Tasks-Query-Template.html').replaceAll('{#query.TaskTitle}','Sample task').replaceAll('{#query.MemberName}','Example member').replaceAll('{#query.DueDate}','18 September 2026');
 const row=(id,children,extra='')=>'<div id="'+id+'" class="row '+extra+'">'+children+'</div>';
 const column=(size,id,content)=>'<div class="col-sm-'+size+'"><div id="'+id+'" class="audit-content">'+content+'</div></div>';
 const fixture=row('balanced',column(8,'main-card',summary)+column(4,'side-card','Bulletin'))+

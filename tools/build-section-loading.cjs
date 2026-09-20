@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const native=(read('Native CSS/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace(/url\([^)]*\)/g,'none');
+const native=(read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace(/url\([^)]*\)/g,'none');
 const ring='<span class="section-loader-spinning-circles" aria-hidden="true"></span>';
 const records='<table><caption class="sr-only">Fictional member records</caption><thead><tr><th>Member</th><th>Status</th></tr></thead><tbody><tr><td>Alex Morgan</td><td>Active</td></tr><tr><td>Jordan Lee</td><td>Active</td></tr><tr><td>Sam Patel</td><td>Review required</td></tr></tbody></table>';
 const wait=(text)=>'<div class="loading-wait">'+ring+'<strong>'+text+'</strong></div>';

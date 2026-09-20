@@ -106,7 +106,7 @@ const fixture = `<div id="hd"><div class="searchfieldplus-dropdown"><div class="
     await page.locator('#taskbar-colours-demo').evaluate(frame => frame.scrollIntoView());
     const preview = await browser.newPage({viewport:{width:1100,height:650}});
     await preview.route('**/*', route => route.abort());
-    await preview.setContent(require('./taskbar-preview.cjs').frameDocument());
+    await preview.setContent(require('../THeme/UnionSuite/guides/usage/build/taskbar-preview.cjs').frameDocument());
     await preview.locator('#us-taskbar-search').fill('Morgan');
     await preview.locator('.tb-dd-name').filter({hasText:'Morgan Engineering'}).waitFor();
     await preview.screenshot({path:'.tmp-iqa-integration/taskbar-guide.png'});

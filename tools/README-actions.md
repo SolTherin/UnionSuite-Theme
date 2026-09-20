@@ -12,9 +12,9 @@ node tools/test-query-empty.cjs
 node tools/test-iqa-defaults.cjs
 node tools/build-home-preview.cjs
 node tools/test-home-task-helpers.cjs
-node .preview/build-banner-preview.cjs
-node tools/build-theme-usage.cjs
-node tools/build-theme-usage.cjs --check
+node THeme/UnionSuite/guides/usage/build/build-banner-preview.cjs
+node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs
+node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs --check
 node tools/test-unified-action-presentations.cjs
 ```
 

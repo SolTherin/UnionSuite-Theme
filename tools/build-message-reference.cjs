@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const image=n=>'data:image/png;base64,'+fs.readFileSync(path.join(root,'THeme/UnionSuite/images/'+n+'.png')).toString('base64');
-const native=(read('Native CSS/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace(/url\([^)]*\)/g,u=>{const n=u.match(/(Asi(?:Success|Error|Warning|Information|Validation))\.png/);return n?'url("'+image(n[1])+'")':'none'});
+const native=(read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace(/url\([^)]*\)/g,u=>{const n=u.match(/(Asi(?:Success|Error|Warning|Information|Validation))\.png/);return n?'url("'+image(n[1])+'")':'none'});
 const tokens=read('THeme/UnionSuite/zUnionSuite.css').split('/* US-NATIVE-BUTTONS:START */')[0];
 const proposal=read('THeme/UnionSuite/zUnionSuite.css').split('/* US-MESSAGES:START */')[1].split('/* US-MESSAGES:END */')[0];
 fs.writeFileSync(path.join(root,'prototypes/Message-Styles.preview.css'),'/* Generated from zUnionSuite.css. */'+proposal);

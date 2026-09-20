@@ -11,7 +11,7 @@ The cascade, in load order:
 
 | # | Served as | Source in this folder |
 |---|---|---|
-| 1 | `10-UltraWaveResponsive.css` | `Native CSS/10-UltraWaveResponsive.css` |
+| 1 | `10-UltraWaveResponsive.css` | `THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css` |
 | 2 | `UT_Staff.css` | `UTStaff.css` |
 | 3 | `99-Orion.css` | `Native CSS/Orion-99.css` |
 | 4 | `zAdditionalStyling.css` | `UT-theme.css` |

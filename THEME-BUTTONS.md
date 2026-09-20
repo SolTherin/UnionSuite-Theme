@@ -71,7 +71,7 @@ fictional data only. In production, native iMIS supplies the data operations.
 
 ## Inventory of the native sheets
 
-Inspected `Native CSS/10-UltraWaveResponsive.css`, `Native CSS/Orion-99.css` and
+Inspected `THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css`, `Native CSS/Orion-99.css` and
 the current theme's `THeme/UnionSuite/99-Orion.css`. The two Orion captures are
 identical after normalising line endings. A class appearing in a selector is
 not evidence of a complete standalone component.

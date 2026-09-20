@@ -2,7 +2,7 @@
 const fs = require('node:fs'), assert = require('node:assert/strict');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
 const read = file => fs.readFileSync(file, 'utf8');
-const css = ['Native CSS/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'');
+const css = ['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'');
 const script = read('THeme/UnionSuite/zUnionSuite.js').split('/* US-BANNER-BEHAVIOUR:START */')[0];
 function items(cards = true) {
   return [['Sarah Mitchell','104582'],['Daniel Chen','103917'],['Emma Thompson','101293']].map(([name,id],i) =>

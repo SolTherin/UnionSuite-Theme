@@ -5,7 +5,7 @@ const dir = path.join(__dirname, '..');
 // The real cascade, in load order. themed.html gets all five; native.html
 // stops at 99-Orion so you can see what the theme is actually doing.
 const NATIVE = [
-  ['10-UltraWaveResponsive.css', 'Native CSS/10-UltraWaveResponsive.css'],
+  ['10-UltraWaveResponsive.css', 'THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'],
   ['UT_Staff.css',              'UTStaff.css'],
   ['Orion-99.css',              'Native CSS/Orion-99.css'],
 ];

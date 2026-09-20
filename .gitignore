@@ -11,3 +11,25 @@ desktop.ini
 
 # Packaged theme archives (rebuilt from source)
 THeme/**/*.zip
+
+# Superseded research and disposable experiments (keep current/approved designs tracked)
+/archive/
+
+# Generated guides and component previews; rebuild from maintained sources
+/THeme/UnionSuite/Usage-Guide.html
+/THeme/UnionSuite/Theme-Config.html
+/references/*.html
+!/references/index.html
+# Approved unimplemented designs remain directly reviewable after checkout
+!/references/Taskbar-Workshop.html
+!/references/Recents-Workshop.html
+# Authored studies without a separate generator: retain until classified
+!/references/Convert-Icon-Preview.html
+!/references/Task List Animations.html
+
+# Local preview output and captures; retain existing maintained helper scripts
+/.preview/*
+!/.preview/*.cjs
+!/.preview/*.js
+!/.preview/*.py
+!/.preview/README.md

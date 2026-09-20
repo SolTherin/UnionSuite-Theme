@@ -1,80 +1,10 @@
-// Dedicated client branding workspace. Reuses the guide's canonical assets.
-const fs = require('node:fs');
-const path = require('node:path');
-const root = path.resolve(__dirname, '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
-const esc = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const decode = value => value.replace(/&(amp|lt|gt|quot);/g,(_,key)=>({amp:'&',lt:'<',gt:'>',quot:'"'}[key]));
-// Native CSS retains asset paths for deployment. These standalone examples use
-// shared inline glyphs and the embedded font; suppress unused native assets.
-const portableCss = css => css.replace(/\burl\(\s*(?:(["'])(.*?)\1|([^)]*))\s*\)/gi,(whole,quote,quoted,plain)=>/^\s*data:/i.test(quoted??plain)?whole:'none');
-const portable = html => html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,(_,start,css,end)=>start+portableCss(css)+end)
-  .replace(/\bstyle=("[^"]*"|'[^']*')/gi,(_,attribute)=>'style='+portableCss(attribute));
-const scopes = {
-  root: ':root',
-  banner: ':root .us-banner:not(:where(.us-report-no-styling, .us-report-no-styling *))',
-  iqa: ':root :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]):not(:where(.us-report-no-styling, .us-report-no-styling *))',
-  actions: ':root .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *))'
-};
-function build(shared, check = false) {
-  const {inserts, rootTokens, declarations, tokenCategory, theme, themeJs, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, demoBanner} = shared;
-  function type(name) {
-    if (name === '--us-actions-duration') return 'number';
-    if (/duration$/.test(name)) return 'time';
-    if (/easing$/.test(name)) return 'easing';
-    if (/^--(face-|font-)|-font$/.test(name)) return 'font';
-    if (/^--fw-/.test(name)) return 'weight';
-    if (/^--lh-/.test(name)) return 'lineHeight';
-    if (/^--z-/.test(name)) return 'integer';
-    if (/^--shadow|^--focus-ring$/.test(name)) return 'shadow';
-    if (/^--(fs-|space-|radius|page-gutter|card-pad-|sidebar-w|header-h)|^--iqa-(radius|inset|expanded-inset|row-padding|filter-min|filter-bottom|action-height|multi-max-height)$|^--banner-(radius|padding|gap|title-size)$/.test(name)) return 'length';
-    return 'colour';
-  }
-  const tokens = [...rootTokens].map(([name, values]) => ({name, value: values.value, scope:'root', group: /^--(checkbox|radio)-colour$/.test(name)?'Form controls':tokenCategory(name), type: type(name)}));
-  const actions = theme.match(/:root \.us-actions[^{}]*\{([^}]*--us-actions-duration[^}]*)\}/)?.[1];
-  if (!actions) throw Error('Actions defaults changed; update config extraction.');
-  for (const [scope, group, css] of [['banner','Banners',bannerDefaults],['iqa','IQAs & data panels',iqaDefaults],['actions','Action menus',actions]]) {
-    declarations(css).filter(([name]) => name.startsWith(scope === 'actions' ? '--us-actions-' : '--'+scope+'-')).forEach(([name,value]) => tokens.push({name,value,scope,group,type:type(name)}));
-  }
-  // Use the actual root overrides for this source snapshot; no logo/site rules.
-  for (const [name,value] of declarations(clientRoots)) { const token=tokens.find(t=>t.name===name); if(token) token.value=value; }
-  const preview = markup => portable(markup).replace('</head>','<meta name="us-config-preview" content="component"><script>'+read('THeme/UnionSuite/docs/config-preview.js')+'</script></head>');
-  const frame = (id,title,markup) => `<iframe id="${id}" data-theme-preview title="${esc(title)}" loading="lazy" srcdoc="${esc(preview(markup))}"></iframe>`;
-  const reuse = html => html.replace(/srcdoc="([^"]*)"/,(_,source)=>'srcdoc="'+esc(preview(decode(source).replace('</head>','<style>'+clientRoots+'</style></head>')))+'"');
-  const documentHtml = (title,markup) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${nativePreviewCss}\n${theme}\n${clientRoots}</style><style>${read('THeme/UnionSuite/docs/config-preview.css')}</style><script>${themeJs}</script></head><body>${markup}</body></html>`;
-  const overview = read('THeme/UnionSuite/docs/Config-Preview.source.html').replace('{{BANNER}}',demoBanner).replace('{{DATA_PANEL}}',read('prototypes/Data-Panel-Native-read.html'));
-  const howtoImages = {
-    BRANDING_MENU_IMAGE:'branding-themes-menu.png',
-    BRANDING_DOWNLOAD_IMAGE:'branding-download-client.png',
-    BRANDING_UPLOAD_IMAGE:'branding-upload-version.png'
-  };
-  const howto = read('THeme/UnionSuite/docs/Branding-Howto.source.html').replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{
-    if(!howtoImages[key])throw Error('Unknown branding screenshot: '+key);
-    return 'data:image/png;base64,'+fs.readFileSync(path.join(root,'THeme/UnionSuite/images',howtoImages[key])).toString('base64');
-  });
-  const values = {
-    BRANDING_HOWTO: howto,
-    CONFIG_CSS: read('THeme/UnionSuite/docs/theme-config.css'),
-    CONFIG_JS: read('THeme/UnionSuite/docs/theme-config.js'),
-    CONFIG_DATA: JSON.stringify({tokens,scopes}).replace(/</g,'\\u003c'),
-    TOKENS_CSS: inserts.TOKENS_CSS,
-    ICON_CSS: inserts.ICON_CSS,
-    ICON_LICENSE: inserts.ICON_LICENSE,
-    OVERVIEW: frame('config-overview','Member overview: banner, buttons and data panel',documentHtml('Member overview',overview)),
-    REPORT: reuse(inserts.REPORT_DEMO),
-    TABS: reuse(inserts.TABS_DEMO),
-    ACTIONS: reuse(inserts.ACTION_MENU_DEMO).replace('Approved option 5','Record actions').replace('Shared theme CSS and behaviour. Open Actions, then Manage Case Contacts. Below 950px the child rows expand inline with the drawing line. Example actions only update the message below.','Open Actions, then Manage Case Contacts to explore a nested menu. Try different colours and preview sizes. Sample commands only update the message below.').replace('Author template','Actions menu').replace('Existing case markup','Quick Actions').replace('Banner Quick Actions','Banner actions'),
-    FORMS: frame('config-forms','Form controls and feedback',documentHtml('Forms and feedback',read('THeme/UnionSuite/docs/Config-Form.source.html')))
-  };
-  const html = read('THeme/UnionSuite/docs/Theme-Config.source.html').replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{
-    if (!(key in values)) throw Error('Unknown config placeholder: '+key);
-    return values[key];
-  });
-  const output=path.join(root,'THeme/UnionSuite/Theme-Config.html');
-  if (check) {
-    if (!fs.existsSync(output)||fs.readFileSync(output,'utf8')!==html) {console.error('Theme-Config.html is stale. Run node tools/build-theme-usage.cjs.');process.exitCode=1;}
-    else console.log('Theme config is current ('+tokens.length+' editable tokens).');
-  } else {fs.writeFileSync(output,html);console.log('Built THeme/UnionSuite/Theme-Config.html ('+tokens.length+' editable tokens).');}
+// Compatibility entry point. Maintained implementation: THeme/UnionSuite/guides/usage/build/build-theme-config.cjs
+'use strict';
+const implementation = require.resolve("../THeme/UnionSuite/guides/usage/build/build-theme-config.cjs");
+if (require.main === module) {
+  const result = require('node:child_process').spawnSync(process.execPath, [implementation, ...process.argv.slice(2)], {stdio: 'inherit'});
+  if (result.error) throw result.error;
+  process.exitCode = result.status === null ? 1 : result.status;
+} else {
+  module.exports = require(implementation);
 }
-module.exports = {build};
-if (require.main === module) build(require('./build-theme-usage.cjs'),process.argv.includes('--check'));

@@ -16,11 +16,11 @@ const iconRules = names.map(name => {
 const styles = nativeButtons + '\n' + read('THeme/UnionSuite/zUnionSuite.css') + '\n' + read('THeme/UnionSuite/zzDarkMode.css')
   + '\n@font-face{font-family:workshop-tabler;src:url(data:font/woff2;base64,' + font + ') format("woff2");font-display:block}\n' + iconRules;
 
-let output = read('prototypes/Recents-Workshop.source.html');
+let output = read('prototypes/approved/taskbar/Recents-Workshop.source.html');
 for (const [marker, replacement] of Object.entries({
   '/* SHARED_STYLES */': styles,
-  '/* RECENTS_STYLES */': read('prototypes/Recents-Workshop.css') + '\n' + read('prototypes/Popup-Shell.css'),
-  '/* RECENTS_SCRIPT */': script(read('prototypes/Recents-Workshop.js'))
+  '/* RECENTS_STYLES */': read('prototypes/approved/taskbar/Recents-Workshop.css') + '\n' + read('prototypes/approved/taskbar/Popup-Shell.css'),
+  '/* RECENTS_SCRIPT */': script(read('prototypes/approved/taskbar/Recents-Workshop.js'))
 })) output = output.replace(marker, () => replacement);
 const destination = path.join(root, 'references/Recents-Workshop.html');
 if (process.argv.includes('--check')) {

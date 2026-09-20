@@ -42,7 +42,7 @@ Contact row/scroll classes remain trial-only. Production query aliases, live des
 
 # Taskbar workshop — 20 September 2026
 
-Shared popup shell: added one `prototypes/Popup-Shell.css` input to both preview builders, adapting the existing US-DIALOG-CHROME title/control rules and Dialog-Chrome reference. Palette, Recents and bookmark editor now share 8px corners, token-based shadows, compact 14px title bars with dividers, 30×28px close controls with danger hover/focus and consistent footer spacing. Inspected the light palette and dark narrow Recents popup in-browser; Escape still dismisses the palette and Mine remains selected in Recents. Production stylesheets remain unchanged. Both generated-file checks passed.
+Shared popup shell: added one `prototypes/approved/taskbar/Popup-Shell.css` input to both preview builders, adapting the existing US-DIALOG-CHROME title/control rules and Dialog-Chrome reference. Palette, Recents and bookmark editor now share 8px corners, token-based shadows, compact 14px title bars with dividers, 30×28px close controls with danger hover/focus and consistent footer spacing. Inspected the light palette and dark narrow Recents popup in-browser; Escape still dismisses the palette and Mine remains selected in Recents. Production stylesheets remain unchanged. Both generated-file checks passed.
 
 Narrow Recents selection: folded the standalone 420px single-column popup into option C, retaining the scroll region and footer. Both prototypes now default to Mine; the taskbar reset restores Mine as well. Browser screenshot confirms option C opens the narrow popup with Mine selected and five IQAs before the content section. Both JavaScript syntax and generated-output checks passed.
 

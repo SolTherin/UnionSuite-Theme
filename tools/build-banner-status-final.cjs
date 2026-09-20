@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const shell = require('./banner-preview-shell.cjs');
-let banner = fs.readFileSync(path.join(root, 'prototypes/Banner-Contact-Template.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+let banner = fs.readFileSync(path.join(root, 'THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
 const values = {'[Contact ID]':'103885','[Full name]':'Tony Fin Stark','[Member type]':'Regular member','[Join date]':'12 March 2018','[Email address]':'tony@example.org','[Mobile number]':'0400 123 777','[Employer name]':'Harbour Services','[Branch name]':'Sydney Metro','[Organiser name]':'Alex Morgan','{#query.StatusColour}':'#23845B','{#query.StatusDescription}':'<span class="status-label">Financial member</span>'};
 for (const [key,value] of Object.entries(values)) banner = banner.replaceAll(key,value);
 banner = banner.replaceAll('us-action-member-', 'us-action-preview-');

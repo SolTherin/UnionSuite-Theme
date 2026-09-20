@@ -1,5 +1,5 @@
 const fs = require('node:fs');
-const {frameDocument} = require('./taskbar-preview.cjs');
+const {frameDocument} = require('../THeme/UnionSuite/guides/usage/build/taskbar-preview.cjs');
 const esc = s => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
 function frame(before) {
   let doc = frameDocument().replace('</style>', '#demo-taskbar-status{margin-top:290px}'+(before?'.us-taskbar__result-kind{display:none}':'')+'</style>');

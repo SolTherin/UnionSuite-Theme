@@ -6,7 +6,7 @@ const font=fs.readFileSync(path.join(root,'THeme/UnionSuite/Tabler/fonts/tabler-
 const icons='@font-face{font-family:tabler-icons;src:url(data:font/woff2;base64,'+font+') format("woff2")}'+['pencil','settings','plus','trash','x'].map(name=>{const rule=iconSource.match(new RegExp('\\.ti-'+name+':before\\{[^}]+\\}'));if(!rule)throw Error(name);return rule[0];}).join('');
 
 const nativeAdapter=read('THeme/UnionSuite/zUnionSuite.js').match(/\/\* US-DATA-PANELS:START[\s\S]*?US-DATA-PANELS:END \*\//)[0];
-const nativeFoundation=(read('Native CSS/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'');
+const nativeFoundation=(read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'');
 const nativeFrames=['read','organisation','edit','multi'].map(name=>{const doc='<html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+nativeFoundation+theme+icons+'html,body{height:auto}body{padding:16px;margin:0;background:#eeeef0}</style><body>'+read('prototypes/Data-Panel-Native-'+name+'.html')+'<script>'+nativeAdapter+';document.addEventListener("click",e=>{if(e.target.closest("a,input[type=image],button,input[type=submit]"))e.preventDefault()},true);new ResizeObserver(()=>parent.postMessage({type:"data-panel-size",height:document.body.scrollHeight+16},"*")).observe(document.body);<\/script></body></html>';return '<iframe id="native-live-'+name+'" title="Native '+name+' panel with shared theme" srcdoc="'+esc(doc)+'"></iframe>';}).join('');
 
 function frame(proposed){const id=proposed?'proposed':'native';

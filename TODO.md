@@ -45,7 +45,7 @@ all validation, error and recovery paths.
 - CCO navigation on grey page backgrounds: design decision deferred by owner. Revisit in the existing [CCO menu comparison](references/CCO-Tabs-Comparison.html). Consider an optional standalone secondary navigation style when there is no shared content container: self-contained pale accent selection, orange left marker, closed rounded edges, transparent inactive rows and a gutter beside white panel cards. Compare this with the existing attached V5 treatment; neither the grey page background nor the standalone variant is approved. Keep V5/H2 and current mobile behaviour unchanged until reviewed. This is separate from banner tab-to-zone switching.
 
 - Unselected taskbar layout comparisons remain trial-only. The taskbar and approved Biscuit greeting are implemented in the theme.
-- Banner tab-to-zone switching: [plan](prototypes/Banner-Tabs-Plan.md). Presentation exists; keep template tabs disabled. On resumption, inspect real zone wrappers, preserve nodes/field values, handle titles and layout gaps, support keyboard focus and partial updates, and fail open for missing mappings. All queries initially load; CCO is a separate adapter.
+- Banner tab-to-zone switching: [plan](prototypes/wip/banner-tabs/Banner-Tabs-Plan.md). Presentation exists; keep template tabs disabled. On resumption, inspect real zone wrappers, preserve nodes/field values, handle titles and layout gaps, support keyboard focus and partial updates, and fail open for missing mappings. All queries initially load; CCO is a separate adapter.
 
 ## Completed implementation — no longer open trial tasks
 

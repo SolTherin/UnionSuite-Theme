@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
 const read = file => fs.readFileSync(file, 'utf8');
-const css = ['Native CSS/10-UltraWaveResponsive.css', 'THeme/UnionSuite/99-Orion.css', 'THeme/UnionSuite/zUnionSuite.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g, '');
+const css = ['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css', 'THeme/UnionSuite/99-Orion.css', 'THeme/UnionSuite/zUnionSuite.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g, '');
 const script = read('THeme/UnionSuite/zUnionSuite.js').split('/* US-BANNER-BEHAVIOUR:START */')[0];
 const panel = `<div class="panel"><div class="panel-heading Distinguish"><h2 class="panel-title">Staff Bulletin</h2></div><div class="panel-body-container"><div class="panel-body"><span class="template-header">Header</span><div class="QueryTemplateSet simplePaginateList"><section class="mb-3"><div class="card QueryTemplateItem"><div class="card-body"><div class="BulletinCard"><h3>Updated Membership Fees</h3><em>Peter Williams - 12/05/2025</em><div class="us-list__body"><p>The fee schedule is available.</p><a href="#fees">Latest Membership Fees</a></div></div></div></div></section></div><span class="template-footer">Footer</span></div></div></div>`;
 (async () => {

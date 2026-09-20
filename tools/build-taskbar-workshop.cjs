@@ -25,21 +25,21 @@ function frame(variant) {
     'FRAME_TITLE': variant === 'baseline' ? 'Current taskbar' : 'Taskbar proposal',
     'FRAME_VARIANT': variant,
     '/* SHARED_STYLES */': styles,
-    '/* FRAME_STYLES */': read('prototypes/Taskbar-Workshop.frame.css') + '\n' + read('prototypes/Popup-Shell.css'),
+    '/* FRAME_STYLES */': read('prototypes/approved/taskbar/Taskbar-Workshop.frame.css') + '\n' + read('prototypes/approved/taskbar/Popup-Shell.css'),
     '/* APPEARANCE_SCRIPT */': script(appearance),
-    '/* FIXTURE_SCRIPT */': script(read('THeme/UnionSuite/docs/taskbar-example.js').replaceAll('union-suite:preview:', 'union-suite:workshop:' + variant + ':')),
+    '/* FIXTURE_SCRIPT */': script(read('THeme/UnionSuite/guides/usage/source/taskbar-example.js').replaceAll('union-suite:preview:', 'union-suite:workshop:' + variant + ':')),
     '/* TASKBAR_SCRIPT */': script(read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js')),
     '/* FUSE_SCRIPT */': variant === 'proposal' ? script(read(fusePath)) : '',
-    '/* FRAME_SCRIPT */': script(read('prototypes/Taskbar-Workshop.frame.js'))
+    '/* FRAME_SCRIPT */': script(read('prototypes/approved/taskbar/Taskbar-Workshop.frame.js'))
   };
-  let html = read('prototypes/Taskbar-Workshop.frame.html');
+  let html = read('prototypes/approved/taskbar/Taskbar-Workshop.frame.html');
   for (const [marker, replacement] of Object.entries(replacements)) html = html.replace(marker, () => replacement);
   return html;
 }
-let output = read('prototypes/Taskbar-Workshop.source.html');
+let output = read('prototypes/approved/taskbar/Taskbar-Workshop.source.html');
 const replacements = {
-  '/* WORKSHOP_STYLES */': read('prototypes/Taskbar-Workshop.css'),
-  '/* WORKSHOP_CONTROLS */': script(read('prototypes/Taskbar-Workshop.controls.js')),
+  '/* WORKSHOP_STYLES */': read('prototypes/approved/taskbar/Taskbar-Workshop.css'),
+  '/* WORKSHOP_CONTROLS */': script(read('prototypes/approved/taskbar/Taskbar-Workshop.controls.js')),
   'BASELINE_DOCUMENT': attribute(frame('baseline')),
   'PROPOSAL_DOCUMENT': attribute(frame('proposal'))
 };

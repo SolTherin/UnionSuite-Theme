@@ -1,7 +1,7 @@
 // Dedicated portable button reference, using the maintained theme assets.
-const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');const g=require('./theme-gallery.cjs');const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const busy=require('../THeme/UnionSuite/docs/busy-examples.cjs');
-const toggles=require('./switch-examples.cjs');
+const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');const g=require('../THeme/UnionSuite/guides/usage/build/theme-gallery.cjs');const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const busy=require('../THeme/UnionSuite/guides/usage/source/busy-examples.cjs');
+const toggles=require('../THeme/UnionSuite/guides/usage/build/switch-examples.cjs');
 const foundation=read('references/Form-Fields-Preview.html').match(/<style>([^]*?)<\/style>/)[1];
 const rows=[
 ['Primary action','TextButton PrimaryButton','Find','Main task: Find, Save, Create. Usually one dominant action per task area.'],

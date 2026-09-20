@@ -1,12 +1,10 @@
-// Shared extraction contract for generated previews and legacy banner assets.
-function bannerBehaviour(themeJs) {
-  const start = '/* US-BANNER-BEHAVIOUR:START */';
-  const end = '/* US-BANNER-BEHAVIOUR:END */';
-  if (themeJs.split(start).length !== 2 || themeJs.split(end).length !== 2) {
-    throw Error('Missing or duplicate banner behaviour section in zUnionSuite.js.');
-  }
-  const code = themeJs.split(start)[1].split(end)[0].trim();
-  if (!code.includes('window.UnionSuiteBanners')) throw Error('Missing banner API.');
-  return code;
+// Compatibility entry point. Maintained implementation: THeme/UnionSuite/guides/usage/build/theme-sources.cjs
+'use strict';
+const implementation = require.resolve("../THeme/UnionSuite/guides/usage/build/theme-sources.cjs");
+if (require.main === module) {
+  const result = require('node:child_process').spawnSync(process.execPath, [implementation, ...process.argv.slice(2)], {stdio: 'inherit'});
+  if (result.error) throw result.error;
+  process.exitCode = result.status === null ? 1 : result.status;
+} else {
+  module.exports = require(implementation);
 }
-module.exports = {bannerBehaviour};

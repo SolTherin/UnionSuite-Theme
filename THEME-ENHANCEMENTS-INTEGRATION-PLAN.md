@@ -10,7 +10,7 @@ Reviewed inputs:
 - [Current IQA output](<../iMIS Enhanced/upload/IQA-Theme/IQA-Enhancements.js>), 216,748 bytes at review. This is the current integration input; the older 55 KB baseline is incomplete by comparison.
 - Existing [theme core](THeme/UnionSuite/zUnionSuite.js), [taskbar](THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js), action registrations, client settings and stylesheet ownership.
 - RiSE/metadata/source-overlay probes, the reviewed route catalogue and existing IQA module sources, available locally.
-- Approved [Option C taskbar reference](references/Taskbar-Workshop.html), [Recents reference](references/Recents-Workshop.html), their maintained `prototypes/` sources and shared `prototypes/Popup-Shell.css`. The design contract below supersedes earlier Pencil/Done and alternative-layout requirements for these features.
+- Approved [Option C taskbar reference](references/Taskbar-Workshop.html), [Recents reference](references/Recents-Workshop.html), their maintained `prototypes/` sources and shared `prototypes/approved/taskbar/Popup-Shell.css`. The design contract below supersedes earlier Pencil/Done and alternative-layout requirements for these features.
 
 ## Recommendation
 
@@ -165,7 +165,7 @@ Approved by James on 20 September 2026. This section is the implementation basel
 
 - Reuse the approved popup shell conventions: theme surface/border/shadow, 8px shell corners via `--radius`, sunken title bar/divider, 14px semibold title, compact 30×28px close control with danger hover/focus, consistent footer spacing and theme Tabler icons.
 - Use 12px supporting text and 13px destination/item titles. Go to…, Recents and footer action buttons use the shared 36px compact control scale; the Recents scope control deliberately uses the smaller 28px scale above. Preserve visible keyboard, hover, active and disabled states.
-- `prototypes/Taskbar-Workshop.frame.html`, `.frame.css` and `.frame.js` are the approved integrated reference. `prototypes/Recents-Workshop.*` retains the isolated popup reference. `prototypes/Popup-Shell.css` is the shared preview shell/control source. Outer comparison controls, sample dashboard/data, mock navigation and A/B variants stay in previews.
+- `prototypes/approved/taskbar/Taskbar-Workshop.frame.html`, `.frame.css` and `.frame.js` are the approved integrated reference. `prototypes/Recents-Workshop.*` retains the isolated popup reference. `prototypes/approved/taskbar/Popup-Shell.css` is the shared preview shell/control source. Outer comparison controls, sample dashboard/data, mock navigation and A/B variants stay in previews.
 - Port component styles into `zUnionSuite.css`, dark-specific rules into `zzDarkMode.css`, and fix any affected existing native presentation in `99-Orion.css`. Production does not load `Popup-Shell.css` or duplicate a separate Recents stylesheet. Client overrides retain their established ownership.
 - The design fits the existing proposed files: Sitewide owns attachment/visibility; CommandPalette owns results and focus; Bookmarks owns order/reordering and emits updates; BookmarkStore owns saves; Recents owns its popup/data lifecycle. Use shared Icons/Feedback and existing spinner styles. No separate file is required for the grip, placeholder, toggle or shell merely because it is a distinct visual element.
 
@@ -275,6 +275,6 @@ Recommended sequence:
 3. Establish shared lifecycle/context/UI/editor helpers; adopt them incrementally without rewriting unrelated core features. Port RiSE and the three browser/list modules, plus confirmed dialog shortcuts.
 4. Implement the approved Option C design above in Sitewide attachment, catalogue/palette, bookmarks/storage and Recents as their data contracts are verified. Port the approved reference interaction and shell styles into their owners; keep historical A/B layouts and demo fixtures out of runtime. Preserve taskbar contact search/history and appearance controls throughout.
 5. Add the separately installed GM owner and DevTools, with ownership/startup-order and independent-toggle checks.
-6. Update installation instructions, copyable include, feature status/examples and the standalone usage guide as implementation lands. Regenerate with `node tools/build-theme-usage.cjs` and verify `--check`; browser-check changed guide examples. Keep generated previews in `references/` and the guide offline.
+6. Update installation instructions, copyable include, feature status/examples and the standalone usage guide as implementation lands. Regenerate with `node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs` and verify `--check`; browser-check changed guide examples. Keep generated previews in `references/` and the guide offline.
 
 Acceptance follows the original plan's section 15: delayed/missing dependencies, double includes, partial replacements, off/on cycles, stale responses, native form persistence, clipboard rejection, correct popup focus, both bookmark owners/startup orders and actual supported-tenant smoke tests. This review does not claim those tests have run.

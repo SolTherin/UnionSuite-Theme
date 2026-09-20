@@ -43,7 +43,7 @@ The legacy pip-prefixed configuration, storage and CSS hooks remain compatible.
 
 The [taskbar preview](../references/Taskbar-Preview.html) and
 [Biscuit review preview](../references/Taskbar-Biscuit-Preview.html) both use those
-shared production assets. Build with `node tools/taskbar-preview.cjs` and
+shared production assets. Build with `node THeme/UnionSuite/guides/usage/build/taskbar-preview.cjs` and
 `node tools/build-taskbar-biscuit.cjs` from the project root. Replay, appearance
 and scratch/tilt controls remain preview-only. See the
 [installation guide](../THeme/UnionSuite/Usage-Guide.html#taskbar-pip).

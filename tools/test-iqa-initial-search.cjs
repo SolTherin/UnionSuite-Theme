@@ -2,7 +2,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 (async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
  const page=await browser.newPage();
- const css=['Native CSS/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(p=>fs.readFileSync(p,'utf8')).join('\n');
+ const css=['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css'].map(p=>fs.readFileSync(p,'utf8')).join('\n');
  const script=fs.readFileSync('THeme/UnionSuite/zUnionSuite.js','utf8').split('/* US-BANNER-BEHAVIOUR:START */')[0];
  const native=fs.readFileSync('.preview/native.html','utf8');
  // Extract the captured pre-Find query's own panel, without executing native scripts.
