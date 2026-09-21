@@ -51,6 +51,19 @@ module.exports = {
     IsCompleted:required('Explicit completion flag: true or 1 for completed; false or 0 for outstanding. Do not infer completion from status wording.', 'false'),
     TaskDateLabel:optional('Complete display label: Due plus a due date for outstanding tasks; Actioned plus an actioned date for completed tasks. Blank leaves no date text.', 'Actioned 14 September 2026')
   },
+  'Tasks-Detail-Query-Template.html':{
+    TaskTitle:taskTitle,
+    TaskUrl:optional('Task destination for the title link. Blank leaves a title that looks like a link but goes nowhere, so supply it or remove the anchor and keep the text in a strong element.', '/tasks/48210'),
+    TaskNote:optional('Plain-text task note. One line is displayed and the rest is clipped by CSS, so the full note stays searchable. Blank removes the line and the row closes up.', 'Discuss the membership options sent earlier this week.'),
+    MemberName:memberName,
+    MemberUrl:optional('Related member’s record. Blank leaves a plain-text name; a blank MemberName hides the icon and name together. Example path is illustrative.', '/Party.aspx?ID=101000'),
+    IsCompleted:required('Explicit completion flag: true or 1 for completed; false or 0 for outstanding. Do not infer completion from status wording.', 'false'),
+    DueState:optional('Urgency for the date: overdue, today, soon or none. Only overdue is coloured, and the label below must carry the word as well, so the state never relies on colour alone. Not updated after a staff member ticks the row.', 'overdue'),
+    TaskDateLabel:optional('Complete display label: Overdue or Due plus a due date for outstanding tasks; Actioned plus an actioned date for completed tasks. Blank leaves no date text.', 'Overdue 10 September 2026'),
+    DueLabel:optional('Original due label, restored if a completed row is reopened. Usually the same value as TaskDateLabel for an outstanding task.', 'Overdue 10 September 2026'),
+    TaskPartyId:optional('ID of the i4u_UT_Interactions row: the party the interaction belongs to. Supplied with TaskOrdinal, ticking the checkbox saves FollowUpActioned; without both the checkbox stays local and nothing is written.', '104019'),
+    TaskOrdinal:optional('Ordinal of the i4u_UT_Interactions row, which identifies it within that party. Whole number. Supplied with TaskPartyId to enable saving.', '219')
+  },
   'Tasks-Query-Footer.html':{},
   'Contacts-Query-Template.html':contacts,
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},

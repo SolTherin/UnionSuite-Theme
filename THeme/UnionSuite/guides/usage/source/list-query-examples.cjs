@@ -117,6 +117,27 @@ const completionExample = {
     {TaskTitle:'Send Alex the renewal summary',MemberName:'Alex Morgan',IsCompleted:'true',TaskDateLabel:'Actioned 11 September 2026',Status:'Complete',TaskNote:'Renewal summary sent.'}
   ]
 };
+// Accepted task list format: title, a one-line note, and the member beside the
+// due or actioned date. Prefer this over the two-line completion template for new
+// lists; the older template stays supported for lists already using it.
+const detailExample = {
+  id:'task-detail', title:'Task list (accepted format)', panelTitle:'My tasks',
+  description:'Title, a clipped one-line note, and a linked member beside the due or actioned date. Overdue says so as well as showing red. Search and the Show completed toggle behave as above.',
+  file:'Tasks-Detail-Query-Template.html', classes:'us-query-search us-task-completed-filter', rows:5,
+  cards:false, footer:'Tasks-Query-Footer.html',
+  query:'Use your tasks query, filtered to the current staff member. Return outstanding tasks and tasks completed in the last 30 days.',
+  order:'Outstanding first, then recently completed. The query owns sorting and the completion date window.',
+  fields:fields['Tasks-Detail-Query-Template.html'],
+  optional:'These aliases are suggested mappings, not verified iMIS fields. Leave Header blank and paste Tasks-Query-Footer.html into the separate Footer field, replacing /your-tasks-page with your destination. The query composes TaskDateLabel in full, including the words Overdue, Due and Actioned, so the row never depends on colour alone and a missing value cannot leave a stray prefix. DueState only drives emphasis; it is not updated when a staff member ticks a row, so a completed row always shows a plain green Actioned date. The note is clipped to one line by CSS rather than truncated in the query, which keeps the whole note searchable. Supply TaskPartyId and TaskOrdinal to save completion: ticking PUTs FollowUpActioned to the matching i4u_UT_Interactions row, and the row only leaves the list once iMIS accepts the change. This example leaves both blank, so its checkboxes stay local.',
+  empty:'No tasks to show.',
+  records:[
+    {TaskTitle:'Call Alex about renewal',MemberName:'Alex Morgan',MemberUrl:'#example',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'overdue',TaskDateLabel:'Overdue 10 September 2026',DueLabel:'Overdue 10 September 2026',TaskUrl:'#example',TaskNote:'Discuss the membership options sent earlier this week and confirm which tier he wants before the renewal lapses.'},
+    {TaskTitle:'Confirm updated workplace details',MemberName:'Jordan Lee',MemberUrl:'#example',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'today',TaskDateLabel:'Due today',DueLabel:'Due today',TaskUrl:'#example',TaskNote:'New site address supplied by the delegate; check it against the employer record.'},
+    {TaskTitle:'Follow up membership application',MemberName:'Taylor Smith',MemberUrl:'#example',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'soon',TaskDateLabel:'Due 18 September 2026',DueLabel:'Due 18 September 2026',TaskUrl:'#example',TaskNote:'Waiting on payroll deduction confirmation from the employer.'},
+    {TaskTitle:'Send Alex the renewal summary',MemberName:'Alex Morgan',MemberUrl:'#example',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'true',DueState:'none',TaskDateLabel:'Actioned 11 September 2026',DueLabel:'Due 9 September 2026',TaskUrl:'#example',TaskNote:'Summary emailed with the fee schedule attached.'}
+  ]
+};
+module.exports.push(detailExample);
 module.exports.push(completionExample, {
   ...completionExample, id:'task-completed-only', title:'Completion filter only',
   description:'The same tasks with only us-task-completed-filter: a Show completed toggle and no search field.',

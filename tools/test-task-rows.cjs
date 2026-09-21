@@ -50,6 +50,15 @@ const panel=wrapped=>'<div class="panel"><div class="panel-heading Distinguish">
   assert.ok(await root.locator('[data-row="0"]').evaluate(n=>n.getAnimations().length)>0,'completed rows animate into view');
   await page.waitForTimeout(350);
   assert.equal(await root.locator('.QueryTemplateSet > section:visible').count(),3);
+  // Completed rows leave the way they arrive: the row stays in the list and
+  // collapses, and filtering waits for it rather than blinking the row out.
+  await root.locator('.us-task-completed-toggle').click();
+  assert.ok(await root.locator('[data-row="0"]').evaluate(n=>n.getAnimations().length)>0,'completed rows animate out of view');
+  assert.equal(await root.locator('[data-row="0"]').evaluate(n=>n.hasAttribute('data-us-query-search-hidden')),false,'filtering waits for the collapse');
+  await page.waitForFunction(()=>document.querySelector('[data-row="0"]').hasAttribute('data-us-query-search-hidden'));
+  await root.locator('.us-task-completed-toggle').click();
+  await page.waitForTimeout(350);
+  assert.equal(await root.locator('.QueryTemplateSet > section:visible').count(),3);
   assert.match(await root.locator('[data-row="0"] .us-task__date').textContent(),/^Actioned /);
   await check(0).click();await waitCount('2 outstanding');
   assert.equal(await root.locator('[data-row="0"] .us-task__date').textContent(),'17/09/2026');

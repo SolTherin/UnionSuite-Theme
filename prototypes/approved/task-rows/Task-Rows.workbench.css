@@ -83,7 +83,7 @@ body {
   color: var(--text-muted);
 }
 
-/* Current and proposed sit side by side while both fit the window at the chosen
+/* The two formats sit side by side while both fit the window at the chosen
    width, and stack once they do not. */
 .wb-stage__variants {
   display: flex;
@@ -109,7 +109,7 @@ body {
   color: var(--text-muted);
 }
 
-.wb-variant--proposed .wb-variant__label {
+.wb-variant--accepted .wb-variant__label {
   color: var(--accent);
 }
 
@@ -127,7 +127,7 @@ body {
   overflow: auto;
 }
 
-.wb-variant--proposed > .wb-stage__frame {
+.wb-variant--accepted > .wb-stage__frame {
   border-color: var(--accent);
 }
 

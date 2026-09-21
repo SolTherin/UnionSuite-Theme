@@ -1,20 +1,18 @@
-// Builds the task row display workbench from real theme assets and the canonical
-// Query Templates. The prototype never copies row styles or behaviour: it inlines
-// the shared stylesheets and the same shared-script slice the guide's list
-// reference uses, then renders the templates inside the wrappers iMIS generates.
+// Builds the task row workbench: the accepted task row beside the older one, both
+// from the canonical Query Templates and the shipped theme CSS and behaviour. It
+// copies no styles of its own, and renders the templates inside the wrappers iMIS
+// generates, so what it shows is what a real list does.
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
 const esc = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const script = text => text.replace(/<\/script/gi, '<\\/script');
-const specimens = require('../prototypes/wip/task-rows/task-specimens.cjs');
+const specimens = require('../prototypes/approved/task-rows/task-specimens.cjs');
 
-// Supported templates come from the guide; the proposal lives with the prototype.
+// Both variants are supported templates now: the accepted row and the older one.
 const supportedDirectory = 'THeme/UnionSuite/guides/usage/templates/List-Templates/';
-const prototypeDirectory = 'prototypes/wip/task-rows/';
-const template = file => read((file.startsWith('Task-Rows.') ? prototypeDirectory : supportedDirectory) + file)
-  .replace(/<!--[\s\S]*?-->\s*/g, '').trim();
+const template = file => read(supportedDirectory + file).replace(/<!--[\s\S]*?-->\s*/g, '').trim();
 
 function themeStyles() {
   const icons = read('THeme/UnionSuite/Tabler/tabler-icons.min.css').replace(
@@ -24,6 +22,9 @@ function themeStyles() {
       + ') format("woff2");font-display:block}'
   );
   return [
+    // Native base first: it sets html{font-size:62.5%}, so anything sized in rem
+    // behaves here exactly as it does on a real iMIS page.
+    read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'),
     read('THeme/UnionSuite/99-Orion.css'),
     read('THeme/UnionSuite/zUnionSuite.css'),
     read('THeme/UnionSuite-Client/Branding.css'),
@@ -78,14 +79,13 @@ function stage(specimen) {
 
 const replacements = {
   '/* THEME_STYLES */': themeStyles(),
-  '/* WORKBENCH_STYLES */': read('prototypes/wip/task-rows/Task-Rows.workbench.css'),
-  '/* PROPOSED_STYLES */': read('prototypes/wip/task-rows/Task-Rows.proposed.css'),
+  '/* WORKBENCH_STYLES */': read('prototypes/approved/task-rows/Task-Rows.workbench.css'),
   '<!-- SPECIMENS -->': specimens.map(stage).join('\n'),
   '/* SHARED_SCRIPT */': script(sharedScript()),
-  '/* WORKBENCH_SCRIPT */': script(read('prototypes/wip/task-rows/Task-Rows.workbench.js'))
+  '/* WORKBENCH_SCRIPT */': script(read('prototypes/approved/task-rows/Task-Rows.workbench.js'))
 };
 
-let output = read('prototypes/wip/task-rows/Task-Rows.source.html');
+let output = read('prototypes/approved/task-rows/Task-Rows.source.html');
 for (const [marker, replacement] of Object.entries(replacements)) {
   if (!output.includes(marker)) throw new Error(`Source is missing the ${marker} marker.`);
   output = output.replace(marker, () => replacement);

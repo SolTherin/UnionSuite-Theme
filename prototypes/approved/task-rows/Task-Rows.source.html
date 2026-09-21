@@ -4,25 +4,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Task row display workbench — Union Suite</title>
+<title>Task row formats — Union Suite</title>
 <style>/* THEME_STYLES */</style>
 <style>/* WORKBENCH_STYLES */</style>
-<style>/* PROPOSED_STYLES */</style>
 </head>
 <body>
 <header class="wb-head">
   <p class="wb-eyebrow">Union Suite · WIP prototype · display only</p>
   <h1>Task rows</h1>
-  <p class="wb-lede">Each scenario below is rendered twice at the same width: <strong>Current</strong>, the shipped
-    <code>.us-task</code> row, and <strong>Proposed</strong>, a layout under discussion. Both use the real theme
-    CSS and the real completion behaviour; the proposal adds a stylesheet scoped to its own frames, so nothing
-    the current rows do is affected. Nothing here is in the theme.</p>
-  <p class="wb-lede">The proposal changes shape with the <em>width of the list</em>, not the window, because the
-    same page can hold a 600px homepage panel and a 1150px tasks page. It has two shapes: stacked below 480px,
-    and title, note and meta beside a right-aligned due column above it. The width buttons are the sizes the
+  <p class="wb-lede">Each scenario below is rendered twice at the same width: <strong>Current</strong>, the older
+    two-line <code>.us-task</code> row, and <strong>Accepted</strong>, the format now used for new lists
+    (<code>us-task--detail</code>). Both come from the canonical Query Templates and the shipped theme CSS and
+    behaviour — this page adds page chrome and the controls only, and no styles of its own.</p>
+  <p class="wb-lede">The accepted row changes shape with the <em>width of the list</em>, not the window, because
+    the same page can hold a 600px homepage panel and a 1150px tasks page. The width buttons are the sizes the
     list is actually used at.</p>
-  <p class="wb-lede"><strong>Nothing is saved.</strong> Ticking a task runs the local completion sequence and no
-    request is made. Reset rows restores anything completed.</p>
+  <p class="wb-lede"><strong>No tenant is touched.</strong> Ticking a task runs the real completion sequence,
+    including the PUT to <code>i4u_UT_Interactions</code>, but this page answers that request itself. Turn on
+    <em>Simulate save failure</em> to see a rejected write: the row comes back with its original state and says
+    so. Reset rows restores anything completed.</p>
 </header>
 
 <div class="wb-toolbar" role="group" aria-label="Workbench controls">
@@ -43,6 +43,7 @@
       <option value="dark">Dark</option>
     </select>
   </label>
+  <label class="wb-control"><input type="checkbox" data-wb-fail> Simulate save failure</label>
   <button type="button" class="TextButton us-outline-button" data-wb-reset>Reset rows</button>
 </div>
 
@@ -51,10 +52,10 @@
 </main>
 
 <footer class="wb-foot">
-  <p>Supported author recipes, field definitions and iPart settings live in the usage guide
-    (<code>#task-completed-filter</code>) and <code>references/List-Templates.html</code>. The proposed template and
-    its scoped styles are in <code>prototypes/wip/task-rows/</code>; see that folder's README for the decisions
-    behind them and what is still open.</p>
+  <p>Supported author recipes, field definitions and iPart settings live in the usage guide and
+    <code>references/List-Templates.html</code>. The accepted row is
+    <code>Tasks-Detail-Query-Template.html</code> with the <code>US-TASK-ROWS</code> styles in
+    <code>zUnionSuite.css</code>; <code>prototypes/approved/task-rows/</code> records the decisions behind it.</p>
 </footer>
 
 <script>/* SHARED_SCRIPT */</script>

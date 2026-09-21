@@ -1113,7 +1113,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
@@ -1153,7 +1153,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0 0 18px;
@@ -1176,7 +1176,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1204,7 +1204,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
 :is(
@@ -1214,7 +1214,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   display: none;
@@ -1227,7 +1227,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1248,7 +1248,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1272,7 +1272,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description > :is(div, p):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1286,7 +1286,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
@@ -1299,7 +1299,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)) + .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
@@ -1314,7 +1314,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
 :where(
@@ -1324,7 +1324,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -8671,7 +8671,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    when iMIS omits QueryTemplateSet for no results; nested iParts are excluded. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding: var(--space-3) var(--iqa-inset,var(--space-4));
 }
@@ -8702,7 +8702,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 /* No-results HTML is author supplied; trim paragraph margins within its own body. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:has(> .QueryTemplateSet)):not(:where(.us-report-no-styling, .us-report-no-styling *)) > p {
   margin: 0;
   color: var(--iqa-muted);
@@ -8720,7 +8720,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   .us-list--no-shell,
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)):not(:where(.us-list *, .us-list--rows *, .us-list--timeline *, .us-list--compact *, .us-list--no-shell *))
 ) {
   --list-gap: var(--space-3);
@@ -10127,6 +10127,197 @@ html.us-taskbar-mounted #hd .search-dropdown {
 .us-task :is(button, a):focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+}
+
+/* Accepted detail row: title, a one-line note, and the member beside the due or
+   actioned date. Opt in with us-task--detail on the row; lists using the original
+   two-line task row are unaffected, because every rule below carries the modifier.
+   Requires Tasks-Detail-Query-Template.html, whose markup supplies the title link,
+   note, member and date elements these rules place. */
+.QueryTemplateSet:has(.us-task--detail):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container-type: inline-size;
+  container-name: us-tasks;
+}
+
+.us-task--detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: auto minmax(18ch, 1fr) max-content;
+  grid-template-areas:
+    "check title title"
+    "check note  note"
+    "check meta  due";
+  align-items: start;
+  align-content: center;
+  column-gap: 12px;
+  row-gap: 0;
+  min-height: 56px;
+  padding: 10px 20px;
+}
+
+/* Aligned to the title line rather than the middle of a three-line row, so the
+   tick and the thing it completes read as one unit. */
+.us-task--detail > .us-task__check:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: check;
+  align-self: start;
+  margin-top: -5px;
+}
+
+/* The wrappers the original row needs for its flex line become transparent, so
+   their children can take grid areas directly. */
+.us-task--detail > .us-task__open:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-task--detail .us-task__copy:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+/* The title wins every tie for width and is the affordance for opening the task.
+   Matched as a.us-task__title on purpose: dark mode colours links inside
+   .panel-body at (0,3,1), so a class-only rule loses and titles turn link blue. */
+.us-task--detail a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: title;
+  max-width: 62ch;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-strong);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.us-task--detail a.us-task__title:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  text-decoration: underline;
+}
+
+/* One line, clamped rather than hidden: clamped text still matches the header
+   search, where a hidden excerpt copy would silently stop matching. The rest of
+   the note belongs to the task record, not the list. */
+.us-task--detail .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: note;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  max-width: 78ch;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.us-task--detail .us-task__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-top: 6px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* The member is the scan token after the title, so it carries the weight. The
+   person icon labels it without spending a word. */
+.us-task--detail .us-task__member:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.us-task--detail .us-task__member > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  align-self: center;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  transition: color 120ms;
+}
+
+/* Hovering the name lights the icon too, so the pair reads as one control. */
+.us-task--detail .us-task__member:has(> a.us-task__member-name:hover) > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--accent);
+}
+
+/* The member link keeps the meta line's appearance rather than taking link colour:
+   two differently coloured links in one row compete. Underline on hover marks it. */
+.us-task--detail a.us-task__member-name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.us-task--detail a.us-task__member-name:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  text-decoration: underline;
+}
+
+/* Capped in px, not rem: native iMIS sets html{font-size:62.5%}, so a rem cap is
+   10px-based on a real page and squeezed the date to two lines. 190px clears the
+   longest real label, "Actioned 30 September 2026" (172px at 12px), so the date
+   never takes the title's width and never wraps. */
+.us-task--detail .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: due;
+  align-self: baseline;
+  max-width: 190px;
+  padding-left: 12px;
+}
+
+/* A blank query value must not leave an empty line or a stranded icon: row rhythm
+   follows the layout, not the data. */
+.us-task--detail :is(.us-task__note, .us-task__meta, .us-task__date):empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-task--detail .us-task__member:has(> a.us-task__member-name:empty):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* Overdue is the only coloured state, and the query supplies the word "Overdue"
+   with it, so the state never rests on colour alone. Due today keeps the weight
+   without a second colour. A badge would cost 80-110px of contested width. */
+.us-task--detail[data-us-task-due-state="overdue" i] .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.us-task--detail[data-us-task-due-state="today" i] .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-weight: 600;
+}
+
+/* data-us-task-due-state comes from the query and is not updated when a row is
+   ticked, so the completed row resets the weight as well as the pill. Both
+   selectors match the due-state rules' specificity and follow them, so they win. */
+.us-task--detail.us-task--complete .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-task--detail[data-us-task-completed="true" i] .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  background: none;
+  font-weight: 400;
+  color: var(--success);
+}
+
+.us-task--detail.us-task--complete a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-task--detail[data-us-task-completed="true" i] a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* Shown in place when a completion cannot be saved, so a rejected write is
+   visible on the task rather than only in the console. */
+.us-task__save-error:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 2 / -1;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+/* A phone-width list cannot honour the title's minimum measure alongside a long
+   date, so the title column gives way there instead of overflowing the row. */
+@container us-tasks (max-width: 479.98px) {
+  .us-task--detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: auto minmax(0, 1fr) max-content;
+  }
 }
 
 /* Only task-bearing native result shells lose generic card/row insets. */

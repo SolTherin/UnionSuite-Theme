@@ -39,6 +39,18 @@ const wrap = (id,classes='',cards=true) => `<div class="ContentItemContainer"><d
     assert.equal(await page.locator('#outer > .panel > .us-query-search-controls').count(),0);
     assert.equal(await visible('nested'),2);
     assert.equal(await page.locator('#both .panel-heading .us-task-completed-toggle .ti-checkbox').count(),1);
+    // This suite runs with reduced motion, where hiding completed rows is
+    // immediate: no collapse animation, and no deferred filtering behind it.
+    await completed('only').click();
+    await page.waitForFunction(()=>!document.querySelector('#only [data-record="done"]').hasAttribute('data-us-query-search-hidden'));
+    await completed('only').click();
+    const hiddenAtOnce=await page.evaluate(()=>{
+      const row=document.querySelector('#only [data-record="done"]');
+      return {hidden:row.hasAttribute('data-us-query-search-hidden'), animations:row.getAnimations().length};
+    });
+    assert.equal(hiddenAtOnce.hidden,true,'reduced motion hides completed rows immediately');
+    assert.equal(hiddenAtOnce.animations,0,'reduced motion runs no collapse animation');
+    assert.equal(await completed('only').getAttribute('aria-pressed'),'false');
     assert.equal(await completed('both').isVisible(),true);
     await funnel('both').click();
     assert(await page.locator('#both .us-query-search-field').evaluate(n=>Math.abs(n.getBoundingClientRect().width-n.parentElement.getBoundingClientRect().width)<2));

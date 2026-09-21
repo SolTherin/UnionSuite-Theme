@@ -867,7 +867,28 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+
+  // Section presets: one authored class stands in for the feature classes it
+  // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
+  // panel combining tab placement, query features and an action exceeds that,
+  // so a preset spends one token where several were needed. Keep every
+  // expanded name listed in queryDisplaySelector above and in the matching
+  // zUnionSuite.css selector, so identification styling applies on first paint
+  // instead of arriving when this script runs.
+  var sectionPresets = {
+    'us-home-tasks': ['us-query-search', 'us-task-completed-filter', 'us-action-home-add-task']
+  };
+
+  // Idempotent: once the classes are present no further mutation is recorded,
+  // so the action observer settles after the first pass.
+  function expandSectionPresets() {
+    Object.keys(sectionPresets).forEach(function (preset) {
+      document.querySelectorAll('.' + preset).forEach(function (element) {
+        sectionPresets[preset].forEach(function (name) { element.classList.add(name); });
+      });
+    });
+  }
 
   function syncQueryDisplayActions() {
     document.querySelectorAll("[data-us-cco-empty-heading]").forEach(function (heading) {
@@ -972,6 +993,37 @@ SOFTWARE.
   function stopTaskReveals(search) {
     (search.taskReveals || []).forEach(function (run) { run.cancel(); });
     search.taskReveals = [];
+  }
+  // Completed rows leave the same way they arrive. The rows are still visible
+  // while this runs: filtering is deferred until the collapse finishes, so the
+  // list closes up instead of the rows blinking out.
+  function hideCompletedRows(search, candidates, done) {
+    var motion = matchMedia('(prefers-reduced-motion: reduce)');
+    var rows = motion.matches ? [] : candidates.filter(function (row) {
+      return row.isConnected && row.getClientRects().length &&
+        getComputedStyle(row).display !== 'none' && row.animate && row.getBoundingClientRect().height;
+    });
+    if (!rows.length) { done(); return; }
+    var remaining = rows.length;
+    rows.forEach(function (row) {
+      var height = row.getBoundingClientRect().height;
+      var animation = row.animate([
+        {height:height+'px', minHeight:'0px', opacity:1, overflow:'hidden'},
+        {height:'0px', minHeight:'0px', paddingTop:'0px', paddingBottom:'0px', borderTopWidth:'0px', opacity:0, overflow:'hidden'}
+      ], {duration:300, easing:'ease-in-out'});
+      var run = {row:row, cancel:function () { animation.cancel(); }};
+      function changed() { if (motion.matches) run.cancel(); }
+      motion.addEventListener('change', changed);
+      (search.taskReveals || (search.taskReveals=[])).push(run);
+      // Cancelled or finished, the rows must still be filtered: otherwise a
+      // cancelled collapse would leave completed rows on screen.
+      function settle() {
+        motion.removeEventListener('change', changed);
+        search.taskReveals = (search.taskReveals || []).filter(function (item) { return item !== run; });
+        if (--remaining === 0) done();
+      }
+      animation.finished.then(settle, settle);
+    });
   }
   function revealCompletedRows(search, candidates) {
     var motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -1161,10 +1213,17 @@ SOFTWARE.
       if (completedToggle) completedToggle.addEventListener('click', function () {
         stopTaskReveals(search);
         var reveal = search.rows.filter(function (row) { return row.hasAttribute('data-us-task-completed-row') && row.hasAttribute('data-us-query-search-hidden'); });
+        var hiding = search.rows.filter(function (row) { return row.hasAttribute('data-us-task-completed-row') && !row.hasAttribute('data-us-query-search-hidden'); });
         search.state.showCompleted = !search.state.showCompleted;
         completedToggle.setAttribute('aria-pressed', String(search.state.showCompleted));
-        filterQueryResults(search);
-        if (search.state.showCompleted) revealCompletedRows(search, reveal);
+        if (search.state.showCompleted) {
+          filterQueryResults(search);
+          revealCompletedRows(search, reveal);
+        } else {
+          // Collapse first, then filter: the rows have to stay in the list to
+          // animate out of it.
+          hideCompletedRows(search, hiding, function () { filterQueryResults(search); });
+        }
       });
       if (window.MutationObserver) {
         search.observer = new MutationObserver(function () {
@@ -1830,6 +1889,7 @@ SOFTWARE.
 
   function reconcile() {
     timer = null;
+    expandSectionPresets();
     attachAjax();
     discoverNativeReports();
     syncQueryDisplayActions();
@@ -4038,6 +4098,59 @@ SOFTWARE.
     }
     return duration;
   }
+  // Completion is stored on the i4u_UT_Interactions row the result came from.
+  // PUT updates that row; POST would create a second interaction. The row carries
+  // its own identity, so a list whose query does not supply one stays local.
+  const saveEntity='i4u_UT_Interactions', saveField='FollowUpActioned';
+  function identity(root) {
+    const partyId=(root.getAttribute('data-us-task-party-id')||'').trim();
+    const ordinal=(root.getAttribute('data-us-task-ordinal')||'').trim();
+    return partyId && /^\d+$/.test(ordinal) ? {partyId, ordinal:Number(ordinal)} : null;
+  }
+  function saveBody(id, done) {
+    const property=(name,value)=>({'$type':'Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts', Name:name, Value:value});
+    const identityData=(entity,values)=>({
+      '$type':'Asi.Soa.Core.DataContracts.IdentityData, Asi.Contracts',
+      EntityTypeName:entity,
+      IdentityElements:{'$type':'System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib', '$values':values}
+    });
+    // Partial update: the row key must appear in the identity and as a property,
+    // and a Boolean field needs its typed wrapper or iMIS rejects the write.
+    return {
+      '$type':'Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts',
+      EntityTypeName:saveEntity,
+      PrimaryParentEntityTypeName:'Party',
+      Identity:identityData(saveEntity,[String(id.partyId),String(id.ordinal)]),
+      PrimaryParentIdentity:identityData('Party',[String(id.partyId)]),
+      Properties:{'$type':'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts', '$values':[
+        property('ID',String(id.partyId)),
+        property('Ordinal',{'$type':'System.Int32','$value':id.ordinal}),
+        property(saveField,{'$type':'System.Boolean','$value':done})
+      ]}
+    };
+  }
+  async function save(root, done) {
+    const id=identity(root);
+    if(!id) return;
+    const token=document.querySelector('#__RequestVerificationToken');
+    const response=await fetch(window.location.origin+'/api/'+saveEntity+'/'+encodeURIComponent(id.partyId)+'/'+id.ordinal, {
+      method:'PUT',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json', RequestVerificationToken:token?token.value:''},
+      body:JSON.stringify(saveBody(id,done))
+    });
+    if(!response.ok) throw new Error(saveEntity+' update failed: '+response.status);
+  }
+  // A failed write must say so where the task is, not in a console nobody reads.
+  function reportFailure(root) {
+    root.querySelectorAll(':scope > .us-task__save-error').forEach(node=>node.remove());
+    const message=document.createElement('span');
+    message.className='us-task__save-error';
+    message.setAttribute('role','status');
+    message.textContent='Not saved. Try again.';
+    root.appendChild(message);
+    setTimeout(()=>message.remove(), 6000);
+  }
   async function toggle(root) {
     if(runs.has(root))return;
     const button=root.querySelector(':scope > [data-us-task-toggle]');
@@ -4049,14 +4162,25 @@ SOFTWARE.
     const animations=[],particles=[];
     let timer,release;
     const pause=ms=>new Promise(resolve=>{release=resolve;timer=setTimeout(resolve,ms);});
+    // Restored verbatim if the write fails, so a rejected reopen keeps its own
+    // actioned date rather than being stamped with today's.
+    const originalDate=root.querySelector('.us-task__date')?.textContent;
+    let saved=true;
     const run={finish:()=>{
       if(runs.get(root)!==run)return;
       runs.delete(root); clearTimeout(timer);release?.();animations.forEach(animation=>animation.cancel());particles.forEach(node=>node.remove());
-      root.setAttribute('data-us-task-completed',String(done));
+      const outcome=saved?done:!done;
+      root.setAttribute('data-us-task-completed',String(outcome));
       root.removeAttribute('data-us-task-changing');
       row.removeAttribute('data-us-task-exiting');row.inert=originalInert;
+      button.setAttribute('aria-checked',String(outcome));
+      button.title=outcome?'Reopen task':'Mark complete';
+      root.classList.toggle('us-task--complete',outcome);
       const date=root.querySelector('.us-task__date');
-      if(date) date.textContent=done?'Actioned '+new Intl.DateTimeFormat(document.documentElement.lang||'en-AU',{day:'numeric',month:'short',year:'numeric'}).format(new Date()):dueLabels.get(root)||'';
+      if(date) date.textContent=saved
+        ? (done?'Actioned '+new Intl.DateTimeFormat(document.documentElement.lang||'en-AU',{day:'numeric',month:'short',year:'numeric'}).format(new Date()):dueLabels.get(root)||'')
+        : (originalDate||'');
+      if(!saved) reportFailure(root);
       window.UnionSuiteIqaFilters?.refresh();schedule();
     }};
     runs.set(root,run);
@@ -4064,7 +4188,13 @@ SOFTWARE.
     button.setAttribute('aria-checked',String(done));button.title=done?'Reopen task':'Mark complete';
     root.classList.toggle('us-task--complete',done);
     const showCompleted=!!wrapper?.querySelector('.us-task-completed-toggle[aria-pressed="true"]');
-    if(!done||reducedMotion.matches||typeof root.animate!=='function'){if(done&&!showCompleted)moveFocus(row,set,wrapper);run.finish();return;}
+    // The write starts with the tick, so the celebration covers the round trip.
+    const request=save(root,done).catch(error=>{saved=false;console.warn(error.message);});
+    if(!done||reducedMotion.matches||typeof root.animate!=='function'){
+      await request;
+      if(done&&saved&&!showCompleted)moveFocus(row,set,wrapper);
+      run.finish();return;
+    }
     if(!showCompleted){moveFocus(row,set,wrapper);row.inert=true;row.setAttribute('data-us-task-exiting','');}
     try {
       const mark=button.querySelector('svg path');
@@ -4074,7 +4204,11 @@ SOFTWARE.
       }
       const duration=celebrate(button,animations,particles);
       await pause(duration+(showCompleted?0:100));
-      if(runs.get(root)!==run||showCompleted)return;
+      if(runs.get(root)!==run)return;
+      // The row only leaves once iMIS has accepted the change; a rejected write
+      // brings it back with its original state instead of hiding a lost edit.
+      await request;
+      if(runs.get(root)!==run||showCompleted||!saved)return;
       const slide=root.animate([{transform:'translateX(0)',opacity:1},{transform:'translateX(-105%)',opacity:0}],{duration:450,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
       animations.push(slide);await slide.finished;
       if(runs.get(root)!==run)return;

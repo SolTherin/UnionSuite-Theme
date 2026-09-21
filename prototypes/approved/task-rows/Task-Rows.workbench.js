@@ -3,6 +3,22 @@
 (function () {
   'use strict';
 
+  // Completion writes are stubbed: this page must never PUT to a tenant, and the
+  // failure path is as much a part of the design as the success path.
+  let failWrites = false;
+  const nativeFetch = window.fetch ? window.fetch.bind(window) : null;
+  window.fetch = function (input, init) {
+    const url = String(typeof input === 'string' ? input : input && input.url || '');
+    if (url.includes('/api/i4u_UT_Interactions/')) {
+      const status = failWrites ? 500 : 200;
+      return new Promise(resolve => setTimeout(
+        () => resolve(new Response(JSON.stringify({stubbed:true, body:init && init.body}), {status})),
+        350
+      ));
+    }
+    return nativeFetch ? nativeFetch(input, init) : Promise.reject(new Error('fetch unavailable'));
+  };
+
   const stages = document.querySelector('.wb-stages');
   const scheme = document.querySelector('[data-wb-scheme]');
   const width = document.querySelector('[data-wb-width]');
@@ -34,6 +50,9 @@
       applyWidth(width.value);
     });
   });
+
+  const failToggle = document.querySelector('[data-wb-fail]');
+  failToggle.addEventListener('change', () => { failWrites = failToggle.checked; });
 
   reset.addEventListener('click', () => {
     original.forEach((markup, frame) => {
