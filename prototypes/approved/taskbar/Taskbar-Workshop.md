@@ -23,7 +23,7 @@ Arrow-key destination navigation outlines the entire palette row. Tabbing to the
 
 The palette search wrapper owns one continuous background across the search icon, input and Esc hint, including in dark mode.
 
-In option C, the bookmarks-bar toggle sits to the right of the divider separating pinned shortcuts from controls, immediately before Go to….
+In option C, the bookmarks-bar toggle is a star that sits to the right of the divider separating pinned shortcuts from controls, immediately after Go to….
 
 Recents now opens with Mine selected. Option C uses the selected narrow 420px popup, with IQAs above content in one scrolling column and a visible Refresh footer. Reset demo also restores Mine. The separate Recents workshop retains its width controls for further experimentation.
 

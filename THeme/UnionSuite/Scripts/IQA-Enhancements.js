@@ -659,12 +659,18 @@
     _enhanceExpressions() {
       const table = document.getElementById('SelectedProperty'); if (!table) return;
 
+      // A long expression in a narrow column wraps over many lines, so growth
+      // stops here and the field scrolls. Dragging the resize grip still wins.
+      const AUTO_HEIGHT_MAX = 320;
       const autoResize = (ta) => {
         const userMin = ta.dataset.userResized === 'true' ? ta.clientHeight : null;
         ta.dataset.resizingProgrammatically = 'true';
         ta.style.height = 'auto';
-        const needed = ta.scrollHeight;
-        ta.style.height = (userMin != null ? Math.max(needed, userMin) : needed) + 'px';
+        const content = ta.scrollHeight;
+        const needed = Math.min(content, AUTO_HEIGHT_MAX);
+        const height = userMin != null ? Math.max(needed, userMin) : needed;
+        ta.style.height = height + 'px';
+        ta.style.overflowY = content > height ? 'auto' : 'hidden';
         requestAnimationFrame(() => { delete ta.dataset.resizingProgrammatically; });
       };
       const iconBtn = (label) => { const el = document.createElement('span'); el.className = 'icon-btn'; el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0'); el.setAttribute('aria-label', label); el.title = label; return el; };
@@ -672,7 +678,9 @@
       table.querySelectorAll('textarea').forEach(ta => {
         if (ta.dataset.enhanced) return;
         ta.dataset.enhanced = 'true';
-        ta.disabled = true; ta.style.resize = 'both'; ta.style.overflowY = 'hidden'; ta.style.boxSizing = 'border-box';
+        // Vertical-only: a manual width would become an inline style that
+        // outlives the column it was dragged in, overflowing narrower layouts.
+        ta.disabled = true; ta.style.resize = 'vertical'; ta.style.overflowY = 'hidden'; ta.style.boxSizing = 'border-box';
 
         const wrapper = document.createElement('div'); wrapper.className = 'textarea-wrap';
         const bar = document.createElement('div'); bar.className = 'icon-bar';
@@ -981,13 +989,17 @@
         /* Reordering presentation follows the taskbar command palette: a grip
            handle, the held row floating under the pointer, an empty dashed slot
            and the displaced rows sliding into their new places. */
-        .iqasort-grip { display:inline-flex; align-items:center; justify-content:center; flex:none; width:24px; height:24px; margin-right:2px; border-radius:var(--radius-sm,4px); color:var(--text-muted,#545962); vertical-align:middle; cursor:grab; user-select:none; touch-action:none; }
+        .iqasort-grip { display:inline-flex; align-items:center; justify-content:center; flex:none; width:24px; height:24px; border-radius:var(--radius-sm,4px); color:var(--text-muted,#545962); cursor:grab; user-select:none; touch-action:none; }
         .iqasort-grip:hover { color:var(--text-link,#006f94); background:var(--bg-sunken,#f1f3f5); }
         .iqasort-grip:active { cursor:grabbing; }
         .iqasort-grip:focus-visible { outline:2px solid var(--border-focus,#006f94); outline-offset:2px; }
         .iqasort-grip > svg { display:block; width:18px; height:18px; }
-        #SelectedProperty .SQLExpression .iqasort-grip { vertical-align:top; margin-top:8px; }
-        #SelectedProperty .SQLExpression:has(.iqasort-grip) .textarea-wrap { display:inline-grid; width:calc(100% - 24px); vertical-align:top; }
+        /* The handle keeps a column of its own beside the property text. Left
+           inline it wraps onto a line above the label as soon as the column is
+           narrow enough for the source name to wrap. */
+        .iqasort-prop { display:flex; align-items:flex-start; gap:var(--space-1,4px); min-width:0; }
+        .iqasort-prop__body { flex:1 1 auto; min-width:0; }
+        #SelectedProperty .SQLExpression .iqasort-grip { margin-top:4px; }
         .iqasort-nosel, .iqasort-nosel * { cursor:grabbing !important; user-select:none !important; -webkit-user-select:none !important; }
         .iqasort-dragging { display:none !important; }
         .iqasort-placeholder > td { padding:0 !important; border:0 !important; background:transparent !important; }
@@ -1210,7 +1222,7 @@
         grip.title = 'Drag to reorder (or Alt+Up / Alt+Down)';
         grip.draggable = false;
         grip.setAttribute('aria-label', 'Reorder ' + tr.__iqa.name); grip.setAttribute('aria-describedby', 'iqasortHelp');
-        cell.insertBefore(grip, cell.firstChild);
+        addGrip(cell, grip);
         on(grip, 'pointerdown', event => {
           if (event.button !== 0 || !event.isPrimary || pointer) return;
           event.preventDefault(); clearSelection(); grip.focus({ preventScroll: true });
@@ -1231,9 +1243,33 @@
       enabled = true; remember(true); syncToggleUi(); status();
     }
 
+    // The handle and the rest of the property cell share a flex row, so the
+    // cell keeps its original children inside a body element while dragging is
+    // on. Removing the handle alone would leave that element behind.
+    function addGrip(cell, grip) {
+      const existing = cell.querySelector('.iqasort-prop');
+      if (existing) { existing.querySelector('.iqasort-grip')?.remove(); existing.insertBefore(grip, existing.firstChild); return; }
+      const body = document.createElement('div');
+      body.className = 'iqasort-prop__body';
+      while (cell.firstChild) body.appendChild(cell.firstChild);
+      const shell = document.createElement('div');
+      shell.className = 'iqasort-prop';
+      shell.appendChild(grip); shell.appendChild(body);
+      cell.appendChild(shell);
+    }
+    function removeGrips() {
+      document.querySelectorAll('.iqasort-prop').forEach(shell => {
+        const body = shell.querySelector('.iqasort-prop__body'), cell = shell.parentNode;
+        if (body) while (body.firstChild) cell.insertBefore(body.firstChild, shell);
+        shell.remove();
+      });
+      document.querySelectorAll('.iqasort-grip').forEach(el => el.remove());
+    }
+
     function disable({ remember: savePreference = true } = {}) {
       ac?.abort(); ac = null;
-      document.querySelectorAll('.iqasort-grip, .iqasort-floating, .iqasort-placeholder').forEach(el => el.remove());
+      removeGrips();
+      document.querySelectorAll('.iqasort-floating, .iqasort-placeholder').forEach(el => el.remove());
       grid()?.classList.remove('iqasort-nosel');
       rows().forEach(tr => { tr.draggable = false; tr.classList.remove('iqasort-moved', 'iqasort-dragging'); });
       enabled = false; if (savePreference) remember(false); syncToggleUi(); status();
@@ -3253,9 +3289,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
 
   var SQLTOOLS_CSS =
       '.textarea-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 30px;gap:6px;align-items:start;}'
-    + 'body.iqa-enhanced #SelectedProperty .textarea-wrap{display:inline-grid!important;grid-template-columns:minmax(0,1fr) 30px!important;width:100%;vertical-align:top;}'
-    + 'body.iqa-enhanced #SelectedProperty .SQLExpression:has(.iqasort-grip) .textarea-wrap{width:calc(100% - 24px);}'
-    + 'body.iqa-enhanced #SelectedProperty .textarea-wrap>textarea{grid-column:1;grid-row:1;}'
+    + 'body.iqa-enhanced #SelectedProperty .textarea-wrap{display:grid!important;grid-template-columns:minmax(0,1fr) 30px!important;width:100%;}'
+    /* The width group repeats what the shared .textarea-wrap rule below
+       already says, at a specificity that beats the native
+       `.SQLExpression td textarea{min-width:300px}`. Without it the field keeps
+       that 300px and spills over its toolbar column and the Alias cell as soon
+       as the grid is narrower than the expression. */
+    + 'body.iqa-enhanced #SelectedProperty .textarea-wrap>textarea{grid-column:1;grid-row:1;width:100%;min-width:0;max-width:100%;}'
     + 'body.iqa-enhanced #SelectedProperty .textarea-wrap>.icon-bar{display:flex!important;flex-direction:column!important;grid-column:2;grid-row:1;gap:4px;margin:0!important;align-self:start;}'
     + '.iqa-copy-flash{background-color:rgba(0,126,168,.12)!important;background-color:color-mix(in srgb,var(--border-focus,#006f94) 14%,transparent)!important;animation:iqaCopyFlash .8s ease-out;}'
     + '@keyframes iqaCopyFlash{0%,25%{box-shadow:inset 0 0 0 9999px rgba(0,126,168,.24);box-shadow:inset 0 0 0 9999px color-mix(in srgb,var(--border-focus,#006f94) 26%,transparent);}100%{box-shadow:inset 0 0 0 9999px transparent;}}'
@@ -3315,8 +3355,26 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
     'body.iqa-enhanced input[id*="_DesignShell1_ctl00_ctl00_ctl00_txtAlias"]{width:100%;}',
     'body.iqa-enhanced table.Grid.no-border.align-middle:not(#SelectedProperty) > tbody > tr.GridHeader > td:nth-child(4){min-width:350px !important;}',
     'body.iqa-enhanced table#SelectedProperty{margin-bottom:25px;}',
-    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(4), body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(5){width:22% !important;min-width:180px !important;}',
+    /* Property carries the source and field names, or a whole SQL expression,
+       so it takes the largest share. Length and Format are capped because the
+       native input and the long date options otherwise collect the spare
+       width and leave Property too narrow to read an expression in. */
+    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(2){width:26%;min-width:200px;}',
+    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(4), body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(5){width:18% !important;min-width:150px !important;}',
     'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(4) > input, body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(5) > input{width:100% !important;min-width:0;box-sizing:border-box;}',
+    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(8){width:80px;}',
+    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(8) > input{width:100%;min-width:0;box-sizing:border-box;}',
+    /* A select is at least as wide as its longest option, so the date formats
+       would otherwise claim the widest column on the grid. max-width caps that
+       contribution and lets the option text truncate instead. */
+    'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(9) > select{max-width:170px;}',
+    /* Below roughly a 1200px editor the fixed minimums are what pushes the grid
+       past the viewport, so they give way before the Property column does. */
+    '@media(max-width:1200px){'
+      + 'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(2){width:30%;min-width:220px;}'
+      + 'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(4),body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(5){width:auto !important;min-width:100px !important;}'
+      + 'body.iqa-enhanced table#SelectedProperty > tbody > tr > td:nth-child(9) > select{max-width:130px;}'
+      + '}',
     'body.iqa-enhanced textarea[id*=_DesignShell1_ctl00_ctl00_ctl00_SQLTextField]{width:80%;min-height:500px;}',
     'body.iqa-enhanced #ctl00_TemplateBody_DesignShell1_ctl00_ctl00_ctl00_DivAdvancedMode > div:nth-child(3) > div > div.PanelFieldValue{width:100%;}',
     'body.iqa-enhanced #ctl00_TemplateBody_DesignShell1_ctl00_ctl00_ctl00_SummaryPanel_Body > div:nth-child(3) > div, body.iqa-enhanced #ctl00_TemplateBody_DesignShell1_ctl00_ctl00_ctl00_SummaryPanel_Body > div:nth-child(3) > div > textarea{width:80%;}',

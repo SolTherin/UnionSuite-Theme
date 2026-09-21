@@ -8,12 +8,28 @@ const fixture = `<!doctype html><html><head><style>${css}\nbody{margin:24px}#hd{
 document.getElementById('__ClientContext').value=JSON.stringify(window.testContext || {loggedInPartyId:'100',selectedPartyId:'900',isAnonymous:false});
 window.fetch=()=>{throw Error('Biscuit must not make API calls');};
 </script><script>${script}</script></body></html>`;
+// The live iMIS header: the brand block, the utility row and the bookmarks row below it.
+const nativeHeader = `<header id="hd"><div id="masterTopBarAuxiliary" class="navbar-header">` +
+  `<div class="navbar-left"><a class="logo" href="#">iMIS</a></div>` +
+  `<div class="navbar-right"><div class="searchfieldplus-dropdown"></div></div></div>` +
+  `<div class="us-bookmarks-bar" id="bookmarks-row">Bookmarks</div></header>`;
+const nativeLayout = `#hd{display:block;position:relative;border-bottom:1px solid #ccc}` +
+  `#masterTopBarAuxiliary{display:flex;align-items:center;padding:8px}` +
+  `.navbar-left{display:flex;align-items:center}` +
+  // A wide client logo is what pushes the utility controls onto a second line.
+  `.navbar-left a.logo{display:block;width:420px;height:38px;background:#eee}` +
+  `.navbar-right{margin-left:auto;display:flex;align-items:center}` +
+  `#bookmarks-row{padding:9px 22px;border-top:1px solid #ccc}#bookmarks-row[hidden]{display:none}`;
+const nativeFixture = fixture
+  .replace('<header id="hd"><div class="searchfieldplus-dropdown"></div></header>', nativeHeader)
+  .replace('#hd{display:block;position:relative;padding-bottom:18px;border-bottom:1px solid #ccc}', nativeLayout);
 (async()=>{
   const browser=await chromium.launch({channel:'msedge',headless:true});
   const errors=[];
   try {
     const context=await browser.newContext({viewport:{width:1100,height:650},timezoneId:'Australia/Sydney'});
-    await context.route('**/*',route=>route.request().url().startsWith('https://pip.example/') ? route.fulfill({contentType:'text/html',body:fixture}) : route.abort());
+    const bodyFor=url=>url.startsWith('https://pip.example/native') ? nativeFixture : fixture;
+    await context.route('**/*',route=>route.request().url().startsWith('https://pip.example/') ? route.fulfill({contentType:'text/html',body:bodyFor(route.request().url())}) : route.abort());
     async function makePage(config={}) {
       const page=await context.newPage();
       page.on('pageerror',error=>errors.push(error.message));
@@ -25,7 +41,7 @@ window.fetch=()=>{throw Error('Biscuit must not make API calls');};
       },config);
       await page.clock.install({time:new Date('2026-09-14T23:00:00Z')});
       await page.clock.pauseAt(new Date('2026-09-14T23:00:00Z'));
-      await page.goto('https://pip.example/home');
+      await page.goto(config.url || 'https://pip.example/home');
       await new Promise(resolve=>setTimeout(resolve,50));
       return page;
     }
@@ -119,6 +135,50 @@ window.fetch=()=>{throw Error('Biscuit must not make API calls');};
     assert.equal(await phase(other),'visit','key uses signed-in user, not selected/OBO party');
     console.log('PASS: next day, teardown/reinitialise and distinct signed-in users');
 
+    const native=await makePage({url:'https://pip.example/native',context:{loggedInPartyId:'900',isAnonymous:false}});
+    await advance(native,4000);
+    assert.equal(await phase(native),'visit');
+    assert.equal(await native.locator('.us-taskbar__pip').evaluate(el=>el.previousElementSibling.className),'navbar-left','Biscuit stands beside the logo block');
+    assert.equal(await native.locator('.us-taskbar__pip').evaluate(el=>el.parentElement.id),'masterTopBarAuxiliary','he joins the top row, not the taskbar');
+    assert.equal(await native.locator('#injected-taskbar').evaluate(el=>el.firstElementChild.classList.contains('us-taskbar__quick-links')),true,'the taskbar keeps its own first control');
+    const onTopRow=()=>native.evaluate(()=>{
+      const row=document.getElementById('masterTopBarAuxiliary'),button=document.querySelector('.us-taskbar__pip-button');
+      return Math.abs(button.getBoundingClientRect().bottom-row.getBoundingClientRect().bottom)<.6;
+    });
+    const onHeaderEdge=()=>native.evaluate(()=>{
+      const header=document.getElementById('hd'),button=document.querySelector('.us-taskbar__pip-button');
+      return Math.abs(button.getBoundingClientRect().bottom-(header.getBoundingClientRect().bottom-parseFloat(getComputedStyle(header).borderBottomWidth)))<.6;
+    });
+    assert(await onTopRow(),'Biscuit rests on the top row edge, above the bookmarks bar');
+    assert.equal(await onHeaderEdge(),false,'the bookmarks bar keeps its own space');
+    await native.evaluate(()=>{document.getElementById('bookmarks-row').hidden=true;});
+    await new Promise(resolve=>setTimeout(resolve,80)); // Deliver the browser's ResizeObserver before advancing mocked RAF.
+    await advance(native,250);
+    assert(await onHeaderEdge(),'without a row below, he rests on the header edge as before');
+    await native.setViewportSize({width:700,height:650}); // Above the 600px hide, where a wide logo wraps the controls.
+    await new Promise(resolve=>setTimeout(resolve,80));
+    await advance(native,250);
+    assert(await native.evaluate(()=>{
+      const button=document.querySelector('.us-taskbar__pip-button').getBoundingClientRect();
+      const search=document.querySelector('.tb-search-input').getBoundingClientRect();
+      return search.top>button.top && search.top>=button.bottom-.6;
+    }),'a wrapped header stops him above the controls that fall below his slot');
+    await native.close();
+    console.log('PASS: placement beside the logo and perch above the bookmarks bar');
+
+    const phone=await makePage({context:{loggedInPartyId:'950',isAnonymous:false}});
+    await phone.setViewportSize({width:390,height:650});
+    await advance(phone,6000);
+    assert.equal(await phase(phone),'away','phone widths hide Biscuit instead of greeting');
+    assert.equal(await phone.locator('.us-taskbar__pip').isVisible(),false);
+    assert.equal(await phone.evaluate(()=>localStorage.getItem('union-suite:pip-greeting:950')),null,'a hidden Biscuit does not consume the daily greeting');
+    assert.equal(await phone.locator('#us-taskbar-search').isVisible(),true,'search keeps the full phone header');
+    await phone.setViewportSize({width:1100,height:650});
+    await advance(phone,6000);
+    assert.equal(await phase(phone),'visit','a wider window still gets that day’s greeting');
+    await phone.close();
+    console.log('PASS: hidden below 600px, with the daily greeting kept for a wider window');
+
     const held=await makePage({context:{loggedInPartyId:'300',isAnonymous:false}});
     await held.locator('#us-taskbar-search').focus();await advance(held,5000);
     assert.equal(await phase(held),'away','typing/search focus defers greeting');
@@ -129,7 +189,7 @@ window.fetch=()=>{throw Error('Biscuit must not make API calls');};
     await advance(held,100);
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.getAnimations({subtree:true}).length),0);
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.style.getPropertyValue('--pip-turn')),'0deg');
-    await held.setViewportSize({width:390,height:650});
+    await held.setViewportSize({width:700,height:650}); // Management shortcuts hide below 768px; Biscuit stays until 600px.
     await held.locator('.us-taskbar__pip-button').focus();await held.keyboard.press('Space');await advance(held,500);
     assert(await held.locator('.us-taskbar__pip').evaluate(el=>el.classList.contains('is-waving')));
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.getAnimations({subtree:true}).length),0);
@@ -141,8 +201,8 @@ window.fetch=()=>{throw Error('Biscuit must not make API calls');};
     assert.equal(await held.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Say goodbye to Biscuit','idle preview preserves click count');
     await held.keyboard.press('Space');
     assert.equal(await phase(held),'away','reduced-motion third activation hides instantly');
-    assert(await held.locator('.us-taskbar__full-search').evaluate(el=>el===document.activeElement),'mobile dismissal restores focus to Full Search');
-    console.log('PASS: activity deferral, keyboard wave/hop/goodbye, static reduced motion and mobile focus');
+    assert(await held.locator('.us-taskbar__full-search').evaluate(el=>el===document.activeElement),'small-screen dismissal restores focus to Full Search');
+    console.log('PASS: activity deferral, keyboard wave/hop/goodbye, static reduced motion and small-screen focus');
 
     const rapid=await makePage({context:{loggedInPartyId:'700',isAnonymous:false}});
     await advance(rapid,3150);

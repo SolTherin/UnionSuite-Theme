@@ -10347,7 +10347,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   --us-pip-tongue: #dc9297;
 }
 
-#injected-taskbar .us-taskbar__pip {
+#hd .us-taskbar__pip {
   --us-pip-enabled: 1;
   --pip-goodbye-duration: 3000ms;
   --pip-fur: var(--us-pip-fur);
@@ -10367,15 +10367,22 @@ html.us-taskbar-mounted #hd .search-dropdown {
   flex: 0 0 96px;
   width: 96px;
   height: 36px;
+  margin-left: 10px;
   overflow: visible;
 }
 
-#injected-taskbar .us-taskbar__pip *,
-#injected-taskbar .us-taskbar__pip *::after {
+/* Biscuit sits outside #injected-taskbar, so the taskbar's own [hidden] rule
+   no longer hides his button between visits. */
+#hd .us-taskbar__pip-button[hidden] {
+  display: none;
+}
+
+#hd .us-taskbar__pip *,
+#hd .us-taskbar__pip *::after {
   box-sizing: border-box;
 }
 
-#injected-taskbar .us-taskbar__pip-button {
+#hd .us-taskbar__pip-button {
   /* Extra headroom clears the hop; the wider slot fits ears throughout the tilt. */
   display: block;
   position: absolute;
@@ -10404,16 +10411,16 @@ html.us-taskbar-mounted #hd .search-dropdown {
   -webkit-tap-highlight-color: transparent;
 }
 
-#injected-taskbar .us-taskbar__pip-button:disabled {
+#hd .us-taskbar__pip-button:disabled {
   cursor: default;
 }
 
-#injected-taskbar .us-taskbar__pip-button:focus-visible {
+#hd .us-taskbar__pip-button:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: -2px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-visitor {
+#hd .us-taskbar__pip .pip-visitor {
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -10425,7 +10432,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   pointer-events: none;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-character {
+#hd .us-taskbar__pip .pip-character {
   position: absolute;
   bottom: -35px;
   left: 15px;
@@ -10442,82 +10449,82 @@ html.us-taskbar-mounted #hd .search-dropdown {
   -webkit-tap-highlight-color: transparent;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="peek"] .pip-character {
+#hd .us-taskbar__pip[data-phase="peek"] .pip-character {
   transform: translateY(45px) rotate(-5deg);
   visibility: visible;
   transition: transform 620ms cubic-bezier(.3,1.25,.5,1), visibility 0s;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="visit"] .pip-character {
+#hd .us-taskbar__pip[data-phase="visit"] .pip-character {
   transform: translateY(0);
   visibility: visible;
   transition: transform 720ms cubic-bezier(.34,1.5,.42,1), visibility 0s;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="leaving"] .pip-character {
+#hd .us-taskbar__pip[data-phase="leaving"] .pip-character {
   transform: translateY(155px) rotate(3deg);
   visibility: visible;
   transition: transform 640ms cubic-bezier(.55,-.38,.78,.22), visibility 0s;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-character {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-character {
   visibility: visible;
   transition: none;
   animation: us-pip-shy-goodbye var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-head {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-head {
   animation: us-pip-goodbye-look var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-eye {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-eye {
   animation: us-pip-goodbye-eyes var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-creature {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-creature {
   animation: us-pip-goodbye-startle var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-mouth {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-mouth {
   animation: us-pip-goodbye-gasp var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-ear {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-ear {
   animation: us-pip-goodbye-ears var(--pip-goodbye-duration) ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-ear-left {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-ear-left {
   --pip-ear-rest: 14deg;
   --pip-ear-alert: 12deg;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-ear-right {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-ear-right {
   --pip-ear-rest: -14deg;
   --pip-ear-alert: -12deg;
 }
 
 /* Separate layers keep arrival/wave movement independent of quiet breathing. */
-#injected-taskbar .us-taskbar__pip .pip-creature {
+#hd .us-taskbar__pip .pip-creature {
   position: absolute;
   inset: 0;
   transform-origin: 50% 100%;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-figure {
+#hd .us-taskbar__pip .pip-figure {
   position: absolute;
   inset: 0;
   transform-origin: 50% 100%;
 }
 
-#injected-taskbar .us-taskbar__pip.is-arriving .pip-creature {
+#hd .us-taskbar__pip.is-arriving .pip-creature {
   animation: us-pip-land 720ms cubic-bezier(.3,1.4,.5,1) both;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="visit"] .pip-figure {
+#hd .us-taskbar__pip[data-phase="visit"] .pip-figure {
   animation: us-pip-breathe 3.6s ease-in-out 720ms infinite;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-ear {
+#hd .us-taskbar__pip .pip-ear {
   /* Positioned inside the head's border so ears follow its turns and tilt. */
   position: absolute;
   top: 5px;
@@ -10532,17 +10539,17 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform-origin: 50% 10%;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-ear-left {
+#hd .us-taskbar__pip .pip-ear-left {
   left: -13px;
   transform: rotate(14deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-ear-right {
+#hd .us-taskbar__pip .pip-ear-right {
   right: -13px;
   transform: rotate(-14deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-body {
+#hd .us-taskbar__pip .pip-body {
   position: absolute;
   left: 40px;
   top: 84px;
@@ -10553,7 +10560,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-fur);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-belly {
+#hd .us-taskbar__pip .pip-belly {
   position: absolute;
   left: 15px;
   top: 20px;
@@ -10563,7 +10570,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-fur-light);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-head {
+#hd .us-taskbar__pip .pip-head {
   position: absolute;
   top: 28px;
   left: 23px;
@@ -10577,7 +10584,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transition: transform 320ms cubic-bezier(.3,1.2,.5,1);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-tail {
+#hd .us-taskbar__pip .pip-tail {
   position: absolute;
   top: 89px;
   right: 9px;
@@ -10591,7 +10598,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform-origin: 0 100%;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-blaze {
+#hd .us-taskbar__pip .pip-blaze {
   position: absolute;
   left: 46px;
   top: 2px;
@@ -10602,7 +10609,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform: rotate(5deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-eye-patch {
+#hd .us-taskbar__pip .pip-eye-patch {
   position: absolute;
   right: 13px;
   top: 21px;
@@ -10613,7 +10620,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform: rotate(13deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-muzzle {
+#hd .us-taskbar__pip .pip-muzzle {
   position: absolute;
   top: 47px;
   left: 29px;
@@ -10623,8 +10630,8 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-fur-light);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-muzzle::before,
-#injected-taskbar .us-taskbar__pip .pip-muzzle::after {
+#hd .us-taskbar__pip .pip-muzzle::before,
+#hd .us-taskbar__pip .pip-muzzle::after {
   content: "";
   position: absolute;
   top: 13px;
@@ -10635,15 +10642,15 @@ html.us-taskbar-mounted #hd .search-dropdown {
   box-shadow: 4px 4px 0 var(--pip-fur-edge);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-muzzle::before {
+#hd .us-taskbar__pip .pip-muzzle::before {
   left: 9px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-muzzle::after {
+#hd .us-taskbar__pip .pip-muzzle::after {
   right: 13px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-collar {
+#hd .us-taskbar__pip .pip-collar {
   position: absolute;
   left: 43px;
   top: 107px;
@@ -10653,7 +10660,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-collar);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-collar::after {
+#hd .us-taskbar__pip .pip-collar::after {
   content: "";
   position: absolute;
   top: 6px;
@@ -10665,7 +10672,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   border: 1px solid var(--pip-fur-edge);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-mouth::before {
+#hd .us-taskbar__pip .pip-mouth::before {
   content: "";
   position: absolute;
   left: 5px;
@@ -10675,7 +10682,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-face);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-tongue {
+#hd .us-taskbar__pip .pip-tongue {
   position: absolute;
   left: 52px;
   top: 70px;
@@ -10686,23 +10693,23 @@ html.us-taskbar-mounted #hd .search-dropdown {
   opacity: 0;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-tail {
+#hd .us-taskbar__pip.is-waving .pip-tail {
   animation: us-biscuit-tail-wag 320ms ease-in-out 6;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-ear-left {
+#hd .us-taskbar__pip.is-waving .pip-ear-left {
   animation: us-biscuit-ear-flop 640ms ease-in-out 3;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-tongue {
+#hd .us-taskbar__pip.is-waving .pip-tongue {
   opacity: 1;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="goodbye"] .pip-mouth::before {
+#hd .us-taskbar__pip[data-phase="goodbye"] .pip-mouth::before {
   content: none;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-tuft {
+#hd .us-taskbar__pip .pip-tuft {
   position: absolute;
   top: -7px;
   left: 46px;
@@ -10713,7 +10720,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform: rotate(-25deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-tuft::after {
+#hd .us-taskbar__pip .pip-tuft::after {
   content: "";
   position: absolute;
   top: 5px;
@@ -10725,7 +10732,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transform: rotate(45deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-eye {
+#hd .us-taskbar__pip .pip-eye {
   position: absolute;
   top: 32px;
   width: 12px;
@@ -10736,7 +10743,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transition: transform 170ms ease-out;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-eye::after {
+#hd .us-taskbar__pip .pip-eye::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -10747,15 +10754,15 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--pip-shine);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-eye-left {
+#hd .us-taskbar__pip .pip-eye-left {
   left: 23px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-eye-right {
+#hd .us-taskbar__pip .pip-eye-right {
   right: 23px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-nose {
+#hd .us-taskbar__pip .pip-nose {
   position: absolute;
   top: 49px;
   left: 46px;
@@ -10766,7 +10773,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   box-shadow: inset 2px 3px 0 color-mix(in srgb, var(--pip-shine) 15%, transparent);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-mouth {
+#hd .us-taskbar__pip .pip-mouth {
   position: absolute;
   left: 48px;
   top: 64px;
@@ -10777,7 +10784,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   border-radius: 0 0 12px 12px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-cheek {
+#hd .us-taskbar__pip .pip-cheek {
   position: absolute;
   top: 56px;
   width: 20px;
@@ -10787,15 +10794,15 @@ html.us-taskbar-mounted #hd .search-dropdown {
   opacity: .72;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-cheek-left {
+#hd .us-taskbar__pip .pip-cheek-left {
   left: 11px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-cheek-right {
+#hd .us-taskbar__pip .pip-cheek-right {
   right: 11px;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-paw {
+#hd .us-taskbar__pip .pip-paw {
   position: absolute;
   top: 108px;
   width: 29px;
@@ -10807,7 +10814,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   z-index: 3;
 }
 
-#injected-taskbar .us-taskbar__pip .pip-paw::after {
+#hd .us-taskbar__pip .pip-paw::after {
   content: "";
   position: absolute;
   left: 8px;
@@ -10818,87 +10825,87 @@ html.us-taskbar-mounted #hd .search-dropdown {
   border-right: 1px solid var(--pip-fur-edge);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-paw-left {
+#hd .us-taskbar__pip .pip-paw-left {
   left: 23px;
   transform: rotate(8deg);
 }
 
-#injected-taskbar .us-taskbar__pip .pip-paw-right {
+#hd .us-taskbar__pip .pip-paw-right {
   right: 23px;
   transform: rotate(-8deg);
   transform-origin: 50% 100%;
 }
 
-#injected-taskbar .us-taskbar__pip[data-phase="peek"] .pip-eye {
+#hd .us-taskbar__pip[data-phase="peek"] .pip-eye {
   animation: us-pip-glance 1.3s ease-in-out 120ms both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-blinking .pip-eye {
+#hd .us-taskbar__pip.is-blinking .pip-eye {
   animation: us-pip-blink 190ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-twitching .pip-ear-left {
+#hd .us-taskbar__pip.is-twitching .pip-ear-left {
   animation: us-biscuit-ear-flop 420ms ease-in-out;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-paw-right {
+#hd .us-taskbar__pip.is-waving .pip-paw-right {
   animation: us-pip-wave 2000ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-creature {
+#hd .us-taskbar__pip.is-waving .pip-creature {
   animation: us-pip-bounce 2000ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-waving .pip-head {
+#hd .us-taskbar__pip.is-waving .pip-head {
   transform: rotate(calc(4deg + var(--pip-turn, 0deg)));
 }
 
-#injected-taskbar .us-taskbar__pip.is-hopping .pip-creature {
+#hd .us-taskbar__pip.is-hopping .pip-creature {
   animation: us-pip-happy-hop 850ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-hopping .pip-eye {
+#hd .us-taskbar__pip.is-hopping .pip-eye {
   scale: 1 .65;
 }
 
-#injected-taskbar .us-taskbar__pip.is-hopping .pip-mouth {
+#hd .us-taskbar__pip.is-hopping .pip-mouth {
   left: 47px;
   width: 18px;
   height: 9px;
 }
 
-#injected-taskbar .us-taskbar__pip.is-curious .pip-head {
+#hd .us-taskbar__pip.is-curious .pip-head {
   transform-origin: 50% 85%;
   animation: us-pip-curious-tilt 2000ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-scratching .pip-paw-right {
+#hd .us-taskbar__pip.is-scratching .pip-paw-right {
   animation: us-pip-head-scratch 2200ms ease-in-out both;
 }
 
-#injected-taskbar .us-taskbar__pip.is-scratching .pip-head {
+#hd .us-taskbar__pip.is-scratching .pip-head {
   transform: rotate(7deg);
 }
 
-#injected-taskbar .us-taskbar__pip.is-scratching .pip-eye {
+#hd .us-taskbar__pip.is-scratching .pip-eye {
   transform: translate(3px,-2px);
 }
 
 @media (hover:hover) and (pointer:fine) {
-  #injected-taskbar .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-left {
+  #hd .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-left {
     transform: rotate(20deg);
   }
 
-  #injected-taskbar .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-right {
+  #hd .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-right {
     transform: rotate(-20deg);
   }
 }
 
-#injected-taskbar .us-taskbar__pip.is-curious .us-taskbar__pip-button .pip-ear-left {
+#hd .us-taskbar__pip.is-curious .us-taskbar__pip-button .pip-ear-left {
   transform: rotate(14deg);
 }
 
-#injected-taskbar .us-taskbar__pip.is-curious .us-taskbar__pip-button .pip-ear-right {
+#hd .us-taskbar__pip.is-curious .us-taskbar__pip-button .pip-ear-right {
   transform: rotate(-14deg);
 }
 
@@ -11245,76 +11252,86 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 @media (prefers-reduced-motion:reduce) {
-  #injected-taskbar .us-taskbar__pip .pip-character,
-  #injected-taskbar .us-taskbar__pip .pip-head,
-  #injected-taskbar .us-taskbar__pip .pip-ear,
-  #injected-taskbar .us-taskbar__pip .pip-eye {
+  #hd .us-taskbar__pip .pip-character,
+  #hd .us-taskbar__pip .pip-head,
+  #hd .us-taskbar__pip .pip-ear,
+  #hd .us-taskbar__pip .pip-eye {
     transition: none !important;
   }
 
-  #injected-taskbar .us-taskbar__pip .pip-character,
-  #injected-taskbar .us-taskbar__pip .pip-creature,
-  #injected-taskbar .us-taskbar__pip .pip-figure,
-  #injected-taskbar .us-taskbar__pip .pip-head,
-  #injected-taskbar .us-taskbar__pip .pip-eye,
-  #injected-taskbar .us-taskbar__pip .pip-ear,
-  #injected-taskbar .us-taskbar__pip .pip-mouth,
-  #injected-taskbar .us-taskbar__pip .pip-tail,
-  #injected-taskbar .us-taskbar__pip .pip-paw-right {
+  #hd .us-taskbar__pip .pip-character,
+  #hd .us-taskbar__pip .pip-creature,
+  #hd .us-taskbar__pip .pip-figure,
+  #hd .us-taskbar__pip .pip-head,
+  #hd .us-taskbar__pip .pip-eye,
+  #hd .us-taskbar__pip .pip-ear,
+  #hd .us-taskbar__pip .pip-mouth,
+  #hd .us-taskbar__pip .pip-tail,
+  #hd .us-taskbar__pip .pip-paw-right {
     animation: none !important;
   }
 
-  #injected-taskbar .us-taskbar__pip .pip-head,
-  #injected-taskbar .us-taskbar__pip.is-waving .pip-head,
-  #injected-taskbar .us-taskbar__pip.is-scratching .pip-head {
+  #hd .us-taskbar__pip .pip-head,
+  #hd .us-taskbar__pip.is-waving .pip-head,
+  #hd .us-taskbar__pip.is-scratching .pip-head {
     transform: rotate(-3deg);
   }
 
-  #injected-taskbar .us-taskbar__pip .pip-eye,
-  #injected-taskbar .us-taskbar__pip.is-scratching .pip-eye {
+  #hd .us-taskbar__pip .pip-eye,
+  #hd .us-taskbar__pip.is-scratching .pip-eye {
     transform: none;
   }
 
-  #injected-taskbar .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-left {
+  #hd .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-left {
     transform: rotate(14deg);
   }
 
-  #injected-taskbar .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-right {
+  #hd .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-right {
     transform: rotate(-14deg);
   }
 
-  #injected-taskbar .us-taskbar__pip.is-waving .pip-paw-right {
+  #hd .us-taskbar__pip.is-waving .pip-paw-right {
     transform: translate(8px,-29px) rotate(16deg);
   }
 
-  #injected-taskbar .us-taskbar__pip.is-scratching .pip-paw-right {
+  #hd .us-taskbar__pip.is-scratching .pip-paw-right {
     transform: translate(-10px,-75px) rotate(-24deg);
   }
 }
 
+/* Phone-width headers wrap their controls, leaving Biscuit no room beside the
+   logo. The disabled token also stops the script greeting on those screens, so
+   a hidden visit never consumes the daily greeting. */
+@media (max-width: 600px) {
+  #hd .us-taskbar__pip {
+    --us-pip-enabled: 0;
+    display: none;
+  }
+}
+
 @media (pointer:coarse) {
-  #injected-taskbar .us-taskbar__pip {
+  #hd .us-taskbar__pip {
     --biscuit-clip-height: 80.6px;
     height: 44px;
   }
 
-  #injected-taskbar .us-taskbar__pip .pip-visitor {
+  #hd .us-taskbar__pip .pip-visitor {
     transform: scale(.52);
   }
 }
 
 @media print {
-  #injected-taskbar .us-taskbar__pip {
+  #hd .us-taskbar__pip {
     display: none;
   }
 }
 
 @media (forced-colors:active) {
-  #injected-taskbar .us-taskbar__pip .pip-visitor {
+  #hd .us-taskbar__pip .pip-visitor {
     forced-color-adjust: none;
   }
 
-  #injected-taskbar .us-taskbar__pip-button:focus-visible {
+  #hd .us-taskbar__pip-button:focus-visible {
     outline-color: Highlight;
   }
 }

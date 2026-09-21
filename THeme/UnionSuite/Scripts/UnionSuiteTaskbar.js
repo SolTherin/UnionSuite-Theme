@@ -182,7 +182,16 @@
       </span>
     `;
     pip.appendChild(button);
-    bar.prepend(pip);
+    // Biscuit stands beside the client logo, at the left of the header's top
+    // row, rather than over the bookmarks bar below it. A previous drawing can
+    // survive partial page replacement, so remove any earlier one first.
+    document.querySelectorAll('.us-taskbar__pip').forEach(node => node.remove());
+    const host = bar.closest('header') || document.getElementById('hd');
+    // The native brand block keeps its own width and logo alignment; Biscuit
+    // follows it as a sibling. Without that block he keeps his taskbar slot.
+    const brand = host && host.querySelector('.navbar-left');
+    if (brand && brand.parentElement) brand.after(pip);
+    else bar.prepend(pip);
 
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const key = settings.pipStoragePrefix + String(partyId);
@@ -193,15 +202,39 @@
     let clickCount = 0;
     let busy = false, intersecting = false, evaluatedDay = '', lastInput = Date.now();
     let perchOffset = 0, layoutFrame = null;
-    // The slot reserves horizontal space beside the icons. The drawing rests on
-    // the actual header border, including its padding and a taller client logo.
-    const header = bar.closest('header') || bar.closest('#hd');
+    // The slot reserves horizontal space beside the logo. The drawing rests on
+    // the bottom edge of the surface below it, including padding and a taller
+    // client logo: the header border, or the top row's own edge when another
+    // row — the bookmarks bar — follows it inside the header.
+    const header = pip.closest('header') || bar.closest('header') || bar.closest('#hd');
+    const topRow = pip.closest('#masterTopBarAuxiliary, .navbar-header');
+    // A narrow header wraps its controls onto further lines. Biscuit stops at
+    // the first one that wraps beneath his slot rather than standing in front
+    // of it; without one he keeps the full surface below him.
+    function clearOfControls(slotRect, bottom) {
+      if (!topRow || bottom <= slotRect.bottom) return bottom;
+      const centre = slotRect.left + slotRect.width / 2;
+      for (const node of topRow.querySelectorAll('a, button, input, select, textarea')) {
+        if (pip.contains(node)) continue;
+        const rect = node.getBoundingClientRect();
+        if (!rect.width || !rect.height) continue;
+        if (rect.left < centre && rect.right > centre && rect.top >= slotRect.bottom && rect.top < bottom) bottom = rect.top;
+      }
+      return bottom;
+    }
+    function perchBottom(slotRect) {
+      if (topRow && topRow !== header) {
+        const nextRow = topRow.nextElementSibling;
+        if (nextRow && nextRow.getClientRects().length) return topRow.getBoundingClientRect().bottom;
+      }
+      if (!header) return slotRect.bottom;
+      return header.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(header).borderBottomWidth) || 0);
+    }
     function alignPerch() {
       layoutFrame = null;
       if (signal.aborted || !pip.isConnected) return;
       const slotRect = pip.getBoundingClientRect();
-      const border = header ? parseFloat(getComputedStyle(header).borderBottomWidth) || 0 : 0;
-      const bottom = header ? header.getBoundingClientRect().bottom - border : slotRect.bottom;
+      const bottom = clearOfControls(slotRect, perchBottom(slotRect));
       const next = Math.round((bottom - slotRect.bottom) * 100) / 100;
       if (next !== perchOffset) {
         perchOffset = next;
@@ -426,6 +459,8 @@
     signal.addEventListener('abort', () => {
       timers.forEach(clearTimeout); timers.clear(); visibility.disconnect(); releaseClaim();
       perchResize.disconnect(); cancelAnimationFrame(layoutFrame);
+      // Biscuit sits outside the taskbar element, so teardown removes him here.
+      pip.remove();
     }, {once:true});
     schedule();
     return {playIdle};
@@ -933,7 +968,7 @@ function appendSearchHistory(frag) {
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  window.UnionSuiteTaskbar = Object.freeze({ version: '1.7', initialise: initialiseTaskbar, refresh, destroy,
+  window.UnionSuiteTaskbar = Object.freeze({ version: '1.8', initialise: initialiseTaskbar, refresh, destroy,
     playPipIdle: action => currentInstance?.pip?.playIdle(action) || false
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseTaskbar, {once:true});

@@ -1,0 +1,149 @@
+/* Workbench page chrome only. Nothing here may style .us-task or its children:
+   the rows must show exactly what the shared theme gives them. Prototype
+   geometry stays in this file and never moves into the theme as-is. */
+
+body {
+  margin: 0;
+  padding: 0 0 64px;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.6 var(--font-ui);
+}
+
+.wb-head {
+  max-width: 760px;
+  padding: 40px 24px 8px;
+}
+
+.wb-eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.wb-head h1 {
+  margin: 0 0 12px;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--text-strong);
+}
+
+.wb-lede {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+}
+
+.wb-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 24px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.wb-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.wb-control output {
+  min-width: 56px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-base);
+}
+
+.wb-stages {
+  --wb-stage-width: 620px;
+  padding: 24px;
+}
+
+.wb-stage {
+  margin: 0 0 48px;
+}
+
+.wb-stage__title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--text-strong);
+}
+
+.wb-stage__note {
+  max-width: 720px;
+  margin: 0 0 16px;
+  color: var(--text-muted);
+}
+
+/* Current and proposed sit side by side while both fit the window at the chosen
+   width, and stack once they do not. */
+.wb-stage__variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Each variant keeps the chosen width so both are compared at the same size;
+   they wrap to their own lines when the window cannot hold two. */
+.wb-variant {
+  flex: 0 0 auto;
+  width: min(100%, var(--wb-stage-width));
+  min-width: 0;
+}
+
+.wb-variant__label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.wb-variant--proposed .wb-variant__label {
+  color: var(--accent);
+}
+
+/* The stage is the only thing the width control resizes, so a row can be read
+   at panel widths without resizing the whole window. */
+/* No padding: the theme bleeds the list to the panel edges with negative margins,
+   so any frame padding makes the list overflow its own stage. */
+.wb-stage__frame {
+  width: 100%;
+  padding: 0;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+  resize: horizontal;
+  overflow: auto;
+}
+
+.wb-variant--proposed > .wb-stage__frame {
+  border-color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .wb-head {
+    padding: 28px 16px 8px;
+  }
+
+  .wb-toolbar,
+  .wb-stages {
+    padding: 12px 16px;
+  }
+}
+
+.wb-foot {
+  max-width: 760px;
+  padding: 0 24px;
+  color: var(--text-muted);
+}

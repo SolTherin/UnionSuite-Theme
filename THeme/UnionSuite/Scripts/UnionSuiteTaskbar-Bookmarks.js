@@ -450,18 +450,20 @@
   outline-offset: 3px;
 }
 
-.us-feature-button kbd {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 2px 4px;
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font: 9px var(--font-ui);
-}
-
 .us-pin {
   width: 36px;
   padding: 5px;
+}
+
+/* A clicked bookmark keeps its size while the page loads: the spinner takes
+   the icon's place rather than sitting beside it. */
+.us-pin.is-busy > .ti {
+  display: none;
+}
+
+.us-pin > .us-button-spinner {
+  width: 18px;
+  height: 18px;
 }
 
 .us-pin-label,
@@ -515,6 +517,11 @@
 
 .us-bookmarks-bar .us-pin .ti {
   font-size: 16px;
+}
+
+.us-bookmarks-bar .us-pin > .us-button-spinner {
+  width: 16px;
+  height: 16px;
 }
 
 .us-bookmarks-bar-nav .us-bookmarks-items {
@@ -934,6 +941,7 @@
   background: transparent;
 }
 
+.us-palette-heading kbd,
 .us-palette-input kbd {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1113,10 +1121,6 @@
 }
 
 @media (max-width: 1060px) {
-  .us-feature-button kbd {
-    display: none;
-  }
-
   #injected-taskbar .us-taskbar__pip {
     display: none;
   }
@@ -1384,7 +1388,8 @@
     palette.setAttribute('aria-labelledby', 'us-tb-palette-heading');
     palette.innerHTML =
       '<header class="us-palette-heading">' +
-        '<div><h2 id="us-tb-palette-heading">Where would you like to go?</h2></div>' +
+        '<div><h2 id="us-tb-palette-heading">Where would you like to go?</h2>' +
+          '<p>Open this from anywhere with <kbd>Ctrl</kbd><kbd>Space</kbd>.</p></div>' +
         '<button type="button" data-close="palette" aria-label="Close command palette">' + icon('x') + '</button>' +
       '</header>' +
       '<div class="us-palette-input">' + icon('search') +
@@ -1515,8 +1520,35 @@
       route.name,
       icon(route.icon) + '<span class="us-pin-label">' + escapeHtml(route.shortName) + '</span>',
       'us-pin',
-      websiteUrl(route.url)
+      websiteUrl(route.url),
+      event => markPinBusy(event.currentTarget)
     );
+  }
+
+  /**
+   * A bookmark starts a full page load, so the pin it was clicked in shows a
+   * spinner until the browser leaves the page. Both the taskbar strip and the
+   * bookmarks bar are built from createPin, so both behave the same way.
+   */
+  function markPinBusy(pin) {
+    if (!pin || pin.classList.contains('is-busy')) return;
+    pin.classList.add('is-busy');
+    pin.setAttribute('aria-busy', 'true');
+    const spinner = document.createElement('span');
+    spinner.className = 'us-button-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    pin.prepend(spinner);
+  }
+
+  // Returning through the back/forward cache restores the page as it was left,
+  // spinner included, so the busy state is cleared when the page is shown again.
+  function clearBusyPins() {
+    document.querySelectorAll('.us-pin.is-busy').forEach(pin => {
+      pin.classList.remove('is-busy');
+      pin.removeAttribute('aria-busy');
+      const spinner = pin.querySelector(':scope > .us-button-spinner');
+      if (spinner) spinner.remove();
+    });
   }
 
   function renderBookmarks() {
@@ -2091,7 +2123,7 @@
 
     const toggle = createButton(
       'Toggle bookmarks bar',
-      icon('layout'),
+      icon('star'),
       'us-nav-icon-button us-bookmarks-toggle',
       () => {
         closePanels();
@@ -2106,7 +2138,7 @@
 
     const paletteButton = createButton(
       'Open command palette',
-      icon('command') + '<span>Go to…</span><kbd>Ctrl Space</kbd>',
+      icon('command') + '<span>Go to…</span>',
       'us-feature-button',
       event => openPanel('palette', event.currentTarget)
     );
@@ -2131,7 +2163,7 @@
     recentsButton.setAttribute('aria-expanded', 'false');
     recentsButton.setAttribute('aria-controls', 'us-tb-recents');
 
-    tools.append(toggle, paletteButton);
+    tools.append(paletteButton, toggle);
     strip.after(tools);
 
     // The labelled bar sits directly under the taskbar row.
@@ -2221,6 +2253,7 @@
     document.addEventListener('click', onDocumentClick);
     document.addEventListener('keydown', onDocumentKeydown);
     window.addEventListener('resize', onResize);
+    window.addEventListener('pageshow', clearBusyPins);
 
     // iMIS partial postbacks and the taskbar's own remount replace the host row.
     if (!observer) {
@@ -2245,6 +2278,7 @@
     document.removeEventListener('click', onDocumentClick);
     document.removeEventListener('keydown', onDocumentKeydown);
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('pageshow', clearBusyPins);
     unmount();
     ['#us-tb-palette', '#us-tb-recents', '#us-tb-toast', '#us-tb-live', '#' + STYLE_ID]
       .forEach(selector => {

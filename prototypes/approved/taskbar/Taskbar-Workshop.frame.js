@@ -158,7 +158,7 @@
     if (pins.length > limit && layout !== 'hybrid') items.append(button('Show all ' + pins.length + ' bookmarks', '+' + (pins.length - limit), 'ws-pin-more', event => openPanel('bookmarks', event.currentTarget)));
     host.append(items);
     if (layout === 'hybrid') {
-      const toggle = button('Toggle bookmarks bar', icon('layout') , 'ws-icon-button ws-bookmark-toggle', () => {
+      const toggle = button('Toggle bookmarks bar', icon('star'), 'ws-icon-button ws-bookmark-toggle', () => {
         closePanels();
         bookmarkBarVisible = !bookmarkBarVisible;
         renderPins();
@@ -168,7 +168,7 @@
       toggle.title = bookmarkBarVisible ? 'Hide bookmarks bar' : 'Show bookmarks bar';
       toggle.setAttribute('aria-expanded', String(bookmarkBarVisible));
       toggle.setAttribute('aria-controls', 'ws-hybrid-bookmarks');
-      query('.ws-feature-tools').prepend(toggle);
+      query('.ws-feature-tools').append(toggle);
       renderHybridBar();
       return;
     }
