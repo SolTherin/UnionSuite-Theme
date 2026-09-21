@@ -183,8 +183,10 @@ Approved by James on 20 September 2026. This section is the implementation basel
 Proposed header include after implementation, using the actual deployed theme URL:
 
 ```html
-<script src="/App_Themes/UnionSuite/index.js" defer></script>
+<script src="/App_Themes/UnionSuite-Core/index.js" async></script>
 ```
+
+`async`, not `defer`: the loader only injects scripts, so it has no reason to wait for the parser. On the dev tenant `defer` left it idle for about 330ms after its own download completed. Inline configuration such as `window.UnionSuiteTaskbarConfig` must appear in the header before this tag. A deferred external config file would be unsafe here, because it can run after a dynamically injected consumer; resolve client configuration through the loader instead.
 
 The default client location is resolved as `../UnionSuite-Client/` relative to the loader. Allow a loader attribute/configured bootstrap path for tenants whose client folder has a different name. Never derive asset paths from the current iMIS page. API/record destinations, in contrast, resolve against the active iMIS environment, not the theme/CDN asset origin.
 
@@ -271,7 +273,7 @@ Served from a static copy of the theme folder, in a browser:
 Confirmed against `uhubemsdev.imiscloud.com`, resolving to `https://uhubemsdev.imiscloud.com/App_Themes/UnionSuite-Core/Scripts/ActionDefinitions.js?v=…`:
 
 - iMIS serves `.js` from the theme folder to a dynamically injected `<script>`, and that script executes. No CSP or MIME obstacle was encountered.
-- `document.currentScript` resolves correctly behind `defer`, so child paths derive from the loader's own URL.
+- `document.currentScript` resolves correctly behind both `defer` and `async`, so child paths derive from the loader's own URL.
 - The skip path behaved as designed against a real leftover include.
 
 ### Findings
@@ -281,9 +283,66 @@ Confirmed against `uhubemsdev.imiscloud.com`, resolving to `https://uhubemsdev.i
 - **The taskbar/core dependency was not visible in the previous graph** and was found only by reading the source. It is corrected above.
 - **iMIS Application Insights emits an unrelated CORS console error** on these pages. It is native telemetry and not a loader symptom.
 
+### Load-time optimisation (trial v0.3)
+
+The step 1 capture showed that **latency dominates and byte size barely matters**: `ActionDefinitions.js` at 6KB cost 219ms while `zUnionSuite.js` at 286KB cost 283ms. Per-request overhead, not payload, sets the cost, so the work went into removing round trips from the critical path rather than into bundling. Three changes were made.
+
+**Preload every module up front.** When the loader runs it injects one `<link rel="preload" as="script">` per module that passes its gate and is not already present, then proceeds through the dependency graph as before. Downloads overlap; execution order is unchanged. The preload href must match the eventual script src exactly, version parameter included, or the browser fetches the file twice. Preload was chosen over injecting every `<script async=false>` at once because the latter executes dependants even when a dependency has failed: a missing `zUnionSuite.js` would leave `ActionDefinitions.js` to run and throw, losing the failure isolation in contract 3.
+
+**`async` on the header include**, as above.
+
+**Bookmarks off the critical path.** `UnionSuiteTaskbar-Bookmarks.js` is marked non-critical: it still loads as soon as the taskbar registers, but `UnionSuiteLoader.ready` no longer waits for it. The taskbar is usable without it, and its own settings request measured 690ms on the tenant. It is deliberately **not** parked on an idle callback. The file replaces visible taskbar controls, so a deliberate delay would only widen the window in which the native quick links are shown and then swapped out.
+
+The loader now exposes two promises: `ready` for the critical modules and `complete` for every module.
+
+Measured A/B, serving the real theme files with a 200ms artificial delay per request to approximate the tenant round trip:
+
+| | v0.2 serial + `defer` | v0.3 preload + `async` |
+|---|---|---|
+| Loader downloaded | 242ms | 231ms |
+| Theme scripts start | 245ms, then 497, 497, 738 | 233ms, all four together |
+| **Last theme script complete** | **947ms** | **452ms** |
+
+That is a 495ms reduction, about half the chain, under an artificial constant delay. **The tenant behaved differently and this figure does not carry over; see the tenant measurements below.** Verified alongside it: no file is fetched twice, every download is initiated by the preload link rather than the script tag, and the gated, skipped, failed and blocked paths all still behave as they did in v0.2.
+
+Not attempted, and why: bundling files together, because the measurements show round trips rather than bytes are the cost and bundling would undo route gating; and inlining the loader into the master page, which would save one round trip but give up the stable `index.js` URL that contract 9 depends on.
+
+### Measured on the dev tenant
+
+Four captures of the same blank staff page, `/UTNewTheme/i4u_Sandbox/Styling-Elements/Blank-Page.aspx`, taken with the resource-timing report on 21 September 2026. Read these in preference to the simulated A/B above.
+
+| Run | Header | Browser cache | `index.js` done | Preloads fire | Gap | Last theme script |
+|---|---|---|---|---|---|---|
+| 1 | `defer` | disabled | 3169ms | 3602ms | 433ms | 4497ms |
+| 2 | `defer` | disabled | 876ms | 1607ms | 731ms | 1753ms |
+| 3 | `async` | disabled | 549ms | 1250ms | 701ms | 1443ms |
+| 4 | `async` | **enabled** | 316ms | 372ms | **56ms** | **431ms** |
+
+The gap between the loader finishing its own download and issuing its preloads is the metric that isolates the loader from page-wide variance. Runs 1 and 2 are the same build and the same header, and differ by 2.7 seconds end to end; treat any single tenant run as unreliable. `index.js`, an 11KB file, took 1178ms in run 1 and 212ms in run 3.
+
+**Preloading works on the tenant.** In every run the four theme files are fetched by the preload link rather than the script tag, start within 2ms of each other, and are never fetched twice.
+
+**`async` is not where the time was.** Runs 2 and 3 differ only by the header attribute and the gap barely moved, 731ms to 701ms. Keep `async` as the more accurate description of what the loader needs, but do not expect it to pay for itself.
+
+**The gap was main-thread contention, and caching removes it.** iMIS downloads roughly 1MB of its own JavaScript — a 698KB Telerik bundle and 304KB `Asi.js` — which must parse and execute before an async script gets the main thread. Serving those from cache collapses the gap from 701ms to 56ms and the whole theme chain from 1443ms to 431ms.
+
+**Caching is working; `?v=` is doing its job.** Runs 1 to 3 showed every asset arriving from the network, which looked like missing cache headers. It was the browser's own disable-cache switch. With it off, every theme file is a true cache hit at zero transfer. Child versioning through `?v=` is therefore both effective and necessary, and revalidation is not a useful substitute for it.
+
+**Static preload hints in the master page were evaluated and rejected.** Moving the hints into the header would start the theme downloads alongside the native assets instead of behind the loader. Against the uncached runs that looked worth about 900ms, but the cached run shows the real headroom is the 56ms gap. It is not worth hardcoding versioned theme paths into the header, which would require a header edit per release and break contract 9 for a saving inside the noise.
+
+**Warm load is the number that matters: 431ms** from the page's first request to the last theme script, at zero bytes transferred.
+
+### Risk: the loader's own cache lifetime
+
+`index.js` is served from cache with no revalidation. That is the one file in this design that must not be cached hard. A release works by bumping `RELEASE` inside `index.js` so every child URL changes; if a stale `index.js` is served, the new file never runs and it keeps requesting the previous `?v=`, so no child update reaches the browser either. The v0.3 deployment only propagated because the browser's cache was disabled at the time.
+
+Before production, confirm the `Cache-Control` iMIS sends for `/App_Themes/UnionSuite-Core/index.js`. It wants revalidation on every request, which for an 11KB file is a cheap 304, while the versioned children keep their long lifetimes. If iMIS applies one policy across `App_Themes` and per-file variation is not available, the fallback is to version the header include, accepting a header edit per release; contract 9 should then be restated rather than quietly broken.
+
 ### Not yet proven
 
-Loading the core file through the loader on the tenant, since the manual include was still present during the test; behaviour across a partial postback; behaviour inside editor and CCO iframes; and cache behaviour for the stable `index.js` URL under contract 9. A frame guard for the taskbar branch is deliberately not implemented yet: the taskbar is self-limiting because it mounts only where it finds the native search markup, and an unverified guard could remove it from a legitimately framed staff document.
+Behaviour across a partial postback. Cache behaviour for the stable `index.js` URL under contract 9 is now measured and is a live risk; see the tenant measurements below.
+
+Frame behaviour is no longer unproven. The tenant page runs the loader three times because two `ContentPreview.aspx` iframes each execute the header include, so every frame downloads the core file, the taskbar and 96KB of bookmarks it cannot use. This is the case contract 4 already describes. A frame guard is still not implemented, by decision, but it is now a measured cost rather than a hypothetical one and is the largest single saving available. A frame guard for the taskbar branch is deliberately not implemented yet: the taskbar is self-limiting because it mounts only where it finds the native search markup, and an unverified guard could remove it from a legitimately framed staff document.
 
 ## Styling and icon integration
 

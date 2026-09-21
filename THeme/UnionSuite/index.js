@@ -1,13 +1,15 @@
 /* UnionSuite loader — TRIAL.
 
    One header include that resolves its own location and loads the theme's
-   scripts as a small dependency graph. Independent branches start together;
-   only real dependencies are serialised.
+   scripts as a dependency graph. Every file is preloaded at once so the
+   downloads overlap, while execution still follows the dependency order.
 
    Header include, replacing the individual script includes:
-     <script src="/App_Themes/UnionSuite-Core/index.js" defer></script>
+     <script src="/App_Themes/UnionSuite-Core/index.js" async></script>
 
-   Inline configuration still belongs in the header, before this file:
+   async, not defer: this file only injects scripts, so it has no reason to
+   wait for the parser. Any inline configuration must still appear in the
+   header BEFORE this tag:
      <script>window.UnionSuiteTaskbarConfig = { pipGreeting: false };</script>
 
    This is a spike, not the planned loader. Context classification, the client
@@ -20,17 +22,19 @@
 
   // Applied to every child request so a release can be published without
   // editing the header include. Bump this when child files change.
-  const RELEASE = '0.2.0-trial';
+  const RELEASE = '0.3.0-trial';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
 
-     after   ids that must register first. Absent means the module starts
-             immediately, in parallel with the other roots.
-     when    optional gate. A gated-out module is never downloaded.
-     ready   registration check. Loading is not success: a file that parses
-             and then throws still fires load. null means the file registers
-             nothing, so loading is all that can be confirmed. */
+     after     ids that must register first. Absent means the module starts
+               immediately, in parallel with the other roots.
+     when      optional gate. A gated-out module is never preloaded or loaded.
+     ready     registration check. Loading is not success: a file that parses
+               and then throws still fires load. null means the file registers
+               nothing, so loading is all that can be confirmed.
+     critical  false keeps the module out of the ready promise. It still loads
+               in dependency order; the page simply does not wait on it. */
   const MODULES = [
     {
       id: 'core',
@@ -56,6 +60,12 @@
       id: 'bookmarks',
       path: 'Scripts/UnionSuiteTaskbar-Bookmarks.js',
       after: ['taskbar'], // Replaces the taskbar's own quick-links region.
+      // Off the critical path: the taskbar is usable without it, and its own
+      // settings request adds most of a second. It is still started as soon
+      // as the taskbar registers, rather than parked on an idle callback,
+      // because it replaces visible controls and a deliberate delay would
+      // only widen the swap.
+      critical: false,
       ready: () => typeof window.UnionSuiteTaskbarBookmarks?.initialise === 'function'
     },
     {
@@ -76,7 +86,8 @@
   function record(module) {
     if (!records.has(module.id)) {
       records.set(module.id, {
-        id: module.id, path: module.path, url: null, state: 'pending', detail: null, ms: null
+        id: module.id, path: module.path, url: null, state: 'pending',
+        detail: null, ms: null, critical: module.critical !== false
       });
     }
     return records.get(module.id);
@@ -103,6 +114,24 @@
     const url = new URL(path, base);
     url.searchParams.set('v', RELEASE);
     return url.href;
+  }
+
+  /* Request every file this page will actually use, at once and up front.
+     Without this the chain pays one round trip per step, and on iMIS a round
+     trip costs about the same for a 6KB file as for a 286KB one. The preload
+     href must match the eventual script src exactly, or the browser fetches
+     the file twice. */
+  function preload() {
+    MODULES
+      .filter(module => !(module.when && !module.when()))
+      .filter(module => !module.ready?.())
+      .forEach(module => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'script';
+        link.href = childUrl(module.path);
+        document.head.append(link);
+      });
   }
 
   function loadScript(url) {
@@ -190,6 +219,8 @@
         throw error;
       }
 
+      // With preloading this measures execution plus a cache hit, not the
+      // download. Read the resource timings for actual transfer cost.
       entry.ms = Math.round(performance.now() - begun);
 
       if (module.ready && !module.ready()) {
@@ -208,28 +239,61 @@
     return promise;
   }
 
-  async function bootstrap() {
-    if (!base) return false;
-    await Promise.allSettled(MODULES.map(run));
-    return [...records.values()].every(entry => entry.state !== 'failed' && entry.state !== 'blocked');
+  function broken() {
+    return [...records.values()].filter(row => row.state === 'failed' || row.state === 'blocked');
   }
 
-  // One startup promise per document, so a repeated include cannot start twice.
-  const ready = bootstrap().then(ok => {
+  function report(label) {
     const rows = [...records.values()];
-    const broken = rows.filter(row => row.state === 'failed' || row.state === 'blocked');
-    console[broken.length ? 'warn' : 'info'](
-      '[UnionSuite loader] ' + RELEASE + ' — ' +
-      (broken.length ? broken.length + ' module(s) did not load.' : 'all modules satisfied.')
+    const failures = broken();
+    console[failures.length ? 'warn' : 'info'](
+      '[UnionSuite loader] ' + RELEASE + ' — ' + label + ' — ' +
+      (failures.length ? failures.length + ' module(s) did not load.' : 'all modules satisfied.')
     );
-    console.table(rows.map(({ path, state, ms, detail }) => ({ path, state, ms, detail })));
-    return ok;
-  });
+    console.table(rows.map(({ path, state, critical, ms, detail }) =>
+      ({ path, state, critical, ms, detail })));
+  }
+
+  let ready;
+  let complete;
+
+  if (!base) {
+    ready = Promise.resolve(false);
+    complete = Promise.resolve(false);
+  } else {
+    preload();
+
+    // Start everything. Dependencies resolve through the memoised graph, so
+    // independent branches overlap instead of queueing behind each other.
+    // Rejections are recorded on the entries, so they are swallowed here.
+    const settled = new Map(MODULES.map(module => [module, run(module).catch(() => {})]));
+
+    const isCritical = module => module.critical !== false;
+    const failed = module => {
+      const state = records.get(module.id)?.state;
+      return state === 'failed' || state === 'blocked';
+    };
+
+    // ready settles once the critical modules are in place, and reports only
+    // on those. Non-critical work continues behind it rather than holding
+    // the page.
+    ready = Promise.all([...settled].filter(([module]) => isCritical(module)).map(([, done]) => done))
+      .then(() => {
+        report('critical ready');
+        return !MODULES.filter(isCritical).some(failed);
+      });
+
+    complete = Promise.all([...settled.values()]).then(() => {
+      if (MODULES.some(module => !isCritical(module))) report('complete');
+      return broken().length === 0;
+    });
+  }
 
   window.UnionSuiteLoader = Object.freeze({
     version: RELEASE,
     base: base?.href || null,
-    ready,
+    ready,    // critical modules only
+    complete, // every module, including non-critical ones
     status: () => [...records.values()].map(entry => ({ ...entry }))
   });
 })();
