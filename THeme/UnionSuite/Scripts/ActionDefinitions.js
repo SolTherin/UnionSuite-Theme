@@ -19,6 +19,12 @@
     url.searchParams.set('AllowEdit','True');
     return url.href;
   }
+  // Client context published in the DOM. loggedInPartyId is who is signed in,
+  // which is not the same as the contact being viewed.
+  function clientContext() {
+    try { return JSON.parse(document.getElementById('__ClientContext')?.value || '{}'); }
+    catch (_) { return {}; }
+  }
   async function refreshReport(env, selector) {
     if (env.origin.report || env.origin.ambiguous) return env.refresh.originReport();
     return env.refresh.iqa(selector,{scope:'page',match:'one'});
@@ -68,6 +74,28 @@
   define('home.manage-bulletin',{
     presentation:{label:'Manage bulletin',default:'button',menu:'menu-item'},context:{},
     action:{type:'navigate',href:'/_i4u_/Core/Staff-Site-Layouts/Home-Dashboard/Staff-Bulletin.aspx',target:'_blank'}
+  });
+  define('home.add-task',{
+    presentation:{label:'Add task',icon:'plus',default:'button',menu:'menu-item'},
+    context:{
+      // The signed-in staff member, not the selected contact. Anonymous
+      // sessions resolve to null so the required check reports it rather
+      // than opening the editor without an owner.
+      partyId:{
+        resolve:() => { const c = clientContext(); return c.isAnonymous === true ? null : c.loggedInPartyId ?? null; },
+        required:true, validate:recordId
+      }
+    },
+    action:{type:'popup',recordKey:['partyId'],
+      href:({context}) => {
+        const url = new URL('/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx',location.origin);
+        url.searchParams.set('ID',context.partyId);
+        return url.href;
+      },
+      popup:{title:'Add task',width:'70%',height:'70%'},
+      // Refresh the iPart the button belongs to, whichever report that is.
+      refresh:{when:'close',targets:[{type:'origin-report'}]}
+    }
   });
   define('jobs.edit',{
     presentation:{label:'Edit job',icon:'pencil',default:'button',row:'icon',menu:'menu-item'},

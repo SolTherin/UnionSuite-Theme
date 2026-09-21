@@ -39,7 +39,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '0.3.0-trial';
+  const RELEASE = '0.3.1-trial';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
