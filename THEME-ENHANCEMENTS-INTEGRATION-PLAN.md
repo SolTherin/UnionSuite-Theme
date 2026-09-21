@@ -2,6 +2,8 @@
 
 Reviewed 20 September 2026. **Option C taskbar design approved and locked for implementation. Loader architecture and production integration remain planned; this is not a deployment instruction.**
 
+Updated 21 September 2026: a trial loader has been built and exercised against the dev tenant. See [Loader trial: step 1 results](#loader-trial-step-1-results). The trial confirms the delivery mechanism only; the file structure and feature migration below are unchanged and still planned.
+
 This maps the iMIS Enhanced implementation plan into the existing UnionSuite theme. The current request changes the delivery destination from a separate enhancement suite to this theme. Existing feature scope and behaviour remain the starting point; CDN-only delivery and a second taskbar are not prerequisites.
 
 Reviewed inputs:
@@ -192,18 +194,18 @@ Conceptual load graph, not executable code:
 index.js: capture URL + establish one startup promise
 │
 ├─ resolve client Config.js (or declared defaults) and DOM readiness
-├─ zUnionSuite.js
+│
+├─ zUnionSuite.js            [UnionSuiteActions, UnionSuiteAppearance]
 │  ├─ ActionDefinitions.js -> client Actions.js
+│  ├─ parent staff page
+│  │  ├─ UnionSuiteTaskbar.js -> UnionSuiteSitewide.js
+│  │  ├─ bookmark strip -> RouteCatalogue.js + Bookmarks.js + BookmarkStore.js
+│  │  ├─ palette open -> CommandPalette.js + shared catalogue + optional Fuse
+│  │  └─ Recents open -> Recents.js + context/API helpers
 │  └─ existing shared theme features remain available in themed documents
 │
 ├─ Shared/Lifecycle.js + Shared/ImisContext.js
 │  └─ classify supported staff/editor/CCO context
-│
-├─ parent staff page
-│  ├─ UnionSuiteTaskbar.js -> UnionSuiteSitewide.js
-│  ├─ bookmark strip -> RouteCatalogue.js + Bookmarks.js + BookmarkStore.js
-│  ├─ palette open -> CommandPalette.js + shared catalogue + optional Fuse
-│  └─ Recents open -> Recents.js + context/API helpers
 │
 ├─ QueryBuilder/Design.aspx -> UnionSuiteIQA.js + its shared helpers
 ├─ ContentRecordEdit.aspx or ContentDesigner.aspx
@@ -217,6 +219,23 @@ index.js: capture URL + establish one startup promise
    ├─ inspector opened -> DevTools/ContentInspector.js
    └─ sources enabled + supported record DOM -> DevTools/FieldSources.js
 ```
+
+The taskbar sits under `zUnionSuite.js` deliberately. It reads `window.UnionSuiteAppearance` to build its appearance switch, and that API is registered by the core file. The existing header include survives this only because the taskbar defers mounting to `DOMContentLoaded`; a dynamically injected taskbar can mount immediately, so the loader must honour the edge rather than treat the two as independent branches.
+
+Registration markers for contract 1. "Loaded" is not "working": a file that parses and then throws still fires `load`, so each step is confirmed by the global it registers.
+
+| File | Registration marker | Must load after |
+|---|---|---|
+| `zUnionSuite.js` | `window.UnionSuiteActions.define` (also registers `UnionSuiteAppearance`, `UnionSuiteSwitches`) | — |
+| `Scripts/ActionDefinitions.js` | `UnionSuiteActions.has('home.manage-bulletin')` | `zUnionSuite.js`; it throws without the runtime |
+| `Scripts/UnionSuiteTaskbar.js` | `window.UnionSuiteTaskbar.initialise` | `zUnionSuite.js`, for `UnionSuiteAppearance` |
+| `Scripts/UnionSuiteTaskbar-Bookmarks.js` | `window.UnionSuiteTaskbarBookmarks.initialise` | `Scripts/UnionSuiteTaskbar.js`; it replaces that script's quick-links region |
+| `Scripts/IQA-Enhancements.js` | **none** | — |
+| `UnionSuite-Client/Actions.js` | none declared | shared runtime and `ActionDefinitions.js` |
+
+`IQA-Enhancements.js` registers no global of its own: it returns early off `QueryBuilder/Design.aspx` and the `window.*` names it touches are native page functions it calls, not exports. Until it is ported to `UnionSuiteIQA.js` its execution cannot be verified by the loader, so gate it by URL and accept loading as the only signal. Give the ported file a registration marker.
+
+`UnionSuiteTaskbar-Bookmarks.js` is not named in the file tree above because the tree describes the target decomposition. The deployed file today is one standalone trial script that its own header says will split into `UnionSuiteSitewide.js`, `RouteCatalogue.js`, `Bookmarks.js`, `BookmarkStore.js`, `CommandPalette.js` and `Recents.js` when promoted. Load it as a single unit until then.
 
 Shared helpers load once and only before consumers that actually require them. The graph shows feature dependencies, not a requirement to serialize independent branches. Bookmark storage failure must not stop search, palette navigation, the editor or unrelated copy tools. Client action registrations follow standard action registration and their verified business helpers; missing business helpers are not silently replaced.
 
@@ -232,6 +251,39 @@ Important loader contracts:
 8. For the first IQA migration preserve its current always-on QuickAdd and source-capture behaviour while Enhance is Off. A whole-module disable is a separate loader setting. Do not assume the IQA pill presently disables every operation.
 9. Capture a central release version in the loader and apply it consistently to child assets. Keep the stable `index.js` URL revalidated/short-cached so releases do not require changing the header. Upload referenced files before publishing the updated loader; do not use a new timestamp on every request.
 10. Replace the old individual includes during deployment. Deduplication cannot make arbitrary legacy scripts harmless: remove overlapping standalone IQA, Quicklinks IQA/shortcut, old taskbar and extension injections while retaining required unrelated business helpers.
+
+## Loader trial: step 1 results
+
+Implementation order step 1 was carried out on 21 September 2026 using a trial `THeme/UnionSuite/index.js`. The trial loads only existing deployed theme files and implements the URL capture, versioned child requests, promise caching, registration checks and failure isolation described above. Route selection, context classification, the client folder and the remaining feature files were out of scope.
+
+### Verified locally
+
+Served from a static copy of the theme folder, in a browser:
+
+| Scenario | Result |
+|---|---|
+| Clean page, loader include only | `zUnionSuite.js` then `ActionDefinitions.js` both loaded; twelve actions registered; the `us-action-home-manage-bulletin` button rendered into the panel header through the iPart wrapper div |
+| An existing manual `zUnionSuite.js` include left in place | Step reported `skipped`; one network request; one rendered button, so no double registration |
+| A child file returning 404 | Step reported `failed` with the reason; the chain stopped; the already-loaded core file kept working |
+
+### Verified on the dev tenant
+
+Confirmed against `uhubemsdev.imiscloud.com`, resolving to `https://uhubemsdev.imiscloud.com/App_Themes/UnionSuite-Core/Scripts/ActionDefinitions.js?v=…`:
+
+- iMIS serves `.js` from the theme folder to a dynamically injected `<script>`, and that script executes. No CSP or MIME obstacle was encountered.
+- `document.currentScript` resolves correctly behind `defer`, so child paths derive from the loader's own URL.
+- The skip path behaved as designed against a real leftover include.
+
+### Findings
+
+- **The deployed theme folder is `UnionSuite-Core`, not `UnionSuite`.** The include example above and every `YOUR_THEME` placeholder are exactly that; resolving relative to the loader's own URL is load-bearing, and any hardcoded theme path would have failed here.
+- **A cold child request measured about 630ms**, against about 25ms locally and about 75ms warm. At that latency a serialized chain of a dozen files would be plainly slow, which is the practical reason the graph's independent branches must actually overlap rather than queue.
+- **The taskbar/core dependency was not visible in the previous graph** and was found only by reading the source. It is corrected above.
+- **iMIS Application Insights emits an unrelated CORS console error** on these pages. It is native telemetry and not a loader symptom.
+
+### Not yet proven
+
+Loading the core file through the loader on the tenant, since the manual include was still present during the test; behaviour across a partial postback; behaviour inside editor and CCO iframes; and cache behaviour for the stable `index.js` URL under contract 9. A frame guard for the taskbar branch is deliberately not implemented yet: the taskbar is self-limiting because it mounts only where it finds the native search markup, and an unverified guard could remove it from a legitimately framed staff document.
 
 ## Styling and icon integration
 
