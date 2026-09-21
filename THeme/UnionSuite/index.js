@@ -4,13 +4,28 @@
    scripts as a dependency graph. Every file is preloaded at once so the
    downloads overlap, while execution still follows the dependency order.
 
-   Header include, replacing the individual script includes:
-     <script src="/App_Themes/UnionSuite-Core/index.js" async></script>
+   Header include, replacing the individual script includes. Deploy it once;
+   it never needs changing again, so every later release ships in the theme
+   folder alone.
 
-   async, not defer: this file only injects scripts, so it has no reason to
-   wait for the parser. Any inline configuration must still appear in the
-   header BEFORE this tag:
-     <script>window.UnionSuiteTaskbarConfig = { pipGreeting: false };</script>
+     <script>
+       // Optional, and must come before the loader.
+       window.UnionSuiteTaskbarConfig = { pipGreeting: false };
+       (function () {
+         var s = document.createElement('script');
+         // 20-minute bucket. iMIS serves App_Themes with
+         // Cache-Control: public, max-age=604800, so a stable entry URL
+         // would be cached for a week and no release could reach a
+         // returning browser. The bucket caps that at 20 minutes while
+         // still serving from cache in between.
+         s.src = '/App_Themes/UnionSuite-Core/index.js?t=' + Math.floor(Date.now() / 1200000);
+         s.async = true; // The loader touches no DOM; it need not wait for the parser.
+         document.head.appendChild(s);
+       })();
+     </script>
+
+   The ?t= parameter is ignored here: child paths resolve against this file's
+   directory, which drops the query.
 
    This is a spike, not the planned loader. Context classification, the client
    folder and the remaining feature files in
@@ -20,8 +35,10 @@
 (function () {
   'use strict';
 
-  // Applied to every child request so a release can be published without
-  // editing the header include. Bump this when child files change.
+  // Applied to every child request. The children are cached for a week on
+  // stable URLs, so this is what invalidates them. Bump it when a child file
+  // changes; changing this loader alone does not need it, because the entry
+  // URL refreshes itself. Bumping needlessly re-downloads every child.
   const RELEASE = '0.3.0-trial';
   const LOAD_TIMEOUT_MS = 20000;
 

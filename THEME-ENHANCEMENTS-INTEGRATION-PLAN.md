@@ -183,10 +183,25 @@ Approved by James on 20 September 2026. This section is the implementation basel
 Proposed header include after implementation, using the actual deployed theme URL:
 
 ```html
-<script src="/App_Themes/UnionSuite-Core/index.js" async></script>
+<script>
+  // Optional, and must come before the loader.
+  window.UnionSuiteTaskbarConfig = { pipGreeting: false };
+  (function () {
+    var s = document.createElement('script');
+    s.src = '/App_Themes/UnionSuite-Core/index.js?t=' + Math.floor(Date.now() / 1200000);
+    s.async = true;
+    document.head.appendChild(s);
+  })();
+</script>
 ```
 
-`async`, not `defer`: the loader only injects scripts, so it has no reason to wait for the parser. On the dev tenant `defer` left it idle for about 330ms after its own download completed. Inline configuration such as `window.UnionSuiteTaskbarConfig` must appear in the header before this tag. A deferred external config file would be unsafe here, because it can run after a dynamically injected consumer; resolve client configuration through the loader instead.
+Deploy this once. It never changes again, which is the point: site headers are a manual deployment on this tenant, while theme folders ship remotely as a zip, so every later release must be able to travel in the zip alone.
+
+`async`, not `defer`: the loader only injects scripts, so it has no reason to wait for the parser. Measured, this is worth little — see the tenant runs — but it describes the requirement accurately. Inline configuration such as `window.UnionSuiteTaskbarConfig` must appear before the loader. A deferred external config file would be unsafe here, because it can run after a dynamically injected consumer; resolve client configuration through the loader instead.
+
+The `?t=` bucket is not decoration. iMIS serves `App_Themes` with `Cache-Control: public, max-age=604800` and no revalidation, confirmed on the tenant, so a stable entry URL is cached for a week. A stale `index.js` is the worst failure available here: the new loader never runs, and the old one keeps requesting the previous `?v=`, so no child update reaches the browser either. The bucket caps that exposure at 20 minutes while still serving from cache in between. The query is dropped when child paths resolve against the loader's directory, so nothing downstream sees it.
+
+Twenty minutes was chosen on operational grounds, not performance. A bucket roll costs one ~5KB fetch, measured at 90–200ms against a cache hit, on the first page load in each new bucket; at 20 minutes an active user pays a few seconds a day in total. Lengthening it to a day would save about a second a day and raise the exposure on a bad release from 20 minutes to 24 hours, with a manual header deployment as the only faster remedy. Buckets longer than an hour also need a local-time key: `Math.floor(Date.now() / n)` divides UTC, so a 12-hour bucket rolls at 10pm and 10am Melbourne time, straddling the start of the working day and defeating the purpose.
 
 The default client location is resolved as `../UnionSuite-Client/` relative to the loader. Allow a loader attribute/configured bootstrap path for tenants whose client folder has a different name. Never derive asset paths from the current iMIS page. API/record destinations, in contrast, resolve against the active iMIS environment, not the theme/CDN asset origin.
 
@@ -251,7 +266,7 @@ Important loader contracts:
 6. Load catalogue data when bookmarks first need it or the palette first opens. Fetch Recents only when used. Load diagnostics on demand. Keep default-off dev tools and module preferences separate from IQA/RiSE Enhance switches.
 7. Preserve `iqaEnhanceMode`, use independent `riseEnhanceMode`, and retain the planned `imisPlus.moduleToggles` / `imisPlus.inspectorOpen` contracts. Safe storage access must fall back to working in-memory state. The current IQA top-level mode reads need hardening for unavailable storage.
 8. For the first IQA migration preserve its current always-on QuickAdd and source-capture behaviour while Enhance is Off. A whole-module disable is a separate loader setting. Do not assume the IQA pill presently disables every operation.
-9. Capture a central release version in the loader and apply it consistently to child assets. Keep the stable `index.js` URL revalidated/short-cached so releases do not require changing the header. Upload referenced files before publishing the updated loader; do not use a new timestamp on every request.
+9. Capture a central release version in the loader and apply it consistently to child assets. Upload referenced files before publishing the updated loader; do not use a new timestamp on every request. **Restated 21 September 2026:** the original requirement here was a stable `index.js` URL served revalidated or short-cached. The tenant does not offer that — `App_Themes` is served `public, max-age=604800` with no per-file variation available — so the entry point instead carries a coarse time bucket applied by the header, as set out under Updated loader structure. The goal it protects is unchanged: a release must never require a header deployment. Bump the loader's release version when a child file changes; changing the loader alone does not need it, because the entry URL refreshes itself, and bumping needlessly re-downloads every child.
 10. Replace the old individual includes during deployment. Deduplication cannot make arbitrary legacy scripts harmless: remove overlapping standalone IQA, Quicklinks IQA/shortcut, old taskbar and extension injections while retaining required unrelated business helpers.
 
 ## Loader trial: step 1 results
@@ -332,11 +347,23 @@ The gap between the loader finishing its own download and issuing its preloads i
 
 **Warm load is the number that matters: 431ms** from the page's first request to the last theme script, at zero bytes transferred.
 
+### Entry-point delivery: alternatives considered
+
+The entry point must be reachable by a release that ships only the theme folder. Four routes were considered against `public, max-age=604800`.
+
+| Option | Header deployments | Verdict |
+|---|---|---|
+| Stable `index.js` URL | one | Rejected. Cached a week; releases cannot propagate. |
+| Ask ASI to serve `index.js` with `no-cache` | one | Worth pursuing in parallel. Needs per-file cache policy under `App_Themes`, which is not known to be available, and the `imiscloud.com` Cloudflare zone is not ours to configure. If it lands, the bucket becomes redundant but harmless. |
+| Version the header include, `index.js?v=4` | one per release | Rejected. Header deployment is manual here, so this puts a manual step in every release. |
+| Move the loader to `cdn.uhub.org.au` | one | Rejected for now. It would give full cache control, and the CDN and its CSP allowance already exist. But it breaks resolving child paths from the loader's own URL, so the theme base would have to be supplied explicitly; it makes exceptions inside the loader opaque to `window.onerror` without `crossorigin`; one file would serve every tenant; and a future `script-src 'self'` would kill it outright. Reconsider if per-tenant cache control becomes worth that. |
+| **Time-bucketed entry URL** | **one** | **Chosen.** No new origin, no per-release manual step, survives a strict CSP, nothing to purge. |
+
 ### Risk: the loader's own cache lifetime
 
 `index.js` is served from cache with no revalidation. That is the one file in this design that must not be cached hard. A release works by bumping `RELEASE` inside `index.js` so every child URL changes; if a stale `index.js` is served, the new file never runs and it keeps requesting the previous `?v=`, so no child update reaches the browser either. The v0.3 deployment only propagated because the browser's cache was disabled at the time.
 
-Before production, confirm the `Cache-Control` iMIS sends for `/App_Themes/UnionSuite-Core/index.js`. It wants revalidation on every request, which for an 11KB file is a cheap 304, while the versioned children keep their long lifetimes. If iMIS applies one policy across `App_Themes` and per-file variation is not available, the fallback is to version the header include, accepting a header edit per release; contract 9 should then be restated rather than quietly broken.
+Confirmed on the tenant: `cache-control: public, max-age=604800`, with an `etag` that is never consulted because nothing triggers revalidation inside the week. `cf-cache-status: DYNAMIC` shows Cloudflare is not holding a copy, so this is browser cache only and there is nothing to purge. The 20-minute entry bucket above is the remedy, and contract 9 has been restated accordingly. This risk is closed unless the bucket is removed.
 
 ### Not yet proven
 
