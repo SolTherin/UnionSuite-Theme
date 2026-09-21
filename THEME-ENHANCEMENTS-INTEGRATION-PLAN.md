@@ -2,7 +2,9 @@
 
 Reviewed 20 September 2026. **Option C taskbar design approved and locked for implementation. Loader architecture and production integration remain planned; this is not a deployment instruction.**
 
-Updated 21 September 2026: a trial loader has been built and exercised against the dev tenant. See [Loader trial: step 1 results](#loader-trial-step-1-results). The trial confirms the delivery mechanism only; the file structure and feature migration below are unchanged and still planned.
+Updated 21 September 2026: a trial loader has been built and exercised against the dev tenant. See [Loader trial: step 1 results](#loader-trial-step-1-results). The trial confirms the delivery mechanism only; feature migration remains planned.
+
+Updated 22 September 2026: the agreed target combines the taskbar, bookmarks, navigation catalogue handling and Recents in `Taskbar.js`, keeps destination definitions in `Data/Navigation.json`, and groups shared helpers in `Shared.js`. The feature name is **Quick Navigation**, with **Go to…** retained on the taskbar button. DevTools becomes one file controlled by a single **Dev Mode** switch available only while Easy Edit is active. These are planning decisions; the runtime files have not yet been merged or renamed.
 
 This maps the iMIS Enhanced implementation plan into the existing UnionSuite theme. The current request changes the delivery destination from a separate enhancement suite to this theme. Existing feature scope and behaviour remain the starting point; CDN-only delivery and a second taskbar are not prerequisites.
 
@@ -16,9 +18,9 @@ Reviewed inputs:
 
 ## Recommendation
 
-Use one `index.js` in the theme root. Keep existing general theme behaviour in `zUnionSuite.js`, retain the theme's `UnionSuiteTaskbar.js`, and add independently loaded feature files for distinct pages and substantial stateful features.
+Use one `index.js` in the theme root. Rename the existing general theme script to `Theme.js`. Combine the existing taskbar and bookmarks trial in `Taskbar.js`, including navigation catalogue loading/lookup, Quick Navigation and Recents. Keep related responsibilities in clearly labelled internal sections with coordinated initialisation and cleanup.
 
-Keep the current IQA designer as one deployment file initially. Its internal modules already provide useful boundaries, and importing/restyling it does not require simultaneously changing its packaging. Separate larger new features where they have different loading conditions, data ownership or lifecycles. Do not create a file for every button or copy operation.
+Keep the current IQA designer as one deployment file, `IqaEditor.js`. Its internal modules already provide useful boundaries. Use `RiseEditor.js` for content/layout editing, `AdminTools.js` for the three browser/list tools and `DevTools.js` for the combined diagnostics. Put helpers used by multiple features in one `Shared.js`; helpers used by only one feature stay with that feature. Reuse or deliberately move existing helpers so each retains one implementation.
 
 The target below uses classic browser-ready scripts with explicit registration and script-element loading. No bundler or ES-module conversion is required for the initial integration.
 
@@ -29,63 +31,41 @@ The target below uses classic browser-ready scripts with explicit registration a
 | Shared theme and taskbar | Theme core, actions, appearance, banners, report enhancements, contact search/history and Biscuit exist. | Put their existing files under one loader. Extend the theme taskbar; do not also load the external `taskbar-inject.js`. Preserve current search behaviour and dependencies. |
 | IQA designer | Current output contains QuickAdd, business-object search, SQL copy/edit tools, searchable filter/sort fields, Display select/clear, filter-value history, Display/Sorting drag order, filter and source workspaces, relationships, SQL editor, help, Enhance switch, path/key copy and Ctrl/Cmd+S. | Port the current output, align CSS/icons, add explicit registration/duplicate protection and reconcile lifecycle with the loader. Existing code is not evidence that integration/live acceptance has passed. |
 | RiSE editor | URL block, deep-links, verb decoration and zone layout have console probes; preview has CSI reference code. | Convert to repeat-safe modules. Add content key copying and the shared Enhance control. Preserve native form state/actions. |
-| Palette and bookmarks | Reviewed CSV and approved Option C prototype exist, including grouped results, stars, full-row drag, animated placeholders and keyboard reordering. | Port the approved UI into the owning modules; implement catalogue/schema conversion, normal per-user store, ownership contract and optional GM owner. Prototype state is session-only. |
+| Quick Navigation and bookmarks | Reviewed CSV and approved Option C prototype exist, including grouped results, stars, full-row drag, animated placeholders and keyboard reordering. | Port the approved UI into the owning modules; implement catalogue/schema conversion, normal per-user store, ownership contract and optional GM owner. Prototype state is session-only. |
 | IQA/content Recents | Approved narrow popup prototype exists with Mine first/default, compact scope control and Refresh feedback. | Port the UI; implement document-backed top-10 lists, verified Mine filtering/modified-by fields and native editor-opening actions. Contact history remains separate. |
-| IQA browser path copy | Native address-field/legacy references exist. | New page-scoped toolbar module. Designer-header path copying does not implement this browser feature. |
-| Object Browser URL copy and Panel Definition ID copy | Legacy Quicklinks implementations exist. | Extract each into its own page-scoped module. |
-| Developer tools | Metadata and field-source probes exist. | One dev controller with two independently enabled tools; production lifecycle, reliable identity resolution and accurate copy feedback. |
+| IQA browser path copy | Native address-field/legacy references exist. | A page-scoped section in `AdminTools.js`. Designer-header path copying does not implement this browser feature. |
+| Object Browser URL copy and Panel Definition ID copy | Legacy Quicklinks implementations exist. | Group with IQA browser path copy in `AdminTools.js`, with a separate section and page guard for each tool. |
+| Developer tools | Metadata and field-source probes exist. | One `DevTools.js` and one taskbar Dev Mode switch, available only during Easy Edit; enables current-page details and supported panel inspection together, with reliable identity resolution and cleanup. |
 | Dialog shortcuts | IQA already handles Ctrl/Cmd+S. | Shared dialog helper adds Maximise/Restore and Save for other verified editors, with one owner per action. |
 
 ## Proposed deployed structure
 
-Existing files are marked `[existing]`; all other runtime files below are proposed. `UnionSuiteIQA.js` is a port of existing functionality, not a completed theme integration. File names are the recommended final names.
+This is the target structure. Current deployed names remain in the trial evidence below. JavaScript uses PascalCase feature names without the redundant UnionSuite prefix, with the conventional `index.js` entry point retained. Stylesheets retain their established names and load order in this JavaScript packaging change.
 
 ```text
 THeme/
 ├── UnionSuite/
 │   ├── index.js                         # the only header script include
-│   ├── zUnionSuite.js                   # existing shared theme behaviour
+│   ├── Theme.js                        # existing zUnionSuite.js behaviour
 │   ├── 99-Orion.css                     # existing native foundation
 │   ├── zUnionSuite.css                  # tokens and added component styles
 │   ├── zzDarkMode.css                   # dark-specific styles; loaded last
 │   ├── Tabler.css + Tabler/             # existing icons/font/licence
 │   ├── Scripts/
-│   │   ├── ActionDefinitions.js         # [existing] standard business actions
-│   │   ├── UnionSuiteTaskbar.js          # [existing] sole search/taskbar owner
-│   │   ├── UnionSuiteSitewide.js         # taskbar attachment and feature controls
-│   │   ├── UnionSuiteIQA.js              # port of current IQA output bundle
-│   │   ├── UnionSuiteRiSEEditor.js       # RiSE controller + small editor features
-│   │   ├── UnionSuiteIQABrowser.js       # folder/selected-query path copying
-│   │   ├── UnionSuiteObjectBrowser.js    # uploaded file/image URL copying
-│   │   ├── UnionSuitePanelList.js        # PanelDefinitionId copying
-│   │   ├── UnionSuiteDevTools.js         # dev gate and two independent controls
-│   │   ├── Shared/
-│   │   │   ├── Lifecycle.js             # ready, remount, cleanup, safe preferences
-│   │   │   ├── ImisContext.js           # staff/editor/frame context + current user
-│   │   │   ├── ImisApi.js               # request helpers, FindByPath, native adapters
-│   │   │   ├── Icons.js                 # shared theme icon names/rendering
-│   │   │   ├── Feedback.js              # toast/live feedback; reuse theme clipboard
-│   │   │   ├── EditorControls.js        # Enhance switch and URL-key/session helper
-│   │   │   └── DialogShortcuts.js       # only supported Telerik dialog contexts
-│   │   ├── Sitewide/
-│   │   │   ├── RouteCatalogue.js        # shared catalogue validation/cache/fallback
-│   │   │   ├── CommandPalette.js        # search, smart tags and pin requests
-│   │   │   ├── Bookmarks.js             # strip, edit/reorder and ownership contract
-│   │   │   ├── BookmarkStore.js         # verified normal iMIS persistence adapter
-│   │   │   └── Recents.js               # recently modified IQAs/content, Sitewide/Mine
-│   │   ├── RiSE/
-│   │   │   ├── DeepLinks.js             # asynchronous IQA/panel target resolution
-│   │   │   └── DesignerChrome.js        # zone layout and native verb decoration
-│   │   ├── DevTools/
-│   │   │   ├── ContentInspector.js      # viewed-page identity/metadata panel
-│   │   │   └── FieldSources.js          # native field-ID badges on record pages
+│   │   ├── ActionDefinitions.js         # existing standard business actions
+│   │   ├── Shared.js                    # common helpers, grouped into sections
+│   │   ├── Taskbar.js                   # search, bookmarks, Quick Navigation, Recents
+│   │   ├── IqaEditor.js                 # query designer enhancements
+│   │   ├── RiseEditor.js                # content editor, deep links and designer UI
+│   │   ├── AdminTools.js                # IQA path, file URL and panel ID copying
+│   │   ├── DevTools.js                  # page details and panel inspection
 │   │   └── Vendor/
-│   │       └── fuse-6.6.2.js            # existing palette engine, if retained
+│   │       └── fuse-6.6.2.js            # optional fuzzy search library
 │   ├── Data/
-│   │   ├── command-palette-routes.json
-│   │   └── command-palette-routes.schema.json
+│   │   ├── Navigation.json             # destination IDs, labels, URLs, icons, keywords
+│   │   └── Navigation.schema.json      # authoring/build validation rules
 │   ├── Usage-Guide.html                 # [existing] generated offline handbook
-│   └── docs/                           # [existing] guide/example sources
+│   └── guides/usage/                   # existing canonical guide/example sources
 └── UnionSuite-Client/
     ├── Config.js                       # [existing] settings; expanded as needed
     ├── Actions.js                      # [existing] client action registrations
@@ -99,54 +79,81 @@ tools/                                 # build/check tools; not runtime dependen
 references/                            # generated component previews
 ```
 
-The vendor file is conditional on retaining the existing fuzzy-search implementation. If retained, preserve its supplied code/licence and load it only for the palette. Do not introduce a second fuzzy-search library.
+The target has nine shared runtime JavaScript files, plus Fuse if retained. The vendor file is conditional: the trial uses `window.Fuse` when available and otherwise matches search words against destination fields; the current loader does not supply Fuse. If retained, preserve its supplied code/licence and load it only for Quick Navigation. Do not introduce a second fuzzy-search library.
 
-`Data/command-palette-routes.schema.json` supports catalogue authoring/validation, not a second browser request on every page. Runtime catalogue validation belongs to `RouteCatalogue.js`.
+`Data/Navigation.json` is the maintained destination list. Define standard links/paths, stable IDs, names, categories, icons and search keywords there. The current trial embeds these entries in `UnionSuiteTaskbar-Bookmarks.js`; promotion extracts that list into JSON. There is no separate `RouteCatalogue.js` or second maintained JavaScript copy of the list.
+
+`Data/Navigation.schema.json` defines the entry structure, required fields and allowed value types for authoring/build checks. It is not fetched by the browser and does not establish that a destination page exists. Everyday link changes touch `Navigation.json`; the schema changes when the entry structure changes. `Taskbar.js` owns runtime loading, validation, caching, ID lookup and URL resolution.
+
+Client-specific destinations/overrides belong in client `Config.js`, keyed by stable destination ID. Dynamic editor links and feature-specific query paths remain in their owning feature's configuration, with client overrides as needed. Resolve page destinations against the active iMIS environment and JSON assets against the loader's theme base.
+
+### File migration map
+
+The left column distinguishes current source files from earlier proposed files that do not yet exist. Consolidate their responsibilities into the target files without creating the superseded intermediate structure.
+
+| Current source or earlier proposal | Target |
+|---|---|
+| Current `zUnionSuite.js` | `Theme.js` |
+| Current `Scripts/UnionSuiteTaskbar.js` and `Scripts/UnionSuiteTaskbar-Bookmarks.js` | `Scripts/Taskbar.js`, with distinct sections and one coordinated lifecycle |
+| Current `Scripts/IQA-Enhancements.js`; earlier proposed `UnionSuiteIQA.js` | `Scripts/IqaEditor.js` |
+| Earlier proposed `Shared/*.js` | Internal helper sections in `Scripts/Shared.js` |
+| Earlier proposed `UnionSuiteSitewide.js` and `Sitewide/*.js`, including `RouteCatalogue.js` | Internal sections in `Scripts/Taskbar.js` |
+| Earlier proposed `UnionSuiteRiSEEditor.js` and `RiSE/*.js` | `Scripts/RiseEditor.js` |
+| Earlier proposed `UnionSuiteIQABrowser.js`, `UnionSuiteObjectBrowser.js` and `UnionSuitePanelList.js` | Page-scoped sections in `Scripts/AdminTools.js` |
+| Earlier proposed `UnionSuiteDevTools.js` and `DevTools/*.js` | `Scripts/DevTools.js`, with the Dev Mode control in `Taskbar.js` |
+| Current embedded destination list; earlier proposed `Data/command-palette-routes.json` | `Data/Navigation.json` |
+| Earlier proposed `Data/command-palette-routes.schema.json` | `Data/Navigation.schema.json` |
+
+Keep `index.js`, `ActionDefinitions.js` and the client `Config.js`/`Actions.js` names. Update loader manifests, build inputs, tests, installation examples and source-file references together as each migration lands. Historical trial evidence retains the names used when measured. Filename and feature-label changes do not rename existing public globals, DOM selectors, storage keys or generator section markers.
 
 ## Boundaries and function ownership
 
-| File or group | Owns | Reason for this boundary |
+Rows within the same file describe internal sections, not additional deployed scripts. Preserve these boundaries during consolidation, including separate async state and cleanup for each feature.
+
+| File / internal section | Owns | Reason for this boundary |
 |---|---|---|
 | `index.js` | Capture its own URL; release manifest; bootstrap promise; dependency/file loading; route selection; optional module load requests. | One installation point, with no business feature implementation. |
-| `Shared/Lifecycle.js` | First mount before/after DOM readiness; one shared endRequest dispatcher for migrated/new modules; subscription disposal; bounded late-WebForms attachment; safe preference access and async generation guards. | Every imported/new module needs the same lifecycle contract. Existing core/taskbar observers are not rewritten just to claim a single subscription for the whole theme. |
-| `Shared/ImisContext.js` | Supported document classification, website/application context and logged-in identity from `__ClientContext`. | Distinguishes a staff document, editor and CCO frame without confusing logged-in and selected parties. Classification is DOM-only; it does not wait for a bookmark API. |
-| `Shared/ImisApi.js` | Request-verification token, same-origin JSON requests, named-filter query execution and shared Document FindByPath. | Shared network mechanics and document resolution. Keep feature-specific Recents filters and pin persistence contracts in their owning files. Add PageMethods wrappers only when a real consumer uses them; missing PageMethods is not a global startup failure. |
-| `Shared/Icons.js` + `Shared/Feedback.js` | Consistent icon rendering, toasts and accessible feedback. | Avoid per-feature icon sets, injected styles and contradictory copy messages. Reuse `.us-copy`/`data-us-copy-target` for ordinary copy buttons. If programmatic copying is needed, expose it from the existing theme copy owner rather than adding a second delegated listener. |
-| `Shared/EditorControls.js` | Reusable Enhance switch, native action-row placement adapter and validated `iUniformKey` reading/retention scoped to editor sessions. | IQA and RiSE share the presentation and identity pattern. Their preferences and native selectors remain separate. This is not the viewed-page metadata resolver. |
-| `Shared/DialogShortcuts.js` | Verified owning RadWindow, Ctrl/Cmd+M; Ctrl/Cmd+S in supported non-IQA editors. | Works independently of the taskbar and data stores. IQA's existing Save handler remains the sole IQA Save owner. |
-| `UnionSuiteSitewide.js` | Attach approved Option C hosts around the existing taskbar; main-row order, bookmarks-bar toggle/visibility, Recents placement and reconnect after host replacement; dev controls as separately planned. | Keeps layout/attachment separate from search, persistence and feature UIs. It must not remove the taskbar on teardown. |
-| `Sitewide/RouteCatalogue.js` | One versioned catalogue, TTL/revalidation, validated cache, fallback and route resolution. | Both bookmarks and palette need the same data; stable IDs survive label/URL edits. |
-| `Sitewide/CommandPalette.js` | Visible button/Ctrl+Space entry, full-text/fuzzy results, smart tags for ID/username/event/keyword/docs, bookmarks-first groups, whole-row focus, navigation and route-ID star requests. Mount/dispose bookmark reorder controls through Bookmarks. | Owns result/search/keyboard state; reads the bookmark snapshot and sends mutations to its sole owner. |
-| `Sitewide/Bookmarks.js` | Empty initial pin set; first-five icon strip and full labelled bar; accessible labels; star/unstar and pointer/keyboard reorder; floating row, placeholder and slide cleanup; pin-event/state contract. No main-row edit pencil. | Owns pin order and reusable palette reorder interaction. Check active ownership before render, applying responses and saving. Missing catalogue entries stay removable; failed saves remain visibly unsaved. |
-| `Sitewide/BookmarkStore.js` | Normal per-user iMIS reads/writes, environment/user cache keys, revalidation and multi-tab conflict handling. | The unverified storage API is isolated. No guessed endpoint, Party UDF or unrestricted GM bridge. Anonymous/missing identity prevents personal writes. |
-| `Sitewide/Recents.js` | Approved 420px popup, IQAs above content, Mine default/left and Sitewide right, compact equal-width scope buttons, Refresh/busy feedback, two top-10 modified-document lists, loading/empty/error states and native editor actions. | Different API contract and lifecycle from pins and existing recent-contact history. Fetch on opening or filter changes. |
-| `UnionSuiteIQA.js` | All current designer modules, help, path/key actions, native Save shortcut and IQA settings. | Preserve the current unit while styling and loading are integrated. Its output already contains the four larger workspace/SQL modules. |
-| `UnionSuiteRiSEEditor.js` | RiSE controller, Enhance preference, full/relative URL copying, editor DVK copying and preview toggle. | These small features share one document and on/off lifecycle. No individual `CopyUrl.js`, `CopyKey.js` or `PreviewToggle.js` is necessary. |
-| `RiSE/DeepLinks.js` | The two IQA source-label variants and multi-instance panel captions; verified folder/query/panel destinations. | Async lookups, deduplication, paging, duplicate captions and stale responses warrant an independent file. Preserve dots in names and literal underscores in paths. |
-| `RiSE/DesignerChrome.js` | Configure/Copy To/Move To/Minimize/Restore/Remove icon decoration, hidden Connect and zone header/footer actions. | Related DOM adaptation, cleanup and native-action preservation belong together. Preview coordinates via scoped state/classes from the controller. |
-| Browser/list files | IQA path; uploaded-file public URL; panel GUID copying, respectively. | Separate native pages and markup. Share clipboard/icon helpers; retain one file per page rather than one per button. |
-| Dev controller + two tool files | Master dev state; independently controlled content inspector and record-field source overlay. | One logical DevTools feature/owner as planned, with separate physical implementations. Large metadata resolution need not load merely to show field badges. |
+| `Theme.js` | Existing shared theme behaviour, appearance, actions runtime, banners and report enhancements. | Preserve existing ownership and APIs through the filename change. |
+| `Shared.js`: Lifecycle | First mount before/after DOM readiness; one shared endRequest dispatcher for migrated/new modules; subscription disposal; bounded late-WebForms attachment; safe preference access and async generation guards. | Every imported/new module needs the same lifecycle contract. Existing core/taskbar observers are not rewritten just to claim a single subscription for the whole theme. |
+| `Shared.js`: iMIS context | Supported document classification, website/application context and logged-in identity from `__ClientContext`. | Distinguishes a staff document, editor and CCO frame without confusing logged-in and selected parties. Classification is DOM-only; it does not wait for a bookmark API. |
+| `Shared.js`: iMIS API | Request-verification token, same-origin JSON requests, named-filter query execution and shared Document FindByPath. | Shared network mechanics and document resolution. Keep feature-specific Recents filters and pin persistence contracts in their owning sections. Add PageMethods wrappers only when a real consumer uses them; missing PageMethods is not a global startup failure. |
+| `Shared.js`: Icons and feedback | Consistent icon rendering, toasts and accessible feedback. | Reuse `.us-copy`/`data-us-copy-target` for ordinary copy buttons. Expose programmatic copying from the existing theme copy owner; retain one implementation and delegated listener. |
+| `Shared.js`: Editor controls | Reusable Enhance switch, native action-row placement adapter and validated `iUniformKey` reading/retention scoped to editor sessions. | IQA and RiSE share the presentation and identity pattern. Their preferences and native selectors remain separate. This is not the viewed-page metadata resolver. |
+| `Shared.js`: Dialog shortcuts | Verified owning RadWindow, Ctrl/Cmd+M; Ctrl/Cmd+S in supported non-IQA editors. | Works independently of the taskbar and data stores. IQA's existing Save handler remains the sole IQA Save owner. |
+| `Taskbar.js`: Header and existing controls | Main-row layout, contact Quick Search/history, Full Search, appearance, Biscuit, bookmarks-bar visibility, Recents placement and reconnect after host replacement. | One coordinated taskbar lifecycle; feature cleanup preserves unrelated taskbar controls. |
+| `Taskbar.js`: Navigation catalogue | Load `Data/Navigation.json`; TTL/revalidation, validated cache, fallback, ID lookup and route resolution. | Bookmarks and Quick Navigation use the same data; stable IDs survive label/URL edits. |
+| `Taskbar.js`: Navigation search | Go to…/Ctrl+Space entry, full-text/fuzzy results, smart tags for ID/username/event/keyword/docs, bookmarks-first groups, whole-row focus, navigation and route-ID star requests. | Owns result/search/keyboard state; reads the bookmark snapshot and sends mutations to its sole owner. |
+| `Taskbar.js`: Bookmarks | Empty initial pin set; first-five icon strip and full labelled bar; accessible labels; star/unstar and pointer/keyboard reorder; floating row, placeholder and slide cleanup; pin-event/state contract. No main-row edit pencil. | Owns pin order and reusable Quick Navigation reorder interaction. Check active ownership before render, applying responses and saving. Missing catalogue entries stay removable; failed saves remain visibly unsaved. |
+| `Taskbar.js`: Bookmarks storage | Normal per-user iMIS reads/writes, environment/user cache keys, revalidation and multi-tab conflict handling. | Preserve the trial's load-before-edit and stale-response guards. Verify per-user enforcement; anonymous/missing identity prevents personal writes. |
+| `Taskbar.js`: Recents | Approved 420px popup, IQAs above content, Mine default/left and Sitewide right, compact equal-width scope buttons, Refresh/busy feedback, two top-10 modified-document lists, loading/empty/error states and native editor actions. | Separate data state and lifecycle from pins and existing recent-contact history. Fetch on opening or filter changes. |
+| `Taskbar.js`: Dev Mode control | One switch, visible/available only while Easy Edit is active; request `DevTools.js` on activation. | Turning it off, or leaving Easy Edit, tears down both diagnostic tools and stops their observers. |
+| `IqaEditor.js` | All current query-designer modules, help, path/key actions, native Save shortcut and IQA settings. | Preserve the current unit while styling and loading are integrated. Its output already contains the four larger workspace/SQL modules. |
+| `RiseEditor.js`: Controller and editor controls | RiSE content/layout editor, independent Enhance preference, full/relative URL copying, editor DVK copying and preview toggle. | Works in content editor documents; opening an IQA from RiSE transfers query editing to `IqaEditor.js`. |
+| `RiseEditor.js`: Deep links | The two IQA source-label variants and multi-instance panel captions; verified folder/query/panel destinations. | Isolate async lookups, deduplication, paging, duplicate captions and stale-response handling within this section. Preserve dots in names and literal underscores in paths. |
+| `RiseEditor.js`: Designer UI | Configure/Copy To/Move To/Minimize/Restore/Remove icon decoration, hidden Connect and zone header/footer actions. | Related DOM adaptation, cleanup and native-action preservation belong together. Preview coordinates via scoped state/classes from the controller. |
+| `AdminTools.js` | IQA browser path, uploaded-file public URL and panel GUID copying, each in its own section. | Load on supported browser/list pages; activate only the matching tool and share clipboard/icon helpers. |
+| `DevTools.js` | Current-page details and supported panel field inspection, enabled together by Dev Mode during Easy Edit. | One lifecycle with separate page-details, panel-inspection and cleanup sections; future diagnostics can extend the same file and gate. |
 | Optional userscript | GM pin storage, bookmark takeover, UI/actions while GM-owned and pinned-ID announcements. | GM storage privileges require userscript installation. The normal theme loader cannot supply them. |
 
 Keep the existing `window.imisPlus` registration shape described in the source plan (`modules`, `helpers`, `config`) for the new enhancement runtime, without replacing it on subsequent loads. Existing `window.UnionSuite*` theme APIs stay intact. Each feature has one explicit registration and one owner; filenames do not require renaming storage keys or duplicating globals.
 
 ## Approved design: Option C — Combined
 
-Approved by James on 20 September 2026. This section is the implementation baseline for the taskbar, bookmarks, command palette and Recents. A/B and the separate bookmark editor remain historical comparison tools; they are not production layout options. Approval covers the design and interaction contract, not completed storage/API integration or live acceptance.
+Approved by James on 20 September 2026. This section is the implementation baseline for the taskbar, bookmarks, Quick Navigation and Recents. A/B and the separate bookmark editor remain historical comparison tools; they are not production layout options. Approval covers the design and interaction contract, not completed storage/API integration or live acceptance.
 
 ### Taskbar and bookmarks bar
 
-- Extend the existing theme taskbar. Main-row order: brand, up to five bookmark icons, divider, bookmarks-bar toggle, Go to… palette button, divider, existing contact Quick Search, Full Search and appearance control. Keep the existing contact search/history and Biscuit behaviour.
+- Extend the existing theme taskbar. Main-row order: brand, up to five bookmark icons, divider, bookmarks-bar toggle, Go to… button for Quick Navigation, divider, existing contact Quick Search, Full Search and appearance control. Keep the existing contact search/history and Biscuit behaviour.
 - The first five saved bookmarks populate the main row in saved order. Five is a maximum, including on narrow screens; controls may wrap. Give icon-only links accessible destination names and tooltips. A new user starts with no bookmarks; the four/nine workshop samples are fixtures only.
-- Omit the edit pencil. Stars in the palette add/remove bookmarks, and its drag handles or keyboard commands change their order. The external workshop Edit bookmarks button and move-button editor are not production taskbar controls.
+- Omit the edit pencil. Stars in Quick Navigation add/remove bookmarks, and its drag handles or keyboard commands change their order. The external workshop Edit bookmarks button and move-button editor are not production taskbar controls.
 - The toggle sits immediately to the right of the bookmark/control divider, before Go to…. It shows/hides a labelled second bar containing all bookmarks, including the first five. Keep its label and `aria-expanded` state accurate and associate it with its controlled bar.
-- Start the bar collapsed. Retain visibility through feature rerenders/host remounts within the active document. Cross-visit persistence of visibility is not part of this approved design; bookmark data persistence belongs to BookmarkStore.
+- Start the bar collapsed. Retain visibility through feature rerenders/host remounts within the active document. Cross-visit persistence of visibility is not part of this approved design; bookmark data persistence belongs to the Bookmarks storage section of `Taskbar.js`.
 - Put Recents at the right of the labelled bookmarks bar. Its normal entry is available when that bar is shown. Any programmatic Recents entry must reveal the bar before positioning the popup.
 - All labelled bookmarks wrap as needed. Preserve constrained Quick Search sizing and main-row alignment; keep Biscuit perched on the main header edge and use the reference's below-1060px hiding rule. Recheck against actual native header widths during implementation.
 
-### Palette and bookmark ordering
+### Quick Navigation and bookmark ordering
 
-- Open the centred palette from Go to… or Ctrl+Space. Keep destination search separate from contact Quick Search. Arrow keys browse destination rows, Enter opens the destination, Escape closes, and focus returns to the opener. Tab still reaches each star and drag handle.
+- Open the centred Quick Navigation dialog from Go to… or Ctrl+Space. Keep destination search separate from contact Quick Search. Arrow keys browse destination rows, Enter opens the destination, Escape closes, and focus returns to the opener. Tab still reaches each star and drag handle.
 - Show matching bookmarks first in saved order, then a divider and Other destinations. Apply the query to both groups. Pin/unpin moves a result between groups and updates both bookmark presentations immediately; persistence failures must remain visible and recoverable.
 - Each bookmarked result has a grip. Starting a drag picks up the entire row; the floating row follows the pointer at 80% opacity. Insert a blank, dashed, row-height placeholder at the proposed drop position. Move that placeholder and reorder neighbouring rows in real time.
 - Animate surrounding rows into place over 180ms. Direction changes continue from current visual positions; hit testing must avoid animation-induced jitter. Honour reduced motion by skipping slides.
@@ -169,12 +176,12 @@ Approved by James on 20 September 2026. This section is the implementation basel
 - Use 12px supporting text and 13px destination/item titles. Go to…, Recents and footer action buttons use the shared 36px compact control scale; the Recents scope control deliberately uses the smaller 28px scale above. Preserve visible keyboard, hover, active and disabled states.
 - `prototypes/approved/taskbar/Taskbar-Workshop.frame.html`, `.frame.css` and `.frame.js` are the approved integrated reference. `prototypes/Recents-Workshop.*` retains the isolated popup reference. `prototypes/approved/taskbar/Popup-Shell.css` is the shared preview shell/control source. Outer comparison controls, sample dashboard/data, mock navigation and A/B variants stay in previews.
 - Port component styles into `zUnionSuite.css`, dark-specific rules into `zzDarkMode.css`, and fix any affected existing native presentation in `99-Orion.css`. Production does not load `Popup-Shell.css` or duplicate a separate Recents stylesheet. Client overrides retain their established ownership.
-- The design fits the existing proposed files: Sitewide owns attachment/visibility; CommandPalette owns results and focus; Bookmarks owns order/reordering and emits updates; BookmarkStore owns saves; Recents owns its popup/data lifecycle. Use shared Icons/Feedback and existing spinner styles. No separate file is required for the grip, placeholder, toggle or shell merely because it is a distinct visual element.
+- Keep distinct sections in `Taskbar.js` for configuration/dependencies, state/lifecycle, header attachment, contact search/history, navigation catalogue, navigation search, bookmarks storage, bookmark strip/bar and reordering, IQA/content Recents, appearance, Biscuit, Dev Mode, and initialisation/cleanup. Use shared icons/feedback and existing spinner styles. Each async feature keeps its own failure and stale-response handling within the coordinated taskbar lifecycle.
 
 ### Implementation acceptance for the approved design
 
 - Compare the implemented C layout against the two approved references in light/dark mode, at desktop and narrow widths, with empty, four, five and more-than-five bookmarks. Verify wrapping, all-bookmark access, Recents placement, native search, Full Search, appearance and Biscuit alignment.
-- Check stars, pointer and keyboard reorder, filtered slot preservation, full-row focus, placeholder movement, interrupted slides, reduced motion, edge scrolling and cancellation. Verify order across strip/bar/palette and confirmed persisted state, including save failures and the optional GM owner's takeover.
+- Check stars, pointer and keyboard reorder, filtered slot preservation, full-row focus, placeholder movement, interrupted slides, reduced motion, edge scrolling and cancellation. Verify order across the bookmark strip, bookmarks bar and Quick Navigation, and confirm persisted state, including save failures and the optional GM owner's takeover.
 - Check first-open Mine, equal compact scope widths/no underline, both top-ten limits, authenticated-user filtering, sticky section-heading handoff and a visible footer while scrolling, Refresh busy/error/retry and rapid scope/close changes. Validate actual editor opening and focus return.
 - Check double loading, partial taskbar replacement, event disposal and one active owner for each feature. Do not carry the prototype's fake data, timer-based requests or blanket navigation interception into production.
 
@@ -212,34 +219,27 @@ index.js: capture URL + establish one startup promise
 │
 ├─ resolve client Config.js (or declared defaults) and DOM readiness
 │
-├─ zUnionSuite.js            [UnionSuiteActions, UnionSuiteAppearance]
-│  ├─ ActionDefinitions.js -> client Actions.js
-│  ├─ parent staff page
-│  │  ├─ UnionSuiteTaskbar.js -> UnionSuiteSitewide.js
-│  │  ├─ bookmark strip -> RouteCatalogue.js + Bookmarks.js + BookmarkStore.js
-│  │  ├─ palette open -> CommandPalette.js + shared catalogue + optional Fuse
-│  │  └─ Recents open -> Recents.js + context/API helpers
-│  └─ existing shared theme features remain available in themed documents
-│
-├─ Shared/Lifecycle.js + Shared/ImisContext.js
-│  └─ classify supported staff/editor/CCO context
-│
-├─ QueryBuilder/Design.aspx -> UnionSuiteIQA.js + its shared helpers
-├─ ContentRecordEdit.aspx or ContentDesigner.aspx
-│  └─ UnionSuiteRiSEEditor.js + RiSE/DeepLinks.js + RiSE/DesignerChrome.js
-├─ AsiCommon/Controls/IQA/Default.aspx -> UnionSuiteIQABrowser.js
-├─ AsiCommon/Controls/BSA/Browser.aspx -> UnionSuiteObjectBrowser.js
-├─ PanelEditor/PanelDefinitionList.aspx -> UnionSuitePanelList.js
-│
-├─ confirmed Telerik editor context -> Shared/DialogShortcuts.js
-└─ dev mode enabled -> UnionSuiteDevTools.js
-   ├─ inspector opened -> DevTools/ContentInspector.js
-   └─ sources enabled + supported record DOM -> DevTools/FieldSources.js
+└─ Theme.js                 [UnionSuiteActions, UnionSuiteAppearance]
+   ├─ ActionDefinitions.js -> client Actions.js
+   ├─ existing shared theme features in themed documents
+   └─ Shared.js -> classify supported staff/editor/CCO context
+      ├─ parent staff page -> Taskbar.js
+      │  ├─ bookmarks/navigation first need -> Data/Navigation.json
+      │  ├─ Quick Navigation open -> optional Fuse, if retained
+      │  ├─ Recents open -> fetch feature data through API helpers
+      │  └─ Easy Edit active + Dev Mode on -> DevTools.js
+      │     ├─ current-page details
+      │     └─ panel inspection where supported
+      ├─ QueryBuilder/Design.aspx -> IqaEditor.js
+      ├─ ContentRecordEdit.aspx or ContentDesigner.aspx -> RiseEditor.js
+      ├─ supported IQA/Object Browser/Panel Definition list -> AdminTools.js
+      │  └─ activate only the matching page section
+      └─ confirmed Telerik editor context -> shared dialog shortcuts
 ```
 
-The taskbar sits under `zUnionSuite.js` deliberately. It reads `window.UnionSuiteAppearance` to build its appearance switch, and that API is registered by the core file. The existing header include survives this only because the taskbar defers mounting to `DOMContentLoaded`; a dynamically injected taskbar can mount immediately, so the loader must honour the edge rather than treat the two as independent branches.
+The taskbar sits under `Theme.js` (currently `zUnionSuite.js`) deliberately. It reads `window.UnionSuiteAppearance` to build its appearance switch, and that API is registered by the core file. The existing header include survives this only because the taskbar defers mounting to `DOMContentLoaded`; a dynamically injected taskbar can mount immediately, so the loader must honour the edge rather than treat the two as independent branches.
 
-Registration markers for contract 1. "Loaded" is not "working": a file that parses and then throws still fires `load`, so each step is confirmed by the global it registers.
+Current trial registration markers for contract 1, using current filenames. "Loaded" is not "working": a file that parses and then throws still fires `load`, so each step is confirmed by the global it registers. Registration also does not establish that asynchronous feature data or UI is ready.
 
 | File | Registration marker | Must load after |
 |---|---|---|
@@ -250,21 +250,21 @@ Registration markers for contract 1. "Loaded" is not "working": a file that pars
 | `Scripts/IQA-Enhancements.js` | **none** | — |
 | `UnionSuite-Client/Actions.js` | none declared | shared runtime and `ActionDefinitions.js` |
 
-`IQA-Enhancements.js` registers no global of its own: it returns early off `QueryBuilder/Design.aspx` and the `window.*` names it touches are native page functions it calls, not exports. Until it is ported to `UnionSuiteIQA.js` its execution cannot be verified by the loader, so gate it by URL and accept loading as the only signal. Give the ported file a registration marker.
+`IQA-Enhancements.js` registers no global of its own: it returns early off `QueryBuilder/Design.aspx` and the `window.*` names it touches are native page functions it calls, not exports. Until it is ported to `IqaEditor.js` its execution cannot be verified by the loader, so gate it by URL and accept loading as the only signal. Give the ported file a registration marker.
 
-`UnionSuiteTaskbar-Bookmarks.js` is not named in the file tree above because the tree describes the target decomposition. The deployed file today is one standalone trial script that its own header says will split into `UnionSuiteSitewide.js`, `RouteCatalogue.js`, `Bookmarks.js`, `BookmarkStore.js`, `CommandPalette.js` and `Recents.js` when promoted. Load it as a single unit until then.
+`UnionSuiteTaskbar-Bookmarks.js` remains a standalone deployed trial until it is merged into `Taskbar.js`. Its header's older multi-file decomposition is superseded by this plan. Migrate the embedded destinations to `Data/Navigation.json` and keep their handling in the Navigation catalogue section of `Taskbar.js`. Update loader paths, build tools, tests and guide installation examples together when performing the renames; preserve existing globals and preference/storage keys.
 
-Shared helpers load once and only before consumers that actually require them. The graph shows feature dependencies, not a requirement to serialize independent branches. Bookmark storage failure must not stop search, palette navigation, the editor or unrelated copy tools. Client action registrations follow standard action registration and their verified business helpers; missing business helpers are not silently replaced.
+Shared helpers load once and only before consumers that actually require them. The graph shows feature dependencies, not a requirement to serialize independent branches. Bookmark storage failure must not stop contact search, Quick Navigation, the editor or unrelated copy tools. Client action registrations follow standard action registration and their verified business helpers; missing business helpers are not silently replaced.
 
 Important loader contracts:
 
 1. Cache promises by resolved, versioned file URL; wait for both script loading and expected registration. Existing self-starting scripts need adapters/registration markers, not a second startup call. Add a duplicate guard to the imported IQA bundle before mixing it with any loader.
 2. Keep one startup promise per document. Dynamic loading must work after DOMContentLoaded. Remounting UI after a postback does not re-download/re-execute script files.
 3. Use load/error/time-out handling and isolate dependency failures. A late registration after a timeout must not automatically start a disabled feature. New files register first; the loader/controller starts them after readiness checks.
-4. Core theme loading is distinct from staff-only enhancements: do not make appearance, banners and report behaviour depend on a staff marker. Do not inject parent taskbar, pins or palette into CCO/editor frames.
+4. Core theme loading is distinct from staff-only enhancements: do not make appearance, banners and report behaviour depend on a staff marker. Do not inject parent taskbar, pins or Quick Navigation into CCO/editor frames.
 5. The same entry include must reach each required editor document. A parent include alone cannot handle keyboard events inside an iframe. Inline Telerik dialogs are handled only when focus and ownership are confirmed, independently of taskbar mounting.
-6. Load catalogue data when bookmarks first need it or the palette first opens. Fetch Recents only when used. Load diagnostics on demand. Keep default-off dev tools and module preferences separate from IQA/RiSE Enhance switches.
-7. Preserve `iqaEnhanceMode`, use independent `riseEnhanceMode`, and retain the planned `imisPlus.moduleToggles` / `imisPlus.inspectorOpen` contracts. Safe storage access must fall back to working in-memory state. The current IQA top-level mode reads need hardening for unavailable storage.
+6. Load catalogue data when bookmarks first need it or Quick Navigation first opens. Fetch Recents only when used. Load `DevTools.js` only when Easy Edit is active and the user enables Dev Mode. Both page details and supported panel inspection share this gate; turning Dev Mode off or leaving Easy Edit removes their UI and stops observers. Check the gate again after asynchronous loading before mounting. Keep Dev Mode separate from IQA/RiSE Enhance switches.
+7. Preserve `iqaEnhanceMode` and use independent `riseEnhanceMode`. The single Dev Mode control supersedes the source plan's independent diagnostic toggles; it starts off and cannot activate outside Easy Edit. Safe storage access must fall back to working in-memory state. The current IQA top-level mode reads need hardening for unavailable storage.
 8. For the first IQA migration preserve its current always-on QuickAdd and source-capture behaviour while Enhance is Off. A whole-module disable is a separate loader setting. Do not assume the IQA pill presently disables every operation.
 9. Capture a central release version in the loader and apply it consistently to child assets. Upload referenced files before publishing the updated loader; do not use a new timestamp on every request. **Restated 21 September 2026:** the original requirement here was a stable `index.js` URL served revalidated or short-cached. The tenant does not offer that — `App_Themes` is served `public, max-age=604800` with no per-file variation available — so the entry point instead carries a coarse time bucket applied by the header, as set out under Updated loader structure. The goal it protects is unchanged: a release must never require a header deployment. Bump the loader's release version when a child file changes; changing the loader alone does not need it, because the entry URL refreshes itself, and bumping needlessly re-downloads every child.
 10. Replace the old individual includes during deployment. Deduplication cannot make arbitrary legacy scripts harmless: remove overlapping standalone IQA, Quicklinks IQA/shortcut, old taskbar and extension injections while retaining required unrelated business helpers.
@@ -320,7 +320,7 @@ Measured A/B, serving the real theme files with a 200ms artificial delay per req
 
 That is a 495ms reduction, about half the chain, under an artificial constant delay. **The tenant behaved differently and this figure does not carry over; see the tenant measurements below.** Verified alongside it: no file is fetched twice, every download is initiated by the preload link rather than the script tag, and the gated, skipped, failed and blocked paths all still behave as they did in v0.2.
 
-Not attempted, and why: bundling files together, because the measurements show round trips rather than bytes are the cost and bundling would undo route gating; and inlining the loader into the master page, which would save one round trip but give up the stable `index.js` URL that contract 9 depends on.
+The trial did not bundle files together or inline the loader into the master page. The revised target groups related features in `Taskbar.js`, `RiseEditor.js` and `AdminTools.js` while retaining page gates; grouping does not require loading all features on every page. The timing measurements below describe the existing trial files, not the proposed consolidated files. Inlining the loader would give up the entry-file update mechanism that contract 9 protects.
 
 ### Measured on the dev tenant
 
@@ -373,7 +373,7 @@ Frame behaviour is no longer unproven. The tenant page runs the loader three tim
 
 ## Styling and icon integration
 
-- Fix existing native control presentation in `99-Orion.css`; put added editor/palette/bookmark/diagnostic components and tokens in `zUnionSuite.css`.
+- Fix existing native control presentation in `99-Orion.css`; put added editor, Quick Navigation, bookmark and diagnostic components and tokens in `zUnionSuite.css`.
 - Remove migrated hard-coded/injected component styles from the IQA/probe code as each feature is integrated. Scope editor styles to their editor state, including off/restore behaviour. Do not simply place another override layer over injected CSS.
 - Use existing semantic surface/text/border/status/focus/type/spacing tokens. Client branding stays in Branding/Override; all dark-specific rules stay in `zzDarkMode.css`.
 - Keep the current icon assets. Use the theme's Tabler action conventions and matching existing inline icons where appropriate; expose a common semantic icon adapter for the new features. Do not add another remote icon library or rewrite every existing icon as part of this migration. The existing `UnionSuiteActionIcons` export manages tooltips, not a general SVG factory.
@@ -383,7 +383,7 @@ Frame behaviour is no longer unproven. The tenant page runs the loader three tim
 
 ## IQA: what should eventually be separate?
 
-For initial deployment, **one `Scripts/UnionSuiteIQA.js`** is the recommendation. The index will load it only in the designer, so dividing it brings maintainability benefits rather than reducing downloads on ordinary pages. The current output has a designer-page execution guard; it does not itself prevent downloading the bundle elsewhere.
+For initial deployment, **one `Scripts/IqaEditor.js`** is the recommendation. The index will load it only in the designer, so dividing it brings maintainability benefits rather than reducing downloads on ordinary pages. The current output has a designer-page execution guard; it does not itself prevent downloading the bundle elsewhere.
 
 If a later extraction is worthwhile, the strongest independent candidates are already identifiable in the output and separate source modules:
 
@@ -392,7 +392,7 @@ If a later extraction is worthwhile, the strongest independent candidates are al
 - `IQA/RelationshipWorkspace.js`: relationship entry modes and field/join handling.
 - `IQA/SqlEditor.js`: SQL editing/completion/validation and source-definition cache.
 
-Keep `UnionSuiteIQA.js` as their controller. QuickAdd/search, Display/Sorting controls and header/help actions can remain grouped until their size or independent usage justifies another boundary. Do not extract one file per helper.
+Keep `IqaEditor.js` as their controller. QuickAdd/search, Display/Sorting controls and header/help actions can remain grouped until their size or independent usage justifies another boundary. Do not extract one file per helper.
 
 Do not lazy-load IQA code solely from the currently visible tab without preserving cross-tab work: SQL source capture currently runs independently of Enhance mode. Check callback references, registration order and source capture before splitting.
 
@@ -410,9 +410,9 @@ Recommended sequence:
 
 1. Implement/test the index using only existing deployed theme files, with dependency/duplicate/failure checks. Include readiness reporting for callers that previously assumed synchronous global availability.
 2. Port the current IQA output as one registered file, consolidate styles/icons and preserve preferences, postbacks, Save ownership and existing module checks. Recheck native Save/reopen behaviour in iMIS.
-3. Establish shared lifecycle/context/UI/editor helpers; adopt them incrementally without rewriting unrelated core features. Port RiSE and the three browser/list modules, plus confirmed dialog shortcuts.
-4. Implement the approved Option C design above in Sitewide attachment, catalogue/palette, bookmarks/storage and Recents as their data contracts are verified. Port the approved reference interaction and shell styles into their owners; keep historical A/B layouts and demo fixtures out of runtime. Preserve taskbar contact search/history and appearance controls throughout.
-5. Add the separately installed GM owner and DevTools, with ownership/startup-order and independent-toggle checks.
+3. Establish `Shared.js` with lifecycle/context/UI/editor helper sections; adopt them incrementally without rewriting unrelated core features. Port `RiseEditor.js` and the three page-scoped sections in `AdminTools.js`, plus confirmed shared dialog shortcuts.
+4. Consolidate taskbar attachment, Quick Navigation, catalogue handling, bookmarks/storage and Recents in `Taskbar.js` with distinct sections. Extract destinations to `Data/Navigation.json` and add schema/build validation using `Data/Navigation.schema.json`. Port the approved interaction and shell styles into their owners; keep historical A/B layouts and demo fixtures out of runtime. Preserve contact search/history, appearance and existing save/load race guards throughout.
+5. Add the separately installed GM owner and the combined `DevTools.js`, with ownership/startup-order checks and Easy Edit/Dev Mode lifecycle checks, including leaving Easy Edit during a pending load. Keep IQA/RiSE Enhance preferences independent.
 6. Update installation instructions, copyable include, feature status/examples and the standalone usage guide as implementation lands. Regenerate with `node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs` and verify `--check`; browser-check changed guide examples. Keep generated previews in `references/` and the guide offline.
 
 Acceptance follows the original plan's section 15: delayed/missing dependencies, double includes, partial replacements, off/on cycles, stale responses, native form persistence, clipboard rejection, correct popup focus, both bookmark owners/startup orders and actual supported-tenant smoke tests. This review does not claim those tests have run.
