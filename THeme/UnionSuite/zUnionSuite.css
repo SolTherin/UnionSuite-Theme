@@ -2489,6 +2489,7 @@ SOFTWARE.
   border-radius: var(--radius);
   background: var(--bg-surface);
   color: var(--text-muted);
+  transition: border-color .4s, box-shadow .4s;
 }
 
 .us-query-search-field > svg {
@@ -2516,9 +2517,13 @@ SOFTWARE.
 }
 
 .us-query-search-field:focus-within:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  border-color: var(--border-focus);
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  outline: 0;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--field-focus-colour) 20%, transparent);
+}
+
+.us-query-search-field:focus-within > svg:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  stroke: var(--field-focus-colour);
 }
 
 .us-query-search-field input::placeholder {
@@ -2560,6 +2565,19 @@ SOFTWARE.
 
   [data-us-query-display] .us-query-search-field input[type="search"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     min-height: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-query-search-field:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-query-search-field:focus-within:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
   }
 }
 
@@ -5659,6 +5677,24 @@ button.us-busy-hide-label > *:not(:where(.us-report-no-styling, .us-report-no-st
 }
 
 .us-iqa-row-overlay > .section-loader-spinning-circles {
+  --size: .5px;
+}
+
+/* Query Template refresh retains the visible records below this overlay. */
+.us-query-refresh-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--space-6, 24px);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+  cursor: progress;
+}
+
+.us-query-refresh-overlay > .section-loader-spinning-circles {
   --size: .5px;
 }
 
@@ -10156,6 +10192,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    .panel-body at (0,3,1), so a class-only rule loses and titles turn link blue. */
 .us-task--detail a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: title;
+  justify-content: flex-start;
   max-width: 62ch;
   font-size: 14px;
   font-weight: 600;
@@ -10217,7 +10254,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* Hovering the name lights the icon too, so the pair reads as one control. */
-.us-task--detail .us-task__member:has(> a.us-task__member-name:hover) > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-task--detail .us-task__member:has(> a.us-task__member-name[href]:hover) > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--accent);
 }
 
@@ -10230,8 +10267,12 @@ html.us-taskbar-mounted #hd .search-dropdown {
   overflow-wrap: anywhere;
 }
 
-.us-task--detail a.us-task__member-name:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-task--detail a.us-task__member-name[href]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   text-decoration: underline;
+}
+
+.us-task--detail a.us-task__member-name[aria-disabled="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  cursor: default;
 }
 
 /* Capped in px, not rem: native iMIS sets html{font-size:62.5%}, so a rem cap is
@@ -11901,3 +11942,91 @@ input:checked ~ .us-switch__state:after {
     animation: none !important;
   }
 }
+
+/* US-HOME-TASKS-EMPTY:START */
+/* Component only. The native iPart continues to own its shell and page layout. */
+.us-task-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4) var(--space-6);
+  text-align: center;
+}
+
+[data-us-task-empty-replaced] {
+  display: none !important;
+}
+
+.us-task-empty__biscuit-scene {
+  display: block;
+  width: min(350px, 100%);
+  height: auto;
+  overflow: visible;
+}
+
+.us-task-empty__scene-halo {
+  fill: var(--bg-subtle);
+}
+
+.us-task-empty__scene-shadow {
+  fill: var(--border);
+  opacity: .5;
+}
+
+/* Keep the polite status available without duplicating the visible message.
+   An authored footer summary stays visible in its own slot. */
+.panel-body:has(> .us-task-empty) > .us-query-search-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.us-task-empty .us-task-empty__title {
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semi);
+  line-height: var(--lh-tight);
+}
+
+.us-task-empty .us-task-empty__description {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+}
+
+/* One gentle settling movement; no endless distraction or pause control needed. */
+.us-task-empty__hammock {
+  transform-origin: 200px 110px;
+  animation: us-task-hammock-settle 4.8s ease-in-out;
+}
+
+@keyframes us-task-hammock-settle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-1.3deg);
+  }
+
+  65% {
+    transform: rotate(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-task-empty__hammock {
+    animation: none;
+  }
+}
+/* US-HOME-TASKS-EMPTY:END */

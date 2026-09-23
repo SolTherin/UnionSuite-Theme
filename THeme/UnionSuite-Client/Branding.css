@@ -24,6 +24,6 @@
 
 /* ── Branding Colours ──── */
 :root {
-  --seed-accent: #ea4ff7;
-  --seed-accent-alt: #f459e9;
+  --seed-primary: #005875;
+  --seed-accent: #f84eda;
 }

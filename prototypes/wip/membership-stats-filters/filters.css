@@ -1,0 +1,467 @@
+/* Mockup page layout and filter states only.
+   Card styling comes from the shared us-membership component. */
+
+html {
+  height: auto;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.5 var(--font-ui);
+}
+
+.msf-page {
+  display: grid;
+  gap: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.msf-page > .us-membership-heading {
+  margin: 0;
+}
+
+.msf-concept {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.msf-concept strong {
+  margin-right: 6px;
+  color: var(--text-strong);
+}
+
+.msf-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 780px) {
+  body {
+    padding: 16px;
+  }
+
+  .msf-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Filter bar */
+
+.msf-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 34px;
+  margin-top: -12px;
+}
+
+.msf-filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.msf-filters__hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.msf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 12px;
+  border: 1px solid var(--brand-700);
+  border-radius: var(--radius-pill);
+  background: var(--brand-50);
+  color: var(--text-strong);
+  font: 12px/1.4 var(--font-ui);
+  cursor: pointer;
+}
+
+.msf-chip:hover {
+  background: var(--brand-100);
+}
+
+.msf-chip__key {
+  color: var(--text-muted);
+}
+
+.msf-chip__value {
+  font-weight: 600;
+}
+
+.msf-chip__x {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.msf-chip:focus-visible,
+.msf-option:focus-visible {
+  outline: 2px solid var(--border-focus, var(--focus-color));
+  outline-offset: 2px;
+}
+
+/* Selectable rows: the button's ::after covers the whole row */
+
+.msf-row {
+  position: relative;
+  transition: opacity .15s ease, background-color .15s ease;
+}
+
+.msf-option {
+  all: unset;
+  cursor: pointer;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.msf-option::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.msf-row:hover {
+  background: var(--bg-subtle, var(--bg-sunken));
+}
+
+.msf-row.is-dimmed {
+  opacity: .45;
+}
+
+.msf-row.is-dimmed:hover {
+  opacity: .8;
+}
+
+.msf-row.is-selected .msf-option {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* Table: highlight the selected category with an accent edge */
+
+.us-membership .msf-table tbody tr.is-selected {
+  background: var(--brand-50);
+}
+
+.us-membership .msf-table tbody tr.is-selected > th {
+  box-shadow: inset 3px 0 0 var(--brand-700);
+}
+
+/* Legend and bars: pad rows so the hover surface has room */
+
+.us-membership .msf-legend {
+  gap: 2px;
+}
+
+.us-membership .msf-legend > .msf-row {
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.us-membership .msf-legend > .msf-row.is-selected {
+  background: var(--brand-50);
+}
+
+.us-membership .msf-bars {
+  gap: 6px;
+}
+
+.us-membership .msf-bars > .msf-row {
+  margin: 0 -8px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+}
+
+.us-membership .msf-bars > .msf-row.is-selected {
+  background: var(--brand-50);
+}
+
+.us-membership .msf-bars > .msf-row.is-selected .us-membership__bar > span {
+  background: var(--accent);
+}
+
+.msf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.msf-filters__clear {
+  all: unset;
+  cursor: pointer;
+  color: var(--text-link);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.msf-filters__clear:hover {
+  text-decoration: underline;
+}
+
+.msf-filters__clear:focus-visible {
+  outline: 2px solid var(--border-focus, var(--focus-color));
+  outline-offset: 2px;
+}
+
+.msf-filters__clear[hidden] {
+  display: none;
+}
+
+/* Membership trend: mock six-month history */
+
+.us-membership .msf-heading-tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.msf-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--text-link);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.msf-link:hover {
+  text-decoration: underline;
+}
+
+.msf-link:focus-visible {
+  outline: 2px solid var(--border-focus, var(--focus-color));
+  outline-offset: 2px;
+}
+
+.us-membership[data-msf="trend"] > .us-membership__content {
+  position: relative;
+}
+
+.msf-trend__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 18px 20px 4px;
+}
+
+.us-membership .msf-trend__headline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-membership .msf-trend__headline strong {
+  color: var(--text-strong);
+  font: 400 24px/1.2 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-membership .msf-trend__change {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.msf-trend__charts {
+  display: grid;
+  gap: 8px;
+  padding: 8px 20px 4px;
+}
+
+.msf-trend__charts[hidden],
+.msf-trend__table[hidden] {
+  display: none;
+}
+
+.msf-trend__table {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.msf-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.us-membership .msf-chart__title {
+  margin: 8px 0 2px;
+  color: var(--text-muted);
+  font: 600 11px/1.5 var(--font-ui);
+}
+
+.msf-chart__legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.msf-chart__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msf-chart__legend span::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--msf-swatch);
+}
+
+.msf-chart__svg {
+  display: block;
+  overflow: visible;
+}
+
+.msf-chart__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.msf-chart__baseline {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.msf-chart__tick {
+  fill: var(--text-muted);
+  font: 11px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.msf-chart__label {
+  fill: var(--text-strong);
+  font: 600 12px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.msf-chart__line {
+  fill: none;
+  stroke: var(--brand-700);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.msf-chart__line.is-partial {
+  stroke-dasharray: 4 4;
+}
+
+.msf-chart__marker {
+  fill: var(--brand-700);
+  stroke: var(--bg-surface);
+  stroke-width: 2;
+}
+
+.msf-chart__bar.is-joined {
+  fill: var(--teal-600);
+}
+
+.msf-chart__bar.is-resigned {
+  fill: var(--accent-700);
+}
+
+.msf-chart__bar.is-partial {
+  opacity: .6;
+}
+
+.msf-chart__band {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.msf-chart__hover {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.msf-chart__hover.is-active {
+  visibility: visible;
+}
+
+.msf-chart__crosshair {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.msf-chart__column-hover {
+  fill: var(--bg-sunken);
+}
+
+.msf-tip {
+  position: absolute;
+  z-index: 2;
+  min-width: 170px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.msf-tip__title {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.msf-tip__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.msf-tip__row.has-swatch > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msf-tip__row.has-swatch > span::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--msf-swatch);
+}
+
+.msf-tip__row b {
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}

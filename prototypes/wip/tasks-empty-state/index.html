@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biscuit · No outstanding tasks</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="empty-state.css">
+</head>
+<body>
+  <main class="preview">
+    <header class="preview-toolbar">
+      <span>HOME / TASKS <span class="concept-label">Empty state concept</span></span>
+      <div class="preview-controls">
+        <button type="button" id="width-toggle" aria-pressed="false">Narrow preview</button>
+        <button type="button" id="motion-toggle" aria-pressed="false">Pause motion</button>
+      </div>
+    </header>
+    <section class="task-card" aria-labelledby="tasks-title">
+      <header class="task-header">
+        <h1 id="tasks-title">My tasks</h1>
+        <span class="task-count">0 outstanding</span>
+      </header>
+      <div class="task-empty">
+        <svg class="biscuit-scene" viewBox="0 0 400 240" fill="none" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="canvas" x1="160" y1="130" x2="220" y2="210" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#b5d8cc"/>
+              <stop offset="1" stop-color="#82b7a5"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="201" cy="131" rx="139" ry="94" class="scene-halo"/>
+          <ellipse cx="201" cy="216" rx="143" ry="9" class="scene-shadow"/>
+          <!-- A small freestanding hammock keeps the scene compact in a task panel. -->
+          <path d="M64 209 87 77M335 209 312 77" stroke="#c5ad8e" stroke-width="9" stroke-linecap="round"/>
+          <path d="M48 213h42m224 0h39" stroke="#c5ad8e" stroke-width="7" stroke-linecap="round"/>
+          <path d="M88 85 121 148m190-63-34 63" stroke="#b5a48c" stroke-width="2.5" stroke-linecap="round"/>
+          <g class="hammock">
+            <path d="M99 113Q199 185 301 113Q282 207 203 208Q129 204 99 113Z" fill="url(#canvas)"/>
+            <!-- Biscuit's relaxed body and curled tail sit behind his familiar face. -->
+            <path d="M256 144q37-36 37-11 0 21-34 23" stroke="#b98459" stroke-width="13" stroke-linecap="round"/>
+            <ellipse cx="225" cy="147" rx="56" ry="36" transform="rotate(-12 225 147)" fill="#ebc492" stroke="#c39a6c" stroke-width="2"/>
+            <ellipse cx="225" cy="141" rx="31" ry="23" transform="rotate(-12 225 141)" fill="#fff0d6"/>
+            <path d="m175 148 15 18" stroke="#6caa95" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="187" cy="165" r="6" fill="#f6d66e" stroke="#c39a6c"/>
+            <g transform="translate(110 71) rotate(-12 56 46)">
+              <rect x="4" y="26" width="32" height="62" rx="17" transform="rotate(14 20 32)" fill="#b98459" stroke="#986a48" stroke-width="2"/>
+              <rect x="91" y="26" width="32" height="62" rx="17" transform="rotate(-14 106 32)" fill="#b98459" stroke="#986a48" stroke-width="2"/>
+              <rect x="13" y="9" width="103" height="81" rx="39" fill="#ebc492" stroke="#c39a6c" stroke-width="2"/>
+              <path d="M58 13q-6-24 6-18l5 9q15-9 10 4" fill="#fff0d6"/>
+              <path d="M60 12q-5 17 0 36 12 10 16-4l-3-30" fill="#fff0d6"/>
+              <ellipse cx="91" cy="43" rx="15" ry="19" transform="rotate(13 91 43)" fill="#d8ab7c"/>
+              <rect x="39" y="52" width="49" height="30" rx="15" fill="#fff0d6"/>
+              <g stroke="#483729" stroke-width="2.8" stroke-linecap="round">
+                <path d="M34 44q7 8 14 0m32 0q7 8 14 0"/>
+                <path d="M63 65v5m-8 0q8 10 16 0" stroke-width="2"/>
+              </g>
+              <path d="M55 55q9-4 17 0 0 12-9 12-8-1-8-12" fill="#483729"/>
+              <ellipse cx="31" cy="63" rx="9" ry="4" fill="#dfaca7" opacity=".7"/>
+              <ellipse cx="98" cy="63" rx="9" ry="4" fill="#dfaca7" opacity=".7"/>
+              <g fill="#c39a6c">
+                <circle cx="48" cy="65" r="1.2"/><circle cx="51" cy="69" r="1.2"/>
+                <circle cx="79" cy="65" r="1.2"/><circle cx="76" cy="69" r="1.2"/>
+              </g>
+            </g>
+            <!-- Front edge and a dangling paw make the resting pose legible. -->
+            <path d="M99 113q101 94 202 0" stroke="#6eaa96" stroke-width="5" stroke-linecap="round"/>
+            <path d="M169 162q-8 7-5 23 3 10 15 7 9-3 6-15l-5-13" fill="#fff0d6" stroke="#c39a6c" stroke-width="2"/>
+            <path d="m171 183 1 6m5-7 1 5" stroke="#c39a6c" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M131 162q59 66 137 0M151 177q47 40 98 0" stroke="#e2efe9" stroke-width="2" opacity=".45"/>
+          </g>
+          <g class="sleep-marks" fill="#6b8d80" font-family="system-ui, sans-serif" font-weight="600">
+            <text x="242" y="89" font-size="13">z</text>
+            <text x="258" y="71" font-size="17">z</text>
+            <text x="277" y="49" font-size="22">z</text>
+          </g>
+        </svg>
+        <div class="empty-copy">
+          <h2>You’re all caught up.</h2>
+          <p>No outstanding tasks assigned to you.</p>
+        </div>
+      </div>
+    </section>
+    <p class="preview-note">A little downtime for Biscuit. A clear task list for you.</p>
+  </main>
+  <script>
+    const preview = document.querySelector('.preview');
+    const widthToggle = document.getElementById('width-toggle');
+    const motionToggle = document.getElementById('motion-toggle');
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    widthToggle.addEventListener('click', () => {
+      const narrow = preview.classList.toggle('is-narrow');
+      widthToggle.setAttribute('aria-pressed', String(narrow));
+      widthToggle.textContent = narrow ? 'Wide preview' : 'Narrow preview';
+    });
+
+    motionToggle.addEventListener('click', () => {
+      const paused = preview.classList.toggle('is-paused');
+      motionToggle.setAttribute('aria-pressed', String(paused));
+      motionToggle.textContent = paused ? 'Play motion' : 'Pause motion';
+    });
+
+    function syncMotionPreference() {
+      motionToggle.disabled = motionPreference.matches;
+      motionToggle.textContent = motionPreference.matches
+        ? 'Reduced motion on'
+        : preview.classList.contains('is-paused') ? 'Play motion' : 'Pause motion';
+    }
+
+    motionPreference.addEventListener('change', syncMotionPreference);
+    syncMotionPreference();
+  </script>
+</body>
+</html>

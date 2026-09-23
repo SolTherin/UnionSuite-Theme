@@ -10,24 +10,29 @@ const decode = value => value.replace(/&(amp|lt|gt|quot);/g,(_,key)=>({amp:'&',l
 const portableCss = css => css.replace(/\burl\(\s*(?:(["'])(.*?)\1|([^)]*))\s*\)/gi,(whole,quote,quoted,plain)=>/^\s*data:/i.test(quoted??plain)?whole:'none');
 const portable = html => html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi,(_,start,css,end)=>start+portableCss(css)+end)
   .replace(/\bstyle=("[^"]*"|'[^']*')/gi,(_,attribute)=>'style='+portableCss(attribute));
+// scopes.iqa is filled from the theme in build(); the order here is the
+// order the branding CSS is written in.
 const scopes = {
   root: ':root',
   banner: ':root .us-banner:not(:where(.us-report-no-styling, .us-report-no-styling *))',
-  iqa: ':root :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]):not(:where(.us-report-no-styling, .us-report-no-styling *))',
+  iqa: '',
   actions: ':root .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *))'
 };
 function build(shared, check = false) {
-  const {inserts, rootTokens, declarations, tokenCategory, theme, themeJs, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, demoBanner} = shared;
+  const {inserts, rootTokens, declarations, tokenCategory, theme, themeJs, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, iqaSelector, demoBanner} = shared;
+  // Overrides must reach the same elements as the theme's own alias rule and
+  // outrank it, so reuse its selector rather than an abbreviated copy.
+  scopes.iqa = ':root ' + iqaSelector.replace(/\s+/g, ' ');
   function type(name) {
     if (name === '--us-actions-duration') return 'number';
     if (/duration$/.test(name)) return 'time';
     if (/easing$/.test(name)) return 'easing';
     if (/^--(face-|font-)|-font$/.test(name)) return 'font';
-    if (/^--fw-/.test(name)) return 'weight';
-    if (/^--lh-/.test(name)) return 'lineHeight';
+    if (/^--fw-|-font-weight$/.test(name)) return 'weight';
+    if (/^--lh-|-line-height$/.test(name)) return 'lineHeight';
     if (/^--z-/.test(name)) return 'integer';
-    if (/^--shadow|^--focus-ring$/.test(name)) return 'shadow';
-    if (/^--(fs-|space-|radius|page-gutter|card-pad-|sidebar-w|header-h)|^--iqa-(radius|inset|expanded-inset|row-padding|filter-min|filter-bottom|action-height|multi-max-height)$|^--banner-(radius|padding|gap|title-size)$/.test(name)) return 'length';
+    if (/^--shadow|^--focus-ring$|-glow$/.test(name)) return 'shadow';
+    if (/^--(fs-|space-|radius|page-gutter|card-pad-|sidebar-w|header-h)|^--iqa-(radius|inset|expanded-inset|row-padding|filter-min|filter-bottom|action-height|multi-max-height)$|^--banner-(radius|padding|gap|title-size)$|-(font-size|min-height|action-height|padding-block)$/.test(name)) return 'length';
     return 'colour';
   }
   const tokens = [...rootTokens].map(([name, values]) => ({name, value: values.value, scope:'root', group: /^--(checkbox|radio)-colour$/.test(name)?'Form controls':tokenCategory(name), type: type(name)}));

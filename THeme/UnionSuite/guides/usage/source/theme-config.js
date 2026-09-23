@@ -42,13 +42,17 @@
     }
     return CSS.supports(properties[token.type],value);
   }
+  // A token that already fails without this edit must not be blamed on it.
+  function broken(token,values) { try {return !validResolved(token,resolve(token.name,values));} catch(error) {return true;} }
   function validate(name,value) {
     // Custom properties accept almost any text; validate their actual CSS use.
     if(/[;{}<>@!\\]|\/\*|url\s*\(|env\s*\(/i.test(value)||/^(inherit|initial|unset|revert(?:-layer)?)$/i.test(value)) throw Error('Enter a CSS value, not a declaration or rule.');
     const candidate=new Map(overrides);if(value)candidate.set(name,value);else candidate.delete(name);
+    const edited=catalogue.get(name);
+    if(!validResolved(edited,resolve(name,candidate))) throw Error('Enter a valid '+edited.type.replace('lineHeight','line height')+' value.');
     for(const token of tokens) {
-      const resolved=resolve(token.name,candidate);
-      if(!validResolved(token,resolved)) throw Error(token.name===name?'Enter a valid '+token.type.replace('lineHeight','line height')+' value.':'This would make '+token.name+' invalid.');
+      if(token.name===name||!broken(token,candidate)||broken(token,overrides)) continue;
+      throw Error('This would make '+token.name+' invalid.');
     }
   }
   function hex(value) {

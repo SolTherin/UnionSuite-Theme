@@ -7,13 +7,14 @@
   </button>
   <div class="us-task__open">
     <span class="us-task__copy">
-      <a class="us-task__title" href="{#query.TaskUrl}">{#query.TaskTitle}</a>
+      <a class="us-task__title us-action-home-open-task" href="{#query.TaskUrl}"
+        data-us-task-url="{#query.TaskUrl}">{#query.TaskTitle}</a>
       <span class="us-task__note">{#query.TaskNote}</span>
     </span>
     <span class="us-task__meta">
       <span class="us-task__member">
         <i class="ti ti-user-filled" aria-hidden="true"></i>
-        <a class="us-task__member-name" href="{#query.MemberUrl}">{#query.MemberName}</a>
+        <a class="us-task__member-name" href="{#query.MemberUrl}" data-id="{#query.MemberId}">{#query.MemberName}</a>
       </span>
     </span>
     <span class="us-task__date">{#query.TaskDateLabel}</span>

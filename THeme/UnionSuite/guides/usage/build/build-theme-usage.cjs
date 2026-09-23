@@ -12,6 +12,7 @@ const listTemplates = require('./list-template-examples.cjs');
 const queryFields = require('./query-template-fields.cjs');
 const reportIconExample = require('./report-icon-example.cjs');
 const popupActionExample = require('./popup-action-example.cjs');
+const queryTemplateRefreshExample = require('./query-template-refresh-example.cjs');
 const actionConflictExample = require('./action-conflict-example.cjs');
 const membership = require('./membership-stats-example.cjs');
 const actionBuilder = require('./build-action-builder.cjs');
@@ -43,6 +44,7 @@ if (compatibilityBehaviour?.trim() !== behaviour || behaviour !== read('THeme/Un
 const clientCss = uncomment(read('THeme/UnionSuite/zzClientSpecific.css'));
 const clientRoots = [...clientCss.matchAll(/:root\s*\{[^}]*\}/g)].map(m => m[0]).join('\n');
 const snippets = {
+  'task-no-results': ['THeme/UnionSuite/guides/usage/templates/List-Templates/Tasks-No-Results.html', read('THeme/UnionSuite/guides/usage/templates/List-Templates/Tasks-No-Results.html')],
   'agreement-facts': ['THeme/UnionSuite/guides/usage/templates/Banner-Agreement-Facts.html', read('THeme/UnionSuite/guides/usage/templates/Banner-Agreement-Facts.html')],
   'case-details': ['THeme/UnionSuite/guides/usage/templates/Case-Details-Content.html', read('THeme/UnionSuite/guides/usage/templates/Case-Details-Content.html')],
   'copy-button': ['THeme/UnionSuite/guides/usage/templates/Copy-Button-Template.html', read('THeme/UnionSuite/guides/usage/templates/Copy-Button-Template.html')],
@@ -98,8 +100,12 @@ function aliasTable(css, pattern) {
   return [...values].map(([name, value]) => `<tr><th scope="row"><code>${name}</code></th><td><code>${esc(value)}</code></td></tr>`).join('\n');
 }
 const bannerDefaults = bannerCss.replaceAll(':not(:where(.us-report-no-styling, .us-report-no-styling *))', '').match(/:where\(\.us-banner\)\s*\{([\s\S]*?)\}/)?.[1];
-const iqaDefaults = theme.match(/:is\(\.us-report, \.SearchContactsClass, \[data-us-iqa-native\], \[data-us-panel\]\)(?:\:not\(\:where\(\.us-report-no-styling, \.us-report-no-styling \*\)\))?\s*\{([\s\S]*?)\}/)?.[1];
-if (!bannerDefaults?.includes('--banner-bg:') || !iqaDefaults) throw Error('Component defaults changed; update extraction.');
+const iqaBlock = theme.match(/\{([^{}]*--iqa-surface:[^{}]*)\}/);
+const iqaDefaults = iqaBlock?.[1];
+// The alias selector grows as the IQA scope gains container patterns, so the
+// config editor reuses it instead of a copy that silently loses specificity.
+const iqaSelector = iqaBlock && theme.slice(0, iqaBlock.index).split(/[}]|[*][/]/).pop().trim();
+if (!bannerDefaults?.includes('--banner-bg:') || !iqaDefaults?.includes('--iqa-radius:') || !iqaSelector?.startsWith(':is(')) throw Error('Component defaults changed; update extraction.');
 const allSources = ['THeme/UnionSuite/guides/usage/build/switch-examples.cjs','THeme/UnionSuite/guides/usage/source/document-loader-example.html','THeme/UnionSuite/guides/usage/source/badge-example.html','THeme/UnionSuite/guides/usage/build/cco-sticky-example.cjs','THeme/UnionSuite/guides/usage/build/tab-loading-example.cjs','THeme/UnionSuite/guides/usage/build/account-menu-example.cjs','THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js','THeme/UnionSuite/guides/usage/source/taskbar-example.js','THeme/UnionSuite/guides/usage/build/taskbar-preview.cjs','THeme/UnionSuite/guides/usage/build/dialog-chrome-example.cjs','THeme/UnionSuite/guides/usage/build/action-menu-example.cjs','THeme/UnionSuite/guides/usage/templates/Action-Menu-Template.html','THeme/UnionSuite/guides/usage/examples/Client-Actions.example.js','THeme/UnionSuite/guides/usage/examples/Data-Panel-Native-read.html','THeme/UnionSuite/guides/usage/build/build-tab-display-options.cjs','THeme/UnionSuite/guides/usage/examples/Tab-Display-Fixture.js','THeme/UnionSuite/guides/usage/examples/CCO-Tabs-Fixture.css','THeme/UnionSuite/guides/usage/source/busy-examples.cjs','THeme/UnionSuite/guides/usage/examples/Form-Fields.source.html','THeme/UnionSuite/guides/usage/examples/Form-Fields.layout.css','THeme/UnionSuite/zUnionSuite.css', 'THeme/UnionSuite/zUnionSuite.js', 'THeme/UnionSuite/zzClientSpecific.css',
   'THeme/UnionSuite/99-Orion.css', 'THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css', 'THEME-BUTTONS.md', 'THeme/UnionSuite/guides/usage/source/Button-Examples.html',
   'THeme/UnionSuite/guides/usage/examples/Banner-Shared-Styles.html', 'THeme/UnionSuite/guides/usage/examples/Banner-Behaviour.js', 'THeme/UnionSuite/guides/usage/templates/Banner-Template.html',
@@ -117,6 +123,7 @@ allSources.push('THeme/UnionSuite-Client/Config.js');
 allSources.push('THeme/UnionSuite/Scripts/ActionDefinitions.js','THeme/UnionSuite-Client/Actions.js');
 allSources.push(...require('./object-browser-example.cjs').sources);
 allSources.push(...require('./query-empty-example.cjs').sources);
+allSources.push('THeme/UnionSuite/guides/usage/build/home-task-empty-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/report-icon-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/popup-action-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/action-conflict-example.cjs');
@@ -126,6 +133,7 @@ allSources.push('THeme/UnionSuite/guides/usage/templates/Home/Welcome-Content.ht
 allSources.push(...require('./attention-example.cjs').sources);
 allSources.push(...membership.sources);
 allSources.push(...actionBuilder.sources);
+allSources.push('THeme/UnionSuite/guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite/guides/usage/examples/Query-Template-Refresh.js');
 allSources.push('THeme/UnionSuite/guides/usage/build/embedded-cco-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/iqa-expand-example.cjs','THeme/UnionSuite/guides/usage/source/iqa-expand-example.html','THeme/UnionSuite/guides/usage/source/iqa-expand-example.css','THeme/UnionSuite/guides/usage/source/iqa-expand-example.js');
 allSources.push('THeme/UnionSuite/guides/usage/build/build-bulletin-study.cjs','THeme/UnionSuite/guides/usage/templates/List-Templates/Bulletin-Style-Preview.html','THeme/UnionSuite/guides/usage/templates/List-Templates/Bulletin-Style-Preview.css','THeme/UnionSuite/guides/usage/templates/List-Templates/Bulletin-Style-Preview.js');
@@ -193,8 +201,11 @@ const inserts = {
  ATTENTION_DEMO: iframe('attention-demo','Needs Attention: four IQA count cards',require('./attention-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  ATTENTION_TEMPLATE: snippet('attention'),
  TASK_DETAIL_ROW_TEMPLATE: snippet('task-detail-row'),
+ QUERY_TEMPLATE_REFRESH_DEMO: iframe('query-template-refresh-demo', 'Query Template refresh and restored task controls', queryTemplateRefreshExample({read, css:nativePreviewCss+theme, themeJs}), true),
  TASK_ROW_TEMPLATE: snippet('task-row'),
  QUERY_EMPTY_DEMO: iframe('query-empty-demo','Query template empty and populated cards',require('./query-empty-example.cjs').documentHtml(),true),
+ HOME_TASK_EMPTY_DEMO: iframe('home-task-empty-demo','Biscuit: no outstanding tasks',require('./home-task-empty-example.cjs').documentHtml(),true),
+ HOME_TASK_EMPTY_TEMPLATE: snippet('task-no-results'),
  CONTACT_ROW_TEMPLATE: snippet('contact-row'),
  TASK_FOOTER_TEMPLATE: snippet('task-footer'),
  REPORT_ICON_DEMO: iframe('report-icon-demo','Generated report icon actions',reportIconExample.documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
@@ -274,7 +285,7 @@ html = html.replace(/<table id="class-table">[\s\S]*?<\/table>/,table=>table
 const output = path.join(root, 'THeme/UnionSuite/Usage-Guide.html');
 // Share the canonical sources and fixtures with the dedicated config page.
 module.exports = {build, inserts, rootTokens, declarations, tokenCategory, colourName,
-  theme, themeJs, tokenCss, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, demoBanner};
+  theme, themeJs, tokenCss, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, iqaSelector, demoBanner};
 function build(check = false) {
   if (check) {
     if (!fs.existsSync(output) || fs.readFileSync(output, 'utf8') !== html) {

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Membership Stats Filters</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="filters.css">
+</head>
+<body>
+  <main class="msf-page" aria-label="Membership Overview">
+    <p class="msf-concept"><strong>Mockup</strong> Click a category, type or status to filter. Sample figures only.</p>
+
+    <header class="us-membership-heading">
+      <h2>Membership Overview</h2>
+      <p>A monthly view of your membership, growth and financial standing.</p>
+    </header>
+
+    <div class="msf-filters" id="msf-filters"></div>
+    <p class="msf-sr" id="msf-announce" role="status" aria-live="polite"></p>
+
+    <section class="us-membership" data-us-membership="summary" data-msf="summary" aria-label="Membership summary">
+      <div class="us-membership__content"></div>
+    </section>
+
+    <div class="msf-grid">
+      <section class="us-membership" data-us-membership="trend" data-msf="trend" aria-label="Membership trend">
+        <header class="us-membership__heading">
+          <h2>Membership trend</h2>
+          <div class="msf-heading-tools">
+            <span data-msf-scope="trend" data-msf-default="Last six months"></span>
+            <button type="button" class="msf-link" data-msf-table aria-pressed="false">Show table</button>
+          </div>
+        </header>
+        <div class="us-membership__content"></div>
+      </section>
+
+      <section class="us-membership" data-us-membership="financial" data-msf="financial" aria-label="Financial status">
+        <header class="us-membership__heading"><h2>Financial status</h2><span data-msf-scope="financial" data-msf-default="Current members"></span></header>
+        <div class="us-membership__content"></div>
+      </section>
+
+      <section class="us-membership" data-us-membership="groups" data-msf="groups" aria-label="Membership by member category">
+        <header class="us-membership__heading"><h2>Membership by member category</h2><span data-msf-scope="group" data-msf-default="1–23 Sept 2026"></span></header>
+        <div class="us-membership__content"></div>
+      </section>
+
+      <section class="us-membership" data-us-membership="categories" data-msf="types" aria-label="Membership type">
+        <header class="us-membership__heading"><h2>Membership type</h2><span data-msf-scope="type" data-msf-default="Current members"></span></header>
+        <div class="us-membership__content"></div>
+      </section>
+    </div>
+  </main>
+  <script src="filters.js"></script>
+</body>
+</html>

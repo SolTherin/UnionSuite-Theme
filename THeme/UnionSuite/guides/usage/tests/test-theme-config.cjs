@@ -61,7 +61,7 @@ async function main(){
     await input('token-us-actions-surface','#f6ddff');const actions=await loaded('action-menu-demo');
     assert(actions.defaultView.getComputedStyle(actions.querySelector('.us-actions')).getPropertyValue('--us-actions-surface').trim()==='#f6ddff','Actions scoped override applied');
     await input('token-iqa-row-padding','16px 18px');
-    assert(report.defaultView.getComputedStyle(report.querySelector('tbody td')).paddingTop==='16px','IQA spacing changes rendered rows');
+    assert(report.defaultView.getComputedStyle(report.querySelector('.rgMasterTable tbody td')).paddingTop==='16px','IQA spacing changes rendered rows');
     await input('token-radius','16px; color:red');
     assert($('token-radius').getAttribute('aria-invalid')==='true'&&!$('css-code').textContent.includes('color:red'),'Declaration injection rejected');
     await input('token-teal-600','var(--brand-600)');
@@ -107,8 +107,11 @@ async function main(){
   if(narrow.scroll>narrow.width+1)throw Error('Editor overflows narrow viewport: '+JSON.stringify(narrow));
   await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true}).then(result=>fs.writeFileSync(path.join(root,'.preview/theme-config-mobile.png'),Buffer.from(result.data,'base64')));
   // Reopening the standalone page must discard every editor value.
-  await send('Page.reload');await delay(300);
-  if(await evaluate('document.getElementById("css-code")?.textContent')!=='/* Using theme defaults. */')throw Error('Reload did not restore defaults');
+  await send('Page.reload');
+  // Wait for the reopened editor to initialise instead of a fixed delay.
+  let reopened='';
+  for(let i=0;i<100;i++){reopened=await evaluate('document.getElementById("seed-primary-hex")?.value ? document.getElementById("css-code").textContent : ""');if(reopened)break;await delay(100);}
+  if(reopened!=='/* Using theme defaults. */')throw Error('Reload did not restore defaults: '+reopened);
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
   await send('Page.navigate',{url:pathToFileURL(path.join(root,'THeme/UnionSuite/Usage-Guide.html')).href+'#custom-config'});await delay(500);
   const guide=await evaluate('!!document.getElementById("custom-config")&&!!document.querySelector("a[href=\\"Theme-Config.html\\"]")');

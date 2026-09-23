@@ -44,7 +44,7 @@ UnionSuiteRefresh serializes native requests, waits for an accepted ASP.NET begi
 
 Declarative refresh targets: origin-report, iqa (selector, scope, match), custom (run). Selectors default to one match within the origin owner. Explicit scope:'page' and match:'all' request page-wide multiple reports. Native targets are deduplicated and completed progress retained for refresh-only retry. Custom callbacks rerun in full on retry and must contain repeatable view updates.
 
-Custom functions can await refresh.originReport(), refresh.iqa(selector,options), and their own element/panel updater. No arbitrary fragment reload is inferred from a selector. Query Template/alert refresh remains a custom integration; hardening the old refreshQueryTemplate helper is outstanding.
+Custom functions can await refresh.originReport(), refresh.iqa(selector,options), refresh.queryTemplate(selector,options), and their own element/panel updater. Origin refresh now recognises a single Query Template Display and reloads its server-rendered HTML while preserving the panel owner and rebuilding shared controls. The supported contract and limits are maintained in [the usage guide](../THeme/UnionSuite/Usage-Guide.html#query-template-refresh). Arbitrary alerts and other native panels still require a custom integration; the legacy CDN refreshQueryTemplate function is unchanged.
 
 ## Verification and boundaries
 

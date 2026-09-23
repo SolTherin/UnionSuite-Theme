@@ -66,8 +66,10 @@ const wrap = (id,classes='',cards=true) => `<div class="ContentItemContainer"><d
     await search.fill('Completed wording');assert.equal(await visible('both'),1,'never infer state from text');
     await search.fill('Alex');await completed('both').click();
     await funnel('both').click();assert.equal(await search.isVisible(),false);
-    assert.equal(await visible('both'),2,'closing disclosure preserves predicates');
+    assert.equal(await visible('both'),4,'closing disclosure clears search and preserves Show completed');
+    assert.equal(await search.inputValue(),'');
     await funnel('both').click();
+    await search.fill('Alex');
     // Native panel/body replacements retain both options and reconcile only one set of controls.
     await page.evaluate(markup=>{document.querySelector('#both').innerHTML=markup;ajaxEnds.forEach(fn=>fn());},panel());
     await page.waitForFunction(()=>document.querySelector('#both input')?.value==='Alex');

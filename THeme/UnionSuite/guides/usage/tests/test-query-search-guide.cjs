@@ -27,6 +27,10 @@ const {chromium}=require('../../../../../.tmp-iqa-integration/node_modules/playw
     assert.equal(await frame.locator('#demo-task-filters > section:visible').count(),3);
     await frame.locator('#task-filters input[type=search]').fill('Alex');
     assert.equal(await frame.locator('#demo-task-filters > section:visible').count(),2);
+    await frame.locator('#task-filters .us-iqa-filter-toggle').dispatchEvent('click');
+    assert.equal(await frame.locator('#task-filters input[type=search]').inputValue(),'');
+    assert.equal(await frame.locator('#demo-task-filters > section:visible').count(),3);
+    assert.equal(await frame.locator('#task-filters .us-task-completed-toggle').getAttribute('aria-pressed'),'true');
     await frame.locator('#search-notes .us-iqa-filter-toggle').dispatchEvent('click');
     await frame.locator('#search-notes input[type=search]').fill('James');
     assert.equal(await frame.locator('#demo-search-notes > section:visible').count(),1);

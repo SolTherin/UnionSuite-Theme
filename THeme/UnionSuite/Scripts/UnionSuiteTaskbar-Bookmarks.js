@@ -195,6 +195,8 @@
 
   let bookmarkIds = [];
   let savedOrdinal = null;
+  let bookmarkLoadState = 'idle';
+  let bookmarkLoadVersion = 0;
   let saveChain = Promise.resolve();
   let hasUnsavedChange = false;
   let barVisible = false;
@@ -953,9 +955,20 @@
 .us-palette-meta {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   margin: 0 22px 7px;
   color: var(--text-muted);
   font: 400 12px/1.4 var(--font-ui);
+}
+
+.us-palette-bookmark-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#us-tb-bookmarks-retry[hidden] {
+  display: none;
 }
 
 .us-palette-results {
@@ -1213,7 +1226,7 @@
 
     load() {
       const partyId = loggedInPartyId();
-      if (!partyId) return Promise.resolve([]);
+      if (!partyId) return Promise.resolve({ ids: [], ordinal: null, duplicate: false });
       const path = '/api/' + settings.settingsEntity +
         '?ID=' + encodeURIComponent(partyId) +
         '&SettingsKey=' + encodeURIComponent(settings.settingsKey) +
@@ -1226,15 +1239,13 @@
           .map(row => ({ ordinal: Number(store.readProperty(row, 'Ordinal')), value: store.readProperty(row, 'Value') }))
           .filter(row => Number.isFinite(row.ordinal))
           .sort((left, right) => left.ordinal - right.ordinal);
-        if (!saved.length) {
-          savedOrdinal = null;
-          return [];
-        }
-        savedOrdinal = saved[0].ordinal;
-        if (saved.length > 1) {
-          announce('More than one saved bookmark row was found; using the earliest.');
-        }
-        return store.parse(saved[0].value);
+        // Return a snapshot: a read from a disposed instance must not change
+        // the identity used by a later instance's writes.
+        return {
+          ids: saved.length ? store.parse(saved[0].value) : [],
+          ordinal: saved.length ? saved[0].ordinal : null,
+          duplicate: saved.length > 1
+        };
       });
     },
 
@@ -1285,7 +1296,7 @@
           savedOrdinal = ordinal;
           return;
         }
-        return store.load();
+        return store.load().then(snapshot => { savedOrdinal = snapshot.ordinal; });
       });
     },
 
@@ -1338,6 +1349,41 @@
     }
   };
 
+  function renderBookmarkLoadState() {
+    const status = query('#us-tb-bookmarks-status');
+    if (status) status.textContent = bookmarkLoadState === 'ready'
+      ? 'Star to bookmark'
+      : bookmarkLoadState === 'failed' ? 'Bookmarks could not be loaded.' : 'Loading bookmarks…';
+    const retry = query('#us-tb-bookmarks-retry');
+    if (retry) retry.hidden = bookmarkLoadState !== 'failed';
+    document.querySelectorAll('#us-tb-palette [data-star], #us-tb-palette [data-palette-handle]').forEach(button => {
+      button.disabled = bookmarkLoadState !== 'ready';
+    });
+  }
+
+  function loadBookmarks() {
+    if (stopped || bookmarkLoadState === 'loading' || bookmarkLoadState === 'ready') return;
+    bookmarkLoadState = 'loading';
+    const version = ++bookmarkLoadVersion;
+    renderBookmarkLoadState();
+    store.load().then(snapshot => {
+      if (stopped || version !== bookmarkLoadVersion) return;
+      savedOrdinal = snapshot.ordinal;
+      bookmarkIds = snapshot.ids;
+      bookmarkLoadState = 'ready';
+      renderBookmarks();
+      if (query('#us-tb-palette')?.open) renderPalette(false);
+      renderBookmarkLoadState();
+      if (snapshot.duplicate) announce('More than one saved bookmark row was found; using the earliest.');
+    }).catch(error => {
+      if (stopped || version !== bookmarkLoadVersion) return;
+      bookmarkLoadState = 'failed';
+      renderBookmarkLoadState();
+      toast('Saved bookmarks could not be loaded. ' + error.message);
+      announce('Saved bookmarks could not be loaded. Use Retry in the command palette.');
+    });
+  }
+
   /**
    * Saves run one at a time. The first save for a user creates the row and then
    * reads back its Ordinal; a second save starting before that finishes would
@@ -1347,6 +1393,7 @@
    * A failed save leaves the change on screen and says so, rather than reverting.
    */
   function persistBookmarks() {
+    if (bookmarkLoadState !== 'ready') return;
     saveChain = saveChain.catch(() => {}).then(() => saveBookmarks());
     return saveChain;
   }
@@ -1396,7 +1443,9 @@
         '<input id="us-tb-palette-query" type="search" placeholder="Search pages, tools and shortcuts…" aria-label="Search destinations" autocomplete="off">' +
         '<kbd>Esc</kbd>' +
       '</div>' +
-      '<div class="us-palette-meta"><span id="us-tb-palette-count">All destinations</span><span>Star to bookmark</span></div>' +
+      '<div class="us-palette-meta"><span id="us-tb-palette-count">All destinations</span>' +
+        '<span class="us-palette-bookmark-status"><span id="us-tb-bookmarks-status" role="status">Loading bookmarks…</span>' +
+          '<button type="button" id="us-tb-bookmarks-retry" class="us-feature-button" aria-label="Retry loading bookmarks" hidden>Retry</button></span></div>' +
       '<div id="us-tb-palette-results" class="us-palette-results"></div>' +
       '<footer class="us-palette-footer">' +
         '<span><kbd>↑</kbd><kbd>↓</kbd> browse <kbd>Enter</kbd> open</span>' +
@@ -1431,6 +1480,7 @@
     document.body.append(live, toastNode, palette, recents);
 
     palette.querySelector('#us-tb-palette-query').addEventListener('input', () => renderPalette());
+    palette.querySelector('#us-tb-bookmarks-retry').addEventListener('click', loadBookmarks);
     palette.addEventListener('cancel', event => { event.preventDefault(); closePanels(true); });
     palette.addEventListener('click', event => {
       if (event.target !== palette) return;
@@ -1614,6 +1664,7 @@
   }
 
   function togglePin(id) {
+    if (bookmarkLoadState !== 'ready') return;
     const index = bookmarkIds.indexOf(id);
     if (index === -1) bookmarkIds.push(id);
     else bookmarkIds.splice(index, 1);
@@ -1624,6 +1675,7 @@
   }
 
   function moveBookmark(id, targetId) {
+    if (bookmarkLoadState !== 'ready') return;
     const from = bookmarkIds.indexOf(id);
     const to = bookmarkIds.indexOf(targetId);
     if (from < 0 || to < 0 || from === to) return;
@@ -1719,6 +1771,7 @@
         () => togglePin(route.id)
       );
       star.dataset.star = route.id;
+      star.disabled = bookmarkLoadState !== 'ready';
       star.setAttribute('aria-pressed', String(pinned));
 
       row.append(destination, star);
@@ -1726,6 +1779,7 @@
     });
 
     host.scrollTop = reset === false ? scrollTop : 0;
+    renderBookmarkLoadState();
   }
 
   function onPaletteKeydown(event) {
@@ -1754,6 +1808,7 @@
     );
     handle.title = 'Drag to reorder. Alt + Up or Down also moves this bookmark.';
     handle.dataset.paletteHandle = route.id;
+    handle.disabled = bookmarkLoadState !== 'ready';
     handle.draggable = false;
     handle.setAttribute('aria-keyshortcuts', 'Alt+ArrowUp Alt+ArrowDown');
     handle.addEventListener('keydown', event => {
@@ -1774,7 +1829,7 @@
    * list commits; Escape, lost capture or release outside cancels.
    */
   function startDrag(event, row, route) {
-    if (event.button !== 0 || !event.isPrimary || paletteDrag) return;
+    if (bookmarkLoadState !== 'ready' || event.button !== 0 || !event.isPrimary || paletteDrag) return;
     event.preventDefault();
 
     const palette = query('#us-tb-palette');
@@ -2179,6 +2234,7 @@
 
     mounted = { bar, strip, tools, barHost, recentsButton };
     renderBookmarks();
+    renderBookmarkLoadState();
     return true;
   }
 
@@ -2240,15 +2296,7 @@
     barVisible = readBarVisible();
     if (!mount()) return;
 
-    store.load()
-      .then(ids => {
-        bookmarkIds = ids;
-        renderBookmarks();
-      })
-      .catch(error => {
-        toast('Saved bookmarks could not be loaded. ' + error.message);
-        announce('Saved bookmarks could not be loaded.');
-      });
+    loadBookmarks();
 
     document.addEventListener('click', onDocumentClick);
     document.addEventListener('keydown', onDocumentKeydown);
@@ -2267,6 +2315,8 @@
 
   function destroy() {
     stopped = true;
+    bookmarkLoadVersion++;
+    bookmarkLoadState = 'idle';
     closePanels();
     if (observer) {
       observer.disconnect();

@@ -35,12 +35,16 @@ all validation, error and recovery paths.
 
 ## Planned functionality
 
+- [ ] Consolidate Biscuit's shared palette and create a usage index. Share fur, ear, muzzle, collar and tag colour tokens across the taskbar and hammock task-empty state, while keeping each pose's drawing and animation separate. Index production uses, maintained source files and generated previews; distinguish historical mockups from maintained assets. Keep the index in the canonical usage guide, update affected examples and verify both poses in light/dark mode and reduced motion. Consider extracting reusable facial features only as more poses justify it.
+- [ ] When editing a panel, automatically call its refresh in the background and show a message that the data has been updated since the page loaded.
 - [ ] Named panel action injection and verified handlers: [action plan](THEME-PANEL-ACTIONS.md). Shared report action slots/styles already exist.
 - [ ] Combined activity feed: [feed plan](THEME-ACTIVITY-FEED.md). Requires source contracts and lifecycle work, not just styling.
+- [ ] Taskbar dev mode: add a developer mode to the taskbar, including a toggle for the native CCO tab-switching session switch (`UnionSuiteCcoSwitch.disable()`/`.enable()`, see the [approved specification](prototypes/approved/cco-inline-loading/README.md#turning-it-off)). The site-wide setting stays in the client `Config.js`. Decide how dev mode is entered and who can see it.
 
 - [ ] Enhanced IQA — preview Business Object sources.
 - [ ] Enhanced IQA — when quick search returns an exact match, sort it first.
 - [ ] Enhanced IQA — add useful functions to the SQL autofill, for example asi_path and asi_GetDate.
+- [ ] Enhanced IQA — add a recents folder to the query explorer.
 
 ## Parked by owner
 
@@ -78,4 +82,4 @@ from their sources and run the usage-guide freshness check before delivery.
 
 - [ ] Verify opt-in `us-cco-sticky-tabs` in live iMIS with the member banner, long menus, partial refresh and site-specific overflow wrappers. Local fixture covers sticky positioning and CCO boundaries; grey-background navigation remains deferred.
 
-- [ ] Native CCO tab switching without page reloads: approve the specification and implement it in the shared theme, applying to every CCO. Live feasibility checklist passed; see the [WIP](prototypes/wip/cco-inline-loading/README.md). Background preloading and kept tabs are v2. The custom CCO iPart is retired and archived.
+- [ ] Native CCO tab switching without page reloads: implement the [approved specification](prototypes/approved/cco-inline-loading/README.md) in the shared theme, applying to every CCO, with queued clicks, both off switches and 7-day stored URL keys. Live feasibility checklist passed; see the [WIP](prototypes/wip/cco-inline-loading/README.md). Background preloading and kept tabs are v2. The custom CCO iPart is retired and archived.

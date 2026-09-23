@@ -46,7 +46,9 @@ const wrap = (id,classes='',cards=true) => `<div class="ContentItemContainer"><d
     assert.equal(await page.locator('#search [data-native-hidden]').isVisible(),false);
     await input.press('Enter');assert.equal(await page.evaluate(()=>window.formSubmits),0);
     await toggle.click();await input.waitFor({state:'hidden'});
-    assert.equal(await input.inputValue(),'  sArAh  ');assert.equal(await page.locator('#search [data-record]:visible').count(),1);
+    assert.equal(await input.inputValue(),'');assert.equal(await page.locator('#search [data-record]:visible').count(),3);
+    assert.equal(await page.locator('#search .us-query-search-status').innerText(),'');
+    assert.equal(await page.locator('#search [data-native-hidden]').isVisible(),false);
     await toggle.click();await page.waitForFunction(()=>document.activeElement.matches('#search input[type=search]'));await input.fill('103917');
     assert.equal(await page.locator('#search [data-record]:visible').innerText(),'Daniel Chen\n\n103917\n\nOpen task');
     await page.locator('#search [data-record]:visible button').click();assert.equal(await page.evaluate(()=>window.rowClicks),1,'native row handler survives');

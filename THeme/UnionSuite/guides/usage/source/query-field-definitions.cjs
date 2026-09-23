@@ -53,10 +53,11 @@ module.exports = {
   },
   'Tasks-Detail-Query-Template.html':{
     TaskTitle:taskTitle,
-    TaskUrl:optional('Task destination for the title link. Blank leaves a title that looks like a link but goes nowhere, so supply it or remove the anchor and keep the text in a strong element.', '/tasks/48210'),
+    TaskUrl:required('Verified task editor URL, including the parameters identifying this task. Used in both href and data-us-task-url. Opens in the native iMIS popup; fragments are not supported. Blank disables the action. Select this alias even when values are blank, or replace the entire anchor with plain title text.', '/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx?ID=104019&Ordinal=219'),
     TaskNote:optional('Plain-text task note. One line is displayed and the rest is clipped by CSS, so the full note stays searchable. Blank removes the line and the row closes up.', 'Discuss the membership options sent earlier this week.'),
     MemberName:memberName,
     MemberUrl:optional('Related member’s record. Blank leaves a plain-text name; a blank MemberName hides the icon and name together. Example path is illustrative.', '/Party.aspx?ID=101000'),
+    MemberId:optional('Party ID represented by MemberName and MemberUrl. Used in the member link data-id; when it matches __ClientContext.loggedInPartyId, the name becomes Personal Task and the link is disabled. Blank leaves the authored name and link. Compare IDs as strings, preserving leading zeroes.', '104203'),
     IsCompleted:required('Explicit completion flag: true or 1 for completed; false or 0 for outstanding. Do not infer completion from status wording.', 'false'),
     DueState:optional('Urgency for the date: overdue, today, soon or none. Only overdue is coloured, and the label below must carry the word as well, so the state never relies on colour alone. Not updated after a staff member ticks the row.', 'overdue'),
     TaskDateLabel:optional('Complete display label: Overdue or Due plus a due date for outstanding tasks; Actioned plus an actioned date for completed tasks. Blank leaves no date text.', 'Overdue 10 September 2026'),

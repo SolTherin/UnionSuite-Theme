@@ -24,13 +24,29 @@ for(const [index,frame] of frames.entries()) {
   assert(frame.includes('window.addEventListener(\'auxclick\',previewLink)'),'Navigation guard installed in frame '+index);
   // CCO uses the shared native-tabs block; other frames use the complete runtime.
   if(index!==2)assert(frame.replace(/\r\n/g,'\n').includes(themeJs),'Canonical theme JS is unchanged in frame '+index);
-  assert(!/\burl\(\s*["']?(?!data:)[/.]/i.test(frame),'No relative/absolute native CSS asset references in frame '+index);
+  // Runtime script targets such as new URL('/path', location.origin) load no asset.
+  assert(!/(?<!new +)\burl\(\s*["']?(?!data:)[/.]/i.test(frame),'No relative/absolute native CSS asset references in frame '+index);
 }
 assert(frames[1].includes('URL.createObjectURL('),'Dummy IQA CSV export remains intact');
 const editor=fs.readFileSync(path.join(root,'THeme/UnionSuite/guides/usage/source/theme-config.js'),'utf8');
 assert(!/\b(?:localStorage|sessionStorage|fetch|XMLHttpRequest)\b/.test(editor),'Editor has no persistence/network calls');
 const names=new Set(data.tokens.map(token=>token.name));
 for(const token of data.tokens){assert(data.scopes[token.scope],'Known scope for '+token.name);for(const ref of token.value.matchAll(/var\((--[\w-]+)/g))assert(names.has(ref[1]),'Known default dependency '+ref[1]);}
+// The editor validates every token on each edit, so a token whose declared type
+// cannot accept its own default would reject unrelated brand colour edits.
+const defaults=new Map(data.tokens.map(token=>[token.name,token.value]));
+const resolveDefault=name=>defaults.get(name).replace(/var[(] *(--[A-Za-z0-9_-]+)[^()]*[)]/g,(_,key)=>resolveDefault(key));
+const shape=value=>/^-?[0-9]+$/.test(value)?'integer'
+  :/^-?[0-9]*[.][0-9]+$/.test(value)?'number'
+  :/^-?[0-9]*[.]?[0-9]+(?:px|rem|em|ch|vh|vw|%)$/.test(value)?'length'
+  :/^-?[0-9]*[.]?[0-9]+m?s$/.test(value)?'time':'other';
+// Functional values such as clamp() or color-mix() are unrecognised, not wrong.
+const accepts={integer:['integer'],number:['integer','number'],weight:['integer'],lineHeight:['integer','number'],length:['length','integer'],time:['time'],colour:[],shadow:[],font:[],easing:[]};
+for(const token of data.tokens) {
+  assert(accepts[token.type],'Known editor type for '+token.name);
+  const resolved=resolveDefault(token.name);
+  assert(shape(resolved)==='other'||accepts[token.type].includes(shape(resolved)),'Default '+resolved+' suits the declared '+token.type+' type of '+token.name);
+}
 // Exercise fixture navigation independently of a desktop/browser provider.
 const navigation=fs.readFileSync(path.join(root,'THeme/UnionSuite/guides/usage/source/config-preview.js'),'utf8');
 const previewWindow=new EventTarget();let scrolled=0;

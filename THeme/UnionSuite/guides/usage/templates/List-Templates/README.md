@@ -18,8 +18,9 @@ Keep the repeating HTML, Header and Footer fields unchanged. A funnel button
 and collapsible search input are generated automatically; the new searchable
 task example uses the unchanged Tasks Query Template and real shared behaviour.
 
-Search starts collapsed, matches displayed text case-insensitively and retains
-the text when closed. It searches the currently displayed page only, leaving
+Search starts collapsed and matches displayed text case-insensitively. Closing
+the funnel clears the search and restores results, respecting the independent
+Show completed setting. It searches the currently displayed page only, leaving
 native pagination/hidden records, full-query filtering and task state to iMIS.
 Hidden content, control attributes and nested iParts are excluded. Matching
 counts/no-match feedback are announced politely below the results. Clearing
@@ -64,6 +65,23 @@ node THeme/UnionSuite/guides/usage/build/build-theme-usage.cjs --check
 
 ## Independent task completion filter
 
+The detail template's title uses `us-task__title us-action-home-open-task` on
+the anchor. Load shared JS and `Scripts/ActionDefinitions.js`; select `TaskUrl`
+in the IQA and supply the verified editor URL, including its task identifiers,
+in both `href` and `data-us-task-url`. The native popup opens at 70% width and
+height and refreshes the originating report on close, matching Add task.
+The task title remains the action label. Blank URLs disable the action;
+fragment destinations are unsupported. Offline sample links cannot open a real
+iMIS editor. The related member link remains a normal link.
+
+Select `MemberId` for the member link's `data-id` attribute. When it matches
+`__ClientContext.loggedInPartyId`, shared task-row JS displays `Personal Task`
+in place of the member name, removing href and disabling keyboard navigation.
+Other or blank IDs retain the authored name and link. Missing/invalid or
+anonymous client context and no-styling opt out.
+The label is reapplied after query refresh. For an unused MemberId, select `''`
+with that alias or remove the attribute from the template.
+
 Use `us-query-search` alone for notes and other query templates. Add
 `us-task-completed-filter` to the task iPart CSS class field for Show completed;
 it works alone or alongside search, with one shared header funnel. Keep a
@@ -98,3 +116,12 @@ class wrapper remains. Marker updates are observed; custom class changes use
 UnionSuiteIqaFilters.refresh(). Removing either class retains the other option;
 removing both or opting out restores native results. All copyable templates
 exclude iMIS-generated wrappers. See the guide for keyboard and token details.
+
+For the homepage, use `us-home-tasks` instead of the three separate helper
+classes to also enable Biscuit's zero-outstanding state. Put
+`Tasks-No-Results.html` in the separate **No results** field and leave **Hide when
+there are no results** unchecked. It is static HTML with no query fields. The
+query must be scoped to the logged-in user and load all outstanding tasks; search
+matches and unloaded server pages cannot establish the user's total. The theme
+counts loaded task markers before filtering. Completed rows remain accessible
+through Show completed. See the guide's `#home-tasks-empty` example and contract.

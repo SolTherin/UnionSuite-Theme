@@ -4,7 +4,7 @@ const source=fs.readFileSync('THeme/UnionSuite/Scripts/ActionDefinitions.js','ut
 const window={UnionSuiteActions:{define(key,value){assert.equal(value.owner,'UnionSuite');assert.equal(value.source,'ActionDefinitions.js:'+key);defs.set(key,value);}}};
 const context=vm.createContext({window,URL,location:{origin:'https://theme.test'}});
 (async()=>{
- vm.runInContext(source,context);assert.equal(defs.size,12);
+ vm.runInContext(source,context);assert.equal(defs.size,14);
  const names=['EmailMemberPopupFn','SMSMemberPopupFn','AddNotePopupFn','CreateCasePopupFn','CreateQuickCasePopupFn','ResolveDuplicatePopupFn','AssignWorkbenchToStaffFn'];
  const keys=['member.email','member.sms','member.add-note','member.create-case','member.create-quick-case','member.resolve-duplicate','member.assign-workbench'];
  for(let i=0;i<keys.length;i++){
@@ -20,5 +20,5 @@ const context=vm.createContext({window,URL,location:{origin:'https://theme.test'
  const calls=[];const refresh={originReport:async()=>calls.push('origin'),iqa:async(selector,options)=>calls.push([selector,options.scope,options.match])};
  await job.action.refresh.run({origin:{report:{}},refresh});await address.action.refresh.run({origin:{report:null},refresh});
  assert.deepEqual(calls,['origin',['.AddressIQA','page','one']]);
- console.log('PASS twelve definitions, seven retained legacy call/promise contracts, selected-member IDs, version routes/failure, address popup and origin/explicit refresh.');
+ console.log('PASS fourteen definitions, seven retained legacy call/promise contracts, selected-member IDs, version routes/failure, address popup and origin/explicit refresh.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

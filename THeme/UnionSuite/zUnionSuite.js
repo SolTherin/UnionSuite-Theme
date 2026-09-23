@@ -216,6 +216,7 @@ SOFTWARE.
 (function () {
   'use strict';
   if (window.UnionSuiteRefresh) return;
+  // Query Template HTML replacement shares the native request queue.
   const gridSelector = '[id$="_ContentPanel"] > [id$="_ListerPanel"] > [data-gridid]';
   const refreshSelector = 'input[id$="_ResultsGrid_RefreshButton"][data-ajaxupdatedcontrolid]';
   let tail = Promise.resolve();
@@ -241,15 +242,27 @@ SOFTWARE.
     const container = root.closest('.ContentItemContainer');
     return [root, ...root.querySelectorAll(gridSelector)].filter(node => node.matches(gridSelector) && node.closest('.ContentItemContainer') === container);
   }
+  function templateParts(container) {
+    if (!container?.matches('.ContentItemContainer')) throw new Error('Query Template refresh requires its ContentItemContainer.');
+    const sets = [...container.querySelectorAll('.QueryTemplateSet')].filter(set => set.closest('.ContentItemContainer') === container);
+    if (sets.length !== 1) throw new Error('Expected one Query Template Display in the refresh target.');
+    const set = sets[0], panel = set.closest('.panel');
+    const owner = panel && panel.closest('.ContentItemContainer') === container ? panel.parentElement : container;
+    if (owner !== container && owner.parentElement !== container) throw new Error('Unsupported Query Template wrapper structure.');
+    if (owner.querySelector('.ContentItemContainer')) throw new Error('Nested iParts require their own refresh target.');
+    return {container, owner, set};
+  }
   function capture(trigger, owner) {
     const container = (owner || trigger)?.closest('.ContentItemContainer');
     const root = owner || trigger?.closest('.panel')?.parentElement || container || trigger;
     let grids = root ? ownGrids(root) : [];
     const inGrid = trigger?.closest('[data-gridid]');
     if (inGrid?.matches(gridSelector) && inGrid.closest('.ContentItemContainer') === container) grids = [inGrid];
+    const sets = container ? [...container.querySelectorAll('.QueryTemplateSet')].filter(set => set.closest('.ContentItemContainer') === container) : [];
     return Object.freeze({owner:identity(root), container:identity(container),
       report:grids.length === 1 ? identity(grids[0].parentElement.parentElement) : null,
-      ambiguous:grids.length > 1});
+      template:!grids.length && sets.length === 1 ? identity(container) : null,
+      ambiguous:grids.length > 1 || (!grids.length && sets.length > 1)});
   }
   function reportControl(origin) {
     if (origin?.ambiguous) throw new Error('The action origin contains multiple reports. Configure an explicit refresh target.');
@@ -330,6 +343,165 @@ SOFTWARE.
     tail = request.catch(() => {});
     return request;
   }
+  function pageUrl() {
+    const query = location.search.length > 1 ? location.search : location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?')) : '';
+    return location.origin + location.pathname + query;
+  }
+  // Read only the known native pagination settings. Do not replay arbitrary
+  // fetched scripts, reload libraries, or raise a page-wide ASP.NET load event.
+  function pagination(parts) {
+    const scripts = [...parts.owner.querySelectorAll('script')].filter(script => !script.src && /\.simplePaginate\s*\(/.test(script.textContent));
+    if (!scripts.length) return null;
+    if (scripts.length !== 1) throw new Error('Ambiguous Query Template pagination initialiser.');
+    const source = scripts[0].textContent;
+    function variable(name) {
+      return source.match(new RegExp('\\bvar\\s+' + name + '\\s*=\\s*([\'"])([^\'"\\r\\n]*)\\1\\s*;'))?.[2];
+    }
+    const id = variable('contentItemId'), count = variable('resultsPerPage');
+    const hide = variable('hidePageNumbers'), element = variable('pageElement');
+    if (id !== '#' + parts.set.id || !/^\d+$/.test(count || '') || Number(count) < 1 ||
+        !/^(true|false)$/i.test(hide || '') || !/^(section|li|div)$/.test(element || '') ||
+        !/jQuery\(contentItemId\)\.simplePaginate\s*\(/.test(source)) {
+      throw new Error('Unsupported Query Template pagination settings.');
+    }
+    if (typeof window.jQuery?.fn?.simplePaginate !== 'function') throw new Error('Load the native simplePaginate plugin before refreshing this Query Template.');
+    return {paginateElement:element, elementsPerPage:Number(count), firstButton:false, lastButton:false,
+      prevButtonText:'&laquo;', nextButtonText:'&raquo;', hidePaginationNumbers:hide.toLowerCase(),
+      uniqueId:parts.set.id, pagerLocation:'justify-content-center'};
+  }
+  function refreshTemplateTheme() {
+    // The header slots must exist before action controls are reconciled.
+    window.UnionSuiteIqaFilters?.refreshQueryTemplates();
+    window.UnionSuiteActions?.refresh();
+    window.UnionSuiteTaskRows?.refresh();
+    window.UnionSuiteBanners?.refresh();
+    window.UnionSuiteActionMenus?.refresh();
+  }
+  function focusIdentity(owner) {
+    const node = document.activeElement;
+    if (!owner.contains(node)) return null;
+    const selectors = [];
+    if (node.id) selectors.push('#' + CSS.escape(node.id));
+    for (const attr of ['data-us-command-key','data-us-task-url','name']) {
+      if (node.getAttribute(attr)) selectors.push('[' + attr + '="' + CSS.escape(node.getAttribute(attr)) + '"]');
+    }
+    if (node.matches('input[type="search"]')) selectors.push('input[type="search"]');
+    if (node.matches('[aria-pressed]')) selectors.push('[aria-pressed]');
+    return {node, selectors, start:node.selectionStart, end:node.selectionEnd};
+  }
+  async function reloadTemplate(ref, options, requestedPage) {
+    const {timeout=30000, signal, initialize} = options;
+    if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
+    if (initialize != null && typeof initialize !== 'function') throw new TypeError('initialize must be a function.');
+    if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
+    const live = templateParts(current(ref));
+    if (!live.container.id || uniqueId(live.container.id) !== live.container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
+    const url = new URL(options.url || pageUrl(), location.href);
+    if (url.origin !== location.origin || url.username || url.password) throw new Error('Query Template refresh requires a same-origin page URL.');
+    url.hash = '';
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal?.aborted) abort();
+    signal?.addEventListener('abort', abort, {once:true});
+    window.addEventListener('pagehide', abort, {once:true});
+    const timer = setTimeout(abort, timeout);
+    const {container, owner, set} = live;
+    const focus = focusIdentity(owner), busy = container.getAttribute('aria-busy');
+    const position = container.style.getPropertyValue('position'), priority = container.style.getPropertyPriority('position');
+    const inertNodes = [];
+    function blockContent() {
+      for (const node of owner.children) {
+        if (node === overlay) continue;
+        inertNodes.push([node, node.inert]);
+        node.inert = true;
+      }
+    }
+    const overlay = document.createElement('div');
+    overlay.className = 'us-query-refresh-overlay';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-label', 'Refreshing results');
+    overlay.innerHTML = '<span class="section-loader-spinning-circles" aria-hidden="true"></span>';
+    const changedPosition = getComputedStyle(container).position === 'static';
+    if (changedPosition) container.style.setProperty('position', 'relative');
+    container.setAttribute('aria-busy', 'true');
+    blockContent();
+    // The overlay stays outside the inert content so its status is accessible.
+    container.append(overlay);
+    const scrollTop = container.scrollTop, scrollLeft = container.scrollLeft;
+    try {
+      const response = await fetch(url.href, {credentials:'same-origin', cache:'no-store', redirect:'error', signal:controller.signal});
+      if (!response.ok) throw new Error('Query Template refresh failed (HTTP ' + response.status + ').');
+      if (!/\btext\/html\b/i.test(response.headers.get('content-type') || '')) throw new Error('Query Template refresh did not return HTML.');
+      if (response.redirected || (response.url && new URL(response.url).href !== url.href)) throw new Error('Query Template refresh returned a different page.');
+      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+      if (doc.querySelector('input.SignInButton')) throw new Error('Sign in again before refreshing the Query Template.');
+      const matches = doc.querySelectorAll('#' + CSS.escape(container.id));
+      if (matches.length !== 1) throw new Error('The refreshed page has no unique matching Query Template iPart.');
+      const fresh = templateParts(matches[0]), settings = pagination(fresh);
+      if ((owner === container) !== (fresh.owner === fresh.container)) throw new Error('The Query Template wrapper changed; reload the page.');
+      if (controller.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
+      if (location.href !== requestedPage || current(ref) !== container || !owner.isConnected || !set.isConnected || templateParts(container).set !== set) {
+        throw new Error('The Query Template changed while its refresh was pending.');
+      }
+      // Keep the immediate panel owner: search/disclosure state is keyed to it.
+      const nodes = [...fresh.owner.childNodes].map(node => document.importNode(node, true));
+      owner.replaceChildren(...nodes);
+      blockContent();
+      const updated = templateParts(container);
+      if (settings) window.jQuery(updated.set).simplePaginate(settings);
+      if (initialize) await initialize(container);
+      refreshTemplateTheme();
+      container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container}}));
+      container.scrollTop = scrollTop;
+      container.scrollLeft = scrollLeft;
+      return {status:'refreshed', controlId:container.id};
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      window.removeEventListener('pagehide', abort);
+      overlay.remove();
+      for (const [node, inert] of inertNodes) node.inert = inert;
+      if (busy === null) container.removeAttribute('aria-busy'); else container.setAttribute('aria-busy', busy);
+      if (changedPosition) {
+        if (position) container.style.setProperty('position', position, priority); else container.style.removeProperty('position');
+      }
+      if (focus && (document.activeElement === document.body || document.activeElement === focus.node)) {
+        const target = focus.node.isConnected ? focus.node : focus.selectors.map(selector => owner.querySelector(selector)).find(Boolean);
+        target?.focus({preventScroll:true});
+        if (target?.setSelectionRange && focus.start != null) target.setSelectionRange(focus.start, focus.end);
+      }
+    }
+  }
+  function enqueueTemplate(ref, options={}) {
+    const requestedPage = location.href;
+    const request = tail.then(() => reloadTemplate(ref, options, requestedPage));
+    tail = request.catch(() => {});
+    return request;
+  }
+  function refreshOrigin(origin, options={}) {
+    if (origin?.ambiguous) return Promise.reject(new Error('The action origin contains multiple reports. Configure an explicit refresh target.'));
+    return origin?.template && !origin.report ? enqueueTemplate(origin.template, options) : enqueue(() => reportControl(origin), options);
+  }
+  async function queryTemplate(selector, options={}) {
+    if (typeof selector !== 'string' || !selector.trim()) throw new TypeError('Query Template refresh requires a selector.');
+    const nodes = [...document.querySelectorAll(selector)];
+    if (!['one','all'].includes(options.match || 'one') || !nodes.length || (options.match !== 'all' && nodes.length !== 1)) {
+      throw new Error('Query Template selector must identify one iPart, or use match: all.');
+    }
+    const refs = nodes.map(node => {
+      const container = node.closest('.ContentItemContainer');
+      templateParts(container);
+      if (!container.id || uniqueId(container.id) !== container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
+      return identity(container);
+    });
+    const results = [], seen = new Set();
+    for (const ref of refs) {
+      if (seen.has(ref.key)) continue;
+      seen.add(ref.key);
+      results.push(await enqueueTemplate(ref, options));
+    }
+    return results;
+  }
   function origins(selector, options, origin) {
     if (typeof selector !== 'string' || !selector.trim()) throw new TypeError('Refresh requires a selector.');
     const scope = options.scope === 'page' ? document : options.scope instanceof Element ? options.scope : current(origin?.owner);
@@ -347,7 +519,8 @@ SOFTWARE.
   }
   function facade(origin, options={}) {
     return Object.freeze({
-      originReport: extra => enqueue(() => reportControl(origin), {...options,...extra}),
+      originReport: extra => refreshOrigin(origin, {...options,...extra}),
+      queryTemplate,
       async iqa(selector, extra={}) {
         const targets = origins(selector, extra, origin), results = [];
         for (const item of targets) results.push(await enqueue(() => reportControl(item), {...options,...extra}));
@@ -366,9 +539,9 @@ SOFTWARE.
       else {
         const matches = target.type === 'origin-report' ? [env.origin] : origins(target.selector, target, env.origin);
         for (const item of matches) {
-          reportControl(item); const key = item.report.key;
+          const key = item.template && !item.report ? item.template.key : (reportControl(item), item.report.key);
           if (seen.has(key)) continue;
-          await enqueue(() => reportControl(item), target);
+          await refreshOrigin(item, target);
           seen.add(key); progress.completed.push(key);
         }
       }
@@ -376,7 +549,7 @@ SOFTWARE.
     }
     return progress;
   }
-  window.UnionSuiteRefresh = Object.freeze({version:'1.0', capture, forOrigin:facade, plan,
+  window.UnionSuiteRefresh = Object.freeze({version:'1.1', capture, forOrigin:facade, plan, queryTemplate,
     iqa:(selector,options={}) => facade(options.origin).iqa(selector, options),
     native:(origin,options) => enqueue(() => reportControl(origin),options)});
 })();
@@ -435,6 +608,7 @@ SOFTWARE.
     const p = value.presentation, a = value.action, context = value.context || {};
     object(p,'presentation'); object(a,'action'); object(context,'context');
     if (typeof p.label !== 'string' || !p.label.trim()) throw new TypeError('presentation.label is required.');
+    if (p.useAuthoredLabel != null && typeof p.useAuthoredLabel !== 'boolean') throw new TypeError('presentation.useAuthoredLabel must be boolean.');
     if (p.icon != null && !/^(plus|pencil|trash|ti-[a-z0-9]+(?:-[a-z0-9]+)*)$/.test(p.icon)) throw new TypeError('Use plus, pencil, trash or one Tabler glyph class.');
     for (const name of ['default','header','row','menu']) if (p[name] != null && !['button','icon','link','menu-item'].includes(p[name])) throw new TypeError('Invalid presentation mode: ' + name);
     if (p.tone != null && !['default','danger'].includes(p.tone)) throw new TypeError('presentation.tone must be default or danger.');
@@ -604,7 +778,7 @@ SOFTWARE.
   function paint(state) {
     const element = state.element, definition = state.definition, p = definition?.presentation;
     const mode = p?.[state.placement] || p?.default || 'button';
-    const label = p?.label || state.original['aria-label'] || state.original.title || state.originalLabel || 'Action';
+    const label = (p?.useAuthoredLabel && state.originalLabel) || p?.label || state.original['aria-label'] || state.original.title || state.originalLabel || 'Action';
     const signature = JSON.stringify([label,p?.icon,mode,p?.tone]);
     window.UnionSuiteActionSafety.clear(element);
     if (signature !== state.paintSignature) {
@@ -897,6 +1071,7 @@ SOFTWARE.
           !entry.header.querySelector('.panel-title')?.textContent.trim() ||
           !entry.actions.isConnected || !entry.customActions.isConnected) {
         disposeQuerySearch(entry);
+        disposeHomeTaskEmpty(entry);
         if (wrapper.closest('.us-report-no-styling')) querySearchStates.delete(wrapper);
         entry.actions.remove();
         wrapper.removeAttribute('data-us-query-display');
@@ -922,6 +1097,7 @@ SOFTWARE.
       }
 
       syncQuerySearch(entry);
+      if (!entry.search) syncHomeTaskEmpty(entry, false);
       orderHeaderActions(entry);
       document.dispatchEvent(new CustomEvent('us:panel-actions-ready', {
         detail: { wrapper: wrapper, container: entry.customActions }
@@ -1033,6 +1209,8 @@ SOFTWARE.
     });
   }
   function filterQueryResults(search) {
+    // A queued observer callback can outlive a fragment replacement.
+    if (!search.set.isConnected) return;
     if (search.timer !== null) window.clearTimeout(search.timer);
     search.timer = null;
     search.taskMarkers.forEach(function (node) { node.removeAttribute('data-us-task-completed-content'); });
@@ -1047,7 +1225,7 @@ SOFTWARE.
     });
     var query = search.input ? search.input.value.replace(/\s+/g, ' ').trim().toLocaleLowerCase() : '';
     search.state.query = search.input ? search.input.value : '';
-    var total = 0, matches = 0, outstanding = 0;
+    var total = 0, matches = 0, outstanding = 0, allOutstanding = 0;
     search.rows.forEach(function (row) {
       var item = row.matches('.QueryTemplateItem') ? row : row.querySelector(':scope > .QueryTemplateItem');
       // Only an explicit marker in this result supplies task state. Do not infer
@@ -1057,6 +1235,10 @@ SOFTWARE.
           node.closest('.ContentItemContainer') === search.set.closest('.ContentItemContainer');
       });
       var completed = !!marker && /^(true|1)$/i.test(marker.getAttribute('data-us-task-completed').trim());
+      // Count before visibility/search filtering, including native hidden pages.
+      // Unknown task states stay outstanding; an exiting task stays outstanding
+      // until its completion marker settles after the existing save/animation.
+      if (!completed) allOutstanding++;
       if (completed) {
         marker.setAttribute('data-us-task-completed-content', '');
         search.taskMarkers.push(marker);
@@ -1087,7 +1269,94 @@ SOFTWARE.
       if (search.status.parentElement !== summarySlot) summarySlot.appendChild(search.status);
       message = outstanding + ' outstanding';
     } else if (search.status.parentElement !== search.set.parentElement) search.set.after(search.status);
+    var taskEmpty = syncHomeTaskEmpty(search.entry, !query && allOutstanding === 0 && matches === 0);
+    if (taskEmpty && !summarySlot) message = 'No outstanding tasks assigned to you.';
     if (search.status.textContent !== message) search.status.textContent = message;
+  }
+
+  // The No results marker is authored only in the iPart's No results field.
+  // Missing containers alone are not proof of a successful empty query.
+  function disposeHomeTaskEmpty(entry) {
+    if (entry.taskEmpty) entry.taskEmpty.remove();
+    if (entry.taskEmptySource) entry.taskEmptySource.removeAttribute('data-us-task-empty-replaced');
+    entry.taskEmpty = null;
+    entry.taskEmptySource = null;
+  }
+
+  function syncHomeTaskEmpty(entry, emptyResults) {
+    var body = entry.wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body');
+    var source = body && body.querySelector(':scope > .us-home-tasks-empty');
+    var eligible = entry.wrapper.classList.contains('us-home-tasks') &&
+      !entry.wrapper.closest('.us-report-no-styling');
+    var show = eligible && body && (entry.search ? emptyResults : !!source);
+    if (!show) { disposeHomeTaskEmpty(entry); return false; }
+    if (entry.taskEmpty && (entry.taskEmpty.parentElement !== body || entry.taskEmptySource !== source)) disposeHomeTaskEmpty(entry);
+    if (!entry.taskEmpty) {
+      var id = nextQuerySearchId();
+      var empty = document.createElement('div');
+      empty.className = 'us-task-empty';
+      empty.innerHTML = `<svg class="us-task-empty__biscuit-scene" viewBox="0 0 400 240" fill="none" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="us-task-hammock-${id}" x1="160" y1="130" x2="220" y2="210" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#b5d8cc"/>
+              <stop offset="1" stop-color="#82b7a5"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="201" cy="131" rx="139" ry="94" class="us-task-empty__scene-halo"/>
+          <ellipse cx="201" cy="216" rx="143" ry="9" class="us-task-empty__scene-shadow"/>
+          <!-- A small freestanding hammock keeps the scene compact in a task panel. -->
+          <path d="M64 209 87 77M335 209 312 77" stroke="#c5ad8e" stroke-width="9" stroke-linecap="round"/>
+          <path d="M48 213h42m224 0h39" stroke="#c5ad8e" stroke-width="7" stroke-linecap="round"/>
+          <path d="M88 85 121 148m190-63-34 63" stroke="#b5a48c" stroke-width="2.5" stroke-linecap="round"/>
+          <g class="us-task-empty__hammock">
+            <path d="M99 113Q199 185 301 113Q282 207 203 208Q129 204 99 113Z" fill="url(#us-task-hammock-${id})"/>
+            <!-- Biscuit's relaxed body and curled tail sit behind his familiar face. -->
+            <path d="M256 144q37-36 37-11 0 21-34 23" stroke="#b98459" stroke-width="13" stroke-linecap="round"/>
+            <ellipse cx="225" cy="147" rx="56" ry="36" transform="rotate(-12 225 147)" fill="#ebc492" stroke="#c39a6c" stroke-width="2"/>
+            <ellipse cx="225" cy="141" rx="31" ry="23" transform="rotate(-12 225 141)" fill="#fff0d6"/>
+            <path d="m175 148 15 18" stroke="#6caa95" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="187" cy="165" r="6" fill="#f6d66e" stroke="#c39a6c"/>
+            <g transform="translate(110 71) rotate(-12 56 46)">
+              <rect x="4" y="26" width="32" height="62" rx="17" transform="rotate(14 20 32)" fill="#b98459" stroke="#986a48" stroke-width="2"/>
+              <rect x="91" y="26" width="32" height="62" rx="17" transform="rotate(-14 106 32)" fill="#b98459" stroke="#986a48" stroke-width="2"/>
+              <rect x="13" y="9" width="103" height="81" rx="39" fill="#ebc492" stroke="#c39a6c" stroke-width="2"/>
+              <path d="M58 13q-6-24 6-18l5 9q15-9 10 4" fill="#fff0d6"/>
+              <path d="M60 12q-5 17 0 36 12 10 16-4l-3-30" fill="#fff0d6"/>
+              <ellipse cx="91" cy="43" rx="15" ry="19" transform="rotate(13 91 43)" fill="#d8ab7c"/>
+              <rect x="39" y="52" width="49" height="30" rx="15" fill="#fff0d6"/>
+              <g stroke="#483729" stroke-width="2.8" stroke-linecap="round">
+                <path d="M34 44q7 8 14 0m32 0q7 8 14 0"/>
+                <path d="M63 65v5m-8 0q8 10 16 0" stroke-width="2"/>
+              </g>
+              <path d="M55 55q9-4 17 0 0 12-9 12-8-1-8-12" fill="#483729"/>
+              <ellipse cx="31" cy="63" rx="9" ry="4" fill="#dfaca7" opacity=".7"/>
+              <ellipse cx="98" cy="63" rx="9" ry="4" fill="#dfaca7" opacity=".7"/>
+              <g fill="#c39a6c">
+                <circle cx="48" cy="65" r="1.2"/><circle cx="51" cy="69" r="1.2"/>
+                <circle cx="79" cy="65" r="1.2"/><circle cx="76" cy="69" r="1.2"/>
+              </g>
+            </g>
+            <!-- Front edge and a dangling paw make the resting pose legible. -->
+            <path d="M99 113q101 94 202 0" stroke="#6eaa96" stroke-width="5" stroke-linecap="round"/>
+            <path d="M169 162q-8 7-5 23 3 10 15 7 9-3 6-15l-5-13" fill="#fff0d6" stroke="#c39a6c" stroke-width="2"/>
+            <path d="m171 183 1 6m5-7 1 5" stroke="#c39a6c" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M131 162q59 66 137 0M151 177q47 40 98 0" stroke="#e2efe9" stroke-width="2" opacity=".45"/>
+          </g>
+          <g class="us-task-empty__sleep-marks" fill="#6b8d80" font-family="system-ui, sans-serif" font-weight="600">
+            <text x="242" y="89" font-size="13">z</text>
+            <text x="258" y="71" font-size="17">z</text>
+            <text x="277" y="49" font-size="22">z</text>
+          </g>
+        </svg>
+        <h3 class="us-task-empty__title">You’re all caught up.</h3>
+        <p class="us-task-empty__description">No outstanding tasks assigned to you.</p>`;
+      if (entry.search) entry.search.set.after(empty);
+      else source.after(empty);
+      entry.taskEmpty = empty;
+      entry.taskEmptySource = source;
+      if (source) source.setAttribute('data-us-task-empty-replaced', '');
+    }
+    return true;
   }
 
   function nextQuerySearchId() {
@@ -1183,13 +1452,18 @@ SOFTWARE.
         completedToggle.setAttribute('aria-pressed', String(!!state.showCompleted));
       }
       var search = entry.search = {
-        wrapper:entry.wrapper, filter:filter, button:button, input:input, set:set, completedToggle:completedToggle,
+        entry:entry, wrapper:entry.wrapper, filter:filter, button:button, input:input, set:set, completedToggle:completedToggle,
         filterFocusTarget:input || completedToggle,
         utilities:utilities, status:status, state:state, rows:[], taskMarkers:[], timer:null,
         animation:null, originalInert:false, generatedSetId:generatedSetId
       };
       button.addEventListener('click', function () {
         search.state.collapsed = !search.state.collapsed;
+        if (search.state.collapsed && search.input) {
+          search.input.value = '';
+          stopTaskReveals(search);
+          filterQueryResults(search);
+        }
         render(search, true);
       });
       if (input) {
@@ -1596,6 +1870,8 @@ SOFTWARE.
     else {
       mode.phase = "open";
       fitExpandedFilters(mode);
+      // Measure after the opening animation releases its temporary width.
+      if (window.UnionSuiteIqaColumns) window.UnionSuiteIqaColumns.refresh();
     }
   }
 
@@ -1654,6 +1930,9 @@ SOFTWARE.
     if (!structure) return;
     if (expanded) releaseExpanded(false, false);
     finishTransition(entry);
+    // Capture normal widths before portaling, including immediately after a
+    // native partial update when the column adapter may not have run yet.
+    if (window.UnionSuiteIqaColumns) window.UnionSuiteIqaColumns.refresh({ immediate: true });
     var wrapper = entry.wrapper;
     var original = expandedIntent && expandedIntent.id === reportId(entry) ? expandedIntent : null;
     if (original) window.scrollTo({ left: original.x, top: original.y, behavior: "instant" });
@@ -2048,6 +2327,7 @@ SOFTWARE.
 
   window.UnionSuiteIqaFilters = {
     refresh: function () { attachAjax(); schedule(); },
+    refreshQueryTemplates: function () { expandSectionPresets(); syncQueryDisplayActions(); },
     getActionSlot: function (wrapper) {
       var entry = entries.get(wrapper) || queryDisplayEntries.get(wrapper);
       return entry ? entry.customActions : null;
@@ -3262,6 +3542,14 @@ SOFTWARE.
     })));
   }
   function apply(entry) {
+    const scroll = entry.table.parentElement;
+    const expanded = !!scroll?.classList.contains('us-iqa-data-scroll');
+    if (expanded !== entry.expanded) {
+      // Full-window sizing must not overwrite the normal panel's column widths.
+      entry.layouts[entry.expanded ? 'expanded' : 'panel'] = entry.values.slice();
+      entry.values = (entry.layouts[expanded ? 'expanded' : 'panel'] || entry.values).slice();
+      entry.expanded = expanded;
+    }
     const rows=Array.from(entry.table.tBodies).flatMap(body=>Array.from(body.rows)).filter(row=>row.matches('.rgRow,.rgAltRow')&&row.cells.length===entry.headers.length&&Array.from(row.cells).every(c=>c.colSpan===1&&c.rowSpan===1));
     entry.headers.forEach((head,i)=>{
       // Keep native indexes: hidden columns still have header/cell/col nodes.
@@ -3270,6 +3558,10 @@ SOFTWARE.
       entry.minimum[i]=entry.ids[i]?minWidth(cells):48;
       if(entry.ids[i])cells.forEach(cell=>{if(!entry.marked.has(cell)){entry.marked.add(cell);cell.setAttribute('data-us-iqa-id-cell','');}});
       entry.values[i]=Math.max(entry.values[i],entry.minimum[i]);
+    });
+    if (expanded) fillExpandedWidth(entry, scroll.clientWidth);
+    entry.headers.forEach((head, i) => {
+      if (!entry.resizable[i]) return;
       head.style.width=entry.values[i]+'px';
       if(entry.cols[i])entry.cols[i].style.width=entry.values[i]+'px';
       entry.handles[i].setAttribute('aria-valuenow',String(Math.round(entry.values[i])));
@@ -3277,6 +3569,18 @@ SOFTWARE.
     });
     const total=entry.values.reduce((sum,value,i)=>sum+(entry.visible[i]?value:0),0);
     entry.table.style.tableLayout='fixed';entry.table.style.width=total+'px';entry.table.style.minWidth=total+'px';
+  }
+  function fillExpandedWidth(entry, available) {
+    const total = entry.values.reduce((sum, value, i) => sum + (entry.visible[i] ? value : 0), 0);
+    const extra = available - total;
+    if (extra <= 0) return; // Wider reports retain their widths and scroll.
+    // Leave native utility/hidden columns alone. During a drag or keyboard
+    // resize, distribute spare space to the other data columns first.
+    let flexible = entry.resizable.map((resizable, i) => resizable && i !== entry.resizing);
+    if (!flexible.some(Boolean)) flexible = entry.resizable;
+    const weight = entry.values.reduce((sum, value, i) => sum + (flexible[i] ? value : 0), 0);
+    if (!weight) return;
+    entry.values = entry.values.map((value, i) => flexible[i] ? value + extra * value / weight : value);
   }
   function attach(table,grid) {
     const heads=Array.from(table.tHead?.rows||[]);
@@ -3299,7 +3603,17 @@ SOFTWARE.
     const query=grid.closest('[data-us-iqa-native],.us-report,.SearchContactsClass')?.querySelector('select[id$="_querySelectDropdown"]')?.value||'';
     const key=(table.id||grid.id)+'|'+query+'|'+labels.join('|');
     const cached=widths.get(key);
-    const entry={table,grid,headers,cols,key,visible,resizable,ids:labels.map((label,i)=>resizable[i]&&isId(label)),values:headers.map((head,i)=>resizable[i]&&cached?.[i]!=null?cached[i]:head.getBoundingClientRect().width),minimum:[],handles:[],marked:new Set(),saved:[rememberStyle(table),...headers.filter((h,i)=>resizable[i]).map(rememberStyle),...cols.filter((c,i)=>resizable[i]).map(rememberStyle)]};
+    const entry = {
+      table, grid, headers, cols, key, visible, resizable,
+      ids: labels.map((label, i) => resizable[i] && isId(label)),
+      values: headers.map((head, i) => resizable[i] && cached?.[i] != null ? cached[i] : head.getBoundingClientRect().width),
+      expanded: false,
+      layouts: { expanded: widths.get(key + '|expanded') },
+      minimum: [], handles: [], marked: new Set(),
+      saved: [rememberStyle(table),
+        ...headers.filter((head, i) => resizable[i]).map(rememberStyle),
+        ...cols.filter((col, i) => resizable[i]).map(rememberStyle)]
+    };
     entries.set(table,entry);table.setAttribute('data-us-iqa-column-table','');grid.setAttribute('data-us-iqa-columns','');
     headers.forEach((head,i)=>{
       if(!resizable[i])return;
@@ -3308,7 +3622,13 @@ SOFTWARE.
       handle.title='Drag to resize; Left/Right arrows adjust width; Home fits content';
       const guide=()=>handle.style.setProperty('--us-resize-guide-height',Math.max(head.offsetHeight,table.getBoundingClientRect().bottom-head.getBoundingClientRect().top)+'px');
       handle.addEventListener('pointerenter',guide);handle.addEventListener('focus',guide);
-      const change=value=>{entry.values[i]=Math.max(entry.minimum[i],value);apply(entry);widths.set(key,entry.values.slice());};
+      const change = value => {
+        entry.values[i] = Math.max(entry.minimum[i], value);
+        entry.resizing = i;
+        apply(entry);
+        entry.resizing = undefined;
+        widths.set(key + (entry.expanded ? '|expanded' : ''), entry.values.slice());
+      };
       handle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();});
       handle.addEventListener('keydown',e=>{
         if(!['ArrowLeft','ArrowRight','Home'].includes(e.key))return;e.preventDefault();e.stopPropagation();
@@ -3334,15 +3654,20 @@ SOFTWARE.
     for(const entry of entries.values()){
       if(!entry.table.isConnected||entry.table.closest('.us-report-no-styling'))dispose(entry);else apply(entry);
     }
-    document.querySelectorAll(':is([data-us-iqa-native],.us-report,.SearchContactsClass):not(.us-report-no-styling) [data-gridid] .RadGrid > table.rgMasterTable').forEach(table=>{
-      if(resizeObserver&&!observed.has(table.parentElement)){observed.add(table.parentElement);resizeObserver.observe(table.parentElement);}
-      if(!entries.has(table)&&!table.closest('.us-report-no-styling'))attach(table,table.parentElement);
+    document.querySelectorAll(':is([data-us-iqa-native],.us-report,.SearchContactsClass):not(.us-report-no-styling) [data-gridid] :is(.RadGrid > table.rgMasterTable, .RadGrid > .us-iqa-data-scroll > table.rgMasterTable)').forEach(table=>{
+      const grid = table.closest('.RadGrid');
+      if(resizeObserver&&!observed.has(grid)){observed.add(grid);resizeObserver.observe(grid);}
+      if(!entries.has(table)&&!table.closest('.us-report-no-styling'))attach(table,grid);
     });
     const next=window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
     if(next&&next!==manager){manager=next;manager.add_pageLoading?.(()=>Array.from(entries.values()).forEach(dispose));manager.add_endRequest(schedule);}
   }
   function schedule(){if(!queued){queued=true;requestAnimationFrame(refresh);}}
-  window.UnionSuiteIqaColumns={version:'1.2',refresh:schedule,isIdColumn:isId};
+  window.UnionSuiteIqaColumns = {
+    version: '1.3',
+    refresh: options => options?.immediate ? refresh() : schedule(),
+    isIdColumn: isId
+  };
   function start(){schedule();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});document.fonts?.ready.then(schedule);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
   window.addEventListener('resize',schedule);window.addEventListener('pageshow',schedule);
@@ -4027,11 +4352,51 @@ SOFTWARE.
   if (window.UnionSuiteTaskRows) {window.UnionSuiteTaskRows.refresh();return;}
   const selector='.us-task[data-us-task-completed]:has(> [data-us-task-toggle])';
   const dueLabels=new WeakMap(), runs=new Map();
+  const personalMemberLabels = new WeakMap();
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let scheduled=false;
   const completed=root=>/^(true|1)$/i.test((root.getAttribute('data-us-task-completed')||'').trim());
+  function syncPersonalTaskLabels() {
+    let loggedInPartyId = '';
+    try {
+      const context = JSON.parse(document.getElementById('__ClientContext')?.value || '{}');
+      if (context.isAnonymous !== true && ['string', 'number'].includes(typeof context.loggedInPartyId)) {
+        loggedInPartyId = String(context.loggedInPartyId).trim();
+      }
+    } catch (_) { /* Missing or invalid client context leaves the authored name. */ }
+    document.querySelectorAll('.us-task .us-task__member-name').forEach(link => {
+      const memberId = (link.getAttribute('data-id') || '').trim();
+      const personal = loggedInPartyId && memberId === loggedInPartyId && !link.closest('.us-report-no-styling');
+      const original = personalMemberLabels.get(link);
+      if (personal) {
+        const saved = original || {
+          nodes: [...link.childNodes],
+          href: link.getAttribute('href'),
+          tabindex: link.getAttribute('tabindex'),
+          disabled: link.getAttribute('aria-disabled')
+        };
+        personalMemberLabels.set(link, saved);
+        if (link.textContent !== 'Personal Task') {
+          saved.nodes = [...link.childNodes];
+          link.textContent = 'Personal Task';
+        }
+        if (link.hasAttribute('href')) saved.href = link.getAttribute('href');
+        link.removeAttribute('href');
+        if (link.getAttribute('tabindex') !== '-1') link.setAttribute('tabindex', '-1');
+        if (link.getAttribute('aria-disabled') !== 'true') link.setAttribute('aria-disabled', 'true');
+      } else if (original) {
+        // Restore the authored name and link when context or row identity changes.
+        if (link.textContent === 'Personal Task') link.replaceChildren(...original.nodes);
+        for (const [attribute, value] of [['href', original.href], ['tabindex', original.tabindex], ['aria-disabled', original.disabled]]) {
+          if (value === null) link.removeAttribute(attribute); else link.setAttribute(attribute, value);
+        }
+        personalMemberLabels.delete(link);
+      }
+    });
+  }
   function sync() {
-    runs.forEach((run,root)=>{if(!root.isConnected||root.closest('.us-report-no-styling'))run.finish();});
+    syncPersonalTaskLabels();
+    runs.forEach((run,root)=>{if(!root.isConnected||root.closest('.us-report-no-styling'))run.stopMotion();});
     document.querySelectorAll(selector).forEach(root=>{
       if(root.closest('.us-report-no-styling')||runs.has(root))return;
       const button=root.querySelector(':scope > [data-us-task-toggle]'), done=completed(root);
@@ -4154,9 +4519,23 @@ SOFTWARE.
     // actioned date rather than being stamped with today's.
     const originalDate=root.querySelector('.us-task__date')?.textContent;
     let saved=true;
-    const run={finish:()=>{
+    let motionStopped=false;
+    // Scrolling or filtering can end the visual effect while the PUT is still
+    // pending. Keep the run (and its click lock) until that request settles.
+    function stopMotion() {
+      if(motionStopped)return;
+      motionStopped=true;
+      clearTimeout(timer);
+      release?.();
+      animations.forEach(animation=>animation.cancel());
+      particles.forEach(node=>node.remove());
+      row.removeAttribute('data-us-task-exiting');
+      row.inert=originalInert;
+    }
+    const run={stopMotion,finish:()=>{
       if(runs.get(root)!==run)return;
-      runs.delete(root); clearTimeout(timer);release?.();animations.forEach(animation=>animation.cancel());particles.forEach(node=>node.remove());
+      stopMotion();
+      runs.delete(root);
       const outcome=saved?done:!done;
       root.setAttribute('data-us-task-completed',String(outcome));
       root.removeAttribute('data-us-task-changing');
@@ -4192,34 +4571,43 @@ SOFTWARE.
       }
       const duration=celebrate(button,animations,particles);
       await pause(duration+(showCompleted?0:100));
-      if(runs.get(root)!==run)return;
+      if(motionStopped)return;
       // The row only leaves once iMIS has accepted the change; a rejected write
       // brings it back with its original state instead of hiding a lost edit.
       await request;
-      if(runs.get(root)!==run||showCompleted||!saved)return;
+      if(motionStopped||showCompleted||!saved)return;
       const slide=root.animate([{transform:'translateX(0)',opacity:1},{transform:'translateX(-105%)',opacity:0}],{duration:450,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
       animations.push(slide);await slide.finished;
-      if(runs.get(root)!==run)return;
+      if(motionStopped)return;
       const collapse=row.animate([{height:row.getBoundingClientRect().height+'px',minHeight:'0px'},{height:'0px',minHeight:'0px',paddingTop:'0px',paddingBottom:'0px',borderTopWidth:'0px'}],{duration:300,easing:'ease-in-out',fill:'forwards'});
       animations.push(collapse);await collapse.finished;
     } catch(error) {if(error.name!=='AbortError')console.warn('Task animation could not finish.');}
-    finally {run.finish();}
+    finally {await request;run.finish();}
   }
   document.addEventListener('click',event=>{
     const button=event.target.closest('[data-us-task-toggle]'), root=button?.closest(selector);
     if(root&&!root.closest('.us-report-no-styling')){event.preventDefault();void toggle(root);return;}
-    if(event.target.closest('.us-task-completed-toggle')) runs.forEach((run,task)=>{if(task.closest('[data-us-query-display]')===event.target.closest('[data-us-query-display]'))run.finish();});
+    if(event.target.closest('.us-task-completed-toggle')) runs.forEach((run,task)=>{if(task.closest('[data-us-query-display]')===event.target.closest('[data-us-query-display]'))run.stopMotion();});
   });
   document.addEventListener('input',event=>{
-    if(event.target.matches('.us-query-search-field input'))runs.forEach((run,task)=>{if(task.closest('[data-us-query-display]')===event.target.closest('[data-us-query-display]'))run.finish();});
+    if(event.target.matches('.us-query-search-field input'))runs.forEach((run,task)=>{if(task.closest('[data-us-query-display]')===event.target.closest('[data-us-query-display]'))run.stopMotion();});
   });
-  reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)runs.forEach(run=>run.finish());});
+  reducedMotion.addEventListener('change',()=>{if(reducedMotion.matches)runs.forEach(run=>run.stopMotion());});
   // Fixed celebration overlays must not drift when their source moves.
-  addEventListener('scroll',()=>runs.forEach(run=>run.finish()),true);
-  addEventListener('resize',()=>runs.forEach(run=>run.finish()));
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)runs.forEach(run=>run.finish());});
+  addEventListener('scroll',()=>runs.forEach(run=>run.stopMotion()),true);
+  addEventListener('resize',()=>runs.forEach(run=>run.stopMotion()));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)runs.forEach(run=>run.stopMotion());});
   window.UnionSuiteTaskRows={refresh:schedule};
-  function start(){sync();new MutationObserver(records=>{if(records.some(record=>record.type==='childList'||record.attributeName==='data-us-task-completed'||record.target.closest('.us-report-no-styling')))schedule();}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-us-task-completed','class']});}
+  function start() {
+    sync();
+    new MutationObserver(records => {
+      if (records.some(record => record.type === 'childList' ||
+          ['data-us-task-completed', 'data-id', 'value'].includes(record.attributeName) ||
+          record.target.closest('.us-report-no-styling') ||
+          (record.attributeName === 'class' && record.target.querySelector('.us-task__member-name')))) schedule();
+    }).observe(document.body, {subtree:true, childList:true, attributes:true,
+      attributeFilter:['data-us-task-completed', 'data-id', 'value', 'class']});
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* US-TASK-ROWS:END */

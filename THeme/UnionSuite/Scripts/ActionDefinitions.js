@@ -97,6 +97,19 @@
       refresh:{when:'close',targets:[{type:'origin-report'}]}
     }
   });
+  define('home.open-task', {
+    presentation: {label: 'Open task', useAuthoredLabel: true, default: 'link'},
+    context: {
+      taskUrl: {from: 'trigger', attribute: 'data-us-task-url', required: true}
+    },
+    action: {
+      type: 'popup',
+      recordKey: ['taskUrl'],
+      href: ({context}) => context.taskUrl,
+      popup: {title: 'Open task', width: '70%', height: '70%'},
+      refresh: {when: 'close', targets: [{type: 'origin-report'}]}
+    }
+  });
   define('jobs.edit',{
     presentation:{label:'Edit job',icon:'pencil',default:'button',row:'icon',menu:'menu-item'},
     context:{...row,workplaceId:{from:'trigger',attribute:'data-workplace',required:true,validate:recordId}},
