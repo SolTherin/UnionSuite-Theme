@@ -1,5 +1,7 @@
 # Native CCO: two inline-loading browser probes
 
+> **Approved specification:** [prototypes/approved/cco-inline-loading/](../../approved/cco-inline-loading/README.md). This folder keeps the live trial, its tests and the research until the theme implementation lands.
+>
 > **Research and history:** `research/native-cco-handover/` holds the dated handovers, findings and user-supplied evidence for this investigation. `research/custom-iframe-ipart/` holds the retained research, plans and verification of the retired custom iframe CCO iPart, whose implementation is archived locally. The current direction and live results are further down this README, under the native partial-postback sections.
 
 Status: WIP console experiments, 22 September 2026. These compare inserting HTML into a **native** CCO without an iframe. They do not modify the deployed theme or the Custom CCO ZIP. Live iMIS verification is still required.

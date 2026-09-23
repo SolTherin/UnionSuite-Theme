@@ -1,10 +1,16 @@
 # Native CCO tab switching without page reloads — specification
 
-Status: **draft for approval**, 23 September 2026. Once accepted it moves to
-`prototypes/approved/cco-inline-loading/`. It is implemented as a shared-theme
-feature only after that, with usage-guide documentation. Evidence: the live
-v0.6.0 checklist passed on the sandbox account page (see the WIP README and
-`research/native-cco-handover/`).
+Status: **approved**, 23 September 2026. The owner decided the three open
+questions; they are recorded under Decisions. It is implemented as a
+shared-theme feature, with usage-guide documentation. Evidence: the live
+v0.6.0 checklist passed on the sandbox account page (see the
+[WIP README](../../wip/cco-inline-loading/README.md) and
+`prototypes/wip/cco-inline-loading/research/native-cco-handover/`).
+
+**Implementing it:** read the [implementation guide](IMPLEMENTATION.md). It covers
+the trial's reference code, CCO identification, the switch step by step, loading
+states, coordination with existing theme features, tests, the guide and live
+acceptance.
 
 ## Problem
 
@@ -41,8 +47,10 @@ scroll position and repaints the whole page.
   key) is not known in the browser. The first switch of a CCO sends one
   background async tab-strip postback, as a native click does, and reads the tab
   URL from its `pageRedirect`; nothing is applied to the page. The key is then
-  cached for the session, per page path and tab strip ID, and later switches
-  fetch directly.
+  stored in `localStorage` per page path and tab strip ID for **7 days**, and
+  later switches fetch directly. A stale key cannot break the page: its fetch
+  lacks the expected view, so the switch falls back to native navigation, the
+  stored key is discarded, and the next switch rediscovers it.
 - **Initialization of the inserted view,** in native order:
   - the view's JavaScript-typed inline and external scripts;
   - page-level grid managers (`window['<id>_jsmanager']`) for controls in the view;
@@ -52,8 +60,12 @@ scroll position and repaints the whole page.
 - **Leaving a view** disposes its components and removes the Sys.Application and
   PageRequestManager handlers its initialization registered. Its content is
   replaced with the native `Loading...` placeholder.
-- **Concurrency.** A click during a switch or during a native partial postback is
-  ignored. (Open decision: queue the latest click instead.)
+- **Concurrency: the latest click wins.** A click during a switch, or during a
+  native partial postback, is queued, and a newer click replaces an older queued
+  one. When the current switch or postback finishes, the script switches to the
+  queued tab. A switch in progress is never cancelled, because stopping part-way
+  could leave the page state half-changed. Clicking the tab already being
+  loaded, or the displayed tab, clears the queue.
 - **Failure.** If a switch cannot complete (unexpected response, missing view,
   sign-in page, discovery failure), the theme falls back to native navigation to
   the tab URL. No page is left half-switched without that fallback.
@@ -65,6 +77,10 @@ scroll position and repaints the whole page.
 - **Tab:** the clicked tab is selected immediately and marked `aria-busy`. After
   the theme's 150 ms delay it shows the existing `us-tab-loading-spinner` with
   `data-us-tab-loading`, like native tab loading today.
+- **Queued clicks:** the tab selection and tab spinner move to the latest clicked
+  tab straight away, so it is clear which tab is coming. The content cover and
+  section spinner stay in place, unchanged, across queued clicks until the final
+  tab is ready. The status message announces the latest tab.
 - **Content:** the CCO's multipage is blocked from interaction. After the same
   delay it is covered by an opaque theme surface carrying the shared
   `section-loader-spinning-circles`, 180 px down and kept in view when the page
@@ -97,9 +113,30 @@ scroll position and repaints the whole page.
 
 ## Diagnostics
 
-`window.UnionSuiteCcoSwitch` exposes `refresh()`, `report()` (the trial's report
-format, without ViewState, tokens or row data) and `disable()` for troubleshooting.
-A session-level kill switch returns all CCOs to native behaviour.
+`window.UnionSuiteCcoSwitch` exposes `refresh()` and `report()` (the trial's
+report format, without ViewState, tokens or row data).
+
+## Turning it off
+
+Two switches return every CCO to native page reloads. Either one turns the
+feature off; both are documented in the usage guide.
+
+- **Site-wide:** `enabled: false` in the client theme config,
+  `THeme/UnionSuite-Client/Config.js`, following the existing per-feature pattern:
+
+  ```js
+  window.UnionSuiteCcoSwitchConfig = {
+    ...window.UnionSuiteCcoSwitchConfig,
+    enabled: true // false = every CCO uses native page reloads.
+  };
+  ```
+
+  The default is `true`. The setting is read at click time, so `Config.js` load
+  order does not matter.
+- **This browser tab only:** `UnionSuiteCcoSwitch.disable()` and `.enable()` in the
+  console. Stored in `sessionStorage`, so it survives reloads until the tab is
+  closed, for diagnosing a page without affecting other users.
+- **Planned:** a toggle for the session switch in a taskbar dev mode (TODO).
 
 ## Acceptance
 
@@ -110,16 +147,22 @@ A session-level kill switch returns all CCOs to native behaviour.
   - initialization order;
   - disposal and handler release;
   - loading states, including scrolled pages;
-  - opt-outs;
+  - opt-outs, the site-wide setting and the session switch;
+  - queued clicks, including the spinner moving to the latest tab;
+  - stored URL keys, their 7-day expiry and stale-key recovery;
   - failure fallback;
   - report hygiene.
 - The live checklist in the WIP README passes on the sandbox, plus one non-account
   page with a CCO.
-- Usage guide section: behaviour, opt-outs, loading states, limits and diagnostics.
-  There are no author templates, since no authoring is required.
+- Usage guide section: behaviour, opt-outs, both off switches with copyable
+  `Config.js` and console snippets, loading states, limits and diagnostics. There
+  are no author templates, since no authoring is required.
 
-## Open decisions
+## Decisions (owner, 23 September 2026)
 
-1. The concurrency rule: ignore clicks during a switch, or queue the latest.
-2. The kill switch's form: a session flag, a site setting, or both.
-3. Whether a nested CCO's discovered key is cached for the session only, or longer.
+1. **Concurrency:** queue the latest click. The tab spinner moves to the latest
+   clicked tab; the content spinner stays unchanged across clicks.
+2. **Off switches:** both a site-wide setting in the client `Config.js` and a
+   per-tab session switch, documented in the guide. The taskbar dev-mode toggle
+   is a TODO.
+3. **URL keys:** long-term storage in `localStorage`, for 7 days.
