@@ -14,6 +14,9 @@ THeme/**/*.zip
 
 # Superseded research and disposable experiments (keep current/approved designs tracked)
 /archive/
+# Retired custom CCO iPart: implementation archived locally in archive/; its
+# research and investigation docs live in prototypes/wip/cco-inline-loading/research/
+/Custom CCO iPart/
 
 # Generated guides and component previews; rebuild from maintained sources
 /THeme/UnionSuite/Usage-Guide.html

@@ -1,0 +1,17 @@
+{
+  "provenance": "User-supplied usCcoPartial.report() from the live sandbox, 23 September 2026 (desktop session). Report format excludes tokens, ViewState and row data. User observation: no errors.",
+  "sequence": "About (native start) -> Cases -> Finance -> About; then MembershipDetails Edit -> Cancel and UTProfile Edit -> Cancel",
+  "switches": [
+    { "tab": "Cases", "fetchMs": 1691, "initMs": 599, "totalMs": 2295, "disposed": 27, "releasedHandlers": 0, "trackedHandlers": 5, "creates": 1, "listerRefreshes": 1, "pageErrors": 0 },
+    { "tab": "Finance", "fetchMs": 3470, "initMs": 13, "totalMs": 3486, "disposed": 7, "releasedHandlers": 5, "trackedHandlers": 1, "creates": 2, "listerRefreshes": 0, "pageErrors": 0 },
+    { "tab": "About", "fetchMs": 2071, "initMs": 1180, "totalMs": 3255, "disposed": 2, "releasedHandlers": 1, "trackedHandlers": 21, "creates": 11, "listerRefreshes": 1, "listersSkippedAlreadyInitialized": 2, "pageErrors": 0 }
+  ],
+  "nativeActionsAfterSwitch": [
+    { "action": "MembershipDetails EditPanelTrigger", "status": 200, "redirect": null, "error": null, "updatedPanels": 6, "requestToEndMs": 2064 },
+    { "action": "MembershipDetails panelEditor CancelButton", "status": 200, "redirect": null, "error": null, "updatedPanels": 6, "requestToEndMs": 1409 },
+    { "action": "UTProfile EditPanelTrigger", "status": 200, "redirect": null, "error": null, "updatedPanels": 6, "requestToEndMs": 1313 },
+    { "action": "UTProfile panelEditor CancelButton", "status": 200, "redirect": null, "error": null, "updatedPanels": 6, "requestToEndMs": 1325 }
+  ],
+  "final": { "inAsyncPostBack": false, "orphans": 0, "registeredPanels": 11 },
+  "notTested": "Row-level ContactDetailsEntry/JobEntry/AddressEntry elements (reported uninitialized); saves; popups"
+}

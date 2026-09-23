@@ -1,0 +1,20 @@
+{
+  "registryAvailable": true,
+  "grids": [
+    {
+      "id": "ctl00_TemplateBody_Interactions_ResultsGrid_Grid1",
+      "registered": false,
+      "attachedToCurrentElement": false
+    },
+    {
+      "id": "ctl00_TemplateBody_Calls_ResultsGrid_Grid1",
+      "registered": false,
+      "attachedToCurrentElement": false
+    },
+    {
+      "id": "ctl00_TemplateBody_EmailCOmmunications_CommunicationGrid",
+      "registered": false,
+      "attachedToCurrentElement": false
+    }
+  ]
+}

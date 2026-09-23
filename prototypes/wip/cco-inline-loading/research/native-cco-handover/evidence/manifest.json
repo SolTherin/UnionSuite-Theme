@@ -1,0 +1,45 @@
+{
+  "snapshotDate": "2026-09-22",
+  "probeVersion": "0.4.0-probe",
+  "evidence": [
+    {
+      "file": "probe-a-report.json",
+      "source": "C:/Users/James/.codex/attachments/32213f2c-4c7a-49a8-a11d-a3574528cf53/Pasted text.txt",
+      "sha256": "2325384049FC6DCB2F5DB241CCEAFF8D8F4EC04D52562FB950A4E4E26F515DD5",
+      "exactCopy": true
+    },
+    {
+      "file": "probe-b-report.json",
+      "source": "C:/Users/James/.codex/attachments/0bc6527a-f59e-4966-9d45-92e984da34d5/Pasted text.txt",
+      "sha256": "DD2DECFCB492BBDED97A73251B20059562706892DD346D3C0C13F0E5941A9AE7",
+      "exactCopy": true
+    },
+    {
+      "file": "probe-a-discovery-console.txt",
+      "source": "C:/Users/James/.codex/attachments/854b74c4-13e9-4c03-960c-8e6abefa9aca/Pasted text.txt",
+      "sha256": "519027AC25784F394E9C0E4AD9071C124AA072F368B1023BFE2E613028378036",
+      "exactCopy": true
+    }
+  ],
+  "transcribedRegistry": {
+    "file": "probe-a-grid-registry.json",
+    "source": "Direct user message; formatting escapes removed",
+    "sha256": "26FCB965D6288C26C92E4D92112DE651B48E8174E92DCF419560E6D1142D1D70"
+  },
+  "maintainedSource": [
+    {
+      "path": "prototypes/wip/cco-inline-loading/CCO-Inline-Probes.js",
+      "sha256": "2D460C6B0C45ABA052C372E91C82104E6EA479A8C893F803C97D4984CFE41546"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/test-probes.cjs",
+      "sha256": "F04565EE29B56CA5B640F97782804E48FC5BC231DC3ECAE25D34ECE676964C6E"
+    }
+  ],
+  "lastImplementationValidation": {
+    "syntaxCheck": "passed",
+    "syntheticBrowserScenarios": 53,
+    "liveImisCallsByAgent": false,
+    "rerunForDocumentationOnly": false
+  }
+}

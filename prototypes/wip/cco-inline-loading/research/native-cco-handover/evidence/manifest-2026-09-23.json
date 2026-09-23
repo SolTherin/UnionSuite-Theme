@@ -1,0 +1,110 @@
+{
+  "snapshotDate": "2026-09-23",
+  "sourceVersion": "0.7.1-probe",
+  "sourceValidation": "Untested parser-scope/error-reporting edit; implementation stopped by user before checks.",
+  "lastLiveVersion": "0.7.0-probe",
+  "lastLiveResult": "Failed before initialization: Ambiguous slash after a closing brace.",
+  "lastVerifiedChecks": "0.7.0: 30 Cases scenarios and 70 general scenarios; subsequent disposal guard: two replacement scenarios, one newly added.",
+  "files": [
+    {
+      "path": "prototypes/wip/cco-inline-loading/CCO-Inline-Probes.js",
+      "sha256": "CFD179B0EABA4C75F4ACB5A3FF12A9942EB1005E015C3ADE69988C2FA00AC4E4"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/test-cases-trial.cjs",
+      "sha256": "3E93F8678767E58A5D407738ED3FBB383CA649F5EE848A1E5766C431C4EEB7F8"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/test-probes.cjs",
+      "sha256": "962433309295345DE0940AB35B1FD625D86A1C5B078B3C9C750427B976845CD9"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/Capture-Cases-Callbacks.js",
+      "sha256": "A0029507F2FE195518109BD8DDE7CB16F1D4083E45FA00693E1B24B6E3F1A0C4"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/Capture-Cases-Manager.js",
+      "sha256": "CB3EC2AD1977CE2B8AFEC247AEEB2AC56EBADE48A424E9AF66B3EBC4ADDABCFB"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/Capture-Cases-Pager.js",
+      "sha256": "C155DEDE08AA401C95A7B2D300252D20082DA319D02B580DFF78CDBDB18B6A1C"
+    },
+    {
+      "path": "prototypes/wip/cco-inline-loading/README.md",
+      "sha256": "83A21261CF817EA5159C3D5656C6A4ADF5FD949BF2169EBF23245418333E80A6"
+    },
+    {
+      "path": "Custom CCO iPart/handover/2026-09-22-Native-CCO-Findings.md",
+      "sha256": "3C979F87A98DC862F8CDC4EB77A2B1C9FCCA723A830BE742CDDEB1CB1556B3A1"
+    },
+    {
+      "path": "Custom CCO iPart/handover/2026-09-22-Native-CCO-Handover.md",
+      "sha256": "6ADDC1764AD3B572E93E08F88486E8F5836C795D59EB1CA877E4A6D70C8C8E95"
+    },
+    {
+      "path": "Custom CCO iPart/handover/2026-09-23-Native-CCO-Findings.md",
+      "sha256": "DE5D1BE101BB575FB4A6E66D0518955022C854E65A54285D68FF3BBBE4D9B249"
+    },
+    {
+      "path": "Custom CCO iPart/handover/2026-09-23-Native-CCO-Handover.md",
+      "sha256": "5CFA36446EB8FBFFA844AB59103F663288651290C6CDE0CF1292B5821015E2A5"
+    },
+    {
+      "path": "Custom CCO iPart/handover/README.md",
+      "sha256": "1C9C36F9EF9F63464B8A2B1151325569E3B7CA6AAE5BA1DE9F2738F30FD5EC34"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/cases-pager-source.json",
+      "sha256": "07457D5C785067865CDECEA84C3DA191DC78A5BA6E0A58312678BE49849AE6DB"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/manifest.json",
+      "sha256": "3E57B1DFE9CB8C2C42F2F479FD4FCE71D0C24084FF973FDC760B3E37DF553CBC"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/native-cases-callback-source.json",
+      "sha256": "6B340EFD58280E4C1BC4D27B73A1DEA442740F15BFB590BF982CE8DFA319B735"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/native-cases-grid-baseline.json",
+      "sha256": "D8489AD075712F4C7035126909D9F54E37BB851A867F3CFA0AA2C833BA75D568"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/native-cases-grid-descriptor-v0.5.1.json",
+      "sha256": "8F51827B717929705A15101FE115C5F4D1DE62576A42B18853A9BE86A3581EFC"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/native-cases-manager-source.json",
+      "sha256": "67271F5A147642ACE13F6FDF0D085ADFAECC02CC47CE534937744B14822E7744"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-a-discovery-console.txt",
+      "sha256": "519027AC25784F394E9C0E4AD9071C124AA072F368B1023BFE2E613028378036"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-a-grid-registry.json",
+      "sha256": "26FCB965D6288C26C92E4D92112DE651B48E8174E92DCF419560E6D1142D1D70"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-a-report.json",
+      "sha256": "2325384049FC6DCB2F5DB241CCEAFF8D8F4EC04D52562FB950A4E4E26F515DD5"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-b-cases-trial-v0.6.0-failure.json",
+      "sha256": "A3DA2FE0B41313C3171B2AAF125EC60453BAFD56BD82FF0EDD0AE7903A8C28EA"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-b-cases-trial-v0.7.0-failure.json",
+      "sha256": "1D610629296C569610F0A44DAC4DBEFDAF8FBF3EF8D05B448CF9E64ACAB0B4A1"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/probe-b-report.json",
+      "sha256": "DD2DECFCB492BBDED97A73251B20059562706892DD346D3C0C13F0E5941A9AE7"
+    },
+    {
+      "path": "Custom CCO iPart/handover/evidence/README.md",
+      "sha256": "36446DE12C5A8CC968E846A0C6418D844602ACCB7372D72520873E88B48816B0"
+    }
+  ]
+}

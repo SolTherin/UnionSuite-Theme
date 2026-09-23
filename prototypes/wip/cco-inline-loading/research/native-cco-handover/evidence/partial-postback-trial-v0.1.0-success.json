@@ -1,0 +1,11 @@
+{
+  "provenance": "User-supplied usCcoPartial.report() from the live sandbox, 23 September 2026 (desktop session). The report format excludes tokens, ViewState and row data. User observation: only the tab refreshed and the grid reloaded in place (no page reload).",
+  "summary": {
+    "start": "About (Page_2), freshly reloaded",
+    "fetchMs": 6408,
+    "fieldsSwitched": ["__VIEWSTATE", "__VIEWSTATEGENERATOR", "__RequestVerificationToken", "PageInstanceKey"],
+    "eventValidation": "absent on both pages",
+    "refresh": { "requestToEndMs": 715, "status": 200, "redirect": null, "error": null, "updatedPanels": ["BatchSelectorDisplayControlPanel", "UserMessagesUpdatePanel", "Cases_ListerPanel"], "scriptStartupBlocks": 26, "gridRegisteredAfter": true, "gridAttachedAfter": true },
+    "userSort": { "eventArgument": "FireCommand:…$Grid1$ctl00;Sort;Date", "requestToEndMs": 616, "status": 200, "redirect": null, "error": null, "updatedPanels": ["BatchSelectorDisplayControlPanel", "UserMessagesUpdatePanel", "Cases_ListerPanel"], "scriptStartupBlocks": 24, "gridRegisteredAfter": true }
+  }
+}

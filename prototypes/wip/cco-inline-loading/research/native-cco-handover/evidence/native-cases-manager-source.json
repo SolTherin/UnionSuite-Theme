@@ -1,0 +1,116 @@
+{
+  "capture": "native-cases-manager-source-v1",
+  "gridId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+  "managerName": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager",
+  "managerAvailable": true,
+  "managerAccessorSkipped": false,
+  "fields": [
+    {
+      "name": "OnGridCreated",
+      "prototypeDepth": 0,
+      "type": "function"
+    },
+    {
+      "name": "OnRowCreated",
+      "prototypeDepth": 0,
+      "type": "function"
+    },
+    {
+      "name": "OnRowSelected",
+      "prototypeDepth": 0,
+      "type": "function"
+    },
+    {
+      "name": "OnRowDeselected",
+      "prototypeDepth": 0,
+      "type": "function"
+    },
+    {
+      "name": "constructor",
+      "prototypeDepth": 1,
+      "type": "function"
+    }
+  ],
+  "methods": [
+    {
+      "name": "OnGridCreated",
+      "available": true,
+      "prototypeDepth": 0,
+      "characters": 88,
+      "source": "function(m,n){k=m;if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){c();}}"
+    },
+    {
+      "name": "OnRowCreated",
+      "available": true,
+      "prototypeDepth": 0,
+      "characters": 15,
+      "source": "function(m,n){}"
+    },
+    {
+      "name": "OnRowDeselected",
+      "available": true,
+      "prototypeDepth": 0,
+      "characters": 182,
+      "source": "function(m,n){if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){a(n.get_gridDataItem(),n.get_tableView());}if(i.ClientOnRowDeselected){f(i.ClientOnRowDeselected,m,n);}}"
+    },
+    {
+      "name": "OnRowSelected",
+      "available": true,
+      "prototypeDepth": 0,
+      "characters": 178,
+      "source": "function(m,n){if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){a(n.get_gridDataItem(),n.get_tableView());}if(i.ClientOnRowSelected){f(i.ClientOnRowSelected,m,n);}}"
+    },
+    {
+      "name": "OnLoad",
+      "available": false
+    },
+    {
+      "name": "OnUnload",
+      "available": false
+    },
+    {
+      "name": "Initialize",
+      "available": false
+    },
+    {
+      "name": "initialize",
+      "available": false
+    },
+    {
+      "name": "Dispose",
+      "available": false
+    },
+    {
+      "name": "dispose",
+      "available": false
+    },
+    {
+      "name": "destroy",
+      "available": false
+    },
+    {
+      "name": "constructor",
+      "available": true,
+      "prototypeDepth": 1,
+      "characters": 2172,
+      "source": "function Asi_Web_BusinessDataGrid2(i){var b=this;var k=null;i.GridClientId=i.GridClientId||null;if(i.IsMultiSelect!==true){i.IsMultiSelect=false;}if(i.TrackItemSelectionAcrossPostbacks!==true){i.TrackItemSelectionAcrossPostbacks=false;}if(i.IsSelectedByDefault!==true){i.IsSelectedByDefault=false;}i.DeltaKeys=i.DeltaKeys||null;i.ClientOnRowSelected=i.ClientOnRowSelected||null;i.ClientOnRowDeselected=i.ClientOnRowDeselected||null;this.OnGridCreated=function(m,n){k=m;if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){c();}};this.OnRowCreated=function(m,n){};this.OnRowSelected=function(m,n){if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){a(n.get_gridDataItem(),n.get_tableView());}if(i.ClientOnRowSelected){f(i.ClientOnRowSelected,m,n);}};this.OnRowDeselected=function(m,n){if(i.IsMultiSelect===true&&i.TrackItemSelectionAcrossPostbacks){a(n.get_gridDataItem(),n.get_tableView());}if(i.ClientOnRowDeselected){f(i.ClientOnRowDeselected,m,n);}};function c(){jQuery(\"#\"+h()).remove();jQuery(\"#\"+i.GridClientId).append('<input type=\"hidden\" id=\"'+h()+'\" name=\"'+h()+'\" />');if(typeof i.DeltaKeys!==undefined){l(i.DeltaKeys);}}function a(m,o){if(m===undefined||m==null){return;}if(o===undefined||o==null){return;}var n=e(m,o);if(n!=null){var p=m.get_selected();if(i.IsSelectedByDefault===true){j(!p,n);}else{j(p,n);}}}function e(m,q){if(m===undefined||m==null){return null;}if(q===undefined||q==null){return null;}var n=q.get_clientDataKeyNames();if(n!=null&&n.length>0){var p=\"\";for(var o=0;o<n.length;o++){p+=\"{\"+n[o]+\":\"+m.getDataKeyValue(n[o])+\"}\";}return p;}return null;}function j(m,q){var n=g();if(n==null){return;}var p=(n+\"\").length==0?new Array():n.split(\",\");var o=jQuery.inArray(q,p);if(o>=0&&!m){p.splice(o,1);}else{if(o<0&&m){p.push(q);}}l(p.toString());}function g(){var m=d();if(m!=null){return jQuery(m).val();}return null;}function l(n){var m=d();if(m!=null){jQuery(m).val(n);}}function h(){return i.GridClientId+\"_HiddenDeltaSelectedKeys\";}function d(){var m=jQuery(\"#\"+h());\nif(m.length==1){return m[0];}return null;}function f(n,m,o){(new Function(\"sender\",\"eventArgs\",\"try {\"+n+\"(sender,eventArgs); } finally {}\"))(m,o);}}"
+    }
+  ],
+  "startupLines": [
+    {
+      "scriptIndex": 37,
+      "line": 31,
+      "characters": 658,
+      "source": "                        }Listers = new Array( $('ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid') );jQuery('.chosen-select').chosen({placeholder_text_multiple: '(Any)'});window['ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager']=new Asi_Web_BusinessDataGrid2({\"GridClientId\":\"ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1\",\"IsMultiSelect\":false,\"TrackItemSelectionAcrossPostbacks\":false,\"IsSelectedByDefault\":false,\"DeltaKeys\":\"\",\"ClientOnRowSelected\":null,\"ClientOnRowDeselected\":null});;(function() {"
+    }
+  ],
+  "skippedLines": [
+    {
+      "scriptIndex": 37,
+      "line": 52,
+      "characters": 5845,
+      "reason": "Grid descriptor or page-state line omitted."
+    }
+  ],
+  "scope": "Bounded manager method/setup source for manual inspection. Runtime field values and full grid properties are omitted. No manager method, captured script or grid action was executed."
+}

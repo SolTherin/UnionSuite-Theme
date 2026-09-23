@@ -78,4 +78,4 @@ from their sources and run the usage-guide freshness check before delivery.
 
 - [ ] Verify opt-in `us-cco-sticky-tabs` in live iMIS with the member banner, long menus, partial refresh and site-specific overflow wrappers. Local fixture covers sticky positioning and CCO boundaries; grey-background navigation remains deferred.
 
-- [ ] Custom CCO iPart: continue from [session handover](prototypes/UnionSuite-CCO-iPart-Handover.md). User prioritizes speed, independent tab loading and retained/background-loaded pages. First verify content-only rendering and native interactions; separate from the deferred banner zone switcher.
+- [ ] Native CCO tab switching without page reloads: approve the specification and implement it in the shared theme, applying to every CCO. Live feasibility checklist passed; see the [WIP](prototypes/wip/cco-inline-loading/README.md). Background preloading and kept tabs are v2. The custom CCO iPart is retired and archived.

@@ -2378,20 +2378,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* Custom CCO: remove only the native body inset immediately around its mount. */
-.panel-body:has(> .us-cco[data-us-cco]):not(:where(.us-report-no-styling, .us-report-no-styling *)):not(:has(> .us-cco.us-report-no-styling)) {
-  padding-inline: 0;
-  padding-top: 0;
-}
-
-.panel-heading[data-us-cco-empty-heading] {
-  display: none;
-}
-
-.us-cco > .tabs-horizontal > .RadTabStrip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  --rail-pad: 0;
-}
-
 /* US-HOME-WELCOME:START — authored Content HTML, independent of the iPart shell. */
 
 /* iPart CSS class: iMIS creates this owner immediately around the panel.
@@ -7182,10 +7168,6 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-EMBEDDED-CCO:START — put EmbeddedCCO in the CCO iPart CSS class field.
    Only the outer organiser loses its chrome; nested panels/tabs keep theirs. */
-:root .EmbeddedCCO .us-cco:has(> .tabs-wrapper):not(:where(.EmbeddedCCO .tabs-wrapper .us-cco, .us-report-no-styling, .us-report-no-styling *)) {
-  background: transparent;
-}
-
 :root .EmbeddedCCO :is(.cco, .tabs-wrapper):has(> .RadMultiPage):not(:where(.EmbeddedCCO :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) {
   display: block;
   margin: 0;
@@ -7214,7 +7196,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* iMIS can render the organiser without a panel, with a direct panel, or with
    one empty/native wrapper around the panel. Do not select descendant panels. */
-:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper, .us-cco) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
   padding: 0;
   border: 0;
@@ -7223,12 +7205,12 @@ html.us-taskbar-mounted #hd .search-dropdown {
   box-shadow: none;
 }
 
-:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper, .us-cco) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-heading {
+:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-heading {
   display: none;
 }
 
-:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper, .us-cco) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-body-container,
-:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper, .us-cco) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-body-container > .panel-body {
+:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-body-container,
+:root :is(.EmbeddedCCO > .panel, .EmbeddedCCO > div:not(.cco, .tabs-wrapper) > .panel):has(.cco, .tabs-wrapper):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .panel-body-container > .panel-body {
   margin: 0;
   padding: 0;
   border: 0;

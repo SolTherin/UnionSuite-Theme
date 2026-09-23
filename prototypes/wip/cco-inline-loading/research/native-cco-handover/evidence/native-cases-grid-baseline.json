@@ -1,0 +1,49 @@
+{
+  "provenance": {
+    "source": "User-pasted gridDiagnostics result in the resumed CCO task, 22 September 2026",
+    "kind": "Selected-field transcription, not an independent agent live request or a full raw copy",
+    "normalization": "Chat backslash escapes before underscores removed from identifiers. Resource paths/query keys are summarized by count only; presentation-formatted URLs and ambiguous TSM query-key decoration are not reconstructed."
+  },
+  "report": {
+    "version": "0.5.0-probe",
+    "selector": "#ste_container_ciAccountpagetabs #ste_container_Cases .RadGrid",
+    "gridId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+    "rendering": "native-dom",
+    "sourceEvidence": "scripts currently present in live DOM; partial-postback scripts may be absent",
+    "registryAvailable": true,
+    "registered": true,
+    "attachedToCurrentElement": true,
+    "radGridTypeAvailable": true,
+    "relatedScripts": [
+      { "scriptIndex": 16, "characters": 197, "insideSource": true },
+      { "scriptIndex": 37, "characters": 24266, "insideSource": true }
+    ],
+    "descriptors": [],
+    "unsupportedScripts": [
+      { "scriptIndex": 16, "reason": "Template/regex/division syntax is outside the diagnostic parser." },
+      { "scriptIndex": 37, "reason": "Template/regex/division syntax is outside the diagnostic parser." }
+    ],
+    "hiddenInputs": [
+      {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_HiddenKeyField1",
+        "sourceCount": 1,
+        "liveCount": 1,
+        "insideSource": true,
+        "sourceHidden": true
+      },
+      {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ClientState",
+        "sourceCount": 1,
+        "liveCount": 1,
+        "insideSource": true,
+        "sourceHidden": true
+      }
+    ]
+  },
+  "resourceSummary": {
+    "reportedEntries": 17,
+    "allReportedExactUrlsPresentInLiveDocument": true,
+    "scope": "Whole source document; this does not identify required Cases dependencies or prove script execution"
+  },
+  "conclusion": "Native Cases client registration and attachment are confirmed by the supplied report. The diagnostic failed to extract descriptors; it does not prove they are absent. No native sort/page action or B-inserted registration result was supplied."
+}

@@ -10,9 +10,8 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
    await page.setViewportSize({width,height:1000});
    for(const vertical of [false,true]){
     await page.locator('#orientation-toggle').setChecked(vertical);
-    for(const kind of ['panel','empty','direct','custom']){
+    for(const kind of ['panel','empty','direct']){
      await page.locator('.iMIS-WebPart').evaluate((n,html)=>n.outerHTML=html,example.fixture('embedded-example',kind,vertical));
-     if(kind==='custom')await page.addStyleTag({content:fs.readFileSync('Custom CCO iPart/src/styles.css','utf8')});
      const cco=page.locator('#embedded-example-cco'),strip=cco.locator(':scope > .RadTabStrip,:scope > .RadTabStripVertical'),body=cco.locator(':scope > .RadMultiPage');
      assert.equal(await strip.isVisible(),false,kind+' outer tabs hidden');
      assert(await cco.locator('.nested-panel > .panel-heading').isVisible(),'nested header retained');
@@ -21,7 +20,6 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
      assert.deepEqual(await body.evaluate(n=>{const s=getComputedStyle(n);return [s.paddingTop,s.paddingLeft,s.borderTopWidth,s.backgroundColor]}),['0px','0px','0px','rgba(0, 0, 0, 0)']);
      assert(await body.evaluate(n=>Math.abs(n.getBoundingClientRect().left-n.parentElement.getBoundingClientRect().left)<1),'no empty vertical rail');
      if(kind==='panel'||kind==='empty')assert.equal(await page.locator('.outer-panel > .panel-heading').isVisible(),false);
-     if(kind==='custom')assert.equal(await page.locator('.us-cco').evaluate(n=>getComputedStyle(n).backgroundColor),'rgba(0, 0, 0, 0)');
      await page.locator('#embedded-example').evaluate(n=>n.classList.add('us-report-no-styling'));
      assert(await strip.isVisible(),'opt-out restores tabs');
      await page.locator('#embedded-example').evaluate(n=>n.classList.remove('us-report-no-styling','EmbeddedCCO'));
@@ -40,6 +38,6 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
   await frame.locator('#embedded-toggle').check();assert.equal(await outer.isVisible(),false);
   assert.equal(await page.locator('#embedded-cco-class').innerText(),'EmbeddedCCO');
   await page.screenshot({path:'.preview/embedded-cco-guide.png'});
-  console.log('PASS EmbeddedCCO: horizontal/vertical, desktop/mobile, direct/wrapped/empty/custom, nested content, opt-out, replacement and guide controls.');
+  console.log('PASS EmbeddedCCO: horizontal/vertical, desktop/mobile, direct/wrapped/empty, nested content, opt-out, replacement and guide controls.');
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

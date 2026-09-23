@@ -1,0 +1,95 @@
+{
+  "provenance": "Transcribed from the user-supplied pager capture. Chat indentation entities and escaped underscores normalized; diagnostic values preserved.",
+  "report": {
+    "capture": "cases-pager-source-v1",
+    "source": "fresh-parent-response-not-inserted",
+    "gridId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+    "pagerId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox",
+    "insideGrid": true,
+    "descriptor": {
+      "scriptIndex": 37,
+      "line": 54,
+      "offset": 13553,
+      "constructor": "Telerik.Web.UI.RadComboBox",
+      "properties": {
+        "type": "object",
+        "fields": {
+          "_dropDownWidth": {
+            "type": "number",
+            "value": 0
+          },
+          "_height": {
+            "type": "number",
+            "value": 0
+          },
+          "_skin": {
+            "type": "string"
+          },
+          "_text": {
+            "type": "string"
+          },
+          "_uniqueId": {
+            "type": "identifier",
+            "id": "ctl01$TemplateBody$WebPartManager1$gwpciAccountpagetabs$ciAccountpagetabs$Cases$ResultsGrid$Grid1$ctl00$ctl03$ctl01$PageSizeComboBox"
+          },
+          "_value": {
+            "type": "string"
+          },
+          "clientStateFieldID": {
+            "type": "identifier",
+            "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox_ClientState"
+          },
+          "collapseAnimation": {
+            "type": "string"
+          },
+          "enableAriaSupport": {
+            "type": "boolean",
+            "value": true
+          },
+          "expandAnimation": {
+            "type": "string"
+          },
+          "itemData": {
+            "type": "array",
+            "length": 4
+          },
+          "localization": {
+            "type": "string"
+          },
+          "selectedIndex": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "truncated": false
+      },
+      "eventsSource": "{\"selectedIndexChanged\":Telerik.Web.UI.Grid.ChangePageSizeComboHandler,\"selectedIndexChanging\":Telerik.Web.UI.Grid.ChangingPageSizeComboHandler}",
+      "referencesSource": "null",
+      "postBackSources": {}
+    },
+    "gridDescriptorPosition": {
+      "scriptIndex": 37,
+      "line": 57,
+      "offset": 15237
+    },
+    "emittedBeforeGrid": true,
+    "hiddenInputs": [
+      {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_HiddenKeyField1",
+        "name": "ctl01$TemplateBody$WebPartManager1$gwpciAccountpagetabs$ciAccountpagetabs$Cases$ResultsGrid$HiddenKeyField1",
+        "insideGrid": false
+      },
+      {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox_ClientState",
+        "name": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox_ClientState",
+        "insideGrid": true
+      },
+      {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ClientState",
+        "name": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ClientState",
+        "insideGrid": true
+      }
+    ],
+    "scope": "One same-origin Cases GET. No insertion, initialization, postback or native action. Row data, combo item data and input values omitted. Exact bounded event/postback code included for inspection."
+  }
+}

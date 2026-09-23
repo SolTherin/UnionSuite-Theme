@@ -1,0 +1,44 @@
+{
+  "provenance": "Transcribed from the user's Cases report and subsequent general report on 22 September 2026. Chat HTML indentation entities normalized; report values unchanged. The user confirmed they had reduced the Cases page size since the earlier captures to expose pagination controls.",
+  "trial": {
+    "version": "0.6.0-probe",
+    "mode": "parent",
+    "initialTab": "About",
+    "status": "failed",
+    "cycles": [
+      {
+        "status": "failed",
+        "error": "Cases contract: additional native controls need inspection."
+      }
+    ],
+    "limitation": "Client initialization trial only. Native sorting/paging and server-state compatibility are unverified. Reload after native actions or failed initialization."
+  },
+  "generalReport": [
+    {
+      "mode": "parent",
+      "tab": "Cases",
+      "index": 8,
+      "status": "failed",
+      "iparts": ["ste_container_Cases"],
+      "nativeControls": [
+        {
+          "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+          "type": "RadGrid RadGrid_MetroTouch"
+        },
+        {
+          "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox",
+          "type": "RadComboBox RadComboBox_MetroTouch  PageSizeDropDown"
+        }
+      ],
+      "scriptsInFragment": 1,
+      "documentScriptsNotReplayed": 41,
+      "componentInitializers": 3,
+      "inlineHandlers": 15,
+      "stylesInHeadNotImported": 9,
+      "removedHiddenInputs": 4,
+      "removedNestedDocuments": 0,
+      "existingComponentIds": [],
+      "error": "Cases contract: additional native controls need inspection."
+    }
+  ]
+}

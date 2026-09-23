@@ -715,13 +715,13 @@ Banner breakout and text insets consume the nearest row's actual gutter.
 The supplied native CCO structure includes
 `.RadMultiPage > .rmpView > .ContentWizardDisplay > div > .row`.
 Its content panel padding shares the row's document and accommodates the
-negative margins. The custom CCO puts an iframe inside its content panel:
-padding outside that iframe cannot balance rows inside the child document.
+negative margins. Content embedded in an iframe cannot use that padding:
+padding outside the iframe cannot balance rows inside the child document, and
 `#MainPanel .EmptyMasterContentPanel` has no horizontal padding. A local replay
-of the native structure with UltraWave, Orion and shared CSS confirmed a 984px
-child viewport with a 1024px outer row spanning −20px to 1004px under the earlier
-40px default. With the 24px page-layout gutter, the same unbalanced layout would
-still have a 1008px row from −12px to 996px; its margin correction remains necessary.
+for the retired custom CCO iPart, with UltraWave, Orion and shared CSS, confirmed a
+984px child viewport with a 1024px outer row spanning −20px to 1004px under the
+earlier 40px default. With the 24px page-layout gutter, the same unbalanced layout
+would still have a 1008px row from −12px to 996px.
 
 Correct the layout boundary that owns the row: retain balancing parent padding,
 or clear only the unbalanced outer row margins. Never reset all `.row` gutters,
@@ -731,11 +731,11 @@ intentional internal scroll regions. Inspect rendered class wrappers before
 choosing selectors. Measure the child document and any scrollable shell using
 `scrollWidth` versus `clientWidth`; inspect row edges and computed parent padding.
 
-The custom CCO correction lives in `Custom CCO iPart/src/frame-size.js`, in the
-stylesheet injected into the child document. It targets the outer
+The retired custom CCO iPart corrected this in the stylesheet it injected into the
+child document, clearing only the outer
 `:is(.ContentWizardDisplay, .ContentPanel, .EmptyMasterContentPanel) > div > .row`
-structure outside iPart/grid/popup components; padded `.container` and
-`.container-fluid` layout divs are excluded. Nested rows and column padding
-remain native. It requires a rebuilt CCO ZIP, not a global theme gutter reset.
-See the [theme gotcha](THeme/UnionSuite/Usage-Guide.html#outer-row-gutters) and
-[CCO visual regression and ownership](Custom%20CCO%20iPart/references/Usage-Guide.html#outer-gutters).
+margins outside iPart/grid/popup components, not with a global theme gutter reset.
+Its research is retained in
+[the CCO feature research](prototypes/wip/cco-inline-loading/research/custom-iframe-ipart/README.md); the
+implementation is archived locally. See the
+[theme gotcha](THeme/UnionSuite/Usage-Guide.html#outer-row-gutters).

@@ -1,0 +1,45 @@
+{
+  "provenance": "Transcribed from the latest user-supplied v0.7.0 report. Chat indentation entities and escaped underscores normalized. No independent live request by the assistant.",
+  "report": {
+    "version": "0.7.0-probe",
+    "mode": "parent",
+    "initialTab": "About",
+    "status": "failed",
+    "cycles": [
+      {
+        "status": "failed",
+        "initializationAttempted": false,
+        "error": "Ambiguous slash after a closing brace.",
+        "insertion": {
+          "mode": "parent",
+          "tab": "Cases",
+          "index": 8,
+          "status": "failed",
+          "iparts": [
+            "ste_container_Cases"
+          ],
+          "nativeControls": [
+            {
+              "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+              "type": "RadGrid RadGrid_MetroTouch"
+            },
+            {
+              "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00_ctl03_ctl01_PageSizeComboBox",
+              "type": "RadComboBox RadComboBox_MetroTouch  PageSizeDropDown"
+            }
+          ],
+          "scriptsInFragment": 1,
+          "documentScriptsNotReplayed": 41,
+          "componentInitializers": 3,
+          "inlineHandlers": 15,
+          "stylesInHeadNotImported": 9,
+          "removedHiddenInputs": 4,
+          "removedNestedDocuments": 0,
+          "existingComponentIds": [],
+          "error": "Ambiguous slash after a closing brace."
+        }
+      }
+    ],
+    "limitation": "Client initialization trial only. Native sorting/paging and server-state compatibility are unverified. Reload after native actions or failed initialization."
+  }
+}

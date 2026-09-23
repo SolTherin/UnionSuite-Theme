@@ -1,0 +1,483 @@
+{
+  "version": "0.5.1-probe",
+  "selector": "#ste_container_ciAccountpagetabs #ste_container_Cases .RadGrid",
+  "gridId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+  "rendering": "native-dom",
+  "sourceEvidence": "scripts currently present in live DOM; partial-postback scripts may be absent",
+  "registryAvailable": true,
+  "registered": true,
+  "attachedToCurrentElement": true,
+  "radGridTypeAvailable": true,
+  "relatedScripts": [
+    {
+      "scriptIndex": 16,
+      "characters": 197,
+      "insideSource": true
+    },
+    {
+      "scriptIndex": 37,
+      "characters": 24266,
+      "insideSource": true
+    }
+  ],
+  "descriptors": [
+    {
+      "scriptIndex": 37,
+      "line": 52,
+      "constructor": "Telerik.Web.UI.RadGrid",
+      "constructorAvailable": true,
+      "target": {
+        "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+        "sourceCount": 1,
+        "liveCount": 1,
+        "insideSource": true,
+        "sourceHidden": false
+      },
+      "properties": {
+        "supported": true,
+        "type": "object",
+        "fields": {
+          "ClientID": {
+            "type": "identifier",
+            "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+            "sourceCount": 1,
+            "liveCount": 1,
+            "insideSource": true,
+            "sourceHidden": false
+          },
+          "ClientSettings": {
+            "type": "object",
+            "fields": {
+              "AllowAutoScrollOnDragDrop": {
+                "type": "boolean"
+              },
+              "ShouldCreateRows": {
+                "type": "boolean"
+              },
+              "DataBinding": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              },
+              "Selecting": {
+                "type": "object",
+                "fields": {
+                  "CellSelectionMode": {
+                    "type": "number"
+                  },
+                  "AllowRowSelect": {
+                    "type": "boolean"
+                  },
+                  "EnableDragToSelectRows": {
+                    "type": "boolean"
+                  }
+                },
+                "truncated": false
+              },
+              "Scrolling": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              },
+              "Resizing": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              },
+              "ClientMessages": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              },
+              "KeyboardNavigationSettings": {
+                "type": "object",
+                "fields": {
+                  "AllowActiveRowCycle": {
+                    "type": "boolean"
+                  },
+                  "EnableKeyboardShortcuts": {
+                    "type": "boolean"
+                  },
+                  "FocusKey": {
+                    "type": "number"
+                  },
+                  "InitInsertKey": {
+                    "type": "number"
+                  },
+                  "RebindKey": {
+                    "type": "number"
+                  },
+                  "ExitEditInsertModeKey": {
+                    "type": "number"
+                  },
+                  "UpdateInsertItemKey": {
+                    "type": "number"
+                  },
+                  "DeleteActiveRow": {
+                    "type": "number"
+                  },
+                  "ExpandDetailTableKey": {
+                    "type": "number"
+                  },
+                  "CollapseDetailTableKey": {
+                    "type": "number"
+                  },
+                  "MoveDownKey": {
+                    "type": "number"
+                  },
+                  "MoveUpKey": {
+                    "type": "number"
+                  },
+                  "SaveChangesKey": {
+                    "type": "number"
+                  },
+                  "CancelChangesKey": {
+                    "type": "number"
+                  }
+                },
+                "truncated": false
+              },
+              "Animation": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              },
+              "Virtualization": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              }
+            },
+            "truncated": false
+          },
+          "Skin": {
+            "type": "string"
+          },
+          "SortingSettings": {
+            "type": "object",
+            "fields": {
+              "SortToolTip": {
+                "type": "string"
+              },
+              "SortedAscToolTip": {
+                "type": "string"
+              },
+              "SortedDescToolTip": {
+                "type": "string"
+              },
+              "SortedBackColor": {
+                "type": "object",
+                "fields": {
+                  "R": {
+                    "type": "number"
+                  },
+                  "G": {
+                    "type": "number"
+                  },
+                  "B": {
+                    "type": "number"
+                  },
+                  "A": {
+                    "type": "number"
+                  },
+                  "IsKnownColor": {
+                    "type": "boolean"
+                  },
+                  "IsEmpty": {
+                    "type": "boolean"
+                  },
+                  "IsNamedColor": {
+                    "type": "boolean"
+                  },
+                  "IsSystemColor": {
+                    "type": "boolean"
+                  },
+                  "Name": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "EnableSkinSortStyles": {
+                "type": "boolean"
+              },
+              "ShowNoSortIcons": {
+                "type": "boolean"
+              },
+              "ViewState": {
+                "type": "object",
+                "fields": {},
+                "truncated": false
+              }
+            },
+            "truncated": false
+          },
+          "UniqueID": {
+            "type": "identifier",
+            "id": "ctl01$TemplateBody$WebPartManager1$gwpciAccountpagetabs$ciAccountpagetabs$Cases$ResultsGrid$Grid1",
+            "sourceCount": 0,
+            "liveCount": 0,
+            "insideSource": false,
+            "sourceHidden": false
+          },
+          "_activeRowIndex": {
+            "type": "string"
+          },
+          "_clientKeyValues": {
+            "type": "object",
+            "fields": {
+              "0": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "1": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "2": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "3": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "4": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              },
+              "5": {
+                "type": "object",
+                "fields": {
+                  "code_CaseNum": {
+                    "type": "string"
+                  }
+                },
+                "truncated": false
+              }
+            },
+            "truncated": false
+          },
+          "_controlToFocus": {
+            "type": "string"
+          },
+          "_currentPageIndex": {
+            "type": "number"
+          },
+          "_defaultDateTimeFormat": {
+            "type": "string"
+          },
+          "_editIndexes": {
+            "type": "string"
+          },
+          "_embeddedSkin": {
+            "type": "boolean"
+          },
+          "_enableAriaSupport": {
+            "type": "boolean"
+          },
+          "_freezeText": {
+            "type": "string"
+          },
+          "_gridTableViewsData": {
+            "type": "string"
+          },
+          "_masterClientID": {
+            "type": "identifier",
+            "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00",
+            "sourceCount": 1,
+            "liveCount": 1,
+            "insideSource": true,
+            "sourceHidden": false
+          },
+          "_shouldFocusOnPage": {
+            "type": "boolean"
+          },
+          "_unfreezeText": {
+            "type": "string"
+          },
+          "allowMultiRowSelection": {
+            "type": "boolean"
+          },
+          "clientStateFieldID": {
+            "type": "identifier",
+            "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ClientState",
+            "sourceCount": 1,
+            "liveCount": 1,
+            "insideSource": true,
+            "sourceHidden": true
+          },
+          "expandItems": {
+            "type": "object",
+            "fields": {},
+            "truncated": false
+          },
+          "renderMode": {
+            "type": "number"
+          }
+        },
+        "truncated": false
+      },
+      "eventsSupported": false,
+      "events": [],
+      "referencesSupported": true,
+      "references": []
+    }
+  ],
+  "unsupportedScripts": [
+    {
+      "scriptIndex": 16,
+      "reason": "Ambiguous slash after a closing brace.",
+      "offset": 191,
+      "line": 3
+    }
+  ],
+  "hiddenInputs": [
+    {
+      "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_HiddenKeyField1",
+      "sourceCount": 1,
+      "liveCount": 1,
+      "insideSource": true,
+      "sourceHidden": true
+    },
+    {
+      "id": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ClientState",
+      "sourceCount": 1,
+      "liveCount": 1,
+      "insideSource": true,
+      "sourceHidden": true
+    }
+  ],
+  "resources": [
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Unbundled/ApplicationInsightsCookieCleanup.min.js",
+      "queryKeys": [
+        "v"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Unbundled/ApplicationInsights.js",
+      "queryKeys": [
+        "v"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://cdn.uhub.org.au/EMS/js/i4u_JsFunctions.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://js.monitor.azure.com/scripts/b/ai.2.min.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://cdn.uhub.org.au/EMS/js/taskbar-inject.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/App_Themes/IQA-Theme/IQA-Enhancements.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Unbundled/AmplitudeCookieCleanup.min.js",
+      "queryKeys": [
+        "v"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Jquery/Jquery.min.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Jquery/jquery-migrate.min.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/WebResource.axd",
+      "queryKeys": [
+        "d",
+        "t"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/ScriptResource.axd",
+      "queryKeys": [
+        "d",
+        "t"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/iParts/Commerce/BatchSelector/BatchSelectorDisplay.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/Telerik.Web.UI.WebResource.axd",
+      "queryKeys": [
+        "_TSM_HiddenField_",
+        "compress",
+        "_TSM_CombinedScripts_"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/AsiCommon/Scripts/Asi.js",
+      "queryKeys": [
+        "v"
+      ],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/iparts/Communications/Notification/Notification.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    },
+    {
+      "path": "https://uhubemsdev.imiscloud.com/iparts/Common/ContentCollectionOrganizer/ContentCollectionOrganizer.js",
+      "queryKeys": [],
+      "exactUrlPresentInLiveDocument": true
+    }
+  ],
+  "resourcesScope": "whole source document; presence does not prove dependency or execution",
+  "limitation": "Read-only inventory. Property values are omitted except verified DOM/control identifiers. No control creation or server-operation acceptance."
+}

@@ -1,0 +1,24 @@
+{
+  "provenance": {
+    "source": "User-pasted callback capture in the resumed CCO task, 22 September 2026",
+    "kind": "Transcription of supplied fields; not an independent live request",
+    "normalization": "Removed chat &#x20; indentation entities, Markdown backslash escapes before underscores/angle brackets and extra presentation escaping around JSON quotes."
+  },
+  "report": {
+    "capture": "native-cases-callback-source-v1",
+    "gridId": "ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1",
+    "descriptorSource": {
+      "scriptIndex": 37,
+      "line": 52
+    },
+    "eventsSource": "{\"gridCreated\":window['ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager'].OnGridCreated,\"rowCreated\":window['ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager'].OnRowCreated,\"rowDeselected\":window['ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager'].OnRowDeselected,\"rowSelected\":window['ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_jsmanager'].OnRowSelected}",
+    "referencesSource": "null",
+    "shortRelatedHelpers": [
+      {
+        "scriptIndex": 16,
+        "source": "\n//<![CDATA[\nvar table = document.getElementById('ctl01_TemplateBody_WebPartManager1_gwpciAccountpagetabs_ciAccountpagetabs_Cases_ResultsGrid_Grid1_ctl00'); if(table != null){ table.focus();}//]]>\n"
+      }
+    ],
+    "scope": "Exact bounded callback/helper source for manual inspection. Properties, row data and input values are not captured. Nothing is initialized or submitted."
+  }
+}

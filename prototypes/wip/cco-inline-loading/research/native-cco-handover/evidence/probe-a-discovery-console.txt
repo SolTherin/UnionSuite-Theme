@@ -1,0 +1,85 @@
+await usCcoInline.startChild({
+  parentDvk: 'bc60a070-2cb9-4bb7-82ba-11b450bf958a',
+  rootSelector: '#ste_container_ciAccountpagetabs'
+});
+console.table() debugger eval code:208:13
+(index)	contentItemKey	name	dynamic	folderMode	folderKey	folderPath	defaultFolderKey	defaultFolderPath	parameter	wizard
+0	b511e4d0-55d8-4a38-b20d-f26d82b1af72	Account page tabs	true	true	a5855360-8ee9-4be8-8cfd-78aca7a92b83	@/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Tabs	2b018016-b481-4fc8-82ee-a98efe006789	@/iCore/Contacts/ContactLayouts/Staff/Tabs	<empty string>	undefined
+[CCO inline] Folder lookup 
+Object { key: "a5855360-8ee9-4be8-8cfd-78aca7a92b83", fallbackUsed: false }
+debugger eval code:240:15
+console.table() debugger eval code:265:13
+(index)	id	name	caption
+0	86852ceb-7000-4fde-b18d-936a0b61a6d8	0Overview	Overview
+1	58ce0823-a5c6-4ed9-9380-45a8a14792bd	1About_Me_Staff	About
+2	90ae814b-5b09-42ff-947d-5210d20d728f	2Finance	Finance
+3	0494880a-7438-4a32-9e40-118b8b21a5ff	3Interaction	Notes and Interactions
+4	aac8a91d-4a3e-4ba9-9bca-18fff68399c8	7Preferences	Preferences
+5	5e335e48-ae14-4f3d-9ea7-fc2465068486	8Security	Security
+6	beefa5a3-1629-4fa9-9708-33c71cfe97ea	9Alerts_Member_Staff	Alerts
+7	a19bad5c-9130-4202-bce0-9739d1fdb405	9Participation	Participation
+8	fb6344f1-c9ae-4009-a336-a44bcc750901	Cases	Cases
+9	263d232d-23e4-4124-8f61-e0fc5fddc2c5	Collective_Agreements	Collective Agreements
+10	0b51acc3-52c5-40a4-a9d4-ef60d7cd4c89	Engagement	Engagement
+11	1e75fa30-1326-46cc-9acb-0829e1186b4c	History	History
+12	07ea70b1-8dfd-416d-9cb7-a0351f7d9125	Manage_Member	Manage Member
+13	00536499-744f-476a-9aa0-0a3d3b6b6262	Salary-Lookup	Salary Lookup
+14	3881e422-4ae4-49a7-8acb-d58d0dc64665	Yabbr-Chat	Yabbr Chat
+console.table() debugger eval code:400:15
+(index)	tab	dvk
+0	Overview	86852ceb-7000-4fde-b18d-936a0b61a6d8
+1	About	58ce0823-a5c6-4ed9-9380-45a8a14792bd
+2	Finance	90ae814b-5b09-42ff-947d-5210d20d728f
+3	Notes and Interactions	0494880a-7438-4a32-9e40-118b8b21a5ff
+4	Preferences	aac8a91d-4a3e-4ba9-9bca-18fff68399c8
+5	Security	5e335e48-ae14-4f3d-9ea7-fc2465068486
+6	Alerts	beefa5a3-1629-4fa9-9708-33c71cfe97ea
+7	Participation	a19bad5c-9130-4202-bce0-9739d1fdb405
+8	Cases	fb6344f1-c9ae-4009-a336-a44bcc750901
+9	Collective Agreements	263d232d-23e4-4124-8f61-e0fc5fddc2c5
+10	Engagement	0b51acc3-52c5-40a4-a9d4-ef60d7cd4c89
+11	History	1e75fa30-1326-46cc-9acb-0829e1186b4c
+12	Manage Member	07ea70b1-8dfd-416d-9cb7-a0351f7d9125
+13	Salary Lookup	00536499-744f-476a-9aa0-0a3d3b6b6262
+14	Yabbr Chat	3881e422-4ae4-49a7-8acb-d58d0dc64665
+Object { mode: "child", tabs: (15) […], message: "Installed; initial content is still native." }
+
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://eastus-8.in.applicationinsights.azure.com//v2/track. (Reason: CORS request did not succeed). Status code: (null). 
+[CCO inline] 
+Object { mode: "child", tab: "Finance", index: 2, status: "inserted", iparts: (10) […], nativeControls: (2) […], scriptsInFragment: 8, documentScriptsNotReplayed: 33, componentInitializers: 2, inlineHandlers: 7, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Notes and Interactions", index: 3, status: "inserted", iparts: (5) […], nativeControls: (3) […], scriptsInFragment: 4, documentScriptsNotReplayed: 28, componentInitializers: 2, inlineHandlers: 28, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Preferences", index: 4, status: "inserted", iparts: (2) […], nativeControls: [], scriptsInFragment: 2, documentScriptsNotReplayed: 27, componentInitializers: 2, inlineHandlers: 5, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Finance", index: 2, status: "inserted", iparts: (10) […], nativeControls: (2) […], scriptsInFragment: 8, documentScriptsNotReplayed: 33, componentInitializers: 2, inlineHandlers: 7, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Security", index: 5, status: "inserted", iparts: [], nativeControls: [], scriptsInFragment: 2, documentScriptsNotReplayed: 30, componentInitializers: 2, inlineHandlers: 4, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Alerts", index: 6, status: "inserted", iparts: (1) […], nativeControls: (1) […], scriptsInFragment: 2, documentScriptsNotReplayed: 28, componentInitializers: 2, inlineHandlers: 10, … }
+debugger eval code:545:19
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://eastus-8.in.applicationinsights.azure.com//v2/track. (Reason: CORS request did not succeed). Status code: (null). 
+[CCO inline] 
+Object { mode: "child", tab: "Participation", index: 7, status: "inserted", iparts: (8) […], nativeControls: (6) […], scriptsInFragment: 6, documentScriptsNotReplayed: 32, componentInitializers: 2, inlineHandlers: 47, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Cases", index: 8, status: "inserted", iparts: (1) […], nativeControls: (1) […], scriptsInFragment: 1, documentScriptsNotReplayed: 25, componentInitializers: 2, inlineHandlers: 11, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Collective Agreements", index: 9, status: "inserted", iparts: (1) […], nativeControls: (1) […], scriptsInFragment: 1, documentScriptsNotReplayed: 25, componentInitializers: 2, inlineHandlers: 10, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Engagement", index: 10, status: "inserted", iparts: (5) […], nativeControls: (1) […], scriptsInFragment: 3, documentScriptsNotReplayed: 28, componentInitializers: 2, inlineHandlers: 4, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Overview", index: 0, status: "inserted", iparts: (4) […], nativeControls: [], scriptsInFragment: 4, documentScriptsNotReplayed: 29, componentInitializers: 2, inlineHandlers: 2, … }
+debugger eval code:545:19
+[CCO inline] 
+Object { mode: "child", tab: "Overview", index: 0, status: "inserted", iparts: (4) […], nativeControls: [], scriptsInFragment: 4, documentScriptsNotReplayed: 29, componentInitializers: 2, inlineHandlers: 2, … }
+debugger eval code:545:19
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://eastus-8.in.applicationinsights.azure.com//v2/track. (Reason: CORS request did not succeed). Status code: (null). 

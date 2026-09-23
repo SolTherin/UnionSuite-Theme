@@ -891,18 +891,6 @@ SOFTWARE.
   }
 
   function syncQueryDisplayActions() {
-    document.querySelectorAll("[data-us-cco-empty-heading]").forEach(function (heading) {
-      if (heading.textContent.trim() || heading.children.length || !heading.parentElement?.querySelector(":scope > .panel-body-container > .panel-body > .us-cco[data-us-cco]") || heading.closest(".us-report-no-styling")) heading.removeAttribute("data-us-cco-empty-heading");
-    });
-    document.querySelectorAll(".panel-body > .us-cco[data-us-cco]").forEach(function (mount) {
-      if (mount.closest(".us-report-no-styling")) return;
-      var container = mount.parentElement.parentElement;
-      if (!container.matches(".panel-body-container")) return;
-      var panel = container.parentElement;
-      if (!panel.matches(".panel")) return;
-      var heading = panel.querySelector(":scope > .panel-heading");
-      if (heading && !heading.textContent.trim() && !heading.children.length && !heading.hasAttribute("data-us-cco-empty-heading")) heading.setAttribute("data-us-cco-empty-heading", "");
-    });
     queryDisplayEntries.forEach(function (entry, wrapper) {
       if (!wrapper.isConnected || !wrapper.matches(queryDisplaySelector) ||
           wrapper.closest('.us-report-no-styling') || !entry.header.isConnected ||

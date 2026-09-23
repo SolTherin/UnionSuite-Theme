@@ -1,0 +1,398 @@
+[
+  {
+    "mode": "child",
+    "tab": "Finance",
+    "index": 2,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_UnionPayRunningTotals",
+      "ste_container_UnionPayArrearsStatus",
+      "ste_container_UniounPayProjectedPayThru",
+      "ste_container_FinanceSummary",
+      "ste_container_UniounPaySavedPaymentmethods",
+      "ste_container_Transactions",
+      "ste_container_NewContentHtml11",
+      "ste_container_UniounPayOpenInvoices",
+      "ste_container_NewContentHtml12",
+      "ste_container_UnionPayRefreshContactPricing"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Transactions_radTab_Top",
+        "type": "RadTabStrip RadTabStrip_Orion RadTabStripTop_Orion RadTabStripTop RadTabStripTop_Orion_Baseline"
+      },
+      {
+        "id": "ctl00_TemplateBody_Transactions_radPage",
+        "type": "RadMultiPage RadMultiPage_Default"
+      }
+    ],
+    "scriptsInFragment": 8,
+    "documentScriptsNotReplayed": 33,
+    "componentInitializers": 2,
+    "inlineHandlers": 7,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 2,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 1,
+    "paginationSkipped": [],
+    "ms": 3199
+  },
+  {
+    "mode": "child",
+    "tab": "Notes and Interactions",
+    "index": 3,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Interactions",
+      "ste_container_Calls",
+      "ste_container_EmailCOmmunications",
+      "ste_container_ZidebarFiles",
+      "ste_container_Overlaystyles"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Interactions_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_Calls_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_EmailCOmmunications_CommunicationGrid",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 4,
+    "documentScriptsNotReplayed": 28,
+    "componentInitializers": 2,
+    "inlineHandlers": 28,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 3,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 988
+  },
+  {
+    "mode": "child",
+    "tab": "Preferences",
+    "index": 4,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_PreferencesPanel",
+      "ste_container_CommunicationPreferences"
+    ],
+    "nativeControls": [],
+    "scriptsInFragment": 2,
+    "documentScriptsNotReplayed": 27,
+    "componentInitializers": 2,
+    "inlineHandlers": 5,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 7,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 329
+  },
+  {
+    "mode": "child",
+    "tab": "Finance",
+    "index": 2,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_UnionPayRunningTotals",
+      "ste_container_UnionPayArrearsStatus",
+      "ste_container_UniounPayProjectedPayThru",
+      "ste_container_FinanceSummary",
+      "ste_container_UniounPaySavedPaymentmethods",
+      "ste_container_Transactions",
+      "ste_container_NewContentHtml11",
+      "ste_container_UniounPayOpenInvoices",
+      "ste_container_NewContentHtml12",
+      "ste_container_UnionPayRefreshContactPricing"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Transactions_radTab_Top",
+        "type": "RadTabStrip RadTabStrip_Orion RadTabStripTop_Orion RadTabStripTop RadTabStripTop_Orion_Baseline"
+      },
+      {
+        "id": "ctl00_TemplateBody_Transactions_radPage",
+        "type": "RadMultiPage RadMultiPage_Default"
+      }
+    ],
+    "scriptsInFragment": 8,
+    "documentScriptsNotReplayed": 33,
+    "componentInitializers": 2,
+    "inlineHandlers": 7,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 2,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 1,
+    "paginationSkipped": [],
+    "ms": 2639
+  },
+  {
+    "mode": "child",
+    "tab": "Security",
+    "index": 5,
+    "status": "inserted",
+    "iparts": [],
+    "nativeControls": [],
+    "scriptsInFragment": 2,
+    "documentScriptsNotReplayed": 30,
+    "componentInitializers": 2,
+    "inlineHandlers": 4,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 1,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 607
+  },
+  {
+    "mode": "child",
+    "tab": "Alerts",
+    "index": 6,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Alerts"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Alerts_multipleInstanceList_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 2,
+    "documentScriptsNotReplayed": 28,
+    "componentInitializers": 2,
+    "inlineHandlers": 10,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 3,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 755
+  },
+  {
+    "mode": "child",
+    "tab": "Participation",
+    "index": 7,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_AddCommitteeBtn",
+      "ste_container_DelegatePanelEditor",
+      "ste_container_RepresentativePositionsQuery",
+      "ste_container_CommitteesQuery",
+      "ste_container_UpcomingEventRegistrations",
+      "ste_container_NewInteractionLogCommon",
+      "ste_container_Communities",
+      "ste_container_Continuingeducationcredits"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_RepresentativePositionsQuery_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_CommitteesQuery_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_UpcomingEventRegistrations_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_NewInteractionLogCommon_CommunicationGrid",
+        "type": "RadGrid RadGrid_MetroTouch"
+      },
+      {
+        "id": "ctl00_TemplateBody_Communities_contactCommunitiesLister_Grid1",
+        "type": "RadGrid RadGrid_Default"
+      },
+      {
+        "id": "ctl00_TemplateBody_Continuingeducationcredits_multipleInstanceList_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 6,
+    "documentScriptsNotReplayed": 32,
+    "componentInitializers": 2,
+    "inlineHandlers": 47,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 11,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 1727
+  },
+  {
+    "mode": "child",
+    "tab": "Cases",
+    "index": 8,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Cases"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Cases_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 1,
+    "documentScriptsNotReplayed": 25,
+    "componentInitializers": 2,
+    "inlineHandlers": 11,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 3,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 462
+  },
+  {
+    "mode": "child",
+    "tab": "Collective Agreements",
+    "index": 9,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Agreements"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_Agreements_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 1,
+    "documentScriptsNotReplayed": 25,
+    "componentInitializers": 2,
+    "inlineHandlers": 10,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 4,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 484
+  },
+  {
+    "mode": "child",
+    "tab": "Engagement",
+    "index": 10,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_CopyofNewEngagementScoreDisplayCommon",
+      "",
+      "ste_container_NewEngagementScoreDisplayCommon1",
+      "",
+      "ste_container_NewQueryMenuCommon"
+    ],
+    "nativeControls": [
+      {
+        "id": "ctl00_TemplateBody_NewQueryMenuCommon_ResultsGrid_Grid1",
+        "type": "RadGrid RadGrid_MetroTouch"
+      }
+    ],
+    "scriptsInFragment": 3,
+    "documentScriptsNotReplayed": 28,
+    "componentInitializers": 2,
+    "inlineHandlers": 4,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 1,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [],
+    "ms": 1133
+  },
+  {
+    "mode": "child",
+    "tab": "Overview",
+    "index": 0,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Membership1",
+      "ste_container_WorkplaceDelegates",
+      "ste_container_OrganiserContacts",
+      "ste_container_CSS"
+    ],
+    "nativeControls": [],
+    "scriptsInFragment": 4,
+    "documentScriptsNotReplayed": 29,
+    "componentInitializers": 2,
+    "inlineHandlers": 2,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 2,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [
+      {
+        "target": "#fe42a1d4c9",
+        "reason": "absent-from-response"
+      },
+      {
+        "target": "#1002b7d8e8",
+        "reason": "absent-from-response"
+      }
+    ],
+    "ms": 565
+  },
+  {
+    "mode": "child",
+    "tab": "Overview",
+    "index": 0,
+    "status": "inserted",
+    "iparts": [
+      "ste_container_Membership1",
+      "ste_container_WorkplaceDelegates",
+      "ste_container_OrganiserContacts",
+      "ste_container_CSS"
+    ],
+    "nativeControls": [],
+    "scriptsInFragment": 4,
+    "documentScriptsNotReplayed": 29,
+    "componentInitializers": 2,
+    "inlineHandlers": 2,
+    "stylesInHeadNotImported": 8,
+    "removedHiddenInputs": 2,
+    "removedNestedDocuments": 0,
+    "existingComponentIds": [],
+    "initializationErrors": [],
+    "paginationInitialized": 0,
+    "paginationSkipped": [
+      {
+        "target": "#fe42a1d4c9",
+        "reason": "absent-from-response"
+      },
+      {
+        "target": "#1002b7d8e8",
+        "reason": "absent-from-response"
+      }
+    ],
+    "ms": 282
+  }
+]

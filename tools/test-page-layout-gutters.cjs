@@ -114,22 +114,7 @@ const result = () => {
       await bannerPage.waitForFunction(() => getComputedStyle(document.querySelector('.us-banner__surface')).position !== 'fixed');
       await bannerPage.close();
     }
-    // Verify the existing custom CCO child-document margin correction with 24px.
-    const child = current.replace('class="ContentPanel"', 'class="EmptyMasterContentPanel"').replace('</style>', 'body{padding:0}</style>');
-    await page.setContent('<!doctype html><style>body{margin:0}iframe{display:block;border:0;width:100%}</style><iframe title="Content page"></iframe>');
-    await page.locator('iframe').evaluate((frame, doc) => { frame.srcdoc = doc; }, child);
-    const frame = page.frames().find(f => f.parentFrame());
-    await frame.waitForSelector('#layout-row');
-    await page.addScriptTag({ content: read('Custom CCO iPart/src/frame-size.js').replace('export function', 'function') + '\nwindow.disposeFrame = installFrameSize(document.querySelector("iframe"), window);' });
-    for (const width of [984, 390]) {
-      await page.setViewportSize({ width, height: 1000 });
-      await frame.waitForFunction(() => getComputedStyle(document.getElementById('layout-row')).marginLeft === '0px');
-      const m = await frame.evaluate(result);
-      assert.equal(m.gutter, '24px'); assert.equal(m.component, '40px'); assert(m.overflow <= 1, 'child document fits after existing correction');
-      assert.equal(m.stacked, width < 768);
-    }
-    await page.evaluate(() => window.disposeFrame());
     fs.writeFileSync(path.join(root, '.preview/page-layout-gutters.json'), JSON.stringify(measurements, null, 2));
-    console.log('PASS: 24px page/CCO/preview gutters; 40px component rows; unchanged card padding, outer edges and responsive stacking; wrappers, empty zones, opt-out, explicit override, replacement, banner pinning and iframe margin correction.');
+    console.log('PASS: 24px page/CCO/preview gutters; 40px component rows; unchanged card padding, outer edges and responsive stacking; wrappers, empty zones, opt-out, explicit override, replacement and banner pinning.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
