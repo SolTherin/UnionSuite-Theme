@@ -1,0 +1,242 @@
+/* Prototype page layout only. Component styling comes from the linked shared theme. */
+
+body.cv2-page {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.5 var(--font-ui);
+}
+
+.cv2-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-size: 13px;
+}
+
+.cv2-tag {
+  color: var(--text-muted);
+}
+
+.cv2-toggle {
+  margin-inline-start: auto;
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  font: 600 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.cv2-toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  /* Brand ramps stay light in dark mode, so tint the surface instead. */
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-surface));
+}
+
+.cv2-page .main {
+  padding-bottom: 48px;
+}
+
+.cv2-page .ContentPanel > div > .row + .row {
+  margin-top: 20px;
+}
+
+/* Four contact trackers fit one row on desktop. */
+.cv2-trackers {
+  --us-attention-columns: 4;
+  margin-bottom: 20px;
+}
+
+.cv2-row {
+  margin-bottom: 0;
+}
+
+/* Native CCO views: Telerik hides these; the fixture has no Telerik script. */
+.cv2-page .rmpHidden {
+  display: none;
+}
+
+.cv2-page .rmpView > .ContentItemContainer + .ContentItemContainer,
+.cv2-page .rmpView > .row + .ContentItemContainer,
+.cv2-page .rmpView > .ContentItemContainer + .row {
+  margin-top: 20px;
+}
+
+.cv2-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cv2-toast {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 20px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 0 auto;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms;
+}
+
+.cv2-toast.is-visible {
+  opacity: 1;
+}
+
+/* Button size comparison strip (prototype only). */
+.cv3-buttons {
+  display: grid;
+  gap: 14px;
+  margin: 12px 20px 0;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.cv3-buttons[hidden] {
+  display: none;
+}
+
+.cv3-buttons__row {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.cv3-buttons__label {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.cv3-buttons__set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cv3-buttons__set .PanelFieldValue {
+  width: 220px;
+}
+
+.cv3-buttons__set .PanelFieldValue input {
+  width: 100%;
+}
+
+.cv3-buttons__wide {
+  max-width: 720px;
+}
+
+.cv3-buttons__sizes {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Stand-in for the iMIS popup window that us-action-finance-view-transaction
+   opens. Live, the window chrome is the theme's US-DIALOG-CHROME (RadWindow)
+   and the body is the Transaction detail content page. */
+.cv3-popup {
+  width: min(880px, calc(100vw - 32px));
+  max-height: min(88vh, 920px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-base);
+  box-shadow: 0 24px 60px rgb(0 0 0 / .28);
+  overflow: hidden;
+}
+
+.cv3-popup[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv3-popup::backdrop {
+  background: rgb(0 0 0 / .4);
+}
+
+.cv3-popup__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.cv3-popup__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.cv3-popup__close {
+  width: 30px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cv3-popup__close:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.cv3-popup__body {
+  overflow: auto;
+  padding: 16px;
+}
+
+/* Make payment only for an invoice with an amount owing. */
+.cv3-popup:not([data-kind="invoice"][data-owing="true"]) :is(button, a).us-action-finance-make-payment {
+  display: none;
+}
+
+/* Balance · Credit available: the total, then one muted line per credit. In
+   the product the Balance panel is a Query Template Display, so this markup
+   comes from its template. */
+.cv3-credit-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Finance · Billing and Balance share a row; both panels take the row's
+   height, so the shorter one does not leave a gap under it. */
+.cv3-finance-row > [class*="col-"],
+.cv3-finance-row > [class*="col-"] > .ContentItemContainer,
+.cv3-finance-row > [class*="col-"] > .ContentItemContainer > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv3-finance-row > [class*="col-"] > .ContentItemContainer,
+.cv3-finance-row > [class*="col-"] > .ContentItemContainer > div,
+.cv3-finance-row > [class*="col-"] > .ContentItemContainer > div > .panel {
+  flex: 1 1 auto;
+}

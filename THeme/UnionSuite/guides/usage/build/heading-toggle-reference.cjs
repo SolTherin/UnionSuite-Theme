@@ -81,15 +81,6 @@ function toggles() {
           state: 'aria-pressed',
           off: { label: 'Show completed tasks', icon: '<i class="ti ti-checkbox" aria-hidden="true"></i>' },
           on: { label: 'Show completed tasks', icon: '<i class="ti ti-checkbox" aria-hidden="true"></i>' }
-        },
-        {
-          name: 'Show historical adjustments',
-          detail: 'Candidate: dues adjustments (<code>prototypes/wip/dues-adjustments</code>) · <code>aria-pressed</code>',
-          candidate: true,
-          className: 'us-adjustments__historical us-iqa-icon-button',
-          state: 'aria-pressed',
-          off: { label: 'Show historical adjustments (4)', icon: '<i class="ti ti-history" aria-hidden="true"></i>' },
-          on: { label: 'Show historical adjustments (4)', icon: '<i class="ti ti-history" aria-hidden="true"></i>' }
         }
       ]
     },
@@ -177,8 +168,7 @@ function table(group) {
     `<th scope="col">${column.title}${column.hint ? `<span>${column.hint}</span>` : ''}</th>`).join('');
   const rows = group.rows.map(row => {
     const cells = columns.map(column => `<td>${cell(group, row, column)}</td>`).join('');
-    const tag = row.candidate ? ' <span class="toggle-tag">Candidate</span>' : '';
-    return `<tr${row.candidate ? ' class="is-candidate"' : ''}><th scope="row">${row.name}${tag}<span>${row.detail}</span></th>${cells}</tr>`;
+    return `<tr><th scope="row">${row.name}<span>${row.detail}</span></th>${cells}</tr>`;
   }).join('\n');
   return `<section class="toggle-group">
   <h2>${group.title}</h2>
@@ -196,7 +186,7 @@ ${rows}
 // run the live column, then report the frame height to the page.
 const frameScript = `(function () {
   var STATES = [[':hover', 'hover'], [':active', 'active'], [':focus-visible', 'focus']];
-  var TARGET = /us-iqa-icon-button|us-task-completed-toggle|us-iqa-filter-toggle|us-iqa-expand-toggle|us-iqa-report-utilities button|us-adjustments__historical|TextButton|dropdown-toggle|btn-group/;
+  var TARGET = /us-iqa-icon-button|us-task-completed-toggle|us-iqa-filter-toggle|us-iqa-expand-toggle|us-iqa-report-utilities button|TextButton|dropdown-toggle|btn-group/;
   function force(container) {
     for (var index = 0; index < container.cssRules.length; index += 1) {
       var rule = container.cssRules[index];
@@ -255,10 +245,9 @@ function frameDocument() {
     read('THeme/UnionSuite-Client/Branding.css'),
     read('THeme/UnionSuite-Client/Override.css'),
     read('THeme/UnionSuite/zzDarkMode.css'),
-    tablerCss(['checkbox', 'history'])
+    tablerCss(['checkbox'])
   ].join('\n');
-  // Preview-only frame layout. The one candidate rule mirrors the tasks
-  // toggle's icon size, as the dues adjustments candidate does.
+  // Preview-only frame layout.
   const frameCss = `
 body { margin: 0; padding: 20px; background: var(--bg-page); color: var(--text-base); font: 14px/1.5 var(--font-ui); }
 .toggle-group + .toggle-group { margin-top: 28px; }
@@ -271,14 +260,12 @@ body { margin: 0; padding: 20px; background: var(--bg-page); color: var(--text-b
 .toggle-matrix thead th { background: var(--bg-subtle); color: var(--text-muted); font: 700 11px/1.4 var(--font-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .toggle-matrix thead th span { display: block; font-weight: 400; letter-spacing: 0; text-transform: none; }
 .toggle-matrix tbody th { min-width: 200px; color: var(--text-strong); font: 600 13px/1.4 var(--font-ui); text-align: left; }
-.toggle-matrix tbody th > span:not(.toggle-tag) { display: block; margin-top: 2px; color: var(--text-muted); font-weight: 400; font-size: 12px; }
+.toggle-matrix tbody th > span { display: block; margin-top: 2px; color: var(--text-muted); font-weight: 400; font-size: 12px; }
 .toggle-matrix td > div { display: flex; justify-content: center; }
 .toggle-matrix td:nth-child(2) { background: var(--bg-subtle); }
-.toggle-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 4px; background: var(--warning-bg); color: var(--warning); font-size: 11px; font-weight: 700; vertical-align: 1px; }
 [data-demo-static] { pointer-events: none; }
 .toggle-matrix .ContentItemContainer { margin: 0; padding: 0; }
 .toggle-matrix td .panel[hidden] { display: none; }
-.us-adjustments__historical > .ti { font-size: 20px; line-height: 1; pointer-events: none; }
 `;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -340,7 +327,6 @@ iframe { display: block; width: 100%; height: 640px; border: 0; }
   <ul class="notes">
     <li><strong>Forced colours</strong> (Windows high contrast) cannot be emulated by a page. There, the on state draws a 2px <code>Highlight</code> border for every toggle; emulate it with the browser's rendering tools to check.</li>
     <li><strong>Keyboard focus</strong> shows only the theme's own focus rules; the page adds none. Every heading icon button, including the relocated native Export, takes the one shared ring, so a cell without a ring would mean a button outside that rule.</li>
-    <li><strong>Candidate</strong> rows are not in the theme yet. Show historical adjustments is the dues adjustments prototype's toggle; its on state and focus ring come from the theme's shared rules, and only its 20px icon size (mirroring the tasks toggle) is added for this page.</li>
     <li><strong>Dark mode depends on panel structure.</strong> The dark rule that remaps <code>--iqa-selected</code> for <code>.us-report</code>, <code>[data-us-iqa-native]</code> and <code>[data-us-panel]</code> owners is outranked by the light rule, whose <code>:is()</code> list includes a long <code>:has()</code> selector. Owners inside a <code>.ContentItemContainer</code> with a panel body, which is every iPart today, are rescued by the second, structural dark rule. An owner without that structure would keep the pale light fill under a pale icon in dark mode. Each cell here carries the real structure in a hidden, empty panel.</li>
     <li>Buttons sit in the owner context the runtime creates (<code>[data-us-query-display]</code>, <code>[data-us-iqa-native]</code>), written statically so every state shows at once. For the runtime-generated controls see the usage guide: <a href="../THeme/UnionSuite/Usage-Guide.html#query-template-search">Query Template search</a>, <a href="../THeme/UnionSuite/Usage-Guide.html#task-completed-filter">Show completed tasks</a> and <a href="../THeme/UnionSuite/Usage-Guide.html#reports">reports</a>.</li>
   </ul>

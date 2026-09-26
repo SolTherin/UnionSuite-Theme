@@ -1,32 +1,34 @@
-/* US-ADJUSTMENTS:START — member dues adjustments list.
+/* US-ADJUSTMENTS:START — Active and upcoming adjustments list.
    Candidate for zUnionSuite.js, translated from the supplied Union
    Innovation Hub design (supplied/Adjustments-3a.dc.html), which ran on the
    x-dc `DCLogic` runtime. None of that runtime carries over: rows render
    server-side as Query Template results and this script only enhances them.
+   The All adjustments grid is a native Query Menu and needs no script here.
 
    Owner: a Query Template Display iPart with the CSS class us-adjustments.
-   One result (the author template, see README) is:
+   Its Header field holds the column headings and its No results field the
+   empty message, so the script adds neither. One result (the Query Template,
+   see README) is:
      <div class="us-adjustment" data-us-adjustment-status="{#query.Status}">
        <button type="button" class="us-adjustment__row" aria-expanded="false">…</button>
        <div class="us-adjustment__panel" hidden>…</div>
      </div>
 
-   The script adds what one result's template cannot own:
-   - column headings above the set (a Query Template has no header template);
-   - the active count in the panel title, and a Show historical toggle
-     (the IQA icon button, in the heading's utilities where the filter
-     button sits), since iMIS generates the heading from the iPart title;
-   - an empty state when every row is filtered out;
-   - disclosure wiring: ids, aria-controls, one open row at a time;
+   The script adds what the templates cannot:
+   - the result count beside the panel title (iMIS generates the heading);
+   - disclosure wiring: ids, aria-controls, one open row at a time, with the
+     activity history's fold animation (US-RECORD-CARDS) when it is loaded;
    - the status badge's tone, from the Status value;
+   - relative time under a date: "in 12 days" for an upcoming start,
+     "11 days left" for an active end, marked when it ends soon;
    - removal of the credit meter on rows without a credit.
    With JavaScript off every row still reads, and every detail panel stays
    hidden but present in the source order.
 
    Config (optional): window.UnionSuiteAdjustmentsConfig = {
-     columns: ['Type', 'Period', 'Reason', 'Detail', 'Status'],
-     tones: { active: 'success', scheduled: 'primary' },  // us-badge--<tone>
-     past: ['expired', 'ended', 'cancelled']               // hidden by default
+     tones: { active: 'success', upcoming: 'primary' },  // us-badge--<tone>
+     soonDays: 30,     // an active end within this many days is marked soon
+     today: null       // 'YYYY-MM-DD' to pin today (previews only)
    } */
 (function () {
   'use strict';
@@ -37,17 +39,17 @@
   }
 
   const OWNER = '.us-adjustments';
+  const DAY = 86400000;
   let uid = 0;
 
   const settings = () => ({
-    columns: ['Type', 'Period', 'Reason', 'Detail', 'Status'],
-    tones: { active: 'success', scheduled: 'primary' },
-    past: ['expired', 'ended', 'cancelled'],
+    tones: { active: 'success', upcoming: 'primary' },
+    soonDays: 30,
+    today: null,
     ...(window.UnionSuiteAdjustmentsConfig || {})
   });
 
   const statusOf = item => String(item.dataset.usAdjustmentStatus || '').trim().toLowerCase();
-  const isPast = (item, config) => config.past.includes(statusOf(item));
   const itemsOf = owner => Array.from(owner.querySelectorAll('.QueryTemplateSet .us-adjustment'));
   const rowOf = item => item.querySelector(':scope > .us-adjustment__row');
   const panelOf = item => item.querySelector(':scope > .us-adjustment__panel');
@@ -57,7 +59,79 @@
     if (easy) return [];
     return Array.from(document.querySelectorAll(OWNER))
       .filter(owner => !owner.closest('.us-report-no-styling') &&
-        owner.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet'));
+        owner.querySelector(':scope > .panel > .panel-body-container > .panel-body'));
+  }
+
+  // --- Relative time ----------------------------------------------------------
+
+  function startOfDay(value) {
+    const date = value ? new Date(value + 'T00:00:00') : new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  // Whole days from today to an ISO date, or null when the field is blank
+  // (an open end, such as a credit "until exhausted").
+  function daysUntil(iso, today) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || '').trim())) return null;
+    return Math.round((startOfDay(iso) - today) / DAY);
+  }
+
+  function span(days) {
+    if (days === 1) return '1 day';
+    if (days < 14) return days + ' days';
+    if (days < 60) return Math.round(days / 7) + ' weeks';
+    const months = Math.round(days / 30);
+    return months === 1 ? '1 month' : months + ' months';
+  }
+
+  function setWhen(cell, text, soon) {
+    let note = cell.querySelector(':scope > .us-adjustment__when');
+    if (!text) {
+      if (note) note.remove();
+      return;
+    }
+    if (!note) {
+      note = document.createElement('span');
+      note.className = 'us-adjustment__when';
+      cell.append(note);
+    }
+    // The leading space keeps the date and this text apart in the row
+    // button's accessible name; it collapses away visually in both layouts.
+    note.textContent = ' ' + text;
+    note.classList.toggle('us-adjustment__when--soon', Boolean(soon));
+  }
+
+  function relative(item, config, today) {
+    const starts = item.querySelector('.us-adjustment__starts');
+    const ends = item.querySelector('.us-adjustment__ends');
+    const dateIn = cell => cell?.querySelector('[data-us-adjustment-date]')?.dataset.usAdjustmentDate;
+    const status = statusOf(item);
+
+    if (starts) {
+      const days = daysUntil(dateIn(starts), today);
+      const upcoming = status === 'upcoming' && days !== null && days >= 0;
+      setWhen(starts, upcoming ? (days === 0 ? 'today' : 'in ' + span(days)) : '');
+    }
+    if (ends) {
+      const days = daysUntil(dateIn(ends), today);
+      const running = status === 'active' && days !== null && days >= 0;
+      const text = running ? (days === 0 ? 'ends today' : span(days) + ' left') : '';
+      setWhen(ends, text, running && days <= config.soonDays);
+    }
+  }
+
+  // --- Disclosure ---------------------------------------------------------------
+
+  // The detail panel folds open and closed exactly as the activity history's
+  // records do: US-RECORD-CARDS fold() (height, padding and fade, 220ms, the
+  // theme's easing, reversible mid-way, instant under reduced motion). Without
+  // that helper the panel simply shows and hides.
+  function fold(panel, open) {
+    const shared = window.UnionSuiteRecordCards?.fold;
+    if (shared) return shared(panel, open);
+    panel.hidden = !open;
+    return Promise.resolve();
   }
 
   function setOpen(item, open) {
@@ -65,7 +139,7 @@
     const panel = panelOf(item);
     if (!row || !panel) return;
     row.setAttribute('aria-expanded', String(open));
-    panel.hidden = !open;
+    fold(panel, open);
   }
 
   function toggle(owner, item) {
@@ -73,140 +147,31 @@
     itemsOf(owner).forEach(other => setOpen(other, other === item && open));
   }
 
-  function head(body, config) {
-    let row = body.querySelector(':scope > .us-adjustments__head');
-    if (row) return;
-    row = document.createElement('div');
-    row.className = 'us-adjustments__head';
-    row.setAttribute('aria-hidden', 'true');
-    // The five labels, then an empty cell over the chevron column.
-    config.columns.concat('').forEach(text => {
-      const cell = document.createElement('span');
-      cell.textContent = text;
-      row.append(cell);
-    });
-    body.prepend(row);
+  // --- Heading count ------------------------------------------------------------
+
+  function count(owner, total) {
+    const title = owner.querySelector(':scope > .panel > .panel-heading .panel-title');
+    if (!title) return;
+    let badge = title.querySelector('.us-adjustments__count');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'us-badge us-badge--primary us-adjustments__count';
+      title.append(badge);
+    }
+    badge.textContent = String(total);
+    badge.title = total + (total === 1 ? ' adjustment' : ' adjustments');
+    badge.hidden = total === 0;
   }
 
-  function heading(owner) {
-    const bar = owner.querySelector(':scope > .panel > .panel-heading');
-    const title = bar?.querySelector('.panel-title');
-    let count = title?.querySelector('.us-adjustments__count');
-    if (title && !count) {
-      count = document.createElement('span');
-      count.className = 'us-badge us-badge--primary us-adjustments__count';
-      title.append(count);
-    }
-
-    // The heading's action area: reuse the theme's, or create it as the theme
-    // does, then the utilities group the IQA icon buttons live in.
-    let actions = bar?.querySelector(':scope > .us-panel-actions');
-    if (bar && !actions) {
-      actions = document.createElement('div');
-      actions.className = 'us-iqa-report-actions us-panel-actions';
-      const slot = document.createElement('div');
-      slot.className = 'us-iqa-custom-actions';
-      slot.setAttribute('data-us-panel-actions-slot', '');
-      actions.append(slot);
-      bar.append(actions);
-    }
-    let utilities = actions?.querySelector(':scope > .us-iqa-report-utilities');
-    if (actions && !utilities) {
-      utilities = document.createElement('div');
-      utilities.className = 'us-iqa-report-utilities';
-      actions.append(utilities);
-      // Utilities sit after the custom actions, as the tasks list's do. The
-      // theme builds its query-display entry after this script and re-appends
-      // its slot then, so keep the utilities last whenever that happens. On
-      // promotion, build this toggle where the theme builds the tasks toggle
-      // (US-QUERY-SEARCH) and this observer goes.
-      const keepLast = () => {
-        if (utilities.isConnected && actions.lastElementChild !== utilities) actions.append(utilities);
-      };
-      new MutationObserver(keepLast).observe(actions, { childList: true });
-    }
-
-    // A pressed toggle with a stable name, like the tasks list's Show
-    // completed toggle: aria-pressed carries the state, so the name does not
-    // flip between Show and Hide.
-    let historical = utilities?.querySelector('.us-adjustments__historical');
-    if (utilities && !historical) {
-      historical = document.createElement('button');
-      historical.type = 'button';
-      historical.className = 'us-adjustments__historical us-iqa-icon-button';
-      historical.setAttribute('aria-pressed', 'false');
-      const set = owner.querySelector('.QueryTemplateSet');
-      if (set) {
-        if (!set.id) set.id = 'us-adjustments-set-' + (++uid);
-        historical.setAttribute('aria-controls', set.id);
-      }
-      const glyph = document.createElement('i');
-      glyph.className = 'ti ti-history';
-      glyph.setAttribute('aria-hidden', 'true');
-      historical.append(glyph);
-      historical.addEventListener('click', () => {
-        const pressed = historical.getAttribute('aria-pressed') === 'true';
-        historical.setAttribute('aria-pressed', String(!pressed));
-        apply(owner);
-      });
-      utilities.append(historical);
-    }
-    return { count, historical };
-  }
-
-  function empty(body) {
-    let note = body.querySelector(':scope > .us-adjustments__empty');
-    if (!note) {
-      note = document.createElement('p');
-      note.className = 'us-adjustments__empty';
-      note.setAttribute('role', 'status');
-      body.append(note);
-    }
-    return note;
-  }
-
-  function apply(owner) {
-    const config = settings();
-    const body = owner.querySelector(':scope > .panel > .panel-body-container > .panel-body');
-    const { count, historical } = heading(owner);
-    const showPast = historical ? historical.getAttribute('aria-pressed') === 'true' : true;
-    const items = itemsOf(owner);
-    const past = items.filter(item => isPast(item, config));
-    let visible = 0;
-
-    items.forEach(item => {
-      const hide = !showPast && isPast(item, config);
-      // A hidden row closes first, so no open panel is left out of view.
-      if (hide) setOpen(item, false);
-      const result = item.closest('.QueryTemplateSet > *') || item;
-      result.hidden = hide;
-      if (!hide) visible += 1;
-    });
-
-    if (count) {
-      count.textContent = String(items.length - past.length);
-      count.title = (items.length - past.length) + ' current adjustments';
-    }
-    if (historical) {
-      const name = 'Show historical adjustments (' + past.length + ')';
-      historical.hidden = past.length === 0;
-      historical.setAttribute('aria-label', name);
-      historical.title = name;
-    }
-
-    const note = empty(body);
-    note.hidden = visible > 0;
-    note.textContent = past.length
-      ? 'No current adjustments. Use Show historical adjustments to see past ones.'
-      : 'No adjustments.';
-  }
+  // --- Setup --------------------------------------------------------------------
 
   function prepare(owner) {
     const config = settings();
-    const body = owner.querySelector(':scope > .panel > .panel-body-container > .panel-body');
-    head(body, config);
+    const today = startOfDay(config.today);
+    const items = itemsOf(owner);
 
-    itemsOf(owner).forEach(item => {
+    items.forEach(item => {
+      relative(item, config, today);
       if (item.dataset.usAdjustmentReady) return;
       item.dataset.usAdjustmentReady = 'true';
       const row = rowOf(item);
@@ -228,7 +193,7 @@
       if (meter && !(Number(progress?.getAttribute('max')) > 0)) meter.remove();
     });
 
-    apply(owner);
+    count(owner, items.length);
   }
 
   function refresh() {

@@ -1,58 +1,92 @@
 /* ==========================================================================
-   Member dues adjustments — candidate component
+   Member dues adjustments — candidate component (Active and upcoming)
    --------------------------------------------------------------------------
    Candidate for zUnionSuite.css, translated from the supplied Union
    Innovation Hub design (supplied/Adjustments-3a.dc.html) onto UnionSuite
    tokens. Every colour, size, radius and weight resolves through
    zUnionSuite.css; no --uih-* token and no literal hex survives here.
 
+   Loaded by contact page v3 (item 33) as well as this folder's preview.
+   Two layouts replace the contact page's adjustments section:
+   - Active and upcoming (this component): a Query Template Display list of
+     the adjustments affecting fees now or soon, each row expanding to its
+     detail and actions.
+   - All adjustments: a native Query Menu grid, styled entirely by the
+     theme's IQA report rules. It needs no CSS here.
+
    iMIS shape: a Query Template Display iPart with the CSS class
-   `us-adjustments` (plus `us-action-finance-add-adjustment` for the heading
-   menu). iMIS inserts that class as a wrapper div around the panel, and
-   wraps each result in section > .card.QueryTemplateItem > .card-body (or
-   a bare .QueryTemplateItem with Display in cards off):
+   `us-query-template us-adjustments us-action-finance-add-adjustment`.
+   us-query-template keeps the theme's card when iMIS omits the result set
+   (no results); the last class places the Add adjustment heading menu.
 
      .ContentItemContainer > .us-adjustments > .panel
        > .panel-heading > .panel-title                       (iPart title)
        > .panel-body-container > .panel-body
-         > .us-adjustments__head                             (script)
+         > (Header field)   .us-adjustments__head, in iMIS's own wrapper
          > .QueryTemplateSet > section > .QueryTemplateItem > .card-body
-           > .us-adjustment                                  (author template)
+           > .us-adjustment                                  (Query Template)
              > .us-adjustment__row + .us-adjustment__panel
+         > (No results field, instead of the set when there are none)
 
-   Shell: the theme already draws a Query Template panel as a card, so this
-   component draws none. Rows: .panel-body is one grid; the head and every
-   row are subgrids of it, so all share one set of column tracks. The iMIS
-   result wrappers and the author root use display: contents to reach it.
+   Rows: .panel-body is one grid; the result set and each row are subgrids of
+   it, so every row shares one set of column tracks. iMIS's result wrappers
+   and the author root use display: contents to reach it. The head is its own
+   grid on the same tracks, so it lines up whatever wrapper iMIS puts around
+   Header output.
    ========================================================================== */
 
 /* Cell padding follows the native IQA grid (9px 12px heads, 10px 12px
-   rows: --iqa-row-padding), so this table and a Query Menu grid on the same
-   page line up. */
+   rows: --iqa-row-padding), so this list and the All adjustments grid below
+   it line up. */
+/* Fee effect takes half the spare width and the two dates a quarter each,
+   so the dates stay near the value they qualify on a wide panel. */
 .us-adjustments {
-  --us-adj-columns: 170px 200px minmax(0, 1fr) 160px 120px 44px;
+  --us-adj-columns: 180px minmax(0, 2fr) minmax(140px, 1fr) minmax(150px, 1fr) 124px 44px;
   --us-adj-pad-y: 10px;
   --us-adj-pad-x: 12px;
 }
 
 /* The container is the body container, not the grid, so the query can
-   restyle the grid itself. */
+   restyle the grid itself.
+
+   Edge to edge, like the native IQA grid below it: the theme pads a Query
+   Template body by var(--space-3) var(--iqa-inset), where a native report
+   body has none. --iqa-inset set here reaches only the body (the heading
+   keeps its own). Both it and the block padding are removed only while
+   there are results, so No results output keeps the theme's spacing. */
 .us-adjustments > .panel > .panel-body-container {
   container-type: inline-size;
 }
 
-/* The theme already pads a Query Template body by --iqa-inset; the table
-   sits inside that inset, as native IQA grids do. */
+.us-adjustments > .panel > .panel-body-container:has(.QueryTemplateSet) {
+  --iqa-inset: 0px;
+}
+
+.us-adjustments .panel-body:has(> .QueryTemplateSet) > :first-child {
+  margin-top: calc(var(--space-3) * -1);
+}
+
+.us-adjustments .panel-body:has(> .QueryTemplateSet) > :last-child {
+  margin-bottom: calc(var(--space-3) * -1);
+}
+
 .us-adjustments > .panel > .panel-body-container > .panel-body {
   display: grid;
   grid-template-columns: var(--us-adj-columns);
   font-family: var(--iqa-font, var(--font-ui));
 }
 
+/* Header output, the result set and No results output each span the row. */
+.us-adjustments > .panel > .panel-body-container > .panel-body > * {
+  grid-column: 1 / -1;
+}
+
+/* The theme spaces card lists with a row gap; these rows are joined by
+   their borders, so a gap would leave an unpainted strip under each row. */
 .us-adjustments .QueryTemplateSet {
   display: grid;
-  grid-column: 1 / -1;
   grid-template-columns: subgrid;
+  gap: 0;
 }
 
 /* The iMIS result wrappers and the author root add no boxes, so the row
@@ -64,21 +98,13 @@
   display: contents;
 }
 
-/* display: contents above would otherwise beat the hidden attribute the
-   historical filter sets on a result. */
-.us-adjustments .QueryTemplateSet > [hidden] {
-  display: none;
-}
-
 /* --------------------------------------------------------------------------
-   Column headings (inserted by the script: a Query Template has no header
-   template, and one row's template cannot own them)
+   Column headings: authored once in the iPart's Header field. Matches the
+   native IQA grid head: same tokens, size and tracking.
    -------------------------------------------------------------------------- */
-/* Matches the native IQA grid head: same tokens, size and tracking. */
 .us-adjustments__head {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
+  grid-template-columns: var(--us-adj-columns);
   border-bottom: 1px solid var(--iqa-border, var(--border));
   background: var(--iqa-table-head, var(--bg-sunken));
 }
@@ -89,6 +115,12 @@
   font: var(--fw-bold) var(--fs-2xs) / var(--lh-base) var(--iqa-font, var(--font-ui));
   letter-spacing: .06em;
   text-transform: uppercase;
+}
+
+/* No results: iMIS omits the set and may still print the Header, so the
+   headings go with the rows. */
+.us-adjustments .panel-body:not(:has(.QueryTemplateSet)) .us-adjustments__head {
+  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -148,23 +180,41 @@
   font-weight: var(--fw-semi);
 }
 
-.us-adjustment__period {
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
-.us-adjustment__reason,
-.us-adjustment__detail {
+/* The fee effect is what staff come for, so it reads first after the type. */
+.us-adjustment__effect {
   overflow: hidden;
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.us-adjustment__detail {
-  color: var(--text-strong);
+/* Cell labels: read by screen readers inside the row button, and shown on
+   narrow panels where the column headings are hidden. */
+.us-adjustment__cell-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Relative time, added by the script under a start or end date. */
+.us-adjustment__when {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* Ending within the configured window (30 days by default). */
+.us-adjustment__when--soon {
+  color: var(--warning);
   font-weight: var(--fw-semi);
 }
 
+/* Status badges keep to one line: contact page v3's status icon badge
+   (section 30) owns that rule, for this list and the All adjustments grid. */
 .us-adjustment__status > .us-badge {
   white-space: nowrap;
 }
@@ -176,21 +226,14 @@
   color: var(--text-muted);
 }
 
+/* Turns with the detail panel's fold: US-RECORD-CARDS timing and easing. */
 .us-adjustment__chevron > .ti {
   font-size: var(--fs-md);
-  transition: transform 250ms;
+  transition: transform 220ms cubic-bezier(.2, 0, 0, 1);
 }
 
 .us-adjustment__row[aria-expanded="true"] .us-adjustment__chevron > .ti {
   transform: rotate(180deg);
-}
-
-/* Closed adjustments stay at full opacity (the supplied design dimmed the
-   whole row to 60%, which took its text below contrast). Muted text and the
-   neutral Expired badge carry "no longer running". */
-.us-adjustment[data-us-adjustment-status="expired" i] :is(.us-adjustment__title, .us-adjustment__detail) {
-  color: var(--text-muted);
-  font-weight: var(--fw-medium);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -352,64 +395,23 @@
   gap: var(--space-2);
 }
 
-/* Actions only apply to running adjustments; closed ones keep the
-   transactions link. */
-.us-adjustment[data-us-adjustment-status="expired" i] .us-adjustment__actions > :not(.us-action-finance-view-adjustment-transactions) {
-  display: none;
-}
-
 .us-adjustment__actions > .us-action-finance-view-adjustment-transactions {
   margin-inline-start: auto;
 }
 
 /* --------------------------------------------------------------------------
-   Panel heading additions (inserted by the script: the heading is
-   generated from the iPart title, so authors cannot place controls in it)
+   Panel heading addition (inserted by the script: the heading is generated
+   from the iPart title)
    -------------------------------------------------------------------------- */
 .us-adjustments__count {
   margin-inline-start: var(--space-2);
 }
 
-/* Show historical: the theme's IQA icon button (the filter button's
-   component, placed in .us-iqa-report-utilities as the tasks list places its
-   Show completed toggle). Size, hover, the shared on state (aria-pressed),
-   its forced-colours border, the shared focus ring, the coarse-pointer target
-   and dark mode all come from zUnionSuite.css; only the icon and the hidden
-   state are added here. */
-
-/* No past adjustments: no toggle. The icon button's display: inline-flex
-   would otherwise beat the hidden attribute. */
-.us-adjustments .us-iqa-report-utilities .us-adjustments__historical[hidden] {
-  display: none;
-}
-
-/* The icon button sets font-size: 0 to hide native text nodes, so a font
-   icon needs its own size, as the tasks toggle's does. */
-.us-adjustments__historical > .ti {
-  font-size: 20px;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.us-adjustments__empty {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: var(--space-6) var(--space-4);
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-  text-align: center;
-}
-
-.us-adjustments__empty[hidden] {
-  display: none;
-}
-
 /* --------------------------------------------------------------------------
-   Narrow panels: each row stacks into a two-column card. A container query,
-   not a media query: the panel can sit in a narrow page column on a wide
-   screen, so its own width decides the layout. The supplied design was a
-   fixed 900px table with no narrow state. 880px keeps Reason at least
-   ~150px wide once the fixed tracks and the theme's inset are taken.
+   Narrow panels: each row stacks into a card. A container query, not a media
+   query: the panel can sit in a narrow page column on a wide screen, so its
+   own width decides the layout. 880px keeps Fee effect at least ~160px wide
+   once the fixed tracks and the theme's inset are taken.
    -------------------------------------------------------------------------- */
 @container (max-width: 880px) {
   .us-adjustments > .panel > .panel-body-container > .panel-body {
@@ -420,8 +422,9 @@
     display: none;
   }
 
+  /* Type and status, then the fee effect, then one line per date. */
   .us-adjustment__row {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto 32px;
     align-items: center;
     column-gap: var(--space-2);
     row-gap: 2px;
@@ -443,15 +446,51 @@
   }
 
   .us-adjustment__chevron {
-    grid-row: 1 / span 3;
+    grid-row: 1 / span 4;
     grid-column: 3;
-    width: 32px;
   }
 
-  .us-adjustment__period,
-  .us-adjustment__reason,
-  .us-adjustment__detail {
+  .us-adjustment__effect {
+    grid-row: 2;
     grid-column: 1 / 3;
+    white-space: normal;
+  }
+
+  .us-adjustment__starts {
+    grid-row: 3;
+    grid-column: 1 / 3;
+  }
+
+  .us-adjustment__ends {
+    grid-row: 4;
+    grid-column: 1 / 3;
+  }
+
+  /* The date labels replace the hidden column headings. */
+  .us-adjustment__starts .us-adjustment__cell-label,
+  .us-adjustment__ends .us-adjustment__cell-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    color: var(--text-muted);
+  }
+
+  /* "Ends: When used up" and "Starts: 01 Sep 2026" both read as a pair. */
+  .us-adjustment__starts .us-adjustment__cell-label::after,
+  .us-adjustment__ends .us-adjustment__cell-label::after {
+    content: ":";
+  }
+
+  .us-adjustment__when {
+    display: inline;
+  }
+
+  .us-adjustment__when::before {
+    content: " · ";
+    color: var(--text-muted);
+    font-weight: var(--fw-normal);
   }
 
   .us-adjustment__actions > .us-action-finance-view-adjustment-transactions {

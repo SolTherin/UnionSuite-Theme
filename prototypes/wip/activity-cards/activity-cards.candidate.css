@@ -1,0 +1,603 @@
+/* ==========================================================================
+   RECORD CARDS — CANDIDATE (not installed)
+   One card for every record list that reads as a history: the combined
+   activity feed, notes, cases, meetings and communications.
+
+   The owner's supplied Recent Activity card, translated to the theme
+   (26 September 2026): its structure is what makes it clear, so it is kept.
+   On the left, a quiet type line, one bold headline and one muted preview
+   line; on the right, date, time and actions stacked in a column, so dates
+   line up down the list; icon nodes on a rail; details below. Kept from the
+   owner's changes: theme tokens and fonts; colour only on the rail icon and
+   for importance (a PriorityFlag flag, danger and warning statuses); the
+   note itself as the headline when there is no subject; a secondary action
+   at the bottom right of the details, which is the only way to open the
+   record (no View link on the card); motion on every state change; the
+   feed chrome of US-ACTIVITY-FEED (contact page v3 section 32).
+
+   Author markup: templates/*.html. On a Query Template Display, put
+   us-records in the iPart CSS class field and turn Display in cards off.
+   The activity feed renders the same markup inside .us-records__items.
+
+   Options under review are modifiers on .us-records (see README):
+     us-records--neutral-rail   rail icons without type colour
+     us-records--dots           small dots on the rail instead of icon nodes
+     us-records--no-rail        no rail or nodes
+     us-records--comfortable    the original's roomier spacing
+   Target when approved: a new US-RECORD-CARDS section in zUnionSuite.css,
+   after the shared list shell rules; dark values in zzDarkMode.css.
+   ========================================================================== */
+
+.us-records {
+  --us-record-gap: var(--space-2);
+  --us-record-pad-y: 9px;
+  --us-record-pad-x: 12px;
+  --us-record-node: 30px;
+  --us-record-icon-size: 14px;
+  --us-record-column-gap: 12px;
+  --us-record-title-size: var(--fs-sm);
+  --us-record-hue: var(--text-muted);
+  --us-record-tint: var(--bg-sunken);
+  container: us-records / inline-size;
+  min-width: 0;
+  color: var(--text-base);
+  font: var(--fs-sm)/var(--lh-base) var(--font-ui);
+}
+
+/* Record lists: native Query Template items or the feed's own list. */
+.us-records :is(.QueryTemplateSet, .us-records__items) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--us-record-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-records .QueryTemplateSet > section {
+  margin: 0;
+}
+
+.us-records .QueryTemplateItem:not(.card) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Type hue and tint. Each pair keeps text on its tint above 4.5:1 in both
+   schemes; dark values are in the dark block at the end. */
+.us-record[data-us-record-type="call"] {
+  --us-record-hue: var(--info);
+  --us-record-tint: var(--info-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2'/%3E%3C/svg%3E");
+}
+
+.us-record[data-us-record-type="email"] {
+  --us-record-hue: var(--status-purple);
+  --us-record-tint: var(--status-purple-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z'/%3E%3Cpath d='M3 7l9 6l9 -6'/%3E%3C/svg%3E");
+}
+
+.us-record[data-us-record-type="sms"] {
+  /* Accent 700 alone is too light for text on its tint (about 2.6:1). */
+  --us-record-hue: color-mix(in srgb, var(--accent-700) 65%, var(--neutral-900));
+  --us-record-tint: var(--accent-100);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 9h8'/%3E%3Cpath d='M8 13h6'/%3E%3Cpath d='M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z'/%3E%3C/svg%3E");
+}
+
+.us-record[data-us-record-type="meeting"] {
+  --us-record-hue: var(--success);
+  --us-record-tint: var(--success-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0'/%3E%3Cpath d='M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3Cpath d='M21 21v-2a4 4 0 0 0 -3 -3.85'/%3E%3C/svg%3E");
+}
+
+.us-record:is([data-us-record-type="note"], [data-us-record-type="interaction"]) {
+  --us-record-hue: var(--warning);
+  --us-record-tint: var(--warning-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 5a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z'/%3E%3Cpath d='M9 7l6 0'/%3E%3Cpath d='M9 11l6 0'/%3E%3Cpath d='M9 15l4 0'/%3E%3C/svg%3E");
+}
+
+.us-record[data-us-record-type="interaction"] {
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10'/%3E%3Cpath d='M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2'/%3E%3C/svg%3E");
+}
+
+.us-record[data-us-record-type="case"] {
+  --us-record-hue: var(--text-link);
+  --us-record-tint: var(--brand-50);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z'/%3E%3Cpath d='M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2'/%3E%3Cpath d='M12 12l0 .01'/%3E%3Cpath d='M3 13a20 20 0 0 0 18 0'/%3E%3C/svg%3E");
+}
+
+/* One record: node on the rail, then the card. */
+.us-record {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--us-record-node) minmax(0, 1fr);
+  gap: var(--us-record-column-gap);
+  align-items: start;
+  min-width: 0;
+}
+
+/* The rail runs from this node to the next; the last record ends it. */
+.us-record::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--us-record-node) / 2);
+  bottom: calc(-1 * var(--us-record-gap) - var(--us-record-node) / 2);
+  left: calc(var(--us-record-node) / 2 - 1px);
+  width: 2px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+.us-records :is(.QueryTemplateSet > section:last-child, .us-records__items > :last-child) .us-record::before,
+.us-records .us-records__items > .us-record:last-child::before {
+  display: none;
+}
+
+.us-record__node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--us-record-node);
+  height: var(--us-record-node);
+  margin-top: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--us-record-tint);
+  color: var(--us-record-hue);
+  box-shadow: 0 0 0 3px var(--bg-surface);
+}
+
+.us-record__node::before {
+  content: "";
+  width: var(--us-record-icon-size);
+  height: var(--us-record-icon-size);
+  background: currentColor;
+  mask: var(--us-record-icon) center / contain no-repeat;
+  -webkit-mask: var(--us-record-icon) center / contain no-repeat;
+}
+
+.us-record__card {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.us-record__card:hover {
+  border-color: var(--border-strong);
+}
+
+/* Priority shows only as the labelled flag (no card edge; owner,
+   26 September 2026). */
+.us-record.is-expanded .us-record__card {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Head, the original's structure: content on the left (the type line, one
+   bold headline, one muted preview line); date, time and actions stacked in
+   a right-hand column, so dates line up down the list. */
+.us-record__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "tags side"
+    "title side"
+    "text side";
+  column-gap: var(--space-3);
+  padding: var(--us-record-pad-y) var(--us-record-pad-x);
+  cursor: pointer;
+}
+
+/* Type line: TYPE · direction · linked record · by whom, then the flags.
+   Quiet by design: the headline is the anchor. */
+.us-record__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  grid-area: tags;
+  min-width: 0;
+  min-height: 18px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 18px;
+}
+
+.us-record__tags > :not(:empty):not(.us-badge) ~ :not(:empty):not(.us-badge)::before {
+  content: "·";
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+.us-record__tags > :not(:empty) ~ .us-record__by:not(:empty):not(.us-badge)::before {
+  content: "· by";
+  margin-right: 4px;
+}
+
+/* The type: a small uppercase label; its colour stays on the rail icon. */
+.us-record__type {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Flags sit in the type line at its 18px height (the badge's 1px borders
+   included), so a status never makes a card taller. */
+.us-record__tags .us-badge {
+  padding: 0 6px;
+  font-size: var(--fs-2xs);
+  line-height: 16px;
+}
+
+/* Routine outcomes stay neutral; only danger and warning (and the priority
+   flag) carry colour. */
+.us-record__status:is(.us-badge--success, .us-badge--primary) {
+  background: var(--bg-sunken);
+  color: var(--text-base);
+}
+
+.us-record__priority {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.us-record[data-us-record-priority="urgent" i] .us-record__priority {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Links are scoped to .us-record to outrank the theme's underlined
+   .QueryTemplateItem links. */
+.us-record .us-record__link {
+  color: var(--text-link);
+  font-weight: var(--fw-semi);
+  text-decoration: none;
+}
+
+.us-record .us-record__link:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+/* Blank optional fields collapse. */
+.us-record :is(.us-record__type, .us-record__direction, .us-record__link, .us-record__by, .us-record__who, .us-record__status, .us-record__priority, .us-record__title, .us-record__text, .us-record__date, .us-record__time, .us-record__body, .us-record__files):empty {
+  display: none;
+}
+
+.us-record__facts > div:has(> dd:empty) {
+  display: none;
+}
+
+/* The anchor: one bold headline. */
+.us-record__title {
+  grid-area: title;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--us-record-title-size)/1.35 var(--font-ui);
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+
+/* The preview: one muted line under the headline. US-RECORD-CARDS animates
+   it opening to its full length when the card expands. */
+.us-record__text {
+  display: -webkit-box;
+  grid-area: text;
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+/* No subject (most records): the note keeps the same type as a preview
+   (owner, 26 September 2026) and may use two lines, as it is the only text. */
+.us-record__title:empty + .us-record__text {
+  margin-top: 3px;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.us-record.is-expanded .us-record__text {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: none;
+  white-space: pre-line;
+}
+
+/* The date column: date, time, then View and expand. */
+.us-record__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  grid-area: side;
+  text-align: right;
+}
+
+.us-record__date {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.us-record__time {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+
+/* The actions tuck into the card's bottom padding, so the date column is
+   no taller than the content beside it. */
+.us-record__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 2px 0 -6px;
+}
+
+.us-record__toggle {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 0 -6px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.us-record__toggle::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  /* Tabler "chevron-down" outline (MIT). */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform .15s;
+}
+
+.us-record__toggle[aria-expanded="true"]::before {
+  transform: rotate(180deg);
+}
+
+.us-record__toggle:hover {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+:is(.us-record__toggle, .us-record__link):focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+/* Details: read-only label voice, the full text, attachments, then one
+   secondary action at the bottom right. */
+.us-record__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--us-record-pad-x) var(--us-record-pad-x);
+  border-top: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.us-record__detail[hidden] {
+  display: none;
+}
+
+.us-record__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+}
+
+.us-record__facts dt {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.us-record__facts dd {
+  margin: 2px 0 0;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.us-record__body {
+  margin: 0;
+  color: var(--text-base);
+  line-height: var(--lh-loose);
+  white-space: pre-line;
+}
+
+.us-record__files {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-record__files::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  /* Tabler "paperclip" outline (MIT). */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* The open-record action: a secondary (white) button at the bottom right. */
+.us-record__more {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Month groups (the activity feed's list). The feed's own chrome (search,
+   range, type filters, "View all", notices, footer) is US-ACTIVITY-FEED's,
+   in contact page v3 section 32.
+   -------------------------------------------------------------------------- */
+.us-records__group + .us-records__group {
+  margin-top: var(--space-4);
+}
+
+.us-records__group-title {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  border: 0;
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-2xs)/1.4 var(--font-ui);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Options under review.
+   -------------------------------------------------------------------------- */
+.us-records--neutral-rail .us-record {
+  --us-record-hue: var(--text-muted);
+  --us-record-tint: var(--bg-sunken);
+}
+
+.us-records--dots {
+  --us-record-node: 12px;
+  --us-record-column-gap: 12px;
+}
+
+/* Dots sit level with the type line. */
+.us-records--dots .us-record__node {
+  margin-top: calc(var(--us-record-pad-y) + 3px);
+  border: 2px solid var(--us-record-hue);
+  background: var(--bg-surface);
+  box-sizing: border-box;
+}
+
+.us-records--dots .us-record__node::before {
+  display: none;
+}
+
+.us-records--dots .us-record::before {
+  top: calc(var(--us-record-pad-y) + 9px);
+  bottom: calc(-1 * var(--us-record-gap) - var(--us-record-pad-y) - 9px);
+}
+
+.us-records--no-rail .us-record {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.us-records--no-rail .us-record__node {
+  display: none;
+}
+
+.us-records--no-rail .us-record::before {
+  display: none;
+}
+
+.us-records--comfortable {
+  --us-record-gap: var(--space-3);
+  --us-record-pad-y: 11px;
+  --us-record-pad-x: 14px;
+  --us-record-node: 36px;
+  --us-record-icon-size: 16px;
+  --us-record-column-gap: 14px;
+}
+
+/* Declared after comfortable so dots keep their size in either spacing. */
+.us-records--dots.us-records--comfortable {
+  --us-record-node: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Motion. Every state change animates (owner, 26 September 2026): details and
+   filter panels fold with US-RECORD-CARDS fold(); hover, selection and
+   option changes cross-fade here. Reduced motion makes all of it instant.
+   -------------------------------------------------------------------------- */
+.us-record__node,
+.us-record__type {
+  transition: background-color .2s, color .2s;
+}
+
+.us-record .us-record__link,
+.us-record__toggle {
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-record__card,
+  .us-record__toggle::before,
+  .us-record__node,
+  .us-record__type,
+    .us-record .us-record__link,
+  .us-record__toggle {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-record__node::before,
+  .us-record__toggle::before,
+  .us-record__files::before {
+    background: CanvasText;
+  }
+}
+
+/* Dark scheme: tints the dark palette does not define. Target: zzDarkMode.css. */
+@media screen {
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="email"] {
+    --us-record-hue: #cdc5f7;
+    --us-record-tint: #302c4a;
+  }
+
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="sms"] {
+    --us-record-hue: var(--dm-accent-text);
+    --us-record-tint: var(--dm-accent-bg);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="case"] {
+    --us-record-tint: var(--info-bg);
+  }
+
+  /* Group titles keep the muted label voice; the dark theme brightens every h3. */
+  :root[data-us-color-scheme="dark"] .us-records__group-title {
+    color: var(--text-muted);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-records--neutral-rail .us-record {
+    --us-record-hue: var(--text-muted);
+    --us-record-tint: var(--bg-sunken);
+  }
+
+}

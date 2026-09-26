@@ -1,0 +1,857 @@
+<!doctype html>
+<!--
+  Contact page v3 — WIP layout prototype. Sample data only.
+  Styling and behaviour come from the linked shared theme; theme-candidate.css holds the
+  proposed theme changes; contact-page.css holds prototype page layout only. Native iMIS wrappers below are fixtures, not author
+  templates. See README.md for the proposed changes and open decisions.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Page v3</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <!-- Tabler icons, as the theme loads them (the icon sheet directly: the Tabler.css shim is an @import the standalone build does not follow). -->
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="theme-candidate.css">
+  <link rel="stylesheet" href="../activity-cards/activity-cards.candidate.css">
+  <link rel="stylesheet" href="../dues-adjustments/dues-adjustments.candidate.css">
+  <link rel="stylesheet" href="contact-page.css">
+</head>
+<body class="us-banner-page cv2-page">
+
+<div class="cv2-toolbar" aria-label="Prototype controls">
+  <strong>Contact page v3</strong>
+  <span class="cv2-tag">WIP · sample data · live theme CSS/JS + candidate</span>
+  <button type="button" class="cv2-toggle" id="cv3-rail-side" aria-pressed="true">Tabs: right</button>
+  <button type="button" class="cv2-toggle" id="cv3-contact-kind" aria-pressed="false">Contact: individual</button>
+  <button type="button" class="cv2-toggle" id="cv3-payment-type">Pays by: auto debit</button>
+  <button type="button" class="cv2-toggle" id="cv3-invoice-state" aria-pressed="true">Arrears: overdue</button>
+  <button type="button" class="cv2-toggle" id="cv3-adjustments-state" aria-pressed="true">Adjustments: active</button>
+  <button type="button" class="cv2-toggle" id="cv3-trackers-clear" aria-pressed="false">Trackers: live</button>
+  <button type="button" class="cv2-toggle" id="cv3-activity-failing" aria-pressed="false">Activity: all sources</button>
+  <button type="button" class="cv2-toggle" id="cv3-color-scheme" aria-pressed="false">Mode: light</button>
+  <button type="button" class="cv2-toggle" id="cv3-new-alert">Raise sample alert</button>
+  <button type="button" class="cv2-toggle cv3-strip-toggle" id="cv3-strip-toggle" aria-expanded="false" aria-controls="cv3-buttons">Button sizes</button>
+  <a href="../contact-page-v2/index.html">Open v2</a>
+  <a href="../../crm-contact-Prototype.html">Open v1</a>
+</div>
+
+<!-- Prototype-only reference strip: real theme button classes at the approved
+     candidate sizes, with measured heights. -->
+<section class="cv3-buttons" id="cv3-buttons" aria-label="Button size comparison" hidden>
+  <div class="cv3-buttons__row">
+    <span class="cv3-buttons__label">Standard<br><code>TextButton</code></span>
+    <div class="cv3-buttons__set">
+        <button type="button" class="TextButton PrimaryButton cv2-demo">Save</button>
+        <button type="button" class="TextButton cv2-demo">Secondary</button>
+        <button type="button" class="TextButton us-outline-button cv2-demo">Add note</button>
+        <button type="button" class="TextButton DangerButton cv2-demo">Delete</button>
+        <button type="button" class="TextButton LinkButton cv2-demo">View history</button>
+    </div>
+  </div>
+  <div class="cv3-buttons__row">
+    <span class="cv3-buttons__label">Small<br><code>SmallButton</code></span>
+    <div class="cv3-buttons__set">
+        <button type="button" class="TextButton PrimaryButton SmallButton cv2-demo">Save</button>
+        <button type="button" class="TextButton SmallButton cv2-demo">Secondary</button>
+        <button type="button" class="TextButton us-outline-button SmallButton cv2-demo">Add note</button>
+        <button type="button" class="TextButton DangerButton SmallButton cv2-demo">Delete</button>
+        <button type="button" class="TextButton LinkButton SmallButton cv2-demo">View history</button>
+    </div>
+  </div>
+  <div class="cv3-buttons__row">
+    <span class="cv3-buttons__label">In an alert<br><code>us-alerts</code> (no class)</span>
+    <div class="us-alerts cv3-buttons__wide">
+      <div class="AsiWarning" role="status">
+        <p><strong>Overdue payment.</strong> $185.00 outstanding since 01 Mar 2026.</p>
+        <div class="us-alerts__actions">
+          <button type="button" class="TextButton PrimaryButton cv2-demo">Record payment</button>
+          <button type="button" class="TextButton cv2-demo">Send reminder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cv3-buttons__row">
+    <span class="cv3-buttons__label">Beside a field<br>36px input</span>
+    <div class="cv3-buttons__set us-form">
+      <div class="PanelFieldValue"><input type="text" value="Reynolds" aria-label="Last name"></div>
+      <button type="button" class="TextButton PrimaryButton cv2-demo">Find</button>
+      <button type="button" class="TextButton cv2-demo">Clear</button>
+    </div>
+  </div>
+  <p class="cv3-buttons__sizes" id="cv3-button-sizes" aria-live="polite"></p>
+</section>
+
+<main class="main">
+<div class="ContentPanel">
+
+  <!-- ═══ Banner · Query Template Display · CSS class: us-banner us-banner-collapsible ═══ -->
+  <div><div class="row"><div class="col-sm-12"><div class="ContentItemContainer"><div class="WebPartZone"><div class="iMIS-WebPart"><div class="ContentItemContainer"><div class="us-banner us-banner-collapsible">
+    <header class="us-banner__surface us-banner__surface--member" data-us-status-colour="#2E7D32">
+      <div class="us-banner__summary">
+        <div class="us-banner__identity">
+          <span class="us-banner__avatar" data-us-contact-kind="Individual" aria-hidden="true"></span>
+          <div class="us-banner__identity-text">
+            <span class="us-banner__eyebrow"><span id="contact-banner-kind">Individual</span> · <span id="contact-banner-id">004821</span><button type="button" class="us-copy" data-us-copy-target="contact-banner-id" aria-label="Copy contact ID" title="Copy contact ID"></button></span>
+            <h1 class="us-banner__title">Sarah Reynolds</h1>
+            <p class="us-banner__subtitle">Full Member – RN · Member since 12 Mar 2018</p>
+          </div>
+        </div>
+        <div class="us-banner__status">
+          <span class="us-banner__badge us-banner__badge--member-status">Active</span>
+        </div>
+        <div class="us-banner__actions"><div class="us-cco-counts" hidden data-us-counts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Tab Counts" data-us-counts-filter="ID" data-us-counts-value="004821"></div><div class="us-banner__alerts" data-us-alerts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Alerts" data-us-alerts-filter="ID" data-us-alerts-value="004821" data-us-alerts-tab="Summary"></div><div class="us-actions"><button type="button" class="us-actions__toggle">Quick Actions</button><ul class="us-actions__list"><li class="dropdown-header">Communication</li><li><button type="button" class="us-actions__item us-action-member-email">Email Member</button></li><li><button type="button" class="us-actions__item us-action-member-sms">SMS Member</button></li><li class="divider"></li><li class="dropdown-header">Member records</li><li><button type="button" class="us-actions__item us-action-member-add-note">Add Note</button></li><li><button type="button" class="us-actions__item us-action-member-add-job">Add New Job</button></li><li class="divider"></li><li class="dropdown-header">Finance</li><li><button type="button" class="us-actions__item us-action-finance-make-payment">Make Payment</button></li></ul></div></div>
+      </div>
+      <div class="us-banner__details">
+        <dl class="us-banner__facts">
+          <div class="us-banner__fact"><dt>Email</dt><dd><a href="mailto:s.reynolds@metrohealth.gov.au">s.reynolds@metrohealth.gov.au</a></dd></div>
+          <div class="us-banner__fact"><dt>Mobile</dt><dd><a href="tel:+61412345678">0412 345 678</a></dd></div>
+          <div class="us-banner__fact"><dt>Employer</dt><dd>Metro Health Services</dd></div>
+          <div class="us-banner__fact"><dt>Branch</dt><dd>Sydney Metro</dd></div>
+          <div class="us-banner__fact"><dt>Organiser</dt><dd>M. Chen</dd></div>
+        </dl>
+      </div>
+    </header>
+  </div></div></div></div></div></div></div>
+
+  <!-- ═══ Contact CCO · Tab display style: Vertical right · CSS class: us-cco-sticky-tabs us-cco-rail (candidate) ═══ -->
+  <div class="row"><div class="col-sm-12">
+  <div class="ContentItemContainer"><div class="us-cco-sticky-tabs us-cco-rail">
+  <div class="cco tabs-wrapper tabs-vertical tabs-right" id="cv2-cco">
+    <div class="RadTabStripVertical RadTabStrip_Orion RadTabStripRight_Orion RadTabStripRight">
+      <div class="rtsLevel rtsLevel1">
+        <ul class="rtsUL" role="tablist">
+          <li class="rtsLI rtsFirst"><a class="rtsLink rtsSelected" role="tab" href="#summary" aria-selected="true" data-view="summary"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Summary</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#profile" aria-selected="false" data-view="profile"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Profile</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#finance" aria-selected="false" data-view="finance"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Finance</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#activity" aria-selected="false" data-view="activity"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Activity</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#cases" aria-selected="false" data-view="cases"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Cases</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#engagement" aria-selected="false" data-view="engagement"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Engagement</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#membership" aria-selected="false" data-view="membership"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Membership</span></span></span></a></li>
+          <li class="rtsLI rtsLast"><a class="rtsLink" role="tab" href="#admin" aria-selected="false" data-view="admin"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Admin</span></span></span></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="RadMultiPage RadMultiPage_Default">
+
+      <!-- ── SUMMARY ─────────────────────────────────────────── -->
+      <div class="rmpView" id="view-summary">
+
+        <!-- Record alerts · Query Template Display from the same Alerts IQA as the
+             banner bell · CSS class: us-alerts (candidate) -->
+        <div class="ContentItemContainer"><div class="us-alerts" id="summary-alerts">
+          <div class="AsiImportant" role="status">
+            <p><strong>Resignation request pending.</strong> Submitted 08 May 2026: “Leaving nursing to travel. Will likely return in 12 months.”</p>
+            <div class="us-alerts__actions">
+              <button type="button" class="TextButton cv2-demo">Save member</button>
+              <button type="button" class="TextButton cv2-demo">Process resignation</button>
+            </div>
+          </div>
+          <div class="AsiWarning" role="status" id="cv3-overdue-alert">
+            <p><strong>Overdue payment.</strong> $185.00 outstanding since 01 Mar 2026 after 3 failed direct debit attempts. Membership may be suspended if not resolved within 14 days.</p>
+            <div class="us-alerts__actions">
+              <button type="button" class="TextButton us-action-finance-make-payment">Make payment</button>
+            </div>
+          </div>
+        </div></div>
+
+        <!-- Contact trackers: the home-page Needs Attention component, scoped to this contact.
+             No-header mode: the <header> is omitted. Proposed folder; the loader
+             does not yet pass the contact ID (see README). -->
+        <div class="ContentItemContainer">
+          <section class="us-attention us-attention--hide-zero cv2-trackers"
+            data-us-iqa-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Trackers"
+            aria-label="Needs Attention">
+            <ul class="us-attention__items" aria-label="Member queues"></ul>
+            <p class="us-attention__status" role="status" aria-live="polite">Loading counts…</p>
+            <button type="button" class="TextButton us-attention__retry" hidden>Retry</button>
+          </section>
+        </div>
+
+        <div class="row cv2-row">
+          <div class="col-md-6">
+            <div class="ContentItemContainer"><div class="panel">
+              <div class="panel-heading Distinguish"><h2 class="panel-title">Contact summary</h2></div>
+              <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred name</span></div><br><div class="PanelFieldValue"><span>Sarah</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Birth date</span></div><br><div class="PanelFieldValue"><span>14 Jun 1985</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred email</span></div><br><div class="PanelFieldValue"><span><a href="mailto:s.reynolds@metrohealth.gov.au">s.reynolds@metrohealth.gov.au</a></span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred mobile</span></div><br><div class="PanelFieldValue"><span>0412 345 678</span></div></div></div>
+                <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Residential address</span></div><br><div class="PanelFieldValue"><span>42 Acacia Street, Newtown NSW 2042</span></div></div></div>
+              </div></div></div></div>
+            </div></div>
+          </div>
+          <div class="col-md-6">
+            <div class="ContentItemContainer"><div class="panel">
+              <div class="panel-heading Distinguish"><h2 class="panel-title">Membership summary</h2></div>
+              <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Category</span></div><br><div class="PanelFieldValue"><span>Full Member – RN</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Financial status</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--danger" id="cv3-financial-status" title="$185 since 01 Mar 2026 · 74 days overdue">Overdue</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Paid through</span></div><br><div class="PanelFieldValue"><span>31 Mar 2026</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Next payment</span></div><br><div class="PanelFieldValue"><span>01 Jul 2026 · $185</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment method</span></div><br><div class="PanelFieldValue"><span>Direct debit ••••4821</span></div></div></div>
+                <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Frequency</span></div><br><div class="PanelFieldValue"><span>Quarterly</span></div></div></div>
+                <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Active adjustment</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--primary" title="Hardship arrangement · applied 15 Mar 2026">Hardship waiver −$20.00 per quarter until 30 Sep 2026</span></div></div></div>
+              </div></div></div></div>
+            </div></div>
+          </div>
+        </div>
+
+        <!-- Query Template Display · CSS class: us-query-template us-notes us-notes--pinned (candidate)
+             · Member-Notes-Compact-Query-Template.html -->
+        <div class="ContentItemContainer"><div class="us-query-template us-notes us-notes--pinned"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Pinned notes</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
+            <section data-item="pinned-0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+              <div class="us-note">
+                <p class="us-note__meta">
+                  <strong class="us-note__author">J. Patel</strong>
+                  <span class="us-note__date">15 Mar 2026</span>
+                  <span class="us-badge us-note__type">Payment</span>
+                </p>
+                <p class="us-note__body"><strong class="us-note__subject"></strong>Called member re overdue Q1 payment. Member advised she is experiencing financial difficulty following extended sick leave. Agreed to a payment arrangement – will pay by 30 March.</p>
+              </div>
+            </div></div></section>
+          </div></div></div>
+        </div></div></div>
+
+        <!-- Query Menu · CSS class: us-iqa-row-groups (candidate) · sorted by reference, newest first -->
+        <div class="ContentItemContainer"><div class="us-iqa-row-groups"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Recent payments</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-recent-payments_ContentPanel"><div id="cv2-recent-payments_ListerPanel"><div data-gridid="cv2-recent-payments"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Amount</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>PAY-8821</td><td>01 Apr 2026</td><td>Q2 2026 subscription</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--success">Paid</span></td></tr>
+              <tr class="rgAltRow"><td>PAY-8654</td><td>15 Mar 2026</td><td>Q1 2026 subscription · account suspended</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger" title="74 days overdue">Overdue</span></td></tr>
+              <tr class="rgRow"><td>PAY-8654</td><td>08 Mar 2026</td><td>Attempt 2 · insufficient funds</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger">Declined</span></td></tr>
+              <tr class="rgAltRow"><td>PAY-8654</td><td>01 Mar 2026</td><td>Attempt 1 · insufficient funds</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger">Declined</span></td></tr>
+              <tr class="rgRow"><td>PAY-8312</td><td>01 Jan 2026</td><td>Q4 2025 subscription</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--success">Paid</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+      </div>
+
+      <!-- ── PROFILE ─────────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-profile">
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="profile" data-us-tab-adapter="page-sections" aria-label="Profile sections">
+          <button type="button" data-us-tab="contact" class="is-active">Contact info</button>
+          <button type="button" data-us-tab="employment">Employment</button>
+          <button type="button" data-us-tab="demographics">Demographics</button>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-contact"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Personal details</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Full name</span></div><br><div class="PanelFieldValue"><span>Sarah Jane Reynolds</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred name</span></div><br><div class="PanelFieldValue"><span>Sarah</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Pronouns</span></div><br><div class="PanelFieldValue"><span>She / her</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Date of birth</span></div><br><div class="PanelFieldValue"><span>14 Jun 1985</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Join date</span></div><br><div class="PanelFieldValue"><span>12 Mar 2018</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Status</span></div><br><div class="PanelFieldValue"><span>A - Active</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-contact"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Email addresses and phones</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-contact-methods_ContentPanel"><div id="cv2-contact-methods_ListerPanel"><div data-gridid="cv2-contact-methods"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Value</th><th class="rgHeader" scope="col">Context</th><th class="rgHeader" scope="col">Flags</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>Work email</td><td><a href="mailto:s.reynolds@metrohealth.gov.au">s.reynolds@metrohealth.gov.au</a></td><td>Metro Health Services</td><td><span class="us-badge us-badge--primary">Preferred</span> <span class="us-badge">No newsletters</span></td></tr>
+              <tr class="rgAltRow"><td>Personal email</td><td><a href="mailto:sarah.reynolds@personal.com">sarah.reynolds@personal.com</a></td><td>Home</td><td><span class="us-badge">All emails</span></td></tr>
+              <tr class="rgRow"><td>Work email</td><td><s>s.reynolds@ambulance.nsw.gov.au</s></td><td>NSW Ambulance</td><td><span class="us-badge us-badge--danger">Bounced 02 Apr 2026</span></td></tr>
+              <tr class="rgAltRow"><td>Mobile</td><td>0412 345 678</td><td>Personal</td><td><span class="us-badge us-badge--primary">Preferred</span> <span class="us-badge us-badge--success">SMS on</span></td></tr>
+              <tr class="rgRow"><td>Work phone</td><td><s>02 9345 6789</s></td><td>Metro Health</td><td><span class="us-badge us-badge--danger">Wrong number</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-contact"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Addresses</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Residential</span></div><br><div class="PanelFieldValue"><span>42 Acacia Street<br>Newtown NSW 2042</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Postal</span></div><br><div class="PanelFieldValue"><span>Same as residential</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-employment"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Jobs</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-jobs_ContentPanel"><div id="cv2-jobs_ListerPanel"><div data-gridid="cv2-jobs"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Employer</th><th class="rgHeader" scope="col">Role</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">From</th><th class="rgHeader" scope="col">To</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>Metro Health Services</td><td>RN Level 3 – ICU</td><td>Permanent PT (0.6)</td><td>Aug 2015</td><td>Current</td><td><span class="us-badge us-badge--primary">Primary</span></td></tr>
+              <tr class="rgAltRow"><td>NSW Ambulance</td><td>Paramedic Level 2</td><td>Casual</td><td>Mar 2021</td><td>Current</td><td><span class="us-badge us-badge--success">Active</span></td></tr>
+              <tr class="rgRow"><td>Northern Beaches Hospital</td><td>RN Level 2</td><td>Permanent PT</td><td>Feb 2012</td><td>Jul 2015</td><td><span class="us-badge">Ended</span></td></tr>
+              <tr class="rgAltRow"><td>Agency Nursing Co.</td><td>Casual RN</td><td>Casual</td><td>Jan 2010</td><td>Jan 2012</td><td><span class="us-badge">Ended</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-demographics"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Demographics and registration</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Gender identity</span></div><br><div class="PanelFieldValue"><span>Woman</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Country of birth</span></div><br><div class="PanelFieldValue"><span>Australia</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Language</span></div><br><div class="PanelFieldValue"><span>English</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">AHPRA number</span></div><br><div class="PanelFieldValue"><span>NMW0001234567</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Registration expiry</span></div><br><div class="PanelFieldValue"><span>31 May 2027</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Highest education</span></div><br><div class="PanelFieldValue"><span>Bachelor of Nursing</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Federal electorate</span></div><br><div class="PanelFieldValue"><span>Grayndler</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">State electorate</span></div><br><div class="PanelFieldValue"><span>Newtown</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Local government</span></div><br><div class="PanelFieldValue"><span>Inner West Council</span></div></div></div>
+            <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Attributes</span></div><br><div class="PanelFieldValue"><span class="us-badge">Delegate</span> <span class="us-badge">HSR</span> <span class="us-badge">First Aid cert</span> <span class="us-badge">EBA bargaining rep</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+      </div>
+
+      <!-- ── FINANCE ─────────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-finance">
+        <!-- Above the switcher, what staff need at a glance (owner, 25 September 2026).
+             Members pay one of three ways: auto debit (card or bank account, charged
+             automatically), invoice (paid by BPAY or EFT) or payroll deduction (the
+             employer pays from salary, pre-tax). Only invoice members have invoices,
+             so nothing here is invoice-only, and nothing that can be empty sits beside
+             another panel: Billing and Balance always show; Active adjustments always
+             adjustments are full width and are set not to render when their query
+             returns no rows, so the page just gets shorter. -->
+        <div class="row cv2-row cv3-finance-row">
+          <div class="col-md-8">
+            <!-- Panel · CSS class: us-action-finance-manage-billing (heading menu: Update billing method, Raise invoice, Refresh pricing) -->
+            <div class="ContentItemContainer"><div class="us-action-finance-manage-billing"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Billing</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Billing category</span></div><br><div class="PanelFieldValue"><span>Full Member – RN</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment type</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-type">Auto debit</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment frequency</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-frequency">Quarterly</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment amount</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-amount">$165.00</span> <span class="us-badge us-badge--primary" title="Standard fee less the $20.00 per quarter hardship waiver">Waiver applied</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Default billing method</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-method">Bank account · BSB 062-000 ••••4821</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Next payment</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-next">01 Jul 2026</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+          </div>
+          <div class="col-md-4">
+            <!-- Panel · CSS class: us-panel-tone-auto us-action-finance-apply-credit (red while anything is overdue) -->
+            <div class="ContentItemContainer"><div class="us-panel-tone-auto us-action-finance-apply-credit"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Balance</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Arrears</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--danger" id="cv3-arrears">$185.00 · 74 days overdue</span></div></div></div>
+            <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Outstanding</span></div><br><div class="PanelFieldValue"><span id="cv3-outstanding-total">$185.00 · 1 failed debit</span></div></div></div>
+            <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Credit available</span></div><br><div class="PanelFieldValue"><span>$65.00</span><span class="cv3-credit-lines"><span>CR-0192 · $40.00 · overpayment on <a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-7412">PAY-7412</a></span><span>CR-0204 · $25.00 · refund of <a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8105">PAY-8105</a></span></span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+          </div>
+        </div>
+
+        <!-- Query Menu · what the member owes, whatever the payment type: open and
+             overdue invoices (invoice), failed debits (auto debit), deductions the
+             employer did not remit (payroll). Not rendered when empty.
+             CSS class: us-panel-tone-auto us-action-finance-make-payment -->
+        <div class="ContentItemContainer" id="cv3-outstanding"><div class="us-panel-tone-auto us-action-finance-make-payment"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Outstanding</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-outstanding_ContentPanel"><div id="cv2-outstanding_ListerPanel"><div data-gridid="cv2-outstanding"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Due</th><th class="rgHeader" scope="col">Amount</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody id="cv3-outstanding-rows">
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>Failed debit</td><td>Q1 2026 subscription · 3 attempts declined</td><td>01 Mar 2026</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger us-badge--icon" title="74 days overdue">Overdue</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Query Template Display · active and upcoming adjustments; always shown (item 33).
+             CSS class: us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment
+             Header field: the column headings below. Query Template field: one
+             result, from <div class="us-adjustment">. No results field:
+             <p>No active or upcoming adjustments.</p> (the info tone drops then).
+             Design, template and field list: prototypes/wip/dues-adjustments/. -->
+        <div class="ContentItemContainer"><div class="us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Active and upcoming adjustments</h2></div>
+          <div class="panel-body-container"><div class="panel-body" id="cv3-adjustments-body">
+            <div class="us-adjustments__head" aria-hidden="true">
+              <span>Type</span>
+              <span>Fee effect</span>
+              <span>Starts</span>
+              <span>Ends</span>
+              <span>Status</span>
+              <span></span>
+            </div>
+            <div class="QueryTemplateSet">
+              <section data-item="0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                <div class="us-adjustment" data-us-adjustment-status="Active">
+                  <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__title">Waiver</span>
+                    <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> −$20.00 per quarter</span>
+                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2026-03-15">15 Mar 2026</span></span>
+                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2026-09-30">30 Sep 2026</span></span>
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Active</span></span>
+                    <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                  </button>
+                  <div class="us-adjustment__panel" hidden>
+                    <dl class="us-adjustment__fields">
+                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Hardship arrangement</dd></div>
+                      <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$20.00 off each quarter</dd></div>
+                      <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                    </dl>
+                    <div class="us-adjustment__meter">
+                      <progress value="" max="" aria-label="Credit remaining"></progress>
+                      <div class="us-adjustment__meter-caption"></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Changed attributes</div>
+                      <div class="us-adjustment__attrs"></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Note</div>
+                      <p class="us-adjustment__note">Financial difficulty after extended sick leave. Review before the arrangement ends.</p>
+                    </div>
+                    <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>J. Patel</strong> on 15 Mar 2026</span></p>
+                    <div class="us-adjustment__actions">
+                      <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2140">Edit</button>
+                      <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2140">End adjustment</button>
+                      <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2140">View affected transactions</button>
+                    </div>
+                  </div>
+                </div>
+              </div></div></section>
+              <section data-item="1" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                <div class="us-adjustment" data-us-adjustment-status="Upcoming">
+                  <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__title">Membership change</span>
+                    <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> Associate rate · $95.00/qtr</span>
+                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2026-10-01">01 Oct 2026</span></span>
+                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2027-03-31">31 Mar 2027</span></span>
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
+                    <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                  </button>
+                  <div class="us-adjustment__panel" hidden>
+                    <dl class="us-adjustment__fields">
+                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Secondment</dd></div>
+                      <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                      <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                    </dl>
+                    <div class="us-adjustment__meter">
+                      <progress value="" max="" aria-label="Credit remaining"></progress>
+                      <div class="us-adjustment__meter-caption"></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Changed attributes</div>
+                      <div class="us-adjustment__attrs"><span class="us-badge"><span class="us-adjustment__attr-label">Category:</span> Full Member – RN <i class="ti ti-arrow-right" aria-hidden="true"></i><span class="sr-only"> to </span> <span class="us-adjustment__attr-to">Associate Member</span></span></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Note</div>
+                      <p class="us-adjustment__note">Temporary for the secondment; reverts to Full Member – RN from 01 Apr 2027.</p>
+                    </div>
+                    <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>M. Chen</strong> on 02 May 2026</span></p>
+                    <div class="us-adjustment__actions">
+                      <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2193">Edit</button>
+                      <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2193">End adjustment</button>
+                      <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2193">View affected transactions</button>
+                    </div>
+                  </div>
+                </div>
+              </div></div></section>
+              <section data-item="2" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                <div class="us-adjustment" data-us-adjustment-status="Upcoming">
+                  <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__title">Suspension</span>
+                    <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> No fees due</span>
+                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2027-04-01">01 Apr 2027</span></span>
+                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2028-03-31">31 Mar 2028</span></span>
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
+                    <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                  </button>
+                  <div class="us-adjustment__panel" hidden>
+                    <dl class="us-adjustment__fields">
+                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Leave without pay · overseas travel</dd></div>
+                      <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                      <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                    </dl>
+                    <div class="us-adjustment__meter">
+                      <progress value="" max="" aria-label="Credit remaining"></progress>
+                      <div class="us-adjustment__meter-caption"></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Changed attributes</div>
+                      <div class="us-adjustment__attrs"></div>
+                    </div>
+                    <div>
+                      <div class="us-adjustment__label">Note</div>
+                      <p class="us-adjustment__note">Agreed instead of resigning: membership kept, no fees debited during the year away.</p>
+                    </div>
+                    <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>A. Smith</strong> on 09 May 2026</span></p>
+                    <div class="us-adjustment__actions">
+                      <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2207">Edit</button>
+                      <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2207">End adjustment</button>
+                      <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2207">View affected transactions</button>
+                    </div>
+                  </div>
+                </div>
+              </div></div></section>
+            </div>
+          </div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="finance" data-us-tab-adapter="page-sections" aria-label="Finance sections">
+          <button type="button" data-us-tab="payments" class="is-active">Payment history</button>
+          <button type="button" data-us-tab="adjustments">Adjustments</button>
+          <button type="button" data-us-tab="methods">Payment methods</button>
+          <button type="button" data-us-tab="tax">Tax statements</button>
+          <button type="button" data-us-tab="admin">Admin</button>
+          <button type="button" data-us-tab="legacy">Legacy</button>
+        </div></div></div>
+
+        <!-- Query Menu · CSS class adds us-iqa-row-groups · status badges carry icons (us-badge--icon) -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-payments us-iqa-row-groups"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Payment history</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-payments_ContentPanel"><div id="cv2-payments_ListerPanel"><div data-gridid="cv2-payments"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Status</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Method</th><th class="rgHeader" scope="col">Amount</th></tr></thead>
+            <tbody id="cv3-payment-rows">
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8902">PAY-8902</a></td><td>01 Jul 2026</td><td><span class="us-badge us-badge--primary us-badge--icon">Scheduled</span></td><td>Q3 2026 subscription · INV-2026-058</td><td>Direct debit</td><td class="cv2-num">$165.00</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8821">PAY-8821</a></td><td>01 Apr 2026</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q2 2026 subscription · INV-2026-044</td><td>Direct debit</td><td class="cv2-num">$165.00</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>15 Mar 2026</td><td><span class="us-badge us-badge--danger us-badge--icon">Declined</span></td><td>Q1 2026 subscription · attempt 3 · direct debit suspended</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>08 Mar 2026</td><td><span class="us-badge us-badge--danger us-badge--icon">Declined</span></td><td>Attempt 2 · insufficient funds</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>01 Mar 2026</td><td><span class="us-badge us-badge--danger us-badge--icon">Declined</span></td><td>Attempt 1 · insufficient funds</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8312">PAY-8312</a></td><td>01 Jan 2026</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q4 2025 subscription</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8105">PAY-8105</a></td><td>12 Nov 2025</td><td><span class="us-badge us-badge--icon" data-us-icon="refund">Refunded</span></td><td>Delegate training day · cancelled, refunded to credit CR-0204</td><td>Credit card</td><td class="cv2-num">$25.00</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-7990">PAY-7990</a></td><td>01 Oct 2025</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q3 2025 subscription</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-7412">PAY-7412</a></td><td>20 Jun 2025</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q2 2025 subscription · $40.00 over, held as credit CR-0192</td><td>Credit card</td><td class="cv2-num">$225.00</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Query Menu · every adjustment, active and upcoming included, newest start first (item 33).
+             No add action here: Add adjustment sits on Active and upcoming, above the switcher.
+             Type links to the adjustment record (us-action-finance-view-adjustment). -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-adjustments"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">All adjustments</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-adjustments_ContentPanel"><div id="cv2-adjustments_ListerPanel"><div data-gridid="cv2-adjustments"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Details</th><th class="rgHeader" scope="col">Fee effect</th><th class="rgHeader" scope="col">From</th><th class="rgHeader" scope="col">To</th><th class="rgHeader" scope="col">Status</th><th class="rgHeader" scope="col">Created by</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2207">Suspension</a></td><td>Leave without pay · overseas travel; membership kept, billing paused</td><td>No fees due</td><td>01 Apr 2027</td><td>31 Mar 2028</td><td><span class="us-badge us-badge--primary us-badge--icon">Upcoming</span></td><td>A. Smith</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2193">Membership change</a></td><td>Secondment · Full Member – RN → Associate Member (temporary)</td><td>Associate rate · $95.00/qtr</td><td>01 Oct 2026</td><td>31 Mar 2027</td><td><span class="us-badge us-badge--primary us-badge--icon">Upcoming</span></td><td>M. Chen</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2140">Waiver</a></td><td>Hardship arrangement · flat $20.00 off each quarter</td><td>−$20.00 per quarter</td><td>15 Mar 2026</td><td>30 Sep 2026</td><td><span class="us-badge us-badge--success us-badge--icon">Active</span></td><td>J. Patel</td></tr>
+              <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-1688">Waiver</a></td><td>Part-time employment concession · 25% off</td><td>−$46.25 per quarter</td><td>01 Jan 2024</td><td>31 Dec 2024</td><td><span class="us-badge us-badge--icon" data-us-icon="ended">Expired</span></td><td>M. Chen</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-0412">Waiver</a></td><td>Joining fee waiver · campaign period · 100% off</td><td>Joining fee waived</td><td>12 Mar 2018</td><td>12 Mar 2018</td><td><span class="us-badge us-badge--icon" data-us-icon="ended">Expired</span></td><td>System (join)</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-methods us-action-finance-add-card"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Payment methods</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-methods_ContentPanel"><div id="cv2-methods_ListerPanel"><div data-gridid="cv2-methods"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Method</th><th class="rgHeader" scope="col">Details</th><th class="rgHeader" scope="col">Frequency</th><th class="rgHeader" scope="col">From</th><th class="rgHeader" scope="col">To</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>Bank account (direct debit)</td><td>BSB 062-000 · ••••4821</td><td>Quarterly</td><td>01 Jan 2020</td><td>Current</td><td><span class="us-badge us-badge--success">Active</span> <span class="us-badge us-badge--primary">Default</span></td></tr>
+              <tr class="rgAltRow"><td>Credit card</td><td>Visa ••••3310</td><td>Annual</td><td>12 Mar 2018</td><td>31 Dec 2019</td><td><span class="us-badge">Replaced</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-tax"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Tax statements</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-tax_ContentPanel"><div id="cv2-tax_ListerPanel"><div data-gridid="cv2-tax"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Financial year</th><th class="rgHeader" scope="col">Total paid</th><th class="rgHeader" scope="col">Tax-deductible</th><th class="rgHeader" scope="col">Document</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>2024–25</td><td class="cv2-num">$740.00</td><td class="cv2-num">$740.00</td><td><a href="#statement">Download PDF</a></td></tr>
+              <tr class="rgAltRow"><td>2023–24</td><td class="cv2-num">$740.00</td><td class="cv2-num">$740.00</td><td><a href="#statement">Download PDF</a></td></tr>
+              <tr class="rgRow"><td>2022–23</td><td class="cv2-num">$680.00</td><td class="cv2-num">$680.00</td><td><a href="#statement">Download PDF</a></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Content · staff only (iMIS access settings on the iPart) -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-admin"><div class="AsiInformation" role="note"><p>Staff overrides replace a calculated value until they are cleared. Every change is recorded in the Admin tab’s audit log.</p></div></div></div>
+        <!-- Query Menu · staff only · CSS class adds us-action-finance-add-override; rows carry us-action-finance-edit-override buttons -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-admin us-action-finance-add-override"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Billing overrides</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-overrides_ContentPanel"><div id="cv2-overrides_ListerPanel"><div data-gridid="cv2-overrides"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Setting</th><th class="rgHeader" scope="col">Calculated</th><th class="rgHeader" scope="col">Override</th><th class="rgHeader" scope="col">Reason</th><th class="rgHeader" scope="col">Set by</th><th class="rgHeader" scope="col">Change</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>Paid through</td><td>31 Dec 2025</td><td><strong>31 Mar 2026</strong></td><td>Payroll deduction error; Q1 confirmed paid by employer</td><td>J. Patel · 02 Apr 2026</td><td><button type="button" class="TextButton SmallButton us-action-finance-edit-override" data-id="004821" data-setting="paid-through">Edit</button></td></tr>
+              <tr class="rgAltRow"><td>Next payment date</td><td>01 Jul 2026</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="TextButton SmallButton us-action-finance-edit-override" data-id="004821" data-setting="next-payment">Override</button></td></tr>
+              <tr class="rgRow"><td>Arrears status</td><td><span class="us-badge us-badge--danger">In arrears · 74 days</span></td><td>—</td><td>—</td><td>—</td><td><button type="button" class="TextButton SmallButton us-action-finance-edit-override" data-id="004821" data-setting="arrears">Override</button></td></tr>
+              <tr class="rgAltRow"><td>Membership fee</td><td>$185.00/qtr · Full Member – RN</td><td>—</td><td>—</td><td>—</td><td><button type="button" class="TextButton SmallButton us-action-finance-edit-override" data-id="004821" data-setting="fee">Override</button></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-legacy"><div class="AsiInformation" role="note"><p>Read only. Imported from the previous membership system (records to 30 Jun 2019); not included in balances or tax statements.</p></div></div></div>
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-legacy"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Legacy transactions</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-legacy_ContentPanel"><div id="cv2-legacy_ListerPanel"><div data-gridid="cv2-legacy"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Amount</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>30 Jun 2019</td><td>L-104552</td><td>Payment</td><td>Annual subscription 2019–20 · cheque</td><td class="cv2-num">$640.00</td></tr>
+              <tr class="rgAltRow"><td>30 Jun 2018</td><td>L-098731</td><td>Payment</td><td>Annual subscription 2018–19 · cheque</td><td class="cv2-num">$620.00</td></tr>
+              <tr class="rgRow"><td>12 Mar 2018</td><td>L-097210</td><td>Invoice</td><td>Joining fee (waived) and pro-rata subscription</td><td class="cv2-num">$206.00</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+      </div>
+
+      <!-- ── ACTIVITY ────────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-activity">
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="activity" data-us-tab-adapter="page-sections" aria-label="Activity sections">
+          <button type="button" data-us-tab="feed" class="is-active">Recent activity</button>
+          <button type="button" data-us-tab="documents">Documents</button>
+        </div></div></div>
+
+        <!-- Query Template Display (item 32) · CSS class: us-tab-panel us-tabset-activity us-tab-feed ·
+             Display in cards: off. Its one-row IQA returns the contact; the template is the
+             .us-activity-feed element, so iMIS fills in {#query.ID} (shown filled in here).
+             US-ACTIVITY-FEED fetches the five source IQAs with GET /api/query.
+             data-us-activity-today fixes "today" to the sample data's date; leave it out in iMIS.
+             data-history on a source: the IQA page behind "View all …" for its type
+             (sample anchors here; the first source of a type with one is used). -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-activity us-tab-feed"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Recent activity</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet">
+            <section data-item="activity-0"><div class="QueryTemplateItem">
+              <div class="us-activity-feed"
+                   data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Activity"
+                   data-us-activity-filter="ID" data-us-activity-value="004821"
+                   data-us-activity-start="StartDate" data-us-activity-days="90"
+                   data-us-activity-history="#activity-history"
+                   data-us-activity-today="2026-05-14">
+                <ul class="us-activity__sources" hidden>
+                  <li data-source="interactions" data-query="Interactions" data-type="interaction" data-history="#iqa-interactions"></li>
+                  <li data-source="calls-out" data-query="Outbound Calls" data-type="call" data-direction="out" data-history="#iqa-calls"></li>
+                  <li data-source="emails-out" data-query="Outbound Emails" data-type="email" data-direction="out" data-history="#iqa-emails"></li>
+                  <li data-source="emails-in" data-query="Inbound Emails" data-type="email" data-direction="in"></li>
+                  <li data-source="meetings" data-query="Meetings" data-type="meeting" data-history="#iqa-meetings"></li>
+                </ul>
+              </div>
+            </div></section>
+          </div></div></div>
+        </div></div></div>
+
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-activity us-tab-documents"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Documents</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-documents_ContentPanel"><div id="cv2-documents_ListerPanel"><div data-gridid="cv2-documents"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Size</th><th class="rgHeader" scope="col">Added</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td><a href="#document">Membership_Application_2018.pdf</a></td><td>PDF</td><td>124 KB</td><td>12 Mar 2018</td></tr>
+              <tr class="rgAltRow"><td><a href="#document">DirectDebit_Authority.pdf</a></td><td>PDF</td><td>89 KB</td><td>01 Jan 2020</td></tr>
+              <tr class="rgRow"><td><a href="#document">AHPRA_Registration_2025.pdf</a></td><td>PDF</td><td>210 KB</td><td>02 Jun 2025</td></tr>
+              <tr class="rgAltRow"><td><a href="#document">Grievance_Statement_WG2026041.docx</a></td><td>Word</td><td>48 KB</td><td>30 Apr 2026</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+      </div>
+
+      <!-- ── CASES ───────────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-cases">
+        <div class="ContentItemContainer"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Cases</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-cases_ContentPanel"><div id="cv2-cases_ListerPanel"><div data-gridid="cv2-cases"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Case</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Summary</th><th class="rgHeader" scope="col">Opened</th><th class="rgHeader" scope="col">Assigned</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td><a href="#case">WG-2026-041</a></td><td>Workplace grievance</td><td>Excessive overtime rostering</td><td>28 Apr 2026</td><td>M. Chen</td><td><span class="us-badge us-badge--danger">Escalated</span></td></tr>
+              <tr class="rgAltRow"><td><a href="#case">MQ-2026-019</a></td><td>Member query</td><td>EBA entitlement clarification</td><td>10 Apr 2026</td><td>Unassigned</td><td><span class="us-badge us-badge--warning">Pending</span></td></tr>
+              <tr class="rgRow"><td><a href="#case">WG-2024-112</a></td><td>Workplace grievance</td><td>Bullying – resolved informally</td><td>03 Jun 2024</td><td>A. Smith</td><td><span class="us-badge">Closed</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div>
+      </div>
+
+      <!-- ── ENGAGEMENT ──────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-engagement">
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="engagement" data-us-tab-adapter="page-sections" aria-label="Engagement sections">
+          <button type="button" data-us-tab="events" class="is-active">Events</button>
+          <button type="button" data-us-tab="roles">Roles and CPD</button>
+          <button type="button" data-us-tab="surveys">Surveys</button>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-engagement us-tab-events"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Event attendance</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-events_ContentPanel"><div id="cv2-events_ListerPanel"><div data-gridid="cv2-events"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Event</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Location</th><th class="rgHeader" scope="col">Attended</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>15 Apr 2026</td><td>Annual Member Meeting 2026</td><td>General meeting</td><td>Town Hall, Sydney</td><td><span class="us-badge us-badge--success">Yes</span></td></tr>
+              <tr class="rgAltRow"><td>10 Nov 2025</td><td>Branch Meeting – Q4 2025</td><td>Branch meeting</td><td>Online</td><td><span class="us-badge us-badge--success">Yes</span></td></tr>
+              <tr class="rgRow"><td>22 Sep 2025</td><td>Organising Skills Workshop</td><td>Training</td><td>Union House, Parramatta</td><td><span class="us-badge us-badge--success">Yes</span></td></tr>
+              <tr class="rgAltRow"><td>04 May 2025</td><td>Annual Member Meeting 2025</td><td>General meeting</td><td>Town Hall, Sydney</td><td><span class="us-badge">No</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-engagement us-tab-roles"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Elected roles and positions</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-roles_ContentPanel"><div id="cv2-roles_ListerPanel"><div data-gridid="cv2-roles"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Role</th><th class="rgHeader" scope="col">Body</th><th class="rgHeader" scope="col">From</th><th class="rgHeader" scope="col">To</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>Workplace delegate</td><td>Royal Sydney Hospital – ICU</td><td>Jan 2021</td><td>Present</td><td><span class="us-badge us-badge--success">Active</span></td></tr>
+              <tr class="rgAltRow"><td>Branch committee member</td><td>Sydney Metro Branch</td><td>Mar 2020</td><td>Present</td><td><span class="us-badge us-badge--success">Active</span></td></tr>
+              <tr class="rgRow"><td>EBA bargaining representative</td><td>Metro Health Services</td><td>Jun 2022</td><td>Dec 2023</td><td><span class="us-badge">Completed</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-engagement us-tab-roles"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Professional development</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-cpd_ContentPanel"><div id="cv2-cpd_ListerPanel"><div data-gridid="cv2-cpd"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Activity</th><th class="rgHeader" scope="col">Provider</th><th class="rgHeader" scope="col">CPD hours</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>22 Sep 2025</td><td>Organising Skills Workshop</td><td>Union Training NSW</td><td class="cv2-num">8</td></tr>
+              <tr class="rgAltRow"><td>14 Mar 2025</td><td>Delegate Skills – Advanced</td><td>ACTU Education</td><td class="cv2-num">16</td></tr>
+              <tr class="rgRow"><td>05 Oct 2024</td><td>Health and Safety Rep training</td><td>WorkSafe NSW</td><td class="cv2-num">12</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-engagement us-tab-surveys us-query-template"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Survey responses</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
+            <section data-item="surveys-0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+              <div class="us-list__heading"><h3 class="us-list__title">Member Satisfaction Survey 2026</h3><p class="us-list__meta"><span>Completed</span><span>14/02/2026</span></p></div>
+              <div class="us-list__body"><p>Overall satisfaction 7 / 10. Would recommend union membership: yes, definitely.</p></div>
+            </div></div></section>
+            <section data-item="surveys-1" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+              <div class="us-list__heading"><h3 class="us-list__title">Workplace Issues Pulse Check – Q3 2025</h3><p class="us-list__meta"><span>Completed</span><span>22/08/2025</span></p></div>
+              <div class="us-list__body"><p>Issues reported: excessive overtime, short staffing, bullying / harassment.</p></div>
+            </div></div></section>
+          </div></div></div>
+        </div></div></div>
+      </div>
+
+      <!-- ── MEMBERSHIP ──────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-membership">
+        <!-- iPart CSS class: us-action-membership-change us-action-membership-suspend -->
+        <div class="ContentItemContainer"><div class="us-action-membership-change us-action-membership-suspend"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Membership details</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Member ID</span></div><br><div class="PanelFieldValue"><span>004821</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Original join date</span></div><br><div class="PanelFieldValue"><span>12 Mar 2018</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Current period start</span></div><br><div class="PanelFieldValue"><span>15 Mar 2023</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Category</span></div><br><div class="PanelFieldValue"><span>Full Member – RN</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Branch</span></div><br><div class="PanelFieldValue"><span>Sydney Metro</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Renewal date</span></div><br><div class="PanelFieldValue"><span>30 Jun 2026</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Membership periods</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-periods_ContentPanel"><div id="cv2-periods_ListerPanel"><div data-gridid="cv2-periods"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">From</th><th class="rgHeader" scope="col">To</th><th class="rgHeader" scope="col">Category</th><th class="rgHeader" scope="col">Branch</th><th class="rgHeader" scope="col">End reason</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>15 Mar 2023</td><td>Current</td><td>Full Member – RN</td><td>Sydney Metro</td><td>—</td></tr>
+              <tr class="rgAltRow"><td>12 Mar 2018</td><td>30 Nov 2022</td><td>Full Member – RN</td><td>Sydney Metro</td><td>Lapsed – non-payment</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div>
+      </div>
+
+      <!-- ── ADMIN ───────────────────────────────────────────── -->
+      <div class="rmpView rmpHidden" id="view-admin">
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="admin" data-us-tab-adapter="page-sections" aria-label="Admin sections">
+          <button type="button" data-us-tab="interactions" class="is-active">Staff interactions</button>
+          <button type="button" data-us-tab="audit">Audit log</button>
+          <button type="button" data-us-tab="login">Portal login</button>
+        </div></div></div>
+
+        <!-- Query Template Display · CSS class adds us-query-template · Recent-History-Query-Template.html -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-admin us-tab-interactions us-query-template"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Staff interactions</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
+            <section data-item="history-0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+              <div class="us-list__heading"><h3 class="us-list__title">Outbound call · 8 min</h3><p class="us-list__meta"><span>J. Patel</span><span>15/03/2026</span></p></div>
+              <div class="us-list__body"><p>Payment arrangement discussion.</p></div>
+            </div></div></section>
+            <section data-item="history-1" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+              <div class="us-list__heading"><h3 class="us-list__title">In-person meeting</h3><p class="us-list__meta"><span>M. Chen</span><span>02/02/2026</span></p></div>
+              <div class="us-list__body"><p>Initial intake for workplace grievance WG-2026-041 at the Sydney union office.</p></div>
+            </div></div></section>
+          </div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-admin us-tab-audit"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Change history</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-audit_ContentPanel"><div id="cv2-audit_ListerPanel"><div data-gridid="cv2-audit"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Date and time</th><th class="rgHeader" scope="col">Field or action</th><th class="rgHeader" scope="col">Old value</th><th class="rgHeader" scope="col">New value</th><th class="rgHeader" scope="col">Changed by</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>10 May 2026 09:00</td><td>Email sent</td><td>—</td><td>Overdue reminder</td><td>System</td></tr>
+              <tr class="rgAltRow"><td>15 Mar 2026 14:34</td><td>Note added</td><td>—</td><td>Payment arrangement</td><td>J. Patel</td></tr>
+              <tr class="rgRow"><td>12 Jan 2026 11:20</td><td>Email preferences</td><td>All emails</td><td>Transactional only</td><td>Member (portal)</td></tr>
+              <tr class="rgAltRow"><td>12 Mar 2018 09:30</td><td>Member created</td><td>—</td><td>004821</td><td>Admin</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-admin us-tab-login"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Member portal login</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Username</span></div><br><div class="PanelFieldValue"><span>sarah.reynolds@personal.com</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Account</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--success">Active</span></div></div></div>
+            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Last login</span></div><br><div class="PanelFieldValue"><span>09 May 2026 · 7:42 pm</span></div></div></div>
+          </div></div></div></div>
+        </div></div></div>
+      </div>
+
+    </div>
+  </div>
+  </div></div>
+  </div></div>
+
+  </div>
+</div>
+</main>
+
+<!-- Prototype stand-in for the iMIS popup (RadWindow) that
+     us-action-finance-view-transaction opens: a "Transaction detail" content
+     page called with ?ID=…&Transaction=…&IsPopup=true, so the theme's dialog
+     page styling applies. Its three iParts filter on the Transaction URL
+     parameter; one page serves invoices and payments. contact-page.js fills
+     this copy from sample data. -->
+<dialog class="cv3-popup" id="cv3-transaction" aria-labelledby="cv3-transaction-title">
+  <div class="cv3-popup__bar">
+    <h2 class="cv3-popup__title" id="cv3-transaction-title">Transaction</h2>
+    <button type="button" class="cv3-popup__close" aria-label="Close">×</button>
+  </div>
+  <div class="cv3-popup__body">
+    <!-- Panel · CSS class: us-action-finance-send-to-member us-action-finance-make-payment
+         (Make payment shows for invoices with an amount owing) -->
+    <div class="ContentItemContainer"><div class="us-action-finance-send-to-member us-action-finance-make-payment"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title" id="cv3-tx-heading">Details</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row" id="cv3-tx-fields"></div></div></div></div>
+    </div></div></div>
+
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Line items</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div id="cv3-tx-lines_ContentPanel"><div id="cv3-tx-lines_ListerPanel"><div data-gridid="cv3-tx-lines"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+        <thead><tr><th class="rgHeader" scope="col">Item</th><th class="rgHeader" scope="col">Amount</th></tr></thead>
+        <tbody id="cv3-tx-lines"></tbody>
+      </table></div></div></div></div></div></div>
+    </div></div>
+
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">History</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div id="cv3-tx-history_ContentPanel"><div id="cv3-tx-history_ListerPanel"><div data-gridid="cv3-tx-history"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+        <thead><tr><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Event</th><th class="rgHeader" scope="col">By</th></tr></thead>
+        <tbody id="cv3-tx-history"></tbody>
+      </table></div></div></div></div></div></div>
+    </div></div>
+  </div>
+</dialog>
+
+<p class="cv2-toast" id="cv2-toast" role="status" aria-live="polite"></p>
+
+<!-- Offline fixture first: it replaces fetch before the shared theme loads. -->
+<script src="contact-page.js"></script>
+<!-- Candidate US-IQA-COLUMNS 1.4 must load first: the theme copy then steps aside. -->
+<script src="theme-candidate-iqa-columns.js"></script>
+<script src="theme-candidate-copy.js"></script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="theme-candidate-heading-menus.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="finance-actions.fixture.js"></script>
+<script src="theme-candidate.js"></script>
+<script src="../activity-cards/activity-cards.candidate.js"></script>
+<script src="../dues-adjustments/dues-adjustments.candidate.js"></script>
+</body>
+</html>

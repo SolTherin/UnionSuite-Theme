@@ -1,23 +1,29 @@
 # Combined activity feed — feature plan
 
-Status: planned direction, documented 2026-09-06. **Not implemented or deployed.**
+Status: direction changed 2026-09-25 from merging Query Template Displays to one
+API-driven module. A working candidate (`US-ACTIVITY-FEED`, item 32) is in the
+[contact page v3 prototype](prototypes/wip/contact-page-v3/README.md#activity-feed)
+with offline fixtures. **Not in the theme, not approved and not deployed.** The
+card layout is being decided in the activity cards workbench
+(`prototypes/wip/activity-cards/`).
 
 The [Theme Usage Guide](THeme/UnionSuite/Usage-Guide.html) lists this feature and
-its proposed classes under planned work. When implementation begins, keep that
-status and authoring contract current alongside this design. Add working templates
-and class recipes only after the corresponding source adapter is implemented.
+its proposed classes under planned work. When it is promoted, update that entry
+with the markup and field contract below. Add working templates and class recipes
+to the guide only then.
 
 The owner wants one recent-activity block containing records from separate
-tables: Calls, Emails, Notes, Meetings and SMS. The supplied screenshot shows
-one header, search and date controls, type filters with counts, month groups,
-and chronological cards with their own details and actions. The owner reports
-poor performance when combining large datasets with UNION; no comparative
-benchmark has been run in this project.
+tables. The first deployment combines five IQAs: Interactions, Outbound calls,
+Outbound emails, Inbound emails and Meetings. The supplied design shows one
+header, search and date controls, type filters with counts, month groups, and
+chronological cards with their own details and actions. The owner reports poor
+performance when combining large datasets with UNION; no comparative benchmark
+has been run in this project.
 
 ## 1. Feature boundary
 
 Build an optional, reusable activity-feed module. Its visual styling belongs in
-the theme; its assembly and interaction logic can live in the central theme
+the theme; its fetching, merging and interaction logic lives in the central theme
 JavaScript file. Queries, record mappings and destinations remain configurable
 for each deployment. The same module should support member, organisation and
 case contexts through explicit configuration.
@@ -25,193 +31,149 @@ case contexts through explicit configuration.
 | Layer | Responsibility |
 |---|---|
 | Theme CSS | Shared panel, timeline, cards, icons, badges, filters, responsive layout and interaction states |
-| Shared JavaScript module | Discover participating sources, assemble cards, sort, group by month, filter loaded items and manage expansion |
-| IQAs and display templates | Query each table, apply record/date/access constraints, and emit content with common item metadata |
-| Instance configuration | Identify the viewed record and participating sources, labels, initial window, limits and verified action/history destinations |
+| Shared JavaScript module | Read the configuration, query each source with `GET /api/query`, merge and page the results, group by month, filter, and manage expansion |
+| IQAs | Query each table, apply record/date/access constraints, sort newest first, and return the common field contract |
+| Host configuration | Identify the viewed record and participating sources, types, initial window, page sizes and the full-history destination |
 
-Ordinary grouped panels remain a separate composition pattern. They can share
-a border and heading while retaining their individual lists. This feature also
-interleaves records across those lists by time, which requires JavaScript.
-It must never activate just because several Query Template Displays share a zone.
+Ordinary grouped panels remain a separate composition pattern. The feed only
+activates on an explicit `.us-activity-feed` element.
 
-The central file is now `THeme/UnionSuite/zUnionSuite.js`; it currently supplies
-IQA report utilities, not feed assembly. Follow [the shared include instructions](THeme/UnionSuite/README.md)
-and verify the deployed load order. The future feed module should remain separate
-within that file and share lifecycle integration where appropriate. No framework
-or build step is required by this plan.
+## 2. Why one API module, not merged Query Template Displays
 
-## 2. Proposed authoring contract
+The 2026-09-06 plan merged the output of one Query Template Display per source.
+It was replaced because:
 
-These names describe planned classes, not functionality currently in the theme.
+- **Paging.** Each source keeps its own offset, so Show more and a wider date
+  range fetch real data in the correct global order. Separate native pagers
+  cannot be combined into one.
+- **Honest filters and counts.** The date range re-queries; type counts are the
+  sources' real `TotalCount`s.
+- **Page cost.** Requests run in parallel, and only when the feed is first
+  visible. Query Template Displays all render on the server during page load.
+- **Less fragile.** No hidden duplicate markup, no partial-postback
+  reconciliation, no authoring-mode detection, no ISO dates emitted into
+  templates.
+- **Content filter.** The host holds configuration only; the RiSE content
+  filter strips `on*` attributes and decodes entities in inline script, so no
+  script lives in page content.
+- **Precedent.** `US-MEMBERSHIP-STATS`, the banner alert bell and the tab counts
+  already work this way.
 
-| Authoring location | Proposed setting | Purpose |
+Trade-offs: nothing renders without JavaScript (an error state and the
+full-history link cover this), and authors cannot reshape cards in RiSE. The
+fixed field contract is deliberate: it keeps every source consistent.
+
+## 3. Authoring contract (candidate)
+
+The host is a one-row Query Template Display whose IQA returns the viewed record.
+Its template is the feed element, so iMIS fills in the record value:
+
+```html
+<div class="us-activity-feed"
+     data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Activity"
+     data-us-activity-filter="ID" data-us-activity-value="{#query.ID}"
+     data-us-activity-start="StartDate" data-us-activity-days="90"
+     data-us-activity-history="…full history page…">
+  <ul class="us-activity__sources" hidden>
+    <li data-source="interactions" data-query="Interactions" data-type="interaction"></li>
+    <li data-source="calls-out" data-query="Outbound Calls" data-type="call" data-direction="out"></li>
+    <li data-source="emails-out" data-query="Outbound Emails" data-type="email" data-direction="out"></li>
+    <li data-source="emails-in" data-query="Inbound Emails" data-type="email" data-direction="in"></li>
+    <li data-source="meetings" data-query="Meetings" data-type="meeting"></li>
+  </ul>
+</div>
+```
+
+A source `<li>` can also carry `data-history`: the IQA page for its type,
+shown as "View all calls" (emails, meetings…) while that type is chosen.
+Each row renders as a record card (`US-RECORD-CARDS`, from
+`prototypes/wip/activity-cards/`).
+
+Optional attributes: `data-us-activity-limit` (rows per request, default 20),
+`data-us-activity-page` (rows per Show more, default 10),
+`data-us-activity-time-zone` (default `Australia/Sydney`). An unsubstituted
+placeholder value leaves the feed inactive.
+
+Every source IQA is sorted newest first, filtered on the record filter and the
+named start-date filter, and returns:
+
+| Alias | Required | Purpose |
 |---|---|---|
-| Dedicated zone: Zone CSS class | `us-activity-feed` | Opt this group into feed assembly |
-| Zone: Title | `Recent activity` or another configured label | One shared title |
-| Zone: Title CSS class | `us-activity-feed-title` | Style and identify the associated title |
-| Each participating Query Template Display: CSS class | `us-activity-source` | Include this source in its nearest owning feed |
-| Each repeated template item | `us-activity-item` plus the metadata below | Identify one authored activity card |
+| `ActivityKey` | yes | Unique within the source; source + key identifies a card |
+| `ActivityDate` | yes | The business date of the activity (not last-modified). Server-local time; the same server for every source, so order is consistent |
+| `Subject` | no | Card headline; most records have none |
+| `Summary` | yes | The note text (the preview under a subject) |
+| `Detail` | no | Plain-text body shown on expand; cap its length in the IQA |
+| `StaffName`, `With`, `Duration`, `Outcome` | no | Card meta and details |
+| `OutcomeTone` | no | `success`, `warning`, `danger` or `primary` |
+| `CaseRef`, `CaseUrl` | no | Linked record |
+| `RecordUrl` | no | Native view page for Open record |
+| `AttachmentCount` | no | Attachment count |
+| `Direction` | no | `In` or `Out`; overrides the source's `data-direction` |
+| `PriorityFlag` | no | `High` or `Urgent`: a coloured flag on the card |
 
-Place one Query Template Display per source in the dedicated zone. Calls and
-Emails can have different templates and card fields. Mark only participating
-iParts; unrelated iParts and nested feed instances must remain independent.
-
-The zone title is outside `.WebPartZone`, as confirmed in
-[CMS structure §15](IMIS-CMS-STRUCTURE.md#15-named-zone-and-ipart-settings-traced-end-to-end-2026-09-06).
-Resolve its association through the verified layout structure or an explicit
-instance mapping. A descendant selector on `us-activity-feed` will not reach it.
-Use the layout/group adapter to create one visual block and an accessible heading
-association, without pulling unrelated layout content into the feed.
-
-On successful assembly, the combined view has one header and no separate source
-panel headers. Preserve source headings and wrappers for fallback and authoring.
-Do not automatically promote a source iPart's action into the group header:
-group actions require their own explicit configuration. Item links continue to
-open verified native view/edit workflows.
-
-The shared header follows the [panel-action button/text-link contract](THEME-PANEL-ACTIONS.md#presentation-and-behaviour).
-A View full history action can use text-link styling alongside a configured
-button action. Define each action's appearance independently and preserve its
-navigation or command semantics.
-
-## 3. Common item metadata
-
-Templates must expose the following values in safely encoded HTML attributes.
-Verify the template engine's field substitution and date formatting before
-settling exact attribute names and publishing example templates.
-
-| Value | Purpose |
-|---|---|
-| Source key | Stable source identity, independent of visible heading text |
-| Record key | Unique within its source; source + record identifies a card |
-| Activity type | Calls, Emails, Notes, Meetings or SMS for filtering and presentation |
-| Activity timestamp | Unambiguous ISO 8601 timestamp with timezone, or an agreed equivalent numeric value |
-| Card content | Title, summary, optional direction/related-record badge and supported action links |
-
-Each source must define which business date represents the activity, rather than
-mixing event dates with arbitrary last-modified dates. Sort newest first, then
-use stable source/record keys to break ties. Format visible dates and month
-groups using one configured display timezone. Do not parse formatted labels
-such as `18 Jul` or silently substitute today's date for missing values.
-
-Use source + record identity to prevent repeat-render duplicates. Do not merge
-distinct records because their titles or dates match. If the same real activity
-exists in several tables, a separate canonical identity rule is needed.
+Values render as text, never HTML. Links must be same-site `http(s)` URLs.
+Type and direction come from the source definition, so Inbound and Outbound
+emails share the Emails filter.
 
 ## 4. Query limits and performance
 
-Filter each query to the viewed record and initial date window before results
-reach the browser. Return only fields needed by the summary cards and sort and
-limit results at the data source. Expensive full details can stay on their
-existing view pages. Client-side hiding does not reduce database work.
+Filter each query to the viewed record and date window before results reach the
+browser. Return only fields needed by the cards; expensive full details can stay
+on their existing view pages.
 
-Suggested pilot: latest **30 activities**, within the last **90 days**. These
-are initial configuration proposals, not measured capacity limits.
+The initial view requests the newest `limit` rows from every source. The global
+newest N are contained in the newest N of each source, given consistent ordering
+and one row per activity, so no per-type quota is needed. Joined duplicate rows
+must not consume the limit before unique activities are selected.
 
-- Retrieve up to 30 newest unique records from each source with consistent
-  filtering and deterministic ordering.
-- With five sources, merge at most 150 candidate cards and show the newest 30.
-- Do not divide the limit equally between sources: six per source could miss
-  recent calls when calls dominate the history.
-
-For the initial unfiltered view, the global newest N records are contained in
-the newest N from every source, assuming complete successful source responses,
-consistent ordering, one row per activity and the same query window. Verify that
-the actual IQA/iPart result limits enforce this. Joined duplicate rows must not
-consume the limit before unique activities are selected.
-
-Measure each query and the full page on representative large contact histories.
-Several separate iParts still add execution and rendering cost; they are not
-guaranteed to run in parallel or outperform a combined query. Compare the bounded
-separate-source approach with the existing UNION implementation before claiming
+Measure each query and the whole feed on representative large contact
+histories, and compare against the existing UNION implementation before claiming
 a performance improvement.
 
 ## 5. Search, counts and paging
 
-The first version is a bounded recent-activity view with a configured **View full
-history** destination. Keep its controls honest about the data available.
+| Feature | Behaviour |
+|---|---|
+| Type filters | Choose which sources merge; Show more keeps paging those sources until the requested number of rows can be shown |
+| Counts | Each source's `TotalCount` for the current window; Emails = inbound + outbound |
+| Date range | Last 90 days (default), 6 months, 12 months, All time. Sources are newest first, so a shorter range is the front of a longer one: narrowing drops loaded rows outside the window (their cards fold away); widening keeps what is loaded and pages on from each source's offset. Only the counts re-query (one row per source). Relies on each IQA returning the same order for any start date |
+| Search | Covers loaded rows only, labelled "Search loaded activity", and never triggers loading. Also matches type and direction words, and faintly highlights matches. Server-side search through an optional named filter on each IQA is a later extension |
+| Filter toggle | On a wide feed (880px and over) search and the date range share the type filters' line and the button hides. On a narrow feed they sit behind the heading's filter button, the theme's `US-QUERY-SEARCH` toggle (as on the home page tasks); the type filters stay visible. This toggle should become one shared component for any Query Template Display or Content HTML block, as IQA reports already hide their filters behind a similar toggle (owner note, 2026-09-25) |
+| Show more | Merges from per-source buffers; a row is shown only once no source with unloaded rows could hold a newer one |
 
-| Feature | Initial behaviour | Extension requiring data-loading work |
-|---|---|---|
-| Type filters | Filter loaded candidate items, then apply the visible-item limit | Retrieve more records for an exhaustive type history |
-| Text search | Search loaded activity summaries, labelled accordingly | Search the full history at each source before limiting results |
-| Date filter | Narrow loaded results within the initial query window | Rerun/refetch sources to widen the window |
-| Counts | Clearly labelled loaded/matching counts | Verified full totals using the same filters and access rules |
-| More items | May reveal already loaded candidates with an explicit limit | Coordinated paging across all sources for a complete history |
+## 6. Lifecycle and failure
 
-Filtering a capped candidate set can miss older matching records. Do not label a
-search of loaded items as a complete search, or imply a date range is complete
-when its source results were capped. A caption such as `24 of 30` must identify
-whether 30 means loaded matches or a verified server total. Do not infer a total
-from the number of rendered cards.
-
-Complete-history search, accurate totals and seamless combined paging belong in
-a dedicated data-loading component behind the same feed presentation. It must
-coordinate per-source progress and a stable global order without omissions or
-duplicates. Independent native pagers cannot be treated as one combined pager.
-That larger component is outside the initial theme enhancement.
-
-## 6. Assembly, refresh and fallback
-
-- Build the combined output from explicitly marked template items. Preserve
-  native iPart wrappers, postback controls, scripts and authoring controls.
-  Do not clone or relocate Telerik controls or their event bindings. Confirm a
-  safe render/copy strategy for plain authored card markup, including unique
-  element IDs, label references and registered item actions, before implementation.
-- Hide duplicate source presentation only after a usable combined view exists.
-  If the script fails, the separate source displays must remain usable.
-- Track expected sources and their state explicitly. An omitted source might be
-  unavailable, denied or still loading; absence must not be interpreted as zero
-  activities. Retain empty-source output or provide a verified status contract.
-- Distinguish loading, no activities, no loaded matches and partial failure.
-  Identify an incomplete feed when a source fails rather than presenting it as
-  complete. Provide recovery without re-running unrelated actions.
-- Reconcile on initial render, delayed tabs and verified iMIS partial updates.
-  Re-read current source output, replace obsolete cards and avoid duplicate
-  cards/listeners or observer loops. Preserve applicable filter, expansion and
-  focus state using stable item identity.
-- Associate state with both the feed instance and viewed record. Clear stale
-  content when context changes and ignore completions from a previous context.
-  Read only data available through the native authorised sources; classes do
-  not grant access or justify exposing extra fields in hidden markup.
-- In Easy Edit and Content Designer, keep the individual iParts and configuration
-  controls accessible. Verify authoring-mode detection before suppressing or
-  assembling anything there.
-
-The visual treatment uses theme tokens. Type badges need visible text as well as
-colour/icons. Search needs a label, type filters need an exposed selected state,
-and expansion controls need keyboard support and expanded-state information.
-Do not impose a fixed-height internal scrollbar on every viewport; test the
-screenshot's scrolling treatment with keyboard use and narrow screens.
+- Loads when the feed first becomes visible; a hidden tab or sub-tab makes no
+  requests.
+- Tracks each source as loading, ready or failed. A failed source shows a notice
+  naming it, with Retry, and is never presented as zero or as complete.
+- Distinguishes loading, no activity in the window, and no loaded matches.
+- State belongs to the feed element and its record value. Replaced or removed
+  hosts (partial updates) are detected; results from a previous context are
+  ignored.
+- Type filters expose a pressed state; expansion controls expose an expanded
+  state and keep focus across re-renders; type badges carry text as well as an
+  icon.
 
 ## 7. Implementation and acceptance
 
-1. Capture representative Calls and Emails template output, empty results,
-   their native action links and a partial refresh on the actual custom page.
-2. Verify metadata emission, record context, source limits, completion signals
-   and title/group ownership. Record baseline timings before combining anything.
-3. Pilot two sources with shared styling, chronological assembly and fallback.
-4. Add loaded-item filters, expansion and explicit counts, then the other sources.
-5. Validate the cases below in iMIS before adding the module to the theme.
+1. Build the five IQAs to the field contract and confirm REST access for staff,
+   the start-date filter names (`GET /api/QueryParameterDefinition?QueryPath=…`)
+   and plain-text email bodies.
+2. Settle the card layout in the activity cards workbench.
+3. Measure paging cost on large histories against the UNION query.
+4. Promote `US-ACTIVITY-FEED` and its CSS, then document it in the usage guide.
 
 | Case | Expected result |
 |---|---|
-| Marker absent; unrelated iPart; two feeds | No accidental assembly or shared instance state |
-| Mixed sources and equal timestamps | Deterministic chronological order, unique cards and correct month groups |
-| One source dominates latest records | Correct newest N across sources, without per-type quotas |
-| Empty, missing, failed or delayed source | Accurate state; no false claim of completeness |
-| Partial refresh or changed record | No stale cards, duplicate actions or previous-record results |
-| Search/date filter on capped data | Loaded-data scope and counts remain explicit |
-| Script failure or authoring mode | Individual displays and editing controls remain usable |
-| Keyboard, mobile and long card content | Readable cards, reachable controls and usable scrolling |
+| Marker absent; unrelated iPart; two feeds | No accidental activation or shared state |
+| Mixed sources and equal timestamps | Deterministic order, unique cards and correct month groups |
+| One source dominates the latest records | Correct newest N across sources, without per-type quotas |
+| Empty, failed or slow source | Accurate state; no false claim of completeness |
+| Replaced host or changed record | No stale cards or results from the previous record |
+| Search on loaded data | Scope and counts remain explicit |
+| Keyboard, mobile and long card content | Readable cards, reachable controls, no horizontal scroll |
 | Large histories | Measured query/page timings and bounded payloads |
 
 This feature is T15 in the [updated condensed component inventory](CRM-Member-Profile-Component-Types-Updated.csv).
-It composes formatted items (T05/T06) within a group (T10) and adds assembly
-behaviour. The newly supplied recent-activity example has no assigned section
-number in the original 48-section prototype mapping.
-
-Native capability reference: [iMIS Query Template Display introduction](https://blog.imis.com/q3-2022-imis-product-update)
-confirms card-style templates and conditional content. The combining behaviour
-and lifecycle described here are this project's proposed extension, not verified
-built-in iMIS functionality.

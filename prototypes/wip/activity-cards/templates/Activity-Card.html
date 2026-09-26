@@ -1,0 +1,46 @@
+<!-- Activity card (candidate). One repeating Query Template result, or one row
+     rendered by US-ACTIVITY-FEED. The owner's original structure on theme
+     tokens: on the left, the type line (type · direction · linked record ·
+     by whom, then the priority and status flags), one bold headline and one
+     muted preview line; on the right, date, time and expand stacked,
+     so dates line up down the list. With no Subject (most records) the note
+     itself is the headline.
+     ActivityType: call, email, sms, meeting, interaction or note (the rail
+     icon and its colour, the card's only type colour). PriorityFlag: High,
+     Urgent or blank. OutcomeTone: danger or warning colour the status; other
+     tones stay neutral. Blank optional fields collapse. -->
+<article class="us-record" data-us-record-type="{#query.ActivityType}" data-us-record-priority="{#query.PriorityFlag}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__type">{#query.TypeLabel}</span>
+        <span class="us-record__direction">{#query.DirectionLabel}</span>
+        <a class="us-record__link" href="{#query.CaseUrl}">{#query.CaseRef}</a>
+        <span class="us-record__by">{#query.StaffName}</span>
+        <span class="us-badge us-record__priority">{#query.PriorityFlag}</span>
+        <span class="us-badge us-badge--{#query.OutcomeTone} us-record__status">{#query.Outcome}</span>
+      </p>
+      <h3 class="us-record__title">{#query.Subject}</h3>
+      <p class="us-record__text">{#query.Summary}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.DateShort}</span>
+        <span class="us-record__time">{#query.TimeText}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <dl class="us-record__facts">
+        <div><dt>Handled by</dt><dd>{#query.StaffName}</dd></div>
+        <div><dt>With</dt><dd>{#query.With}</dd></div>
+        <div><dt>Duration</dt><dd>{#query.Duration}</dd></div>
+        <div><dt>Outcome</dt><dd>{#query.Outcome}</dd></div>
+      </dl>
+      <p class="us-record__body">{#query.Detail}</p>
+      <p class="us-record__files">{#query.AttachmentLabel}</p>
+      <p class="us-record__more"><a class="TextButton SmallButton us-outline-button" href="{#query.RecordUrl}">View full details</a></p>
+    </div>
+  </div>
+</article>

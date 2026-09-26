@@ -29,6 +29,8 @@ THeme/**/*.zip
 # Authored studies without a separate generator: retain until classified
 !/references/Convert-Icon-Preview.html
 !/references/Task List Animations.html
+# Single-file prototype exports; rebuild with node build-standalone.cjs
+/prototypes/wip/contact-page-v3/Contact-Page-v3-Standalone.html
 
 # Local preview output and captures; retain existing maintained helper scripts
 /.preview/*

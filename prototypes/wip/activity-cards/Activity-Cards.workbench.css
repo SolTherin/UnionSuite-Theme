@@ -1,0 +1,177 @@
+/* Workbench page chrome only. Nothing here styles the candidate cards: they
+   show exactly what the theme and activity-cards.candidate.css give them.
+   The supplied original is frozen in supplied/Original-Feed.html. */
+
+body {
+  margin: 0;
+  padding: 0 0 64px;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.6 var(--font-ui);
+}
+
+.wb-head {
+  max-width: 780px;
+  padding: 40px 24px 8px;
+}
+
+.wb-eyebrow {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.wb-head h1 {
+  margin: 0 0 12px;
+  color: var(--text-strong);
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.wb-lede {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+}
+
+.wb-toolbar,
+.wb-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.wb-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.wb-options {
+  margin-bottom: 8px;
+  background: var(--bg-subtle);
+}
+
+.wb-options__title {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.wb-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.wb-control select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px var(--font-ui);
+}
+
+.wb-control--tiers [aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-surface));
+}
+
+.wb-stages {
+  --wb-stage-width: 620px;
+  padding: 24px;
+}
+
+.wb-stage {
+  margin: 0 0 48px;
+}
+
+.wb-stage__title {
+  margin: 0 0 6px;
+  color: var(--text-strong);
+  font-size: 17px;
+}
+
+.wb-stage__note {
+  max-width: 760px;
+  margin: 0 0 16px;
+  color: var(--text-muted);
+}
+
+.wb-stage__variants {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 24px;
+}
+
+.wb-variant {
+  flex: 0 0 auto;
+  width: min(100%, var(--wb-stage-width));
+  min-width: 0;
+}
+
+.wb-only-candidate .wb-variant--supplied {
+  display: none;
+}
+
+.wb-variant__label {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.wb-variant--candidate .wb-variant__label {
+  color: var(--accent);
+}
+
+.wb-stage__frame {
+  width: 100%;
+  padding: 0;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+  overflow: auto;
+}
+
+.wb-variant--candidate > .wb-stage__frame {
+  border-color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .wb-head {
+    padding: 28px 16px 8px;
+  }
+
+  .wb-toolbar,
+  .wb-options,
+  .wb-stages {
+    padding: 12px 16px;
+  }
+}
+
+.wb-foot {
+  max-width: 780px;
+  padding: 0 24px;
+  color: var(--text-muted);
+}
+
+/* The supplied original is a separate document in an iframe (frozen,
+   untouched by theme or candidate CSS); the workbench sizes it to fit. */
+.wb-original {
+  display: block;
+  width: 100%;
+  min-height: 200px;
+  border: 0;
+  background: #f4f6fa;
+}

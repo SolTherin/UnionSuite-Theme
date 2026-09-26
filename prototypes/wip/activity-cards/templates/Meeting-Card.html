@@ -1,0 +1,39 @@
+<!-- Meeting card (candidate). One repeating Query Template result. The type
+     line ("Meeting" · linked record · by the organiser, then the priority and
+     outcome flags), the meeting title as the headline and the summary as a
+     muted preview; date and time stack on the right with the expand button.
+     Duration, location and attendees sit in the details. CaseRef, Outcome
+     (OutcomeTone danger or warning colour it) and PriorityFlag (High, Urgent
+     or blank) are optional. -->
+<article class="us-record" data-us-record-type="meeting" data-us-record-priority="{#query.PriorityFlag}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__type">Meeting</span>
+        <a class="us-record__link" href="{#query.CaseUrl}">{#query.CaseRef}</a>
+        <span class="us-record__by">{#query.Organiser}</span>
+        <span class="us-badge us-record__priority">{#query.PriorityFlag}</span>
+        <span class="us-badge us-badge--{#query.OutcomeTone} us-record__status">{#query.Outcome}</span>
+      </p>
+      <h3 class="us-record__title">{#query.MeetingTitle}</h3>
+      <p class="us-record__text">{#query.MeetingSummary}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.DateShort}</span>
+        <span class="us-record__time">{#query.TimeText}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <dl class="us-record__facts">
+        <div><dt>Duration</dt><dd>{#query.Duration}</dd></div>
+        <div><dt>Location</dt><dd>{#query.Location}</dd></div>
+        <div><dt>Attendees</dt><dd>{#query.Attendees}</dd></div>
+        <div><dt>Organiser</dt><dd>{#query.Organiser}</dd></div>
+      </dl>
+      <p class="us-record__more"><a class="TextButton SmallButton us-outline-button" href="{#query.RecordUrl}">Open meeting</a></p>
+    </div>
+  </div>
+</article>

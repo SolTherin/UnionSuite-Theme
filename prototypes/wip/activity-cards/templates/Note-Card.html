@@ -1,0 +1,31 @@
+<!-- Note card (candidate). One repeating Query Template result. The type line
+     (note type · linked record · by author, then the priority flag), then the
+     note: NoteTitle, when there is one, is the bold headline with the note as
+     a muted preview; without it the note itself is the headline. Date and
+     time stack on the right with the expand button. NoteTitle, NoteType,
+     CaseRef and PriorityFlag (High, Urgent or blank) are optional. -->
+<article class="us-record" data-us-record-type="note" data-us-record-priority="{#query.PriorityFlag}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__type">{#query.NoteType}</span>
+        <a class="us-record__link" href="{#query.CaseUrl}">{#query.CaseRef}</a>
+        <span class="us-record__by">{#query.AuthorName}</span>
+        <span class="us-badge us-record__priority">{#query.PriorityFlag}</span>
+      </p>
+      <h3 class="us-record__title">{#query.NoteTitle}</h3>
+      <p class="us-record__text">{#query.NoteBody}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.DateShort}</span>
+        <span class="us-record__time">{#query.TimeText}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <p class="us-record__more"><a class="TextButton SmallButton us-outline-button" href="{#query.RecordUrl}">Open note</a></p>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,157 @@
+<!doctype html>
+<!-- Frozen reference: the owner's supplied Recent Activity card
+     (Downloads/Recent Activity Card - standalone.html, 25 September 2026),
+     reproduced with its own inline values, palette and Font Awesome icons.
+     The workbench shows it in an isolated iframe, so no theme or candidate
+     CSS can reach it. Do not restyle this file; it is the "before".
+     Its design-system controls (search, select, chips, buttons) are
+     approximated from that system's tokens; everything else is exact.
+     Markers are filled by tools/build-activity-cards-workbench.cjs. -->
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url(data:font/woff2;base64,/* FONT */) format("woff2");
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #f4f6fa; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1f2e; }
+button, input, select { font: inherit; }
+
+/* Font Awesome 6 Free (SIL OFL 1.1; icons CC BY 4.0), solid glyphs used. */
+.fa { display: inline-block; font-family: "Font Awesome 6 Free"; font-weight: 900; font-style: normal; line-height: 1; -webkit-font-smoothing: antialiased; }
+.fa-phone::before { content: "\f095"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-note-sticky::before { content: "\f249"; }
+.fa-users::before { content: "\f0c0"; }
+.fa-comment-dots::before { content: "\f4ad"; }
+.fa-clock-rotate-left::before { content: "\f1da"; }
+.fa-arrow-down::before { content: "\f063"; }
+.fa-arrow-up::before { content: "\f062"; }
+.fa-link::before { content: "\f0c1"; }
+.fa-chevron-down::before { content: "\f078"; }
+.fa-chevron-up::before { content: "\f077"; }
+.fa-paperclip::before { content: "\f0c6"; }
+.fa-up-right-from-square::before { content: "\f35d"; }
+.fa-layer-group::before { content: "\f5fd"; }
+.fa-magnifying-glass::before { content: "\f002"; }
+.fa-inbox::before { content: "\f01c"; }
+
+.o-card { background: #fff; border: 1px solid #d0d7e3; border-radius: 12px; overflow: hidden; }
+.o-head { display: flex; align-items: center; gap: 10px; padding: 13px 18px; background: #f4f6fa; border-bottom: 1px solid #d0d7e3; }
+.o-head .fa { font-size: 14px; color: #1a1f2e; }
+.o-title { font-size: 13px; font-weight: 700; color: #1a1f2e; }
+.o-count { font-size: 12px; font-weight: 600; color: #6b7280; background: #e9eef7; border-radius: 99px; padding: 1px 9px; }
+.o-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 18px; border-bottom: 1px solid #d0d7e3; }
+.o-search { flex: 1; min-width: 170px; display: flex; align-items: center; gap: 7px; height: 32px; padding: 6px 9px; border: 1px solid #d0d7e3; border-radius: 6px; background: #fff; color: #6b7280; }
+.o-search .fa { font-size: 12px; }
+.o-search input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 0; font-size: 13px; color: #1a1f2e; background: transparent; }
+.o-select { min-width: 150px; height: 32px; padding: 0 9px; border: 1px solid #d0d7e3; border-radius: 6px; background: #fff; font-size: 13px; color: #1a1f2e; }
+.o-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid #d0d7e3; background: #f4f6fa; }
+.o-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 3px 11px; border: 1px solid #d0d7e3; border-radius: 99px; background: #fff; color: #1a1f2e; font-size: 12px; font-weight: 600; cursor: pointer; }
+.o-chip .fa { font-size: 11px; color: #6b7280; }
+.o-chip[aria-pressed="true"] { border-color: #1f63c9; background: #1f63c9; color: #fff; }
+.o-chip[aria-pressed="true"] .fa { color: #fff; }
+.o-list { max-height: 640px; overflow-y: auto; padding: 6px 18px 16px; }
+.o-month { position: sticky; top: 0; z-index: 2; background: #fff; padding: 12px 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: #6b7280; }
+.o-group { position: relative; padding-left: 2px; }
+.o-rail { position: absolute; left: 18px; top: 6px; bottom: 6px; width: 2px; background: #d0d7e3; }
+.o-item { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 6px 0; }
+.o-item[hidden], .o-group[hidden], .o-month[hidden], .o-empty[hidden] { display: none; }
+.o-node { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1; border: 2px solid #fff; }
+.o-node .fa { font-size: 14px; }
+.o-box { flex: 1; min-width: 0; border: 1px solid #d0d7e3; border-radius: 8px; background: #fff; overflow: hidden; transition: border-color .15s; }
+.o-item.is-open .o-box { border-color: #1f63c9; }
+.o-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 14px; cursor: pointer; }
+.o-main { flex: 1; min-width: 0; }
+.o-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.o-pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; border-radius: 99px; padding: 2px 9px; }
+.o-dir { font-size: 11px; font-weight: 600; color: #6b7280; }
+.o-dir .fa { font-size: 9px; margin-right: 3px; }
+.o-case { font-size: 10px; font-weight: 700; color: #1f63c9; background: #e8f0fb; border-radius: 99px; padding: 1px 8px; }
+.o-case .fa { font-size: 8px; margin-right: 3px; }
+.o-subject { font-size: 13px; font-weight: 700; color: #1a1f2e; margin-top: 4px; line-height: 1.35; }
+.o-preview { font-size: 12px; color: #6b7280; line-height: 1.45; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.o-side { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.o-date { font-size: 12px; font-weight: 600; color: #1a1f2e; }
+.o-time { font-size: 11px; color: #6b7280; }
+.o-acts { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.o-view { height: 24px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; color: #1f63c9; font-size: 12px; font-weight: 600; cursor: pointer; }
+.o-view:hover { background: #e8f0fb; }
+.o-chev { font-size: 11px; color: #6b7280; }
+.o-more { border-top: 1px solid #d0d7e3; background: #f4f6fa; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 11px; }
+.o-more[hidden] { display: none; }
+.o-meta { display: flex; flex-wrap: wrap; gap: 18px; }
+.o-meta div { display: flex; flex-direction: column; gap: 1px; }
+.o-meta span:first-child { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #6b7280; }
+.o-meta span:last-child { font-size: 12px; color: #1a1f2e; }
+.o-body { margin: 0; font-size: 12px; color: #1a1f2e; line-height: 1.55; }
+.o-att { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6b7280; }
+.o-primary { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px; border: 1px solid #1f63c9; border-radius: 6px; background: #1f63c9; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+.o-empty { text-align: center; padding: 36px 20px; color: #6b7280; }
+.o-empty .fa { font-size: 22px; opacity: .5; }
+.o-empty div { font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="o-card">
+  <div class="o-head"><i class="fa fa-clock-rotate-left"></i><span class="o-title">Recent activity</span><span class="o-count" data-count><!-- COUNT --></span></div>
+  <div class="o-controls">
+    <label class="o-search"><i class="fa fa-magnifying-glass"></i><input type="search" placeholder="Search activity…" aria-label="Search activity" data-search></label>
+    <select class="o-select" aria-label="Date range"><option>Last 30 days</option><option selected>Last 90 days</option><option>Last 6 months</option><option>Last 12 months</option><option>All time</option></select>
+  </div>
+  <div class="o-chips"><!-- CHIPS --></div>
+  <div class="o-list">
+<!-- GROUPS -->
+    <div class="o-empty" hidden><i class="fa fa-inbox"></i><div>No activity matches your filters.</div></div>
+  </div>
+</div>
+<script>
+// The original's behaviour: expand a card, filter by type, search.
+(function () {
+  var total = document.querySelectorAll('.o-item').length;
+  function filter() {
+    var type = document.querySelector('.o-chip[aria-pressed="true"]').getAttribute('data-type');
+    var query = document.querySelector('[data-search]').value.trim().toLowerCase();
+    var shown = 0;
+    document.querySelectorAll('.o-item').forEach(function (item) {
+      var match = (type === 'all' || item.getAttribute('data-type') === type) && (!query || item.textContent.toLowerCase().indexOf(query) >= 0);
+      item.hidden = !match;
+      if (match) shown++;
+    });
+    document.querySelectorAll('.o-group').forEach(function (group) {
+      group.hidden = !group.querySelector('.o-item:not([hidden])');
+      group.previousElementSibling.hidden = group.hidden;
+    });
+    document.querySelector('.o-empty').hidden = shown > 0;
+    document.querySelector('[data-count]').textContent = shown + ' of ' + total;
+  }
+  document.addEventListener('click', function (event) {
+    var chip = event.target.closest('.o-chip');
+    if (chip) {
+      document.querySelectorAll('.o-chip').forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
+      filter();
+      return;
+    }
+    if (event.target.closest('.o-view, .o-primary')) return;
+    var row = event.target.closest('.o-row');
+    if (!row) return;
+    var item = row.closest('.o-item');
+    var open = !item.classList.contains('is-open');
+    item.classList.toggle('is-open', open);
+    item.querySelector('.o-more').hidden = !open;
+    var chev = item.querySelector('.o-chev');
+    chev.classList.toggle('fa-chevron-down', !open);
+    chev.classList.toggle('fa-chevron-up', open);
+  });
+  document.querySelector('[data-search]').addEventListener('input', filter);
+})();
+</script>
+</body>
+</html>

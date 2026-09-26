@@ -1,0 +1,39 @@
+<!-- Case card (candidate). One repeating Query Template result. The type line
+     (case reference · case type · assignee, then the priority and status
+     flags), the case title as the headline and the last update as a muted
+     preview. The right-hand column shows when the case last changed
+     (DateShort) and what happened (DateLabel: Updated, Closed), with the expand
+     button. StatusTone danger or warning colour the status; other tones stay
+     neutral. PriorityFlag: High, Urgent or blank. -->
+<article class="us-record" data-us-record-type="case" data-us-record-priority="{#query.PriorityFlag}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <a class="us-record__link" href="{#query.RecordUrl}">{#query.CaseRef}</a>
+        <span class="us-record__type">{#query.CaseType}</span>
+        <span class="us-record__who">{#query.AssignedTo}</span>
+        <span class="us-badge us-record__priority">{#query.PriorityFlag}</span>
+        <span class="us-badge us-badge--{#query.StatusTone} us-record__status">{#query.Status}</span>
+      </p>
+      <h3 class="us-record__title">{#query.CaseTitle}</h3>
+      <p class="us-record__text">{#query.LastUpdate}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.DateShort}</span>
+        <span class="us-record__time">{#query.DateLabel}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <dl class="us-record__facts">
+        <div><dt>Assigned to</dt><dd>{#query.AssignedTo}</dd></div>
+        <div><dt>Opened</dt><dd>{#query.Opened}</dd></div>
+        <div><dt>Priority</dt><dd>{#query.Priority}</dd></div>
+        <div><dt>Next step</dt><dd>{#query.NextStep}</dd></div>
+      </dl>
+      <p class="us-record__more"><a class="TextButton SmallButton us-outline-button" href="{#query.RecordUrl}">Open case</a></p>
+    </div>
+  </div>
+</article>

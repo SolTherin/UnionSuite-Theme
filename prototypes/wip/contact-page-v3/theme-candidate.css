@@ -1,0 +1,2455 @@
+/* ==========================================================================
+   CONTACT PAGE v3 — THEME CANDIDATE (not installed)
+   Proposed changes to THeme/UnionSuite/zUnionSuite.css. Each block names the
+   theme section it replaces or extends and uses the same selectors, so an
+   approved block moves into that section unchanged. Loaded after the shared
+   theme; the prototype toolbar can switch this file off to compare.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. Panel headers: 56px → 44px, title 15px → 14px.
+   Target: :root panel header tokens (top of zUnionSuite.css) and the
+   pointer: coarse override. Shared by panels, IQA reports, list shells and
+   the Needs Attention heading.
+   -------------------------------------------------------------------------- */
+:root {
+  --panel-header-min-height: 44px;
+  --panel-header-padding-block: 6px;
+  --panel-header-font-size: 14px;
+  --panel-header-font-weight: 700;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --panel-header-min-height: 56px;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Standalone section switcher: narrower track and buttons.
+   Target: US-SECTION-TABS. Touch pointers keep 44px targets.
+   -------------------------------------------------------------------------- */
+.us-section-navigation:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-block: 4px 16px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:not(:where(.us-report-no-styling *)) {
+  min-width: 72px;
+  min-height: 30px;
+  padding: 5px 14px;
+  border-radius: 5px;
+  font: 600 12.5px var(--font-ui);
+}
+
+.us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:is(.is-active, [aria-selected=true])::after {
+  bottom: 2px;
+  width: 16px;
+  left: calc(50% - 8px);
+}
+
+.us-section-tabs[data-us-section-indicator]:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
+  width: 16px;
+}
+
+@media (pointer: coarse) {
+  .us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:not(:where(.us-report-no-styling *)) {
+    min-height: 44px;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Banner: one row, keeping v2's pinning and condensing.
+   Target: US-BANNER-COMPONENT. No template change: the summary becomes
+   display: contents so identity, status, actions and the (JS-wrapped)
+   details fold share one grid.
+   - Fits (data-us-banner-fit="row", set by US-BANNER-ROW): identity |
+     details | status | actions in one row, with a light rule between the
+     identity and the details.
+   - Does not fit ("wrap", and until measured): identity, status and actions
+     in the top row; the details take a second row starting under the avatar,
+     below a full-width light rule.
+   -------------------------------------------------------------------------- */
+:where(.us-banner):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --banner-padding: var(--space-4);
+  --banner-gap: var(--space-3);
+  --banner-title-size: var(--fs-xl);
+}
+
+@media (min-width: 900px) {
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: grid;
+    grid-template-columns: minmax(14rem, max-content) minmax(0, 1fr) auto auto;
+    column-gap: var(--space-6);
+    row-gap: var(--space-2);
+    align-items: center;
+  }
+
+  /* Unplaced children (tabs, descriptions, authored collapses) span the row. */
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > * {
+    grid-column: 1 / -1;
+  }
+
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-banner__summary {
+    display: contents;
+  }
+
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-banner__summary > .us-banner__identity {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Badges sit right, next to the actions (alert bell, Quick Actions), at
+     the actions' own 8px spacing rather than the 24px column gap. */
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-banner__summary > .us-banner__status {
+    grid-column: 3;
+    grid-row: 1;
+    justify-content: flex-end;
+    margin-inline-end: calc(var(--space-2) - var(--space-6));
+  }
+
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-banner__summary > .us-banner__actions {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  /* Wrapped: the details get a full row under the avatar. */
+  .us-banner .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) > :is(.us-banner__details, .us-banner__fold:has(> .us-banner__fold-inner > .us-banner__details)) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  /* In the top row, a light rule separates the details from the identity:
+     the theme's banner divider colour (as between the description and the
+     facts), the details' height, 24px either side. The condensed banner's
+     fold fades it out with the details. */
+  .us-banner .us-banner__surface[data-us-banner-fit="row"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) > :is(.us-banner__details, .us-banner__fold:has(> .us-banner__fold-inner > .us-banner__details)) {
+    grid-column: 2;
+    grid-row: 1;
+    padding-inline-start: var(--space-6);
+    border-inline-start: 1px solid color-mix(in srgb, var(--banner-border) 85%, var(--banner-text));
+  }
+
+  .us-banner .us-banner__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* Wrapped, the same light rule runs across the banner above the details,
+     12px from the identity (8px row gap plus 4px) and from the facts. It is
+     on the details inside the fold, so it collapses with them when the
+     banner condenses. */
+  .us-banner .us-banner__surface:not([data-us-banner-fit="row"]) .us-banner__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-top: 4px;
+    padding-top: var(--space-3);
+    border-top: 1px solid color-mix(in srgb, var(--banner-border) 85%, var(--banner-text));
+  }
+
+  /* Facts read left to right from the start of their cell, 24px apart. */
+  .us-banner .us-banner__facts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--space-2) var(--space-6);
+  }
+
+  .us-banner.us-banner--compact .us-banner__surface:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    row-gap: 0;
+  }
+}
+
+/* Condensed on phones (where the row wraps): the alert bell stays on the
+   name line and the status pill starts the second line beside Quick
+   Actions. The actions group lets the bell and the menu take their own
+   places in the summary's wrapping row; the identity leaves just enough
+   room for the bell (36px, or 44px on touch), so the status wraps.
+   Expanded, the status and the actions share one row instead of the theme's
+   full-width row each: badges left, bell and Quick Actions right. Quick
+   Actions sits at the right in both states and wraps right-aligned when the
+   badges fill the row. Its menu already opens from its right edge. */
+@media (max-width: 600px) {
+  .us-banner:not(.us-banner--compact) .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-basis: 100%;
+  }
+
+  .us-banner .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 1 1 auto;
+  }
+
+  .us-banner .us-banner__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+
+  .us-banner.us-banner--compact .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-inline-start: auto;
+  }
+
+  .us-banner.us-banner--compact .us-banner__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+
+  .us-banner.us-banner--compact .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 1 1 calc(100% - 64px);
+  }
+
+  .us-banner.us-banner--compact .us-banner__actions > .us-banner__alerts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    order: 1;
+  }
+
+  .us-banner.us-banner--compact .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    order: 2;
+  }
+
+  .us-banner.us-banner--compact .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    order: 3;
+  }
+}
+
+/* A copy button beside the record ID in the eyebrow is compact and pulled
+   into the line, so the eyebrow keeps its height. Touch pointers keep the
+   theme's 44px target. It centres on the capitals and digits (half the cap
+   height above the baseline); `middle` centres on lowercase letters, which
+   sits it low beside an ID. The button's baseline is the bottom of its 16px
+   icon, 8px below its centre, at either button size. */
+.us-banner .us-banner__eyebrow:not(:where(.us-report-no-styling, .us-report-no-styling *)) > button.us-copy {
+  width: 24px;
+  height: 24px;
+  margin-block: -6px;
+  margin-inline-start: 2px;
+  vertical-align: calc(.5cap - 8px);
+}
+
+/* Touch only: a narrow window with a mouse keeps the compact button. */
+@media (pointer: coarse) {
+  .us-banner .us-banner__eyebrow:not(:where(.us-report-no-styling, .us-report-no-styling *)) > button.us-copy {
+    width: 44px;
+    height: 44px;
+    margin-block: -16px;
+  }
+}
+
+/* Pixel sizes: Orion's 10px root makes the current 3.5rem avatar only 35px.
+   A translucent ring keeps the avatar visible on the brand surface. */
+.us-banner .us-banner__avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 48px;
+  height: 48px;
+  border: 2px solid color-mix(in srgb, var(--banner-text) 40%, transparent);
+  background: color-mix(in srgb, var(--banner-text) 16%, transparent);
+  font-size: var(--fs-lg);
+}
+
+.us-banner.us-banner--compact .us-banner__avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 32px;
+  height: 32px;
+  font-size: var(--fs-sm);
+}
+
+/* Contact kind avatar: an empty avatar with data-us-contact-kind shows the
+   taskbar quick search's person or company drawing instead of initials.
+   The value is the query's contact type text, so the same alias fills the
+   eyebrow; organisation, organization and company show the building. The
+   icon is sized from the avatar, so it follows the banner's condensing. */
+.us-banner .us-banner__avatar[data-us-contact-kind]:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: '';
+  width: 54%;
+  aspect-ratio: 1;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M5 21v-2a7 7 0 0 1 14 0v2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.us-banner .us-banner__avatar:is([data-us-contact-kind="organisation" i], [data-us-contact-kind="organization" i], [data-us-contact-kind="company" i]):not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 21V4h11v17M15 10h5v11M2 21h20M8 21v-4h3v4M7 8h1m3 0h1M7 12h1m3 0h1m6 2h1m-1 3h1'/%3E%3C/svg%3E");
+}
+
+.us-banner .us-banner__subtitle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: var(--space-1);
+}
+
+.us-banner .us-banner__fact dt:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-bottom: 2px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.us-banner .us-banner__fact dd:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-weight: var(--fw-medium);
+}
+
+.us-banner :is(.us-banner__surface--member, .us-banner__surface--status) :is(.us-banner__badge--member-status, .us-banner__badge--record-status):not(:where(.us-report-no-styling *)) {
+  padding: 3px 11px;
+  font-size: 12px;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Needs Attention: shorter cards. Omitting the <header> is the no-header
+   mode; no class is needed.
+   Target: US-ATTENTION.
+   -------------------------------------------------------------------------- */
+.us-attention:not(:where(.us-report-no-styling, .us-report-no-styling *)) .us-attention__card {
+  min-height: 72px;
+  padding: 16px 18px;
+  gap: 12px;
+}
+
+.us-attention:not(:where(.us-report-no-styling, .us-report-no-styling *)) .us-attention__number {
+  padding-bottom: 4px;
+  font-size: 26px;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Card-style CCO (opt-in): add us-cco-cards to the CCO iPart CSS class.
+   The rail width and gap become tokens rather than literal values.
+   Target: new block after US-NATIVE-TABS-COMPONENT. Resolves the deferred
+   "grey page background" TODO: no shared content box; panels sit on the page
+   and the tab rail becomes a standalone nav with a pale accent selection and
+   an accent marker. Nested CCOs and mobile (≤600px) keep V5/H2.
+   -------------------------------------------------------------------------- */
+/* Target: US-NATIVE-TABS-PAGE-LAYOUT (replaces the literal 220px column). */
+:root {
+  --us-cco-rail-width: 220px;
+  --us-cco-cards-gap: var(--space-5);
+}
+
+:root .tabs-wrapper.tabs-vertical {
+  grid-template-columns: var(--us-cco-rail-width) minmax(0, 1fr);
+}
+
+@media (min-width: 601px) {
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) {
+    gap: var(--us-cco-cards-gap);
+  }
+
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --rail-bg: transparent;
+    --rail-pad: 0;
+    --tab-gap: 2px;
+    --tab-radius: 6px;
+    --tab-bg: transparent;
+    --tab-border: transparent;
+    --tab-pad: 7px 12px;
+    --tab-height: 36px;
+    --active-bg: var(--accent-100);
+    --active-border: transparent;
+    --active-shadow: inset 3px 0 0 var(--accent);
+    --hover-bg: var(--bg-surface);
+    --hover-border: transparent;
+    border-right: 0;
+  }
+
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+    width: 100%;
+    margin-inline: 0;
+    border-inline-color: transparent;
+  }
+
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical + .RadMultiPage {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+}
+
+/* Phones: the same, so panels sit on the page instead of inside a second
+   padded box (page gutter + content box + panel padding left about 260px
+   of text on a 375px screen). A 16px gap keeps the first panel off the tabs
+   or Sections bar above. */
+@media (max-width: 600px) {
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadMultiPage {
+    padding: var(--space-4) 0 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   6. Read-only panel fields: 64px → about 44px per field.
+   Target: the [data-us-panel] data display panel rules. Edit forms unchanged.
+   -------------------------------------------------------------------------- */
+[data-us-panel] > .panel > .panel-body-container > .panel-body {
+  padding: 6px 18px 4px;
+}
+
+[data-us-panel="multiple"] > .panel > .panel-body-container > .panel-body {
+  padding: 0;
+}
+
+[data-us-panel] .PanelEditorReadOnlyForm .PanelField {
+  padding-block: 6px;
+}
+
+
+/* --------------------------------------------------------------------------
+   7. Report column headers: clearly darker than the panel header (v1 contrast).
+   Target: the IQA token block after US-IQA-BASELINE. The existing fallbacks
+   already name v1's #e2e8f0; --bg-sunken resolves far paler, so the column
+   head gets its own step on the neutral ramp and a firmer rule below it.
+   Declared on the grid so it wins over the report token block by
+   inheritance; in the theme it can join that block instead.
+   -------------------------------------------------------------------------- */
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --iqa-table-head: var(--neutral-200, #e2e8f0);
+  --iqa-table-head-border: var(--neutral-300, #cbd5e1);
+}
+
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid .rgMasterTable > thead > tr > .rgHeader:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom-color: var(--iqa-table-head-border);
+}
+
+
+/* --------------------------------------------------------------------------
+   8. Expandable related rows (opt-in): us-iqa-row-groups on the Query Menu
+   iPart. Behaviour: US-IQA-ROW-GROUPS in theme-candidate.js.
+   Target: new block after the IQA report rules.
+   -------------------------------------------------------------------------- */
+.us-iqa-row-groups .us-row-group__toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-inline-start: 8px;
+  padding: 1px 7px 1px 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-link);
+  font: 600 11.5px/1.5 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.us-iqa-row-groups .us-row-group__toggle:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--brand-100);
+  background: var(--brand-50);
+}
+
+.us-iqa-row-groups .us-row-group__toggle:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-iqa-row-groups .us-row-group__toggle > svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 160ms;
+}
+
+.us-iqa-row-groups .us-row-group__toggle[aria-expanded="true"] > svg {
+  transform: rotate(90deg);
+}
+
+/* A toggle whose hidden rows share a status badge takes that badge's tone
+   (v1's red "3 failed attempts"). */
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --row-group-tone: var(--text-link);
+  color: var(--row-group-tone);
+}
+
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone="danger"] { --row-group-tone: var(--danger); }
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone="warning"] { --row-group-tone: var(--warning); }
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone="success"] { --row-group-tone: var(--success); }
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone="info"] { --row-group-tone: var(--info); }
+
+.us-iqa-row-groups .us-row-group__toggle[data-us-tone]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--row-group-tone) 30%, transparent);
+  background: color-mix(in srgb, var(--row-group-tone) 10%, transparent);
+}
+
+/* Detail rows read as one block under the parent (v1's attempt list): a
+   tint, no rules between them, smaller text, a dot in place of the repeated
+   key, and one tinted rule closing the group. */
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --row-group-tone: var(--border-strong);
+  --row-group-tint: var(--bg-subtle);
+  background-color: var(--row-group-tint);
+}
+
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"][data-us-tone="danger"] { --row-group-tone: var(--danger); --row-group-tint: var(--danger-bg); }
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"][data-us-tone="warning"] { --row-group-tone: var(--warning); --row-group-tint: var(--warning-bg); }
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"][data-us-tone="success"] { --row-group-tone: var(--success); --row-group-tint: var(--success-bg); }
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"][data-us-tone="info"] { --row-group-tone: var(--info); --row-group-tint: var(--info-bg); }
+
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"] > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-block: 5px;
+  border-bottom-color: transparent;
+  background-color: transparent;
+  font-size: 12px;
+}
+
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"][data-us-row-group-last] > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom-color: color-mix(in srgb, var(--row-group-tone) 45%, transparent);
+}
+
+/* The repeated key is shown once, on the parent row; the child's cell keeps
+   its text for export and screen readers but shows a dot. */
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"] > td:first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  padding-inline-start: 24px;
+  color: transparent;
+}
+
+.us-iqa-row-groups [data-gridid] .RadGrid tr[data-us-row-group="child"] > td:first-child::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--row-group-tone);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-iqa-row-groups .us-row-group__toggle > svg {
+    transition: none;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   9. Record alerts (opt-in): us-alerts on the alerts iPart (Summary tab).
+   Lighter native messages with a coloured left edge and an optional action
+   row (.us-alerts__actions). The banner bell (section 12) lists the same
+   alerts on every tab.
+   Target: new block after the native feedback messages.
+   -------------------------------------------------------------------------- */
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span):not(:where(.SecurityIndicator, .SecurityIndicator *, .us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 9px 14px;
+  border-color: color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+  font-size: var(--fs-sm);
+}
+
+/* Outer paragraph margins are trimmed for every native message (section 22). */
+
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span) + :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: var(--space-2);
+}
+
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):has(> .us-alerts__actions):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The message takes only its text width, so the buttons follow the sentence
+   instead of sitting at the far edge. When they no longer fit on the line,
+   they wrap underneath, aligned with the text. */
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):has(> .us-alerts__actions) > p:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 0 1 auto;
+  margin: 0;
+}
+
+.us-alerts .us-alerts__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+
+/* --------------------------------------------------------------------------
+   10. Collapsible CCO rail (opt-in): us-cco-collapsible on the CCO iPart.
+   Behaviour: US-CCO-RAIL-COLLAPSE in theme-candidate.js. Desktop only; the
+   collapsed rail shows the existing mobile "All sections" picker as a
+   "Sections: <current>" dropdown. Icons are the iMIS navigation toggle's.
+   Target: new block after US-NATIVE-TABS-COMPONENT. On promotion, the icon
+   URLs become images/NavbarSprite.svg#… (relative to zUnionSuite.css).
+   -------------------------------------------------------------------------- */
+.us-cco-rail-toggle {
+  display: none;
+}
+
+@media (min-width: 601px) {
+  /* The toggle keeps one position in both states: the top of the rail's
+     column. Expanded, it is a direct child of the CCO wrapper in a toolbar
+     row above the rail; the content spans that row, starting level with the
+     toggle. Collapsed, it
+     leads the Sections bar, which takes that same row. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] .us-cco-rail-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] .us-cco-rail-toggle:hover {
+    border-color: var(--border);
+    background: var(--bg-surface);
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] .us-cco-rail-toggle:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 1px;
+  }
+
+  .us-cco-rail-toggle__icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    background: var(--text-muted);
+    mask: url("../../../THeme/UnionSuite/images/NavbarSprite.svg#menu-collapse") center / 24px 24px no-repeat;
+  }
+
+  .us-cco-rail-toggle:hover > .us-cco-rail-toggle__icon {
+    background: var(--accent);
+  }
+
+  [data-us-cco-rail="collapsed"] .us-cco-rail-toggle > .us-cco-rail-toggle__icon {
+    mask-image: url("../../../THeme/UnionSuite/images/NavbarSprite.svg#menu-expand");
+  }
+
+  /* Halve the native 32px between the iPart above (usually the banner) and
+     the toggle row: the row's 20px margin plus the iPart's bottom margin.
+     Applies in both states so the toggle keeps its position. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] {
+    margin-top: -16px;
+  }
+
+  /* Expanded: toolbar row, then rail and content side by side. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] {
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: var(--space-2);
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .us-cco-rail-toggle {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .RadTabStripVertical {
+    grid-row: 2;
+  }
+
+  /* The toggle row belongs to the rail's column only; content starts level
+     with the toggle rather than leaving an empty row above it. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .RadMultiPage {
+    grid-row: 1 / span 2;
+  }
+
+  /* Collapsed: the toggle leads the Sections bar. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-cco-rail-toggle {
+    order: -1;
+  }
+
+  /* Collapsed: one full-width column; the rail becomes a toolbar row. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: var(--space-2);
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    grid-column: 1;
+    grid-row: 1;
+    border: 0;
+    background: transparent;
+
+    /* The strip is its own stacking context; lift it above the content that
+       follows so the Sections list opens over the panels. */
+    position: relative;
+    z-index: 5;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .rtsLevel {
+    display: none;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadMultiPage {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  /* V5 (non-card) content box regains the left edge the rail used to close. */
+  :root :is(.us-cco-collapsible, .us-cco-rail):not(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical + .RadMultiPage {
+    border-left: 1px solid var(--open-border);
+    border-radius: var(--radius);
+  }
+
+  /* The mobile picker, shown on desktop while collapsed. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections {
+    display: block;
+    position: relative;
+    z-index: 5;
+    min-width: 240px;
+    margin: 0;
+    color: var(--text-base);
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: var(--fw-semi) 13px var(--font-ui);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A section switcher leading the open tab shares the Sections row when it
+     fits (decided by the rail script, which sets data-us-cco-sections-inline
+     and the two properties below). The content starts in that row, the bar
+     shrinks to its controls on the rail's side, and the switcher's block
+     leaves room for them and lines up with the Sections box. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage {
+    grid-row: 1 / span 2;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadTabStripVertical {
+    justify-self: start;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadTabStripVertical {
+    justify-self: end;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView > [data-us-cco-sections-host] {
+    margin-top: var(--us-cco-sections-offset, 0px);
+    margin-inline-start: var(--us-cco-bar-space, 0px);
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView > [data-us-cco-sections-host] {
+    margin-inline-start: 0;
+    margin-inline-end: var(--us-cco-bar-space, 0px);
+  }
+
+  /* The banner Quick Actions chevron: a filled 10x6 chevron that turns over
+     220ms when the list opens. */
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections summary::after {
+    content: '';
+    flex: none;
+    width: 10px;
+    height: 6px;
+    background: currentColor;
+    clip-path: polygon(0 0, 50% 65%, 100% 0, 100% 35%, 50% 100%, 0 35%);
+    transition: transform 220ms ease-out;
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections[open] summary::after {
+    content: '';
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections summary::after {
+      transition: none;
+    }
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections summary:hover {
+    border-color: var(--accent);
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    max-height: min(420px, calc(100vh - 160px));
+    overflow-y: auto;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    box-shadow: 0 8px 20px rgb(0 0 0 / .14);
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button {
+    display: block;
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--bg-surface);
+    color: var(--text-base);
+    font: 13px var(--font-ui);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button:is(:hover, [aria-current="true"]) {
+    background: var(--accent-100);
+    color: var(--brand-900);
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button[aria-current="true"] {
+    box-shadow: inset 3px 0 0 var(--accent);
+    font-weight: var(--fw-semi);
+  }
+
+  [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections :is(summary, button):focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: -3px;
+  }
+}
+
+
+/* Collapse/expand duration: one setting for the script and these rules. */
+:root {
+  --us-cco-rail-motion: 1000ms;
+}
+
+/* Collapse/expand motion: the view transition started by the rail script.
+   Only active while data-us-cco-rail-transition is on the root. The rail
+   morphs to or from the Sections box in two steps (see the script). */
+:root[data-us-cco-rail-transition]::view-transition-group(*),
+:root[data-us-cco-rail-transition]::view-transition-old(*),
+:root[data-us-cco-rail-transition]::view-transition-new(*) {
+  /* --us-cco-rail-motion is also read by US-CCO-RAIL-COLLAPSE; the rail's own two-step
+     keyframes are applied by script on top of these defaults. */
+  animation-duration: var(--us-cco-rail-motion);
+  animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Keep each snapshot's own proportions while its box resizes. */
+:root[data-us-cco-rail-transition]::view-transition-old(*),
+:root[data-us-cco-rail-transition]::view-transition-new(*) {
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+}
+
+/* Clip each snapshot to its morphing box: the menu folds up without its full
+   height spilling below, and the content is revealed as its box resizes. */
+/* Only the menu is a snapshot: the page itself is not captured, so the
+   content stays live and animates its real layout (see the rail script).
+   The menu's snapshots are clipped to the morphing box. */
+:root[data-us-cco-rail-transition] {
+  view-transition-name: none;
+}
+
+/* Held content blocks must not trigger scroll anchoring mid-animation (the
+   page jumped, often to the bottom). The script also restores the scroll. */
+:root[data-us-cco-rail-transition],
+:root[data-us-cco-rail-transition] body {
+  overflow-anchor: none;
+}
+
+:root[data-us-cco-rail-transition]::view-transition-group(*) {
+  overflow: clip;
+}
+
+/* The snapshot layer sits above the whole page, including a pinned banner.
+   Clip it below the page chrome (--us-cco-rail-clip-top, set by the rail
+   script) so the menu stays beneath the banner, as it does outside the
+   animation. */
+:root[data-us-cco-rail-transition]::view-transition {
+  clip-path: inset(var(--us-cco-rail-clip-top, 0px) 0 0 0);
+}
+
+/* A right-hand rail's snapshots stay pinned to the right edge, so the rail
+   folds towards its own side instead of appearing to come from the left.
+   The content keeps its left anchor in both cases. */
+:root[data-us-cco-rail-transition="right"]::view-transition-old(us-cco-rail),
+:root[data-us-cco-rail-transition="right"]::view-transition-new(us-cco-rail) {
+  object-position: right top;
+}
+
+/* --------------------------------------------------------------------------
+   11. Buttons: standard size in scale; a real small size.
+   Target: 99-Orion.css — the base .btn/.TextButton rule (font-size 15px,
+   padding 7px 13px) and the .SmallButton rule. Orion is project-owned, so
+   these values replace Orion's rather than overriding them in the theme.
+   Standard stays 36px tall to line up with 36px form fields; text drops
+   from 15px to 13px semibold. SmallButton gets fixed sizes: its 85% font
+   was relative to the surrounding text, so it varied (11px in alerts).
+   MediumButton/LargeButton keep their native percentages.
+   -------------------------------------------------------------------------- */
+.btn,
+.TextButton,
+.RadUpload.RadUpload .ruButton,
+.RadUploadProgressArea.RadUploadProgressArea .ruButton {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.SmallButton,
+.UseSmallButton .TextButton {
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 4px;
+}
+
+/* Alert actions are small without an author class. Target: section 9. */
+.us-alerts .us-alerts__actions :is(.TextButton, .btn):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 4px;
+}
+
+
+/* --------------------------------------------------------------------------
+   12. Banner alert bell (opt-in): .us-banner__alerts placeholder inside
+   .us-banner__actions. Behaviour: US-BANNER-ALERTS in theme-candidate.js.
+   The count badge is red while something is new since this browser last
+   opened the list, then a quieter outlined count while alerts remain.
+   Target: US-BANNER-COMPONENT, after the Quick Actions toggle rules.
+   -------------------------------------------------------------------------- */
+.us-banner .us-banner__alerts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  display: inline-flex;
+}
+
+.us-banner .us-banner__alerts[data-us-alerts-state="unconfigured"] {
+  display: none;
+}
+
+/* Same glass treatment and height as the member banner's Quick Actions. */
+.us-banner .us-banner__alerts-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(165deg, rgb(255 255 255 / 23%), rgb(255 255 255 / 7%) 58%, rgb(255 255 255 / 13%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 36%), 0 3px 8px rgb(0 20 30 / 18%);
+  color: #fff;
+  cursor: pointer;
+}
+
+.us-banner .us-banner__alerts-toggle:is(:hover, :focus-visible, [aria-expanded="true"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: rgb(255 255 255 / 65%);
+  background: linear-gradient(165deg, rgb(255 255 255 / 32%), rgb(255 255 255 / 13%) 58%, rgb(255 255 255 / 19%));
+}
+
+.us-banner .us-banner__alerts-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.us-banner .us-banner__alerts-icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.us-banner .us-banner__alerts-count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1.5px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-pill);
+  background: var(--banner-bg);
+  color: #fff;
+  font: 700 11px/15px var(--font-ui);
+  text-align: center;
+}
+
+.us-banner .us-banner__alerts-count--new:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--banner-bg);
+  background: var(--danger);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 45%);
+}
+
+.us-banner .us-banner__alerts-count[hidden] {
+  display: none;
+}
+
+/* Popup: the banner menu surface, anchored to the bell's right edge. */
+.us-banner .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  inset-inline-end: 0;
+  z-index: 3;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+  border: 1px solid var(--banner-menu-border);
+  border-radius: var(--radius);
+  background: var(--banner-menu-bg);
+  color: var(--banner-menu-text);
+  box-shadow: var(--shadow-lg);
+  text-align: start;
+}
+
+.us-banner .us-banner__alerts-panel[hidden] {
+  display: none;
+}
+
+.us-banner .us-banner__alerts-panel:focus {
+  outline: none;
+}
+
+.us-banner .us-banner__alerts-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--banner-menu-border);
+  font: 700 13px/1.4 var(--font-ui);
+}
+
+.us-banner .us-banner__alerts-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-banner .us-banner__alerts-item {
+  --alert-edge: var(--info);
+  margin: 0;
+  border-bottom: 1px solid var(--banner-menu-border);
+  box-shadow: inset 4px 0 0 var(--alert-edge);
+}
+
+.us-banner .us-banner__alerts-item[data-us-alert-severity="danger"] {
+  --alert-edge: var(--danger);
+}
+
+.us-banner .us-banner__alerts-item:is([data-us-alert-severity="warning"], [data-us-alert-severity="important"]) {
+  --alert-edge: var(--warning);
+}
+
+.us-banner .us-banner__alerts-item[data-us-alert-severity="success"] {
+  --alert-edge: var(--success);
+}
+
+.us-banner .us-banner__alerts-body {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px 10px 18px;
+  color: var(--banner-menu-text);
+  font: 12.5px/1.45 var(--font-ui);
+  text-decoration: none;
+}
+
+/* Outrank the banner's inverse (white, underlined) link colour. */
+.us-banner .us-banner__surface a.us-banner__alerts-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--banner-menu-text);
+  text-decoration: none;
+}
+
+.us-banner .us-banner__surface a.us-banner__alerts-body:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--banner-menu-hover);
+  text-decoration: none;
+}
+
+.us-banner .us-banner__alerts-body > strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.us-banner .us-banner__alerts-body > span {
+  color: var(--banner-menu-muted);
+}
+
+.us-banner .us-banner__alerts-body > small {
+  color: var(--banner-menu-muted);
+  font-size: 11px;
+}
+
+.us-banner .us-banner__alerts-status {
+  margin: 0;
+  padding: 10px 14px;
+  color: var(--banner-menu-muted);
+  font: 12.5px/1.45 var(--font-ui);
+}
+
+.us-banner .us-banner__alerts-status[hidden] {
+  display: none;
+}
+
+.us-banner .us-banner__alerts-foot {
+  padding: 8px 14px;
+  text-align: end;
+}
+
+.us-banner .us-banner__alerts-more {
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-link);
+  font: 600 12.5px var(--font-ui);
+  cursor: pointer;
+}
+
+.us-banner .us-banner__alerts-more:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 950px), (pointer: coarse) {
+  .us-banner .us-banner__alerts-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Below the banner's grid breakpoint the actions start at the left edge, so
+   the popup opens rightwards from the bell instead of off-screen. Condensed,
+   the bell is at the right again (beside the name on phones), so it opens
+   leftwards as on desktop. */
+@media (max-width: 899px) {
+  .us-banner .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
+  .us-banner.us-banner--compact .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   13. Compact notes (v1 layout): us-notes on a Query Template Display iPart
+   (with us-query-template), using Member-Notes-Compact-Query-Template.html.
+   One meta line (author · date · type badge on the right), then the note.
+   Add us-notes--pinned to the same field for the amber pinned treatment.
+   Target: new block after the shared list shell (.us-list__*) rules.
+   -------------------------------------------------------------------------- */
+.us-notes .QueryTemplateItem > .card-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 12px 14px;
+}
+
+.us-notes .QueryTemplateItem.card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-radius: var(--radius);
+}
+
+.us-note__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-2);
+  margin: 0 0 6px;
+}
+
+.us-note__author:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+}
+
+.us-note__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-note__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline-start: auto;
+}
+
+/* Optional fields left blank by the query collapse cleanly. */
+.us-note__type:empty,
+.us-note__subject:empty {
+  display: none;
+}
+
+.us-note__body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.us-note__subject:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+.us-note__subject:not(:empty)::after {
+  content: " — ";
+  font-weight: var(--fw-normal);
+}
+
+/* Pinned: warm surface, accent edge and a pin before the author. */
+.us-notes--pinned .QueryTemplateItem.card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
+  border-inline-start: 3px solid var(--warning-fill);
+  background: var(--warning-bg);
+}
+
+.us-notes--pinned .us-note__meta::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: var(--warning-fill);
+  /* Tabler "pin" outline (MIT). */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4'/%3E%3Cpath d='M9 15l-4.5 4.5'/%3E%3Cpath d='M14.5 4l5.5 5.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+
+/* --------------------------------------------------------------------------
+   14. Read-only panel labels: the page's label voice (as report column
+   headers and banner facts) with stronger values beneath.
+   Target: the [data-us-panel] data display panel rules. Edit forms keep
+   their sentence-case labels.
+   -------------------------------------------------------------------------- */
+[data-us-panel] .PanelEditorReadOnlyForm .PanelField .Label {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+[data-us-panel] .PanelEditorReadOnlyForm .PanelField .PanelFieldValue {
+  margin-top: 2px;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+}
+
+
+/* --------------------------------------------------------------------------
+   15. Right-hand CCO rail: the CCO iPart's own "Tab display style: Vertical
+   right" setting (iMIS renders .tabs-right on the .cco element and
+   RadTabStripRight on the strip; the markup order is unchanged). With
+   us-cco-cards or us-cco-rail, the tab rail sits right of the content on
+   desktop, away from the iMIS navigation; the collapse toggle stays at the
+   top of the rail's column, now top right, with mirrored icons. "Vertical
+   left" needs nothing. Mobile, nested CCOs and V5 attached tabs (no
+   us-cco-cards or us-cco-rail) are unchanged.
+   Target: new block after section 5 (card-style CCO).
+   -------------------------------------------------------------------------- */
+@media (min-width: 601px) {
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr) var(--us-cco-rail-width);
+  }
+
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    grid-column: 2;
+    --active-shadow: inset -3px 0 0 var(--accent);
+  }
+
+  :root :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadMultiPage {
+    grid-column: 1;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="expanded"] > .us-cco-rail-toggle {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  /* Collapsed: one column again; the bar and its toggle sit on the right. */
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"] > :is(.RadTabStripVertical, .RadMultiPage) {
+    grid-column: 1;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"] > .RadTabStripVertical {
+    justify-content: flex-end;
+  }
+
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-cco-rail-toggle {
+    order: 1;
+  }
+
+  .tabs-right[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options {
+    left: auto;
+    right: 0;
+  }
+
+  /* The iMIS icons point for a left rail; mirror them for a right one. */
+  .tabs-right .us-cco-rail-toggle__icon {
+    transform: scaleX(-1);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   16. v1 sidebar rail (opt-in): us-cco-rail on the CCO iPart. One class: it
+   brings the card layout (section 5) and the collapsible rail (section 10)
+   with it, so those sections match :is(.us-cco-cards, .us-cco-rail) and
+   :is(.us-cco-collapsible, .us-cco-rail). Not default styling: other CCOs
+   keep the native vertical tabs. The side follows the iPart's own "Vertical
+   left" / "Vertical right" setting (section 15).
+   Rules written .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) match
+   every rail; the second class keeps the weight they need over sections 10
+   and 15.
+   v1's edge-attached sidebar: page structure, not a content card. Square,
+   white, one border on the content side; in the page-level column it bleeds
+   through the column's half-gutter to the page edge (as the us-banner-page
+   banner does) and, when a banner is directly above, rises to meet it (the
+   gap is measured by US-CCO-SIDEBAR JS). Full-width 40px rows, 13px
+   semibold text, subtle hover, pale brand selection with a 3px brand bar on
+   the content side in both orientations. Expanded, the panel holds the collapse toggle
+   in its top corner; collapsed, the Sections bar is unchanged. Search and
+   tab counts are section 17. Nested CCOs are unchanged; on phones the tabs become
+   one attached "Sections" dropdown (end of section 17).
+   Target: new block after section 15.
+   -------------------------------------------------------------------------- */
+@media (min-width: 601px) {
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --rail-pad: 6px 0;
+    --tab-gap: 0;
+    --tab-radius: 0;
+    --tab-height: 40px;
+    --tab-pad: 0 12px 0 14px;
+    --tab-bg: transparent;
+    --tab-color: var(--neutral-700);
+    --tab-border: transparent;
+    --hover-bg: var(--bg-subtle);
+    --hover-color: var(--text-strong);
+    --hover-border: transparent;
+    --active-bg: var(--brand-50);
+    --active-color: var(--brand-700);
+    --active-border: transparent;
+    --active-shadow: inset 3px 0 0 var(--brand-600);
+    margin-top: calc(-1 * var(--us-cco-rail-pull, 0px));
+    border: 0;
+    border-inline-end: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--bg-surface);
+  }
+
+  /* Page-level column only: bleed through the column's half-gutter to the
+     page edge. --bs-gutter-x resolves from the CCO's own row, so this matches
+     the column padding exactly. Nested rows keep the normal inset. */
+  body.us-banner-page :where(.main > .ContentPanel > div > .row > .col-sm-12) .us-cco-rail:not(:where(.row .row .us-cco-rail)) :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    margin-inline-start: calc(var(--bs-gutter-x) * -.5);
+  }
+
+  body.us-banner-page :where(.main > .ContentPanel > div > .row > .col-sm-12) .us-cco-rail:not(:where(.row .row .us-cco-rail)) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    margin-inline-start: 0;
+    margin-inline-end: calc(var(--bs-gutter-x) * -.5);
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink {
+    transition: background-color 150ms, color 150ms;
+  }
+
+  /* Expanded + collapsible: the panel spans the toggle row and holds the
+     toggle in its top corner, so the panel starts level with the content. */
+  /* Equal 8px above and below the toggle: the panel starts at the banner
+     (margin-top -pull), the toggle sits 8px down, and the search box starts
+     8px under the toggle (44px = 8 + 36 toggle + 8, less the rail's 6px top
+     padding and the search box's 2px). */
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .RadTabStripVertical {
+    grid-row: 1 / span 2;
+    padding-top: 44px;
+  }
+
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .us-cco-rail-toggle {
+    margin-top: calc(8px - var(--us-cco-rail-pull, 0px));
+  }
+
+  /* Collapsed: the Sections bar rises by the same amount, so the toggle stays
+     8px below the banner in both states. */
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical {
+    margin-top: calc(4px - var(--us-cco-rail-pull, 0px));
+  }
+
+  /* The strip is a grid item with z-index 1 (a stacking context), so the
+     toggle, earlier in the DOM, must sit above it. */
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="expanded"] > .us-cco-rail-toggle {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Same inset in both states, so the toggle does not move on collapse; 10px
+     lines it up with the search box inside the panel. */
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] .us-cco-rail-toggle {
+    margin-inline: 10px;
+    margin-bottom: 0;
+  }
+
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] .us-cco-rail-toggle {
+    margin-top: 4px;
+  }
+
+  /* Top-align the Sections box with the toggle (both 36px), rather than
+     centring it against the toggle's 4px top margin. */
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical {
+    align-items: flex-start;
+  }
+
+  :root .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections {
+    margin-top: 4px;
+  }
+
+  /* Where the panel bleeds to the page edge, the toggle moves out with it
+     (in both states), staying 10px inside the panel's outer edge. */
+  body.us-banner-page :where(.main > .ContentPanel > div > .row > .col-sm-12) .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail):not(:where(.row .row .us-cco-rail)) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail] .us-cco-rail-toggle {
+    margin-inline-start: calc(10px - var(--bs-gutter-x) * .5);
+  }
+
+  body.us-banner-page :where(.main > .ContentPanel > div > .row > .col-sm-12) .us-cco-rail:is(.us-cco-collapsible, .us-cco-rail):not(:where(.row .row .us-cco-rail)) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail] .us-cco-rail-toggle {
+    margin-inline: 10px calc(10px - var(--bs-gutter-x) * .5);
+  }
+
+  /* A right-hand sidebar moves its border to the content (left) side. The
+     selection bar stays on that side too: against the page edge it reads as
+     part of the edge rather than as a marker, and next to the content it
+     points at what the tab opens. */
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    border-inline-end: 0;
+    border-inline-start: 1px solid var(--border);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink {
+      transition: none;
+    }
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   17. v1 sidebar extras (tailored to us-cco-rail only): tab search and
+   tab counts. Behaviour: US-CCO-SIDEBAR in theme-candidate.js.
+   Search shows above the tabs and at the top of the collapsed Sections
+   list once the menu has enough tabs (Config.js searchMinTabs, default 8).
+   Counts are v1's nav badges, rendered from data-us-count so tab text is
+   untouched. Tones use status tokens.
+   Target: new block after section 16.
+   -------------------------------------------------------------------------- */
+.us-cco-rail .us-cco-search {
+  position: relative;
+  padding: 2px 10px 8px;
+}
+
+.us-cco-rail .us-cco-search::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  width: 14px;
+  height: 14px;
+  background: var(--text-muted);
+  pointer-events: none;
+  /* Tabler "search" outline (MIT). */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0'/%3E%3Cpath d='M21 21l-6 -6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.us-cco-rail .us-cco-search__input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0 8px 0 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  font: 13px var(--font-ui);
+}
+
+.us-cco-rail .us-cco-search__input::placeholder {
+  color: var(--text-muted);
+}
+
+.us-cco-rail .us-cco-search__input:focus {
+  border-color: var(--field-focus-colour, var(--brand-600));
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--field-focus-colour, var(--brand-600)) 18%, transparent);
+}
+
+.us-cco-rail .us-cco-search__empty {
+  margin: 6px 4px 0;
+  color: var(--text-muted);
+  font: 12px/1.4 var(--font-ui);
+}
+
+.us-cco-rail .us-cco-search__empty[hidden] {
+  display: none;
+}
+
+/* In the collapsed Sections list the box sits above the options. */
+.us-cco-rail .us-cco-search--picker {
+  padding: 2px 2px 6px;
+}
+
+/* The Alt+S keycap sits inside the box's right edge until the box is used. */
+.us-cco-rail .us-cco-search__key {
+  position: absolute;
+  top: 8px;
+  right: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font: 600 10px/14px var(--font-ui);
+  pointer-events: none;
+}
+
+.us-cco-rail .us-cco-search--picker .us-cco-search__key {
+  top: 8px;
+  right: 10px;
+}
+
+.us-cco-rail .us-cco-search:is(:focus-within, :has(.us-cco-search__input:not(:placeholder-shown))) .us-cco-search__key {
+  display: none;
+}
+
+.us-cco-rail .us-cco-search__input {
+  padding-inline-end: 48px;
+}
+
+.us-cco-rail .us-cco-search--picker::before {
+  left: 12px;
+}
+
+/* Filtered-out tabs and options: the native rules set display, so the
+   hidden attribute needs matching specificity. */
+:root .us-cco-rail :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI[hidden],
+.us-cco-rail .us-tab-section-options > button[hidden] {
+  display: none;
+}
+
+/* The rail's search belongs to the vertical layout; mobile keeps only the
+   All sections list's search. */
+@media (max-width: 600px) {
+  .us-cco-rail .RadTabStripVertical > .rtsLevel > .us-cco-search {
+    display: none;
+  }
+}
+
+/* Phones: the sidebar's tabs become one "Sections: <current>" dropdown
+   attached under the banner, as the desktop panel is: square, edge to edge
+   in the page-level column, white with a bottom border, rising to meet the
+   banner (--us-cco-rail-pull) and sticking beneath the pinned banner
+   (--us-cco-rail-sticky-top, both from US-CCO-SIDEBAR). The horizontal
+   tab strip is hidden; the dropdown's list opens over the content. The CCO
+   becomes a formatting context so the strip's negative margin does not
+   drag the CCO (and the measured gap) up with it. */
+@media (max-width: 600px) {
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) {
+    display: flow-root;
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    position: sticky;
+    top: var(--us-cco-rail-sticky-top, 0px);
+    z-index: 5;
+    margin-top: calc(-1 * var(--us-cco-rail-pull, 0px));
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--bg-surface);
+    box-shadow: none;
+  }
+
+  /* Page-level column only: edge to edge, text on the content's inset. */
+  body.us-banner-page :where(.main > .ContentPanel > div > .row > .col-sm-12) .us-cco-rail:not(:where(.row .row .us-cco-rail)) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --us-cco-rail-inset: calc(var(--bs-gutter-x) * .5);
+    margin-inline: calc(var(--bs-gutter-x) * -.5);
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical > .rtsLevel {
+    display: none;
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical > .us-tab-sections {
+    margin: 0;
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical > .us-tab-sections > summary {
+    padding-inline: var(--us-cco-rail-inset, 12px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+}
+
+/* Counts: v1's nav badges, pushed to the row's end. */
+.us-cco-rail .rtsLink[data-us-count]::after,
+.us-cco-rail .us-tab-section-options > button[data-us-count]::after {
+  content: attr(data-us-count);
+  flex: none;
+  min-width: 18px;
+  margin-inline-start: auto;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font: 700 10px/16px var(--font-ui);
+  text-align: center;
+}
+
+.us-cco-rail .rtsLink[data-us-count] > .rtsOut {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Matches the collapsed list's own button rule, which sets display: block. */
+.us-cco-rail [data-us-cco-rail] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options > button[data-us-count],
+.us-cco-rail .us-tab-sections .us-tab-section-options > button[data-us-count] {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.us-cco-rail :is(.rtsLink, .us-tab-section-options > button)[data-us-count][data-us-count-tone="danger"]::after {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.us-cco-rail :is(.rtsLink, .us-tab-section-options > button)[data-us-count][data-us-count-tone="warning"]::after {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.us-cco-rail :is(.rtsLink, .us-tab-section-options > button)[data-us-count][data-us-count-tone="info"]::after {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+
+/* --------------------------------------------------------------------------
+   21. Dark mode for the candidate sections. The candidate uses brand and
+   neutral ramp steps (--neutral-200, --brand-50, --accent-100 …), which
+   zzDarkMode.css deliberately leaves light because they also colour filled
+   buttons and banners. Each rule below re-points one of those uses at the
+   dark palette.
+   Target: zzDarkMode.css, beside the matching component overrides.
+   -------------------------------------------------------------------------- */
+@media screen {
+  /* 5. Card-style CCO rail selection. */
+  :root[data-us-color-scheme="dark"] :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --active-bg: var(--dm-selected);
+    --hover-bg: var(--dm-hover);
+  }
+
+  /* 7. Report column headers: one step darker than the panel header, as in
+     light mode, instead of the light --neutral-200. */
+  :root[data-us-color-scheme="dark"] :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --iqa-table-head: var(--bg-sunken);
+    --iqa-table-head-border: var(--border-strong);
+  }
+
+  /* 8. Row group toggle hover. */
+  :root[data-us-color-scheme="dark"] .us-iqa-row-groups .us-row-group__toggle:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-color: var(--border);
+    background: var(--dm-hover);
+  }
+
+  /* 10. Collapsed Sections list: hover and current option. */
+  :root[data-us-color-scheme="dark"] [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button:is(:hover, [aria-current="true"]) {
+    background: var(--dm-selected);
+    color: var(--text-strong);
+  }
+}
+
+@media screen and (min-width: 601px) {
+  /* 16. v1 sidebar: tab text, selection and selection bar. */
+  :root[data-us-color-scheme="dark"] .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --tab-color: var(--text-base);
+    --hover-bg: var(--dm-hover);
+    --active-bg: var(--dm-selected);
+    --active-color: var(--text-strong);
+    --active-shadow: inset 3px 0 0 var(--text-link);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   22. Native messages: trim authored paragraph margins. A <p> typed into
+   content inside any Asi* message keeps its 13px bottom margin, so the bottom
+   padding looks larger than the top. Trimming the first child's top margin
+   and the last child's bottom margin gives even padding; margins between
+   paragraphs stay. iMIS-generated messages hold bare text and are unchanged.
+   Replaces the us-alerts-only trim first proposed in item 9.
+   Target: US-MESSAGES, after the shared message box rule.
+   -------------------------------------------------------------------------- */
+:is(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])) > :first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 0;
+}
+
+:is(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])) > :last-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-bottom: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   23. Report scroll edges: a report wider than its panel fades the edge that
+   has columns hidden beyond it, so a clipped column no longer looks like the
+   end of the table. A mask, not a shadow, because header and row cells paint
+   their own backgrounds over the grid's. Behaviour: US-IQA-SCROLL-EDGES in
+   theme-candidate.js sets data-us-scroll-more.
+   Target: the IQA report rules; the script beside US-IQA-COLUMNS.
+   -------------------------------------------------------------------------- */
+:is([data-gridid] .RadGrid, .RadGrid[data-gridid])[data-us-scroll-more]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-scroll-fade-start: 0px;
+  --us-scroll-fade-end: 0px;
+  mask-image: linear-gradient(to right,
+    transparent,
+    #000 var(--us-scroll-fade-start),
+    #000 calc(100% - var(--us-scroll-fade-end)),
+    transparent);
+}
+
+:is([data-gridid] .RadGrid, .RadGrid[data-gridid])[data-us-scroll-more~="start"] {
+  --us-scroll-fade-start: 32px;
+}
+
+:is([data-gridid] .RadGrid, .RadGrid[data-gridid])[data-us-scroll-more~="end"] {
+  --us-scroll-fade-end: 32px;
+}
+
+/* Right-to-left pages scroll from the right edge. */
+:is([data-gridid] .RadGrid, .RadGrid[data-gridid])[data-us-scroll-more]:dir(rtl) {
+  mask-image: linear-gradient(to left,
+    transparent,
+    #000 var(--us-scroll-fade-start),
+    #000 calc(100% - var(--us-scroll-fade-end)),
+    transparent);
+}
+
+
+/* --------------------------------------------------------------------------
+   25. Panel tones (opt-in) on a panel iPart's CSS class field: a tinted
+   heading and a tinted border (a leading tone bar was declined).
+   - us-panel-tone-danger / -warning / -info: a fixed tone.
+   - us-panel-tone-auto: the tone follows the most serious status badge in the
+     panel (danger, then warning); otherwise the panel stays plain. Used for
+     Outstanding invoices: an invoice that is only "Due" leaves it plain, a
+     "Due soon" one tints it amber, an "Overdue" one red. The IQA decides the
+     status; no script.
+   A toned panel with nothing in it stays plain: an empty list needs no
+   attention. That is a native grid showing its empty row (rgNoRecords), or
+   a declared Query Template (us-query-template) whose result set iMIS has
+   omitted because there are no results.
+   Used above the Finance switcher: Outstanding (auto) and Active and
+   upcoming adjustments (info, a Query Template, item 33). The iPart's own tokens are overridden on .panel, which
+   wins over the wrapper's report token block by inheritance. Status tokens
+   are remapped by zzDarkMode.css, so dark mode follows.
+   Target: new block after the panel and report heading rules.
+   -------------------------------------------------------------------------- */
+.us-panel-tone-danger,
+.us-panel-tone-auto:has(> .panel .us-badge--danger) {
+  --us-panel-tone: var(--danger);
+  --us-panel-tone-bg: var(--danger-bg);
+}
+
+.us-panel-tone-warning,
+.us-panel-tone-auto:has(> .panel .us-badge--warning):not(:has(> .panel .us-badge--danger)) {
+  --us-panel-tone: var(--warning);
+  --us-panel-tone-bg: var(--warning-bg);
+}
+
+.us-panel-tone-info {
+  --us-panel-tone: var(--info);
+  --us-panel-tone-bg: var(--info-bg);
+}
+
+:is(
+  .us-panel-tone-danger,
+  .us-panel-tone-warning,
+  .us-panel-tone-info,
+  .us-panel-tone-auto:has(> .panel :is(.us-badge--danger, .us-badge--warning))
+) > .panel:not(:has(.rgNoRecords)):not(.us-query-template > .panel:not(:has(.QueryTemplateSet))):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --iqa-header: var(--us-panel-tone-bg);
+  --iqa-border: color-mix(in srgb, var(--us-panel-tone) 35%, var(--border));
+  --iqa-divider: color-mix(in srgb, var(--us-panel-tone) 25%, var(--bg-sunken));
+}
+
+
+/* --------------------------------------------------------------------------
+   27. Copy flash: the copied text is highlighted instead of ringed. A
+   rounded rectangle fills the target, its edges softened by a blurred
+   shadow of the same colour, holds briefly and then fades slowly (1.6s).
+   The candidate US-COPY script (theme-candidate-copy.js) keeps the class
+   for the animation's own length, so this rule alone sets the timing.
+   The accent colour at 60% everywhere, including the banner (owner's
+   choice over a white banner glow). The rectangle is the text's own box,
+   with no padding (owner: cover just the text); the 3px blur only softens
+   its edges. The colour is a registered property so the fill and shadow
+   can animate.
+   Target: US-COPY, replacing .us-copy-flash and @keyframes us-copy-flash.
+   -------------------------------------------------------------------------- */
+@property --us-copy-glow {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
+.us-copy-flash {
+  --us-copy-glow-colour: color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius: 3px;
+  background-color: var(--us-copy-glow);
+  box-shadow: 0 0 3px var(--us-copy-glow);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: us-copy-glow 1600ms ease-out;
+}
+
+@keyframes us-copy-glow {
+  0%,
+  10% {
+    --us-copy-glow: var(--us-copy-glow-colour);
+  }
+
+  100% {
+    --us-copy-glow: transparent;
+  }
+}
+
+/* "Copied" beside the button (added by the candidate US-COPY script while the
+   success tick shows): past the button's edge, so nothing moves; in the
+   button's success colour, softened; placed from the icon's centre so the
+   gap stays the same on a 44px touch button; fades in during the flash's
+   hold, then fades out with it (same 1.6s, keyframe 10% and ease-out). */
+:is(button.us-copy, button.us-banner__copy) > .us-copy-label {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: calc(50% + 12px);
+  transform: translateY(-50%);
+  color: var(--copy-success);
+  font: 500 11px/1 var(--font-ui);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: us-copy-label 1600ms ease-out forwards;
+}
+
+@keyframes us-copy-label {
+  0% {
+    opacity: 0;
+    translate: -4px 0;
+  }
+
+  10% {
+    opacity: .75;
+    translate: 0 0;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(button.us-copy, button.us-banner__copy) > .us-copy-label {
+    animation: none;
+    opacity: .75;
+  }
+
+  .us-copy-flash {
+    --us-copy-glow: var(--us-copy-glow-colour);
+    animation: none;
+    outline: 0;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   28. Quiet trackers (opt-in): us-attention--hide-zero beside us-attention.
+   Behaviour: US-ATTENTION-HIDE-ZERO in theme-candidate.js hides zero-count
+   cards (the rest share the row) and, when every card is zero, shows one
+   "Nothing needs attention" line instead of a row of zeros.
+   Target: US-ATTENTION.
+   -------------------------------------------------------------------------- */
+.us-attention--hide-zero > .us-attention__items[hidden],
+.us-attention--hide-zero > .us-attention__items > li[hidden],
+.us-attention--hide-zero > .us-attention__clear[hidden] {
+  display: none;
+}
+
+/* Dividers between the visible cards only: a hidden first card would
+   otherwise leave the next one with a leading rule. */
+.us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-attention__items > li {
+  border-inline-start: 0;
+}
+
+.us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-attention__items > li:not([hidden]) ~ li:not([hidden]) {
+  border-inline-start: 1px solid var(--border);
+}
+
+.us-attention--hide-zero > .us-attention__clear {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 18px;
+  color: var(--text-muted);
+  font: 500 13px/1.4 var(--font-ui);
+}
+
+.us-attention--hide-zero > .us-attention__clear::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--success);
+  /* Tabler "circle-check" outline (MIT). */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M9 12l2 2l4 -4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+
+/* --------------------------------------------------------------------------
+   29. Native "Vertical right" CCOs: honour the CCO iPart's own "Tab display
+   style: Vertical right" setting. iMIS renders .tabs-right on the .cco
+   element and RadTabStripRight on the strip, in the same markup order as
+   "Vertical left". The theme's page layout put every vertical strip in
+   column 1, so a right-hand CCO showed its tabs on the left. On desktop the
+   strip moves to the right-hand column and V5's attached tabs mirror (shape,
+   accent bar, fade and the open side). Phones keep the stacked tabs, as for
+   "Vertical left". Card and rail CCOs (sections 5, 15 and 16) style their
+   own rails over this.
+   Target: US-NATIVE-TABS-PAGE-LAYOUT (grid) and US-NATIVE-TABS-COMPONENT
+   (the V5 mirror, after the desktop V5 rule).
+   -------------------------------------------------------------------------- */
+@media (min-width: 601px) {
+  :root .tabs-wrapper.tabs-vertical.tabs-right {
+    grid-template-columns: minmax(0, 1fr) var(--us-cco-rail-width);
+  }
+
+  :root .tabs-wrapper.tabs-vertical.tabs-right > .RadTabStripVertical {
+    grid-column: 2;
+  }
+
+  :root .tabs-wrapper.tabs-vertical.tabs-right > .RadMultiPage {
+    grid-column: 1;
+  }
+
+  :root .tabs-right > .RadTabStripVertical {
+    --rail-pad: 4px 4px 4px 0;
+    --tab-radius: 0 7px 7px 0;
+    --active-shadow: inset -4px 0 0 var(--accent);
+    --fade-direction: to left;
+  }
+
+  :root .tabs-right > .RadTabStripVertical + .RadMultiPage {
+    border-right: 0;
+    border-left: 1px solid var(--open-border);
+  }
+
+  :root .tabs-right > .RadTabStripVertical > .rtsLevel > .rtsUL > .rtsLI > .rtsLink.rtsSelected {
+    margin-right: 0;
+    margin-left: -1px;
+    border-right-color: var(--active-border);
+    border-left-color: var(--open-surface);
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   30. Status icons in badges (opt-in): us-badge--icon beside us-badge adds a
+   14px icon before the text, so status reads by shape as well as colour
+   (payment history, invoices, adjustments). The tone picks the icon:
+   success a tick, danger a cross, warning a warning sign, primary a clock
+   (scheduled, due, upcoming), no tone a minus. data-us-icon overrides it for
+   statuses that share a tone: check, cross, alert, clock, refund, ended.
+   The icon is decorative; the badge text stays the status.
+   Target: US-BADGES, after the tone rules.
+   -------------------------------------------------------------------------- */
+/* A status is one short word or two: it never breaks inside a word. The base
+   badge allows overflow-wrap: anywhere for long free text, which split
+   "Upcoming" in a narrow grid column (item 33). */
+.us-badge.us-badge--icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.us-badge.us-badge--icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M9 12h6'/%3E%3C/svg%3E");
+  padding-inline-start: 6px;
+}
+
+.us-badge.us-badge--icon:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask: var(--us-badge-icon) center / contain no-repeat;
+  -webkit-mask: var(--us-badge-icon) center / contain no-repeat;
+}
+
+/* Tabler icons (MIT): circle-check, circle-x, alert-triangle, clock,
+   arrow-back-up, circle-minus. */
+.us-badge.us-badge--icon:is(.us-badge--success, [data-us-icon="check"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M9 12l2 2l4 -4'/%3E%3C/svg%3E");
+}
+
+.us-badge.us-badge--icon:is(.us-badge--danger, [data-us-icon="cross"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M10 10l4 4m0 -4l-4 4'/%3E%3C/svg%3E");
+}
+
+.us-badge.us-badge--icon:is(.us-badge--warning, [data-us-icon="alert"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+}
+
+.us-badge.us-badge--icon:is(.us-badge--primary, [data-us-icon="clock"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E");
+}
+
+.us-badge.us-badge--icon[data-us-icon="refund"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 14l-4 -4l4 -4'/%3E%3Cpath d='M5 10h11a4 4 0 1 1 0 8h-1'/%3E%3C/svg%3E");
+}
+
+.us-badge.us-badge--icon[data-us-icon="ended"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'/%3E%3Cpath d='M9 12h6'/%3E%3C/svg%3E");
+}
+
+@media (forced-colors: active) {
+  .us-badge.us-badge--icon:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+    background: CanvasText;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   31. Heading menus: a dropdown in a panel heading, configured like a heading
+   button (US-ACTION-HEADING-MENUS in theme-candidate-heading-menus.js). The
+   menu is the theme's .us-actions dropdown; only its toggle is restyled to
+   match the heading's outline buttons (32px, 12px semibold, brand outline),
+   so a menu and a button sit side by side as equals. The list, items,
+   motion and keyboard handling are US-ACTION-MENUS' own.
+   Target: US-ACTION-MENUS, after the shared toggle rules.
+   -------------------------------------------------------------------------- */
+[data-us-heading-menu-placeholder] {
+  display: none !important;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) {
+  font-size: 12px;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle {
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--brand-800);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--brand-800);
+  font: 600 12px/18px var(--font-ui);
+  white-space: nowrap;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:is(:hover, :focus, [aria-expanded=true]) {
+  border-color: var(--brand-800);
+  background: var(--brand-50);
+  color: var(--brand-800);
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:active {
+  background: var(--brand-100);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .18);
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle::after {
+  width: 6px;
+  height: 6px;
+  margin-inline-start: 2px;
+  margin-block-start: -3px;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle[aria-expanded=true]::after {
+  margin-block-start: 3px;
+}
+
+.us-heading-menu__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* The list is as wide as its longest item, not Quick Actions' 288px. */
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *))[data-us-actions-ready] .us-actions__list {
+  width: max-content;
+  min-width: 200px;
+  max-width: min(320px, calc(100vw - 32px));
+}
+
+/* Top level only: the side line and travelling glint of the theme's submenus
+   (US-ACTION-MENUS .us-actions__inline), with its line keyframes and timing.
+   theme-candidate-heading-menus.js restarts the draw each time the menu
+   opens; the line spans the items (6px list padding each end). Items start 5px past the
+   line (margin, not padding), so their hover fill never covers it; the
+   text stays where submenu text sits. */
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list > li > .us-actions__item {
+  width: calc(100% - 16px);
+  margin-inline-start: 16px;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  width: 1px;
+  height: calc(100% - 12px);
+  background: var(--us-actions-line);
+  pointer-events: none;
+}
+
+:root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list::before {
+  content: '';
+  display: none;
+  position: absolute;
+  z-index: 2;
+  top: -2px;
+  left: 15.5px;
+  width: 2px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--brand-600) 65%, var(--accent));
+  box-shadow: 0 0 4px color-mix(in srgb, var(--brand-600) 45%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list.us-heading-menu__drawing::after {
+    transform-origin: top;
+    animation: us-actions-line-draw var(--us-actions-glint-duration) linear both;
+  }
+
+  :root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list.us-heading-menu__drawing::before {
+    display: block;
+    animation: us-heading-menu-glint var(--us-actions-glint-duration) linear both;
+  }
+}
+
+/* us-actions-glint-pass moves by a measured distance; this one runs from the
+   top of the line to its foot, whatever height the list has reached. */
+@keyframes us-heading-menu-glint {
+  0% {
+    top: -6px;
+    opacity: 0;
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: calc(100% - 18px);
+    opacity: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  :root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list::after {
+    background: CanvasText;
+  }
+
+  :root .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__list::before {
+    display: none;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   32. Recent activity feed (opt-in): a .us-activity-feed element, usually in a
+   one-row Query Template, which US-ACTIVITY-FEED fills from several IQAs
+   (see theme-candidate.js for the markup and field contract). This section
+   styles the feed's own chrome: the folding search and range, the type
+   filters (the section switcher) with the chosen type's "View all" link, the
+   incomplete-list notice, the empty state and the footer. The rows are
+   record cards, styled by prototypes/wip/activity-cards/
+   activity-cards.candidate.css (US-RECORD-CARDS).
+   Target: new US-ACTIVITY-FEED section after the shared list shell rules.
+   -------------------------------------------------------------------------- */
+.us-activity__sources {
+  display: none !important;
+}
+
+.us-activity-feed:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  min-width: 0;
+  color: var(--text-base);
+  font: var(--fs-sm)/var(--lh-base) var(--font-ui);
+}
+
+/* Filters (search and range): hidden behind the heading's filter button
+   (the theme's US-QUERY-SEARCH toggle), opening above the type filters. */
+.us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  order: -1;
+  box-sizing: border-box;
+}
+
+.us-activity__controls[hidden] {
+  display: none;
+}
+
+/* A wide feed (data-us-activity-wide, set from the feed's own width) puts
+   search and range at the end of the type filters' line, and the heading's
+   filter button hides. */
+.us-activity-feed[data-us-activity-wide] .us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 320px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  order: 0;
+}
+
+.us-activity-feed[data-us-activity-wide] .us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  max-width: 360px;
+}
+
+.us-activity__utilities[hidden] {
+  display: none !important;
+}
+
+/* Type filters stay visible, with one rule beneath. */
+.us-activity__bar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+/* "View all calls": the chosen type's IQA page, at the end of the bar. */
+.us-activity__type-history:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.us-activity__type-history:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+.us-activity__type-history:focus-visible {
+  outline: 0;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+.us-activity__type-history[hidden] {
+  display: none;
+}
+
+.us-activity__types:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 0 1 auto;
+}
+
+.us-activity__types:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:not(:where(.us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-inline: 10px;
+}
+
+.us-activity__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.us-activity__types > [data-us-tab]:is(.is-active, [aria-pressed="true"]) > .us-activity__count {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+.us-activity__count:empty {
+  display: none;
+}
+
+.us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 200px;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.us-activity__search > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.us-activity__search input[type="search"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--text-base);
+  font: var(--fw-normal) var(--fs-sm)/1.5 var(--font-ui);
+}
+
+.us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: none;
+  background-color: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fw-normal) var(--fs-sm) var(--font-ui);
+  cursor: pointer;
+}
+
+.us-activity__range:focus-visible {
+  border-color: var(--field-focus-colour);
+  outline: 0;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--field-focus-colour) 20%, transparent);
+}
+
+/* Incomplete list: the item 9 alert shape (pale border, coloured edge). */
+.us-activity__notice:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--border));
+  border-inline-start: 4px solid var(--warning-fill);
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--text-strong);
+}
+
+.us-activity__notice[hidden] {
+  display: none;
+}
+
+.us-activity__notice > p {
+  flex: 1 1 16rem;
+  margin: 0;
+}
+
+.us-activity__empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: var(--space-8) var(--space-4);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Footer: honest count, Show more, full history. */
+.us-activity__footer:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.us-activity__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0 auto 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-activity__history:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+}
+
+@media (max-width: 600px) {
+  .us-activity__types:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-basis: 100%;
+  }
+
+  .us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 1 1 100%;
+  }
+}
+
+/* Search matches: a faint highlight, drawn by US-ACTIVITY-FEED with CSS
+   Custom Highlights (the card text is untouched). The accent at 30%. */
+::highlight(us-activity-match) {
+  background-color: rgb(255 153 71 / 30%);
+}

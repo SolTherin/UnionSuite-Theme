@@ -1,0 +1,14 @@
+<!-- Candidate author template (v1 note layout). Query Template Display:
+     paste once into the Query Template field; iMIS repeats it per note.
+     iPart CSS class: us-query-template us-notes (add us-notes--pinned for a
+     pinned-notes iPart). Display in cards: checked. Header/Footer blank.
+     Fields: AuthorName, CreatedOn, NoteBody (required); NoteType and
+     NoteTitle optional — select '' AS NoteType / NoteTitle when unused. -->
+<div class="us-note">
+  <p class="us-note__meta">
+    <strong class="us-note__author">{#query.AuthorName}</strong>
+    <span class="us-note__date">{#query.CreatedOn}</span>
+    <span class="us-badge us-note__type">{#query.NoteType}</span>
+  </p>
+  <p class="us-note__body"><strong class="us-note__subject">{#query.NoteTitle}</strong>{#query.NoteBody}</p>
+</div>

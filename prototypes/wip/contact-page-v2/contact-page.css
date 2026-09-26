@@ -1,0 +1,106 @@
+/* Prototype page layout only. Component styling comes from the linked shared theme. */
+
+body.cv2-page {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.5 var(--font-ui);
+}
+
+.cv2-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-size: 13px;
+}
+
+.cv2-tag {
+  color: var(--text-muted);
+}
+
+.cv2-toolbar a {
+  margin-inline-start: auto;
+}
+
+.cv2-page .main {
+  padding-bottom: 48px;
+}
+
+.cv2-page .ContentPanel > div > .row + .row {
+  margin-top: 20px;
+}
+
+/* Record alerts: native message classes with an authored action row. */
+.cv2-alerts {
+  display: grid;
+  gap: 10px;
+}
+
+.cv2-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.cv2-alert p {
+  flex: 1 1 360px;
+  margin: 0;
+}
+
+.cv2-alert__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Four contact trackers fit one row on desktop. */
+.cv2-trackers {
+  --us-attention-columns: 4;
+  margin-bottom: 20px;
+}
+
+.cv2-row {
+  margin-bottom: 0;
+}
+
+/* Native CCO views: Telerik hides these; the fixture has no Telerik script. */
+.cv2-page .rmpHidden {
+  display: none;
+}
+
+.cv2-page .rmpView > .ContentItemContainer + .ContentItemContainer,
+.cv2-page .rmpView > .row + .ContentItemContainer,
+.cv2-page .rmpView > .ContentItemContainer + .row {
+  margin-top: 20px;
+}
+
+.cv2-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cv2-toast {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 20px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 0 auto;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms;
+}
+
+.cv2-toast.is-visible {
+  opacity: 1;
+}

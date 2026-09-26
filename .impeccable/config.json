@@ -29,6 +29,15 @@
         ],
         "createdAt": "2026-09-05T05:50:17.291Z",
         "reason": "Not authored here: .callout-gradient-text and .callout2-gradient-text are Orion's own classes (Orion-99.css lines 469/474), reproduced verbatim except that the literals are swapped for tokens so a client rebrand recolours them too. Deleting them would hand the callouts back to Orion's hardcoded cyan/orange and break the per-client story."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "prototypes/wip/contact-page-v3/theme-candidate.css"
+        ],
+        "createdAt": "2026-09-23T12:24:43.819Z",
+        "reason": "Spec decision in contact-page-v3/README.md: item 9 alert severity edge and item 13 pinned-note edge (v1 notes layout accepted by owner, 23 Sep 2026)"
       }
     ]
   }
