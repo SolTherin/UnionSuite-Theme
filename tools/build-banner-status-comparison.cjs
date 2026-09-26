@@ -1,19 +1,109 @@
-const fs=require('fs');
-const options=[
- ['pill','Coloured status pill','Familiar and compact. Easy to read, but a small target when scanning a wide banner.'],
- ['status-band','Full status row','Closest to the previous banner: unmistakable colour across the record, with more vertical space.'],
- ['avatar','Profile initials','Colour sits beside the member’s name. A white circle keeps coloured initials distinct from the navy banner.'],
- ['rail','Status rail + coloured pill','A client-coloured left edge paired with a matching status pill. The orange top strip is removed in both states. Dark colours gain a light 1px inner separator; pale colours gain a darker 1px outer edge.'],
- ['tile','Status tile','A dedicated status block separates membership state from identity and actions. Stronger than a pill.']
+const fs = require('node:fs');
+const path = require('node:path');
+const shell = require('./banner-preview-shell.cjs');
+
+const root = path.resolve(__dirname, '..');
+const options = [
+  ['pill', 'Coloured status pill', 'Familiar and compact. Easy to read, but a small target when scanning a wide banner.'],
+  ['status-band', 'Full status row', 'A full-width status row makes the colour unmistakable, with more vertical space.'],
+  ['avatar', 'Profile initials', 'Colour sits beside the member’s name. A white circle keeps coloured initials distinct from the navy banner.'],
+  ['rail', 'Status rail + coloured pill', 'Current theme: a 15px client-coloured rail and matching pill remain visible in both states.'],
+  ['tile', 'Status tile', 'A dedicated status block separates membership state from identity and actions. Stronger than a pill.']
 ];
-function banner(kind,compact){return `<div class="ContentItemContainer"><div class="us-banner trial ${kind} ${compact?'compact':''}"><header class="us-banner__surface">
-<div class="us-banner__summary"><div class="us-banner__identity">${kind==='avatar'?'<span class="initials" aria-hidden="true">TS</span>':''}<div><span class="us-banner__eyebrow">Member · 103885</span><h2 class="us-banner__title">Tony Fin Stark</h2><p class="us-banner__subtitle">Regular member · Member since 2018</p></div></div>
-<div class="status-slot">${kind==='tile'?'<small>MEMBERSHIP STATUS</small>':''}<span class="status-label">Financial member</span></div><button type="button" class="us-banner__action" disabled title="Visual comparison only">Quick Actions <span aria-hidden="true">⌄</span></button></div>
-${kind==='status-band'?'<div class="status-row"><span class="status-label">Financial member</span></div>':''}
-<div class="us-banner__details"><dl class="us-banner__facts"><div class="us-banner__fact"><dt>Email</dt><dd>tony@example.org</dd></div><div class="us-banner__fact"><dt>Mobile</dt><dd>0400 123 777</dd></div><div class="us-banner__fact"><dt>Category</dt><dd>Billing Category 3</dd></div><div class="us-banner__fact"><dt>Membership fee</dt><dd>$39.90</dd></div></dl></div></header></div></div>`;}
-fs.writeFileSync('references/Banner-Status-Comparison.html',`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Member banner · Status comparison</title><link rel="stylesheet" href="../THeme/UnionSuite/99-Orion.css"><link rel="stylesheet" href="../THeme/UnionSuite/zUnionSuite.css"><link rel="stylesheet" href="../prototypes/banner-status-comparison.css"></head><body>
-<main><header class="intro"><p class="kicker">UNION SUITE / DESIGN COMPARISON</p><h1>Membership status, at a glance.</h1><p>Five ways to carry client-defined status colour into the member banner. Each option keeps the status visible when collapsed.</p><p class="trial-note">Proposal only · fictional member data · production theme unchanged</p></header>
-<form class="controls"><label>Sample status<select id="preset"><option value="0">Financial member</option><option value="1">Overdue member</option><option value="2">Former member</option><option value="3">Non member</option></select></label><label>Status label<input id="label" value="Financial member" maxlength="80"></label><label>Client colour<input id="colour" type="color" value="#23845b"></label><label>Hex code<input id="hex" value="#23845B" pattern="#[0-9a-fA-F]{6}" maxlength="7"></label><p id="feedback" role="status">All ten banners use the same status.</p></form>
-<nav aria-label="Options">${options.map(([id,title],i)=>`<a href="#${id}">${i+1}. ${title}</a>`).join('')}</nav>
-${options.map(([id,title,note],i)=>`<section id="${id}"><div class="option-heading"><h2><span>0${i+1}</span> ${title}</h2><p>${note}</p></div><p class="state-label">Expanded</p>${banner(id,false)}<p class="state-label">Collapsed</p>${banner(id,true)}</section>`).join('')}
-<aside><h2>How client-defined colours would work</h2><p>The IQA formula supplies a status label and a hex colour independently. No fixed list of membership statuses is required. Status text stays white. Colours that are too light are darkened to provide at least 4.5:1 contrast, with the same display colour used for the pill and strip. The entered client hex remains unchanged. Written labels ensure colour is never the only cue.</p><p>The initials treatment uses the adjusted display colour on white, with the same colour on its ring. Try your own hex value above before choosing a direction. These are visual state samples; scroll-triggered collapsing and action handlers remain in the shared banner.</p></aside></main><script src="../prototypes/banner-status-comparison.js"></script></body></html>`);
+
+function status(kind) {
+  if (kind === 'status-band') return '';
+  if (kind === 'avatar') {
+    return '<div class="us-banner__status"><span class="status-indicator"><span class="status-dot" aria-hidden="true"></span><span class="status-label">Financial member</span></span></div>';
+  }
+
+  const badgeClass = kind === 'rail' ? 'us-banner__badge--member-status' : 'trial-status-badge';
+  const label = kind === 'tile' ? '<small>MEMBERSHIP STATUS</small><span class="status-label">Financial member</span>' : '<span class="status-label">Financial member</span>';
+  return `<div class="us-banner__status"><span class="us-banner__badge ${badgeClass}">${label}</span></div>`;
+}
+
+function banner(kind, compact) {
+  const compactClass = compact ? ' us-banner--compact' : '';
+  const surfaceClass = kind === 'rail' ? 'us-banner__surface--member' : 'us-banner__surface--glass';
+  const colourAttribute = kind === 'rail' ? ' data-us-status-colour="#23845B"' : '';
+  const avatar = kind === 'avatar' ? '<span class="us-banner__avatar trial-avatar" aria-hidden="true">TS</span>' : '';
+  const band = kind === 'status-band' ? '<div class="trial-status-row"><span class="status-label">Financial member</span></div>' : '';
+
+  return `<div class="us-banner trial trial--${kind}${compactClass}">
+  <header class="us-banner__surface ${surfaceClass}"${colourAttribute}>
+    <div class="us-banner__summary">
+      <div class="us-banner__identity">
+        ${avatar}
+        <div class="us-banner__identity-text">
+          <span class="us-banner__eyebrow">Member · 103885</span>
+          <h2 class="us-banner__title">Tony Fin Stark</h2>
+          <p class="us-banner__subtitle">Regular member · Member since 2018</p>
+        </div>
+      </div>
+      ${status(kind)}
+      <div class="us-banner__actions">
+        <div class="us-actions">
+          <button type="button" class="us-actions__toggle">Quick Actions</button>
+          <ul class="us-actions__list"><li><button type="button" class="us-actions__item" disabled>Visual comparison only</button></li></ul>
+        </div>
+      </div>
+    </div>
+    ${band}
+    <div class="us-banner__details">
+      <dl class="us-banner__facts">
+        <div class="us-banner__fact"><dt>Email</dt><dd>tony@example.org</dd></div>
+        <div class="us-banner__fact"><dt>Mobile</dt><dd>0400 123 777</dd></div>
+        <div class="us-banner__fact"><dt>Category</dt><dd>Billing Category 3</dd></div>
+        <div class="us-banner__fact"><dt>Membership fee</dt><dd>$39.90</dd></div>
+      </dl>
+    </div>
+  </header>
+</div>`;
+}
+
+const html = `<!doctype html>
+<!-- Generated by tools/build-banner-status-comparison.cjs. Edit the generator and preview CSS/JS. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member banner · Status comparison</title>
+  ${shell.styles}
+  <link rel="stylesheet" href="../prototypes/banner-status-comparison.css">
+</head>
+<body class="banner-comparison">
+  <main>
+    <header class="intro">
+      <p class="kicker">UNION SUITE / DESIGN COMPARISON</p>
+      <h1>Membership status, at a glance.</h1>
+      <p>Five status treatments on the current shared banner. Option 4 is used by the theme; the other treatments remain visual alternatives. Each keeps the status visible when collapsed.</p>
+      <p class="trial-note">Fictional member data · status alternatives are preview only</p>
+    </header>
+    <form class="controls">
+      <label>Sample status<select id="preset"><option value="0">Financial member</option><option value="1">Overdue member</option><option value="2">Former member</option><option value="3">Non member</option></select></label>
+      <label>Status label<input id="label" value="Financial member" maxlength="80"></label>
+      <label>Client colour<input id="colour" type="color" value="#23845b"></label>
+      <label>Hex code<input id="hex" value="#23845B" pattern="#[0-9a-fA-F]{6}" maxlength="7"></label>
+      <p id="feedback" role="status">All ten banners use the same status.</p>
+    </form>
+    <nav aria-label="Options">${options.map(([id, title], index) => `<a href="#${id}">${index + 1}. ${title}</a>`).join('')}</nav>
+    ${options.map(([id, title, note], index) => `<section id="${id}">
+      <div class="option-heading"><h2><span>0${index + 1}</span> ${title}${id === 'rail' ? ' <small>Current theme</small>' : ''}</h2><p>${note}</p></div>
+      <p class="state-label">Expanded</p>
+      ${banner(id, false)}
+      <p class="state-label">Collapsed</p>
+      ${banner(id, true)}
+    </section>`).join('')}
+    <aside>
+      <h2>How client-defined colours work</h2>
+      <p>The IQA formula supplies a status label and hex colour independently. No fixed list of statuses is required. Colours that are too light are darkened to keep white status text at 4.5:1 contrast; the entered client hex stays unchanged. The rail and pill in option 4 use the shared theme’s status treatment. All five banners use its gradient background, glass Actions button, typography and spacing.</p>
+      <p>Try your own hex value above before comparing the alternatives. The collapsed views are static samples; scroll behaviour belongs to the shared banner.</p>
+    </aside>
+  </main>
+  <script src="../THeme/UnionSuite/zUnionSuite.js"></script>
+  <script src="../prototypes/banner-status-comparison.js"></script>
+</body>
+</html>`;
+
+fs.writeFileSync(path.join(root, 'references/Banner-Status-Comparison.html'), html);
+console.log('Updated references/Banner-Status-Comparison.html with current shared banner styling.');

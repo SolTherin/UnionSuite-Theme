@@ -1,9 +1,274 @@
-/* Comparison-only treatments. Not production author classes. */
-:root{--status:#23845b;--status-ink:#fff;--status-readable:#23845b}
-body{margin:0;background:#f1f3f5;color:#243e4b;font-family:var(--font-ui,system-ui)}main{max-width:1360px;margin:auto;padding:40px 28px 80px}.intro{max-width:800px}.intro h1{font-size:36px;letter-spacing:-1px;color:#003a4c;margin:8px 0 16px}.intro p{line-height:1.6}.kicker,.state-label{font-size:11px;letter-spacing:.1em;font-weight:700}.trial-note{color:#667780;font-size:13px}.controls{display:flex;align-items:end;gap:16px;flex-wrap:wrap;background:white;padding:20px;border:1px solid #dbe1e5;border-radius:10px;margin:28px 0 16px}.controls label{display:flex;flex-direction:column;gap:6px;font-size:12px;margin:0}.controls input,.controls select{height:38px;border:1px solid #aebcc3;border-radius:5px;padding:6px 10px;font:14px system-ui;background:white;color:#243e4b}.controls input[type=color]{width:60px;padding:3px}#hex{width:110px}#feedback{font-size:12px;flex-basis:100%;margin:0}nav{display:flex;flex-wrap:wrap;gap:8px 24px}nav a{font-size:13px;color:#006582}section{margin-top:40px;scroll-margin-top:20px}.option-heading h2{font-size:22px;color:#003a4c}.option-heading h2 span{color:#788994;margin-right:8px}.option-heading p{font-size:14px;margin-bottom:20px}.state-label{color:#637681;margin:18px 0 8px}.trial .us-banner__surface{border-radius:8px}.trial .us-banner__identity{display:flex;align-items:center;gap:16px}.trial .us-banner__action{opacity:1;cursor:default}.trial .status-slot{font-size:13px;font-weight:650;max-width:280px}.trial .status-label{overflow-wrap:anywhere}.pill .status-slot{background:var(--status);color:var(--status-ink);padding:7px 13px;border-radius:99px;border:1px solid #ffffff55}.status-band .status-slot{display:none}.status-band .status-row{background:var(--status);color:var(--status-ink);padding:8px 16px;margin-top:18px;border-radius:3px;font-size:13px;font-weight:650}.initials{display:grid;place-items:center;flex:0 0 58px;height:58px;border-radius:50%;background:white;color:var(--status-readable);border:4px solid var(--status);font-size:22px;font-weight:750}.rail .us-banner__surface{border-left:7px solid var(--status)}.rail .status-slot::before,.avatar .status-slot::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--status);border:1px solid #ffffff88;margin-right:8px}.tile .status-slot{padding:10px 16px;background:var(--status);color:var(--status-ink);border-radius:5px;min-width:170px;border:1px solid #ffffff55}.tile .status-slot small{display:block;font-size:9px;letter-spacing:.07em;margin-bottom:4px}.trial.compact .us-banner__surface{padding:10px 18px}.trial.compact .us-banner__title{font-size:18px}.trial.compact .us-banner__details,.trial.compact .us-banner__subtitle{display:none}.trial.compact .us-banner__eyebrow{font-size:10px}.compact .initials{flex-basis:36px;height:36px;font-size:14px;border-width:3px}.compact .status-row{margin-top:8px;padding:4px 12px}.compact.tile .status-slot{padding:5px 12px}aside{margin-top:40px;padding:24px;background:white;border:1px solid #dbe1e5;border-radius:8px}aside h2{font-size:19px}aside p{max-width:950px;font-size:14px;line-height:1.6}@media(max-width:650px){main{padding:24px 14px}.intro h1{font-size:28px}.trial .us-banner__summary{gap:12px}.trial .us-banner__identity{flex-basis:100%}.trial .status-slot{max-width:100%}.controls label{max-width:100%}.controls input{max-width:100%}}
-/* Combined option 4: status rail and pill, without the brand accent strip. */
-.rail.us-banner .us-banner__surface{border-top:0;position:relative;box-shadow:var(--shadow-sm)}
-.rail .status-slot{background:var(--status);color:var(--status-ink);padding:7px 13px;border-radius:99px;border:1px solid #ffffff55}
-.rail .status-slot::before{display:none}
-/* Preserve the exact status colour; adaptive edges occupy only 1px each. */
-.rail .us-banner__surface::before{content:"";position:absolute;pointer-events:none;top:0;bottom:0;left:-7px;width:7px;border-radius:8px 0 0 8px;border-left:1px solid var(--status-outer-edge,transparent);border-right:1px solid var(--status-inner-edge,transparent)}
+/* Preview layout and the four alternate status treatments. Shared banner styles
+   provide the gradient, typography, spacing, glass Actions toggle and option 4. */
+:root {
+  --status: #23845b;
+  --status-readable: #23845b;
+}
+
+body.banner-comparison {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font-family: var(--font-ui);
+}
+
+.banner-comparison main {
+  max-width: 1360px;
+  margin: auto;
+  padding: 40px 28px 80px;
+}
+
+.banner-comparison .intro {
+  max-width: 800px;
+}
+
+.banner-comparison .intro h1 {
+  margin: 8px 0 16px;
+  color: var(--text-strong);
+  font-size: 36px;
+  letter-spacing: -1px;
+}
+
+.banner-comparison .intro p {
+  line-height: 1.6;
+}
+
+.banner-comparison .kicker,
+.banner-comparison .state-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+
+.banner-comparison .trial-note {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.banner-comparison .controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  margin: 28px 0 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.banner-comparison .controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.banner-comparison .controls input,
+.banner-comparison .controls select {
+  height: 38px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 14px var(--font-ui);
+}
+
+.banner-comparison .controls input[type="color"] {
+  width: 60px;
+  padding: 3px;
+}
+
+.banner-comparison #hex {
+  width: 110px;
+}
+
+.banner-comparison #feedback {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12px;
+}
+
+.banner-comparison nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.banner-comparison nav a {
+  color: var(--text-link);
+  font-size: 13px;
+}
+
+.banner-comparison section {
+  margin-top: 40px;
+  scroll-margin-top: 20px;
+}
+
+.banner-comparison .option-heading h2 {
+  color: var(--text-strong);
+  font-size: 22px;
+}
+
+.banner-comparison .option-heading h2 span {
+  margin-right: 8px;
+  color: var(--text-muted);
+}
+
+.banner-comparison .option-heading h2 small {
+  margin-left: 8px;
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.banner-comparison .option-heading p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.banner-comparison .state-label {
+  margin: 18px 0 8px;
+  color: var(--text-muted);
+}
+
+/* The shared member banner omits the brand accent strip. Keep the same base
+   surface for all five status treatments while retaining the real gradient. */
+.trial .us-banner__surface {
+  border-top: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.trial .status-label {
+  overflow-wrap: anywhere;
+}
+
+.trial--pill .trial-status-badge,
+.trial--tile .trial-status-badge {
+  border-color: rgb(255 255 255 / 33%);
+  background: var(--status);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.trial--pill .trial-status-badge {
+  padding: 7px 13px;
+}
+
+.trial--status-band .trial-status-row {
+  margin-top: var(--space-5);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--status);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trial--avatar .trial-avatar {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  border: 4px solid var(--status);
+  background: #fff;
+  color: var(--status-readable);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.trial--avatar .status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--banner-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trial--avatar .status-dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 50%;
+  background: var(--status);
+}
+
+.trial--tile .trial-status-badge {
+  display: block;
+  min-width: 170px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+}
+
+.trial--tile .trial-status-badge small {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 9px;
+  letter-spacing: .07em;
+}
+
+/* Static compact samples use the same compact class as the shared banner. */
+.trial.us-banner--compact .us-banner__details,
+.trial.us-banner--compact .us-banner__subtitle {
+  display: none;
+}
+
+.trial.us-banner--compact .trial-status-badge {
+  padding-block: 3px;
+}
+
+.trial.us-banner--compact .trial-status-row {
+  margin-top: var(--space-2);
+  padding: 4px 12px;
+}
+
+.trial.us-banner--compact .trial-avatar {
+  flex-basis: 36px;
+  width: 36px;
+  height: 36px;
+  border-width: 3px;
+  font-size: 14px;
+}
+
+.trial.us-banner--compact.trial--tile .trial-status-badge {
+  padding: 5px 12px;
+}
+
+.banner-comparison aside {
+  margin-top: 40px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.banner-comparison aside h2 {
+  font-size: 19px;
+}
+
+.banner-comparison aside p {
+  max-width: 950px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+  .banner-comparison main {
+    padding: 24px 14px;
+  }
+
+  .banner-comparison .intro h1 {
+    font-size: 28px;
+  }
+
+  .banner-comparison .controls label,
+  .banner-comparison .controls input {
+    max-width: 100%;
+  }
+}
