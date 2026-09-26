@@ -119,6 +119,81 @@ SOFTWARE.
 })();
 /* US-APPEARANCE:END */
 
+/* US-PANEL-TITLE-ICONS:START — an optional icon before a panel title.
+   Authors start the iPart title with a Tabler icon name in double square
+   brackets, e.g. "[[user]] Contact summary" (the name is the ti-<name>
+   class without its prefix). The token is removed and a decorative icon
+   (aria-hidden) is inserted before the text, so everything that reads the
+   title afterwards, including later theme blocks that build labels from it,
+   sees only "Contact summary". An unknown name draws no glyph and takes no
+   space (the spacing is on the glyph). This block runs before the others
+   and handles titles synchronously as they arrive, including those added by
+   partial updates and in-place CCO switches. Easy Edit keeps the raw title
+   so authors see the setting; us-report-no-styling opts out. */
+(function () {
+  'use strict';
+  if (window.UnionSuitePanelTitleIcons) {
+    window.UnionSuitePanelTitleIcons.refresh();
+    return;
+  }
+
+  const TITLE = '.panel-heading .panel-title';
+  // Only at the very start of the title: lowercase words joined by hyphens.
+  const TOKEN = /^\s*\[\[([a-z0-9]+(?:-[a-z0-9]+)*)\]\]\s*/;
+
+  const easyEdit = () => window.gIsEasyEditEnabled === true ||
+    Boolean(document.body?.classList.contains('TemplateAreaEasyEditOn'));
+
+  // The title text may sit directly in the heading or inside a span or link.
+  function firstText(title) {
+    const walker = document.createTreeWalker(title, NodeFilter.SHOW_TEXT, {
+      acceptNode: node => node.data.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    });
+    return walker.nextNode();
+  }
+
+  // Idempotent: once the token is gone there is nothing left to match.
+  function apply(title) {
+    if (title.closest('.us-report-no-styling')) return;
+    const text = firstText(title);
+    const match = text?.data.match(TOKEN);
+    if (!match) return;
+    const name = match[1];
+    text.data = text.data.slice(match[0].length);
+    const icon = document.createElement('i');
+    icon.className = 'ti ti-' + name + ' us-panel-title__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    text.before(icon);
+    title.setAttribute('data-us-title-icon', name);
+  }
+
+  function refresh(scope = document) {
+    if (easyEdit()) return;
+    if (scope.matches?.(TITLE)) apply(scope);
+    scope.querySelectorAll?.(TITLE).forEach(apply);
+  }
+
+  // Registered before the other blocks' observers, so their callbacks see
+  // titles already cleaned. The parser adds a heading before its text, so a
+  // text node arriving inside a title is handled too.
+  new MutationObserver(records => {
+    if (easyEdit()) return;
+    records.forEach(record => record.addedNodes.forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE) refresh(node);
+      else if (node.nodeType === Node.TEXT_NODE) {
+        const title = node.parentElement?.closest(TITLE);
+        if (title) apply(title);
+      }
+    }));
+  }).observe(document.documentElement, { childList: true, subtree: true });
+
+  window.UnionSuitePanelTitleIcons = Object.freeze({ refresh });
+
+  refresh();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => refresh(), { once: true });
+})();
+/* US-PANEL-TITLE-ICONS:END */
+
 /* US-ACTION-SAFETY:START — internal guard shared by the two public action APIs. */
 (function () {
   'use strict';

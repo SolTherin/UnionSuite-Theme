@@ -32,6 +32,7 @@
     <a href="#action-builder">07a <span>Action builder</span></a>
     <a href="#action-icons">07b <span>Action icons &amp; usage</span></a>
     <a href="#navigation-icons">07c <span>Navigation icons</span></a>
+    <a href="#panel-title-icons">07d <span>Section title icons</span></a>
     <a href="#templates">08 <span>Template library</span></a>
     <a href="#shared-copy-button">08a <span>Copy button</span></a>
     <a href="#troubleshooting">09 <span>Troubleshooting</span></a>
@@ -985,6 +986,56 @@ indicator.clear();
     <p>Upload the updated <code>zUnionSuite.css</code> and retain the root <code>Tabler.css</code>, <code>Tabler/tabler-icons.min.css</code>, <code>Tabler/fonts/tabler-icons.woff2</code> and <code>Tabler/LICENSE</code>. The root shim imports the icon pack through relative paths, so renaming the deployed theme folder does not require changing those paths. This feature requires CSS and the font; it does not need JavaScript.</p>
     <p>Maintain the <code>US-STAFF-NAV-ICONS</code> block in the shared theme. Once deployed and verified, remove the duplicated staff-icon rules from any separately loaded legacy <code>UTStaff.css</code>; do not remove unrelated rules from that file. The repository's legacy copy remains a reference. Recheck collapsed and expanded navigation, hover, keyboard focus and selected-child states on the live page.</p>
     <details class="reference"><summary>Icons inside authored HTML <span>Separate from the navigation wrapper recipe</span></summary><p>For a decorative icon beside visible text in authored HTML, use both Tabler classes on the icon element and hide the redundant icon from assistive technology. An icon-only action still needs an accessible name.</p><div class="snippet"><div class="snippet-bar"><span>Decorative home icon</span><button type="button" data-copy="tabler-icon-recipe">Copy</button></div><pre><code id="tabler-icon-recipe">&lt;i class="ti ti-home" aria-hidden="true"&gt;&lt;/i&gt; Home</code></pre></div></details>
+  </section>
+
+  <section id="panel-title-icons" class="section">
+    <div class="section-heading"><span class="section-number">07d / HEADINGS</span><h2>An icon beside a section title.</h2><p>Implemented in shared <code>zUnionSuite.js</code> and <code>zUnionSuite.css</code>. Start an iPart's title with a Tabler icon name in double square brackets and the panel heading shows that icon before the title. Optional: titles without the token are unchanged.</p></div>
+    {{PANEL_TITLE_ICONS_DEMO}}
+    <p class="placement"><strong>Where to type it:</strong> at the very start of the iPart's <strong>Title</strong> field, not the CSS class field (which iMIS truncates at 100 characters). Use the icon's Tabler name without its <code>ti-</code> prefix, in lowercase, then a space and the title. Works on every iPart that renders a panel heading: Query Menu, Query Template Display, Content HTML with a title, and Panel Editor panels.</p>
+    <div class="snippet"><div class="snippet-bar"><span>iPart Title field</span><button type="button" data-copy="panel-title-icon-recipe">Copy</button></div><pre><code id="panel-title-icon-recipe">[[user]] Contact summary</code></pre></div>
+    <h3>Recommended icons</h3>
+    <p>One meaning per icon, so the same kind of section looks the same on every page. Click a token to copy it. Any other name from the bundled Tabler set also works; browse them at tabler.io/icons.</p>
+    <div class="table-wrap"><table><caption>Suggested title tokens by kind of section</caption><thead><tr><th scope="col">Section</th><th scope="col">Token — click to copy</th></tr></thead><tbody>
+      <tr><th scope="row">Person, personal details, contact summary</th><td><button type="button" class="copy-class" data-copy-text="[[user]]" aria-label="Copy token: [[user]]"><code>[[user]]</code></button></td></tr>
+      <tr><th scope="row">Membership details and summary</th><td><button type="button" class="copy-class" data-copy-text="[[id]]" aria-label="Copy token: [[id]]"><code>[[id]]</code></button></td></tr>
+      <tr><th scope="row">Membership periods, timelines</th><td><button type="button" class="copy-class" data-copy-text="[[timeline]]" aria-label="Copy token: [[timeline]]"><code>[[timeline]]</code></button></td></tr>
+      <tr><th scope="row">Email addresses and phones</th><td><button type="button" class="copy-class" data-copy-text="[[address-book]]" aria-label="Copy token: [[address-book]]"><code>[[address-book]]</code></button></td></tr>
+      <tr><th scope="row">Addresses</th><td><button type="button" class="copy-class" data-copy-text="[[map-pin]]" aria-label="Copy token: [[map-pin]]"><code>[[map-pin]]</code></button></td></tr>
+      <tr><th scope="row">Jobs, employers, workplaces</th><td><button type="button" class="copy-class" data-copy-text="[[building]]" aria-label="Copy token: [[building]]"><code>[[building]]</code></button></td></tr>
+      <tr><th scope="row">Registration, qualifications, demographics</th><td><button type="button" class="copy-class" data-copy-text="[[certificate]]" aria-label="Copy token: [[certificate]]"><code>[[certificate]]</code></button></td></tr>
+      <tr><th scope="row">Pinned notes</th><td><button type="button" class="copy-class" data-copy-text="[[pin]]" aria-label="Copy token: [[pin]]"><code>[[pin]]</code></button></td></tr>
+      <tr><th scope="row">Recent activity</th><td><button type="button" class="copy-class" data-copy-text="[[activity]]" aria-label="Copy token: [[activity]]"><code>[[activity]]</code></button></td></tr>
+      <tr><th scope="row">Staff interactions, messages</th><td><button type="button" class="copy-class" data-copy-text="[[messages]]" aria-label="Copy token: [[messages]]"><code>[[messages]]</code></button></td></tr>
+      <tr><th scope="row">Documents</th><td><button type="button" class="copy-class" data-copy-text="[[files]]" aria-label="Copy token: [[files]]"><code>[[files]]</code></button></td></tr>
+      <tr><th scope="row">Cases (matches the Cases navigation icon)</th><td><button type="button" class="copy-class" data-copy-text="[[briefcase]]" aria-label="Copy token: [[briefcase]]"><code>[[briefcase]]</code></button></td></tr>
+      <tr><th scope="row">Billing, invoices</th><td><button type="button" class="copy-class" data-copy-text="[[file-invoice]]" aria-label="Copy token: [[file-invoice]]"><code>[[file-invoice]]</code></button></td></tr>
+      <tr><th scope="row">Payments, payment history</th><td><button type="button" class="copy-class" data-copy-text="[[receipt]]" aria-label="Copy token: [[receipt]]"><code>[[receipt]]</code></button></td></tr>
+      <tr><th scope="row">Balance, credit</th><td><button type="button" class="copy-class" data-copy-text="[[wallet]]" aria-label="Copy token: [[wallet]]"><code>[[wallet]]</code></button></td></tr>
+      <tr><th scope="row">Outstanding amounts</th><td><button type="button" class="copy-class" data-copy-text="[[report-money]]" aria-label="Copy token: [[report-money]]"><code>[[report-money]]</code></button></td></tr>
+      <tr><th scope="row">Adjustments (waivers, credits, suspensions)</th><td><button type="button" class="copy-class" data-copy-text="[[adjustments-horizontal]]" aria-label="Copy token: [[adjustments-horizontal]]"><code>[[adjustments-horizontal]]</code></button></td></tr>
+      <tr><th scope="row">Payment methods</th><td><button type="button" class="copy-class" data-copy-text="[[credit-card]]" aria-label="Copy token: [[credit-card]]"><code>[[credit-card]]</code></button></td></tr>
+      <tr><th scope="row">Tax statements</th><td><button type="button" class="copy-class" data-copy-text="[[receipt-tax]]" aria-label="Copy token: [[receipt-tax]]"><code>[[receipt-tax]]</code></button></td></tr>
+      <tr><th scope="row">Staff overrides and settings</th><td><button type="button" class="copy-class" data-copy-text="[[settings-dollar]]" aria-label="Copy token: [[settings-dollar]]"><code>[[settings-dollar]]</code></button></td></tr>
+      <tr><th scope="row">Legacy or archived records</th><td><button type="button" class="copy-class" data-copy-text="[[archive]]" aria-label="Copy token: [[archive]]"><code>[[archive]]</code></button></td></tr>
+      <tr><th scope="row">Events, attendance</th><td><button type="button" class="copy-class" data-copy-text="[[calendar-event]]" aria-label="Copy token: [[calendar-event]]"><code>[[calendar-event]]</code></button></td></tr>
+      <tr><th scope="row">Elected roles and positions (matches the banner's positions badge)</th><td><button type="button" class="copy-class" data-copy-text="[[id-badge-2]]" aria-label="Copy token: [[id-badge-2]]"><code>[[id-badge-2]]</code></button></td></tr>
+      <tr><th scope="row">Training, professional development</th><td><button type="button" class="copy-class" data-copy-text="[[school]]" aria-label="Copy token: [[school]]"><code>[[school]]</code></button></td></tr>
+      <tr><th scope="row">Surveys</th><td><button type="button" class="copy-class" data-copy-text="[[clipboard-list]]" aria-label="Copy token: [[clipboard-list]]"><code>[[clipboard-list]]</code></button></td></tr>
+      <tr><th scope="row">Change history, audit</th><td><button type="button" class="copy-class" data-copy-text="[[history]]" aria-label="Copy token: [[history]]"><code>[[history]]</code></button></td></tr>
+      <tr><th scope="row">Logins and access</th><td><button type="button" class="copy-class" data-copy-text="[[key]]" aria-label="Copy token: [[key]]"><code>[[key]]</code></button></td></tr>
+      <tr><th scope="row">Line items, detail lists</th><td><button type="button" class="copy-class" data-copy-text="[[list-details]]" aria-label="Copy token: [[list-details]]"><code>[[list-details]]</code></button></td></tr>
+    </tbody></table></div>
+    <h3>How it works</h3>
+    <ul>
+      <li><strong>Only a leading token is read:</strong> <code>[[</code>, a name of lowercase letters, digits and single hyphens, then <code>]]</code>, at the start of the title. Brackets anywhere else in a title are left alone.</li>
+      <li><strong>The token is always removed.</strong> A name the bundled Tabler set does not have leaves no icon and no gap, rather than showing <code>[[…]]</code>. Check the heading after typing a new name.</li>
+      <li><strong>Decorative only:</strong> the icon has <code>aria-hidden="true"</code>, so screen readers read the title alone. Everything the theme builds from a title, such as a search box's label, sees the title without the token.</li>
+      <li><strong>Appearance:</strong> 16px beside the 14px title, in the muted text colour (<code>--iqa-muted</code>, falling back to <code>--text-muted</code>), 8px before the title. Dark mode follows the token. Headings with a count badge, heading buttons or a panel tone keep them as before.</li>
+      <li><strong>Timing:</strong> the <code>US-PANEL-TITLE-ICONS</code> block runs first in <code>zUnionSuite.js</code> and converts titles as they arrive, including panels replaced by partial refreshes and in-place CCO tab switches.</li>
+      <li><strong>Where the raw token shows:</strong> places iMIS shows the title without the theme's script, such as Easy Edit (deliberately left raw so authors see the setting) and RiSE's content lists. Accepted by the owner, 26 September 2026. <code>us-report-no-styling</code> on a panel also leaves its title raw.</li>
+      <li><strong>Not covered:</strong> banner titles, CCO tab labels, section switcher buttons and Needs Attention headings; they are authored separately.</li>
+    </ul>
+    <p>Deploy by uploading the updated <code>zUnionSuite.js</code> and <code>zUnionSuite.css</code>. The icons need the Tabler files the theme already requires (<code>Tabler.css</code>, <code>Tabler/tabler-icons.min.css</code> and its font). Use icons on every panel of a page or on none, so a missing icon never looks like an error.</p>
   </section>
 
   <section id="templates" class="section">

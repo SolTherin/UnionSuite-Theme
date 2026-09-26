@@ -125,6 +125,7 @@ allSources.push(...require('./object-browser-example.cjs').sources);
 allSources.push(...require('./query-empty-example.cjs').sources);
 allSources.push('THeme/UnionSuite/guides/usage/build/home-task-empty-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/report-icon-example.cjs');
+allSources.push(...require('./panel-title-icons-example.cjs').sources);
 allSources.push('THeme/UnionSuite/guides/usage/build/popup-action-example.cjs');
 allSources.push('THeme/UnionSuite/guides/usage/build/action-conflict-example.cjs');
 allSources.push(...require('./unified-action-example.cjs').sources);
@@ -210,6 +211,7 @@ const inserts = {
  CONTACT_ROW_TEMPLATE: snippet('contact-row'),
  TASK_FOOTER_TEMPLATE: snippet('task-footer'),
  REPORT_ICON_DEMO: iframe('report-icon-demo','Generated report icon actions',reportIconExample.documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
+ PANEL_TITLE_ICONS_DEMO: iframe('panel-title-icons-demo','Panel titles typed with an icon token',require('./panel-title-icons-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
  POPUP_ACTION_DEMO: iframe('popup-action-demo','Native popup action example',popupActionExample.documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  ACTION_CONFLICT_DEMO: iframe('action-conflict-demo','Duplicate action detection example',actionConflictExample.documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  UNIFIED_ACTION_DEMO: iframe('unified-action-demo','Shared buttons, menus and row actions',require('./unified-action-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),

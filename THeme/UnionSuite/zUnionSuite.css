@@ -896,6 +896,26 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 
 /* US-STAFF-NAV-ICONS:END */
 
+/* US-PANEL-TITLE-ICONS:START — optional icon before a panel title.
+   zUnionSuite.js turns a leading "[[icon-name]]" in the iPart title into a
+   decorative Tabler icon (.us-panel-title__icon). Muted, so the title text
+   stays the strongest thing in the heading; 16px beside the 14px title,
+   centred on its capitals. The gap belongs to the glyph (::before), so an
+   unknown icon name, which draws no glyph, leaves no space either. */
+.panel-heading .panel-title .us-panel-title__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--iqa-muted, var(--text-muted));
+  font-size: 16px;
+  font-weight: normal;
+  vertical-align: -2px;
+}
+
+.panel-heading .panel-title .us-panel-title__icon:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  display: inline-block;
+  margin-inline-end: 8px;
+}
+
+/* US-PANEL-TITLE-ICONS:END */
+
 /* ==========================================================================
    UNION SUITE — IQA REPORTS
    Approved Query Menu presentation and utilities, promoted from the IQA embed.

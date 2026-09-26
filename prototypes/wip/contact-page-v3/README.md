@@ -697,6 +697,14 @@ explicit approval.
   retention call and Process resignation (`membership.log-retention-call`,
   `membership.process-resignation`, in the fixture until they reach the
   client `Actions.js`). Alert buttons sit at the alert's right edge.
+- 26 September 2026: section titles carry an optional icon, typed as a
+  leading `[[icon-name]]` in the iPart title ("[[user]] Contact summary"),
+  because the iPart CSS class field is capped at 100 characters. This is
+  implemented in the theme itself (`US-PANEL-TITLE-ICONS` in `zUnionSuite.js`
+  and `zUnionSuite.css`, usage guide section 07d with the recommended icons),
+  not a v3 candidate. Every v3 panel title uses the guide's recommended
+  icon; the Transaction detail popup's details heading stays plain, since
+  the prototype rewrites that title.
 - 26 September 2026, phones: the alert bell moves to the top right of the
   banner, on the name line, when expanded as well as condensed. Expanded,
   Quick Actions runs the full width on its own line under the status
