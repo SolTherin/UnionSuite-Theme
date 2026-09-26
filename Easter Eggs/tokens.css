@@ -1,0 +1,191 @@
+/* ==========================================================================
+   Design tokens — Union Suite theme
+   ==========================================================================
+
+   TIER 1 — PRIMITIVES. Raw values. This is the ONLY block a client tenant
+            overrides, from zUnionStyling.css.
+   TIER 2 — SEMANTICS. What each value is FOR. Shared by every client.
+            Components reference Tier 2 only, never Tier 1, never a literal.
+
+   Colour defaults are iMIS Orion's own palette, measured from 99-Orion.css.
+   Contrast figures are measured, against BOTH grounds that exist on a staff
+   page: card white #ffffff and page ground #eeeeef. A colour that passes on a
+   card can still fail on the page behind it — see --text-muted.
+   ========================================================================== */
+
+:root {
+
+  /* ── TIER 1 ─────────────────────────────────────────────────────────────
+     Primary ramp — Orion teal. 7 of 10 stops are native Orion values.       */
+  --teal-950: #001b23;   /* interpolated                                    */
+  --teal-900: #002632;   /* Orion native — sidebar                          */
+  --teal-800: #003a4c;   /* Orion native — banners, dark headers            */
+  --teal-700: #00506a;   /* interpolated                                    */
+  --teal-600: #006f94;   /* Orion native — links. 5.67 / 4.89 SAFE BOTH     */
+  --teal-500: #007ea8;   /* Orion native. 4.62 / 3.98 — card only           */
+  --teal-400: #3fb5d9;   /* Orion native. 2.38 — non-text                   */
+  --teal-300: #5acbf8;   /* Orion native — default button. 1.85 — non-text  */
+  --teal-100: #d0e4ea;   /* Orion native — tints                            */
+  --teal-50:  #eef6f9;   /* interpolated                                    */
+
+  /* Accent ramp — Orion orange. The most-used colour in Orion (73 uses).   */
+  --accent-700: #e07a1f; /* darkened for hover. 3.01                        */
+  --accent-600: #ff9947; /* Orion native. 2.12 on white, 7.48 on teal-900   */
+  --accent-500: #ff734f; /* Orion native coral                              */
+  --accent-100: #ffe8d6; /* interpolated                                    */
+
+  /* Neutral ramp — anchored on Orion's own #545962 body text.              */
+  --neutral-900: #1c2024;  /* 16.39 / 14.13                                 */
+  --neutral-800: #2b3036;  /* 13.30 / 11.47                                 */
+  --neutral-700: #3d434b;  /*  9.99 /  8.61                                 */
+  --neutral-600: #545962;  /* Orion native body text. 7.04 / 6.07           */
+  --neutral-500: #6b7580;  /*  4.69 / 4.04 — CARD ONLY, fails on page       */
+  --neutral-400: #9aa1aa;  /*  2.61 — borders, disabled                     */
+  --neutral-300: #c8ccd2;  /*  1.61 — control borders                       */
+  --neutral-200: #e2e5e9;  /*  1.26 — dividers                              */
+  --neutral-100: #f1f3f5;  /*  1.11 — surface tint                          */
+  --neutral-50:  #f8f9fa;  /*  1.05 — faintest fill                         */
+  --white:       #ffffff;
+  --page:        #eeeeef;  /* Orion's page ground — NOT white               */
+
+  /* Status ramp. Fill = Orion native; text = darkened to clear 4.5.        */
+  --status-red:         #d03528;  /* Orion native. 4.97 / 4.29 card only    */
+  --status-red-bg:      #fbe4e2;
+  --status-green:       #3f7a2a;  /* darkened from #68bd49. 5.21 / 4.50     */
+  --status-green-fill:  #68bd49;  /* Orion native. 2.34 — fills only        */
+  --status-green-bg:    #e8f4e2;
+  --status-amber:       #a35a00;  /* 5.22 / 4.51                            */
+  --status-amber-fill:  #ff9947;  /* Orion native                           */
+  --status-amber-bg:    #fdefe0;
+  --status-info:        #006f94;
+  --status-info-bg:     #e4f0f4;
+  --status-purple:      #413d6b;  /* Orion native. 9.98 / 8.61              */
+  --status-purple-bg:   #e6e5ef;
+
+  /* Type faces — Orion's own. Loaded by 99-Orion.css.                      */
+  --face-body:    "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --face-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+  --face-ui:      "Inter", system-ui, -apple-system, sans-serif;
+  --face-mono:    ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* Type scale — 10 sizes in UT_Staff.css consolidated to 8.               */
+  --fs-2xs:  11px;
+  --fs-xs:   12px;
+  --fs-sm:   13px;
+  --fs-base: 14px;   /* most used in UT_Staff.css (22x)                     */
+  --fs-md:   16px;
+  --fs-lg:   18px;
+  --fs-xl:   22px;
+  --fs-2xl:  28px;
+
+  --lh-tight: 1.25;
+  --lh-base:  1.5;
+  --lh-loose: 1.65;
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semi:   600;
+  --fw-bold:   700;
+
+  /* Spacing — a 4px scale. Replaces gap/padding values 5,8,10,12,15,30.    */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radii — 7 values in UT_Staff.css consolidated to 4.                    */
+  --radius-sm:   4px;
+  --radius:      8px;   /* most used (19x)                                  */
+  --radius-lg:  12px;
+  --radius-pill: 999px;
+
+  /* Shadows — 6 near-identical consolidated to 3. Tinted with the brand
+     dark rather than pure black, so depth stays in the palette.            */
+  --shadow-sm: 0 1px 2px rgba(0, 27, 35, .07);
+  --shadow:    0 2px 4px rgba(0, 27, 35, .11);
+  --shadow-lg: 0 8px 20px rgba(0, 27, 35, .16);
+
+  /* Layout — measured from the live DOM.                                   */
+  --page-gutter:    20px;    /* .main / .sidebar / .footer padding          */
+  --card-pad-x:     18px;    /* .panel-body horizontal                      */
+  --card-pad-y:     16px;    /* .panel-body vertical                        */
+  --sidebar-w:      62.5px;  /* collapsed                                   */
+  --sidebar-w-open: 250px;
+  --header-h:       64px;
+
+  /* Z-index                                                                */
+  --z-sidebar: 1030;
+  --z-header:  1031;
+  --z-modal:   1040;
+  --z-tooltip: 1060;
+
+
+  /* ── TIER 2 ─────────────────────────────────────────────────────────────
+     Never overridden per client. Components use only these.                */
+
+  /* Brand */
+  --brand-950: var(--teal-950);
+  --brand-900: var(--teal-900);
+  --brand-800: var(--teal-800);
+  --brand-700: var(--teal-700);
+  --brand-600: var(--teal-600);   /* primary action                         */
+  --brand-500: var(--teal-500);
+  --brand-100: var(--teal-100);
+  --brand-50:  var(--teal-50);
+
+  --accent:       var(--accent-600);
+  --accent-hover: var(--accent-700);
+
+  /* Surfaces */
+  --bg-page:     var(--page);
+  --bg-surface:  var(--white);
+  --bg-subtle:   var(--neutral-50);
+  --bg-sunken:   var(--neutral-100);
+  --bg-inverse:  var(--brand-900);
+
+  /* Text. --text-muted uses neutral-600, not 500: 500 fails on the page
+     ground (4.04). Only use --text-faint on a white card.                  */
+  --text-strong:  var(--neutral-900);
+  --text-base:    var(--neutral-600);
+  --text-muted:   var(--neutral-600);
+  --text-faint:   var(--neutral-500);   /* card only                        */
+  --text-inverse: var(--white);
+  --text-link:          var(--brand-600);
+  --text-link-hover:    var(--brand-700);
+  --text-link-visited:  #003242;
+  --text-on-accent:     var(--brand-900);  /* 7.48 — never white on orange  */
+
+  /* Borders */
+  --border:        var(--neutral-200);
+  --border-strong: var(--neutral-400);
+  --border-focus:  var(--brand-600);
+  --focus-ring:    0 0 0 2px var(--white), 0 0 0 4px var(--brand-600);
+
+  /* Status */
+  --success:        var(--status-green);
+  --success-fill:   var(--status-green-fill);
+  --success-bg:     var(--status-green-bg);
+  --warning:        var(--status-amber);
+  --warning-fill:   var(--status-amber-fill);
+  --warning-bg:     var(--status-amber-bg);
+  --danger:         var(--status-red);
+  --danger-bg:      var(--status-red-bg);
+  --info:           var(--status-info);
+  --info-bg:        var(--status-info-bg);
+
+  /* Type roles */
+  --font-body:    var(--face-body);
+  --font-display: var(--face-display);
+  --font-ui:      var(--face-ui);
+}
+
+/* Breakpoints cannot be custom properties — @media does not read var().
+   Declared here as documentation. Use these three and no others:
+     small   max-width:  576px
+     medium  max-width:  768px
+     large   max-width: 1024px
+   UT_Staff.css currently uses 7 breakpoints and mixes min-/max-width
+   against the same boundaries. Pick max-width and stay with it. */
