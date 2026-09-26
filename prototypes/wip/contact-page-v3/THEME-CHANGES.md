@@ -179,6 +179,16 @@ selectors, so it moves across unchanged.
 - [ ] Item 17: add the `UnionSuiteCcoSidebarConfig` setting to the client
       `Config.js`.
 - [ ] Items 12 and 17: document the Alerts and Tab Counts IQA field lists.
+- [ ] Items 12 and 28: build the Alerts IQA from deadline-driven or
+      actionable conditions only (resignation effective date, suspension
+      date, lapse dates), and the contact tracker IQAs so nothing an alert
+      covers is also counted (Pending requests excludes a resignation).
+      One payment tracker per payment type: Failed payments, Overdue
+      invoices, Missed deductions. See README Owner decisions,
+      26 September 2026.
+- [ ] Item 28: the tracker width cap (section 28) needs
+      `--us-attention-shown` set where the `US-ATTENTION` loader filters
+      zero cards.
 - [ ] Item 34: add the positions placeholder to `Banner-Contact-Template.html`
       (in `.us-banner__status`, after the status badge). Build the Active
       Positions IQA (README [Active positions](README.md#active-positions)):

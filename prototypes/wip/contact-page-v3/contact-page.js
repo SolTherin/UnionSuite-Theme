@@ -7,21 +7,34 @@
 // 4. Stands in for the Transaction detail popup page (invoices, payments).
 (() => {
   // Contact-scoped tracker IQAs: Name, Count, Header, Label, Link.
+  // Trackers say something is happening, with no immediate action required;
+  // anything with a deadline or a required action is an alert instead, and
+  // is not counted here too (owner, 26 September 2026). A member has one
+  // payment type, so only its payment tracker can be above zero: failed
+  // payments for auto debit, overdue invoices for invoice, missed deductions
+  // for payroll (see trackerCount). The resignation request is an alert, so
+  // Pending requests has nothing open in this sample.
   const trackers = [
     ['01 Open cases', 2, 'Open cases', '1 escalated', '#cases'],
-    ['02 Overdue invoices', 1, 'Overdue invoices', '$185 since 01 Mar', '#finance'],
-    ['03 Failed payments', 3, 'Failed payments', 'Last attempt 15 Mar', '#finance'],
-    ['04 Pending requests', 1, 'Pending requests', 'Resignation submitted', '']
+    ['02 Failed payments', 1, 'Failed payments', '3 attempts · last 15 Mar', '#finance'],
+    ['03 Overdue invoices', 1, 'Overdue invoices', '$185 since 01 Mar', '#finance'],
+    ['04 Missed deductions', 1, 'Missed deductions', 'Pays 9–10 not remitted', '#finance'],
+    ['05 Pending requests', 0, 'Pending requests', 'None open', '']
   ];
+  const paymentTrackers = { 1: 'auto', 2: 'invoice', 3: 'payroll' };
   // Toolbar "Trackers: all clear": every tracker IQA returns 0 (a member in
   // good standing), to show the us-attention--hide-zero all-clear line.
   let trackersAllClear = false;
   const folderId = '00000000-0000-4000-8000-000000000200';
 
   // Contact alerts IQA rows, newest first (AlertKey, Severity, Title, Message, AlertDate, Link).
+  // Alerts are deadline-driven or actionable only: each title says what
+  // happens and when (owner, 26 September 2026). A debt alone is a tracker;
+  // it becomes an alert when a consequence is near. The overdue row's title
+  // and message follow the payment type (applyFinanceState).
   const alerts = [
-    { AlertKey: 'A-1042', Severity: 'important', Title: 'Resignation request pending', Message: 'Submitted by the member: leaving nursing to travel.', AlertDate: '08 May 2026', Link: '' },
-    { AlertKey: 'A-1017', Severity: 'warning', Title: 'Overdue payment', Message: '$185.00 outstanding after 3 failed direct debit attempts.', AlertDate: '15 Mar 2026', Link: '#finance' }
+    { AlertKey: 'A-1042', Severity: 'important', Title: 'Resignation takes effect 30 Jun 2026', Message: 'Leaving nursing to travel; may return in 12 months. Retention call not made yet.', AlertDate: 'Submitted 08 May 2026', Link: '' },
+    { AlertKey: 'A-1017', Severity: 'warning', Title: 'Membership suspends 28 May 2026', Message: '$185.00 unpaid after 3 declined direct debits.', AlertDate: 'Overdue since 01 Mar 2026', Link: '#finance' }
   ];
   // Counts are for things that need attention, not volume: a member can have
   // hundreds of activity records, and the number says nothing useful. The
@@ -161,7 +174,7 @@
       if (index >= 0) {
         const values = ['Count', 'Header', 'Label', 'Link'].map((name, column) => ({
           Name: name,
-          Value: name === 'Count' && trackersAllClear ? 0 : trackers[index][column + 1]
+          Value: name === 'Count' ? trackerCount(index) : trackers[index][column + 1]
         }));
         data = { TotalCount: 1, Items: { $values: [{ Properties: { $values: values } }] } };
       }
@@ -274,9 +287,11 @@
       owing: [['PAY-8654', 'Failed debit', 'Q1 2026 subscription · 3 attempts declined', '01 Mar 2026', '$185.00', ['danger', 'Overdue', '74 days overdue']]],
       current: [],
       totals: [['$185.00 · 74 days overdue', '$185.00 · 1 failed debit'], ['None', 'Nothing outstanding']],
-      bell: '$185.00 outstanding after 3 failed direct debit attempts.',
+      bellTitle: 'Membership suspends 28 May 2026',
+      bell: '$185.00 unpaid after 3 declined direct debits.',
       settled: [2, ['PAY-8870', '22 Mar 2026', ['success', 'Paid'], 'Q1 2026 subscription · paid by card after 3 declined debits', 'Credit card', '$185.00']],
-      alert: '$185.00 outstanding since 01 Mar 2026 after 3 failed direct debit attempts. Membership may be suspended if not resolved within 14 days.',
+      alertTitle: 'Membership suspends 28 May 2026 unless $185.00 is paid',
+      alert: 'The Q1 2026 subscription is unpaid after 3 declined direct debits, the last on 15 Mar.',
       history: null
     },
     invoice: {
@@ -288,9 +303,11 @@
       ],
       current: [['INV-2026-058', 'Invoice', 'Q3 2026 subscription', '01 Jul 2026', '$165.00', ['primary', 'Due', 'Due in 48 days']]],
       totals: [['$185.00 · 74 days overdue', '$350.00 across 2 invoices'], ['None', '$165.00 · 1 invoice, due 01 Jul']],
-      bell: 'Invoice INV-2026-031 ($185.00) is 74 days overdue.',
+      bellTitle: 'Membership suspends 28 May 2026',
+      bell: 'Invoice INV-2026-031 ($185.00) unpaid since 01 Mar.',
       settled: [1, ['PAY-8702', '27 Feb 2026', ['success', 'Paid'], 'Q1 2026 · invoice INV-2026-031', 'BPAY', '$185.00']],
-      alert: '$185.00 outstanding since 01 Mar 2026: invoice INV-2026-031 is unpaid. Membership may be suspended if not resolved within 14 days.',
+      alertTitle: 'Membership suspends 28 May 2026 unless $185.00 is paid',
+      alert: 'Invoice INV-2026-031 for the Q1 2026 subscription has been unpaid since it fell due on 01 Mar.',
       history: [
         ['PAY-8830', '28 Mar 2026', ['success', 'Paid'], 'Q2 2026 · invoice INV-2026-044', 'BPAY', '$165.00'],
         ['PAY-8420', '04 Jan 2026', ['success', 'Paid'], 'Q4 2025 · invoice INV-2025-061', 'EFT', '$185.00'],
@@ -304,9 +321,11 @@
       owing: [['RM-2026-10', 'Missed deduction', 'Pay periods 9–10 · not remitted by Metro Health Services', '14 May 2026', '$50.76', ['danger', 'Overdue', 'Remittance not received']]],
       current: [],
       totals: [['$50.76 · 2 pays not remitted', '$50.76 · 1 missed remittance'], ['None', 'Nothing outstanding']],
+      bellTitle: 'Confirm employment before the 28 May pay run',
       bell: 'Metro Health Services did not remit $50.76 (pay periods 9–10).',
       settled: [0, ['RM-2026-11', '21 May 2026', ['success', 'Paid'], 'Pay periods 9–10 · late remittance received', 'Payroll', '$50.76']],
-      alert: '$50.76 outstanding: Metro Health Services did not remit deductions for pay periods 9–10. Check the member is still on the employer’s payroll.',
+      alertTitle: 'Confirm employment before the 28 May pay run',
+      alert: 'Metro Health Services did not remit $50.76 for pay periods 9–10. If the member has left, change their payment type before the next deduction is missed.',
       history: [
         ['RM-2026-10', '14 May 2026', ['warning', 'Not received'], 'Pay periods 9–10 · Metro Health Services remittance', 'Payroll', '$50.76'],
         ['RM-2026-08', '16 Apr 2026', ['success', 'Paid'], 'Pay periods 7–8 · Metro Health Services remittance', 'Payroll', '$50.76'],
@@ -323,8 +342,15 @@
 
   const overdueAlert = alerts.find(alert => alert.AlertKey === 'A-1017');
   const financeCount = tabCounts.find(count => count.Tab === 'Finance');
-  const overdueTracker = trackers[1];
-  const notDueTracker = ['02 Overdue invoices', 0, 'Overdue invoices', 'Nothing overdue', '#finance'];
+
+  // A payment tracker counts only for its own payment type, and only while
+  // something is owed; the toolbar's "Trackers: all clear" zeroes them all.
+  function trackerCount(index) {
+    if (trackersAllClear) return 0;
+    const type = paymentTrackers[index];
+    if (type && (type !== paymentType || !inArrears)) return 0;
+    return trackers[index][1];
+  }
 
   const paintBadge = (badge, [tone, text, title]) => {
     badge.className = 'us-badge us-badge--' + tone;
@@ -372,12 +398,12 @@
     if (alert) {
       alert.hidden = !inArrears;
       const text = alert.querySelector('p');
-      if (text) text.innerHTML = '<strong>Overdue payment.</strong> ' + type.alert;
+      if (text) text.innerHTML = '<strong>' + type.alertTitle + '.</strong> ' + type.alert;
     }
+    overdueAlert.Title = type.bellTitle;
     overdueAlert.Message = type.bell;
     include(alerts, overdueAlert, inArrears);
     include(tabCounts, financeCount, inArrears);
-    trackers[1] = inArrears ? overdueTracker : notDueTracker;
     window.UnionSuiteBannerAlerts?.reload();
     window.UnionSuiteCcoSidebar?.reloadCounts();
     document.querySelectorAll('.cv2-trackers').forEach(root => window.UnionSuiteAttention?.reload(root));

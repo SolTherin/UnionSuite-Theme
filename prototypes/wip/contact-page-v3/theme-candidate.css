@@ -1943,6 +1943,25 @@
    "Nothing needs attention" line instead of a row of zeros.
    Target: US-ATTENTION.
    -------------------------------------------------------------------------- */
+/* No card grows past a quarter of the row (--us-attention-slots): with one
+   or two trackers left the box narrows to them, instead of one card
+   stretching the full width with its count and chevron far apart. Four fill
+   the row as before. The box never drops below 440px, so its own container
+   stays wider than the theme's 420px stacked layout, and on phones that
+   floor is the full width anyway. The all-clear line keeps the floor too.
+   US-ATTENTION-HIDE-ZERO sets --us-attention-shown. */
+.us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-attention-slots: 4;
+  width: min(100%, max(440px, 100% * var(--us-attention-shown, 4) / var(--us-attention-slots)));
+  transition: width 200ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
+}
+
 .us-attention--hide-zero > .us-attention__items[hidden],
 .us-attention--hide-zero > .us-attention__items > li[hidden],
 .us-attention--hide-zero > .us-attention__clear[hidden] {

@@ -1730,6 +1730,8 @@
     });
     const allClear = items.length > 0 && shown === 0;
     if (items.length) list.style.setProperty('--us-attention-columns', String(Math.max(1, shown)));
+    // The box narrows to the visible cards (CSS section 28).
+    root.style.setProperty('--us-attention-shown', String(shown));
     list.hidden = allClear;
 
     let clear = root.querySelector(':scope > .us-attention__clear');
