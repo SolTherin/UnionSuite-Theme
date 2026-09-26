@@ -19,8 +19,9 @@
    - disclosure wiring: ids, aria-controls, one open row at a time, with the
      activity history's fold animation (US-RECORD-CARDS) when it is loaded;
    - the status badge's tone, from the Status value;
-   - relative time under a date: "in 12 days" for an upcoming start,
-     "11 days left" for an active end, marked when it ends soon;
+   - relative time under the period, from its data-us-adjustment-start and
+     -end ISO dates: "Starts in 12 days" for an upcoming adjustment, "11 days
+     left" for an active one, marked when it ends soon;
    - removal of the credit meter on rows without a credit.
    With JavaScript off every row still reads, and every detail panel stays
    hidden but present in the source order.
@@ -102,22 +103,21 @@
     note.classList.toggle('us-adjustment__when--soon', Boolean(soon));
   }
 
+  // One line under the period: when an upcoming adjustment starts, or how
+  // long an active one has left (marked soon within config.soonDays).
   function relative(item, config, today) {
-    const starts = item.querySelector('.us-adjustment__starts');
-    const ends = item.querySelector('.us-adjustment__ends');
-    const dateIn = cell => cell?.querySelector('[data-us-adjustment-date]')?.dataset.usAdjustmentDate;
+    const period = item.querySelector('.us-adjustment__period');
+    if (!period) return;
     const status = statusOf(item);
+    const starts = daysUntil(period.dataset.usAdjustmentStart, today);
+    const ends = daysUntil(period.dataset.usAdjustmentEnd, today);
 
-    if (starts) {
-      const days = daysUntil(dateIn(starts), today);
-      const upcoming = status === 'upcoming' && days !== null && days >= 0;
-      setWhen(starts, upcoming ? (days === 0 ? 'today' : 'in ' + span(days)) : '');
-    }
-    if (ends) {
-      const days = daysUntil(dateIn(ends), today);
-      const running = status === 'active' && days !== null && days >= 0;
-      const text = running ? (days === 0 ? 'ends today' : span(days) + ' left') : '';
-      setWhen(ends, text, running && days <= config.soonDays);
+    if (status === 'upcoming' && starts !== null && starts >= 0) {
+      setWhen(period, starts === 0 ? 'Starts today' : 'Starts in ' + span(starts));
+    } else if (status === 'active' && ends !== null && ends >= 0) {
+      setWhen(period, ends === 0 ? 'Ends today' : span(ends) + ' left', ends <= config.soonDays);
+    } else {
+      setWhen(period, '');
     }
   }
 

@@ -372,27 +372,27 @@
           <div class="panel-heading Distinguish"><h2 class="panel-title">Active and upcoming adjustments</h2></div>
           <div class="panel-body-container"><div class="panel-body" id="cv3-adjustments-body">
             <div class="us-adjustments__head" aria-hidden="true">
+              <span>Status</span>
               <span>Type</span>
               <span>Fee effect</span>
-              <span>Starts</span>
-              <span>Ends</span>
-              <span>Status</span>
+              <span>Period</span>
+              <span class="us-adjustments__head-reason">Reason</span>
               <span></span>
             </div>
             <div class="QueryTemplateSet">
               <section data-item="0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
                 <div class="us-adjustment" data-us-adjustment-status="Active">
                   <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Active</span></span>
                     <span class="us-adjustment__cell us-adjustment__title">Waiver</span>
                     <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> −$20.00 per quarter</span>
-                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2026-03-15">15 Mar 2026</span></span>
-                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2026-09-30">30 Sep 2026</span></span>
-                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Active</span></span>
+                    <span class="us-adjustment__cell us-adjustment__period" data-us-adjustment-start="2026-03-15" data-us-adjustment-end="2026-09-30"><span class="us-adjustment__cell-label">Period</span> 15 Mar 2026 – 30 Sep 2026</span>
+                    <span class="us-adjustment__cell us-adjustment__reason"><span class="us-adjustment__cell-label">Reason</span> Hardship arrangement</span>
                     <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
                   </button>
                   <div class="us-adjustment__panel" hidden>
                     <dl class="us-adjustment__fields">
-                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Hardship arrangement</dd></div>
+                      <div class="us-adjustment__field--reason"><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Hardship arrangement</dd></div>
                       <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$20.00 off each quarter</dd></div>
                       <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
                     </dl>
@@ -420,16 +420,16 @@
               <section data-item="1" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
                 <div class="us-adjustment" data-us-adjustment-status="Upcoming">
                   <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
                     <span class="us-adjustment__cell us-adjustment__title">Membership change</span>
                     <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> Associate rate · $95.00/qtr</span>
-                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2026-10-01">01 Oct 2026</span></span>
-                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2027-03-31">31 Mar 2027</span></span>
-                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
+                    <span class="us-adjustment__cell us-adjustment__period" data-us-adjustment-start="2026-10-01" data-us-adjustment-end="2027-03-31"><span class="us-adjustment__cell-label">Period</span> 01 Oct 2026 – 31 Mar 2027</span>
+                    <span class="us-adjustment__cell us-adjustment__reason"><span class="us-adjustment__cell-label">Reason</span> Secondment</span>
                     <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
                   </button>
                   <div class="us-adjustment__panel" hidden>
                     <dl class="us-adjustment__fields">
-                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Secondment</dd></div>
+                      <div class="us-adjustment__field--reason"><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Secondment</dd></div>
                       <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
                       <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
                     </dl>
@@ -457,16 +457,16 @@
               <section data-item="2" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
                 <div class="us-adjustment" data-us-adjustment-status="Upcoming">
                   <button type="button" class="us-adjustment__row" aria-expanded="false">
+                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
                     <span class="us-adjustment__cell us-adjustment__title">Suspension</span>
                     <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> No fees due</span>
-                    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="2027-04-01">01 Apr 2027</span></span>
-                    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="2028-03-31">31 Mar 2028</span></span>
-                    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Upcoming</span></span>
+                    <span class="us-adjustment__cell us-adjustment__period" data-us-adjustment-start="2027-04-01" data-us-adjustment-end="2028-03-31"><span class="us-adjustment__cell-label">Period</span> 01 Apr 2027 – 31 Mar 2028</span>
+                    <span class="us-adjustment__cell us-adjustment__reason"><span class="us-adjustment__cell-label">Reason</span> Leave without pay · overseas travel</span>
                     <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
                   </button>
                   <div class="us-adjustment__panel" hidden>
                     <dl class="us-adjustment__fields">
-                      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Leave without pay · overseas travel</dd></div>
+                      <div class="us-adjustment__field--reason"><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Leave without pay · overseas travel</dd></div>
                       <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
                       <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
                     </dl>

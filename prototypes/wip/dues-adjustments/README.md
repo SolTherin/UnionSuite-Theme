@@ -45,7 +45,8 @@ http://localhost:8778/prototypes/wip/dues-adjustments/index.html
 The bar at the top switches light/dark, switches the Active list between its
 four sample adjustments and its No results state, and resizes the panels
 (Full, 820, 620, 380) rather than the window, because the Active list's
-layout follows its panel's own width. "Supplied source" opens the original,
+layout follows its panel's own width. The Reason column needs a panel of
+1100px or more, so check it with Full in a wide window. "Supplied source" opens the original,
 which renders from `supplied/`.
 
 The sample's "today" is pinned to 20 August 2026 (inline in `index.html`), so
@@ -82,7 +83,7 @@ The two layouts read as one family: the same words and badges in both.
 | Type | Waiver, Membership change, Credit, Suspension, Pro-rata membership ("Membership change" is v3's term; the supplied design said "Member Change") |
 | Fee effect | What the adjustment does to fees, in a few words: "50% off fees", "Part-time rate", "$138.50 credit left", "No fees due", "$86.40 pro-rata", "$120.00 waived" |
 | Status | Active (`us-badge us-badge--success us-badge--icon`), Upcoming (`us-badge us-badge--primary us-badge--icon`), Expired (`us-badge us-badge--icon` with `data-us-icon="ended"`). "Upcoming" follows contact page v3; the supplied design said "Scheduled". |
-| Dates | `01 Mar 2026`; an open end reads "When used up" |
+| Dates | `01 Mar 2026`; an open end reads "When used up" in the grid's To column, "when used up" after the dash in the Active list's period (`15 Apr 2026 – when used up`) |
 
 ## Active and upcoming adjustments
 
@@ -103,11 +104,11 @@ One Query Template Display iPart:
 
 ```html
 <div class="us-adjustments__head" aria-hidden="true">
+  <span>Status</span>
   <span>Type</span>
   <span>Fee effect</span>
-  <span>Starts</span>
-  <span>Ends</span>
-  <span>Status</span>
+  <span>Period</span>
+  <span class="us-adjustments__head-reason">Reason</span>
   <span></span>
 </div>
 ```
@@ -117,16 +118,16 @@ One Query Template Display iPart:
 ```html
 <div class="us-adjustment" data-us-adjustment-status="{#query.Status}">
   <button type="button" class="us-adjustment__row" aria-expanded="false">
+    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">{#query.Status}</span></span>
     <span class="us-adjustment__cell us-adjustment__title">{#query.Type}</span>
     <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> {#query.FeeEffect}</span>
-    <span class="us-adjustment__cell us-adjustment__starts"><span class="us-adjustment__cell-label">Starts</span> <span data-us-adjustment-date="{#query.StartDateIso}">{#query.StartDate}</span></span>
-    <span class="us-adjustment__cell us-adjustment__ends"><span class="us-adjustment__cell-label">Ends</span> <span data-us-adjustment-date="{#query.EndDateIso}">{#query.EndDate}</span></span>
-    <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">{#query.Status}</span></span>
+    <span class="us-adjustment__cell us-adjustment__period" data-us-adjustment-start="{#query.StartDateIso}" data-us-adjustment-end="{#query.EndDateIso}"><span class="us-adjustment__cell-label">Period</span> {#query.StartDate} – {#query.EndDate}</span>
+    <span class="us-adjustment__cell us-adjustment__reason"><span class="us-adjustment__cell-label">Reason</span> {#query.Reason}</span>
     <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
   </button>
   <div class="us-adjustment__panel" hidden>
     <dl class="us-adjustment__fields">
-      <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">{#query.Reason}</dd></div>
+      <div class="us-adjustment__field--reason"><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">{#query.Reason}</dd></div>
       <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">{#query.Amount}</dd></div>
       <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive">{#query.Remaining}</dd></div>
     </dl>
@@ -172,10 +173,10 @@ selected; for one a row does not use, select `''` with the alias.
 | `Type` | Yes | Adjustment type, from the shared vocabulary | — | `Suspension` |
 | `FeeEffect` | Yes | The effect on fees, in a few words | — | `No fees due` |
 | `StartDate` | Yes | Display date | — | `01 Sep 2026` |
-| `StartDateIso` | Yes | The same date as `YYYY-MM-DD`, for "in 12 days" | No relative time | `2026-09-01` |
-| `EndDate` | Yes | Display date, or "When used up" for an open end | — | `30 Nov 2026` |
+| `StartDateIso` | Yes | The same date as `YYYY-MM-DD`, for "Starts in 12 days" | No relative time | `2026-09-01` |
+| `EndDate` | Yes | Display date, or "when used up" for an open end (it follows a dash) | — | `30 Nov 2026` |
 | `EndDateIso` | Optional | `YYYY-MM-DD`, for "11 days left" | No relative time (open end) | `2026-11-30` |
-| `Reason` | Optional | Why the adjustment was made | Field hidden | `Parental leave` |
+| `Reason` | Optional | Why the adjustment was made: a column on wide panels, otherwise in the expanded panel | Cell empty, field hidden | `Parental leave` |
 | `Amount` | Optional | Total amount or rate, where the type has one | Field hidden | `$240.00` |
 | `Remaining` | Optional | Remaining credit, display value | Field hidden | `$138.50` |
 | `RemainingValue` | Optional | Remaining credit as a number | — | `138.50` |
@@ -188,11 +189,22 @@ selected; for one a row does not use, select `''` with the alias.
 
 ### At a glance
 
-Each row shows Type, Fee effect, Starts, Ends and Status; everything else is
-in the expanded panel. The script adds relative time under a date: "in 12
-days" for an upcoming start, "11 days left" for an active end, in the warning
+Each row shows Status, Type, Fee effect and Period; everything else is in the
+expanded panel. Status leads, so active and upcoming read at the start of
+every row however wide the panel. An upcoming row's fee effect is muted: it is
+not applying to fees yet. The script adds relative time under the period,
+from its `data-us-adjustment-start` and `-end` dates: "Starts in 12 days" for
+an upcoming adjustment, "11 days left" for an active one, in the warning
 colour when it ends within 30 days (`soonDays`). Closed adjustments never
 appear here; they live in All adjustments.
+
+The panel's own width decides the layout (container queries):
+
+| Panel width | Layout |
+|---|---|
+| 1100px and wider | Status, Type, Fee effect, Period, Reason. The expanded panel's Reason field hides, so the reason is not shown twice. |
+| 761–1099px | Status, Type, Fee effect, Period; Reason in the expanded panel. |
+| 760px and narrower | Each row stacks into a card: type and status, the fee effect, then the period and its relative time on one line (`01 Mar 2026 – 31 Aug 2026 · 11 days left`). |
 
 ## All adjustments
 
@@ -223,7 +235,7 @@ filters, and moves the native Export into the heading.
 | Pale-blue column head with brand-blue text, 10px, .6px tracking | Native IQA grid head: `--iqa-table-head`, `--iqa-muted`, 11px bold, .06em, 9px 12px padding | Lines up with the All adjustments grid below it. |
 | Rows inset in the card | Edge to edge, no body padding, as the native IQA grid is | The two panels' tables line up exactly. |
 | One list with a Show historical control | Two layouts: Active and upcoming (this list) and All adjustments (native grid) | They answer different questions; the grid pages and sorts natively, so no filter control is needed. |
-| Columns: Type, Period, Reason, Detail, Status | Type, Fee effect, Starts, Ends, Status; Reason moves into the expanded panel | Fee effect is what staff come for; separate dates carry relative time. |
+| Columns: Type, Period, Reason, Detail, Status | Status, Type, Fee effect, Period; Reason as a column from a 1100px panel, otherwise in the expanded panel | Status leads so active and upcoming scan at a glance; fee effect is what staff come for; one period cell carries the relative time. |
 | Status pills (`99px` radius): keep-green, info-blue, outlined grey; "Scheduled" | `.us-badge` with v3's status icons: success, primary, neutral "ended"; "Upcoming" | Existing components and v3's vocabulary. |
 | System font stack | Inter (`--font-ui` / `--iqa-font`) | Theme UI face. |
 | Title Case: "Member Change", "Add Adjustment", "End Adjustment" | Sentence case | Theme copy convention. |
@@ -232,7 +244,7 @@ filters, and moves the native Export into the heading.
 | Hover: pale tint plus 3px bar | Hover as a native grid row (`--brand-50`); the open row adds the 3px bar | Grid hover plus the CCO rail's selection convention. |
 | Credit bar: a div at a hard-coded 58% | Native `<progress value max>` on `--success-fill` | Real value, readable by assistive technology. |
 | No dark mode | `zzDarkMode.css` tokens; rows use `--dm-hover` / `--dm-selected` | The dark palette keeps the brand ramp light, so the light tints cannot be reused. |
-| Fixed 900px layout, no narrow state | Stacks into cards below an 880px panel (container query), with labelled dates | The panel can sit in a narrow page column. |
+| Fixed 900px layout, no narrow state | Stacks into cards at a 760px panel and narrower (container query), the period on one line | The panel can sit in a narrow page column. |
 
 ### Buttons and actions
 
@@ -249,7 +261,8 @@ filters, and moves the native Export into the heading.
   moved to the script.
 - **Clickable `<div>` rows:** not keyboard reachable. Each row is a
   `<button aria-expanded aria-controls>`, whose accessible name includes the
-  cell labels ("Fee effect", "Starts", "Ends").
+  cell labels ("Fee effect", "Period", and "Reason" while that column
+  shows).
 - **Result wrappers:** iMIS wraps each result in
   `section > .card.QueryTemplateItem > .card-body`. The wrappers use
   `display: contents` so every row still shares one set of column tracks.
@@ -302,7 +315,11 @@ These need changes in the shared theme, not only in this component.
   adjustments (native Query Menu grid).
 - Active and upcoming includes scheduled (upcoming) adjustments.
 - All adjustments includes active and upcoming rows, not only closed ones.
-- Active at-a-glance fields: Type, Fee effect, Starts, Ends, Status.
+- Active at-a-glance fields (revised 26 September 2026): Status first, then
+  Type, Fee effect and one Period cell (start – end, with relative time
+  under it), replacing Type, Fee effect, Starts, Ends, Status. Reason joins as
+  a column on panels 1100px and wider. An upcoming row's fee effect is muted.
+  Rows stack into cards at 760px and narrower (was 880px).
 - Active stays as table rows, not activity-style cards (26 September 2026):
   the fields are the same for every adjustment and read best in columns, the
   rows line up with the All adjustments grid below, and the always-visible
