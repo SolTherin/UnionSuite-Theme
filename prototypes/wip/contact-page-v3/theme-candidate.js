@@ -1566,7 +1566,9 @@
       }
     }
     if (picker.open) {
-      picker.querySelector('.us-cco-search__input, .us-tab-section-options > button[aria-current="true"]')?.focus();
+      // Phones hide the list's search box, so focus goes to the current tab.
+      const search = desktop.matches && picker.querySelector('.us-cco-search__input');
+      (search || picker.querySelector('.us-tab-section-options > button[aria-current="true"]'))?.focus();
     } else {
       picker.querySelector(':scope > summary')?.click();
     }

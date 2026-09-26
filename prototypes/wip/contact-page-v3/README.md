@@ -135,7 +135,7 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 | 17 | Sidebar extras, tailored to `us-cco-rail` only: tab search and tab counts. See [Sidebar search and tab counts](#sidebar-search-and-tab-counts). | 1 request per page when configured | Opt-in with the sidebar | New block after item 16; `US-CCO-SIDEBAR` JS |
 | 18 | Report columns fit their panel: until someone resizes a column, a native report's columns share the grid's available width in proportion to their natural widths (never below each column's floor: its whole text when that fits in 140px, otherwise its longest word, so text never breaks mid-word; candidate 1.5, 24 September 2026; a short badge or button in the cell counts at its own font, padding, border and icon, so a status badge never wraps, 25 September 2026), so a report that narrows or widens after load (window resize, the collapsible rail) refits instead of keeping its load-time width and scrolling sideways. User-resized widths are kept as before. `theme-candidate-iqa-columns.js` is the whole `US-IQA-COLUMNS` block (1.5-candidate), generated from the theme block with only `fitPanelWidth`, `entry.base`/`userSized` and the version changed. | Sideways scroll removed | Site-wide: native reports | Replace `US-IQA-COLUMNS` in `zUnionSuite.js` |
 | 19 | Contact banner identity: the eyebrow shows the contact type from the query instead of the fixed word "Contact", and the ID gets the theme's copy button. An empty avatar with `data-us-contact-kind` shows the taskbar quick search's person or company drawing instead of initials (`Organisation`, `Organization` or `Company` show the building; any other value the person), sized from the avatar so it condenses with the banner. The copy button in the eyebrow is 24px (44px on touch), pulled into the line so the eyebrow keeps its 18px height, and centred on the capitals and digits (`vertical-align: calc(.5cap - 8px)`). See [Contact type](#contact-type). | Eyebrow "Contact · 004821" → "Individual · 004821 ⧉"; initials → icon | Opt-in: contact banner template | `US-BANNER-COMPONENT` (after the avatar rules); `Banner-Contact-Template.html` |
-| 20 | One-row banner, replacing the two-row grid first proposed in item 3; locked in by the owner. See [One-row banner](#one-row-banner). Phones (24 September 2026): the badges and the actions share one row under the name, badges left, bell and Quick Actions right; condensed, Quick Actions sits at the right of the second row. | Banner 149 → 105px when the details fit | Site-wide: all banners | `US-BANNER-COMPONENT` (CSS section 3); `US-BANNER-ROW` JS |
+| 20 | One-row banner, replacing the two-row grid first proposed in item 3; locked in by the owner. See [One-row banner](#one-row-banner). Phones (revised 26 September 2026): the bell sits at the top right, on the name line, in both states. Expanded, the badges take the next line and Quick Actions runs the full width below them; condensed, the badges and Quick Actions share the second line, Quick Actions at the right. (Was, 24 September: badges left, bell and Quick Actions right on one row under the name.) | Banner 149 → 105px when the details fit | Site-wide: all banners | `US-BANNER-COMPONENT` (CSS section 3); `US-BANNER-ROW` JS |
 | 21 | Dark mode for the candidate: items 5, 7, 8, 10 and 16 used brand/neutral ramp steps, which `zzDarkMode.css` keeps light, so sidebar tab text was unreadable, the selected tab stayed pale and report column heads stayed `#e5e6e7`. CSS section 21 re-points each use at the dark palette (`--dm-selected`, `--dm-hover`, `--bg-sunken`, `--text-link`). | Column head in dark `#e5e6e7` → `#263740` | Site-wide in dark mode (follows its items) | `zzDarkMode.css`, beside each component's dark overrides |
 | 22 | Native messages: trim the first child's top margin and the last child's bottom margin inside every `Asi*` message, so authored paragraphs get even padding. Margins between paragraphs stay; iMIS-generated messages (bare text) are unchanged. Replaces item 9's us-alerts-only trim (Finding 6). | Authored message bottom gap 13px + padding → padding only | Site-wide: all native messages | `US-MESSAGES`, after the shared message box rule |
 | 23 | Report scroll edges: a native report wider than its panel fades the edge with hidden columns (32px mask on the right while more lies right, on the left once scrolled), so a clipped column no longer looks like the table's end. A mask, not a shadow, because header and row cells paint over the grid's background. `US-IQA-SCROLL-EDGES` sets `data-us-scroll-more` (`start`, `end`) on scroll, resize and partial updates; right-to-left pages mirror. | — | Site-wide: native reports that scroll sideways | CSS section 23 after the IQA report rules; `US-IQA-SCROLL-EDGES` JS beside `US-IQA-COLUMNS` |
@@ -243,9 +243,11 @@ separate until the theme's sticky script also recognises `us-cco-rail`
   sticky directly beneath the pinned banner while scrolling
   (`--us-cco-rail-sticky-top`, measured by `US-CCO-SIDEBAR` from the
   pinned banner and any fixed top chrome). The list opens over the content.
-  Opening it does not focus the search box on phones, so the on-screen
-  keyboard does not cover the list; desktop still focuses it. Other CCOs
-  keep the theme's mobile picker and tab strip.
+  It has no search box on phones (owner, 26 September 2026): the list is
+  short enough to scroll, and a box there raised the on-screen keyboard over
+  it. Alt+S with the list open focuses the current tab instead. Desktop
+  keeps the search and focuses it on open. Other CCOs keep the theme's
+  mobile picker and tab strip.
 
 ### Sidebar search and tab counts
 
@@ -312,22 +314,20 @@ Actions:
 - Badge: red while something is new, an outlined count once seen, hidden at 0.
   The popup shows a severity edge, title, message, date and optional link, and
   ends with "View on Summary →", which selects that CCO tab. Escape and outside
-  clicks close it. Below 900px the popup opens rightwards from the bell
-  (the actions start at the left edge), except in the condensed banner,
+  clicks close it. From 601 to 899px the popup opens rightwards from the
+  bell (the actions start at the left edge), except in the condensed banner,
   where the bell is at the right and it opens leftwards as on desktop.
-- Condensed banner on phones (600px and below, where it wraps): the bell
-  stays on the name line at the right and the status pill starts the
-  second line beside Quick Actions (the actions group becomes
-  `display: contents` so the bell and menu are placed separately).
+  Phones always open it leftwards, since the bell is always at the right.
+- Phones (600px and below, where the banner wraps): the bell sits on the
+  name line at the top right in both states (the actions group becomes
+  `display: contents` so the bell and menu are placed separately). Expanded,
+  the status badges take the next line and Quick Actions the full width
+  below them; condensed, the badges and Quick Actions share the second line.
 - The Summary alerts should be a Query Template Display on the same IQA so
   both agree. The prototype's Summary alerts are static.
 - `UnionSuiteBannerAlerts.reload()` re-checks counts. A placeholder with no
   query, filter or value, or an unsubstituted `{#…}`, is hidden.
 
-### One-row banner
-
-Item 20, locked in by the owner on 24 September 2026 after comparing it with
-the two-row grid first proposed in item 3. Removing the alert badges had left
 ### Active positions
 
 Item 34 (proposed, not yet approved). Place in the banner template's
@@ -369,6 +369,10 @@ Item 34 (proposed, not yet approved). Place in the banner template's
   after a role is added or ended. The toolbar's "Positions" button cycles the
   sample between 2, 1 and none.
 
+### One-row banner
+
+Item 20, locked in by the owner on 24 September 2026 after comparing it with
+the two-row grid first proposed in item 3. Removing the alert badges had left
 that grid with an empty top-middle cell and empty space under the identity;
 the one-row layout removes both. It is the banner layout in section 3 of
 `theme-candidate.css` (no modifier class):
@@ -666,13 +670,18 @@ explicit approval.
   which read best in columns and line up with the grid. The Membership
   summary's Active adjustment line now matches the waiver's 30 Sep 2026 end
   (it said 30 Jun 2026).
+- 26 September 2026: active positions show in the banner (item 34), one
+  badge naming the most senior role with a count, opening a popup that links
+  to Engagement › Roles and CPD.
+- 26 September 2026, phones: the alert bell moves to the top right of the
+  banner, on the name line, when expanded as well as condensed. Expanded,
+  Quick Actions runs the full width on its own line under the status
+  badges; condensed, it stays beside them so the pinned banner keeps two
+  lines. The Sections dropdown has no search box on phones (item 17).
 - Paragraph margin trim for all native messages (item 22); dark mode toggle
   in the toolbar and dark fixes for the candidate (item 21).
 
 ## Findings
-- 26 September 2026: active positions show in the banner (item 34), one
-  badge naming the most senior role with a count, opening a popup that links
-  to Engagement › Roles and CPD.
 
 Theme issues and facts found while building v1 → v3:
 

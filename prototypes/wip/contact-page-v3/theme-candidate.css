@@ -169,51 +169,67 @@
   }
 }
 
-/* Condensed on phones (where the row wraps): the alert bell stays on the
-   name line and the status pill starts the second line beside Quick
-   Actions. The actions group lets the bell and the menu take their own
-   places in the summary's wrapping row; the identity leaves just enough
-   room for the bell (36px, or 44px on touch), so the status wraps.
-   Expanded, the status and the actions share one row instead of the theme's
-   full-width row each: badges left, bell and Quick Actions right. Quick
-   Actions sits at the right in both states and wraps right-aligned when the
-   badges fill the row. Its menu already opens from its right edge. */
+/* Phones (where the row wraps), owner, 26 September 2026: the alert bell sits
+   at the top right of the banner, on the name line, in both states. The
+   actions group becomes display: contents so the bell and the menu take
+   their own places in the summary's wrapping row; the identity leaves just
+   enough room for the bell (36px, or 44px on touch).
+   - Expanded: the status badges take the next line, then Quick Actions runs
+     the full width on its own line, a large, easy target. Its menu keeps
+     the runtime's 288px, under the button's right end (US-ACTION-MENUS sets
+     the width inline).
+   - Condensed: the status and Quick Actions share the second line, Quick
+     Actions at the right, so the pinned banner stays two lines tall. */
 @media (max-width: 600px) {
-  .us-banner:not(.us-banner--compact) .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    flex-basis: 100%;
-  }
-
-  .us-banner .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    flex: 1 1 auto;
+  /* The condensed banner's 12px column gap in both states, so the bell fits
+     beside the identity (the expanded 24px gap pushed it to its own line). */
+  .us-banner .us-banner__summary:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    column-gap: var(--space-3);
   }
 
   .us-banner .us-banner__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    flex: 0 0 auto;
-    margin-inline-start: auto;
-  }
-
-  .us-banner.us-banner--compact .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    margin-inline-start: auto;
-  }
-
-  .us-banner.us-banner--compact .us-banner__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     display: contents;
   }
 
+  /* The condensed selector outranks the theme's condensed 12rem basis. */
+  .us-banner .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)),
   .us-banner.us-banner--compact .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     flex: 1 1 calc(100% - 64px);
   }
 
-  .us-banner.us-banner--compact .us-banner__actions > .us-banner__alerts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  .us-banner .us-banner__actions > .us-banner__alerts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     order: 1;
   }
 
-  .us-banner.us-banner--compact .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  .us-banner .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 1 1 auto;
     order: 2;
   }
 
-  .us-banner.us-banner--compact .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  .us-banner .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     order: 3;
+  }
+
+  /* Expanded: the bell at the top of the name block, not centred on the
+     eyebrow, name and subtitle. */
+  .us-banner:not(.us-banner--compact) .us-banner__actions > .us-banner__alerts:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    align-self: flex-start;
+  }
+
+  .us-banner:not(.us-banner--compact) .us-banner__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-basis: 100%;
+  }
+
+  .us-banner:not(.us-banner--compact) .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: 1 1 100%;
+  }
+
+  :root .us-banner:not(.us-banner--compact) .us-banner__surface .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle {
+    width: 100%;
+  }
+
+  .us-banner.us-banner--compact .us-banner__actions > .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-inline-start: auto;
   }
 }
 
@@ -1136,8 +1152,8 @@
 
 /* Below the banner's grid breakpoint the actions start at the left edge, so
    the popup opens rightwards from the bell instead of off-screen. Condensed,
-   the bell is at the right again (beside the name on phones), so it opens
-   leftwards as on desktop. */
+   and on phones in both states (section 3), the bell is at the right, so it
+   opens leftwards as on desktop. */
 @media (max-width: 899px) {
   .us-banner .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     inset-inline-start: 0;
@@ -1145,6 +1161,13 @@
   }
 
   .us-banner.us-banner--compact .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .us-banner .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     inset-inline-start: auto;
     inset-inline-end: 0;
   }
@@ -1555,10 +1578,13 @@
   display: none;
 }
 
-/* The rail's search belongs to the vertical layout; mobile keeps only the
-   All sections list's search. */
+/* Phones have no search: the rail's belongs to the vertical layout, and the
+   Sections dropdown lists every tab in a short scroll, where a box that
+   raises the on-screen keyboard is more in the way than useful (owner,
+   26 September 2026). */
 @media (max-width: 600px) {
-  .us-cco-rail .RadTabStripVertical > .rtsLevel > .us-cco-search {
+  .us-cco-rail .RadTabStripVertical > .rtsLevel > .us-cco-search,
+  .us-cco-rail .us-cco-search--picker {
     display: none;
   }
 }
