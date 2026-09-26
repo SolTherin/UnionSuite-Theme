@@ -1,0 +1,31 @@
+/* ─────────────────────────────────────────────────────────────
+   UTILITIES — shared tokens for internal tools & content pages
+   Sourced from the UI Styling Reference (legacy baseline used across
+   UIH internal apps). Values reconciled with the platform layers —
+   see readme.md "Legacy styling reference" for the mapping.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Selection / highlight (choice UI, toggles, selected rows) ─ */
+  --uih-select-bg:     #eff6ff;
+  --uih-select-border: #93c5fd;
+
+  /* ── Status pairs (saturated fg + pale bg of the same hue) ──── */
+  --uih-keep-fg:    #15803d;  --uih-keep-bg:    #dcfce7;
+  --uih-remove-fg:  #dc2626;  --uih-remove-bg:  #fee2e2;
+  --uih-warn-fg:    #d97706;  --uih-warn-bg:    #fffbeb;
+  --uih-info-fg:    #2563eb;  --uih-info-bg:    #eff6ff;  /* legacy blue — see readme */
+  --uih-match-fg:   #65a30d;  --uih-match-bg:   #ecfccb;
+  --uih-error-fg:   #991b1b;  --uih-error-bg:   #fff5f5;  --uih-error-border: #fca5a5;
+
+  /* ── Utility shape & elevation (content pages / internal tools) */
+  --uih-util-radius:  10px;   /* panels, modals, banners on content pages */
+  --uih-util-shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --uih-util-shadow-md: 0 4px 12px rgba(0,0,0,.1);
+
+  /* ── Modal ────────────────────────────────────────────────── */
+  --uih-scrim: rgba(0,0,0,.4);
+
+  /* ── Skeleton shimmer ─────────────────────────────────────── */
+  --uih-skeleton-a: #eceff3;
+  --uih-skeleton-b: #f5f7fa;
+}

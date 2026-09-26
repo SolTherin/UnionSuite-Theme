@@ -1,0 +1,28 @@
+/* ─────────────────────────────────────────────────────────────
+   EFFECTS — radii, borders, shadows, motion
+   Sourced from report-builder.css.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Corner radii ─────────────────────────────────────── */
+  --uih-radius:      6px;    /* default — cards, inputs, buttons, panels */
+  --uih-radius-sm:   4px;    /* filter-row inputs, small controls */
+  --uih-radius-xs:   3px;    /* micro badges, chips-in-toast */
+  --uih-radius-pill: 99px;   /* count badges, chips, logic toggles */
+
+  /* ── Border widths ────────────────────────────────────── */
+  --uih-border-w:      1px;
+  --uih-border-w-emph: 1.5px;  /* selected datasource rows, logic buttons */
+
+  /* ── Shadows ──────────────────────────────────────────── */
+  --uih-shadow:      0 1px 4px rgba(0,0,0,.10);   /* cards, tables, panels */
+  --uih-shadow-lg:   0 4px 20px rgba(0,0,0,.12);  /* toasts, popovers */
+  --uih-shadow-header: 0 2px 8px rgba(0,0,0,.2);  /* header bar */
+  /* Accent stripe used on an expanded/active accordion header */
+  --uih-inset-accent: inset 3px 0 0 var(--uih-brand-light);
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --uih-ease:        ease;   /* @kind other */
+  --uih-dur-fast:    .12s;   /* @kind other */
+  --uih-dur-med:     .22s;   /* @kind other */
+  --uih-dur-slow:    .3s;    /* @kind other */
+}

@@ -1,0 +1,11 @@
+/* Union Innovation Hub — Design System
+   Global entry point. Consumers link THIS file only.
+   Keep this file a list of @import lines — no rules inline. */
+
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
+@import "./tokens/effects.css";
+@import "./tokens/platform.css";
+@import "./tokens/utilities.css";
+@import "./tokens/fonts.css";

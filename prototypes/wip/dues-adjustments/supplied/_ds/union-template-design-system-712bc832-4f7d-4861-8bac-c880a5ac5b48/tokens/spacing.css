@@ -1,0 +1,29 @@
+/* ─────────────────────────────────────────────────────────────
+   SPACING & SIZING — Union Innovation Hub
+   Compact, information-dense scale matched to the Report Builder UI.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Space scale (the app runs on a tight 2–4px rhythm) ── */
+  --uih-space-1:  2px;
+  --uih-space-2:  4px;
+  --uih-space-3:  6px;
+  --uih-space-4:  8px;
+  --uih-space-5:  10px;
+  --uih-space-6:  12px;
+  --uih-space-7:  14px;
+  --uih-space-8:  16px;
+  --uih-space-10: 20px;
+
+  /* ── Common component paddings (verbatim from source) ─── */
+  --uih-pad-input:    6px 9px;     /* search / text inputs */
+  --uih-pad-btn-sm:   3px 9px;     /* pill quick-buttons, chips */
+  --uih-pad-btn:      5px 12px;    /* header + standard buttons */
+  --uih-pad-btn-lg:   9px;         /* full-width primary run button */
+  --uih-pad-cell:     8px 12px;    /* table cells */
+  --uih-pad-section:  11px 14px;   /* accordion section header */
+
+  /* ── Fixed layout metrics ─────────────────────────────── */
+  --uih-header-h:     52px;        /* app header bar */
+  --uih-sidebar-w:    300px;       /* config / nav panel */
+  --uih-touch-min:    44px;        /* min hit target */
+}

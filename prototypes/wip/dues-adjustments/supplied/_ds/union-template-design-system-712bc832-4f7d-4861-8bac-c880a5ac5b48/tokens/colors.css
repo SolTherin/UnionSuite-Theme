@@ -1,0 +1,68 @@
+/* ─────────────────────────────────────────────────────────────
+   COLORS — Union Innovation Hub
+   Sourced verbatim from the Report Builder iMIS template
+   (report-builder.css `.rb-root` custom properties + inline literals).
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Brand (deep iMIS blue) ───────────────────────────── */
+  --uih-brand:        #1a4b8c;  /* primary — headers, table heads, CTAs */
+  --uih-brand-light:  #2563c4;  /* interactive blue — buttons, active tabs, focus */
+  --uih-brand-pale:   #e8f0fb;  /* tint — selected rows, badges, hover fills */
+
+  /* ── Accent (warm orange) ─────────────────────────────── */
+  --uih-accent:       #e8720c;  /* progress fills, sparing highlights */
+
+  /* ── Neutrals / surfaces ──────────────────────────────── */
+  --uih-surface:      #ffffff;  /* cards, panels, inputs */
+  --uih-bg:           #f4f6fa;  /* app background, section header bands */
+  --uih-bg-hover:     #e9eef7;  /* section header hover */
+  --uih-border:       #d0d7e3;  /* hairline dividers, input borders */
+
+  /* ── Text ─────────────────────────────────────────────── */
+  --uih-text:         #1a1f2e;  /* primary body + headings */
+  --uih-text-muted:   #6b7280;  /* labels, meta, placeholders */
+  --uih-text-invert:  #ffffff;  /* on brand / on dark toasts */
+
+  /* ── Semantic ─────────────────────────────────────────── */
+  --uih-danger:       #dc2626;
+  --uih-success:      #16a34a;
+
+  /* Success surface (join-info pills, positive banners) */
+  --uih-success-bg:     #f0fdf4;
+  --uih-success-border: #bbf7d0;
+
+  /* Warning / preview (amber — "this is a preview" banner) */
+  --uih-warning:        #92400e;
+  --uih-warning-bg:     #fef3c7;
+  --uih-warning-border: #fcd34d;
+
+  /* Alert / stale (orange — "results out of date") */
+  --uih-alert:          #9a3412;
+  --uih-alert-bg:       #ffedd5;
+  --uih-alert-border:   #fb923c;
+  --uih-alert-solid:    #ea580c;
+
+  /* Danger surface (delete hover) */
+  --uih-danger-bg:      #fee2e2;
+
+  /* ── Datasource accents (product-specific) ────────────── */
+  --uih-iqa-bg:         #fef9c3;  /* IQA row icon chip (yellow) */
+  --uih-cloudtoolz:     #2d8fdd;  /* CloudToolz blue */
+  --uih-cloudtoolz-bg:  #eff6ff;
+  --uih-cloudtoolz-border: #bfdbfe;
+  --uih-cloudtoolz-strong: #1d4ed8;
+  --uih-source-badge-bg:   #dbeafe;  /* multi-BO field-source pill */
+  --uih-source-badge-fg:   #1e40af;
+
+  /* ── Semantic aliases (use these in components) ───────── */
+  --text-body:        var(--uih-text);
+  --text-muted:       var(--uih-text-muted);
+  --text-on-brand:    var(--uih-text-invert);
+  --surface-card:     var(--uih-surface);
+  --surface-app:      var(--uih-bg);
+  --surface-sunken:   var(--uih-bg);
+  --border-default:   var(--uih-border);
+  --accent-primary:   var(--uih-brand);
+  --accent-interactive: var(--uih-brand-light);
+  --accent-tint:      var(--uih-brand-pale);
+}

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/colors.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/typography.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/effects.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/platform.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/utilities.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/styles.css">
+<script src="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  body { margin:0; background:#e9edf3; font-family:var(--uih-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+  a { color: var(--uih-brand-light); text-decoration: none; }
+  a:hover { color: var(--uih-brand); text-decoration: underline; }
+  @keyframes adjExpand { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+</style>
+</helmet>
+
+<section style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:48px; padding:40px">
+
+  <!-- ═══════════════ OPTION 2A — Compact expandable rows (interactive) ═══════════════ -->
+  <div id="2a" style="width:780px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#2a" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">2a</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Compact expandable rows</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— like <a href="#1a">1a</a> but condensed; click a row to expand</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <i class="fa-solid fa-sliders" style="font-size:14px; color:var(--uih-text)"></i>
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">5</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column">
+        <sc-for list="{{ adjustments }}" as="item" hint-placeholder-count="5">
+          <div style="border-bottom:1px solid var(--uih-border)">
+            <div onClick="{{ item.toggle }}" style="display:flex; align-items:center; gap:12px; padding:11px 18px; cursor:pointer; background:{{ item.rowBg }}" style-hover="background:var(--uih-brand-pale)">
+              <div style="width:30px; height:30px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:7px; background:{{ item.iconBg }}; color:{{ item.iconColor }}"><i class="{{ item.icon }}" style="font-size:12px"></i></div>
+              <span style="font-size:13px; font-weight:700; color:var(--uih-text); width:150px; flex:0 0 auto">{{ item.title }}</span>
+              <span style="font-size:12px; color:var(--uih-text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.summary }}</span>
+              <span style="font-size:12px; color:var(--uih-text-muted); white-space:nowrap">{{ item.period }}</span>
+              <span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:{{ item.statusBg }}; color:{{ item.statusFg }}; font-size:11px; font-weight:700; border:1px solid {{ item.statusBorder }}">{{ item.status }}</span>
+              <i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--uih-text-muted); transition:transform .25s; transform:{{ item.chevron }}"></i>
+            </div>
+            <sc-if value="{{ item.expanded }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:4px 18px 14px 60px; display:flex; flex-direction:column; gap:10px">
+                <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px 20px">
+                  <sc-for list="{{ item.fields }}" as="f" hint-placeholder-count="3">
+                    <div>
+                      <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">{{ f.label }}</div>
+                      <div style="font-size:13px; font-weight:{{ f.weight }}; color:{{ f.color }}">{{ f.value }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ item.hasAttrs }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px">
+                      <sc-for list="{{ item.attrs }}" as="attr" hint-placeholder-count="2">
+                        <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">{{ attr.label }}:</span> {{ attr.from }} <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>{{ attr.to }}</b></span>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>{{ item.note }}</div>
+                <div style="display:flex; gap:8px">
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:4px 11px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)"><i class="fa-solid fa-pen" style="font-size:10px"></i> Edit</button>
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:4px 11px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-danger); border:1px solid var(--uih-border)" style-hover="background:var(--uih-danger-bg)"><i class="fa-solid fa-ban" style="font-size:10px"></i> End Adjustment</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OPTION 3A — Expandable grid + audit meta ═══════════════ -->
+  <div id="3a" style="width:860px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#3a" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">3a</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Expandable grid + audit</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— <a href="#2b">2b</a> with Created by / Created on in the detail</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">{{ activeCount }}</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:12px">
+          <button type="button" onClick="{{ toggleHistorical3 }}" style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-weight:600; cursor:pointer; white-space:nowrap; padding:5px 2px; font-size:12px; background:none; border:none; color:var(--uih-text-muted)" style-hover="color:var(--uih-brand-light)">
+            <span style="position:relative; width:30px; height:16px; border-radius:99px; background:{{ histTrackBg3 }}; transition:background .15s; flex:0 0 auto"><span style="position:absolute; top:2px; left:{{ histKnobLeft3 }}; width:12px; height:12px; border-radius:99px; background:#fff; transition:left .15s"></span></span>
+            <span style="display:inline-block; width:104px; text-align:left">{{ histToggleLabel3 }}</span>
+          </button>
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:170px 190px 1fr 160px 100px 40px">
+        <!-- head -->
+        <div style="padding:9px 14px 9px 18px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Type</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Period</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Reason</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Detail</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Status</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale)"></div>
+
+        <sc-for list="{{ grid3 }}" as="item" hint-placeholder-count="5">
+          <!-- clickable header row -->
+          <div onClick="{{ item.toggle }}" style="grid-column:1 / -1; display:grid; grid-template-columns:subgrid; border-top:1px solid var(--uih-border); cursor:pointer; background:{{ item.rowBg }}; opacity:{{ item.rowOpacity }}" style-hover="background:var(--uih-brand-pale); box-shadow:inset 3px 0 0 var(--uih-brand-light)">
+            <div style="padding:12px 14px 12px 18px; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:{{ item.titleColor }}">{{ item.title }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:12px; color:var(--uih-text-muted)">{{ item.period }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.reason }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; font-weight:600; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.detail }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:{{ item.statusBg }}; color:{{ item.statusFg }}; font-size:11px; font-weight:700; border:1px solid {{ item.statusBorder }}">{{ item.status }}</span></div>
+            <div style="padding:12px 14px; display:flex; align-items:center; justify-content:center"><i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--uih-text-muted); transition:transform .25s; transform:{{ item.chevron }}"></i></div>
+          </div>
+
+          <!-- expanded detail -->
+          <sc-if value="{{ item.expanded }}" hint-placeholder-val="{{ false }}">
+            <div style="grid-column:1 / -1; padding:6px 18px 16px 18px; background:var(--uih-bg); border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:12px; animation:adjExpand .18s ease">
+
+              <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px 20px">
+                <sc-for list="{{ item.fields }}" as="f" hint-placeholder-count="4">
+                  <div>
+                    <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">{{ f.label }}</div>
+                    <div style="font-size:13px; font-weight:{{ f.weight }}; color:{{ f.color }}">{{ f.value }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ item.isCredit }}" hint-placeholder-val="{{ false }}">
+                <div style="max-width:280px">
+                  <div style="height:6px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); overflow:hidden">
+                    <div style="width:58%; height:100%; background:var(--uih-success)"></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ item.hasAttrs }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:6px">
+                    <sc-for list="{{ item.attrs }}" as="attr" hint-placeholder-count="2">
+                      <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">{{ attr.label }}:</span> {{ attr.from }} <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>{{ attr.to }}</b></span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:4px">Note</div>
+                <div style="font-size:13px; color:var(--uih-text)">{{ item.note }}</div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:6px; padding-top:8px; border-top:1px solid var(--uih-border); font-size:11px; color:var(--uih-text-muted)">
+                <i class="fa-regular fa-clock" style="font-size:10px"></i>
+                <span>Created by <b style="font-weight:600; color:var(--uih-text)">{{ item.createdBy }}</b> on {{ item.createdOn }}</span>
+              </div>
+
+              <div style="display:flex; gap:8px">
+                <sc-if value="{{ item.isActive }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)"><i class="fa-solid fa-pen" style="font-size:10px"></i> Edit</button>
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-danger); border:1px solid var(--uih-border)" style-hover="background:var(--uih-danger-bg)"><i class="fa-solid fa-ban" style="font-size:10px"></i> End Adjustment</button>
+                </sc-if>
+                <button type="button" style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-border)" style-hover="background:var(--uih-brand-pale)"><i class="fa-solid fa-receipt" style="font-size:10px"></i> View affected transactions</button>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OPTION 2B — Expandable grid ═══════════════ -->
+  <div id="2b" style="width:860px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#2b" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">2b</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Expandable grid</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— <a href="#1b">1b</a> grid, reason only; click to expand full detail</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">{{ activeCount }}</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:12px">
+          <button type="button" onClick="{{ toggleHistorical }}" style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-weight:600; cursor:pointer; white-space:nowrap; padding:5px 2px; font-size:12px; background:none; border:none; color:var(--uih-text-muted)" style-hover="color:var(--uih-brand-light)">
+            <span style="position:relative; width:30px; height:16px; border-radius:99px; background:{{ histTrackBg }}; transition:background .15s; flex:0 0 auto"><span style="position:absolute; top:2px; left:{{ histKnobLeft }}; width:12px; height:12px; border-radius:99px; background:#fff; transition:left .15s"></span></span>
+            <span style="display:inline-block; width:104px; text-align:left">{{ histToggleLabel }}</span>
+          </button>
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:170px 190px 1fr 160px 100px 40px">
+        <!-- head -->
+        <div style="padding:9px 14px 9px 18px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Type</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Period</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Reason</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Detail</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Status</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale)"></div>
+
+        <sc-for list="{{ grid }}" as="item" hint-placeholder-count="5">
+          <!-- clickable header row -->
+          <div onClick="{{ item.toggle }}" style="grid-column:1 / -1; display:grid; grid-template-columns:subgrid; border-top:1px solid var(--uih-border); cursor:pointer; background:{{ item.rowBg }}; opacity:{{ item.rowOpacity }}" style-hover="background:var(--uih-brand-pale); box-shadow:inset 3px 0 0 var(--uih-brand-light)">
+            <div style="padding:12px 14px 12px 18px; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:{{ item.titleColor }}">{{ item.title }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:12px; color:var(--uih-text-muted)">{{ item.period }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.reason }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; font-weight:600; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.detail }}</div>
+            <div style="padding:12px 14px; display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:{{ item.statusBg }}; color:{{ item.statusFg }}; font-size:11px; font-weight:700; border:1px solid {{ item.statusBorder }}">{{ item.status }}</span></div>
+            <div style="padding:12px 14px; display:flex; align-items:center; justify-content:center"><i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--uih-text-muted); transition:transform .25s; transform:{{ item.chevron }}"></i></div>
+          </div>
+
+          <!-- expanded detail -->
+          <sc-if value="{{ item.expanded }}" hint-placeholder-val="{{ false }}">
+            <div style="grid-column:1 / -1; padding:6px 18px 16px 18px; background:var(--uih-bg); border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:12px; animation:adjExpand .18s ease">
+
+              <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px 20px">
+                <sc-for list="{{ item.fields }}" as="f" hint-placeholder-count="4">
+                  <div>
+                    <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">{{ f.label }}</div>
+                    <div style="font-size:13px; font-weight:{{ f.weight }}; color:{{ f.color }}">{{ f.value }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ item.isCredit }}" hint-placeholder-val="{{ false }}">
+                <div style="max-width:280px">
+                  <div style="height:6px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); overflow:hidden">
+                    <div style="width:58%; height:100%; background:var(--uih-success)"></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ item.hasAttrs }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:6px">
+                    <sc-for list="{{ item.attrs }}" as="attr" hint-placeholder-count="2">
+                      <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">{{ attr.label }}:</span> {{ attr.from }} <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>{{ attr.to }}</b></span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:4px">Note</div>
+                <div style="font-size:13px; color:var(--uih-text)">{{ item.note }}</div>
+              </div>
+
+              <div style="display:flex; gap:8px">
+                <sc-if value="{{ item.isActive }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)"><i class="fa-solid fa-pen" style="font-size:10px"></i> Edit</button>
+                  <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-danger); border:1px solid var(--uih-border)" style-hover="background:var(--uih-danger-bg)"><i class="fa-solid fa-ban" style="font-size:10px"></i> End Adjustment</button>
+                </sc-if>
+                <button type="button" style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-border)" style-hover="background:var(--uih-brand-pale)"><i class="fa-solid fa-receipt" style="font-size:10px"></i> View affected transactions</button>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OPTION 1A — Stacked card list ═══════════════ -->
+  <div id="1a" style="width:780px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#1a" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">1a</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Stacked card list</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— one card per adjustment, detail inline</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <i class="fa-solid fa-sliders" style="font-size:14px; color:var(--uih-text)"></i>
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">5</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column">
+
+        <!-- Waiver -->
+        <div style="display:flex; gap:14px; padding:16px 18px; border-bottom:1px solid var(--uih-border)">
+          <div style="width:38px; height:38px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--uih-warn-bg); color:var(--uih-warn-fg)"><i class="fa-solid fa-percent" style="font-size:15px"></i></div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <span style="font-size:14px; font-weight:700; color:var(--uih-text)">Waiver</span>
+              <span style="display:inline-flex; align-items:center; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span>
+              <span style="margin-left:auto; font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>01/03/2026 – 31/08/2026</span>
+            </div>
+            <div style="display:flex; gap:32px">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Waiver Amount</div>
+                <div style="font-size:13px; font-weight:600; color:var(--uih-text)">50% of fees</div>
+              </div>
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div>
+                <div style="font-size:13px; color:var(--uih-text)">Financial hardship</div>
+              </div>
+            </div>
+            <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>Approved by branch secretary, review before end of period.</div>
+          </div>
+        </div>
+
+        <!-- Member change -->
+        <div style="display:flex; gap:14px; padding:16px 18px; border-bottom:1px solid var(--uih-border)">
+          <div style="width:38px; height:38px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--uih-select-bg); color:var(--uih-brand-light)"><i class="fa-solid fa-user-pen" style="font-size:14px"></i></div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <span style="font-size:14px; font-weight:700; color:var(--uih-text)">Member Change</span>
+              <span style="display:inline-flex; align-items:center; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span>
+              <span style="margin-left:auto; font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>01/06/2026 – 31/08/2026</span>
+            </div>
+            <div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px">
+                <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">Category:</span> Full-time <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>Part-time</b></span>
+                <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">Employment:</span> Permanent <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>Casual</b></span>
+              </div>
+            </div>
+            <div style="display:flex; gap:32px">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div>
+                <div style="font-size:13px; color:var(--uih-text)">Reduced working hours</div>
+              </div>
+            </div>
+            <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>Member reverts to full-time rate from 01/09/2026.</div>
+          </div>
+        </div>
+
+        <!-- Credit -->
+        <div style="display:flex; gap:14px; padding:16px 18px; border-bottom:1px solid var(--uih-border)">
+          <div style="width:38px; height:38px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--uih-keep-bg); color:var(--uih-keep-fg)"><i class="fa-solid fa-coins" style="font-size:14px"></i></div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <span style="font-size:14px; font-weight:700; color:var(--uih-text)">Credit</span>
+              <span style="display:inline-flex; align-items:center; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span>
+              <span style="margin-left:auto; font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>15/04/2026 – until exhausted</span>
+            </div>
+            <div style="display:flex; gap:32px; align-items:flex-end">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Credit Total</div>
+                <div style="font-size:13px; font-weight:600; color:var(--uih-text)">$240.00</div>
+              </div>
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Remaining Balance</div>
+                <div style="font-size:13px; font-weight:600; color:var(--uih-keep-fg)">$138.50</div>
+              </div>
+              <div style="flex:1; max-width:220px; padding-bottom:3px">
+                <div style="height:6px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); overflow:hidden">
+                  <div style="width:58%; height:100%; background:var(--uih-success)"></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div>
+                <div style="font-size:13px; color:var(--uih-text)">Overpayment refund</div>
+              </div>
+            </div>
+            <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>Credit is drawn down before each scheduled debit.</div>
+          </div>
+        </div>
+
+        <!-- Suspension -->
+        <div style="display:flex; gap:14px; padding:16px 18px; border-bottom:1px solid var(--uih-border)">
+          <div style="width:38px; height:38px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--uih-alert-bg); color:var(--uih-alert)"><i class="fa-solid fa-pause" style="font-size:15px"></i></div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <span style="font-size:14px; font-weight:700; color:var(--uih-text)">Suspension</span>
+              <span style="display:inline-flex; align-items:center; padding:2px 9px; border-radius:99px; background:var(--uih-info-bg); color:var(--uih-info-fg); font-size:11px; font-weight:700">Scheduled</span>
+              <span style="margin-left:auto; font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>01/09/2026 – 30/11/2026</span>
+            </div>
+            <div style="display:flex; gap:32px">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div>
+                <div style="font-size:13px; color:var(--uih-text)">Parental leave</div>
+              </div>
+            </div>
+            <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>Membership stays active; no fees debited during the period.</div>
+          </div>
+        </div>
+
+        <!-- Pro-rata -->
+        <div style="display:flex; gap:14px; padding:16px 18px">
+          <div style="width:38px; height:38px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--uih-brand-pale); color:var(--uih-brand)"><i class="fa-solid fa-scale-balanced" style="font-size:14px"></i></div>
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <span style="font-size:14px; font-weight:700; color:var(--uih-text)">Pro-rata Membership</span>
+              <span style="display:inline-flex; align-items:center; padding:2px 9px; border-radius:99px; background:var(--uih-bg); color:var(--uih-text-muted); font-size:11px; font-weight:700; border:1px solid var(--uih-border)">Expired</span>
+              <span style="margin-left:auto; font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>15/01/2026 – 31/01/2026</span>
+            </div>
+            <div style="display:flex; gap:32px">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Pro-rata Amount</div>
+                <div style="font-size:13px; font-weight:600; color:var(--uih-text)">$86.40</div>
+              </div>
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div>
+                <div style="font-size:13px; color:var(--uih-text)">New joiner — part period</div>
+              </div>
+            </div>
+            <div style="font-size:12px; color:var(--uih-text-muted)"><i class="fa-regular fa-note-sticky" style="margin-right:6px"></i>Covers join date to first full payment date.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OPTION 1B — Data grid ═══════════════ -->
+  <div id="1b" style="width:920px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#1b" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">1b</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Data grid</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— compact table, one row per adjustment</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <i class="fa-solid fa-sliders" style="font-size:14px; color:var(--uih-text)"></i>
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">5</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:190px 200px 1fr 220px 96px; align-items:stretch">
+        <!-- head -->
+        <div style="padding:9px 14px 9px 18px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Type</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Period</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Reason &amp; Note</div>
+        <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Detail</div>
+        <div style="padding:9px 18px 9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Status</div>
+
+        <!-- Waiver -->
+        <div style="padding:12px 14px 12px 18px; border-top:1px solid var(--uih-border); display:flex; align-items:center; gap:9px"><i class="fa-solid fa-percent" style="width:16px; text-align:center; color:var(--uih-warn-fg)"></i><span style="font-size:13px; font-weight:600; color:var(--uih-text)">Waiver</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center">01/03/2026 – 31/08/2026</div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:2px; justify-content:center"><span style="font-size:13px; color:var(--uih-text)">Financial hardship</span><span style="font-size:11px; color:var(--uih-text-muted)">Approved by branch secretary</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center"><span><span style="color:var(--uih-text-muted)">Waiver:</span> <b>50% of fees</b></span></div>
+        <div style="padding:12px 18px 12px 14px; border-top:1px solid var(--uih-border); display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span></div>
+
+        <!-- Member change -->
+        <div style="padding:12px 14px 12px 18px; border-top:1px solid var(--uih-border); display:flex; align-items:center; gap:9px"><i class="fa-solid fa-user-pen" style="width:16px; text-align:center; color:var(--uih-brand-light)"></i><span style="font-size:13px; font-weight:600; color:var(--uih-text)">Member Change</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center">01/06/2026 – 31/08/2026</div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:2px; justify-content:center"><span style="font-size:13px; color:var(--uih-text)">Reduced working hours</span><span style="font-size:11px; color:var(--uih-text-muted)">Reverts from 01/09/2026</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:3px; justify-content:center; font-size:12px; color:var(--uih-text)"><span><span style="color:var(--uih-text-muted)">Category:</span> <b>Part-time</b></span><span><span style="color:var(--uih-text-muted)">Employment:</span> <b>Casual</b></span></div>
+        <div style="padding:12px 18px 12px 14px; border-top:1px solid var(--uih-border); display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span></div>
+
+        <!-- Credit -->
+        <div style="padding:12px 14px 12px 18px; border-top:1px solid var(--uih-border); display:flex; align-items:center; gap:9px"><i class="fa-solid fa-coins" style="width:16px; text-align:center; color:var(--uih-keep-fg)"></i><span style="font-size:13px; font-weight:600; color:var(--uih-text)">Credit</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center">15/04/2026 – until exhausted</div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:2px; justify-content:center"><span style="font-size:13px; color:var(--uih-text)">Overpayment refund</span><span style="font-size:11px; color:var(--uih-text-muted)">Drawn down before each debit</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:3px; justify-content:center; font-size:12px; color:var(--uih-text)"><span><span style="color:var(--uih-text-muted)">Total:</span> <b>$240.00</b></span><span><span style="color:var(--uih-text-muted)">Remaining:</span> <b style="color:var(--uih-keep-fg)">$138.50</b></span></div>
+        <div style="padding:12px 18px 12px 14px; border-top:1px solid var(--uih-border); display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span></div>
+
+        <!-- Suspension -->
+        <div style="padding:12px 14px 12px 18px; border-top:1px solid var(--uih-border); display:flex; align-items:center; gap:9px"><i class="fa-solid fa-pause" style="width:16px; text-align:center; color:var(--uih-alert)"></i><span style="font-size:13px; font-weight:600; color:var(--uih-text)">Suspension</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center">01/09/2026 – 30/11/2026</div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:2px; justify-content:center"><span style="font-size:13px; color:var(--uih-text)">Parental leave</span><span style="font-size:11px; color:var(--uih-text-muted)">Active membership, no fees debited</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text-muted); display:flex; align-items:center">—</div>
+        <div style="padding:12px 18px 12px 14px; border-top:1px solid var(--uih-border); display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-info-bg); color:var(--uih-info-fg); font-size:11px; font-weight:700">Scheduled</span></div>
+
+        <!-- Pro-rata -->
+        <div style="padding:12px 14px 12px 18px; border-top:1px solid var(--uih-border); display:flex; align-items:center; gap:9px"><i class="fa-solid fa-scale-balanced" style="width:16px; text-align:center; color:var(--uih-brand)"></i><span style="font-size:13px; font-weight:600; color:var(--uih-text)">Pro-rata</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center">15/01/2026 – 31/01/2026</div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:2px; justify-content:center"><span style="font-size:13px; color:var(--uih-text)">New joiner — part period</span><span style="font-size:11px; color:var(--uih-text-muted)">Join date to first full payment date</span></div>
+        <div style="padding:12px 14px; border-top:1px solid var(--uih-border); font-size:12px; color:var(--uih-text); display:flex; align-items:center"><span><span style="color:var(--uih-text-muted)">Amount:</span> <b>$86.40</b></span></div>
+        <div style="padding:12px 18px 12px 14px; border-top:1px solid var(--uih-border); display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); color:var(--uih-text-muted); font-size:11px; font-weight:700">Expired</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ OPTION 1C — Summary card grid ═══════════════ -->
+  <div id="1c" style="width:820px; flex:0 0 auto">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px">
+      <a href="#1c" style="display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 8px; border-radius:99px; background:var(--uih-brand); color:#fff; font-size:12px; font-weight:700; text-decoration:none">1c</a>
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Summary card grid</span>
+      <span style="font-size:12px; color:var(--uih-text-muted)">— two-up tiles, scannable at a glance</span>
+    </div>
+
+    <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+      <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+        <i class="fa-solid fa-sliders" style="font-size:14px; color:var(--uih-text)"></i>
+        <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+        <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">5</span>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+          <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:18px">
+
+        <!-- Waiver -->
+        <div style="border:1px solid var(--uih-border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; gap:9px; padding:10px 14px; background:var(--uih-warn-bg); border-bottom:1px solid var(--uih-border)">
+            <i class="fa-solid fa-percent" style="color:var(--uih-warn-fg); font-size:13px"></i>
+            <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Waiver</span>
+            <span style="margin-left:auto; display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span>
+          </div>
+          <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px; flex:1">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Period</div><div style="font-size:13px; color:var(--uih-text)">01/03 – 31/08/2026</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Waiver Amount</div><div style="font-size:13px; font-weight:700; color:var(--uih-text)">50% of fees</div></div>
+              <div style="grid-column:1 / -1"><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div><div style="font-size:13px; color:var(--uih-text)">Financial hardship</div></div>
+            </div>
+            <div style="margin-top:auto; font-size:11px; color:var(--uih-text-muted); border-top:1px dashed var(--uih-border); padding-top:8px">Approved by branch secretary, review before end of period.</div>
+          </div>
+        </div>
+
+        <!-- Member change -->
+        <div style="border:1px solid var(--uih-border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; gap:9px; padding:10px 14px; background:var(--uih-select-bg); border-bottom:1px solid var(--uih-border)">
+            <i class="fa-solid fa-user-pen" style="color:var(--uih-brand-light); font-size:13px"></i>
+            <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Member Change</span>
+            <span style="margin-left:auto; display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700">Active</span>
+          </div>
+          <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px; flex:1">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Period</div><div style="font-size:13px; color:var(--uih-text)">01/06 – 31/08/2026</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div><div style="font-size:13px; color:var(--uih-text)">Reduced working hours</div></div>
+            </div>
+            <div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+              <div style="display:flex; flex-direction:column; gap:5px">
+                <div style="display:flex; align-items:center; gap:7px; font-size:12px"><span style="color:var(--uih-text-muted); width:88px">Category</span><span style="color:var(--uih-text-muted); text-decoration:line-through">Full-time</span><i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i><b style="color:var(--uih-text)">Part-time</b></div>
+                <div style="display:flex; align-items:center; gap:7px; font-size:12px"><span style="color:var(--uih-text-muted); width:88px">Employment</span><span style="color:var(--uih-text-muted); text-decoration:line-through">Permanent</span><i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i><b style="color:var(--uih-text)">Casual</b></div>
+              </div>
+            </div>
+            <div style="margin-top:auto; font-size:11px; color:var(--uih-text-muted); border-top:1px dashed var(--uih-border); padding-top:8px">Member reverts to full-time rate from 01/09/2026.</div>
+          </div>
+        </div>
+
+        <!-- Credit -->
+        <div style="border:1px solid var(--uih-border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; gap:9px; padding:10px 14px; background:var(--uih-keep-bg); border-bottom:1px solid var(--uih-border)">
+            <i class="fa-solid fa-coins" style="color:var(--uih-keep-fg); font-size:13px"></i>
+            <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Credit</span>
+            <span style="margin-left:auto; display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-keep-bg); color:var(--uih-keep-fg); font-size:11px; font-weight:700; border:1px solid var(--uih-success-border)">Active</span>
+          </div>
+          <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px; flex:1">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Credit Total</div><div style="font-size:16px; font-weight:700; color:var(--uih-text)">$240.00</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Remaining</div><div style="font-size:16px; font-weight:700; color:var(--uih-keep-fg)">$138.50</div></div>
+            </div>
+            <div style="height:6px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); overflow:hidden"><div style="width:58%; height:100%; background:var(--uih-success)"></div></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Applied From</div><div style="font-size:13px; color:var(--uih-text)">15/04/2026</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div><div style="font-size:13px; color:var(--uih-text)">Overpayment refund</div></div>
+            </div>
+            <div style="margin-top:auto; font-size:11px; color:var(--uih-text-muted); border-top:1px dashed var(--uih-border); padding-top:8px">Credit is drawn down before each scheduled debit.</div>
+          </div>
+        </div>
+
+        <!-- Suspension -->
+        <div style="border:1px solid var(--uih-border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+          <div style="display:flex; align-items:center; gap:9px; padding:10px 14px; background:var(--uih-alert-bg); border-bottom:1px solid var(--uih-border)">
+            <i class="fa-solid fa-pause" style="color:var(--uih-alert); font-size:13px"></i>
+            <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Suspension</span>
+            <span style="margin-left:auto; display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-info-bg); color:var(--uih-info-fg); font-size:11px; font-weight:700">Scheduled</span>
+          </div>
+          <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px; flex:1">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Period</div><div style="font-size:13px; color:var(--uih-text)">01/09 – 30/11/2026</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div><div style="font-size:13px; color:var(--uih-text)">Parental leave</div></div>
+            </div>
+            <div style="margin-top:auto; font-size:11px; color:var(--uih-text-muted); border-top:1px dashed var(--uih-border); padding-top:8px">Membership stays active; no fees debited during the period.</div>
+          </div>
+        </div>
+
+        <!-- Pro-rata -->
+        <div style="border:1px solid var(--uih-border); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; grid-column:1 / -1">
+          <div style="display:flex; align-items:center; gap:9px; padding:10px 14px; background:var(--uih-brand-pale); border-bottom:1px solid var(--uih-border)">
+            <i class="fa-solid fa-scale-balanced" style="color:var(--uih-brand); font-size:13px"></i>
+            <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Pro-rata Membership</span>
+            <span style="margin-left:auto; display:inline-flex; padding:2px 9px; border-radius:99px; background:var(--uih-bg); border:1px solid var(--uih-border); color:var(--uih-text-muted); font-size:11px; font-weight:700">Expired</span>
+          </div>
+          <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px 16px">
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Period</div><div style="font-size:13px; color:var(--uih-text)">15/01 – 31/01/2026</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Pro-rata Amount</div><div style="font-size:13px; font-weight:700; color:var(--uih-text)">$86.40</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Reason</div><div style="font-size:13px; color:var(--uih-text)">New joiner — part period</div></div>
+              <div><div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">Note</div><div style="font-size:13px; color:var(--uih-text-muted)">Join date to first full payment date</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { expandedId: 'waiver', expandedId2b: 'credit', showHistorical2b: false, expandedId3: 'credit', showHistorical3: false };
+
+  renderVals() {
+    const data = [
+      {
+        id: 'waiver', icon: 'fa-solid fa-percent', iconBg: 'var(--uih-warn-bg)', iconColor: 'var(--uih-warn-fg)',
+        title: 'Waiver', summary: '50% of fees waived', period: '01/03/2026 – 31/08/2026',
+        status: 'Active', statusBg: 'var(--uih-keep-bg)', statusFg: 'var(--uih-keep-fg)', statusBorder: 'transparent',
+        note: 'Approved by branch secretary, review before end of period.',
+        fields: [
+          { label: 'Waiver Amount', value: '50% of fees', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '01/03/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/08/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Financial hardship', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'change', icon: 'fa-solid fa-user-pen', iconBg: 'var(--uih-select-bg)', iconColor: 'var(--uih-brand-light)',
+        title: 'Member Change', summary: '2 attributes changed', period: '01/06/2026 – 31/08/2026',
+        status: 'Active', statusBg: 'var(--uih-keep-bg)', statusFg: 'var(--uih-keep-fg)', statusBorder: 'transparent',
+        note: 'Member reverts to full-time rate from 01/09/2026.',
+        fields: [
+          { label: 'Start Date', value: '01/06/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/08/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Reduced working hours', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [
+          { label: 'Category', from: 'Full-time', to: 'Part-time' },
+          { label: 'Employment', from: 'Permanent', to: 'Casual' },
+        ],
+      },
+      {
+        id: 'credit', icon: 'fa-solid fa-coins', iconBg: 'var(--uih-keep-bg)', iconColor: 'var(--uih-keep-fg)',
+        title: 'Credit', summary: '$138.50 remaining of $240.00', period: '15/04/2026 – until exhausted',
+        status: 'Active', statusBg: 'var(--uih-keep-bg)', statusFg: 'var(--uih-keep-fg)', statusBorder: 'transparent',
+        note: 'Credit is drawn down before each scheduled debit.',
+        fields: [
+          { label: 'Credit Total', value: '$240.00', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Remaining Balance', value: '$138.50', weight: 700, color: 'var(--uih-keep-fg)' },
+          { label: 'Applied From', value: '15/04/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Overpayment refund', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'suspension', icon: 'fa-solid fa-pause', iconBg: 'var(--uih-alert-bg)', iconColor: 'var(--uih-alert)',
+        title: 'Suspension', summary: 'Membership on hold — no fees debited', period: '01/09/2026 – 30/11/2026',
+        status: 'Scheduled', statusBg: 'var(--uih-info-bg)', statusFg: 'var(--uih-info-fg)', statusBorder: 'transparent',
+        note: 'Membership stays active; no fees debited during the period.',
+        fields: [
+          { label: 'Start Date', value: '01/09/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '30/11/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Parental leave', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'prorata', icon: 'fa-solid fa-scale-balanced', iconBg: 'var(--uih-brand-pale)', iconColor: 'var(--uih-brand)',
+        title: 'Pro-rata Membership', summary: '$86.40 for part period', period: '15/01/2026 – 31/01/2026',
+        status: 'Expired', statusBg: 'var(--uih-bg)', statusFg: 'var(--uih-text-muted)', statusBorder: 'var(--uih-border)',
+        note: 'Covers join date to first full payment date.',
+        fields: [
+          { label: 'Pro-rata Amount', value: '$86.40', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '15/01/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/01/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'New joiner — part period', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+    ];
+
+    const adjustments = data.map((d) => {
+      const expanded = this.state.expandedId === d.id;
+      return {
+        ...d,
+        expanded,
+        hasAttrs: d.attrs.length > 0,
+        chevron: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+        rowBg: expanded ? 'var(--uih-bg)' : 'var(--uih-surface)',
+        toggle: () => this.setState({ expandedId: expanded ? null : d.id }),
+      };
+    });
+
+    const expiredStatus = { status: 'Expired', statusBg: 'var(--uih-bg)', statusFg: 'var(--uih-text-muted)', statusBorder: 'var(--uih-border)' };
+    const historicalData = [
+      {
+        id: 'h-waiver', ...expiredStatus, title: 'Waiver', period: '01/07/2025 – 30/09/2025',
+        note: 'One-off hardship waiver, closed on schedule.',
+        fields: [
+          { label: 'Waiver Amount', value: '$120.00', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '01/07/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '30/09/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Temporary hardship', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'h-suspension', ...expiredStatus, title: 'Suspension', period: '01/02/2025 – 31/05/2025',
+        note: 'Study leave; resumed full membership on return.',
+        fields: [
+          { label: 'Start Date', value: '01/02/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/05/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Study leave', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'h-change', ...expiredStatus, title: 'Member Change', period: '01/09/2024 – 31/12/2024',
+        note: 'Reverted to standard category at end of period.',
+        fields: [
+          { label: 'Start Date', value: '01/09/2024', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/12/2024', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Seasonal work', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [
+          { label: 'Category', from: 'Full-time', to: 'Seasonal' },
+        ],
+      },
+    ];
+
+    const reasonOf = (d) => (d.fields.find((f) => f.label === 'Reason') || {}).value || '—';
+    const detailOf = {
+      waiver: '50% of fees',
+      change: '2 fields updated',
+      credit: '$138.50 remaining',
+      suspension: 'No fees due',
+      prorata: '$86.40',
+      'h-waiver': '$120.00',
+      'h-suspension': 'No fees due',
+      'h-change': '1 field updated',
+    };
+
+    const createdBy = { waiver: 'Alicia Miller', change: 'Ravi Patel', credit: 'System (refund)', suspension: 'Alicia Miller', prorata: 'System (join)', 'h-waiver': 'Jo Tan', 'h-suspension': 'Alicia Miller', 'h-change': 'Ravi Patel' };
+    const createdOn = { waiver: '24/02/2026', change: '20/05/2026', credit: '15/04/2026', suspension: '12/08/2026', prorata: '15/01/2026', 'h-waiver': '28/06/2025', 'h-suspension': '25/01/2025', 'h-change': '26/08/2024' };
+
+    const allItems = [...data, ...historicalData];
+    const historicalCount = allItems.filter((d) => d.status === 'Expired').length;
+    const activeCount = allItems.length - historicalCount;
+
+    const makeBundle = (expandKey, histKey) => {
+      const showHistorical = this.state[histKey];
+      const source = showHistorical ? allItems : allItems.filter((d) => d.status !== 'Expired');
+      const grid = source.map((d) => {
+        const expanded = this.state[expandKey] === d.id;
+        const isPast = d.status === 'Expired';
+        return {
+          ...d,
+          reason: reasonOf(d),
+          detail: detailOf[d.id] || '—',
+          createdBy: createdBy[d.id] || '—',
+          createdOn: createdOn[d.id] || '—',
+          isCredit: d.id === 'credit',
+          expanded,
+          isActive: !isPast,
+          rowOpacity: isPast ? 0.6 : 1,
+          titleColor: isPast ? 'var(--uih-text-muted)' : 'var(--uih-text)',
+          bodyColor: isPast ? 'var(--uih-text-muted)' : 'var(--uih-text)',
+          hasAttrs: d.attrs.length > 0,
+          chevron: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          rowBg: expanded ? 'var(--uih-bg-hover)' : 'var(--uih-surface)',
+          toggle: () => this.setState({ [expandKey]: expanded ? null : d.id }),
+        };
+      });
+      return {
+        grid,
+        showHistorical,
+        toggleHistorical: () => this.setState({ [histKey]: !showHistorical }),
+        histToggleLabel: showHistorical ? 'Hide historical' : 'Show historical (' + historicalCount + ')',
+        histTrackBg: showHistorical ? 'var(--uih-brand-light)' : 'var(--uih-border)',
+        histKnobLeft: showHistorical ? '16px' : '2px',
+      };
+    };
+
+    const b2b = makeBundle('expandedId2b', 'showHistorical2b');
+    const b3 = makeBundle('expandedId3', 'showHistorical3');
+
+    return {
+      adjustments, activeCount, historicalCount,
+      grid: b2b.grid, showHistorical: b2b.showHistorical, toggleHistorical: b2b.toggleHistorical, histToggleLabel: b2b.histToggleLabel, histTrackBg: b2b.histTrackBg, histKnobLeft: b2b.histKnobLeft,
+      grid3: b3.grid, showHistorical3: b3.showHistorical, toggleHistorical3: b3.toggleHistorical, histToggleLabel3: b3.histToggleLabel, histTrackBg3: b3.histTrackBg, histKnobLeft3: b3.histKnobLeft,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/colors.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/typography.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/effects.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/platform.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/utilities.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/styles.css">
+<script src="_ds/union-template-design-system-712bc832-4f7d-4861-8bac-c880a5ac5b48/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  body { margin:0; background:var(--uih-bg); font-family:var(--uih-font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+  a { color: var(--uih-brand-light); text-decoration: none; }
+  a:hover { color: var(--uih-brand); text-decoration: underline; }
+  @keyframes adjExpand { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+</style>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1a4b8c"/><rect x="30" y="30" width="40" height="8" rx="2" fill="#fff"/><rect x="30" y="46" width="40" height="8" rx="2" fill="#e8f0fb"/><rect x="30" y="62" width="40" height="8" rx="2" fill="#e8f0fb"/></svg>
+</template>
+</helmet>
+
+<div style="padding:24px; max-width:900px; margin:0 auto">
+  <div style="background:var(--uih-surface); border:1px solid var(--uih-border); border-radius:12px; box-shadow:var(--uih-util-shadow); overflow:hidden">
+    <div style="display:flex; align-items:center; gap:10px; padding:12px 18px; background:var(--uih-bg); border-bottom:1px solid var(--uih-border)">
+      <span style="font-size:13px; font-weight:700; color:var(--uih-text)">Adjustments</span>
+      <span style="display:inline-flex; align-items:center; padding:1px 8px; border-radius:99px; background:var(--uih-brand-pale); color:var(--uih-brand); font-size:11px; font-weight:700">{{ activeCount }}</span>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:12px">
+        <button type="button" onClick="{{ toggleHistorical }}" style="display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-weight:600; cursor:pointer; white-space:nowrap; padding:5px 2px; font-size:12px; background:none; border:none; color:var(--uih-text-muted)" style-hover="color:var(--uih-brand-light)">
+          <span style="position:relative; width:30px; height:16px; border-radius:99px; background:{{ histTrackBg }}; transition:background .15s; flex:0 0 auto"><span style="position:absolute; top:2px; left:{{ histKnobLeft }}; width:12px; height:12px; border-radius:99px; background:#fff; transition:left .15s"></span></span>
+          <span style="display:inline-block; width:104px; text-align:left">{{ histToggleLabel }}</span>
+        </button>
+        <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; white-space:nowrap; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)">+ Add Adjustment</button>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:170px 190px 1fr 160px 100px 40px">
+      <div style="padding:9px 14px 9px 18px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Type</div>
+      <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Period</div>
+      <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Reason</div>
+      <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Detail</div>
+      <div style="padding:9px 14px; background:var(--uih-brand-pale); font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-brand)">Status</div>
+      <div style="padding:9px 14px; background:var(--uih-brand-pale)"></div>
+
+      <sc-for list="{{ grid }}" as="item" hint-placeholder-count="4">
+        <div onClick="{{ item.toggle }}" style="grid-column:1 / -1; display:grid; grid-template-columns:subgrid; border-top:1px solid var(--uih-border); cursor:pointer; background:{{ item.rowBg }}; opacity:{{ item.rowOpacity }}" style-hover="background:var(--uih-brand-pale); box-shadow:inset 3px 0 0 var(--uih-brand-light)">
+          <div style="padding:12px 14px 12px 18px; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:{{ item.titleColor }}">{{ item.title }}</div>
+          <div style="padding:12px 14px; display:flex; align-items:center; font-size:12px; color:var(--uih-text-muted)">{{ item.period }}</div>
+          <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.reason }}</div>
+          <div style="padding:12px 14px; display:flex; align-items:center; font-size:13px; font-weight:600; color:{{ item.bodyColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ item.detail }}</div>
+          <div style="padding:12px 14px; display:flex; align-items:center"><span style="display:inline-flex; padding:2px 9px; border-radius:99px; background:{{ item.statusBg }}; color:{{ item.statusFg }}; font-size:11px; font-weight:700; border:1px solid {{ item.statusBorder }}">{{ item.status }}</span></div>
+          <div style="padding:12px 14px; display:flex; align-items:center; justify-content:center"><i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--uih-text-muted); transition:transform .25s; transform:{{ item.chevron }}"></i></div>
+        </div>
+
+        <sc-if value="{{ item.expanded }}" hint-placeholder-val="{{ false }}">
+          <div style="grid-column:1 / -1; padding:6px 18px 16px 18px; background:var(--uih-bg); border-top:1px solid var(--uih-border); display:flex; flex-direction:column; gap:12px; animation:adjExpand .18s ease">
+
+            <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px 20px">
+              <sc-for list="{{ item.fields }}" as="f" hint-placeholder-count="4">
+                <div>
+                  <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:3px">{{ f.label }}</div>
+                  <div style="font-size:13px; font-weight:{{ f.weight }}; color:{{ f.color }}">{{ f.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ item.isCredit }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:280px">
+                <div style="height:6px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); overflow:hidden">
+                  <div style="width:58%; height:100%; background:var(--uih-success)"></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ item.hasAttrs }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:5px">Changed Attributes</div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px">
+                  <sc-for list="{{ item.attrs }}" as="attr" hint-placeholder-count="2">
+                    <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; background:var(--uih-surface); border:1px solid var(--uih-border); font-size:12px; color:var(--uih-text)"><span style="color:var(--uih-text-muted)">{{ attr.label }}:</span> {{ attr.from }} <i class="fa-solid fa-arrow-right" style="font-size:9px; color:var(--uih-text-muted)"></i> <b>{{ attr.to }}</b></span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <div>
+              <div style="font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--uih-text-muted); margin-bottom:4px">Note</div>
+              <div style="font-size:13px; color:var(--uih-text)">{{ item.note }}</div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:6px; padding-top:8px; border-top:1px solid var(--uih-border); font-size:11px; color:var(--uih-text-muted)">
+              <i class="fa-regular fa-clock" style="font-size:10px"></i>
+              <span>Created by <b style="font-weight:600; color:var(--uih-text)">{{ item.createdBy }}</b> on {{ item.createdOn }}</span>
+            </div>
+
+            <div style="display:flex; gap:8px">
+              <sc-if value="{{ item.isActive }}" hint-placeholder-val="{{ true }}">
+                <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-brand-light)"><i class="fa-solid fa-pen" style="font-size:10px"></i> Edit</button>
+                <button type="button" style="display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-danger); border:1px solid var(--uih-border)" style-hover="background:var(--uih-danger-bg)"><i class="fa-solid fa-ban" style="font-size:10px"></i> End Adjustment</button>
+              </sc-if>
+              <button type="button" style="margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-weight:700; cursor:pointer; padding:5px 12px; font-size:12px; border-radius:6px; background:var(--uih-surface); color:var(--uih-brand-light); border:1px solid var(--uih-border)" style-hover="background:var(--uih-brand-pale)"><i class="fa-solid fa-receipt" style="font-size:10px"></i> View affected transactions</button>
+            </div>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { expandedId: 'credit', showHistorical: false };
+
+  renderVals() {
+    const activeStatus = (s) => s === 'Scheduled'
+      ? { status: 'Scheduled', statusBg: 'var(--uih-info-bg)', statusFg: 'var(--uih-info-fg)', statusBorder: 'transparent' }
+      : { status: 'Active', statusBg: 'var(--uih-keep-bg)', statusFg: 'var(--uih-keep-fg)', statusBorder: 'transparent' };
+    const expired = { status: 'Expired', statusBg: 'var(--uih-bg)', statusFg: 'var(--uih-text-muted)', statusBorder: 'var(--uih-border)' };
+
+    const data = [
+      {
+        id: 'waiver', title: 'Waiver', period: '01/03/2026 – 31/08/2026', ...activeStatus(),
+        note: 'Approved by branch secretary, review before end of period.',
+        fields: [
+          { label: 'Waiver Amount', value: '50% of fees', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '01/03/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/08/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Financial hardship', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'change', title: 'Member Change', period: '01/06/2026 – 31/08/2026', ...activeStatus(),
+        note: 'Member reverts to full-time rate from 01/09/2026.',
+        fields: [
+          { label: 'Start Date', value: '01/06/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/08/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Reduced working hours', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [
+          { label: 'Category', from: 'Full-time', to: 'Part-time' },
+          { label: 'Employment', from: 'Permanent', to: 'Casual' },
+        ],
+      },
+      {
+        id: 'credit', title: 'Credit', period: '15/04/2026 – until exhausted', ...activeStatus(),
+        note: 'Credit is drawn down before each scheduled debit.',
+        fields: [
+          { label: 'Credit Total', value: '$240.00', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Remaining Balance', value: '$138.50', weight: 700, color: 'var(--uih-keep-fg)' },
+          { label: 'Applied From', value: '15/04/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Overpayment refund', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'suspension', title: 'Suspension', period: '01/09/2026 – 30/11/2026', ...activeStatus('Scheduled'),
+        note: 'Membership stays active; no fees debited during the period.',
+        fields: [
+          { label: 'Start Date', value: '01/09/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '30/11/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Parental leave', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'prorata', title: 'Pro-rata Membership', period: '15/01/2026 – 31/01/2026', ...expired,
+        note: 'Covers join date to first full payment date.',
+        fields: [
+          { label: 'Pro-rata Amount', value: '$86.40', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '15/01/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/01/2026', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'New joiner — part period', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'h-waiver', title: 'Waiver', period: '01/07/2025 – 30/09/2025', ...expired,
+        note: 'One-off hardship waiver, closed on schedule.',
+        fields: [
+          { label: 'Waiver Amount', value: '$120.00', weight: 700, color: 'var(--uih-text)' },
+          { label: 'Start Date', value: '01/07/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '30/09/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Temporary hardship', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'h-suspension', title: 'Suspension', period: '01/02/2025 – 31/05/2025', ...expired,
+        note: 'Study leave; resumed full membership on return.',
+        fields: [
+          { label: 'Start Date', value: '01/02/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/05/2025', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Study leave', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [],
+      },
+      {
+        id: 'h-change', title: 'Member Change', period: '01/09/2024 – 31/12/2024', ...expired,
+        note: 'Reverted to standard category at end of period.',
+        fields: [
+          { label: 'Start Date', value: '01/09/2024', weight: 400, color: 'var(--uih-text)' },
+          { label: 'End Date', value: '31/12/2024', weight: 400, color: 'var(--uih-text)' },
+          { label: 'Reason', value: 'Seasonal work', weight: 400, color: 'var(--uih-text)' },
+        ],
+        attrs: [{ label: 'Category', from: 'Full-time', to: 'Seasonal' }],
+      },
+    ];
+
+    const detailOf = {
+      waiver: '50% of fees', change: '2 fields updated', credit: '$138.50 remaining',
+      suspension: 'No fees due', prorata: '$86.40',
+      'h-waiver': '$120.00', 'h-suspension': 'No fees due', 'h-change': '1 field updated',
+    };
+    const createdBy = { waiver: 'Alicia Miller', change: 'Ravi Patel', credit: 'System (refund)', suspension: 'Alicia Miller', prorata: 'System (join)', 'h-waiver': 'Jo Tan', 'h-suspension': 'Alicia Miller', 'h-change': 'Ravi Patel' };
+    const createdOn = { waiver: '24/02/2026', change: '20/05/2026', credit: '15/04/2026', suspension: '12/08/2026', prorata: '15/01/2026', 'h-waiver': '28/06/2025', 'h-suspension': '25/01/2025', 'h-change': '26/08/2024' };
+    const reasonOf = (d) => (d.fields.find((f) => f.label === 'Reason') || {}).value || '—';
+
+    const showHistorical = this.state.showHistorical;
+    const historicalCount = data.filter((d) => d.status === 'Expired').length;
+    const activeCount = data.length - historicalCount;
+    const source = showHistorical ? data : data.filter((d) => d.status !== 'Expired');
+
+    const grid = source.map((d) => {
+      const expanded = this.state.expandedId === d.id;
+      const isPast = d.status === 'Expired';
+      return {
+        ...d,
+        reason: reasonOf(d),
+        detail: detailOf[d.id] || '—',
+        createdBy: createdBy[d.id] || '—',
+        createdOn: createdOn[d.id] || '—',
+        isCredit: d.id === 'credit',
+        expanded,
+        isActive: !isPast,
+        rowOpacity: isPast ? 0.6 : 1,
+        titleColor: isPast ? 'var(--uih-text-muted)' : 'var(--uih-text)',
+        bodyColor: isPast ? 'var(--uih-text-muted)' : 'var(--uih-text)',
+        hasAttrs: d.attrs.length > 0,
+        chevron: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+        rowBg: expanded ? 'var(--uih-bg-hover)' : 'var(--uih-surface)',
+        toggle: () => this.setState({ expandedId: expanded ? null : d.id }),
+      };
+    });
+
+    return {
+      grid, activeCount, historicalCount,
+      showHistorical,
+      toggleHistorical: () => this.setState({ showHistorical: !showHistorical }),
+      histToggleLabel: showHistorical ? 'Hide historical' : 'Show historical (' + historicalCount + ')',
+      histTrackBg: showHistorical ? 'var(--uih-brand-light)' : 'var(--uih-border)',
+      histKnobLeft: showHistorical ? '16px' : '2px',
+    };
+  }
+}
+</script>
+</body>
+</html>

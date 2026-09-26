@@ -1,0 +1,56 @@
+/* Preview chrome for the dues adjustments prototype. Not part of the
+   candidate: nothing here is proposed for the theme. */
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font-family: var(--font-body);
+}
+
+.adj-preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+}
+
+.adj-preview-bar > strong {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+}
+
+.adj-preview-bar__group {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.adj-preview-bar button {
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.adj-preview-bar button[aria-pressed="true"] {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+  color: var(--brand-800);
+}
+
+.adj-preview-stage {
+  padding: var(--page-gutter);
+}
+
+.adj-preview-frame {
+  max-width: 100%;
+  margin-inline: auto;
+}

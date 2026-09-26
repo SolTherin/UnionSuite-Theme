@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dues Adjustments</title>
+  <!-- Live theme in production load order, then the candidates. -->
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <!-- Contact page v3 candidate: button sizes (section 11) and heading menus. -->
+  <link rel="stylesheet" href="../contact-page-v3/theme-candidate.css">
+  <link rel="stylesheet" href="dues-adjustments.candidate.css">
+  <link rel="stylesheet" href="dues-adjustments.preview.css">
+</head>
+<body>
+  <!-- Preview chrome only: not part of the candidate. -->
+  <div class="adj-preview-bar" role="toolbar" aria-label="Preview options">
+    <strong>Dues adjustments</strong>
+    <span>WIP · sample data · live theme CSS/JS + candidate</span>
+    <button type="button" data-preview-scheme aria-pressed="false">Mode: light</button>
+    <span class="adj-preview-bar__group" role="group" aria-label="Panel width">
+      <button type="button" data-preview-width="100%" aria-pressed="true">Full</button>
+      <button type="button" data-preview-width="820px" aria-pressed="false">820</button>
+      <button type="button" data-preview-width="620px" aria-pressed="false">620</button>
+      <button type="button" data-preview-width="380px" aria-pressed="false">380</button>
+    </span>
+    <a href="supplied/Adjustments-3a.dc.html">Supplied source</a>
+  </div>
+
+  <main class="adj-preview-stage">
+    <div class="adj-preview-frame" data-preview-frame>
+      <!-- iMIS output of one Query Template Display iPart.
+           CSS class field: us-adjustments us-action-finance-add-adjustment
+           (iMIS inserts it as the wrapper div below). Title: Adjustments.
+           Each <section> is one result: iMIS's wrappers around the author
+           template, which starts at <div class="us-adjustment">. -->
+      <div class="ContentItemContainer">
+        <div class="us-adjustments us-action-finance-add-adjustment">
+          <div class="panel">
+            <div class="panel-heading Distinguish"><h2 class="panel-title">Adjustments</h2></div>
+            <div class="panel-body-container">
+              <div class="panel-body">
+                <div class="QueryTemplateSet">
+                  <section data-item="0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Active">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Waiver</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Mar 2026 – 31 Aug 2026</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Financial hardship</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">50% of fees</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Active</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">50% of fees</dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Mar 2026</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">31 Aug 2026</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Financial hardship</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Approved by branch secretary, review before end of period.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Alicia Miller</strong> on 24 Feb 2026</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="1" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Active">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Member change</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Jun 2026 – 31 Aug 2026</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Reduced working hours</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">2 fields updated</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Active</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Jun 2026</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">31 Aug 2026</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Reduced working hours</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"><span class="us-badge"><span class="us-adjustment__attr-label">Category:</span> Full-time <i class="ti ti-arrow-right" aria-hidden="true"></i><span class="sr-only"> to </span> <span class="us-adjustment__attr-to">Part-time</span></span><span class="us-badge"><span class="us-adjustment__attr-label">Employment:</span> Permanent <i class="ti ti-arrow-right" aria-hidden="true"></i><span class="sr-only"> to </span> <span class="us-adjustment__attr-to">Casual</span></span></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Member reverts to full-time rate from 01 Sep 2026.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Ravi Patel</strong> on 20 May 2026</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="2" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Active">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Credit</span>
+                        <span class="us-adjustment__cell us-adjustment__period">15 Apr 2026 – until exhausted</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Overpayment refund</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">$138.50 remaining</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Active</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel">
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$240.00</dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive">$138.50</dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">15 Apr 2026</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">Until exhausted</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Overpayment refund</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="138.5" max="240" aria-label="Credit remaining">$138.50 of $240.00 remaining</progress>
+                          <div class="us-adjustment__meter-caption">$138.50 of $240.00 remaining</div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Credit is drawn down before each scheduled debit.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>System (refund)</strong> on 15 Apr 2026</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="3" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Scheduled">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Suspension</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Sep 2026 – 30 Nov 2026</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Parental leave</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">No fees due</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Scheduled</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Sep 2026</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">30 Nov 2026</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Parental leave</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Membership stays active; no fees debited during the period.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Alicia Miller</strong> on 12 Aug 2026</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="4" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Expired">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Pro-rata membership</span>
+                        <span class="us-adjustment__cell us-adjustment__period">15 Jan 2026 – 31 Jan 2026</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">New joiner — part period</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">$86.40</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Expired</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$86.40</dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">15 Jan 2026</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">31 Jan 2026</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">New joiner — part period</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Covers join date to first full payment date.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>System (join)</strong> on 15 Jan 2026</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="5" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Expired">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Waiver</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Jul 2025 – 30 Sep 2025</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Temporary hardship</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">$120.00</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Expired</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$120.00</dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Jul 2025</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">30 Sep 2025</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Temporary hardship</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">One-off hardship waiver, closed on schedule.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Jo Tan</strong> on 28 Jun 2025</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="6" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Expired">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Suspension</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Feb 2025 – 31 May 2025</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Study leave</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">No fees due</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Expired</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Feb 2025</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">31 May 2025</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Study leave</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Study leave; resumed full membership on return.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Alicia Miller</strong> on 25 Jan 2025</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                  <section data-item="7" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">
+                    <div class="us-adjustment" data-us-adjustment-status="Expired">
+                      <button type="button" class="us-adjustment__row" aria-expanded="false">
+                        <span class="us-adjustment__cell us-adjustment__title">Member change</span>
+                        <span class="us-adjustment__cell us-adjustment__period">01 Sep 2024 – 31 Dec 2024</span>
+                        <span class="us-adjustment__cell us-adjustment__reason">Seasonal work</span>
+                        <span class="us-adjustment__cell us-adjustment__detail">1 field updated</span>
+                        <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge">Expired</span></span>
+                        <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
+                      </button>
+                      <div class="us-adjustment__panel" hidden>
+                        <dl class="us-adjustment__fields">
+                          <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong"></dd></div>
+                          <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
+                          <div><dt class="us-adjustment__label">Start date</dt><dd class="us-adjustment__value">01 Sep 2024</dd></div>
+                          <div><dt class="us-adjustment__label">End date</dt><dd class="us-adjustment__value">31 Dec 2024</dd></div>
+                          <div><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Seasonal work</dd></div>
+                        </dl>
+                        <div class="us-adjustment__meter">
+                          <progress value="" max="" aria-label="Credit remaining"></progress>
+                          <div class="us-adjustment__meter-caption"></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Changed attributes</div>
+                          <div class="us-adjustment__attrs"><span class="us-badge"><span class="us-adjustment__attr-label">Category:</span> Full-time <i class="ti ti-arrow-right" aria-hidden="true"></i><span class="sr-only"> to </span> <span class="us-adjustment__attr-to">Seasonal</span></span></div>
+                        </div>
+                        <div>
+                          <div class="us-adjustment__label">Note</div>
+                          <p class="us-adjustment__note">Reverted to standard category at end of period.</p>
+                        </div>
+                        <p class="us-adjustment__origin"><i class="ti ti-clock" aria-hidden="true"></i><span>Created by <strong>Ravi Patel</strong> on 26 Aug 2024</span></p>
+                        <div class="us-adjustment__actions">
+                          <button type="button" class="us-action-finance-edit-adjustment">Edit</button>
+                          <button type="button" class="us-action-finance-end-adjustment">End adjustment</button>
+                          <button type="button" class="us-action-finance-view-adjustment-transactions">View affected transactions</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div></div></section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+  <script src="../contact-page-v3/theme-candidate-heading-menus.js"></script>
+  <script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+  <script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+  <script src="../contact-page-v3/finance-actions.fixture.js"></script>
+  <script src="adjustment-actions.fixture.js"></script>
+  <script src="dues-adjustments.candidate.js"></script>
+  <script src="dues-adjustments.preview.js"></script>
+</body>
+</html>

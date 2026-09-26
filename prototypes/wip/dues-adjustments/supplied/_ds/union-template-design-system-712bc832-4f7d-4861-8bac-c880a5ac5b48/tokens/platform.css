@@ -1,0 +1,69 @@
+/* ─────────────────────────────────────────────────────────────
+   PLATFORM (HUB) — the iMIS platform shell & record-page language
+   Sourced from the HUB Membership Profile design (Option E, selected)
+   and the Agreement/Case record page. This is the surrounding iMIS
+   chrome — top bar, dark side nav, record banner — that UIH tools sit
+   inside. Distinct from the Report Builder tool tokens in colors.css.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* ── Brand navy (record banners, headings) ────────────── */
+  --uih-navy:      #13283f;
+  --uih-navy-top:  #1d3c5f;   /* banner gradient start */
+  --uih-navy-bot:  #15304e;   /* banner gradient end */
+
+  /* ── Side navigation (dark) ───────────────────────────── */
+  --uih-sidebar:       #0f2339;
+  --uih-sidebar-line:  rgba(255,255,255,.07);
+  --uih-sidebar-text:  #c4d0dd;
+  --uih-sidebar-muted: #7e8ea0;
+
+  /* ── HUB orange (brand accent — logo, active nav) ─────── */
+  --uih-hub-orange:      #f47b20;
+  --uih-hub-orange-soft: #fbeada;
+
+  /* ── Interactive blue (links, section rail, primary btns) */
+  --uih-hub-blue:      #1f63c9;
+  --uih-hub-blue-dark: #19529f;
+  --uih-hub-link:      #1763b8;
+
+  /* Canonical in-content primary (conflict resolution: HUB blue wins over
+     legacy #2563eb; page-chrome actions use --uih-content-accent instead;
+     the Report Builder keeps --uih-brand-light inside that tool only). */
+  --uih-primary:       var(--uih-hub-blue);
+  --uih-primary-hover: var(--uih-hub-blue-dark);
+
+  /* ── Status accents (people, alerts, tags) ────────────── */
+  --uih-hub-red:        #df3b3b;
+  --uih-hub-red-bg:     #fcebea;
+  --uih-hub-amber:      #9a6510;
+  --uih-hub-amber-bg:   #fdf4dc;
+  --uih-hub-amber-line: #e6b54a;
+  --uih-hub-green:      #2e9d62;
+  --uih-hub-green-bg:   #e7f5ee;
+  --uih-hub-purple:     #7b46c9;
+
+  /* ── Record-page ink & neutrals ───────────────────────── */
+  --uih-hub-ink:         #22303f;
+  --uih-hub-sub:         #5c6a79;
+  --uih-hub-label:       #8893a2;
+  --uih-hub-border:      #e3e8ef;
+  --uih-hub-border-soft: #edf1f6;
+  --uih-hub-card-head:   #f5f7fa;
+  --uih-hub-page:        #eef1f5;
+  --uih-hub-page-alt:    #f3f5f9;  /* record content bg */
+  --uih-hub-rail-active: #eef4fd;  /* active section pill */
+
+  /* ── Content page header (non-app RiSE pages, e.g. Staff) ─ */
+  --uih-content-banner:       #2c3e50;  /* dark slate header bar */
+  --uih-content-accent:       #3498db;  /* selected section / Actions */
+  --uih-content-accent-hover: #2980b9;
+  --uih-content-page:         #ececec;  /* page background */
+
+  /* ── Display / brand font ─────────────────────────────── */
+  --uih-font-display: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* ── Fixed platform metrics ───────────────────────────── */
+  --uih-topbar-h:   60px;
+  --uih-sidenav-w:  212px;
+  --uih-rail-w:     226px;   /* record section rail */
+}
