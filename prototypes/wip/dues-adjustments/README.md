@@ -202,7 +202,7 @@ The panel's own width decides the layout (container queries):
 
 | Panel width | Layout |
 |---|---|
-| 1100px and wider | Status, Type, Fee effect, Period, Reason. The expanded panel's Reason field hides, so the reason is not shown twice. |
+| 1100px and wider | Status, Type, Fee effect, Period, Reason. The expanded panel's Reason field hides, so the reason is not shown twice, and the credit meter sits in its first row, beside Amount and Remaining balance. |
 | 761–1099px | Status, Type, Fee effect, Period; Reason in the expanded panel. |
 | 760px and narrower | Each row stacks into a card: type and status, the fee effect, then the period and its relative time on one line (`01 Mar 2026 – 31 Aug 2026 · 11 days left`). |
 

@@ -454,6 +454,41 @@
   .us-adjustment__fields > .us-adjustment__field--reason {
     display: none;
   }
+
+  /* The credit meter joins the first row, beside Amount and Remaining
+     balance; every other block keeps its own full-width row. */
+  .us-adjustment__panel {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--space-4) var(--space-6);
+  }
+
+  .us-adjustment__panel > * {
+    grid-column: 1 / -1;
+  }
+
+  .us-adjustment__panel > .us-adjustment__fields {
+    display: flex;
+    grid-column: 1;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .us-adjustment__fields > div {
+    min-width: 150px;
+  }
+
+  .us-adjustment__panel > .us-adjustment__meter {
+    grid-column: 2;
+    align-self: center;
+    width: 100%;
+  }
+
+  /* With Reason in the row, a type with no amount has no fields left; drop
+     the empty list so it leaves no gap above the next block. */
+  .us-adjustment__fields:not(:has(> div:not(.us-adjustment__field--reason) > dd:not(:empty))) {
+    display: none;
+  }
 }
 
 .us-adjustments__head-reason {
