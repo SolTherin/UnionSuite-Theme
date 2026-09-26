@@ -1954,17 +1954,12 @@
    the row as before. The box never drops below 440px, so its own container
    stays wider than the theme's 420px stacked layout, and on phones that
    floor is the full width anyway. The all-clear line keeps the floor too.
-   US-ATTENTION-HIDE-ZERO sets --us-attention-shown. */
+   US-ATTENTION-HIDE-ZERO sets --us-attention-shown. The width changes
+   instantly (owner, 26 September 2026): it changes once, as the counts
+   load, and animating width would relayout the page on every frame. */
 .us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --us-attention-slots: 4;
   width: min(100%, max(440px, 100% * var(--us-attention-shown, 4) / var(--us-attention-slots)));
-  transition: width 200ms cubic-bezier(.2, 0, 0, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    transition: none;
-  }
 }
 
 .us-attention--hide-zero > .us-attention__items[hidden],
