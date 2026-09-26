@@ -5379,11 +5379,9 @@ SOFTWARE.
   // collapse/expand animation is holding the content.
   function placeSwitcher(cco, entry, collapsedDesktop) {
     if (holding) return;
-    const view = Array.from(cco.querySelectorAll(':scope > .RadMultiPage > .rmpView'))
-      .find(node => node.getClientRects().length);
-    const host = view && Array.from(view.children).find(node => node.getClientRects().length);
+    const host = sectionsHost(openView(cco));
     const tabs = host?.querySelector('.us-section-navigation .us-section-tabs');
-    const previous = cco.querySelector(':scope > .RadMultiPage > .rmpView > [data-us-cco-sections-host]');
+    const previous = cco.querySelector(':scope > .RadMultiPage > .rmpView [data-us-cco-sections-host]');
     const wasInline = cco.hasAttribute('data-us-cco-sections-inline');
     let inline = false;
     if (collapsedDesktop && tabs) {
@@ -5480,8 +5478,37 @@ SOFTWARE.
       .find(node => node.getClientRects().length) || null;
   }
 
+  const visibleChildren = node => Array.from(node.children).filter(child => child.getClientRects().length);
+
+  // The blocks are the tab's visible iParts, however the content page nests
+  // them (.ContentWizardDisplay > div > .row > .col-* > .WebPartZone), so
+  // several iParts in one zone or row still move one by one. iParts inside
+  // another iPart move with it. A view with no iParts falls back to its
+  // visible children.
   function contentBlocks(view) {
-    return view ? Array.from(view.children).filter(node => node.getClientRects().length) : [];
+    if (!view) return [];
+    const parts = Array.from(view.querySelectorAll('.ContentItemContainer')).filter(node =>
+      node.getClientRects().length && !view.contains(node.parentElement.closest('.ContentItemContainer')));
+    return parts.length ? parts : visibleChildren(view);
+  }
+
+  // The block a leading section switcher can share the Sections row with: the
+  // highest ancestor of its .us-section-navigation that holds nothing else
+  // visible (its layout row, or its own iPart when other iParts share the
+  // zone). Null unless the switcher is the first visible content of the tab.
+  function sectionsHost(view) {
+    const nav = view?.querySelector('.us-section-navigation');
+    if (!nav || !nav.getClientRects().length) return null;
+    let host = nav;
+    let settled = false;
+    for (let node = nav; node !== view; node = node.parentElement) {
+      const parent = node.parentElement;
+      const shown = visibleChildren(parent);
+      if (shown[0] !== node) return null;
+      if (!settled && parent !== view && shown.length === 1) host = parent;
+      else settled = true;
+    }
+    return host;
   }
 
   // Bottom edge of the menu at time t (0-1), matching animateRail's steps.

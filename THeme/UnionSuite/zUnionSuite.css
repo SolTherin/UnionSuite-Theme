@@ -8424,12 +8424,12 @@ html.us-taskbar-mounted #hd .search-dropdown {
     justify-self: end;
   }
 
-  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView > [data-us-cco-sections-host] {
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView [data-us-cco-sections-host] {
     margin-top: var(--us-cco-sections-offset, 0px);
     margin-inline-start: var(--us-cco-bar-space, 0px);
   }
 
-  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView > [data-us-cco-sections-host] {
+  :root :is(.us-cco-collapsible, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical.tabs-right[data-us-cco-rail="collapsed"][data-us-cco-sections-inline] > .RadMultiPage > .rmpView [data-us-cco-sections-host] {
     margin-inline-start: 0;
     margin-inline-end: var(--us-cco-bar-space, 0px);
   }
