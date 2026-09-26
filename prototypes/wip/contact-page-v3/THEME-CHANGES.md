@@ -186,6 +186,10 @@ selectors, so it moves across unchanged.
       One payment tracker per payment type: Failed payments, Overdue
       invoices, Missed deductions. See README Owner decisions,
       26 September 2026.
+- [ ] Item 12: register `membership.log-retention-call` and
+      `membership.process-resignation` in the client `Actions.js` (popups
+      with the contact's ID), replacing the fixture's; the Alerts IQA's
+      resignation template carries their buttons.
 - [ ] Item 28: the tracker width cap (section 28) needs
       `--us-attention-shown` set where the `US-ATTENTION` loader filters
       zero cards.

@@ -573,18 +573,23 @@
   gap: var(--space-2) var(--space-4);
 }
 
-/* The message takes only its text width, so the buttons follow the sentence
-   instead of sitting at the far edge. When they no longer fit on the line,
-   they wrap underneath, aligned with the text. */
+/* The buttons sit at the alert's right edge (owner, 26 September 2026), so
+   every alert's actions line up in one column down the Summary. When they
+   no longer fit beside the message, they wrap underneath, still at the
+   right. Alert actions are registered actions, which the runtime paints as
+   outline buttons with icons; none is filled, since the alert itself
+   carries the emphasis, and the likelier step comes first. */
 .us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):has(> .us-alerts__actions) > p:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  flex: 0 1 auto;
+  flex: 1 1 20rem;
   margin: 0;
 }
 
 .us-alerts .us-alerts__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: var(--space-2);
+  margin-inline-start: auto;
 }
 
 

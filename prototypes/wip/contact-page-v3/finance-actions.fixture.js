@@ -79,4 +79,11 @@
   // Suspension is a pause for leave (travel, parental), not a penalty: no
   // danger tone and no confirm. Its editor (leave dates, reason) is the check.
   define('membership.suspend', { label: 'Suspend membership', order: 2 });
+  // Resignation alert (Summary and the bell, item 12). Registered like every
+  // other action so the runtime paints alert buttons one way: outline with an
+  // icon, the likelier step first. Log retention call records the call staff
+  // make before a resignation takes effect; Process resignation opens the
+  // resignation workflow.
+  define('membership.log-retention-call', { label: 'Log retention call', icon: 'ti-phone', order: 1 });
+  define('membership.process-resignation', { label: 'Process resignation', icon: 'ti-user-minus', order: 2 });
 })();

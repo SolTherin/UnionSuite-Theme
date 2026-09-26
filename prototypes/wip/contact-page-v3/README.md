@@ -124,7 +124,7 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 | 6 | Read-only data panel fields: padding 12 → 6px; panel body padding reduced. | Field 64 → 52px | Site-wide: `[data-us-panel]` read-only | Data display panel rules |
 | 7 | Header contrast: report column headers `--neutral-200` with a `--neutral-300` rule (the old token resolved almost to the panel header shade). | Column head `#f3f4f4` → `#e5e6e7` | Site-wide: native reports | IQA token block after `US-IQA-BASELINE` |
 | 8 | `us-iqa-row-groups`: adjacent rows sharing the first column collapse under the first row with a toggle. When every hidden row has the same status badge, the toggle names it and takes its tone (v1's failed attempts: "› 2 declined" in red); otherwise "n more". Expanded detail rows read as one block, as in v1: tone tint (or grey), no rules between them, 12px text, a dot in place of the repeated key (still in the cell for export and screen readers), one tinted rule closing the group (24 September 2026). Rows stay native (sorting, paging, export unchanged). See [Row groups](#row-groups). | — | Opt-in per Query Menu iPart | New CSS after the IQA report rules; `US-IQA-ROW-GROUPS` JS |
-| 9 | `us-alerts`: lighter native messages (pale border, 4px coloured left edge, 13px text, even padding; outer paragraph margins trimmed by item 22) and an optional `.us-alerts__actions` group with small buttons that follow the message text (16px after it, or wrapped underneath and aligned with the text when the line is full). Alerts live on the Summary tab. | Alert 57 → 48px; buttons 37 → 28px | Opt-in per iPart | New block after the native feedback messages |
+| 9 | `us-alerts`: lighter native messages (pale border, 4px coloured left edge, 13px text, even padding; outer paragraph margins trimmed by item 22) and an optional `.us-alerts__actions` group with small buttons at the alert's right edge (26 September 2026; they had followed the message text), wrapping underneath, still right-aligned, when the line is full. Alert actions are registered actions, so the runtime paints them all alike: outline buttons with icons, none filled, the likelier step first. Alerts live on the Summary tab. | Alert 57 → 48px; buttons 37 → 28px | Opt-in per iPart | New block after the native feedback messages |
 | 10 | `us-cco-collapsible` (also brought by `us-cco-rail`, item 16): collapsible vertical CCO rail. See [Collapsible rail](#collapsible-rail). | Content +240px wide when collapsed | Opt-in per CCO iPart | New block after `US-NATIVE-TABS-COMPONENT`; `US-CCO-RAIL-COLLAPSE` JS |
 | 11 | Buttons: standard `TextButton` text 15px/500 → 13px/600, height held at 36px to match form fields. `SmallButton` / `UseSmallButton` fixed at 28px with 12px text (was 85% of the surrounding text). Alert buttons are small automatically. | Standard 37 → 36px | Site-wide: every native button | `99-Orion.css` base button rule and `.SmallButton` (Orion is project-owned; change it in place) |
 | 12 | Banner alert bell with count badge and popup list. See [Alert bell](#alert-bell). | 1 small request per page | Opt-in per banner template | `US-BANNER-COMPONENT` (after Quick Actions); `US-BANNER-ALERTS` JS; `Banner-Contact-Template.html` |
@@ -690,6 +690,13 @@ explicit approval.
   debit), Overdue invoices (invoice), Missed deductions (payroll). The
   prototype's trackers and overdue alert follow the toolbar's "Pays by" and
   "Arrears" buttons.
+- 26 September 2026: every alert action has the same styling, an outline
+  button with an icon, because each is a registered action the runtime
+  paints (the resignation's "Save member" and "Process resignation" were
+  hand-made filled buttons). The resignation alert's actions are now Log
+  retention call and Process resignation (`membership.log-retention-call`,
+  `membership.process-resignation`, in the fixture until they reach the
+  client `Actions.js`). Alert buttons sit at the alert's right edge.
 - 26 September 2026, phones: the alert bell moves to the top right of the
   banner, on the name line, when expanded as well as condensed. Expanded,
   Quick Actions runs the full width on its own line under the status
