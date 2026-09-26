@@ -325,7 +325,9 @@
 }
 
 /* Credit drawdown: a native <progress> so the value reaches assistive
-   technology; the script removes it when the row has no credit. */
+   technology; the script removes it when the row has no credit. The strong
+   border keeps the unfilled (used) part visible on the panel's subtle
+   background. */
 .us-adjustment__meter {
   max-width: 280px;
 }
@@ -334,7 +336,7 @@
   display: block;
   width: 100%;
   height: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--bg-surface);
   appearance: none;
