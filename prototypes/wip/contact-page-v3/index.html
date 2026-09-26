@@ -33,6 +33,7 @@
   <button type="button" class="cv2-toggle" id="cv3-payment-type">Pays by: auto debit</button>
   <button type="button" class="cv2-toggle" id="cv3-invoice-state" aria-pressed="true">Arrears: overdue</button>
   <button type="button" class="cv2-toggle" id="cv3-adjustments-state" aria-pressed="true">Adjustments: active</button>
+  <button type="button" class="cv2-toggle" id="cv3-positions-state">Positions: 2</button>
   <button type="button" class="cv2-toggle" id="cv3-trackers-clear" aria-pressed="false">Trackers: live</button>
   <button type="button" class="cv2-toggle" id="cv3-activity-failing" aria-pressed="false">Activity: all sources</button>
   <button type="button" class="cv2-toggle" id="cv3-color-scheme" aria-pressed="false">Mode: light</button>
@@ -105,6 +106,9 @@
         </div>
         <div class="us-banner__status">
           <span class="us-banner__badge us-banner__badge--member-status">Active</span>
+          <!-- Active positions badge (item 34): filled by US-BANNER-POSITIONS
+               from the Active Positions IQA; hidden when there are none. -->
+          <div class="us-banner__positions" hidden data-us-positions-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Active Positions" data-us-positions-filter="ID" data-us-positions-value="004821" data-us-positions-tab="Engagement" data-us-positions-section="engagement:roles"></div>
         </div>
         <div class="us-banner__actions"><div class="us-cco-counts" hidden data-us-counts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Tab Counts" data-us-counts-filter="ID" data-us-counts-value="004821"></div><div class="us-banner__alerts" data-us-alerts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Alerts" data-us-alerts-filter="ID" data-us-alerts-value="004821" data-us-alerts-tab="Summary"></div><div class="us-actions"><button type="button" class="us-actions__toggle">Quick Actions</button><ul class="us-actions__list"><li class="dropdown-header">Communication</li><li><button type="button" class="us-actions__item us-action-member-email">Email Member</button></li><li><button type="button" class="us-actions__item us-action-member-sms">SMS Member</button></li><li class="divider"></li><li class="dropdown-header">Member records</li><li><button type="button" class="us-actions__item us-action-member-add-note">Add Note</button></li><li><button type="button" class="us-actions__item us-action-member-add-job">Add New Job</button></li><li class="divider"></li><li class="dropdown-header">Finance</li><li><button type="button" class="us-actions__item us-action-finance-make-payment">Make Payment</button></li></ul></div></div>
       </div>

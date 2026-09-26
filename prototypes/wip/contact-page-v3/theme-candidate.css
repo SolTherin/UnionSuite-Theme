@@ -2453,3 +2453,270 @@
 ::highlight(us-activity-match) {
   background-color: rgb(255 153 71 / 30%);
 }
+
+
+/* --------------------------------------------------------------------------
+   34. Banner positions (opt-in): a .us-banner__positions placeholder inside
+   .us-banner__status, after the status badge. Behaviour:
+   US-BANNER-POSITIONS in theme-candidate.js. One badge names the most
+   senior active position and counts the rest ("Branch committee +1"); it
+   opens a popup listing each one, with a link to the roles section.
+   The status area is the part of the banner that stays when it condenses,
+   so the badge is visible on every tab, scrolled or not. It sits beside the
+   member status pill at the same height, in the banner's glass treatment
+   (as the alert bell and Quick Actions), so the status colour stays the
+   only membership signal. The popup is the alert bell's surface.
+   Target: US-BANNER-COMPONENT, after the alert bell (item 12). Share the
+   popup rules with the bell's when both move.
+   -------------------------------------------------------------------------- */
+.us-banner .us-banner__positions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
+.us-banner .us-banner__positions[hidden] {
+  display: none;
+}
+
+/* The member status pill's box as section 3 sets it (12px text on a 20px
+   line, 3px padding, 1px border: 28px), so the two read as one row. */
+.us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 3px 9px 3px 10px;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(165deg, rgb(255 255 255 / 23%), rgb(255 255 255 / 7%) 58%, rgb(255 255 255 / 13%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 36%), 0 3px 8px rgb(0 20 30 / 18%);
+  color: #fff;
+  font: 600 12px/20px var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 180ms cubic-bezier(.2, 0, 0, 1), background-color 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__positions-toggle:is(:hover, :focus-visible, [aria-expanded="true"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: rgb(255 255 255 / 65%);
+  background: linear-gradient(165deg, rgb(255 255 255 / 32%), rgb(255 255 255 / 13%) 58%, rgb(255 255 255 / 19%));
+}
+
+.us-banner .us-banner__positions-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.us-banner .us-banner__positions-icon,
+.us-banner .us-banner__positions-chevron {
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.us-banner .us-banner__positions-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8;
+}
+
+.us-banner .us-banner__positions-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* "+1": the other positions, as a small count inside the badge. */
+.us-banner .us-banner__positions-more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 0 0 auto;
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 22%);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.us-banner .us-banner__positions-more[hidden],
+.us-banner .us-banner__positions-total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-banner .us-banner__positions-chevron {
+  width: 14px;
+  height: 14px;
+  margin-inline-start: -2px;
+  stroke-width: 2;
+  opacity: .8;
+  transition: transform 200ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__positions-toggle[aria-expanded="true"] > .us-banner__positions-chevron {
+  transform: rotate(180deg);
+}
+
+/* Popup: the alert bell's surface, anchored to the badge's right edge. */
+.us-banner .us-banner__positions-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  inset-inline-end: 0;
+  z-index: 3;
+  width: min(340px, calc(100vw - 32px));
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+  border: 1px solid var(--banner-menu-border);
+  border-radius: var(--radius);
+  background: var(--banner-menu-bg);
+  color: var(--banner-menu-text);
+  box-shadow: var(--shadow-lg);
+  text-align: start;
+  white-space: normal;
+  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1), translate 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@starting-style {
+  .us-banner .us-banner__positions-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.us-banner .us-banner__positions-panel[hidden] {
+  display: none;
+}
+
+.us-banner .us-banner__positions-panel:focus {
+  outline: none;
+}
+
+.us-banner .us-banner__positions-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--banner-menu-border);
+  font: 700 13px/1.4 var(--font-ui);
+}
+
+.us-banner .us-banner__positions-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-banner .us-banner__positions-item {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--banner-menu-border);
+  font: 12.5px/1.45 var(--font-ui);
+}
+
+.us-banner .us-banner__positions-item > strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.us-banner .us-banner__positions-item > :is(span, small) {
+  color: var(--banner-menu-muted);
+}
+
+.us-banner .us-banner__positions-item > small {
+  font-size: 11px;
+}
+
+.us-banner .us-banner__positions-foot {
+  padding: 8px 14px;
+  text-align: end;
+}
+
+.us-banner .us-banner__positions-all {
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-link);
+  font: 600 12.5px var(--font-ui);
+  cursor: pointer;
+}
+
+.us-banner .us-banner__positions-all:hover {
+  text-decoration: underline;
+}
+
+/* Tablets (the banner's wrapping layout above phone width): the theme lets
+   the identity shrink to 18rem (180px on Orion's 10px root) so status and
+   actions share its row. With the badge that squeezes the name onto two
+   lines, so the identity keeps 300px and whatever no longer fits wraps to
+   the next row, where the actions keep to the right as in every layout. */
+@media (min-width: 601px) and (max-width: 899px) {
+  .us-banner .us-banner__summary:has(.us-banner__positions:not([hidden])) > .us-banner__identity:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-basis: 300px;
+  }
+
+  .us-banner .us-banner__summary:has(.us-banner__positions:not([hidden])) > .us-banner__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-inline-start: auto;
+  }
+}
+
+/* Phones: the status row starts at the banner's left edge (section 3), so
+   the popup hangs from the start of that row, not from the badge's right
+   edge, which would push it off-screen to the left. */
+@media (max-width: 600px) {
+  .us-banner .us-banner__status:has(> .us-banner__positions):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    position: relative;
+  }
+
+  .us-banner .us-banner__positions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    position: static;
+  }
+
+  .us-banner .us-banner__positions-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+}
+
+/* Condensed below the one-row banner (tablets and phones), the name, status
+   and actions share one line, so the badge shows its icon and the number
+   of positions ("2"). The accessible name and tooltip still list them, and
+   expanding the banner or opening the popup names them. */
+@media (max-width: 899px) {
+  .us-banner.us-banner--compact :is(.us-banner__positions-label, .us-banner__positions-more):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: none;
+  }
+
+  .us-banner.us-banner--compact .us-banner__positions-total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: inline;
+  }
+}
+
+/* Touch: a 44px target around the 28px badge, without changing its size
+   beside the status pill. */
+@media (pointer: coarse) {
+  .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    position: relative;
+  }
+
+  .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+    content: '';
+    position: absolute;
+    inset: -8px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-banner :is(.us-banner__positions-toggle, .us-banner__positions-chevron, .us-banner__positions-panel) {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-color: ButtonText;
+  }
+}

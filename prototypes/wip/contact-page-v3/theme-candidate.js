@@ -2855,3 +2855,287 @@
   else refresh();
 })();
 /* US-ACTIVITY-FEED:END */
+
+
+/* US-BANNER-POSITIONS:START — the contact's active positions as one banner badge.
+   Author placeholder inside .us-banner__status, after the status badge (a
+   Query Template banner):
+     <div class="us-banner__positions" hidden
+       data-us-positions-query="$/…/Contact_Page/Active Positions"
+       data-us-positions-filter="ID" data-us-positions-value="{#query.ID}"
+       data-us-positions-tab="Engagement"
+       data-us-positions-section="engagement:roles"></div>
+   One IQA of the contact's active positions, most senior first (sorted by a
+   rank the IQA owns). Output aliases: PositionKey (unique), Role (full
+   title), Label (short badge text; Role when blank), Body, Since (display
+   text), optional TermEnds (display text).
+   The badge names the most senior position and counts the rest ("Branch
+   committee +1"); it stays hidden when there are none or the query fails.
+   Clicking it opens a popup listing every active position. Its footer link
+   selects the named CCO tab, then the section switcher's group:key.
+   One request per page load (limit 20). Uses GET /api/query. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteBannerPositions) {
+    window.UnionSuiteBannerPositions.refresh();
+    return;
+  }
+
+  const SELECTOR = '.us-banner__positions[data-us-positions-query]';
+  const LIMIT = 20;
+  const states = new Map();
+  let panelId = 0;
+  let queued = false;
+
+  // Tabler "id-badge-2" and "chevron-down" outlines (MIT), drawn with currentColor.
+  const ICON = '<svg class="us-banner__positions-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M7 12h3v4h-3z"></path>' +
+    '<path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6"></path>' +
+    '<path d="M10 4a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"></path>' +
+    '<path d="M14 16h2"></path><path d="M14 12h4"></path></svg>';
+  const CHEVRON = '<svg class="us-banner__positions-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M6 9l6 6l6 -6"></path></svg>';
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  // Rows arrive either as alias-keyed objects or as Name/Value property lists.
+  function field(row, name) {
+    const properties = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(properties)) {
+      const match = properties.find(item => String(item.Name).toLowerCase() === name.toLowerCase());
+      return match ? unwrap(match.Value) : undefined;
+    }
+    const key = Object.keys(row || {}).find(item => item.toLowerCase() === name.toLowerCase());
+    return key ? unwrap(row[key]) : undefined;
+  }
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  function config(root) {
+    const query = text(root.dataset.usPositionsQuery);
+    const filter = text(root.dataset.usPositionsFilter);
+    const value = text(root.dataset.usPositionsValue);
+    // Unsubstituted template placeholders mean the banner has no record yet.
+    if (!/^\$\/.+/.test(query) || !filter || !value || /^[\[{]/.test(value)) return null;
+    const [group, section] = text(root.dataset.usPositionsSection).split(':');
+    return { query, filter, value, tab: text(root.dataset.usPositionsTab), group, section };
+  }
+
+  async function request(cfg) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const params = new URLSearchParams({ QueryName: cfg.query, limit: String(LIMIT), offset: '0' });
+      params.set(cfg.filter, cfg.value);
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: { Accept: 'application/json', ...(token ? { RequestVerificationToken: token } : {}) }
+      });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw Error('Unexpected response');
+      return rows;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function position(row) {
+    const role = text(field(row, 'Role'));
+    return {
+      role,
+      label: text(field(row, 'Label')) || role,
+      body: text(field(row, 'Body')),
+      since: text(field(row, 'Since')),
+      termEnds: text(field(row, 'TermEnds'))
+    };
+  }
+
+  function item(entry) {
+    const li = document.createElement('li');
+    li.className = 'us-banner__positions-item';
+    const role = document.createElement('strong');
+    role.textContent = entry.role;
+    li.append(role);
+    if (entry.body) {
+      const body = document.createElement('span');
+      body.textContent = entry.body;
+      li.append(body);
+    }
+    const dates = [entry.since && 'Since ' + entry.since, entry.termEnds && 'term ends ' + entry.termEnds].filter(Boolean);
+    if (dates.length) {
+      const when = document.createElement('small');
+      when.textContent = dates.join(' · ');
+      li.append(when);
+    }
+    return li;
+  }
+
+  function render(state, entries) {
+    const { root, button, label, more, total, list } = state;
+    root.hidden = entries.length === 0;
+    root.setAttribute('data-us-positions-state', entries.length ? 'ready' : 'empty');
+    if (!entries.length) return open(state, false);
+
+    const others = entries.length - 1;
+    label.textContent = entries[0].label;
+    more.textContent = '+' + others;
+    more.hidden = others === 0;
+    total.textContent = String(entries.length);
+    const summary = 'Active positions: ' + entries.map(entry => entry.role).join(', ');
+    button.setAttribute('aria-label', summary);
+    button.title = summary;
+    list.replaceChildren(...entries.map(item));
+  }
+
+  async function load(state) {
+    try {
+      render(state, (await request(state.cfg)).map(position).filter(entry => entry.role));
+    } catch (error) {
+      // A badge that cannot load says nothing; the roles grid still has them.
+      state.root.hidden = true;
+      state.root.setAttribute('data-us-positions-state', 'error');
+    }
+  }
+
+  function open(state, show) {
+    state.panel.hidden = !show;
+    state.button.setAttribute('aria-expanded', String(show));
+    if (show) state.panel.focus();
+  }
+
+  function goToSection(state) {
+    const { tab, group, section } = state.cfg;
+    const target = Array.from(document.querySelectorAll('.RadTabStripVertical .rtsLink, .RadTabStrip .rtsLink'))
+      .find(link => text(link.querySelector('.rtsTxt')?.textContent || link.textContent) === tab);
+    open(state, false);
+    target?.click();
+    if (group && section) window.UnionSuiteSections?.select(group, section);
+  }
+
+  function attach(root, cfg) {
+    const id = 'us-banner-positions-' + (++panelId);
+    root.replaceChildren();
+    root.hidden = true;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'us-banner__positions-toggle';
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', id);
+    button.innerHTML = ICON;
+    const label = document.createElement('span');
+    label.className = 'us-banner__positions-label';
+    const more = document.createElement('span');
+    more.className = 'us-banner__positions-more';
+    more.setAttribute('aria-hidden', 'true');
+    // Every position's count, shown instead of the label and "+N" where the
+    // condensed banner has no room for them (phones).
+    const total = document.createElement('span');
+    total.className = 'us-banner__positions-total';
+    total.setAttribute('aria-hidden', 'true');
+    button.append(label, more, total);
+    button.insertAdjacentHTML('beforeend', CHEVRON);
+
+    const panel = document.createElement('div');
+    panel.className = 'us-banner__positions-panel';
+    panel.id = id;
+    panel.hidden = true;
+    panel.tabIndex = -1;
+    panel.setAttribute('role', 'region');
+    panel.setAttribute('aria-label', 'Active positions');
+    const head = document.createElement('div');
+    head.className = 'us-banner__positions-head';
+    head.textContent = 'Active positions';
+    const list = document.createElement('ul');
+    list.className = 'us-banner__positions-list';
+    panel.append(head, list);
+    if (cfg.tab) {
+      const foot = document.createElement('div');
+      foot.className = 'us-banner__positions-foot';
+      const link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'us-banner__positions-all';
+      link.textContent = 'View all roles →';
+      foot.append(link);
+      panel.append(foot);
+    }
+    root.append(button, panel);
+
+    const state = { root, cfg, button, label, more, total, panel, list };
+    states.set(root, state);
+    load(state);
+  }
+
+  function update() {
+    queued = false;
+    states.forEach((state, root) => {
+      if (!root.isConnected || !root.contains(state.button)) states.delete(root);
+    });
+    document.querySelectorAll(SELECTOR).forEach(root => {
+      if (states.has(root) || root.closest('.us-report-no-styling')) return;
+      const cfg = config(root);
+      if (!cfg) {
+        root.hidden = true;
+        root.setAttribute('data-us-positions-state', 'unconfigured');
+        return;
+      }
+      attach(root, cfg);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+
+  document.addEventListener('click', event => {
+    states.forEach(state => {
+      if (event.target.closest('.us-banner__positions-toggle') === state.button) {
+        open(state, state.panel.hidden);
+      } else if (state.panel.contains(event.target) && event.target.closest('.us-banner__positions-all')) {
+        goToSection(state);
+      } else if (!state.root.contains(event.target) && !state.panel.hidden) {
+        open(state, false);
+      }
+    });
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    states.forEach(state => {
+      if (!state.panel.hidden) {
+        open(state, false);
+        state.button.focus();
+      }
+    });
+  });
+
+  new MutationObserver(records => {
+    if (records.some(record => !record.target.closest?.('.us-banner__positions'))) schedule();
+  }).observe(document.documentElement, { subtree: true, childList: true });
+
+  window.UnionSuiteBannerPositions = {
+    refresh: schedule,
+    // Re-reads every badge's positions, e.g. after a role is added or ended.
+    reload() {
+      states.forEach(state => load(state));
+    }
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', update);
+  else update();
+})();
+/* US-BANNER-POSITIONS:END */

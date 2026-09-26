@@ -10,6 +10,10 @@ Item 32, the recent activity feed on the Activity tab, was added on
 25 September 2026 after that approval and is **proposed, not yet approved**.
 See [Activity feed](#activity-feed).
 
+Items 33 (adjustments) and 34 (active positions in the banner) were added on
+26 September 2026 and are also **proposed, not yet approved**. See
+[Active positions](#active-positions).
+
 ## Resume here
 
 1. Start the preview (see [Preview](#preview)) and open v3.
@@ -97,7 +101,7 @@ Browser state used by the candidate and fixtures:
 | `THEME-CHANGES.md` | Checklist of every change to make in the theme, by target file, with the decisions that shape the move. |
 | `build-standalone.cjs` / `Contact-Page-v3-Standalone.html` | Reproducible single-file export of `index.html` with local CSS, JS and available image assets embedded. |
 | `theme-candidate.css` | Proposed CSS, sections 1–17, 21–23, 25, 27–31 and 32 (items 19 and 20 are in section 3; item 18 is script only). Each section names its target in the theme and uses the theme's own selectors, so an approved section moves across unchanged. |
-| `theme-candidate.js` | Proposed `US-IQA-ROW-GROUPS`, `US-CCO-RAIL-COLLAPSE`, `US-BANNER-ALERTS`, `US-CCO-SIDEBAR`, `US-BANNER-ROW`, `US-IQA-SCROLL-EDGES`, `US-ATTENTION-HIDE-ZERO` and `US-ACTIVITY-FEED` blocks for `zUnionSuite.js`. |
+| `theme-candidate.js` | Proposed `US-IQA-ROW-GROUPS`, `US-CCO-RAIL-COLLAPSE`, `US-BANNER-ALERTS`, `US-CCO-SIDEBAR`, `US-BANNER-ROW`, `US-IQA-SCROLL-EDGES`, `US-ATTENTION-HIDE-ZERO`, `US-ACTIVITY-FEED` and `US-BANNER-POSITIONS` blocks for `zUnionSuite.js`. |
 | `theme-candidate-iqa-columns.js` | Candidate replacement for the whole `US-IQA-COLUMNS` block (item 18). |
 | `theme-candidate-heading-menus.js` | Candidate `US-ACTION-HEADING-MENUS` (item 31): dropdowns in panel headings, configured like heading buttons. Loads straight after `zUnionSuite.js`, before `ActionDefinitions.js` and the client `Actions.js`, so menus can be registered there. |
 | `theme-candidate-copy.js` | Candidate replacement for the whole `US-COPY` block (item 27): the flash lasts as long as its CSS animation, and a "Copied" label shows beside the button. Loads before `zUnionSuite.js`. |
@@ -142,6 +146,7 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 | 28 | Quiet trackers: `us-attention--hide-zero` beside `us-attention` hides zero-count cards (the rest share the row, dividers between visible cards only); when every card is zero, the row gives way to one "✓ Nothing needs attention" line, so an all-clear still reads as loaded. Unavailable counts ("—") always show. Used on the contact trackers; the home dashboard keeps its zeros unless opted in. | Tracker 76px → 40px when all clear | Opt-in per Needs Attention block | CSS section 28; `US-ATTENTION-HIDE-ZERO` JS (on promotion, filter inside the `US-ATTENTION` loader) |
 | 30 | Status icons in badges: `us-badge--icon` beside `us-badge` adds a 14px icon before the text, chosen by tone (tick, cross, warning sign, clock, minus), or by `data-us-icon` (check, cross, alert, clock, refund, ended) when statuses share a tone. Status reads by shape as well as colour. Used on Finance payment, invoice and adjustment statuses and in the Transaction detail popup. | — | Opt-in per badge | CSS section 30, `US-BADGES` after the tone rules |
 | 33 | Adjustments (proposed, not yet approved), 26 September 2026: the owner's dues adjustments design (`prototypes/wip/dues-adjustments/`, where its Query Template, field list and decisions live) as two layouts. Above the Finance switcher, **Active and upcoming adjustments**: a Query Template Display (`us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment`) with Status, Type, Fee effect and Period (start – end) at a glance, plus Reason on panels 1100px and wider (revised 26 September 2026; was Type, Fee effect, Starts, Ends, Status); an upcoming row's fee effect muted; relative time under the period ("5 months left", "Starts in 5 months"; amber when an active adjustment ends within 30 days); rows stack into cards at 760px and narrower; each row expands, with the activity history's fold animation, to its reason, amount, changed attributes, note, who created it and Edit / End adjustment / View affected transactions. Column headings in the iPart's Header field, "No active or upcoming adjustments." in its No results field; the info tone drops when there are none. On the Adjustments tab, **All adjustments**: the standard native Query Menu grid of every adjustment, active and upcoming included, Type linking to the record (`finance.view-adjustment`). Both use the same type names, fee-effect wording, status badges and dates. | Two Query Menu grids (Active adjustments, All adjustments) → a Query Template list above the switcher + one native grid on the tab | Opt-in: `us-adjustments` on the Query Template iPart; the grid needs no class | `dues-adjustments.candidate.css` and `US-ADJUSTMENTS` JS from `prototypes/wip/dues-adjustments/` (its danger outline-button fix → `zUnionSuite.css` / `zzDarkMode.css`); section 25 (empty Query Template stays plain) and section 30 (status badges keep to one line) additions |
+| 34 | Active positions in the banner (proposed, not yet approved), 26 September 2026: elected roles and committee seats must be apparent on every tab, not only in Engagement › Roles and CPD. One badge in the banner's status area, beside the member status pill, names the most senior active position and counts the rest ("Branch committee +1"); one position shows just its label. The status area is what stays when the banner condenses, so the badge is visible scrolled or not. Neutral glass pill at the status pill's 28px (a role icon and a chevron), so the status colour stays the only membership signal. Clicking opens a popup (the alert bell's surface) listing each active position, its body and dates ("Since Mar 2020 · term ends Mar 2027"), and "View all roles →", which selects Engagement and its Roles and CPD section (`UnionSuiteSections.select`). Hidden when there are none or the query fails. Condensed below 900px it shows the icon and the number ("2") so the banner keeps one line; tablets (601–899px) keep the name at 300px so the badge wraps instead of squeezing it; phones anchor the popup to the start of the status row. Owner decisions, 26 September 2026: one badge (not one per role, not a generic "Elected official" count), naming the most senior role; a popup with a link through, not a jump straight to the tab; branch committee ranks above workplace delegate. Sourced from the positions records with dates, not the Attributes badges (Profile shows "EBA bargaining rep" for a role that ended in Dec 2023). See [Active positions](#active-positions). | Roles on Engagement only → a badge on every tab | Opt-in per banner template | CSS section 34 in `US-BANNER-COMPONENT` (after the alert bell); `US-BANNER-POSITIONS` JS; `Banner-Contact-Template.html`; an Active Positions IQA |
 | 32 | Recent activity feed (proposed, not yet approved): one list on the Activity tab built from five IQAs (Interactions, Outbound calls, Outbound emails, Inbound emails, Meetings) with `GET /api/query`, replacing the Notes and Communications sub-tabs (Documents stays). Each row is a record card from the activity cards workbench (`prototypes/wip/activity-cards/`, `US-RECORD-CARDS`): the owner's original card structure on theme tokens (type line, headline, preview, date column; colour only on the rail icon and for importance). Search and date range fold behind the heading's filter button; the type filters (slim section switcher) stay visible, and a chosen type shows a "View all …" link to its IQA page. See [Activity feed](#activity-feed). | Notes panel + communications grid → one feed | Opt-in: a `.us-activity-feed` element | CSS section 32 (the feed chrome); the card CSS and `US-RECORD-CARDS` from `prototypes/wip/activity-cards/`; `US-ACTIVITY-FEED` JS |
 | 31 | Heading menus: a dropdown in a panel heading, configured exactly like a heading button. One definition with the button's shape and `action: {type: 'menu', items: [action keys]}`, placed by its `us-action-*` class in the iPart CSS class field. It renders as the theme's `.us-actions` dropdown (Quick Actions' motion and keyboard handling); each item is an ordinary control with the item action's class, so the action runtime labels, checks and runs it. The toggle matches the heading's outline buttons (32px). The top level draws the side line and travelling glint of the theme's submenus when it opens (same line keyframe and timing); deeper levels are unchanged. The line spans the items exactly and grows with the list as it unfolds, the glint riding its tip; items start 5px past the line, so the hover fill never covers it. Used for Manage billing and Add adjustment. | Three heading buttons → one menu | Opt-in per iPart, by class | `US-UNIFIED-ACTIONS` (accept type `menu`; render it in the heading slot); CSS section 31 in `US-ACTION-MENUS` |
 
@@ -323,6 +328,47 @@ Actions:
 
 Item 20, locked in by the owner on 24 September 2026 after comparing it with
 the two-row grid first proposed in item 3. Removing the alert badges had left
+### Active positions
+
+Item 34 (proposed, not yet approved). Place in the banner template's
+`.us-banner__status`, after the status badge:
+
+```html
+<div class="us-banner__positions" hidden
+  data-us-positions-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Active Positions"
+  data-us-positions-filter="ID" data-us-positions-value="{#query.ID}"
+  data-us-positions-tab="Engagement"
+  data-us-positions-section="engagement:roles"></div>
+```
+
+- One IQA of the contact's **active** positions (end date blank or in the
+  future), sorted most senior first by a rank the IQA owns (for example a
+  rank column on the position type: branch committee above workplace
+  delegate). Output aliases: `PositionKey` (unique), `Role` (full title,
+  "Branch committee member"), `Label` (the badge's short text, "Branch
+  committee"; `Role` when blank), `Body` ("Sydney Metro Branch"), `Since`
+  (display text, "Mar 2020"), optional `TermEnds` (display text). `ID` is an
+  example filter name, as for the bell.
+- Page load: one `GET /api/query` with `limit=20`. The popup opens from those
+  rows, with no second request.
+- Badge: the first row's `Label`, then "+N" for the others. Its accessible
+  name and tooltip list every `Role`. Hidden when the IQA returns nothing or
+  the request fails (the roles grid still has them). A placeholder with no
+  query, filter or value, or an unsubstituted `{#…}`, is hidden.
+- Popup: "Active positions", one entry per row (role, body, "Since … · term
+  ends …"), then "View all roles →". That selects the CCO tab named in
+  `data-us-positions-tab`, then the section switcher's `group:key` from
+  `data-us-positions-section` (`UnionSuiteSections.select`). Escape and
+  outside clicks close it; Escape returns focus to the badge.
+- Widths: condensed below 900px the badge shows its icon and the number of
+  positions ("2"), so the condensed banner keeps its line. Tablets
+  (601–899px) keep the identity at 300px when the badge shows, so the status
+  and actions wrap under the name rather than squeezing it. Phones anchor the
+  popup to the start of the status row.
+- `UnionSuiteBannerPositions.reload()` re-reads the positions, for example
+  after a role is added or ended. The toolbar's "Positions" button cycles the
+  sample between 2, 1 and none.
+
 that grid with an empty top-middle cell and empty space under the identity;
 the one-row layout removes both. It is the banner layout in section 3 of
 `theme-candidate.css` (no modifier class):
@@ -624,6 +670,9 @@ explicit approval.
   in the toolbar and dark fixes for the candidate (item 21).
 
 ## Findings
+- 26 September 2026: active positions show in the banner (item 34), one
+  badge naming the most senior role with a count, opening a popup that links
+  to Engagement › Roles and CPD.
 
 Theme issues and facts found while building v1 → v3:
 

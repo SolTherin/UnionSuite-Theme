@@ -30,6 +30,14 @@
     { Tab: 'Finance', Count: 1, Tone: 'danger', Badge: '!' },
     { Tab: 'Cases', Count: 2, Tone: 'warning', Badge: '' }
   ];
+  // Active Positions IQA rows (item 34), most senior first: PositionKey,
+  // Role, Label (the badge's short text), Body, Since, optional TermEnds.
+  // Toolbar "Positions" cycles 2 → 1 → none.
+  const positions = [
+    { PositionKey: 'P-311', Role: 'Branch committee member', Label: 'Branch committee', Body: 'Sydney Metro Branch', Since: 'Mar 2020', TermEnds: 'Mar 2027' },
+    { PositionKey: 'P-356', Role: 'Workplace delegate', Label: 'Workplace delegate', Body: 'Royal Sydney Hospital – ICU', Since: 'Jan 2021', TermEnds: '' }
+  ];
+  let positionCount = positions.length;
   const sampleAlert = { AlertKey: 'A-1051', Severity: 'danger', Title: 'Email bounced', Message: 'Preferred email s.reynolds@metrohealth.gov.au bounced today.', AlertDate: 'Today', Link: '#profile' };
   const ids = trackers.map((_, index) => '00000000-0000-4000-8000-' + String(index + 1).padStart(12, '0'));
 
@@ -127,6 +135,9 @@
     } else if (url.pathname.endsWith('/api/query') && /Tab Counts$/.test(url.searchParams.get('QueryName') || '')) {
       // Contact tab counts IQA: Tab (exact label), Count, Tone, optional Badge.
       data = { TotalCount: tabCounts.length, Items: { $values: tabCounts } };
+    } else if (url.pathname.endsWith('/api/query') && /Active Positions$/.test(url.searchParams.get('QueryName') || '')) {
+      const rows = positions.slice(0, positionCount);
+      data = { TotalCount: rows.length, Items: { $values: rows } };
     } else if (url.pathname.endsWith('/api/query') && /Alerts$/.test(url.searchParams.get('QueryName') || '')) {
       const limit = Number(url.searchParams.get('limit')) || 100;
       data = { TotalCount: alerts.length, Items: { $values: alerts.slice(0, limit) } };
@@ -557,6 +568,14 @@
       window.UnionSuiteAdjustments?.refresh();
       adjustmentsButton.setAttribute('aria-pressed', String(active));
       adjustmentsButton.textContent = active ? 'Adjustments: active' : 'Adjustments: none';
+      return;
+    }
+
+    const positionsButton = event.target.closest('#cv3-positions-state');
+    if (positionsButton) {
+      positionCount = positionCount === 0 ? positions.length : positionCount - 1;
+      positionsButton.textContent = 'Positions: ' + (positionCount || 'none');
+      window.UnionSuiteBannerPositions?.reload();
       return;
     }
 

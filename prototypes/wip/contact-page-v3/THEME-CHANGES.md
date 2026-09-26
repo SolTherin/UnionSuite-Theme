@@ -104,6 +104,10 @@ selectors, so it moves across unchanged.
       shell rules. Its rows need the record cards first: move
       `prototypes/wip/activity-cards/activity-cards.candidate.css` into a new
       `US-RECORD-CARDS` section (dark values into `zzDarkMode.css`).
+- [ ] Item 34, active positions badge (proposed, not yet approved):
+      section 34 → `US-BANNER-COMPONENT`, after the alert bell (item 12).
+      Its popup rules repeat the bell's; merge them into one shared banner
+      popup rule set as both move.
 - [ ] Section 29, native "Vertical right" CCOs: the grid rules →
       `US-NATIVE-TABS-PAGE-LAYOUT`; the V5 mirror →
       `US-NATIVE-TABS-COMPONENT`, after the desktop V5 rule. Check against
@@ -154,6 +158,9 @@ selectors, so it moves across unchanged.
 - [ ] Item 33: add `US-ADJUSTMENTS` (`dues-adjustments.candidate.js`) after
       `US-RECORD-CARDS`, whose `fold()` animates its rows (or after the shared
       fold helper, if that lands first).
+- [ ] Item 34: add `US-BANNER-POSITIONS` after `US-BANNER-ALERTS`. Its
+      `field`, `apiRoot` and query request repeat the bell's: share one
+      helper between the two blocks.
 - [ ] Item 32: extract the heading filter toggle into one shared helper for
       any Query Template Display or Content HTML block (owner note,
       25 September 2026). `US-QUERY-SEARCH`, `US-ACTIVITY-FEED` and the IQA
@@ -172,6 +179,11 @@ selectors, so it moves across unchanged.
 - [ ] Item 17: add the `UnionSuiteCcoSidebarConfig` setting to the client
       `Config.js`.
 - [ ] Items 12 and 17: document the Alerts and Tab Counts IQA field lists.
+- [ ] Item 34: add the positions placeholder to `Banner-Contact-Template.html`
+      (in `.us-banner__status`, after the status badge). Build the Active
+      Positions IQA (README [Active positions](README.md#active-positions)):
+      active rows only, sorted by a seniority rank on the position type;
+      confirm REST access and the filter name.
 - [ ] Item 32: build the five activity source IQAs to the field contract
       (README [Activity feed](README.md#activity-feed)) and the one-row host
       Query Template; confirm REST access, the start-date filter names and
