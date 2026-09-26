@@ -70,7 +70,8 @@ module.exports = {
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},
   'explicit-query-search':{ContactName:contacts.ContactName, ContactId:contacts.ContactId},
   'Banner-Contact-Template.html':{
-    ContactId:required('Contact identifier in the summary.', '101000', '[Contact ID]'),
+    ContactId:required('Contact identifier in the eyebrow, copied by its copy button. Also the filter value for the optional positions, tab counts and alerts blocks.', '101000', '[Contact ID]'),
+    ContactType:required('Display text for the contact type, in the eyebrow and on the avatar. Organisation, Organization or Company show a building; any other value a person. Derive it from the same COMPANY_RECORD flag the taskbar quick search uses.', 'Individual', '[Contact type]'),
     ContactName:required('Full contact name.', 'Adam Phillips', '[Full name]'),
     MemberType:optional('Membership category. If unused, remove this token and the adjoining separator from the subtitle.', 'Full member', '[Member type]'),
     JoinDate:optional('Formatted membership join date. If unused, remove Member since and this token from the subtitle.', '1 July 2021', '[Join date]'),

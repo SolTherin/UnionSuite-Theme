@@ -563,6 +563,13 @@
     --iqa-sort-bg: var(--dm-hover);
   }
 
+  /* Report column heads: one step darker than the panel header, as in light
+     mode, instead of the light --neutral-200. */
+  :root[data-us-color-scheme="dark"] :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --iqa-table-head: var(--bg-sunken);
+    --iqa-table-head-border: var(--border-strong);
+  }
+
   :root[data-us-color-scheme="dark"] :is(.RadGrid, .k-grid):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     background-color: var(--bg-surface);
     color: var(--text-base);
@@ -672,6 +679,21 @@
     --button-hover-text: var(--bg-page);
   }
 
+  /* Danger-toned outline buttons (zUnionSuite.css): the dark outline
+     modifier re-declares its colours, so the danger cue needs a dark
+     counterpart at the same specificity. */
+  :root[data-us-color-scheme="dark"] :is(.TextButton, .btn).us-outline-button.DangerButton:not(.us-icon-button):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    --button-text: var(--danger);
+    --button-current-text: var(--danger);
+    --button-hover-text: var(--danger);
+    --button-border: var(--danger);
+    border-color: var(--danger);
+  }
+
+  :root[data-us-color-scheme="dark"] :is(.TextButton, .btn).us-outline-button.DangerButton:not(.us-icon-button):hover:not(:where(:disabled, [aria-disabled=true], .disabled, .aspNetDisabled, .us-report-no-styling, .us-report-no-styling *)) {
+    --button-current-bg: var(--danger-bg);
+  }
+
   :root[data-us-color-scheme="dark"] .us-badge--primary:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     color: var(--text-link);
     background: var(--dm-hover);
@@ -683,7 +705,31 @@
     --hover-color: var(--text-strong);
     --focus-color: var(--border-focus);
   }
+
+  /* Card-style CCO rail selection (us-cco-cards, us-cco-rail): the rail's
+     light brand/neutral tints would stay pale. */
+  :root[data-us-color-scheme="dark"] :is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(:is(.us-cco-cards, .us-cco-rail) :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --active-bg: var(--dm-selected);
+    --hover-bg: var(--dm-hover);
+  }
+
+  /* Collapsed Sections list (us-cco-collapsible, us-cco-rail): hover and
+     current option. */
+  :root[data-us-color-scheme="dark"] [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button:is(:hover, [aria-current="true"]) {
+    background: var(--dm-selected);
+    color: var(--text-strong);
+  }
 }
+
+@media screen and (min-width: 601px) {
+  /* v1 sidebar rail (us-cco-rail): tab text, selection and selection bar. */
+  :root[data-us-color-scheme="dark"] .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-cco-rail :is(.cco, .tabs-wrapper) :is(.cco, .tabs-wrapper), .us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    --tab-color: var(--text-base);
+    --hover-bg: var(--dm-hover);
+    --active-bg: var(--dm-selected);
+    --active-color: var(--text-strong);
+    --active-shadow: inset 3px 0 0 var(--text-link);
+  }}
 
 /* iMIS Object Browser: captured Metro splitters and MetroTouch menu/tree.
    Keep native dimensions, overflow, resize handles, images and event ownership. */
@@ -916,5 +962,72 @@
     --task-night-1: #ffe5a0;
     --task-night-2: #d7e8ff;
     --task-night-3: #acbaff;
+  }
+}
+
+/* Contact page v3 components. The dark palette keeps the brand and neutral
+   ramps light (they also colour filled buttons and banners), so each light
+   tint these components use is re-pointed at the dark palette here. */
+@media screen {
+  /* Row group toggle hover (us-iqa-row-groups). */
+  :root[data-us-color-scheme="dark"] .us-iqa-row-groups .us-row-group__toggle:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-color: var(--border);
+    background: var(--dm-hover);
+  }
+
+  /* Heading menu toggle (US-ACTION-HEADING-MENUS): the dark outline button's
+     colours and states, instead of --brand-800 text and border on the dark
+     panel heading. */
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle {
+    border-color: var(--border-strong);
+    background: var(--bg-surface);
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:is(:hover, :focus, [aria-expanded=true]) {
+    border-color: var(--border-strong);
+    background: var(--dm-hover);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:active {
+    background: var(--dm-selected);
+  }
+
+  /* Record cards (US-RECORD-CARDS): tints the dark palette does not define. */
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="email"] {
+    --us-record-hue: #cdc5f7;
+    --us-record-tint: #302c4a;
+  }
+
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="sms"] {
+    --us-record-hue: var(--dm-accent-text);
+    --us-record-tint: var(--dm-accent-bg);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="case"] {
+    --us-record-tint: var(--info-bg);
+  }
+
+  /* Group titles keep the muted label voice; the dark theme brightens every h3. */
+  :root[data-us-color-scheme="dark"] .us-records__group-title {
+    color: var(--text-muted);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-records--neutral-rail .us-record {
+    --us-record-hue: var(--text-muted);
+    --us-record-tint: var(--bg-sunken);
+  }
+
+  /* Adjustments (US-ADJUSTMENTS): the light --brand-50 row tints would be
+     pale bars under pale text, so rows use the palette's hover and selected
+     fills, and the selection bar takes the link colour as the CCO rail does. */
+  :root[data-us-color-scheme="dark"] .us-adjustment__row:hover {
+    background: var(--dm-hover);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-adjustment__row[aria-expanded="true"] {
+    background: var(--dm-selected);
+    box-shadow: inset 3px 0 0 var(--text-link);
   }
 }

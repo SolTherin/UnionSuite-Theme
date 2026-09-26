@@ -5,18 +5,30 @@
      Replace bracketed placeholders using this query's field substitution.
      Return one row for the current record. Brackets are not IQA syntax.
      Quick Actions requires the site popup functions. Optional tabs are in Banner-Template.html.
-     StatusColour must return #RRGGBB; StatusDescription is plain text. Rename these IQA aliases as needed. -->
+     StatusColour must return #RRGGBB; StatusDescription is plain text. Rename these IQA aliases as needed.
+     [Contact type] fills the eyebrow and picks the avatar drawing: Organisation,
+     Organization or Company show a building; any other value a person.
+     Optional blocks, each hidden when its IQA returns nothing or fails; remove
+     any you do not use. Confirm each filter name (ID here) with
+     GET /api/QueryParameterDefinition.
+     - .us-banner__positions: Active Positions IQA (US-BANNER-POSITIONS).
+     - .us-cco-counts: Tab Counts IQA for a us-cco-rail CCO (US-CCO-SIDEBAR).
+     - .us-banner__alerts: Alerts IQA for the alert bell (US-BANNER-ALERTS). -->
 <header class="us-banner__surface us-banner__surface--member" data-us-status-colour="{#query.StatusColour}">
   <div class="us-banner__summary">
     <div class="us-banner__identity">
-      <span class="us-banner__eyebrow">Contact · [Contact ID]</span>
-      <h1 class="us-banner__title">[Full name]</h1>
-      <p class="us-banner__subtitle">[Member type] · Member since [Join date]</p>
+      <span class="us-banner__avatar" data-us-contact-kind="[Contact type]" aria-hidden="true"></span>
+      <div class="us-banner__identity-text">
+        <span class="us-banner__eyebrow">[Contact type] · <span id="contact-banner-id">[Contact ID]</span><button type="button" class="us-copy" data-us-copy-target="contact-banner-id" aria-label="Copy contact ID" title="Copy contact ID"></button></span>
+        <h1 class="us-banner__title">[Full name]</h1>
+        <p class="us-banner__subtitle">[Member type] · Member since [Join date]</p>
+      </div>
     </div>
     <div class="us-banner__status">
       <span class="us-banner__badge us-banner__badge--member-status">{#query.StatusDescription}</span>
+      <div class="us-banner__positions" hidden data-us-positions-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Active Positions" data-us-positions-filter="ID" data-us-positions-value="[Contact ID]" data-us-positions-tab="Engagement" data-us-positions-section="engagement:roles"></div>
     </div>
-    <div class="us-banner__actions"><div class="us-actions"><button type="button" class="us-actions__toggle">Quick Actions</button><ul class="us-actions__list"><li class="dropdown-header">Communication</li><li><button type="button" class="us-actions__item us-action-member-email">Email Member</button></li><li><button type="button" class="us-actions__item us-action-member-sms">SMS Member</button></li><li class="divider"></li><li class="dropdown-header">Member records</li><li><button type="button" class="us-actions__item us-action-member-add-note">Add Note</button></li><li><button type="button" class="us-actions__item us-action-member-add-job">Add New Job</button></li></ul></div></div>
+    <div class="us-banner__actions"><div class="us-cco-counts" hidden data-us-counts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Tab Counts" data-us-counts-filter="ID" data-us-counts-value="[Contact ID]"></div><div class="us-banner__alerts" data-us-alerts-query="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Alerts" data-us-alerts-filter="ID" data-us-alerts-value="[Contact ID]" data-us-alerts-tab="Summary"></div><div class="us-actions"><button type="button" class="us-actions__toggle">Quick Actions</button><ul class="us-actions__list"><li class="dropdown-header">Communication</li><li><button type="button" class="us-actions__item us-action-member-email">Email Member</button></li><li><button type="button" class="us-actions__item us-action-member-sms">SMS Member</button></li><li class="divider"></li><li class="dropdown-header">Member records</li><li><button type="button" class="us-actions__item us-action-member-add-note">Add Note</button></li><li><button type="button" class="us-actions__item us-action-member-add-job">Add New Job</button></li></ul></div></div>
   </div>
   <div class="us-banner__details">
     <dl class="us-banner__facts">

@@ -1191,7 +1191,7 @@ input[type="checkbox"]:focus {
 .RadUploadProgressArea.RadUploadProgressArea .ruButton {
   display: inline-block;
   margin-bottom: 0;
-  font-weight: 500;
+  font-weight: 600;
   font-family: "Inter", Helvetica Neue, Arial, sans-serif;
   text-align: center;
   vertical-align: middle;
@@ -1200,9 +1200,11 @@ input[type="checkbox"]:focus {
   border: 0px solid transparent;
   white-space: normal;
   text-decoration: none;
-  padding: 7px 13px;
-  font-size: 15px;
-  line-height: 1.428571429;
+  /* 13px semibold; the theme's standard button stays 36px tall, in line with
+     36px form fields (UnionSuite contact page v3, item 11). */
+  padding: 7px 14px;
+  font-size: 13px;
+  line-height: 20px;
   border-radius: 5px;
   -webkit-user-select: none;
   user-select: none;
@@ -1762,11 +1764,14 @@ a.TextButton.aspNetDisabled {
   border-color: transparent;
 }
 
+/* Fixed sizes: a percentage varied with the surrounding text (11px inside a
+   13px alert). */
 .SmallButton,
 .UseSmallButton .TextButton {
-  font-size: 85%;
-  padding: 5px 11px;
-  border-radius: 3px;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 4px 10px;
+  border-radius: 4px;
 }
 
 .MediumButton,
