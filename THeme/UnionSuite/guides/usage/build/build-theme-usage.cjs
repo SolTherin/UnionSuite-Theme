@@ -131,6 +131,7 @@ allSources.push(...require('./unified-action-example.cjs').sources);
 allSources.push(...require('./page-layout-example.cjs').sources);
 allSources.push('THeme/UnionSuite/guides/usage/templates/Home/Welcome-Content.html');
 allSources.push(...require('./attention-example.cjs').sources);
+allSources.push(...require('./heading-toggle-reference.cjs').sources);
 allSources.push(...membership.sources);
 allSources.push(...actionBuilder.sources);
 allSources.push('THeme/UnionSuite/guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite/guides/usage/examples/Query-Template-Refresh.js');
@@ -302,5 +303,6 @@ function build(check = false) {
   require('./account-menu-example.cjs').build(check);
   require('./object-browser-example.cjs').build(check);
   require('./build-bulletin-study.cjs')(check);
+  require('./heading-toggle-reference.cjs').build(check);
 }
 if (require.main === module) build(process.argv.includes('--check'));

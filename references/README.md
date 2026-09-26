@@ -80,6 +80,8 @@ is required by the production theme.
 
 - Query Template Display search is implemented by the shared `us-query-search` iPart class. The searchable-task example in List-Templates.html uses canonical shared JS, with no search markup in its repeating template. `tools/test-query-search.cjs` checks filtering, native visibility, wrapper ownership, actions, AJAX replacement and cleanup.
 
+- Heading-Icon-Toggles.html shows every IQA and Query Template heading icon button (filter, the relocated native Export, expand, Show completed tasks, and the dues adjustments Show historical candidate) in each state, light and dark, from the production stylesheets. Hover, press and keyboard focus are held open by copying the theme's own `:hover`, `:active` and `:focus-visible` rules onto a data attribute in the same cascade position; each cell carries its owner's real panel structure so the `--iqa-*` colours resolve as on a page. The usage guide build regenerates and checks it; run it alone with `node THeme/UnionSuite/guides/usage/build/heading-toggle-reference.cjs` (add `--check` to confirm it is current).
+
 Shared header icon actions are documented in the usage guide at
 `#report-icon-actions` and shown on the task-filter example in List-Templates.html.
 `us-report-icon-add-task` generates a labelled plus action; other icons use the
