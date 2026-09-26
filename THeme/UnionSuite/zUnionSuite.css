@@ -8042,6 +8042,45 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-CCO-STICKY-TABS:END */
 
+/* US-CCO-SWITCH:START — in-place CCO tab switching; zUnionSuite.js owns the lifecycle.
+   The tab spinner and status reuse the native tab-loading and report-refresh classes. */
+:root .RadMultiPage[data-us-cco-switch-busy] {
+  position: relative;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+:root .RadMultiPage[data-us-cco-switch-loading] {
+  min-height: 260px;
+}
+
+.us-cco-switch__cover {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  border-radius: inherit;
+  background: var(--bg-surface, #fff);
+  pointer-events: none;
+}
+
+/* Sticky keeps the spinner in view when the page is scrolled to lower tabs. */
+.us-cco-switch__cover > .section-loader-spinning-circles {
+  display: block;
+  position: sticky;
+  top: min(180px, calc(50vh - 24px));
+  margin: 180px auto 0;
+}
+
+/* The switch's internal report refreshes would otherwise show a second spinner. */
+:root[data-us-cco-switching] .us-iqa-refresh-overlay,
+:root[data-us-cco-switching] .us-iqa-find-overlay,
+:root[data-us-cco-switching] .us-iqa-refresh-status:not(.us-cco-switch__status),
+:root .RadMultiPage[data-us-cco-switch-busy] [id$="_UpdateProgress1"] {
+  display: none !important;
+}
+
+/* US-CCO-SWITCH:END */
+
 /* US-CONTACTS:START — one authored contact result; native panel shell remains native. */
 .us-contact:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: relative;

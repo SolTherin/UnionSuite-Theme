@@ -7,6 +7,16 @@ v0.6.0 checklist passed on the sandbox account page (see the
 [WIP README](../../wip/cco-inline-loading/README.md) and
 `prototypes/wip/cco-inline-loading/research/native-cco-handover/`).
 
+**Implementation status (23 September 2026):** implemented in the shared theme,
+awaiting live acceptance. Behaviour is the `US-CCO-SWITCH` section of
+`THeme/UnionSuite/zUnionSuite.js`, styles the `US-CCO-SWITCH` section of
+`zUnionSuite.css` (the cover uses `--bg-surface`, which already follows dark
+mode, so `zzDarkMode.css` needs no change), and the site-wide setting is in
+`THeme/UnionSuite-Client/Config.js`. The usage guide documents it at
+`#cco-tab-switching`. The 23 offline scenarios are in
+`THeme/UnionSuite/guides/usage/tests/test-cco-switch.cjs`. Keep this spec here
+until the live checklist passes on the deployed theme.
+
 **Implementing it:** read the [implementation guide](IMPLEMENTATION.md). It covers
 the trial's reference code, CCO identification, the switch step by step, loading
 states, coordination with existing theme features, tests, the guide and live

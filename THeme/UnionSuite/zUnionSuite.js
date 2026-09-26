@@ -3999,6 +3999,1045 @@ SOFTWARE.
 })();
 /* US-CCO-STICKY-TABS:END */
 
+/* US-CCO-SWITCH:START — native CCO tabs switch in place; native navigation is the fallback.
+ *
+ * A native CCO tab click posts the page back and the server redirects to the
+ * page URL carrying the tab's key, reloading everything. Instead, the tab's
+ * page is fetched, only that CCO's view is replaced, and page-level form
+ * state is switched to the fetched page so iMIS's own partial postbacks keep
+ * working. The view is then initialized in native order: its scripts, grid
+ * managers, $create blocks and one native refresh per report lister.
+ *
+ * Opt-outs, checked at click time: UnionSuiteCcoSwitch.disable() for this
+ * browser tab, UnionSuiteCcoSwitchConfig.enabled === false, Easy Edit,
+ * us-report-no-styling, and any tab strip that is not a native CCO. Anything
+ * the switch cannot complete falls back to native navigation. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteCcoSwitch) return;
+
+  const version = '1.0';
+  const disabledKey = 'UnionSuiteCcoSwitch:disabled';
+  const keysKey = 'UnionSuiteCcoSwitch:keys';
+  const keyLifetime = 7 * 24 * 60 * 60 * 1000;
+  const indicatorDelay = 150;
+  const requestTimeout = 15000;
+  // Page-level state that must describe the displayed tab for server postbacks.
+  // Script and stylesheet manager fields stay live: they describe what this
+  // browser has already loaded, so the server sends any missing resources.
+  const stateFields = ['__VIEWSTATE', '__VIEWSTATEGENERATOR', '__EVENTVALIDATION', '__RequestVerificationToken', 'PageInstanceKey'];
+  const log = [];
+  // Handlers registered while each view was initialized, removed when it is left.
+  const viewHandlers = new WeakMap();
+  // Tab strips whose selection was moved ahead of their displayed view.
+  const selectedAhead = new Set();
+
+  let current = null;
+  let queued = null;
+  let waitTimer = null;
+  let pendingEnd = null;
+  let manager = null;
+  let tabIndicator = null;
+  let contentIndicator = null;
+
+  const brief = value => String(value && value.message || value).slice(0, 200);
+  const typeName = component => {
+    try {
+      return typeof component.getType === 'function' ? component.getType().getName() : component.constructor?.name || 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  };
+
+  function record(entry) {
+    log.push(entry);
+    if (log.length > 20) log.shift();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Settings
+
+  function sessionDisabled() {
+    try {
+      return sessionStorage.getItem(disabledKey) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  // Read at click time: client Config.js may load after this script.
+  function enabled() {
+    return !sessionDisabled() && window.UnionSuiteCcoSwitchConfig?.enabled !== false;
+  }
+
+  const easyEdit = () => window.gIsEasyEditEnabled === true || !!document.body?.classList.contains('TemplateAreaEasyEditOn');
+
+  // ---------------------------------------------------------------------------
+  // CCO identification
+
+  // A native CCO renders div.cco.tabs-wrapper > <prefix>radTab_Top (the strip)
+  // plus <prefix>radPage (the multipage). Other tab strips, such as the
+  // Address iPart's, are never intercepted.
+  function ccoFor(strip) {
+    if (!strip?.id?.endsWith('_radTab_Top') || !strip.matches('.RadTabStrip, .RadTabStripVertical')) return null;
+    const wrapper = strip.parentElement;
+    if (!wrapper?.matches('.cco.tabs-wrapper')) return null;
+    const prefix = strip.id.slice(0, -'radTab_Top'.length);
+    const multiPage = document.getElementById(prefix + 'radPage');
+    if (!multiPage || multiPage.parentElement !== wrapper || !multiPage.classList.contains('RadMultiPage')) return null;
+    const cco = { prefix, strip, multiPage, wrapper };
+    // Each tab link needs its own view, in the same order.
+    return tabLinks(cco).length && tabLinks(cco).length === views(cco).length ? cco : null;
+  }
+
+  const views = cco => [...cco.multiPage.children].filter(view => view.classList.contains('rmpView'));
+  const tabLinks = cco => [...cco.strip.querySelectorAll(':scope > .rtsLevel > .rtsUL > .rtsLI > a.rtsLink')];
+  const displayedIndex = cco => views(cco).findIndex(view => !view.classList.contains('rmpHidden'));
+  // A view's value is the number in its ..._Page_<n> ID: the tab's URL value.
+  const tabValue = (cco, index) => views(cco)[index]?.id.match(/_Page_(\d+)$/)?.[1] || null;
+  const caption = (cco, index) => tabLinks(cco)[index]?.querySelector('.rtsTxt')?.textContent.trim() || tabLinks(cco)[index]?.textContent.trim() || 'section';
+  const unavailable = link => link.matches('.rtsDisabled, [aria-disabled="true"]') || !!link.closest('.rtsDisabled');
+
+  function pageRequestManager() {
+    const prm = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+    const registry = prm && [prm._updatePanelIDs, prm._updatePanelClientIDs, prm._updatePanelHasChildrenAsTriggers].every(Array.isArray);
+    return registry ? prm : null;
+  }
+
+  // Everything required to handle this click, or null to leave it native.
+  function target(link) {
+    if (!enabled() || easyEdit()) return null;
+    const cco = ccoFor(link.closest('.RadTabStrip, .RadTabStripVertical'));
+    if (!cco || cco.wrapper.closest('.us-report-no-styling') || unavailable(link)) return null;
+    const index = tabLinks(cco).indexOf(link);
+    const form = cco.wrapper.closest('form');
+    const prm = pageRequestManager();
+    if (index < 0 || !tabValue(cco, index) || !form || !prm || typeof window.__doPostBack !== 'function') return null;
+    return { cco, index, link, form, prm };
+  }
+
+  function setTabAppearance(cco, index) {
+    tabLinks(cco).forEach((link, position) => {
+      link.classList.toggle('rtsSelected', position === index);
+      link.classList.toggle('rtsBefore', position === index - 1);
+      link.classList.toggle('rtsAfter', position === index + 1);
+      if (link.hasAttribute('aria-selected')) link.setAttribute('aria-selected', String(position === index));
+    });
+    if (index === displayedIndex(cco)) selectedAhead.delete(cco.strip);
+    else selectedAhead.add(cco.strip);
+  }
+
+  // A strip's selection belongs on the tab being loaded, else its displayed tab.
+  function resetStrip(cco) {
+    if (!cco.strip.isConnected) return;
+    if (current?.cco.strip === cco.strip) setTabAppearance(cco, current.index);
+    else setTabAppearance(cco, displayedIndex(cco));
+  }
+
+  // Return strips selected ahead of a switch that will not happen to their
+  // displayed tab.
+  function restoreSelections(except) {
+    for (const strip of [...selectedAhead]) {
+      if (strip === except) continue;
+      const cco = strip.isConnected ? ccoFor(strip) : null;
+      if (cco) setTabAppearance(cco, displayedIndex(cco));
+      selectedAhead.delete(strip);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // URL keys
+  //
+  // Each CCO's tab is selected by a query parameter named with the first 12
+  // hex characters of its placement key. The key is not known in the browser;
+  // it is taken from storage, the current URL or a discovery postback.
+
+  const keyId = cco => location.pathname + '|' + cco.strip.id;
+
+  function readKeys() {
+    try {
+      const keys = JSON.parse(localStorage.getItem(keysKey) || '{}');
+      const now = Date.now();
+      let pruned = false;
+      for (const [id, entry] of Object.entries(keys)) {
+        if (!entry || typeof entry.key !== 'string' || !(entry.expires > now)) {
+          delete keys[id];
+          pruned = true;
+        }
+      }
+      if (pruned) localStorage.setItem(keysKey, JSON.stringify(keys));
+      return keys;
+    } catch {
+      return {};
+    }
+  }
+
+  function writeKey(cco, key) {
+    try {
+      const keys = readKeys();
+      if (key) keys[keyId(cco)] = { key, expires: Date.now() + keyLifetime };
+      else delete keys[keyId(cco)];
+      localStorage.setItem(keysKey, JSON.stringify(keys));
+    } catch {
+      // Without storage each page's first switch per CCO discovers its key.
+    }
+  }
+
+  // After a native tab click, the redirect leaves that CCO's key in the URL.
+  // Only a single unclaimed hex parameter carrying the displayed tab's value
+  // is trusted; anything ambiguous is discovered instead.
+  function keyFromUrl(cco, keys) {
+    const displayed = tabValue(cco, displayedIndex(cco));
+    const claimed = new Set(Object.entries(keys)
+      .filter(([id]) => id.startsWith(location.pathname + '|') && id !== keyId(cco))
+      .map(([, entry]) => entry.key));
+    const candidates = [...new URL(location.href).searchParams]
+      .filter(([name, value]) => /^[0-9a-f]{12}$/.test(name) && value === displayed && !claimed.has(name));
+    return candidates.length === 1 ? candidates[0][0] : null;
+  }
+
+  function tabUrl(key, value) {
+    const url = new URL(location.href);
+    url.hash = '';
+    url.searchParams.set(key, value);
+    return url;
+  }
+
+  function scriptManagerId(prm) {
+    if (typeof prm._scriptManagerID === 'string' && prm._scriptManagerID) return prm._scriptManagerID;
+    for (const script of document.scripts) {
+      const id = script.textContent.match(/PageRequestManager\._initialize\(\s*'([^']+)'/)?.[1];
+      if (id) return id;
+    }
+    return 'ctl01$ScriptManager1';
+  }
+
+  // The strip's own ID segment keeps its underscore: ...$ciAccountpagetabs$radTab_Top.
+  // Dollar strings use double quotes: guide builders embed this file with
+  // String.replace, where a dollar followed by a single quote is a pattern.
+  function stripUniqueId(cco) {
+    const reference = window.$find?.(cco.strip.id)?._postBackReference || '';
+    return reference.match(/__doPostBack\('([^']+)'/)?.[1] || cco.prefix.replaceAll('_', "$") + 'radTab_Top';
+  }
+
+  const stripState = index => JSON.stringify({ selectedIndexes: [String(index)], logEntries: [], scrollState: {} });
+
+  // Entries of an MS AJAX delta: "length|type|id|content|" repeated.
+  function deltaEntries(text) {
+    const entries = [];
+    let index = 0;
+    while (index < text.length) {
+      const lengthEnd = text.indexOf('|', index);
+      const length = Number.parseInt(text.slice(index, lengthEnd), 10);
+      if (lengthEnd < 0 || Number.isNaN(length)) break;
+      const typeEnd = text.indexOf('|', lengthEnd + 1);
+      const idEnd = text.indexOf('|', typeEnd + 1);
+      entries.push({ type: text.slice(lengthEnd + 1, typeEnd), id: text.slice(typeEnd + 1, idEnd), content: text.substr(idEnd + 1, length) });
+      index = idEnd + 1 + length + 1;
+    }
+    return entries;
+  }
+
+  // One background async postback of the tab strip, as a native click sends.
+  // The server answers with a redirect to the tab's URL; nothing is applied to
+  // the page.
+  async function discoverTabUrl(job, value) {
+    const { cco, index, form, prm } = job;
+    const uniqueId = stripUniqueId(cco);
+    const body = new URLSearchParams();
+    for (const [name, field] of new FormData(form)) {
+      if (typeof field === 'string') body.append(name, field);
+    }
+    const scriptManager = scriptManagerId(prm);
+    body.set(scriptManager, scriptManager + '|' + uniqueId);
+    body.set('__EVENTTARGET', uniqueId);
+    body.set('__EVENTARGUMENT', JSON.stringify({ type: 0, index: String(index) }));
+    body.set(cco.strip.id + '_ClientState', stripState(index));
+    body.set('__ASYNCPOST', 'true');
+    const response = await fetch(form.action, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'X-MicrosoftAjax': 'Delta=true',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+      },
+      body,
+      signal: AbortSignal.timeout?.(requestTimeout)
+    });
+    const entries = response.ok ? deltaEntries(await response.text()) : [];
+    const redirect = entries.find(entry => entry.type === 'pageRedirect');
+    if (!redirect) throw new Error('The tab strip did not return a tab URL (' + response.status + ').');
+    const url = new URL(decodeURIComponent(redirect.content), location.href);
+    if (url.origin !== location.origin || url.pathname !== location.pathname) throw new Error('The tab URL is for another page.');
+    url.hash = '';
+    const now = new URL(location.href);
+    const key = [...url.searchParams.keys()].find(name => url.searchParams.get(name) === value && now.searchParams.get(name) !== value) || null;
+    return { url, key };
+  }
+
+  async function resolveUrl(job, value, entry) {
+    const keys = readKeys();
+    const stored = keys[keyId(job.cco)]?.key;
+    if (stored) {
+      entry.key = 'stored';
+      return tabUrl(stored, value);
+    }
+    const fromUrl = keyFromUrl(job.cco, keys);
+    if (fromUrl) {
+      entry.key = 'url';
+      writeKey(job.cco, fromUrl);
+      return tabUrl(fromUrl, value);
+    }
+    const began = performance.now();
+    const discovered = await discoverTabUrl(job, value);
+    entry.key = 'discovered';
+    entry.discovery = { found: !!discovered.key, ms: Math.round(performance.now() - began) };
+    if (discovered.key) writeKey(job.cco, discovered.key);
+    return discovered.url;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Loading states: the tab spinner follows the latest clicked tab; the content
+  // cover stays on the switching CCO until its final tab is ready.
+
+  function status() {
+    let node = document.querySelector('.us-cco-switch__status');
+    if (!node) {
+      node = document.createElement('span');
+      node.className = 'us-iqa-refresh-status us-cco-switch__status';
+      node.setAttribute('role', 'status');
+    }
+    return node;
+  }
+
+  function clearTab() {
+    if (!tabIndicator) return;
+    const { link, previousBusy, spinner, timer } = tabIndicator;
+    clearTimeout(timer);
+    spinner.remove();
+    link.removeAttribute('data-us-tab-loading');
+    if (previousBusy === null) link.removeAttribute('aria-busy');
+    else link.setAttribute('aria-busy', previousBusy);
+    tabIndicator = null;
+  }
+
+  // Moving to another tab keeps an indicator already shown visible at once.
+  function indicateTab(link, label) {
+    if (tabIndicator?.link === link) return;
+    const shown = !!tabIndicator?.shown;
+    clearTab();
+    const spinner = document.createElement('span');
+    spinner.className = 'us-tab-loading-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    const indicator = { link, spinner, previousBusy: link.getAttribute('aria-busy'), shown: false, timer: null };
+    const show = () => {
+      indicator.shown = true;
+      link.setAttribute('data-us-tab-loading', '');
+      link.append(spinner);
+      const node = status();
+      if (!node.isConnected) document.body.append(node);
+      node.textContent = 'Loading ' + label;
+    };
+    link.setAttribute('aria-busy', 'true');
+    tabIndicator = indicator;
+    if (shown) show();
+    else indicator.timer = setTimeout(show, indicatorDelay);
+  }
+
+  function clearContent() {
+    if (!contentIndicator) return;
+    const { multiPage, cover, timer } = contentIndicator;
+    clearTimeout(timer);
+    cover.remove();
+    multiPage.removeAttribute('data-us-cco-switch-busy');
+    multiPage.removeAttribute('data-us-cco-switch-loading');
+    multiPage.removeAttribute('aria-busy');
+    document.documentElement.removeAttribute('data-us-cco-switching');
+    contentIndicator = null;
+  }
+
+  function indicateContent(cco) {
+    if (contentIndicator?.multiPage === cco.multiPage) return;
+    clearContent();
+    const cover = document.createElement('div');
+    cover.className = 'us-cco-switch__cover';
+    cover.setAttribute('aria-hidden', 'true');
+    const loader = document.createElement('span');
+    loader.className = 'section-loader-spinning-circles';
+    cover.append(loader);
+    const multiPage = cco.multiPage;
+    multiPage.setAttribute('data-us-cco-switch-busy', '');
+    multiPage.setAttribute('aria-busy', 'true');
+    document.documentElement.setAttribute('data-us-cco-switching', '');
+    const timer = setTimeout(() => {
+      multiPage.setAttribute('data-us-cco-switch-loading', '');
+      multiPage.append(cover);
+    }, indicatorDelay);
+    contentIndicator = { multiPage, cover, timer };
+  }
+
+  function clearIndicators() {
+    clearTab();
+    clearContent();
+    document.querySelector('.us-cco-switch__status')?.remove();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Leaving a view
+
+  // Dispose components inside a view before its markup is discarded, the same
+  // way PageRequestManager does before replacing an update panel.
+  function disposeTree(prm, element) {
+    const components = () => window.Sys?.Application?.getComponents?.() || [];
+    const before = components().length;
+    if (typeof prm._destroyTree === 'function') prm._destroyTree(element);
+    for (const component of components()) {
+      const node = typeof component.get_element === 'function' ? component.get_element() : null;
+      if (node && element.contains(node)) component.dispose();
+    }
+    return before - components().length;
+  }
+
+  function releaseHandlers(view) {
+    const handlers = viewHandlers.get(view) || [];
+    for (const { owner, name, handler } of handlers) {
+      if (typeof owner['remove_' + name] === 'function') owner['remove_' + name](handler);
+    }
+    viewHandlers.delete(view);
+    return handlers.length;
+  }
+
+  function placeholder() {
+    const info = document.createElement('span');
+    info.className = 'Info';
+    info.textContent = 'Loading...';
+    return info;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Form state and PageRequestManager registration
+
+  function setField(form, name, source) {
+    const live = [...form.querySelectorAll(`input[name="${name}"]`)];
+    if (source && live.length) {
+      live.forEach(input => { input.value = source.value; });
+      return 'changed';
+    }
+    if (source) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.id = source.id;
+      input.value = source.value;
+      form.append(input);
+      return 'added';
+    }
+    if (live.length) {
+      live.forEach(input => input.remove());
+      return 'removed';
+    }
+    return 'absent';
+  }
+
+  function switchFormState(job, fetchedForm) {
+    const { cco, index, form } = job;
+    const fields = {};
+    for (const name of stateFields) {
+      fields[name] = setField(form, name, fetchedForm.querySelector(`input[name="${name}"]`));
+    }
+    const tabState = form.querySelector(`input[name="${cco.strip.id}_ClientState"]`);
+    if (tabState) tabState.value = stripState(index);
+    const pageState = form.querySelector(`input[name="${cco.multiPage.id}_ClientState"]`);
+    if (pageState) pageState.value = '';
+    form.setAttribute('action', fetchedForm.getAttribute('action'));
+    // Keep PageRequestManager from treating the new action as a cross-page post.
+    form._initialAction = form.action;
+    return fields;
+  }
+
+  // Read the fetched page's PageRequestManager._initialize(...) arrays.
+  function parseInitialize(doc) {
+    const script = [...doc.scripts].find(node => node.textContent.includes('PageRequestManager._initialize('));
+    const call = script?.textContent.match(/PageRequestManager\._initialize\(([\s\S]*?)\);/)?.[1];
+    if (!call) return null;
+    const arrays = [...call.matchAll(/\[([^\]]*)\]/g)].map(match => [...match[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)].map(item => item[1]));
+    const timeout = Number(call.slice(call.lastIndexOf(']') + 1).match(/\d+/)?.[0] || 90);
+    return arrays.length === 3 ? { panels: arrays[0], async: arrays[1], postBack: arrays[2], timeout } : null;
+  }
+
+  // Arrays use the ASP.NET 4 format: server ID then client ID ('' = derived);
+  // update panel server IDs carry a 't'/'f' children-as-triggers prefix.
+  function registerPanels(prm, parsed) {
+    const pairs = list => list.filter((item, position) => position % 2 === 0).map((id, position) => ({ id, client: list[position * 2 + 1] }));
+    const clientId = id => typeof prm._uniqueIDToClientID === 'function' ? prm._uniqueIDToClientID(id) : id.replaceAll("$", '_');
+    const panels = pairs(parsed.panels).map(({ id, client }) => ({ id: id.slice(1), client: client || clientId(id.slice(1)), triggers: id.charAt(0) === 't' }));
+    const expected = panels.map(panel => panel.id);
+    if (typeof prm._updateControls === 'function') {
+      prm._updateControls(parsed.panels, parsed.async, parsed.postBack, parsed.timeout, true);
+      if (JSON.stringify(prm._updatePanelIDs) === JSON.stringify(expected)) return { path: 'native', panels: expected.length };
+    }
+    prm._updatePanelIDs = expected;
+    prm._updatePanelClientIDs = panels.map(panel => panel.client);
+    prm._updatePanelHasChildrenAsTriggers = panels.map(panel => panel.triggers);
+    prm._asyncPostBackControlIDs = pairs(parsed.async).map(item => item.id);
+    prm._asyncPostBackControlClientIDs = pairs(parsed.async).map(item => item.client || clientId(item.id));
+    prm._postBackControlIDs = pairs(parsed.postBack).map(item => item.id);
+    prm._postBackControlClientIDs = pairs(parsed.postBack).map(item => item.client || clientId(item.id));
+    return { path: 'manual', panels: expected.length };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Initialization of the inserted view
+
+  // Execute server-provided script text in global scope, as the page would.
+  // Errors are captured without wrapping the code in try, which would change
+  // function-declaration scope.
+  function execute(code) {
+    const errors = [];
+    const capture = event => {
+      errors.push(brief(event.error || event.message));
+      event.preventDefault();
+    };
+    window.addEventListener('error', capture);
+    const script = document.createElement('script');
+    script.textContent = code;
+    document.head.append(script);
+    script.remove();
+    window.removeEventListener('error', capture);
+    return errors;
+  }
+
+  function loadScript(src) {
+    return new Promise(resolve => {
+      const script = document.createElement('script');
+      const done = result => {
+        clearTimeout(timer);
+        resolve(result);
+      };
+      const timer = setTimeout(() => done('timeout'), requestTimeout);
+      script.src = src;
+      script.onload = () => done('loaded');
+      script.onerror = () => done('failed');
+      document.head.append(script);
+    });
+  }
+
+  // Only types the browser itself would execute; JSON and template blocks stay inert.
+  const isJavaScript = script => !script.type || /^(?:text|application)\/(?:x-)?(?:java|ecma)script$|^text\/jscript$/i.test(script.type.trim());
+
+  async function runViewScripts(scripts) {
+    const result = { inline: 0, loaded: 0, present: 0, skipped: 0, errors: [] };
+    const present = new Set([...document.scripts].map(node => node.src).filter(Boolean));
+    for (const script of scripts) {
+      if (!isJavaScript(script)) {
+        result.skipped++;
+      } else if (script.src) {
+        const src = new URL(script.getAttribute('src'), location.href).href;
+        if (present.has(src)) {
+          result.present++;
+          continue;
+        }
+        const loaded = await loadScript(src);
+        present.add(src);
+        if (loaded === 'loaded') result.loaded++;
+        else result.errors.push({ script: new URL(src).pathname, message: loaded });
+      } else {
+        result.inline++;
+        for (const message of execute(script.textContent)) result.errors.push({ script: 'inline ' + result.inline, message });
+      }
+    }
+    return result;
+  }
+
+  // Page-level script managers, emitted outside the $create blocks, e.g.
+  // window['<gridId>_jsmanager']=new Asi_Web_BusinessDataGrid2({...});
+  // A grid's $create events reference its manager, so it must exist first.
+  const managerPattern = /window\[\s*'([\w$]+)_jsmanager'\s*\]\s*=\s*(new\s+[\w$.]+\s*)\(/g;
+
+  // Index of the parenthesis closing the call opened at text[open].
+  function callEnd(text, open) {
+    let depth = 0;
+    let quote = null;
+    for (let index = open; index < text.length; index++) {
+      const char = text[index];
+      if (quote) {
+        if (char === '\\') index++;
+        else if (char === quote) quote = null;
+      } else if (char === '"' || char === "'" || char === '`') {
+        quote = char;
+      } else if (char === '(') {
+        depth++;
+      } else if (char === ')' && --depth === 0) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  function managerStatements(doc, fetchedView) {
+    const statements = [];
+    for (const script of doc.scripts) {
+      if (fetchedView.contains(script)) continue;
+      const text = script.textContent;
+      for (const match of text.matchAll(managerPattern)) {
+        const open = match.index + match[0].length - 1;
+        const end = callEnd(text, open);
+        if (end < 0) continue;
+        statements.push({
+          owner: match[1],
+          type: match[2].replace(/^new\s+/, '').trim(),
+          code: `window['${match[1]}_jsmanager'] = ${match[2]}${text.slice(open, end + 1)};`
+        });
+      }
+    }
+    return statements;
+  }
+
+  // Server $create blocks: Sys.Application.add_init(function() { $create(...$get("id")); });
+  // A match may not run into the next add_init block.
+  const createPattern = /Sys\.Application\.add_init\(function\(\)\s*\{\s*(\$create\((?:(?!Sys\.Application\.add_init)[\s\S])*?\$get\("([^"]+)"\)\))\s*;\s*\}\);/g;
+
+  function createBlocks(doc, fetchedView) {
+    const blocks = [];
+    for (const script of doc.scripts) {
+      if (fetchedView.contains(script)) continue;
+      for (const match of script.textContent.matchAll(createPattern)) {
+        blocks.push({ code: match[1], target: match[2], type: match[1].match(/^\$create\(([\w$.]+)/)?.[1] || 'unknown' });
+      }
+    }
+    return blocks;
+  }
+
+  const inLister = (element, listers) => listers.some(lister => lister.contains(element));
+  const registered = id => typeof window.$find === 'function' && !!window.$find(id);
+
+  // Native lister refreshes emit their own managers and $create blocks.
+  function replayManagers(statements, view, listers) {
+    const result = { run: 0, errors: [] };
+    for (const statement of statements) {
+      const element = document.getElementById(statement.owner);
+      if (!element || !view.contains(element) || inLister(element, listers)) continue;
+      result.run++;
+      for (const message of execute(statement.code)) result.errors.push({ type: statement.type, owner: statement.owner, message });
+    }
+    return result;
+  }
+
+  function replayCreates(blocks, view, listers) {
+    const result = { run: 0, skippedInListers: 0, errors: [] };
+    for (const block of blocks) {
+      const element = document.getElementById(block.target);
+      if (!element || !view.contains(element)) continue;
+      if (inLister(element, listers)) {
+        result.skippedInListers++;
+        continue;
+      }
+      if (registered(block.target)) continue;
+      result.run++;
+      for (const message of execute('Sys.Application.add_init(function() {\n' + block.code + ';\n});')) {
+        result.errors.push({ type: block.type, target: block.target, message });
+      }
+    }
+    return result;
+  }
+
+  // Resolves on endRequest. If a page script throws while PageRequestManager
+  // completes the update, endRequest never fires: 0.7 s idle after starting
+  // counts as finished with an error.
+  function nativePostBack(prm, eventTarget) {
+    return new Promise(resolve => {
+      let done = false;
+      let started = false;
+      let idleSince = 0;
+      const finish = result => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        clearInterval(poll);
+        if (pendingEnd === onEnd) pendingEnd = null;
+        resolve(result);
+      };
+      const onEnd = error => finish(error ? brief(error) : null);
+      const timer = setTimeout(() => finish('timeout'), requestTimeout);
+      const poll = setInterval(() => {
+        if (prm.get_isInAsyncPostBack()) {
+          started = true;
+          idleSince = 0;
+        } else if (started) {
+          idleSince = idleSince || performance.now();
+          if (performance.now() - idleSince > 700) finish('endRequest was not raised');
+        }
+      }, 100);
+      pendingEnd = onEnd;
+      window.__doPostBack(eventTarget, '');
+    });
+  }
+
+  const listerGrid = lister => lister.querySelector('.RadGrid[id]');
+  const listerReady = lister => !!listerGrid(lister) && registered(listerGrid(lister).id);
+
+  // Each report lister has a hidden native refresh button inside its update
+  // panel; its partial response initializes the grid with iMIS's own scripts.
+  // One refresh can update every lister on the tab, so re-check before each.
+  async function refreshListers(prm, listers) {
+    const results = [];
+    for (const lister of listers) {
+      if (listerReady(lister)) {
+        results.push({ lister: lister.id, ms: 0, error: null, gridRegistered: true, skipped: 'already initialized' });
+        continue;
+      }
+      const button = lister.querySelector('input[id$="_ResultsGrid_RefreshButton"][name]');
+      const began = performance.now();
+      const error = await nativePostBack(prm, button.name);
+      results.push({ lister: lister.id, ms: Math.round(performance.now() - began), error, gridRegistered: listerReady(lister) });
+    }
+    return results;
+  }
+
+  function uninitialized(view) {
+    if (typeof window.$find !== 'function') return [];
+    return [...view.querySelectorAll('[id][class*="Rad"]')]
+      .filter(node => /(^|\s)Rad[A-Z]\w*(\s|$)/.test(node.className) && !/(^|\s)Rad\w+(DropDown|Slide)\b/.test(node.className) && !registered(node.id))
+      // A RadAjaxPanel wrapper holds the registered component on its child.
+      .filter(node => !(node.classList.contains('RadAjaxPanel') && node.firstElementChild && registered(node.firstElementChild.id)))
+      .slice(0, 30)
+      .map(node => ({ id: node.id, type: node.className.match(/(^|\s)(Rad[A-Z]\w*)/)[2] }));
+  }
+
+  // Components still registered whose element has left the document.
+  function orphans() {
+    return (window.Sys?.Application?.getComponents?.() || [])
+      .filter(component => typeof component.get_element === 'function' && component.get_element() && !document.contains(component.get_element()))
+      .slice(0, 20)
+      .map(component => ({ id: component.get_id?.() || null, type: typeName(component) }));
+  }
+
+  // Record handlers added through the MS AJAX add_<event> methods while run()
+  // executes, so they can be removed with the view. Natively a tab's controls
+  // are never disposed without a reload, and some leave load handlers behind
+  // that fail during the next partial update.
+  async function tracking(prm, run) {
+    const added = [];
+    const patched = [];
+    const events = [
+      [window.Sys.Application, 'load'],
+      [prm, 'initializeRequest'],
+      [prm, 'beginRequest'],
+      [prm, 'pageLoading'],
+      [prm, 'pageLoaded'],
+      [prm, 'endRequest']
+    ];
+    for (const [owner, name] of events) {
+      const method = 'add_' + name;
+      if (!owner || typeof owner[method] !== 'function') continue;
+      const own = Object.prototype.hasOwnProperty.call(owner, method);
+      const original = owner[method];
+      patched.push({ owner, method, own, original });
+      owner[method] = function (handler) {
+        added.push({ owner, name, handler });
+        return original.call(this, handler);
+      };
+    }
+    try {
+      await run();
+      return added;
+    } finally {
+      for (const { owner, method, own, original } of patched) {
+        if (own) owner[method] = original;
+        else delete owner[method];
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // The switch
+
+  class FallbackError extends Error {
+    constructor(message, forgetKey) {
+      super(message);
+      this.forgetKey = forgetKey;
+    }
+  }
+
+  async function fetchTab(url, target) {
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      headers: { Accept: 'text/html' },
+      signal: AbortSignal.timeout?.(requestTimeout)
+    });
+    const landed = new URL(response.url || url, location.href);
+    if (!response.ok || landed.pathname !== location.pathname) throw new FallbackError('Unexpected tab response (' + response.status + ').');
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    if (doc.querySelector('input.SignInButton') && !document.querySelector('input.SignInButton')) throw new FallbackError('The tab response is a sign-in page.');
+    const fetchedForm = doc.getElementById(target.form.id);
+    const fetchedView = doc.getElementById(views(target.cco)[target.index].id);
+    const parsed = parseInitialize(doc);
+    if (!fetchedForm || !parsed) throw new FallbackError('The tab response lacks the form or panel registry.');
+    // A stored key that no longer selects this CCO fetches a page without its view.
+    if (!fetchedView) throw new FallbackError('The tab response lacks the tab view.', true);
+    return { doc, fetchedForm, fetchedView, parsed };
+  }
+
+  // Native navigation to the tab, owned from here by the native indicators.
+  function fallBack(job, url) {
+    clearIndicators();
+    restoreSelections(job.cco.strip);
+    window.UnionSuiteTabBusy?.show?.(job.link);
+    if (url) {
+      location.assign(url);
+      return;
+    }
+    const tabState = job.form.querySelector(`input[name="${job.cco.strip.id}_ClientState"]`);
+    if (tabState) tabState.value = stripState(job.index);
+    window.__doPostBack(stripUniqueId(job.cco), JSON.stringify({ type: 0, index: String(job.index) }));
+  }
+
+  async function run(job) {
+    const { cco, index, prm } = job;
+    const value = tabValue(cco, index);
+    const targetView = views(cco)[index];
+    const leaving = views(cco)[displayedIndex(cco)];
+    current = job;
+    setTabAppearance(cco, index);
+    indicateTab(job.link, caption(cco, index));
+    indicateContent(cco);
+    const began = performance.now();
+    const entry = { cco: cco.prefix, tab: caption(cco, index), from: leaving ? caption(cco, views(cco).indexOf(leaving)) : null, pageErrors: [] };
+    const recordError = event => {
+      if (entry.pageErrors.length < 10) entry.pageErrors.push(brief(event.error || event.message));
+    };
+    window.addEventListener('error', recordError);
+    let url = null;
+    let changed = false;
+    try {
+      url = await resolveUrl(job, value, entry);
+      const { doc, fetchedForm, fetchedView, parsed } = await fetchTab(url, job);
+      entry.fetchMs = Math.round(performance.now() - began);
+
+      changed = true;
+      if (leaving) {
+        entry.releasedHandlers = releaseHandlers(leaving);
+        entry.disposedComponents = disposeTree(prm, leaving);
+        leaving.replaceChildren(placeholder());
+        leaving.classList.add('rmpHidden');
+      }
+      const content = document.importNode(fetchedView, true);
+      const scripts = [...content.querySelectorAll('script')];
+      scripts.forEach(script => script.remove());
+      targetView.replaceChildren(...content.childNodes);
+      targetView.classList.remove('rmpHidden');
+      selectedAhead.delete(cco.strip);
+
+      entry.fields = switchFormState(job, fetchedForm);
+      entry.registration = registerPanels(prm, parsed);
+      history.replaceState(history.state, '', url);
+
+      const initializing = performance.now();
+      const listers = [...targetView.querySelectorAll('[id$="_ListerPanel"]')].filter(lister => lister.querySelector('input[id$="_ResultsGrid_RefreshButton"][name]'));
+      // Lister refreshes are not tracked: PageRequestManager disposes the
+      // controls in the panels it replaces.
+      const added = await tracking(prm, async () => {
+        entry.scripts = await runViewScripts(scripts);
+        entry.managers = replayManagers(managerStatements(doc, fetchedView), targetView, listers);
+        entry.creates = replayCreates(createBlocks(doc, fetchedView), targetView, listers);
+      });
+      viewHandlers.set(targetView, added);
+      entry.trackedHandlers = added.length;
+      entry.listers = await refreshListers(prm, listers);
+      entry.initMs = Math.round(performance.now() - initializing);
+      entry.uninitialized = uninitialized(targetView);
+      entry.orphans = orphans();
+      entry.status = 'shown';
+    } catch (error) {
+      entry.status = 'fallback';
+      entry.error = brief(error);
+      if (error instanceof FallbackError && error.forgetKey && entry.key !== 'discovered') writeKey(cco, null);
+    } finally {
+      window.removeEventListener('error', recordError);
+      entry.totalMs = Math.round(performance.now() - began);
+      record(entry);
+      current = null;
+    }
+    if (entry.status !== 'shown') {
+      queued = null;
+      // Before any change a stored or URL key may be wrong, so the native
+      // postback chooses the URL. After a change the URL is known to be good.
+      fallBack(job, changed ? url : null);
+      return;
+    }
+    next();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Clicks and the queue: the latest click wins.
+
+  function finish() {
+    clearIndicators();
+    restoreSelections();
+  }
+
+  // Run the queued click, if it still applies, once the page is free.
+  function next() {
+    clearInterval(waitTimer);
+    waitTimer = null;
+    const job = queued;
+    queued = null;
+    const fresh = job?.link.isConnected ? target(job.link) : null;
+    if (!fresh) {
+      finish();
+      return;
+    }
+    if (fresh.index === displayedIndex(fresh.cco)) {
+      setTabAppearance(fresh.cco, fresh.index);
+      finish();
+      return;
+    }
+    if (fresh.prm.get_isInAsyncPostBack()) {
+      queue(fresh);
+      return;
+    }
+    if (contentIndicator && contentIndicator.multiPage !== fresh.cco.multiPage) clearContent();
+    restoreSelections(fresh.cco.strip);
+    run(fresh);
+  }
+
+  function queue(job) {
+    const previous = queued;
+    queued = job;
+    if (previous && previous.cco.strip !== job.cco.strip) resetStrip(previous.cco);
+    setTabAppearance(job.cco, job.index);
+    indicateTab(job.link, caption(job.cco, job.index));
+    // Wait for a native partial postback to finish, including one whose
+    // endRequest is never raised.
+    if (!current && !waitTimer) {
+      waitTimer = setInterval(() => {
+        if (!job.prm.get_isInAsyncPostBack()) next();
+      }, 100);
+    }
+  }
+
+  function cancelQueue() {
+    const previous = queued;
+    queued = null;
+    if (previous) resetStrip(previous.cco);
+    if (current) {
+      setTabAppearance(current.cco, current.index);
+      indicateTab(current.link, caption(current.cco, current.index));
+    } else {
+      clearInterval(waitTimer);
+      waitTimer = null;
+      finish();
+    }
+  }
+
+  function handle(job) {
+    if (current) {
+      if (job.link === current.link) cancelQueue();
+      // Another CCO's displayed tab is where it already is.
+      else if (job.cco.strip !== current.cco.strip && job.index === displayedIndex(job.cco)) cancelQueue();
+      else queue(job);
+      return;
+    }
+    if (job.index === displayedIndex(job.cco)) {
+      if (queued) cancelQueue();
+      return;
+    }
+    if (job.prm.get_isInAsyncPostBack() || queued) {
+      queue(job);
+      return;
+    }
+    run(job);
+  }
+
+  // Capture phase on the document runs before Telerik's own click handling,
+  // which would post back and redirect. Nested CCOs inserted by a switch are
+  // covered without further registration.
+  function onClick(event) {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest?.('a.rtsLink');
+    const job = link ? target(link) : null;
+    if (!job) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    handle(job);
+  }
+
+  // Resolves internal lister refreshes, and records their errors instead of
+  // letting iMIS surface them as alerts.
+  function onEndRequest(sender, args) {
+    if (!pendingEnd) return;
+    const error = args?.get_error?.();
+    if (error) args.set_errorHandled?.(true);
+    const resolve = pendingEnd;
+    pendingEnd = null;
+    resolve(error);
+  }
+
+  function attach() {
+    const prm = pageRequestManager();
+    if (!prm || prm === manager) return;
+    manager?.remove_endRequest?.(onEndRequest);
+    manager = prm;
+    manager.add_endRequest(onEndRequest);
+  }
+
+  // A page restored with Back resumes with no loading state or queue.
+  function onPageShow(event) {
+    if (!event.persisted) return;
+    clearInterval(waitTimer);
+    waitTimer = null;
+    queued = null;
+    finish();
+  }
+
+  function setSessionDisabled(disabled) {
+    try {
+      if (disabled) sessionStorage.setItem(disabledKey, '1');
+      else sessionStorage.removeItem(disabledKey);
+    } catch {
+      return 'Session storage is unavailable; the setting was not changed.';
+    }
+    return disabled
+      ? 'CCO tab switching is off in this browser tab until it is closed. Tabs reload the page natively.'
+      : 'CCO tab switching is on in this browser tab' + (window.UnionSuiteCcoSwitchConfig?.enabled === false ? ', but turned off site-wide in Config.js.' : '.');
+  }
+
+  // Support diagnostics. Never includes ViewState, tokens, row data or URL
+  // values other than tab values.
+  function report() {
+    const prm = pageRequestManager();
+    return {
+      version,
+      enabled: enabled(),
+      sessionDisabled: sessionDisabled(),
+      siteDisabled: window.UnionSuiteCcoSwitchConfig?.enabled === false,
+      easyEdit: easyEdit(),
+      switching: current ? { cco: current.cco.prefix, tab: caption(current.cco, current.index) } : null,
+      queued: queued ? { cco: queued.cco.prefix, tab: caption(queued.cco, queued.index) } : null,
+      storedKeys: Object.keys(readKeys()).filter(id => id.startsWith(location.pathname + '|')).length,
+      registeredPanels: prm ? prm._updatePanelIDs.length : null,
+      inAsyncPostBack: prm ? prm.get_isInAsyncPostBack() : null,
+      orphans: orphans(),
+      log: log.map(entry => ({ ...entry }))
+    };
+  }
+
+  window.UnionSuiteCcoSwitch = {
+    version,
+    refresh: attach,
+    report,
+    enable: () => setSessionDisabled(false),
+    disable: () => setSessionDisabled(true)
+  };
+  document.addEventListener('click', onClick, true);
+  window.addEventListener('pageshow', onPageShow);
+  attach();
+  document.addEventListener('DOMContentLoaded', attach, { once: true });
+  window.addEventListener('load', attach, { once: true });
+})();
+/* US-CCO-SWITCH:END */
+
 /* US-SECTION-SWITCHER:START */
 (function(){
  'use strict';
