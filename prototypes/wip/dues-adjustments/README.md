@@ -67,7 +67,7 @@ Borrowed from contact page v3 (another WIP, loaded not copied):
 badges, which keep to one line), `theme-candidate-heading-menus.js` and
 `finance-actions.fixture.js` (the `finance.add-adjustment` heading menu and
 the adjustment actions: `finance.view-adjustment`, `edit-adjustment`,
-`end-adjustment`, `view-adjustment-transactions`; in the product they belong
+`end-adjustment`, `cancel-adjustment`, `view-adjustment-transactions`; in the product they belong
 in `UnionSuite-Client/Actions.js`). Also borrowed from the activity
 cards WIP: `activity-cards.candidate.js`, whose `UnionSuiteRecordCards.fold()`
 animates the Active rows' detail panels exactly as the activity history's
@@ -147,6 +147,7 @@ One Query Template Display iPart:
     <div class="us-adjustment__actions">
       <button type="button" class="us-action-finance-edit-adjustment" data-adjustment="{#query.AdjustmentKey}">Edit</button>
       <button type="button" class="us-action-finance-end-adjustment" data-adjustment="{#query.AdjustmentKey}">End adjustment</button>
+      <button type="button" class="us-action-finance-cancel-adjustment" data-adjustment="{#query.AdjustmentKey}">Cancel adjustment</button>
       <button type="button" class="us-action-finance-view-adjustment-transactions" data-adjustment="{#query.AdjustmentKey}">View affected transactions</button>
     </div>
   </div>
@@ -289,11 +290,11 @@ These need changes in the shared theme, not only in this component.
    for both schemes: target `zUnionSuite.css` after the outline and warning
    modifiers (around lines 451–489), and `zzDarkMode.css` after its outline
    rules (around line 652). It affects every danger-toned button action.
-2. **Heading menu toggle unreadable in dark mode.** The contact page v3
-   candidate's `.us-heading-menu > .us-actions__toggle` uses `--brand-800` text
-   with no dark override: `#002d3c` on `#1b272f`. Visible here on
-   Add adjustment and on v3's own heading menus. Not fixed here because it
-   belongs to the v3 candidate.
+2. **Heading menu toggle unreadable in dark mode — fixed in the v3
+   candidate (26 September 2026).** The contact page v3 candidate's
+   `.us-heading-menu > .us-actions__toggle` used `--brand-800` text with no
+   dark override: `#002d3c` on `#1b272f`. v3's dark section 21 now gives it
+   the dark outline button's colours and states.
 3. **Status badges broke mid-word — fixed in the v3 candidate.** The base
    badge allows `overflow-wrap: anywhere` for long free text, which split
    "Upcoming" in a narrow grid column. v3's status icon badge (section 30) now
@@ -305,6 +306,12 @@ These need changes in the shared theme, not only in this component.
    forced-colours border and one keyboard focus ring for every heading icon
    button, including the relocated Export this page's grid uses. Found while
    building this prototype's former Show historical toggle.
+5. **Detail fields wrapped in fixed tracks — fixed (26 September 2026).**
+   Below a 1100px panel the expanded fields were a grid of `auto-fill`
+   150px tracks, so "Leave without pay · overseas travel" wrapped into a
+   ~170px cell with the rest of the row empty. `.us-adjustment__fields` is
+   now a wrapping flex row (each field at least 150px) at every width, as
+   the 1100px layout already was.
 
 ## Decisions made
 
@@ -327,6 +334,13 @@ These need changes in the shared theme, not only in this component.
   block. Revisit only if the card family becomes the rule for current-state
   lists too.
 - Rows expand with the activity history's fold animation (US-RECORD-CARDS).
+- 26 September 2026 (owner): an upcoming adjustment has not started, so its
+  row offers **Cancel adjustment** (`finance.cancel-adjustment`) instead of
+  End adjustment. The template carries both buttons; the candidate CSS shows
+  one from `data-us-adjustment-status`, so the IQA needs no extra field.
+- 26 September 2026 (owner), contact page v3's hardship waiver: no
+  "quarter" wording. Fee effect "Reducing fees by $20 per instalment";
+  Amount "−$20".
 
 ## Open decisions
 

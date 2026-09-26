@@ -1029,12 +1029,15 @@
   display: none;
 }
 
-/* Popup: the banner menu surface, anchored to the bell's right edge. */
+/* Popup: the banner menu surface, anchored to the bell's right edge. The
+   unpinned banner is not a stacking context, so the popup takes the pinned
+   banner's layer to open over page content such as the CCO rail's
+   collapsed Sections bar (z-index 5). */
 .us-banner .us-banner__alerts-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: absolute;
   top: calc(100% + var(--space-2));
   inset-inline-end: 0;
-  z-index: 3;
+  z-index: calc(var(--z-sidebar) - 1);
   width: min(360px, calc(100vw - 32px));
   max-height: min(60vh, 480px);
   overflow-y: auto;
@@ -1718,6 +1721,25 @@
   :root[data-us-color-scheme="dark"] [data-us-cco-rail="collapsed"] > .RadTabStripVertical > .us-tab-sections .us-tab-section-options button:is(:hover, [aria-current="true"]) {
     background: var(--dm-selected);
     color: var(--text-strong);
+  }
+
+  /* 31. Heading menu toggle: the dark outline button's colours and states
+     (zzDarkMode.css .us-outline-button), instead of --brand-800 text and
+     border on the dark panel heading. */
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle {
+    border-color: var(--border-strong);
+    background: var(--bg-surface);
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:is(:hover, :focus, [aria-expanded=true]) {
+    border-color: var(--border-strong);
+    background: var(--dm-hover);
+    color: var(--text-strong);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-actions.us-heading-menu:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle:active {
+    background: var(--dm-selected);
   }
 }
 
@@ -2607,12 +2629,13 @@
   transform: rotate(180deg);
 }
 
-/* Popup: the alert bell's surface, anchored to the badge's right edge. */
+/* Popup: the alert bell's surface and layer, anchored to the badge's right
+   edge. */
 .us-banner .us-banner__positions-panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: absolute;
   top: calc(100% + var(--space-2));
   inset-inline-end: 0;
-  z-index: 3;
+  z-index: calc(var(--z-sidebar) - 1);
   width: min(340px, calc(100vw - 32px));
   max-height: min(60vh, 480px);
   overflow-y: auto;

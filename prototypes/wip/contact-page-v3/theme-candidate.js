@@ -244,11 +244,11 @@
    Opt in with us-cco-collapsible on the CCO iPart CSS class field (pairs with
    us-cco-cards). A toggle at the top of the rail's column (the same spot in
    both states) collapses the outer rail on desktop; the collapsed rail becomes a "Sections: <current>" dropdown, reusing the mobile All
-   sections picker that UnionSuiteTabs already adds to every vertical strip.
+   sections picker that UnionSuiteTabs already adds to every vertical strip
+   (UnionSuiteTabs 1.1 writes the label, theme-candidate-tabs.js).
    The user's choice is remembered per browser for every page. With no saved
    choice, the rail collapses automatically below 1200px. Mobile, nested CCOs
-   and Easy Edit are unchanged. On promotion, the summary label belongs in
-   UnionSuiteTabs rather than being rewritten here. */
+   and Easy Edit are unchanged. */
 (function () {
   'use strict';
 
@@ -298,11 +298,6 @@
         cco.querySelector(':scope > .RadTabStripVertical > .rtsLevel'));
   }
 
-  function selectedLabel(strip) {
-    const link = strip.querySelector(':scope > .rtsLevel .rtsLink.rtsSelected, :scope > .rtsLevel .rtsLink[aria-selected="true"]');
-    return (link?.querySelector('.rtsTxt')?.textContent || link?.textContent || '').trim();
-  }
-
   function attach(cco) {
     const strip = cco.querySelector(':scope > .RadTabStripVertical');
     const level = strip.querySelector(':scope > .rtsLevel');
@@ -322,9 +317,8 @@
     cco.style.removeProperty('--us-cco-bar-space');
     cco.style.removeProperty('--us-cco-sections-offset');
     cco.querySelector('[data-us-cco-sections-host]')?.removeAttribute('data-us-cco-sections-host');
-    const summary = entry.strip.querySelector(':scope > .us-tab-sections > summary');
-    if (summary) summary.textContent = 'All sections';
     entries.delete(cco);
+    window.UnionSuiteTabs?.refresh();
   }
 
   function update() {
@@ -338,6 +332,7 @@
     });
 
     const isCollapsed = collapsed();
+    let switched = false;
     entries.forEach((entry, cco) => {
       // Expanded: a wrapper child in the toolbar row above the rail.
       // Collapsed: the start of the Sections bar, which takes that row.
@@ -348,19 +343,19 @@
         else cco.insertBefore(entry.button, entry.strip);
         if (focused) entry.button.focus();
       }
-      cco.setAttribute('data-us-cco-rail', isCollapsed ? 'collapsed' : 'expanded');
+      const state = isCollapsed ? 'collapsed' : 'expanded';
+      if (cco.getAttribute('data-us-cco-rail') !== state) switched = true;
+      cco.setAttribute('data-us-cco-rail', state);
       entry.button.setAttribute('aria-expanded', String(!isCollapsed));
       entry.button.setAttribute('aria-label', isCollapsed ? 'Expand sections menu' : 'Collapse sections menu');
       entry.button.title = isCollapsed ? 'Expand sections' : 'Collapse sections';
-      const summary = entry.strip.querySelector(':scope > .us-tab-sections > summary');
-      const label = selectedLabel(entry.strip);
-      // Mobile keeps its own "All sections" picker label, except a sidebar
-      // CCO's phone dropdown, which US-CCO-SIDEBAR labels.
       const desktop = window.matchMedia('(min-width: 601px)').matches;
-      const text = isCollapsed && desktop && label ? 'Sections: ' + label : 'All sections';
-      if (summary && summary.textContent !== text && (desktop || !cco.closest('.us-cco-rail'))) summary.textContent = text;
       placeSwitcher(cco, entry, isCollapsed && desktop);
     });
+    // UnionSuiteTabs labels the Sections picker from whether the tab list is
+    // rendered. Ask it now, so the label is right in the frame the rail
+    // switches (its resize observer would otherwise catch up a frame later).
+    if (switched) window.UnionSuiteTabs?.refresh();
   }
 
   // Collapsed: a section switcher leading the open tab shares the Sections
@@ -1228,22 +1223,8 @@
   }
 
   // Phones: the tabs become one "Sections: <current>" dropdown under the
-  // banner, which sticks below the pinned banner (and any fixed top chrome).
-  function selectedLabel(entry) {
-    const link = entry.list.querySelector(':scope > .rtsLI > .rtsLink.rtsSelected, :scope > .rtsLI > .rtsLink[aria-selected="true"]');
-    return text(link?.querySelector('.rtsTxt')?.textContent || link?.textContent);
-  }
-
-  function labelPicker(cco, entry) {
-    const summary = entry.strip.querySelector(':scope > .us-tab-sections > summary');
-    if (!summary) return;
-    // Desktop: the collapsible rail labels its own collapsed bar.
-    if (desktop.matches && cco.closest('.us-cco-collapsible, .us-cco-rail')) return;
-    const current = selectedLabel(entry);
-    const value = !desktop.matches && current ? 'Sections: ' + current : 'All sections';
-    if (summary.textContent !== value) summary.textContent = value;
-  }
-
+  // banner (UnionSuiteTabs 1.1 names the open tab, since the tab list is
+  // hidden), which sticks below the pinned banner and any fixed top chrome.
   function chromeBottom() {
     let bottom = 0;
     document.querySelectorAll('#hd, #injected-taskbar, .us-banner--pinned .us-banner__surface').forEach(node => {
@@ -1419,10 +1400,6 @@
     });
     cco.style.removeProperty('--us-cco-rail-pull');
     cco.style.removeProperty('--us-cco-rail-sticky-top');
-    if (!cco.closest('.us-cco-collapsible, .us-cco-rail')) {
-      const summary = entry.strip.querySelector(':scope > .us-tab-sections > summary');
-      if (summary) summary.textContent = 'All sections';
-    }
     entries.delete(cco);
   }
 
@@ -1439,7 +1416,6 @@
       }
       const entry = entries.get(cco);
       pull(cco);
-      labelPicker(cco, entry);
       ensureSearch(entry);
       applyCounts(entry);
       filter(entry);

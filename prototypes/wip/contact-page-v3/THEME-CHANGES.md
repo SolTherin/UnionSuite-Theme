@@ -1,9 +1,17 @@
 # Contact page v3: theme changes to make
 
 Status: the v3 candidate was approved by the owner on 25 September 2026.
-**Nothing in `THeme/` has been changed yet.** Do not start moving these
-changes into the theme until the owner says to begin. Until then, the
-prototype keeps loading the candidate files after the theme files.
+On 26 September 2026 the owner asked for items 1–34 (including the
+proposed items 32–34) to be merged for testing in iMIS. The theme changes
+are on branch `theme/contact-page-v3`: `zUnionSuite.css`, `99-Orion.css`,
+`zzDarkMode.css`, `zUnionSuite.js`, the client `Config.js` and
+`Banner-Contact-Template.html`. With every candidate file removed, the
+prototype renders exactly as it did with them (computed styles and boxes of
+every element on every tab, light and dark, at 1280 and 1100px). At 375px two
+narrow-width theme rules were kept that the candidate had overridden by
+loading last: Needs Attention cards stay 16px/24px below 420px, and data
+panels keep 14px side padding on phones (top and bottom now 6px/4px, as
+item 6). The prototype still loads the candidate files after the theme files.
 
 This file tracks what has to change and where. The detail for each item
 (what it does, measurements, scope) is in the
@@ -11,6 +19,14 @@ This file tracks what has to change and where. The detail for each item
 README. Tick an item off only once it is in the theme and has been checked.
 
 ## Decisions that shape the promotion
+
+- 26 September 2026: `us-cco-cards` stays opt-in; the theme's default
+  vertical CCO is unchanged. `us-cco-rail` is for the main tabs of
+  top-level record pages: contact profile, organisation profile, manage
+  case and the like. (README open decision 1.)
+- 26 September 2026: `UnionSuiteTabs` owns the Sections picker label
+  (README open decision 5), so `US-NATIVE-TABS` is replaced by
+  `theme-candidate-tabs.js` below.
 
 - 25 September 2026: the whole v3 candidate (items 1–28) is approved.
   Item 26 is page layout and client actions, not theme code.
@@ -30,13 +46,19 @@ README. Tick an item off only once it is in the theme and has been checked.
 
 ## Before starting
 
-- [ ] Owner says to begin moving changes into the theme.
+- [x] Owner says to begin moving changes into the theme.
+      26 September 2026: the owner asked for items 1–34 to be merged into a
+      branch for testing in iMIS, including the proposed items 32–34.
 - [ ] Review the site-wide items (1–4, 6, 7, 11, 14, 18, 20, 22, 23) against
       other pages: agreement, case, staff and dashboard banners (README open
       decisions 2 and 11), and fit-to-width reports site-wide (open
       decision 10).
+      Not done yet. The items are in the theme on branch
+      `theme/contact-page-v3` for live testing in iMIS.
 - [ ] Finish the dark mode checks listed in README
       [Verification status](README.md#verification-status).
+      The merged theme matches the prototype in dark mode on every tab at
+      1280px (26 September 2026); the manual checks listed there remain.
 - [ ] Move this folder to `prototypes/approved/contact-page-v3/`, as
       `AGENTS.md` requires for approved designs, and update the preview URL,
       the v1/v2 links and the paths in `build-standalone.cjs`.
@@ -46,69 +68,71 @@ README. Tick an item off only once it is in the theme and has been checked.
 Each `theme-candidate.css` section names its target and uses the theme's own
 selectors, so it moves across unchanged.
 
-- [ ] Item 1, panel header tokens: section 1 → tokens at the top of the file
+- [x] Item 1, panel header tokens: section 1 → tokens at the top of the file
       and the `pointer: coarse` override.
-- [ ] Item 2, section switcher: section 2 → `US-SECTION-TABS`.
-- [ ] Items 3, 19 and 20, banner: section 3 → `US-BANNER-COMPONENT`.
-- [ ] Item 4, Needs Attention cards: section 4 → `US-ATTENTION`.
-- [ ] Item 5, `us-cco-cards`: section 5 → new block after
+- [x] Item 2, section switcher: section 2 → `US-SECTION-TABS`.
+- [x] Items 3, 19 and 20, banner: section 3 → `US-BANNER-COMPONENT`.
+- [x] Item 4, Needs Attention cards: section 4 → `US-ATTENTION`.
+- [x] Item 5, `us-cco-cards`: section 5 → new block after
       `US-NATIVE-TABS-COMPONENT`; rail width and gap tokens in
       `US-NATIVE-TABS-PAGE-LAYOUT`.
-- [ ] Items 6 and 14, read-only panel fields and labels: sections 6 and 14 →
+- [x] Items 6 and 14, read-only panel fields and labels: sections 6 and 14 →
       data display panel rules.
-- [ ] Item 7, report column headers: section 7 → IQA token block after
+- [x] Item 7, report column headers: section 7 → IQA token block after
       `US-IQA-BASELINE`.
-- [ ] Item 8, row groups: section 8 → after the IQA report rules.
-- [ ] Item 9, `us-alerts` (buttons follow the text): section 9 → after the
+- [x] Item 8, row groups: section 8 → after the IQA report rules.
+- [x] Item 9, `us-alerts` (buttons follow the text): section 9 → after the
       native feedback messages.
-- [ ] Item 10, collapsible rail: section 10 → after
+- [x] Item 10, collapsible rail: section 10 → after
       `US-NATIVE-TABS-COMPONENT`. Change the icon URLs to
       `images/NavbarSprite.svg#…`; keep the view-transition rules and
       `--us-cco-rail-motion`.
-- [ ] Item 12, alert bell: section 12 → `US-BANNER-COMPONENT`, after Quick
+- [x] Item 12, alert bell: section 12 → `US-BANNER-COMPONENT`, after Quick
       Actions.
-- [ ] Item 13, compact notes: section 13 → after the list shell rules.
-- [ ] Item 15, right-hand rail (from the Vertical right setting):
+- [x] Item 13, compact notes: section 13 → after the list shell rules.
+- [x] Item 15, right-hand rail (from the Vertical right setting):
       section 15 → after item 5.
-- [ ] Items 16, 17 and 24, `us-cco-rail`, tab search, counts and shortcut
+- [x] Items 16, 17 and 24, `us-cco-rail`, tab search, counts and shortcut
       keycap: sections 16 and 17 → after item 15. Sections 5 and 10 already
       match `:is(.us-cco-cards, .us-cco-rail)` and
       `:is(.us-cco-collapsible, .us-cco-rail)`.
-- [ ] Item 22, message paragraph trim: section 22 → `US-MESSAGES`, after
+- [x] Item 22, message paragraph trim: section 22 → `US-MESSAGES`, after
       the shared message box rule.
-- [ ] Item 23, report scroll edges: section 23 → after the IQA report rules.
-- [ ] Item 25, panel tones: section 25 → after the panel and report heading
+- [x] Item 23, report scroll edges: section 23 → after the IQA report rules.
+- [x] Item 25, panel tones: section 25 → after the panel and report heading
       rules.
-- [ ] Item 27, copy flash and "Copied" label: section 27 → replaces
+- [x] Item 27, copy flash and "Copied" label: section 27 → replaces
       `.us-copy-flash` and `@keyframes us-copy-flash` in `US-COPY`.
-- [ ] Item 28, quiet trackers: section 28 → after `US-ATTENTION`.
-- [ ] Item 31, heading menus: section 31 → `US-ACTION-MENUS`, after the
+- [x] Item 28, quiet trackers: section 28 → after `US-ATTENTION`.
+- [x] Item 31, heading menus: section 31 → `US-ACTION-MENUS`, after the
       shared toggle rules (toggle sized like the heading buttons; top-level
       side line and glint: `us-actions-line-draw` and a glint keyframe
       sized from the list, not measured, because US-ACTION-MENUS collapses
       the list and items while it unfolds). Consider the same item inset
       for the theme's own submenus, whose hover fill also covers their line.
-- [ ] Item 25 addition: a toned panel whose grid shows `rgNoRecords`, or a
+      The submenu inset suggestion was not applied.
+- [x] Item 25 addition: a toned panel whose grid shows `rgNoRecords`, or a
       declared Query Template (`us-query-template`) with no result set, stays
       plain (section 25).
-- [ ] Item 30, status icons in badges: section 30 → `US-BADGES`, after the
+- [x] Item 30, status icons in badges: section 30 → `US-BADGES`, after the
       tone rules, with its one-line rule (a status never breaks mid-word).
-- [ ] Item 33, adjustments (proposed, not yet approved): move
+- [x] Item 33, adjustments (proposed, not yet approved): move
       `prototypes/wip/dues-adjustments/dues-adjustments.candidate.css` into a
       new `US-ADJUSTMENTS` section after the Query Template list rules (its
       dark section into `zzDarkMode.css`). Its danger outline-button fix is a
       shared change: after the outline and warning modifiers in
       `zUnionSuite.css`, and after the dark outline rules in `zzDarkMode.css`.
-- [ ] Item 32, activity feed (proposed, not yet approved): section 32 (the
+- [x] Item 32, activity feed (proposed, not yet approved): section 32 (the
       feed chrome) → a new `US-ACTIVITY-FEED` section after the shared list
       shell rules. Its rows need the record cards first: move
       `prototypes/wip/activity-cards/activity-cards.candidate.css` into a new
       `US-RECORD-CARDS` section (dark values into `zzDarkMode.css`).
-- [ ] Item 34, active positions badge (proposed, not yet approved):
+- [x] Item 34, active positions badge (proposed, not yet approved):
       section 34 → `US-BANNER-COMPONENT`, after the alert bell (item 12).
       Its popup rules repeat the bell's; merge them into one shared banner
       popup rule set as both move.
-- [ ] Section 29, native "Vertical right" CCOs: the grid rules →
+      Merged as written; the shared banner popup rule set is still to do.
+- [x] Section 29, native "Vertical right" CCOs: the grid rules →
       `US-NATIVE-TABS-PAGE-LAYOUT`; the V5 mirror →
       `US-NATIVE-TABS-COMPONENT`, after the desktop V5 rule. Check against
       the live Telerik `RadTabStripRight_Orion` skin, which the prototype
@@ -116,31 +140,35 @@ selectors, so it moves across unchanged.
 
 ## `THeme/UnionSuite/99-Orion.css`
 
-- [ ] Item 11, buttons: section 11 → the base button rule and
+- [x] Item 11, buttons: section 11 → the base button rule and
       `.SmallButton`. Orion is project-owned; change it in place.
 
 ## `THeme/UnionSuite/zzDarkMode.css`
 
-- [ ] Item 21, dark mode: section 21 → beside each component's dark
+- [x] Item 21, dark mode: section 21 → beside each component's dark
       overrides.
 
 ## `THeme/UnionSuite/zUnionSuite.js`
 
-- [ ] Item 8: add `US-IQA-ROW-GROUPS`.
-- [ ] Item 10: add `US-CCO-RAIL-COLLAPSE` (its owner selector is
+- [x] Item 8: add `US-IQA-ROW-GROUPS`.
+- [x] Item 10: add `US-CCO-RAIL-COLLAPSE` (its owner selector is
       `.us-cco-collapsible, .us-cco-rail`; it reads the side from `tabs-right`).
-- [ ] Item 16: in `US-CCO-STICKY-TABS` (zUnionSuite.js), also
+- [x] Item 16: in `US-CCO-STICKY-TABS` (zUnionSuite.js), also
       match `.us-cco-rail`, so a rail needs no second class. The prototype
       keeps `us-cco-sticky-tabs` on the contact CCO until then.
-- [ ] Item 12: add `US-BANNER-ALERTS`.
-- [ ] Items 16, 17 and 24: add `US-CCO-SIDEBAR` (owner `.us-cco-rail`). Move the "Sections: …"
-      label logic into `UnionSuiteTabs`, which builds the picker (README
-      open decision 5).
-- [ ] Item 18: replace `US-IQA-COLUMNS` with
+- [x] Item 12: add `US-BANNER-ALERTS`.
+- [x] Items 16, 17 and 24: add `US-CCO-SIDEBAR` (owner `.us-cco-rail`). It
+      no longer writes the "Sections: …" label; `UnionSuiteTabs` does
+      (next item).
+- [x] Open decision 5: replace `US-NATIVE-TABS` with
+      `theme-candidate-tabs.js` (`UnionSuiteTabs` 1.1 labels its own
+      Sections picker). Re-apply the change if the theme block has moved on
+      since the candidate was generated.
+- [x] Item 18: replace `US-IQA-COLUMNS` with
       `theme-candidate-iqa-columns.js` (its `wordWidth` also counts badges
       and buttons at their own size). Re-apply the change if the theme
       block has moved on since the candidate was generated.
-- [ ] Item 20: add `US-BANNER-ROW`.
+- [x] Item 20: add `US-BANNER-ROW`.
 - [ ] Item 31: in `US-UNIFIED-ACTIONS`, accept `action: {type: 'menu',
       items: [keys]}` in `define` and render a menu definition's heading
       slot entry as the `.us-actions` markup from
@@ -149,34 +177,43 @@ selectors, so it moves across unchanged.
       placeholder hiding and `UnionSuiteHeadingMenus`. Start the top-level
       line draw from `US-ACTION-MENUS`' open handling, as it does for
       submenus.
-- [ ] Item 23: add `US-IQA-SCROLL-EDGES` beside `US-IQA-COLUMNS`.
-- [ ] Item 27: replace `US-COPY` with `theme-candidate-copy.js`.
+      Not done in the merge: the candidate is its own
+      `US-ACTION-HEADING-MENUS` block after `US-ACTION-MENUS`, with its own
+      registry, as in the prototype.
+- [x] Item 23: add `US-IQA-SCROLL-EDGES` beside `US-IQA-COLUMNS`.
+- [x] Item 27: replace `US-COPY` with `theme-candidate-copy.js`.
 - [ ] Item 28: fold `US-ATTENTION-HIDE-ZERO` into the `US-ATTENTION` loader,
       so zero cards are filtered as they render.
-- [ ] Item 32: add `US-RECORD-CARDS` (`activity-cards.candidate.js`), then
+      Not done in the merge: `US-ATTENTION-HIDE-ZERO` is its own block,
+      after `US-ATTENTION`, as in the candidate.
+- [x] Item 32: add `US-RECORD-CARDS` (`activity-cards.candidate.js`), then
       `US-ACTIVITY-FEED`, which renders record cards.
-- [ ] Item 33: add `US-ADJUSTMENTS` (`dues-adjustments.candidate.js`) after
+- [x] Item 33: add `US-ADJUSTMENTS` (`dues-adjustments.candidate.js`) after
       `US-RECORD-CARDS`, whose `fold()` animates its rows (or after the shared
       fold helper, if that lands first).
-- [ ] Item 34: add `US-BANNER-POSITIONS` after `US-BANNER-ALERTS`. Its
+- [x] Item 34: add `US-BANNER-POSITIONS` after `US-BANNER-ALERTS`. Its
       `field`, `apiRoot` and query request repeat the bell's: share one
       helper between the two blocks.
+      Merged as written; the shared request helper is still to do.
 - [ ] Item 32: extract the heading filter toggle into one shared helper for
       any Query Template Display or Content HTML block (owner note,
       25 September 2026). `US-QUERY-SEARCH`, `US-ACTIVITY-FEED` and the IQA
       report filter toggle should all use it; the feed's local
       `headingToggle`/`setFiltersOpen` copy goes.
+      Not done in the merge: the feed keeps its own toggle.
 
 ## Templates, configuration and IQAs
 
-- [ ] Items 12 and 19: update `Banner-Contact-Template.html` (bell and counts
+- [x] Items 12 and 19: update `Banner-Contact-Template.html` (bell and counts
       placeholders, contact-type eyebrow, ID copy button, avatar icon). Add
       a `ContactType` alias to its IQA.
+      Template updated (26 September 2026), with the `ContactType` field
+      definition. The banner IQA still needs the `ContactType` alias.
 - [ ] Item 13: add `Member-Notes-Compact-Query-Template.html` to
       `guides/usage/templates/List-Templates/`, with its field definitions in
       `guides/usage/source/query-field-definitions.cjs`. Decide whether it
       replaces the existing notes template (README open decision 7).
-- [ ] Item 17: add the `UnionSuiteCcoSidebarConfig` setting to the client
+- [x] Item 17: add the `UnionSuiteCcoSidebarConfig` setting to the client
       `Config.js`.
 - [ ] Items 12 and 17: document the Alerts and Tab Counts IQA field lists.
 - [ ] Items 12 and 28: build the Alerts IQA from deadline-driven or
@@ -190,14 +227,15 @@ selectors, so it moves across unchanged.
       `membership.process-resignation` in the client `Actions.js` (popups
       with the contact's ID), replacing the fixture's; the Alerts IQA's
       resignation template carries their buttons.
-- [ ] Item 28: the tracker width cap (section 28) needs
+- [x] Item 28: the tracker width cap (section 28) needs
       `--us-attention-shown` set where the `US-ATTENTION` loader filters
       zero cards.
-- [ ] Item 34: add the positions placeholder to `Banner-Contact-Template.html`
+- [x] Item 34: add the positions placeholder to `Banner-Contact-Template.html`
       (in `.us-banner__status`, after the status badge). Build the Active
       Positions IQA (README [Active positions](README.md#active-positions)):
       active rows only, sorted by a seniority rank on the position type;
       confirm REST access and the filter name.
+      Placeholder added; the Active Positions IQA is still to build.
 - [ ] Item 32: build the five activity source IQAs to the field contract
       (README [Activity feed](README.md#activity-feed)) and the one-row host
       Query Template; confirm REST access, the start-date filter names and
@@ -244,7 +282,7 @@ selectors, so it moves across unchanged.
       the bell, tab search, counts and the Alt+S shortcut, the no-header
       tracker, `us-attention--hide-zero`, the panel tones, the button sizes,
       report column fit and scroll edges, and the copy label.
-- [ ] Rebuild with `node tools/build-theme-usage.cjs`, then run its `--check`
+- [x] Rebuild with `node tools/build-theme-usage.cjs`, then run its `--check`
       and `node tools/check-usage-sources.cjs`. Rebuild the banner, home and
       reference previews.
 

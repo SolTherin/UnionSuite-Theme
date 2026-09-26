@@ -430,7 +430,7 @@
     'INV-2026-058': {
       kind: 'invoice', status: ['primary', 'Due'], owing: true,
       fields: [['Description', 'Q3 2026 subscription'], ['Issued', '01 Jun 2026'], ['Due', '01 Jul 2026'], ['Amount', '$165.00'], ['Paid', '$0.00'], ['Owing', '$165.00'], ['Billing method', 'Direct debit · ••••4821'], ['Payments', link('PAY-8902') + ' · scheduled 01 Jul']],
-      lines: [['Membership fee · Full Member – RN · Q3 2026', '$185.00'], ['Hardship waiver · flat $20.00 per quarter', '−$20.00']],
+      lines: [['Membership fee · Full Member – RN · Q3 2026', '$185.00'], ['Hardship waiver · $20 per instalment', '−$20.00']],
       history: [['01 Jun 2026', 'Invoice issued', 'System'], ['01 Jun 2026', sent, 'System'], ['01 Jun 2026', 'Direct debit scheduled for 01 Jul 2026', 'System']]
     },
     'PAY-8902': {
@@ -442,7 +442,7 @@
     'PAY-8821': {
       kind: 'payment', status: ['success', 'Paid'],
       fields: [['Date', '01 Apr 2026'], ['Method', 'Direct debit · BSB 062-000 ••••4821'], ['Amount', '$165.00'], ['Applied to', 'INV-2026-044'], ['Batch', 'DD-2026-04-01'], ['Receipt', 'R-55120']],
-      lines: [['Membership fee · Full Member – RN · Q2 2026', '$185.00'], ['Hardship waiver · flat $20.00 per quarter', '−$20.00']],
+      lines: [['Membership fee · Full Member – RN · Q2 2026', '$185.00'], ['Hardship waiver · $20 per instalment', '−$20.00']],
       history: [['01 Mar 2026', 'Scheduled from the recurring payment plan', 'System'], ['01 Apr 2026', 'Collected', 'System'], ['01 Apr 2026', 'Receipt R-55120 emailed to member', 'System']]
     },
     'PAY-8654': {

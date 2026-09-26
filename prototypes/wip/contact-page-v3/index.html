@@ -204,7 +204,7 @@
                 <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Next payment</span></div><br><div class="PanelFieldValue"><span>01 Jul 2026 · $185</span></div></div></div>
                 <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment method</span></div><br><div class="PanelFieldValue"><span>Direct debit ••••4821</span></div></div></div>
                 <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Frequency</span></div><br><div class="PanelFieldValue"><span>Quarterly</span></div></div></div>
-                <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Active adjustment</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--primary" title="Hardship arrangement · applied 15 Mar 2026">Hardship waiver −$20.00 per quarter until 30 Sep 2026</span></div></div></div>
+                <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Active adjustment</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--primary" title="Hardship arrangement · applied 15 Mar 2026">Hardship waiver reducing fees by $20 per instalment until 30 Sep 2026</span></div></div></div>
               </div></div></div></div>
             </div></div>
           </div>
@@ -335,7 +335,7 @@
             <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Billing category</span></div><br><div class="PanelFieldValue"><span>Full Member – RN</span></div></div></div>
             <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment type</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-type">Auto debit</span></div></div></div>
             <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment frequency</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-frequency">Quarterly</span></div></div></div>
-            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment amount</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-amount">$165.00</span> <span class="us-badge us-badge--primary" title="Standard fee less the $20.00 per quarter hardship waiver">Waiver applied</span></div></div></div>
+            <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Payment amount</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-amount">$165.00</span> <span class="us-badge us-badge--primary" title="Standard fee less the $20 per instalment hardship waiver">Waiver applied</span></div></div></div>
             <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Default billing method</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-method">Bank account · BSB 062-000 ••••4821</span></div></div></div>
             <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Next payment</span></div><br><div class="PanelFieldValue"><span id="cv3-bill-next">01 Jul 2026</span></div></div></div>
           </div></div></div></div>
@@ -391,7 +391,7 @@
                   <button type="button" class="us-adjustment__row" aria-expanded="false">
                     <span class="us-adjustment__cell us-adjustment__status"><span class="us-badge us-badge--icon">Active</span></span>
                     <span class="us-adjustment__cell us-adjustment__title">Waiver</span>
-                    <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> −$20.00 per quarter</span>
+                    <span class="us-adjustment__cell us-adjustment__effect"><span class="us-adjustment__cell-label">Fee effect</span> Reducing fees by $20 per instalment</span>
                     <span class="us-adjustment__cell us-adjustment__period" data-us-adjustment-start="2026-03-15" data-us-adjustment-end="2026-09-30"><span class="us-adjustment__cell-label">Period</span> 15 Mar 2026 – 30 Sep 2026</span>
                     <span class="us-adjustment__cell us-adjustment__reason"><span class="us-adjustment__cell-label">Reason</span> Hardship arrangement</span>
                     <span class="us-adjustment__cell us-adjustment__chevron"><i class="ti ti-chevron-down" aria-hidden="true"></i></span>
@@ -399,7 +399,7 @@
                   <div class="us-adjustment__panel" hidden>
                     <dl class="us-adjustment__fields">
                       <div class="us-adjustment__field--reason"><dt class="us-adjustment__label">Reason</dt><dd class="us-adjustment__value">Hardship arrangement</dd></div>
-                      <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">$20.00 off each quarter</dd></div>
+                      <div><dt class="us-adjustment__label">Amount</dt><dd class="us-adjustment__value us-adjustment__value--strong">−$20</dd></div>
                       <div><dt class="us-adjustment__label">Remaining balance</dt><dd class="us-adjustment__value us-adjustment__value--positive"></dd></div>
                     </dl>
                     <div class="us-adjustment__meter">
@@ -418,6 +418,7 @@
                     <div class="us-adjustment__actions">
                       <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2140">Edit</button>
                       <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2140">End adjustment</button>
+                      <button type="button" class="us-action-finance-cancel-adjustment" data-id="004821" data-adjustment="ADJ-2140">Cancel adjustment</button>
                       <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2140">View affected transactions</button>
                     </div>
                   </div>
@@ -455,6 +456,7 @@
                     <div class="us-adjustment__actions">
                       <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2193">Edit</button>
                       <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2193">End adjustment</button>
+                      <button type="button" class="us-action-finance-cancel-adjustment" data-id="004821" data-adjustment="ADJ-2193">Cancel adjustment</button>
                       <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2193">View affected transactions</button>
                     </div>
                   </div>
@@ -492,6 +494,7 @@
                     <div class="us-adjustment__actions">
                       <button type="button" class="us-action-finance-edit-adjustment" data-id="004821" data-adjustment="ADJ-2207">Edit</button>
                       <button type="button" class="us-action-finance-end-adjustment" data-id="004821" data-adjustment="ADJ-2207">End adjustment</button>
+                      <button type="button" class="us-action-finance-cancel-adjustment" data-id="004821" data-adjustment="ADJ-2207">Cancel adjustment</button>
                       <button type="button" class="us-action-finance-view-adjustment-transactions" data-id="004821" data-adjustment="ADJ-2207">View affected transactions</button>
                     </div>
                   </div>
@@ -539,7 +542,7 @@
             <tbody>
               <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2207">Suspension</a></td><td>Leave without pay · overseas travel; membership kept, billing paused</td><td>No fees due</td><td>01 Apr 2027</td><td>31 Mar 2028</td><td><span class="us-badge us-badge--primary us-badge--icon">Upcoming</span></td><td>A. Smith</td></tr>
               <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2193">Membership change</a></td><td>Secondment · Full Member – RN → Associate Member (temporary)</td><td>Associate rate · $95.00/qtr</td><td>01 Oct 2026</td><td>31 Mar 2027</td><td><span class="us-badge us-badge--primary us-badge--icon">Upcoming</span></td><td>M. Chen</td></tr>
-              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2140">Waiver</a></td><td>Hardship arrangement · flat $20.00 off each quarter</td><td>−$20.00 per quarter</td><td>15 Mar 2026</td><td>30 Sep 2026</td><td><span class="us-badge us-badge--success us-badge--icon">Active</span></td><td>J. Patel</td></tr>
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-2140">Waiver</a></td><td>Hardship arrangement · flat $20 off each instalment</td><td>Reducing fees by $20 per instalment</td><td>15 Mar 2026</td><td>30 Sep 2026</td><td><span class="us-badge us-badge--success us-badge--icon">Active</span></td><td>J. Patel</td></tr>
               <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-1688">Waiver</a></td><td>Part-time employment concession · 25% off</td><td>−$46.25 per quarter</td><td>01 Jan 2024</td><td>31 Dec 2024</td><td><span class="us-badge us-badge--icon" data-us-icon="ended">Expired</span></td><td>M. Chen</td></tr>
               <tr class="rgRow"><td><a href="#" class="us-action-finance-view-adjustment" data-id="004821" data-adjustment="ADJ-0412">Waiver</a></td><td>Joining fee waiver · campaign period · 100% off</td><td>Joining fee waived</td><td>12 Mar 2018</td><td>12 Mar 2018</td><td><span class="us-badge us-badge--icon" data-us-icon="ended">Expired</span></td><td>System (join)</td></tr>
             </tbody>
@@ -852,6 +855,7 @@
 <script src="contact-page.js"></script>
 <!-- Candidate US-IQA-COLUMNS 1.4 must load first: the theme copy then steps aside. -->
 <script src="theme-candidate-iqa-columns.js"></script>
+<script src="theme-candidate-tabs.js"></script>
 <script src="theme-candidate-copy.js"></script>
 <script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
 <script src="theme-candidate-heading-menus.js"></script>

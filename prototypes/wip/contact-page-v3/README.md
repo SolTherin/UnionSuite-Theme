@@ -1,10 +1,12 @@
 # Contact page v3
 
-Status: approved, last updated 25 September 2026. The owner approved the v3
-candidate (items 1–28) on 25 September 2026. It is not yet in the theme:
-nothing in `THeme/` has changed, and the move starts only when the owner says
-so. [THEME-CHANGES.md](THEME-CHANGES.md) tracks every change to make. Nothing
-is committed.
+Status: approved, last updated 26 September 2026. The owner approved the v3
+candidate (items 1–28) on 25 September 2026. On 26 September 2026 the owner
+asked for items 1–34 to be merged into the theme on branch
+`theme/contact-page-v3` for testing in iMIS; the theme code is merged and
+checked against this prototype. [THEME-CHANGES.md](THEME-CHANGES.md) tracks
+what is merged and what remains (usage guide, IQAs, client actions and the
+live checks).
 
 Item 32, the recent activity feed on the Activity tab, was added on
 25 September 2026 after that approval and is **proposed, not yet approved**.
@@ -103,6 +105,7 @@ Browser state used by the candidate and fixtures:
 | `theme-candidate.css` | Proposed CSS, sections 1–17, 21–23, 25, 27–31 and 32 (items 19 and 20 are in section 3; item 18 is script only). Each section names its target in the theme and uses the theme's own selectors, so an approved section moves across unchanged. |
 | `theme-candidate.js` | Proposed `US-IQA-ROW-GROUPS`, `US-CCO-RAIL-COLLAPSE`, `US-BANNER-ALERTS`, `US-CCO-SIDEBAR`, `US-BANNER-ROW`, `US-IQA-SCROLL-EDGES`, `US-ATTENTION-HIDE-ZERO`, `US-ACTIVITY-FEED` and `US-BANNER-POSITIONS` blocks for `zUnionSuite.js`. |
 | `theme-candidate-iqa-columns.js` | Candidate replacement for the whole `US-IQA-COLUMNS` block (item 18). |
+| `theme-candidate-tabs.js` | Candidate replacement for the whole `US-NATIVE-TABS` block (open decision 5): `UnionSuiteTabs` 1.1 labels its own Sections picker. Generated from the theme block with only `label()`, its call and the version changed. Loads before `zUnionSuite.js`. |
 | `theme-candidate-heading-menus.js` | Candidate `US-ACTION-HEADING-MENUS` (item 31): dropdowns in panel headings, configured like heading buttons. Loads straight after `zUnionSuite.js`, before `ActionDefinitions.js` and the client `Actions.js`, so menus can be registered there. |
 | `theme-candidate-copy.js` | Candidate replacement for the whole `US-COPY` block (item 27): the flash lasts as long as its CSS animation, and a "Copied" label shows beside the button. Loads before `zUnionSuite.js`. |
 | `Member-Notes-Compact-Query-Template.html` | Candidate author template for compact (v1-layout) notes. |
@@ -145,7 +148,7 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 | 27 | Copy flash: the copied text is highlighted instead of ringed. A rectangle exactly the size of the text (no padding; 3px radius) fills the target, its edges softened by a 3px blur of the same colour, holds briefly, then fades slowly over 1.6s; the candidate US-COPY script (`theme-candidate-copy.js`) removes the class after the CSS animation's own length instead of a fixed 700ms, so CSS alone sets the timing. The banner ID copy button stays compact (24px) except on touch pointers; it had also grown to 44px in any window 950px or narrower. A "Copied" label (success colour at 75%, 11px medium) appears 4px past the copy icon (measured from the icon, so the gap is the same on a 44px touch button) while its tick shows, positioned outside the button so nothing moves, fading in during the flash's hold, then fading out at exactly the flash's rate; aria-hidden, since the live region already announces "Copied". The accent colour at 60% everywhere, including the banner. The glow colour is a registered property (`@property --us-copy-glow`) so the fill and shadow animate; reduced motion shows it static. | Outline ring → glow | Site-wide: every `us-copy` / banner copy target | CSS section 27, replacing `.us-copy-flash` and `@keyframes us-copy-flash` in `US-COPY`; `theme-candidate-copy.js` replaces the `US-COPY` script block |
 | 28 | Quiet trackers: `us-attention--hide-zero` beside `us-attention` hides zero-count cards (the rest share the row, dividers between visible cards only); when every card is zero, the row gives way to one "✓ Nothing needs attention" line, so an all-clear still reads as loaded. Unavailable counts ("—") always show. Used on the contact trackers; the home dashboard keeps its zeros unless opted in. No card grows past a quarter of the row (26 September 2026): with one or two trackers left the box narrows to them (never below 440px, and full width on phones) instead of one card stretching across the page; four fill the row as before. | Tracker 76px → 40px when all clear; one tracker 938px → 440px wide at 1000px | Opt-in per Needs Attention block | CSS section 28; `US-ATTENTION-HIDE-ZERO` JS (on promotion, filter inside the `US-ATTENTION` loader) |
 | 30 | Status icons in badges: `us-badge--icon` beside `us-badge` adds a 14px icon before the text, chosen by tone (tick, cross, warning sign, clock, minus), or by `data-us-icon` (check, cross, alert, clock, refund, ended) when statuses share a tone. Status reads by shape as well as colour. Used on Finance payment, invoice and adjustment statuses and in the Transaction detail popup. | — | Opt-in per badge | CSS section 30, `US-BADGES` after the tone rules |
-| 33 | Adjustments (proposed, not yet approved), 26 September 2026: the owner's dues adjustments design (`prototypes/wip/dues-adjustments/`, where its Query Template, field list and decisions live) as two layouts. Above the Finance switcher, **Active and upcoming adjustments**: a Query Template Display (`us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment`) with Status, Type, Fee effect and Period (start – end) at a glance, plus Reason on panels 1100px and wider (revised 26 September 2026; was Type, Fee effect, Starts, Ends, Status); an upcoming row's fee effect muted; relative time under the period ("5 months left", "Starts in 5 months"; amber when an active adjustment ends within 30 days); rows stack into cards at 760px and narrower; each row expands, with the activity history's fold animation, to its reason, amount, changed attributes, note, who created it and Edit / End adjustment / View affected transactions. Column headings in the iPart's Header field, "No active or upcoming adjustments." in its No results field; the info tone drops when there are none. On the Adjustments tab, **All adjustments**: the standard native Query Menu grid of every adjustment, active and upcoming included, Type linking to the record (`finance.view-adjustment`). Both use the same type names, fee-effect wording, status badges and dates. | Two Query Menu grids (Active adjustments, All adjustments) → a Query Template list above the switcher + one native grid on the tab | Opt-in: `us-adjustments` on the Query Template iPart; the grid needs no class | `dues-adjustments.candidate.css` and `US-ADJUSTMENTS` JS from `prototypes/wip/dues-adjustments/` (its danger outline-button fix → `zUnionSuite.css` / `zzDarkMode.css`); section 25 (empty Query Template stays plain) and section 30 (status badges keep to one line) additions |
+| 33 | Adjustments (proposed, not yet approved), 26 September 2026: the owner's dues adjustments design (`prototypes/wip/dues-adjustments/`, where its Query Template, field list and decisions live) as two layouts. Above the Finance switcher, **Active and upcoming adjustments**: a Query Template Display (`us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment`) with Status, Type, Fee effect and Period (start – end) at a glance, plus Reason on panels 1100px and wider (revised 26 September 2026; was Type, Fee effect, Starts, Ends, Status); an upcoming row's fee effect muted; relative time under the period ("5 months left", "Starts in 5 months"; amber when an active adjustment ends within 30 days); rows stack into cards at 760px and narrower; each row expands, with the activity history's fold animation, to its reason, amount, changed attributes, note, who created it and Edit / End adjustment (Cancel adjustment on an upcoming row, which has not started) / View affected transactions. Column headings in the iPart's Header field, "No active or upcoming adjustments." in its No results field; the info tone drops when there are none. On the Adjustments tab, **All adjustments**: the standard native Query Menu grid of every adjustment, active and upcoming included, Type linking to the record (`finance.view-adjustment`). Both use the same type names, fee-effect wording, status badges and dates. | Two Query Menu grids (Active adjustments, All adjustments) → a Query Template list above the switcher + one native grid on the tab | Opt-in: `us-adjustments` on the Query Template iPart; the grid needs no class | `dues-adjustments.candidate.css` and `US-ADJUSTMENTS` JS from `prototypes/wip/dues-adjustments/` (its danger outline-button fix → `zUnionSuite.css` / `zzDarkMode.css`); section 25 (empty Query Template stays plain) and section 30 (status badges keep to one line) additions |
 | 34 | Active positions in the banner (proposed, not yet approved), 26 September 2026: elected roles and committee seats must be apparent on every tab, not only in Engagement › Roles and CPD. One badge in the banner's status area, beside the member status pill, names the most senior active position and counts the rest ("Branch committee +1"); one position shows just its label. The status area is what stays when the banner condenses, so the badge is visible scrolled or not. Neutral glass pill at the status pill's 28px (a role icon and a chevron), so the status colour stays the only membership signal. Clicking opens a popup (the alert bell's surface) listing each active position, its body and dates ("Since Mar 2020 · term ends Mar 2027"), and "View all roles →", which selects Engagement and its Roles and CPD section (`UnionSuiteSections.select`). Hidden when there are none or the query fails. Condensed below 900px it shows the icon and the number ("2") so the banner keeps one line; tablets (601–899px) keep the name at 300px so the badge wraps instead of squeezing it; phones anchor the popup to the start of the status row. Owner decisions, 26 September 2026: one badge (not one per role, not a generic "Elected official" count), naming the most senior role; a popup with a link through, not a jump straight to the tab; branch committee ranks above workplace delegate. Sourced from the positions records with dates, not the Attributes badges (Profile shows "EBA bargaining rep" for a role that ended in Dec 2023). See [Active positions](#active-positions). | Roles on Engagement only → a badge on every tab | Opt-in per banner template | CSS section 34 in `US-BANNER-COMPONENT` (after the alert bell); `US-BANNER-POSITIONS` JS; `Banner-Contact-Template.html`; an Active Positions IQA |
 | 32 | Recent activity feed (proposed, not yet approved): one list on the Activity tab built from five IQAs (Interactions, Outbound calls, Outbound emails, Inbound emails, Meetings) with `GET /api/query`, replacing the Notes and Communications sub-tabs (Documents stays). Each row is a record card from the activity cards workbench (`prototypes/wip/activity-cards/`, `US-RECORD-CARDS`): the owner's original card structure on theme tokens (type line, headline, preview, date column; colour only on the rail icon and for importance). Search and date range fold behind the heading's filter button; the type filters (slim section switcher) stay visible, and a chosen type shows a "View all …" link to its IQA page. See [Activity feed](#activity-feed). | Notes panel + communications grid → one feed | Opt-in: a `.us-activity-feed` element | CSS section 32 (the feed chrome); the card CSS and `US-RECORD-CARDS` from `prototypes/wip/activity-cards/`; `US-ACTIVITY-FEED` JS |
 | 31 | Heading menus: a dropdown in a panel heading, configured exactly like a heading button. One definition with the button's shape and `action: {type: 'menu', items: [action keys]}`, placed by its `us-action-*` class in the iPart CSS class field. It renders as the theme's `.us-actions` dropdown (Quick Actions' motion and keyboard handling); each item is an ordinary control with the item action's class, so the action runtime labels, checks and runs it. The toggle matches the heading's outline buttons (32px). The top level draws the side line and travelling glint of the theme's submenus when it opens (same line keyframe and timing); deeper levels are unchanged. The line spans the items exactly and grows with the list as it unfolds, the glint riding its tip; items start 5px past the line, so the hover fill never covers it. Used for Manage billing and Add adjustment. | Three heading buttons → one menu | Opt-in per iPart, by class | `US-UNIFIED-ACTIONS` (accept type `menu`; render it in the heading slot); CSS section 31 in `US-ACTION-MENUS` |
@@ -674,6 +677,10 @@ explicit approval.
   which read best in columns and line up with the grid. The Membership
   summary's Active adjustment line now matches the waiver's 30 Sep 2026 end
   (it said 30 Jun 2026).
+- 26 September 2026: an upcoming adjustment offers Cancel adjustment instead
+  of End adjustment (item 33). The hardship waiver drops "quarter" everywhere
+  (Summary, Billing, adjustments, transactions): its fee effect reads
+  "Reducing fees by $20 per instalment" and its Amount "−$20".
 - 26 September 2026: active positions show in the banner (item 34), one
   badge naming the most senior role with a count, opening a popup that links
   to Engagement › Roles and CPD.
@@ -783,11 +790,24 @@ Theme issues and facts found while building v1 → v3:
     size current while it is open, so a filtered or half-opened list folds
     from its real size. The Quick Actions code should be checked for the same
     issue when this is promoted.
-21. **Report column fit squeezes phone reports** (item 18). On a 375px
-    phone the Email addresses report's columns shrink until words break
-    mid-word ("Pref / erre / d"); the theme's per-column minimum is
-    smaller than a word. Pending: stop fitting at the longest word (or
-    scroll sideways) on narrow panels.
+21. **Report column fit squeezed phone reports** (item 18, fixed by
+    candidate 1.5). On a 375px phone the Email addresses report's columns
+    shrank until words broke mid-word ("Pref / erre / d"); the theme's
+    per-column minimum was smaller than a word. Each column now stops at its
+    whole text (up to 140px) or its longest word, and the report scrolls
+    sideways below that. Re-checked 26 September 2026 on every report on
+    every tab at 375px: no word breaks mid-word. Remaining, by design: text
+    still wraps at hyphens and dashes, which CSS treats as break points
+    ("INV-2026-|058", "2019–|20", "non-|payment"). Preventing that would
+    mean rewriting cell text (non-breaking hyphens) or wrapping tokens in
+    nowrap spans, so it is left to the browser.
+22. **Banner popups opened under the collapsed Sections bar** (items 12
+    and 34, fixed 26 September 2026). The unpinned banner is not a stacking
+    context, so the bell and positions popups (`z-index: 3`) lost to the
+    collapsed rail's strip (`z-index: 5`), which painted over them below
+    1200px. Both popups now take the pinned banner's layer,
+    `calc(var(--z-sidebar) - 1)`. Quick Actions was unaffected: its list is
+    fixed at `z-index: 100010`.
 
 ## Verification status
 
@@ -840,9 +860,13 @@ errors from real input:
   contrast (lowest 7.56:1); 375px with no horizontal overflow.
 
 Dark mode (24 September 2026, item 21): Summary and Finance tabs, v1 sidebar
-rail, report column heads and the prototype toolbar. Not yet checked in dark:
-the other tabs, the alert bell popup, row group detail rows, the collapsed
-Sections list and the button strip.
+rail, report column heads and the prototype toolbar. 26 September 2026: the
+alert bell and positions popups, the activity feed, Active and upcoming
+adjustments (rows and expanded detail) and the heading menus, whose toggles
+were unreadable (`--brand-800` on the dark heading) and now use the dark
+outline button's colours (section 21, item 31). Not yet checked in dark: the
+remaining tabs, row group detail rows, the collapsed Sections list and the
+button strip.
 
 Not yet verified: the rest of dark mode (above); other browsers (view
 transitions fall back to instant); live iMIS (native CCO switching with the
@@ -855,15 +879,21 @@ performance on long tabs with many blocks.
 
 ## Open decisions
 
-1. `us-cco-cards` is opt-in because a CCO whose tabs hold plain text would put
-   that text on the grey page. Make it the default if every CCO uses panels?
+1. Resolved 26 September 2026: `us-cco-cards` stays opt-in and the theme's
+   default vertical CCO is unchanged. `us-cco-rail` is for the main tabs of
+   top-level record pages (contact profile, organisation profile, manage
+   case and the like).
 2. The banner layout (item 3) affects every banner type. Review agreement,
    case, staff and dashboard banners before approval.
 3. Contact trackers: add the contact parameter to the Needs Attention loader
    (Finding 5); keep them on Summary only or show them on every tab?
 4. Collapsible rail: one saved choice for every page, or per page?
-5. The "Sections: …" label is rewritten by the candidate script; on promotion
-   it belongs in `UnionSuiteTabs`, which builds the picker.
+5. Resolved 26 September 2026: `UnionSuiteTabs`, which builds the picker,
+   owns its label (`theme-candidate-tabs.js`, US-NATIVE-TABS 1.1). The picker
+   reads "Sections: <open tab>" whenever the tab list is not rendered (a
+   collapsed rail, a `us-cco-rail` phone layout) and "All sections" beside
+   visible tabs. US-CCO-RAIL-COLLAPSE and US-CCO-SIDEBAR no longer write it;
+   the rail asks `UnionSuiteTabs.refresh()` when it switches state.
 6. Alert bell "seen" is per browser, not per user across devices (a per-user
    record needs an iMIS table or panel). The popup is read-only; actions stay
    on the Summary alerts.
@@ -911,8 +941,8 @@ target file. The summary below is kept for reference.
    `--us-cco-rail-motion` with item 10.
 3. Move the JS blocks into `zUnionSuite.js` and replace `US-IQA-COLUMNS`
    with `theme-candidate-iqa-columns.js` (item 18; re-apply the change if the
-   theme block has moved on); move the collapsed label logic into
-   `UnionSuiteTabs`.
+   theme block has moved on) and `US-NATIVE-TABS` with
+   `theme-candidate-tabs.js` (open decision 5).
 4. Update `Banner-Contact-Template.html` (bell and counts placeholders,
    contact type eyebrow, ID copy button and avatar icon, with a `ContactType`
    alias in its IQA); add

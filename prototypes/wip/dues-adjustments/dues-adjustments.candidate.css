@@ -293,10 +293,16 @@
   display: none;
 }
 
+/* A wrapping row, not fixed tracks: each field takes its own width (at
+   least 150px), so a long reason stays on one line while there is room. */
 .us-adjustment__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3) var(--space-5);
+}
+
+.us-adjustment__fields > div {
+  min-width: 150px;
 }
 
 .us-adjustment__label {
@@ -421,6 +427,13 @@
   margin-inline-start: auto;
 }
 
+/* The template carries both End and Cancel: an upcoming adjustment has not
+   started, so it is cancelled rather than ended. */
+.us-adjustment[data-us-adjustment-status="upcoming" i] .us-adjustment__actions > .us-action-finance-end-adjustment,
+.us-adjustment:not([data-us-adjustment-status="upcoming" i]) .us-adjustment__actions > .us-action-finance-cancel-adjustment {
+  display: none;
+}
+
 /* --------------------------------------------------------------------------
    Panel heading addition (inserted by the script: the heading is generated
    from the iPart title)
@@ -470,14 +483,7 @@
   }
 
   .us-adjustment__panel > .us-adjustment__fields {
-    display: flex;
     grid-column: 1;
-    flex-wrap: wrap;
-    gap: var(--space-3) var(--space-5);
-  }
-
-  .us-adjustment__fields > div {
-    min-width: 150px;
   }
 
   .us-adjustment__panel > .us-adjustment__meter {

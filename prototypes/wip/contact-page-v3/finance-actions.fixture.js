@@ -69,11 +69,14 @@
   define('finance.edit-override', { label: 'Edit override', useAuthoredLabel: true });
   // Adjustments (item 33). Each reads data-id and data-adjustment from its
   // control. view-adjustment is the All adjustments grid's Type link (its
-  // own text is the label); the other three sit in an Active and upcoming
-  // row's detail. End uses the danger tone. contact-page.js shows a toast.
+  // own text is the label); the others sit in an Active and upcoming row's
+  // detail. End (an active adjustment) and Cancel (an upcoming one, which has
+  // not started) use the danger tone; the template carries both and the
+  // row's status shows one. contact-page.js shows a toast.
   define('finance.view-adjustment', { label: 'View adjustment', useAuthoredLabel: true, default: 'link' });
   define('finance.edit-adjustment', { label: 'Edit', icon: 'pencil', order: 1 });
   define('finance.end-adjustment', { label: 'End adjustment', icon: 'ti-ban', tone: 'danger', order: 2 });
+  define('finance.cancel-adjustment', { label: 'Cancel adjustment', icon: 'ti-x', tone: 'danger', order: 2 });
   define('finance.view-adjustment-transactions', { label: 'View affected transactions', icon: 'ti-receipt', order: 3 });
   define('membership.change', { label: 'Change membership', order: 1 });
   // Suspension is a pause for leave (travel, parental), not a penalty: no

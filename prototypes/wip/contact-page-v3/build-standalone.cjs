@@ -107,8 +107,8 @@ html = html.replace(/^<script src="([^"]+)"><\/script>\r?\n/gm, (_, href) => {
   return `${inlineScript(href)}\n`;
 });
 
-if (stylesheetCount !== 11 || scriptCount !== 11) {
-  throw new Error(`Expected eleven stylesheets and eleven scripts (including the Tabler icon sheet and the activity cards and dues adjustments candidates); found ${stylesheetCount} and ${scriptCount}.`);
+if (stylesheetCount !== 11 || scriptCount !== 12) {
+  throw new Error(`Expected eleven stylesheets and twelve scripts (including the Tabler icon sheet, the tabs candidate and the activity cards and dues adjustments candidates); found ${stylesheetCount} and ${scriptCount}.`);
 }
 if (/<(?:link\s+rel="stylesheet"|script\s+src=)/i.test(html)) {
   throw new Error('The output still contains a linked stylesheet or script.');
