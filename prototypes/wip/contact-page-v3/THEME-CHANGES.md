@@ -301,8 +301,11 @@ selectors, so it moves across unchanged.
       settings (staff only).
 
 - [x] Owner request, 27 September 2026: a page-level `us-cco-rail` CCO with
-      nothing after it reaches the window bottom on short tabs, the rail
-      bleeding through the page bottom padding. `US-CCO-RAIL-FILL` in
+      nothing after it runs to the end of the page on short tabs: into a
+      stretched page wrapper when the site footer is pinned to the window
+      bottom (the live tenant), otherwise to the window bottom; the rail
+      bleeds through the remaining padding. Fixed 27 September 2026: the
+      first version only handled pages shorter than the window. `US-CCO-RAIL-FILL` in
       `zUnionSuite.js` (after `US-CCO-STICKY-TABS`) and a rule at the end of
       `US-CCO-RAIL` in `zUnionSuite.css`. Check on the tenant that nothing
       iMIS renders after the CCO (footer, button panel) is visible there.

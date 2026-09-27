@@ -5373,13 +5373,15 @@ SOFTWARE.
 })();
 /* US-CCO-STICKY-TABS:END */
 /* US-CCO-RAIL-FILL:START — a page-level us-cco-rail CCO with nothing after
-   it reaches the bottom of the window, so the rail's column runs to the page
-   end on short tabs. Sets --us-cco-fill-height (a min-height) on the CCO:
-   the extra height the document needs to fill the window, measured from the
-   CCO's natural height each time so it shrinks again on longer tabs. Page
-   bottom padding is kept; the rail alone bleeds through it
-   (--us-cco-fill-bleed) to meet the window's edge. Desktop only; not in
-   Easy Edit or print. */
+   it runs to the end of the page on short tabs, so the rail's column does
+   too. The space to fill is either
+   - inside a stretched page wrapper (the site's footer is pinned to the
+     window bottom, leaving empty space below the content), or
+   - below the document, when the page is shorter than the window.
+   Sets --us-cco-fill-height (a min-height) on the CCO, measured from its
+   natural height each time so it shrinks again on longer tabs. Wrapper
+   padding is kept; the rail alone bleeds through it (--us-cco-fill-bleed).
+   Desktop only; not in Easy Edit or print. */
 (function () {
   'use strict';
 
@@ -5395,17 +5397,41 @@ SOFTWARE.
   const observed = new Set();
   let queued = false;
 
-  // True when something visible follows the CCO's content item in the page.
-  function followed(cco) {
-    const stop = cco.closest('.ContentPanel') || document.body;
-    for (let node = cco.closest('.ContentItemContainer') || cco; node && node !== stop; node = node.parentElement) {
-      for (let next = node.nextElementSibling; next; next = next.nextElementSibling) {
-        if (next.matches('script, style, input[type="hidden"]')) continue;
-        const rect = next.getBoundingClientRect();
-        if (next.getClientRects().length && rect.height > 0 && rect.width > 0) return true;
+  const inFlow = node => {
+    if (node.matches('script, style, input[type="hidden"]') || !node.getClientRects().length) return false;
+    const position = getComputedStyle(node).position;
+    return position !== 'fixed' && position !== 'absolute';
+  };
+
+  const visible = node => {
+    const rect = node.getBoundingClientRect();
+    return inFlow(node) && rect.height > 0 && rect.width > 0;
+  };
+
+  const edge = (style, side) => ['padding', 'border'].reduce((sum, box) =>
+    sum + (parseFloat(style[box + side + (box === 'border' ? 'Width' : '')]) || 0), 0);
+
+  // Walk up from the CCO. Content after it at any level: nothing to fill.
+  // Otherwise the first ancestor with empty space under its last child is a
+  // stretched wrapper: fill that space. Returns { space, bottom } (bottom:
+  // the wrapper's content edge, page coordinates), or null.
+  function wrapperSpace(cco) {
+    let child = cco;
+    for (let node = cco.parentElement; node && node !== document.documentElement; node = node.parentElement) {
+      for (let next = child.nextElementSibling; next; next = next.nextElementSibling) {
+        if (visible(next)) return null;
       }
+      let last = 0;
+      Array.from(node.children).forEach(item => {
+        if (!inFlow(item)) return;
+        const margin = parseFloat(getComputedStyle(item).marginBottom) || 0;
+        last = Math.max(last, item.getBoundingClientRect().bottom + Math.max(0, margin));
+      });
+      const bottom = node.getBoundingClientRect().bottom - edge(getComputedStyle(node), 'Bottom');
+      if (bottom - last > 1) return { space: Math.floor(bottom - last), bottom: bottom + window.scrollY };
+      child = node;
     }
-    return false;
+    return { space: 0, bottom: 0 };
   }
 
   // The bottom of the page's in-flow content, plus the body's own bottom
@@ -5442,17 +5468,25 @@ SOFTWARE.
         const cco = owner.querySelector(':scope .cco.tabs-wrapper.tabs-vertical');
         if (!cco || cco.parentElement.closest('.cco') || cco.closest('.us-cco-rail') !== owner) return;
 
-        // Measure without the fill, then fill only the window's spare height.
+        // Measure without the fill: a stretched wrapper's empty space first,
+        // otherwise the window's spare height below a short document.
         cco.style.removeProperty(PROPERTY);
         cco.style.removeProperty(BLEED);
-        if (!cco.getClientRects().length || followed(cco)) return;
-        const pageBottom = documentBottom();
-        const spare = Math.floor(window.innerHeight - pageBottom);
-        if (spare > 0) {
-          const rect = cco.getBoundingClientRect();
-          const below = Math.max(0, Math.floor(pageBottom - (rect.bottom + window.scrollY)));
-          cco.style.setProperty(PROPERTY, Math.ceil(rect.height + spare) + 'px');
-          cco.style.setProperty(BLEED, below + 'px');
+        if (!cco.getClientRects().length) return;
+        const wrapper = wrapperSpace(cco);
+        if (!wrapper) return;
+        const rect = cco.getBoundingClientRect();
+        const top = rect.top + window.scrollY;
+        let space = wrapper.space;
+        let end = wrapper.bottom;
+        if (!space) {
+          space = Math.floor(window.innerHeight - documentBottom());
+          end = window.innerHeight + window.scrollY;
+        }
+        if (space > 0) {
+          const height = Math.ceil(rect.height + space);
+          cco.style.setProperty(PROPERTY, height + 'px');
+          cco.style.setProperty(BLEED, Math.max(0, Math.floor(end - (top + height))) + 'px');
           next.add(cco);
           filled.add(cco);
         }
