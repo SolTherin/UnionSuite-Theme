@@ -9350,6 +9350,13 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transition: transform 160ms;
 }
 
+/* The native glyph (a sysicon ::after, drawn from the iMIS sprite) is not
+   swapped when the script opens the panel; this chevron replaces it. */
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
+  content: none;
+  display: none;
+}
+
 .us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse.collapsed:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
   margin: 0 0 0 -3px;
   transform: rotate(-45deg);
@@ -9419,6 +9426,24 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--text-base);
   opacity: 1;
   -webkit-text-fill-color: currentColor;
+}
+
+/* Required labels: the native asterisk is a background image in the label
+   padding the reset above removes; show the theme asterisk instead, as the
+   Panel Editor forms do. */
+.us-credentials label.Required:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background-image: none !important;
+}
+
+.us-credentials label.Required:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "*";
+  margin-right: 4px;
+  color: var(--danger);
+}
+
+.HideRequiredAsterisks .us-credentials label.Required:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
+.us-credentials .HideRequiredAsterisks label.Required:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  display: none;
 }
 
 /* Calendar validators reserve space while hidden (visibility, not display). */
