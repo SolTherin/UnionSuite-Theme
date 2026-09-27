@@ -851,33 +851,64 @@
     return controller;
   }
 
+  const radEditors = new Map();
+
   /* A RadEditor's HTML view (textarea.reTextArea): the source tools appear
      only while that view is showing, and the Format / status row sits below
      the editor.
+
+     The textarea is not there to attach to when the page first loads: RadEditor
+     builds its content area as it initialises, which can finish after a page
+     script has run. The controller therefore watches the editor and attaches
+     when the textarea appears, and again if RadEditor replaces it, so it can
+     be created as soon as the editor's element exists.
 
      options.fieldTool  the insert-field tool's name, 'auto' (default) for the
                         first tool whose items are {#…} placeholders, or null
                         for no suggestions. Other options are as for attach(). */
   function attachRadEditor(editorEl, options = {}) {
-    const textarea = editorEl.querySelector('textarea.reTextArea');
-    if (!textarea) return null;
+    if (radEditors.has(editorEl)) return radEditors.get(editorEl);
     const tool = options.fieldTool === undefined ? 'auto' : options.fieldTool;
     let cached = null;
     // Cache only a successful read, so a late editor configuration is retried.
     const fields = tool === null ? null : () => cached || (cached = radEditorFields(editorEl, tool));
-    const controller = attach(textarea, {
-      placeTools: tools => editorEl.after(tools),
-      ...options,
-      fields: options.fields || fields
-    });
-    if (controller.radEditor) return controller; // Already attached.
+    const settings = { placeTools: tools => editorEl.after(tools), ...options, fields: options.fields || fields };
+
+    let inner = null;
+    const connect = () => {
+      const textarea = editorEl.querySelector('textarea.reTextArea');
+      if (textarea === (inner?.textarea || null) && (!inner || textarea.isConnected)) return;
+      inner?.dispose();
+      inner = textarea ? attach(textarea, settings) : null;
+    };
+
+    // Only a change of textarea matters. The highlight inside the editor also
+    // mutates on every repaint, which connect() ignores after one lookup.
+    const observer = new MutationObserver(connect);
+    observer.observe(editorEl, { childList: true, subtree: true });
     // The mode links switch views without resizing anything else observable
     // in some skins, so they refresh directly too.
     const modes = new AbortController();
-    editorEl.querySelector('.reModes')?.addEventListener('click', () => setTimeout(controller.refresh), { signal: modes.signal });
-    const dispose = controller.dispose;
-    controller.dispose = () => { modes.abort(); dispose(); };
-    controller.radEditor = editorEl;
+    editorEl.addEventListener('click', event => {
+      if (!event.target.closest?.('.reModes a')) return;
+      setTimeout(() => { connect(); inner?.refresh(); });
+    }, { signal: modes.signal });
+
+    const controller = {
+      radEditor: editorEl,
+      get textarea() { return inner?.textarea || null; },
+      refresh() { connect(); inner?.refresh(); },
+      format() { inner?.format(); },
+      dispose() {
+        observer.disconnect();
+        modes.abort();
+        inner?.dispose();
+        inner = null;
+        radEditors.delete(editorEl);
+      }
+    };
+    radEditors.set(editorEl, controller);
+    connect();
     return controller;
   }
 
