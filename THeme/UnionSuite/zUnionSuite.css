@@ -8948,6 +8948,21 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--info);
 }
 
+/* Short tabs: the page-level rail CCO reaches the window's bottom when
+   nothing follows it (US-CCO-RAIL-FILL sets the height), and the rail's
+   column stretches with it. The page keeps its bottom padding; the rail
+   alone bleeds through it (a stretched grid item grows by a negative
+   margin), so it meets the window's edge without adding a scrollbar. */
+@media screen and (min-width: 601px) {
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    min-height: var(--us-cco-fill-height, 0);
+  }
+
+  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
+    margin-bottom: calc(-1 * var(--us-cco-fill-bleed, 0px));
+  }
+}
+
 /* US-CCO-RAIL:END */
 
 
@@ -9190,6 +9205,714 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* US-DATA-PANELS:END */
+
+/* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
+   that shows the native iMIS "User credentials" control. iMIS puts the class
+   on a div around the whole control, so every rule starts from it.
+
+   Native structure (captured 27 September 2026):
+   - _UserDetailsMainPanel > .row > _ContactInfoPanel, _UserInfoPanel
+     (User credentials), then _CommonUserPanel (User information) and
+     _StaffUserPanel (Staff access, collapsible; staff users only).
+   - Every credentials field is nested inside the Username PanelField.
+   - User information holds three .panel-border cards in col-md-4 columns:
+     Account, Roles (RadGrid), Security groups (RadGrid).
+
+   Presentation only: every control, postback and validator stays native.
+   Bootstrap utilities (mb-4, DisplayInlineBlock, FloatRight) and inline
+   styles are overridden with !important where they would otherwise win.
+   Dark icon variants: zzDarkMode.css. */
+.us-credentials:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-credentials-label: 150px;
+  --us-credentials-field: 360px;
+  --us-credentials-radius: 12px;
+  --us-credentials-inset: 18px;
+  --us-credentials-trash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3'/%3E%3C/svg%3E");
+  --us-credentials-trash-danger: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d03528' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3'/%3E%3C/svg%3E");
+  --us-credentials-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23006f94' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M11 13l9-9M15 4h5v5'/%3E%3C/svg%3E");
+  container: us-credentials / inline-size;
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+}
+
+/* ── 1. Panels ─────────────────────────────────────────────────────────── */
+
+/* The row only groups two panels; its gutters would offset them. */
+.us-credentials [id$="_UserDetailsMainPanel"] > .row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+/* us-credentials--hide-contact: where a contact banner already shows the
+   ID and full name (the profile CCO), Contact information is hidden. The
+   page is also opened outside the profile, so it shows by default. */
+.us-credentials.us-credentials--hide-contact [id$="_ContactInfoPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* The sections read as the page's other cards. */
+.us-credentials :is(
+  [id$="_ContactInfoPanel"],
+  [id$="_UserInfoPanel"],
+  [id$="_CommonUserPanel"],
+  [id$="_StaffUserPanel"]
+):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--us-credentials-radius);
+  background: var(--bg-surface);
+  box-shadow: none;
+  overflow: visible;
+}
+
+.us-credentials :is(
+  [id$="_ContactInfoPanel"],
+  [id$="_UserInfoPanel"],
+  [id$="_CommonUserPanel"],
+  [id$="_StaffUserPanel"]
+) > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  box-sizing: border-box;
+  min-height: var(--panel-header-min-height);
+  margin: 0;
+  padding: var(--panel-header-padding-block) var(--us-credentials-inset);
+  border: 0;
+  border-bottom: 1px solid var(--bg-sunken);
+  border-radius: calc(var(--us-credentials-radius) - 1px) calc(var(--us-credentials-radius) - 1px) 0 0;
+  background: var(--bg-subtle);
+  box-shadow: none;
+}
+
+/* A collapsed Staff access heading is the whole card. */
+.us-credentials [id$="_StaffUserPanel"]:has(> .panel-body-container.collapse:not(.in)) > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom: 0;
+  border-radius: calc(var(--us-credentials-radius) - 1px);
+}
+
+.us-credentials :is(
+  [id$="_ContactInfoPanel"],
+  [id$="_UserInfoPanel"],
+  [id$="_CommonUserPanel"],
+  [id$="_StaffUserPanel"]
+) > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+  color: var(--text-strong);
+  font-family: var(--font-ui);
+  font-size: var(--panel-header-font-size);
+  font-weight: var(--panel-header-font-weight);
+  line-height: var(--panel-header-line-height);
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-title > a:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Native floats and offsets the options box; it sits in the flex heading. */
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading > .panel-heading-options:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: static;
+  display: flex;
+  align-items: center;
+  float: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The collapse toggle: a chevron drawn with borders, pointing right when
+   collapsed and down when open, in place of the sysicon glyph. */
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  line-height: 0;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0;
+  text-decoration: none;
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  transition: transform 160ms;
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse.collapsed:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  margin: 0 0 0 -3px;
+  transform: rotate(-45deg);
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading .panel-heading-collapse:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+.us-credentials :is(
+  [id$="_ContactInfoPanel"],
+  [id$="_UserInfoPanel"],
+  [id$="_CommonUserPanel"],
+  [id$="_StaffUserPanel"]
+) > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: var(--us-credentials-inset);
+}
+
+/* ── 2. Shared fields ──────────────────────────────────────────────────── */
+
+.us-credentials .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  float: none;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.us-credentials :is(.PanelField > label, .PanelField > .Label, .PanelField > div > label, .PanelField > div > .Label):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  color: var(--text-strong);
+  font: 600 13px/1.4 var(--font-ui);
+}
+
+.us-credentials :is(
+  input[type="text"],
+  input[type="password"],
+  select
+):not(.riTextBox, .rdfd_):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+  box-shadow: none;
+}
+
+/* Username and email are shown, not edited, here. */
+.us-credentials :is(input[type="text"], input[type="password"]):is(:disabled, .aspNetDisabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--border);
+  background-color: var(--bg-subtle);
+  color: var(--text-base);
+  opacity: 1;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Calendar validators reserve space while hidden (visibility, not display). */
+.us-credentials .ValidationError[style*="visibility:hidden"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-credentials .ValidationError:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* Contact information: ID and full name in the credentials label column. */
+.us-credentials [id$="_ContactInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: var(--us-credentials-label) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px 16px;
+}
+
+.us-credentials [id$="_ContactInfoPanel_Body"] > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+/* ── 3. User credentials: fields beside the password reset card ───────── */
+
+.us-credentials [id$="_UserInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: minmax(0, calc(var(--us-credentials-label) + var(--us-credentials-field) + 16px)) minmax(260px, 340px);
+  justify-content: start;
+  align-items: start;
+  gap: 24px 48px;
+}
+
+/* The Username field wraps every other field: one label/value grid. */
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: var(--us-credentials-label) minmax(0, var(--us-credentials-field));
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  row-gap: 4px;
+}
+
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > :is(label, .Label):not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField > :is(label, .Label):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 1;
+}
+
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelFieldValue:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField > :is(.PanelFieldValue, .ValidationError):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Username: the field and its remove button on one line. */
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelFieldValue:has(> [id$="_RemoveUserButton"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Password: the native inline-block wrapper would shrink the input. */
+.us-credentials [id$="_PasswordEdit1_Password"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 100%;
+}
+
+.us-credentials .PanelFieldValue > div:has(> div > [id$="_PasswordEdit1_Password"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block !important;
+}
+
+.us-credentials #PasswordMeter.progress:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: 4px;
+  margin: 6px 0 0;
+  border-radius: 2px;
+  background: var(--bg-sunken);
+  box-shadow: none;
+}
+
+.us-credentials [id$="_PasswordMeterMessage"]:not(:empty):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Account status: read-only facts, set apart from what can be changed. */
+.us-credentials #LockoutStatus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bg-sunken);
+}
+
+.us-credentials :is(#LockoutStatus, #LastLogin, #LastActive) > .PanelFieldValue:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+}
+
+/* User class: the choices stay stacked (three do not fit one field width). */
+.us-credentials [id$="_UserInfoPanel_Body"] .PanelField:has(> .PanelFieldValue > [id$="_UserClassList"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-items: start;
+  margin-top: 6px;
+}
+
+.us-credentials [id$="_UserClassList"] > label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+  font-weight: 500;
+}
+
+/* ── 4. Password reset card ────────────────────────────────────────────── */
+
+.us-credentials [id$="_ResetPasswordPanel"] > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block !important;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-subtle);
+  box-shadow: none;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 16px;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0 0 4px !important;
+  padding: 0 !important;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .GridTitlePanel .Title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+/* Description, then the website picker with its open-link button, then
+   Send Email. The native markup separates them with <br>s. */
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > br:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 1 / -1;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > span.pt-lg-2:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 6px;
+  padding: 0 !important;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > a[title="Open link"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  margin: 0 !important;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > a[title="Open link"] > .sysicon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > a[title="Open link"]:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-credentials-external) center / contain no-repeat;
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] .PanelField > a[title="Open link"]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--brand-50);
+}
+
+.us-credentials [id$="_ResetPasswordPanel"] [id$="_InlineResetPassword"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 1 / -1;
+  justify-self: start;
+  float: none !important;
+  margin: 4px 0 0 !important;
+}
+
+/* ── 5. Icon buttons (native image inputs) ─────────────────────────────── */
+
+/* The legacy image stays the control; it is moved out of view and the
+   theme glyph drawn as a background, as the IQA date buttons do. */
+.us-credentials input[type="image"]:is([id$="_RemoveUserButton"], [id$="_gbcDeleteColumn"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  flex: none;
+  float: none !important;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent !important;
+  border-radius: 6px;
+  background: transparent var(--us-credentials-trash) center / 18px no-repeat;
+  color: transparent;
+  font-size: 0;
+  object-fit: none;
+  object-position: -9999px -9999px;
+  cursor: pointer;
+}
+
+.us-credentials input[type="image"]:is([id$="_RemoveUserButton"], [id$="_gbcDeleteColumn"]):hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent) !important;
+  background-color: var(--danger-bg);
+  background-image: var(--us-credentials-trash-danger);
+}
+
+.us-credentials input[type="image"]:is([id$="_RemoveUserButton"], [id$="_gbcDeleteColumn"]):focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* Removing the username ends the member's sign-in: a bordered button,
+   not a bare glyph, beside the field. */
+.us-credentials input[type="image"][id$="_RemoveUserButton"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 36px;
+  height: 36px;
+  border-color: var(--border-strong) !important;
+  background-color: var(--bg-surface);
+}
+
+/* ── 6. User information: Account, Roles, Security groups ──────────────── */
+
+.us-credentials [id$="_UserSecurityInfoPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] > .row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] > .row > [class*="col-"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  float: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] > .row > [class*="col-"] > div:not(.panel):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: 100%;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0 !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  box-shadow: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 14px 16px 16px;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  margin: 0 0 12px;
+  padding: 0 !important;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel .Title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel > [id$="_TopLeftPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
+  display: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel > [id$="_TopRightPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  float: none;
+  margin: 0 0 0 auto;
+}
+
+/* Add opens the native role or group picker: a small outline button. */
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] [id$="_TopRightPanel"] > a:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-link);
+  font: 600 12px/1 var(--font-ui);
+  text-decoration: none;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] [id$="_TopRightPanel"] > a:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "+";
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] [id$="_TopRightPanel"] > a:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--brand-100);
+  background: var(--brand-50);
+}
+
+/* Account: Disabled as a checkbox row, dates labelled above. The date
+   picker floats, so each field contains its floats. */
+.us-credentials [id$="_AccountPanel"] .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flow-root;
+}
+
+.us-credentials [id$="_AccountPanel"] .PanelField + .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 16px;
+}
+
+.us-credentials [id$="_AccountPanel"] .PanelField.Right:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 8px;
+}
+
+.us-credentials [id$="_AccountPanel"] .PanelField.Right label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-weight: 500;
+}
+
+.us-credentials [id$="_AccountPanel"] .PanelField.Right > .PanelFieldValue:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: auto;
+  margin: 0;
+}
+
+.us-credentials [id$="_AccountPanel"] .PanelField.Left > div:first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block !important;
+  margin-bottom: 6px;
+}
+
+/* Roles and groups: compact lists rather than bordered grids. */
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-collapse: collapse;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > thead > tr > th:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: auto;
+  padding: 6px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font: 600 11px/1.4 var(--font-ui);
+  letter-spacing: .04em;
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: 40px;
+  padding: 4px 6px 4px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--bg-sunken);
+  background: transparent;
+  color: var(--text-base);
+  vertical-align: middle;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr:last-child > td:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr:has(+ tr.rgNoRecords[style*="display:none"]) > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom: 0;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr > td.ListerColumnHeader:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 1%;
+  padding-inline: 0 6px;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgNoRecords > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: auto;
+  padding: 12px !important;
+  color: var(--text-muted);
+}
+
+/* ── 7. Staff access ───────────────────────────────────────────────────── */
+
+.us-credentials [id$="_StaffUserEdit1_PanelTemplateControl1"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px 16px;
+}
+
+.us-credentials [id$="_StaffUserEdit1_PanelTemplateControl1"] > .PanelField > div:first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block !important;
+  margin-bottom: 6px;
+}
+
+/* Set all to: the Staff access heading control (US-CREDENTIALS JS). It acts
+   on the levels below, so it is hidden while the panel is collapsed. */
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex-wrap: wrap;
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading > .us-credentials__set-all:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  color: var(--text-muted);
+  font: 600 12px/1.4 var(--font-ui);
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading > .us-credentials__set-all > select:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: auto;
+  min-width: 190px;
+  height: 32px;
+  padding-block: 4px;
+  font-weight: 500;
+}
+
+.us-credentials [id$="_StaffUserPanel"]:has(> .panel-body-container.collapse:not(.in)) > .panel-heading > .us-credentials__set-all:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* ── 8. Narrow panels ──────────────────────────────────────────────────── */
+
+@container us-credentials (max-width: 760px) {
+  .us-credentials [id$="_UserInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container us-credentials (max-width: 520px) {
+  .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 6px;
+  }
+
+  .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    row-gap: 6px;
+  }
+
+  .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > :is(label, .Label, .PanelFieldValue):not(:where(.us-report-no-styling, .us-report-no-styling *)),
+  .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField > :is(label, .Label, .PanelFieldValue, .ValidationError):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-column: 1;
+  }
+
+  .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    margin-top: 6px;
+  }
+}
+
+/* US-CREDENTIALS:END */
 [data-us-panel-action="edit"] {
   --us-panel-glyph: "\eb04";
 }
@@ -10352,6 +11075,58 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* US-BADGES:END */
+
+/* US-PLACEHOLDER:START — authored Content HTML standing in for a section whose
+   data source is not ready yet ("coming soon"). Put it directly in the panel
+   body; the panel shell stays native. The icon is a Tabler <i class="ti">
+   or an inline <svg>, and is decorative. us-report-no-styling opts out. */
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 32px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 3%, var(--bg-surface)), var(--bg-surface));
+}
+
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) .us-placeholder__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-surface);
+  color: var(--accent);
+}
+
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) .us-placeholder__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) .us-placeholder__icon .ti {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) h3 {
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+  font: 600 16px/1.5 var(--font-ui);
+  color: var(--text-strong);
+}
+
+.us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* US-PLACEHOLDER:END */
 
 /* Management shortcuts precede the record lookup; SVGs use the shared outline style. */
 #injected-taskbar .us-taskbar__quick-links {

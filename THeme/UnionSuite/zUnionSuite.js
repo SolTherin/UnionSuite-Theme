@@ -4799,6 +4799,124 @@ SOFTWARE.
 })();
 /* US-DATA-PANELS:END */
 
+/* US-CREDENTIALS:START — the native User credentials control (us-credentials).
+   Staff access has no "collapsed by default" setting and always renders
+   collapsed: open it once per render (a manual collapse holds until the next
+   render). Add "Set all to" to its heading: one select, with no name so it is
+   never posted, that sets every access level to one value. The native selects
+   keep their names, values and validators; saving is unchanged. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCredentials) {
+    window.UnionSuiteCredentials.refresh();
+    return;
+  }
+
+  const OWNER = '.us-credentials';
+  const PANEL = '[id$="_StaffUserPanel"]';
+  const LEVELS = '[id$="_StaffUserEdit1_PanelTemplateControl1"] select';
+  const opened = new WeakSet();
+  let queued = false;
+
+  const eligible = owner => owner.isConnected &&
+    !owner.closest('.us-report-no-styling') &&
+    !document.body.classList.contains('TemplateAreaEasyEditOn');
+
+  // Bootstrap's own open state: .in on the body, no .collapsed on the toggles.
+  function expand(panel) {
+    const body = panel.querySelector(':scope > .panel-collapse');
+    if (!body || opened.has(body)) return;
+    opened.add(body);
+    if (body.classList.contains('in')) return;
+    body.classList.add('in');
+    panel.querySelectorAll(':scope > .panel-heading [data-toggle="collapse"]').forEach(toggle => {
+      toggle.classList.remove('collapsed');
+      toggle.setAttribute('aria-expanded', 'true');
+    });
+    const text = panel.querySelector(':scope > .panel-heading .panel-heading-collapse-text');
+    if (text && body.dataset.expandedtext) text.textContent = body.dataset.expandedtext;
+  }
+
+  // Shows the shared level, or "Mixed levels" when the areas differ.
+  function sync(control, levels) {
+    const values = new Set(levels.map(level => level.value));
+    const shared = values.size === 1 ? values.values().next().value : '';
+    const index = Array.from(control.options).findIndex(option => option.value === shared);
+    control.selectedIndex = shared && index > 0 ? index : 0;
+  }
+
+  function addSetAll(panel) {
+    const heading = panel.querySelector(':scope > .panel-heading');
+    const levels = Array.from(panel.querySelectorAll(LEVELS));
+    if (!heading || levels.length < 2 || heading.querySelector('.us-credentials__set-all')) return;
+
+    const label = document.createElement('label');
+    label.className = 'us-credentials__set-all';
+    const caption = document.createElement('span');
+    caption.textContent = 'Set all to';
+    const control = document.createElement('select');
+    const mixed = new Option('Mixed levels', '');
+    mixed.disabled = true;
+    control.append(mixed);
+    Array.from(levels[0].options)
+      .filter(option => option.value !== '')
+      .forEach(option => control.append(new Option(option.text, option.value)));
+    label.append(caption, control);
+    heading.insertBefore(label, heading.querySelector(':scope > .panel-heading-options'));
+    sync(control, levels);
+
+    control.addEventListener('change', () => {
+      // Read the choice first: each level's change event re-syncs this control.
+      const value = control.value;
+      Array.from(panel.querySelectorAll(LEVELS)).forEach(level => {
+        if (level.value === value) return;
+        level.value = value;
+        level.dispatchEvent(new Event('input', { bubbles: true }));
+        level.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
+  }
+
+  function update() {
+    queued = false;
+    document.querySelectorAll(OWNER).forEach(owner => {
+      if (!eligible(owner)) return;
+      const panel = owner.querySelector(PANEL);
+      if (!panel) return;
+      expand(panel);
+      addSetAll(panel);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+
+  // A level changed by hand: the heading control follows it.
+  document.addEventListener('change', event => {
+    const level = event.target.closest?.(OWNER + ' ' + LEVELS);
+    if (!level) return;
+    const panel = level.closest(PANEL);
+    const control = panel?.querySelector(':scope > .panel-heading .us-credentials__set-all select');
+    if (control) sync(control, Array.from(panel.querySelectorAll(LEVELS)));
+  });
+
+  // Postbacks (user class, roles, groups) re-render the control.
+  new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
+  if (window.Sys?.WebForms?.PageRequestManager) {
+    window.Sys.WebForms.PageRequestManager.getInstance().add_endRequest(schedule);
+  }
+
+  window.UnionSuiteCredentials = { refresh: schedule };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', update);
+  else update();
+})();
+/* US-CREDENTIALS:END */
+
 /* US-ACTION-MENUS:START — approved option 5; explicit actions, no evaluated HTML. */
 (function(){
  'use strict';
@@ -5254,6 +5372,134 @@ SOFTWARE.
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* US-CCO-STICKY-TABS:END */
+/* US-CCO-RAIL-FILL:START — a page-level us-cco-rail CCO with nothing after
+   it reaches the bottom of the window, so the rail's column runs to the page
+   end on short tabs. Sets --us-cco-fill-height (a min-height) on the CCO:
+   the extra height the document needs to fill the window, measured from the
+   CCO's natural height each time so it shrinks again on longer tabs. Page
+   bottom padding is kept; the rail alone bleeds through it
+   (--us-cco-fill-bleed) to meet the window's edge. Desktop only; not in
+   Easy Edit or print. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCcoFill) {
+    window.UnionSuiteCcoFill.refresh();
+    return;
+  }
+
+  const PROPERTY = '--us-cco-fill-height';
+  const BLEED = '--us-cco-fill-bleed';
+  const filled = new Set();
+  const resize = new ResizeObserver(schedule);
+  const observed = new Set();
+  let queued = false;
+
+  // True when something visible follows the CCO's content item in the page.
+  function followed(cco) {
+    const stop = cco.closest('.ContentPanel') || document.body;
+    for (let node = cco.closest('.ContentItemContainer') || cco; node && node !== stop; node = node.parentElement) {
+      for (let next = node.nextElementSibling; next; next = next.nextElementSibling) {
+        if (next.matches('script, style, input[type="hidden"]')) continue;
+        const rect = next.getBoundingClientRect();
+        if (next.getClientRects().length && rect.height > 0 && rect.width > 0) return true;
+      }
+    }
+    return false;
+  }
+
+  // The bottom of the page's in-flow content, plus the body's own bottom
+  // padding, margin and border, in page coordinates.
+  function documentBottom() {
+    let bottom = 0;
+    Array.from(document.body.children).forEach(child => {
+      if (!child.getClientRects().length) return;
+      const position = getComputedStyle(child).position;
+      if (position === 'fixed' || position === 'absolute') return;
+      bottom = Math.max(bottom, child.getBoundingClientRect().bottom);
+    });
+    const style = getComputedStyle(document.body);
+    const after = ['paddingBottom', 'marginBottom', 'borderBottomWidth']
+      .reduce((sum, key) => sum + (parseFloat(style[key]) || 0), 0);
+    return bottom + window.scrollY + after;
+  }
+
+  function clear(cco) {
+    cco.style.removeProperty(PROPERTY);
+    cco.style.removeProperty(BLEED);
+    filled.delete(cco);
+  }
+
+  function update() {
+    queued = false;
+    const desktop = window.matchMedia('(min-width: 601px)').matches;
+    const easy = window.gIsEasyEditEnabled === true || document.body.classList.contains('TemplateAreaEasyEditOn');
+    const next = new Set();
+
+    if (desktop && !easy) {
+      document.querySelectorAll('.us-cco-rail').forEach(owner => {
+        if (owner.closest('.us-report-no-styling')) return;
+        const cco = owner.querySelector(':scope .cco.tabs-wrapper.tabs-vertical');
+        if (!cco || cco.parentElement.closest('.cco') || cco.closest('.us-cco-rail') !== owner) return;
+
+        // Measure without the fill, then fill only the window's spare height.
+        cco.style.removeProperty(PROPERTY);
+        cco.style.removeProperty(BLEED);
+        if (!cco.getClientRects().length || followed(cco)) return;
+        const pageBottom = documentBottom();
+        const spare = Math.floor(window.innerHeight - pageBottom);
+        if (spare > 0) {
+          const rect = cco.getBoundingClientRect();
+          const below = Math.max(0, Math.floor(pageBottom - (rect.bottom + window.scrollY)));
+          cco.style.setProperty(PROPERTY, Math.ceil(rect.height + spare) + 'px');
+          cco.style.setProperty(BLEED, below + 'px');
+          next.add(cco);
+          filled.add(cco);
+        }
+
+        // Tab content changing height re-measures.
+        cco.querySelectorAll(':scope > .RadMultiPage > .rmpView').forEach(view => {
+          if (!observed.has(view)) {
+            observed.add(view);
+            resize.observe(view);
+          }
+        });
+      });
+    }
+
+    Array.from(filled).forEach(cco => {
+      if (!next.has(cco)) clear(cco);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+
+  function start() {
+    update();
+    new MutationObserver(schedule).observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'hidden']
+    });
+  }
+
+  window.addEventListener('resize', schedule);
+  window.addEventListener('pageshow', schedule);
+  if (window.Sys?.WebForms?.PageRequestManager) {
+    window.Sys.WebForms.PageRequestManager.getInstance().add_endRequest(schedule);
+  }
+
+  window.UnionSuiteCcoFill = { refresh: schedule };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
+})();
+/* US-CCO-RAIL-FILL:END */
 /* US-CCO-RAIL-COLLAPSE:START — collapsible vertical CCO rail.
    Opt in with us-cco-collapsible on the CCO iPart CSS class field (pairs with
    us-cco-cards). A toggle at the top of the rail's column (the same spot in

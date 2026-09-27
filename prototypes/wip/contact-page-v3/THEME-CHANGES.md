@@ -138,6 +138,15 @@ selectors, so it moves across unchanged.
       the live Telerik `RadTabStripRight_Orion` skin, which the prototype
       does not load.
 
+- [x] Item 35, Login Credentials (not yet approved): the candidate →
+      `US-CREDENTIALS` after `US-DATA-PANELS`, with the
+      `us-report-no-styling` guard on each rule; icon variants →
+      `zzDarkMode.css`; the Staff access behaviour (open by default, Set all
+      to) → `US-CREDENTIALS` in `zUnionSuite.js`; guide section 06g.
+      Merged 27 September 2026. Still to capture: the no-credentials and
+      locked-out states. In iMIS, change the iPart's CSS class from
+      `HubCredentials` to `us-credentials us-credentials--hide-contact`.
+
 ## `THeme/UnionSuite/99-Orion.css`
 
 - [x] Item 11, buttons: section 11 → the base button rule and
@@ -259,11 +268,28 @@ selectors, so it moves across unchanged.
       (add-waiver, membership.suspend). Set the Active adjustments Query
       Menu's empty text to "No active adjustments" (confirm the setting in
       iMIS; otherwise use a Query Template Display with a No results field).
-- [ ] Item 26: an Outstanding IQA that returns what is owed for each payment
-      type in one list (open and overdue invoices, failed debits, deductions
-      not remitted), with Reference, Type, Description, Due, Amount and
-      Status; its Query Menu iPart and Active adjustments' are set not to
-      render when empty. Billing reads the payment type and billing method;
+- [ ] Item 26: the Finance **Invoices** tab also waits on HubQueryTemplate
+      (invoice data is in CloudToolz). Raw layout with native grid markup
+      and CSS class `us-tab-panel us-tabset-finance us-tab-invoices
+      us-iqa-row-groups`. The endpoint returns the contact's invoices,
+      newest first, each followed by its payments; a payment row repeats the
+      invoice reference in the first column (plain text, not a link) so row
+      groups fold it under the invoice. Columns: Invoice, Date, Description,
+      Amount, Paid, Owing, Status. No results: "No invoices to display."
+      The endpoint returns the last two years (owner, 27 September 2026),
+      and HubQueryTemplate needs pagination in its build.
+      Row groups must re-run after HubQueryTemplate renders late (its §7
+      render hook).
+- [ ] Item 26: Outstanding waits on the HubQueryTemplate iPart, because
+      payment data lives in CloudToolz (plan
+      `…\Claude\iParts\HubQueryTemplate\PLAN.md`, Appendix A). The
+      prototype shows a placeholder until then (27 September 2026); when
+      the iPart lands, restore the grid and the
+      `us-panel-tone-auto us-action-finance-make-payment` classes. It lists
+      what is owed for each payment type in one list (open and overdue
+      invoices, failed debits, deductions not remitted), with Reference,
+      Type, Description, Due, Amount and Status, and does not render when
+      empty. Active adjustments always renders (item 33). Billing reads the payment type and billing method;
       Balance (a Query Template Display) lists each credit under the total.
       Billing and Balance need equal-height panels in their row: a page
       layout rule today (`contact-page.css`); consider a theme option if
@@ -274,10 +300,19 @@ selectors, so it moves across unchanged.
       row buttons. Admin overrides and Legacy need their own IQAs and access
       settings (staff only).
 
+- [x] Owner request, 27 September 2026: a page-level `us-cco-rail` CCO with
+      nothing after it reaches the window bottom on short tabs, the rail
+      bleeding through the page bottom padding. `US-CCO-RAIL-FILL` in
+      `zUnionSuite.js` (after `US-CCO-STICKY-TABS`) and a rule at the end of
+      `US-CCO-RAIL` in `zUnionSuite.css`. Check on the tenant that nothing
+      iMIS renders after the CCO (footer, button panel) is visible there.
+
 ## Usage guide
 
 - [ ] Document in `THeme/UnionSuite/guides/usage/`: `us-cco-cards`,
-      `us-cco-collapsible`, `us-cco-rail` (what it includes), the
+      `us-cco-collapsible`, `us-cco-rail` (what it includes, and that a
+      page-level rail CCO with nothing after it fills to the window bottom on
+      short tabs, `US-CCO-RAIL-FILL`), the
       "Vertical right" setting for every vertical CCO, `us-iqa-row-groups`, `us-alerts` with inline actions, `us-notes`,
       the bell, tab search, counts and the Alt+S shortcut, the no-header
       tracker, `us-attention--hide-zero`, the panel tones, the button sizes,

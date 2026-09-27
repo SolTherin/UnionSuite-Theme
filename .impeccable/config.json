@@ -38,6 +38,15 @@
         ],
         "createdAt": "2026-09-23T12:24:43.819Z",
         "reason": "Spec decision in contact-page-v3/README.md: item 9 alert severity edge and item 13 pinned-note edge (v1 notes layout accepted by owner, 23 Sep 2026)"
+      },
+      {
+        "rule": "monotonous-spacing",
+        "value": "*",
+        "files": [
+          "prototypes/wip/contact-page-v3/index.html"
+        ],
+        "createdAt": "2026-09-27T12:02:21.365Z",
+        "reason": "Claude: index.html is a fixture of captured native iMIS markup (inline styles verbatim from iMIS); its spacing rhythm comes from the shared theme CSS, verified in screenshots"
       }
     ]
   }

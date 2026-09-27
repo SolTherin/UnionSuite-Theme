@@ -34,6 +34,7 @@
   <button type="button" class="cv2-toggle" id="cv3-invoice-state" aria-pressed="true">Arrears: overdue</button>
   <button type="button" class="cv2-toggle" id="cv3-adjustments-state" aria-pressed="true">Adjustments: active</button>
   <button type="button" class="cv2-toggle" id="cv3-positions-state">Positions: 2</button>
+  <button type="button" class="cv2-toggle" id="cv3-login-state" aria-pressed="false">Login: member</button>
   <button type="button" class="cv2-toggle" id="cv3-trackers-clear" aria-pressed="false">Trackers: live</button>
   <button type="button" class="cv2-toggle" id="cv3-activity-failing" aria-pressed="false">Activity: all sources</button>
   <button type="button" class="cv2-toggle" id="cv3-color-scheme" aria-pressed="false">Mode: light</button>
@@ -138,6 +139,7 @@
           <li class="rtsLI"><a class="rtsLink" role="tab" href="#cases" aria-selected="false" data-view="cases"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Cases</span></span></span></a></li>
           <li class="rtsLI"><a class="rtsLink" role="tab" href="#engagement" aria-selected="false" data-view="engagement"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Engagement</span></span></span></a></li>
           <li class="rtsLI"><a class="rtsLink" role="tab" href="#membership" aria-selected="false" data-view="membership"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Membership</span></span></span></a></li>
+          <li class="rtsLI"><a class="rtsLink" role="tab" href="#access" aria-selected="false" data-view="access"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Login Credentials</span></span></span></a></li>
           <li class="rtsLI rtsLast"><a class="rtsLink" role="tab" href="#admin" aria-selected="false" data-view="admin"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Admin</span></span></span></a></li>
         </ul>
       </div>
@@ -354,19 +356,25 @@
           </div>
         </div>
 
-        <!-- Query Menu · what the member owes, whatever the payment type: open and
-             overdue invoices (invoice), failed debits (auto debit), deductions the
-             employer did not remit (payroll). Not rendered when empty.
-             CSS class: us-panel-tone-auto us-action-finance-make-payment -->
-        <div class="ContentItemContainer" id="cv3-outstanding"><div class="us-panel-tone-auto us-action-finance-make-payment"><div class="panel">
+        <!-- Placeholder until HubQueryTemplate is built (27 September 2026).
+             Outstanding lists what the member owes, whatever the payment type:
+             open and overdue invoices (invoice), failed debits (auto debit),
+             deductions the employer did not remit (payroll). Payment data lives
+             in CloudToolz, so a Query Menu cannot feed it; the HubQueryTemplate
+             iPart will, from Template/ContactLayout/OutstandingInvoices. Plan:
+             …\Claude\iParts\HubQueryTemplate\PLAN.md, Appendix A.
+             Content HTML: templates/Placeholder-Content.html (us-placeholder).
+             Planned CSS class: us-panel-tone-auto us-action-finance-make-payment -->
+        <div class="ContentItemContainer" id="cv3-outstanding"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[report-money]] Outstanding</h2></div>
-          <div class="panel-body-container"><div class="panel-body"><div id="cv2-outstanding_ContentPanel"><div id="cv2-outstanding_ListerPanel"><div data-gridid="cv2-outstanding"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
-            <thead><tr><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Due</th><th class="rgHeader" scope="col">Amount</th><th class="rgHeader" scope="col">Status</th></tr></thead>
-            <tbody id="cv3-outstanding-rows">
-              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>Failed debit</td><td>Q1 2026 subscription · 3 attempts declined</td><td>01 Mar 2026</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger us-badge--icon" title="74 days overdue">Overdue</span></td></tr>
-            </tbody>
-          </table></div></div></div></div></div></div>
-        </div></div></div>
+          <div class="panel-body-container"><div class="panel-body">
+            <div class="us-placeholder">
+              <span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-receipt"></i></span>
+              <h3>Outstanding payments coming soon</h3>
+              <p>Open invoices, failed debits and unremitted deductions will appear here.</p>
+            </div>
+          </div></div>
+        </div></div>
 
         <!-- Query Template Display · active and upcoming adjustments; always shown (item 33).
              CSS class: us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment
@@ -506,6 +514,7 @@
 
         <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="finance" data-us-tab-adapter="page-sections" aria-label="Finance sections">
           <button type="button" data-us-tab="payments" class="is-active">Payment history</button>
+          <button type="button" data-us-tab="invoices">Invoices</button>
           <button type="button" data-us-tab="adjustments">Adjustments</button>
           <button type="button" data-us-tab="methods">Payment methods</button>
           <button type="button" data-us-tab="tax">Tax statements</button>
@@ -528,6 +537,25 @@
               <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8105">PAY-8105</a></td><td>12 Nov 2025</td><td><span class="us-badge us-badge--icon" data-us-icon="refund">Refunded</span></td><td>Delegate training day · cancelled, refunded to credit CR-0204</td><td>Credit card</td><td class="cv2-num">$25.00</td></tr>
               <tr class="rgAltRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-7990">PAY-7990</a></td><td>01 Oct 2025</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q3 2025 subscription</td><td>Direct debit</td><td class="cv2-num">$185.00</td></tr>
               <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-7412">PAY-7412</a></td><td>20 Jun 2025</td><td><span class="us-badge us-badge--success us-badge--icon">Paid</span></td><td>Q2 2025 subscription · $40.00 over, held as credit CR-0192</td><td>Credit card</td><td class="cv2-num">$225.00</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Sample grid · waits on HubQueryTemplate (27 September 2026). Invoice and
+             payment data live in CloudToolz, so a Query Menu cannot feed it; the
+             HubQueryTemplate iPart's raw layout outputs this native grid markup.
+             Invoices from the last two years (owner, 27 September 2026), newest first, each followed by the
+             payments applied to it. A payment row repeats the invoice reference
+             in the first column, so us-iqa-row-groups folds it under its invoice
+             ("3 paid"); the payment reference links to the payment. Only invoice
+             members have invoices (item 26): "Pays by: invoice" in the toolbar.
+             CSS class: us-tab-panel us-tabset-finance us-tab-invoices us-iqa-row-groups -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-finance us-tab-invoices us-iqa-row-groups"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-invoice]] Invoices</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv3-invoices_ContentPanel"><div id="cv3-invoices_ListerPanel"><div data-gridid="cv3-invoices"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Invoice</th><th class="rgHeader" scope="col">Date</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Amount</th><th class="rgHeader" scope="col">Paid</th><th class="rgHeader" scope="col">Owing</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody id="cv3-invoice-rows">
+              <tr class="rgNoRecords"><td colspan="7"><div>No invoices to display.</div></td></tr>
             </tbody>
           </table></div></div></div></div></div></div>
         </div></div></div>
@@ -757,12 +785,281 @@
         </div></div>
       </div>
 
+<!-- ── LOGIN CREDENTIALS ───────────────────────────────── -->
+      <!-- Native iMIS "User credentials" content, captured from the dev tenant's
+           Security CCO tab (27 September 2026) and anonymised. It renders in the
+           CCO page's ContentWizardDisplay zone with no ContentItemContainer, so
+           the class sits on a Content wrapper div (the live page used
+           HubCredentials; the theme classes are us-credentials
+           us-credentials--hide-contact, as the banner shows the ID and name). Inline postback handlers (Remove
+           user, user class, Send Email, Add role/group) are dropped here, and
+           icon_delete.png is a data-URI stand-in (the real path is in data-cv3-src).
+           Styles: US-CREDENTIALS in zUnionSuite.css (design record:
+           prototypes/wip/user-credentials/). -->
+      <div class="rmpView rmpHidden" id="view-access">
+        <div class="ContentWizardDisplay ClearFix"><div>
+          <div class="row"><div class="col-sm-12">
+            <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Zone1PlaceHolder" class="WebPartZone">
+<div class="us-credentials us-credentials--hide-contact">
+<div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserDetailsMainPanel" translate="yes">
+  <div class="row">
+    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactInfoPanel" class="panel ">
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactInfoPanel_Head" class="panel-heading Distinguish"><h2 class="panel-title" translate="yes">Contact information</h2></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactInfoPanel_BodyContainer" class="panel-body-container">
+        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactInfoPanel_Body" class="panel-body">
+          <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactID" class="PanelField Left">
+            <div style="display:inline;"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactID_Caption" class=" Label ">ID</span></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactID_ValueContainer" class="PanelFieldValue"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactID_Label" data-propertyname="SyncContactID">004821</span></div>
+          </div>
+          <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactName" class="PanelField Left" translate="no">
+            <div style="display:inline;"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactName_Caption" class=" CapitalizeFirst Label ">Full Name</span></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactName_ValueContainer" class="PanelFieldValue"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ContactName_Label" data-propertyname="FullName">Sarah Reynolds</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserInfoPanel" class="panel ">
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserInfoPanel_Head" class="panel-heading Distinguish"><h2 class="panel-title" translate="yes">User credentials</h2></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserInfoPanel_BodyContainer" class="panel-body-container">
+        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserInfoPanel_Body" class="panel-body">
+          <div class="PanelField">
+            <label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserIDTextBox" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LogonLabel">Username</label>
+            <div class="PanelFieldValue">
+              <input name="UserIDTextBox" type="text" value="SREYNOLDS" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserIDTextBox" disabled="disabled" class="aspNetDisabled InputLarge">
+              <input type="image" name="RemoveUserButton" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_RemoveUserButton" title="To change the username, you must remove the existing credentials then re-add them." src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27%3E%3Cpath d=%27M3 3l10 10M13 3L3 13%27 stroke=%27red%27 stroke-width=%273%27/%3E%3C/svg%3E" data-cv3-src="/AsiCommon/Images/icon_delete.png" alt="Remove User Button">
+              <input type="submit" name="AddUserHiddenButton" value="Hidden Add User Button" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_AddUserHiddenButton" style="display:none">
+            </div>
+<div class="PanelField">
+  <label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_Password" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordLabel">Password</label>
+  <div class="PanelFieldValue">
+    <div style="display:inline-block;">
+      <div style="display:flex;">
+        <input name="PasswordEdit1_Password" type="password" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_Password" class="InputLarge" autocomplete="off" translate="yes">
+      </div>
+      <div id="PasswordMeter" class="progress progress-small"><div class="progress-bar"></div></div>
+    </div>
+    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordMeterMessage" title="A strong password should include a combination of upper and lower case letters, numbers, and symbols. It should also be at least 8 characters long."></div>
+  </div>
+  <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordCustomValidator" class="ValidationError" style="display:none;"></span>
+  <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordCompareValidator1" class="ValidationError" style="display:none;">Passwords do not match</span>
+</div>
+<div class="PanelField">
+  <label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordVerify" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordVerifyLabel">Confirm password</label>
+  <div class="PanelFieldValue">
+    <input name="PasswordEdit1_PasswordVerify" type="password" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordVerify" class="InputLarge" autocomplete="off" translate="yes">
+    <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordEdit1_PasswordCompareValidator" class="ValidationError" style="display:none;">Passwords do not match</span>
+  </div>
+</div>
+            <div class="PanelField">
+              <label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_MemberEmail" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_EmailLabel">Email</label>
+              <div class="PanelFieldValue"><input name="MemberEmail" type="text" value="sarah.reynolds@personal.com" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_MemberEmail" disabled="disabled" class="aspNetDisabled InputLarge"></div>
+            </div>
+            <div class="PanelField" id="LockoutStatus">
+              <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LockedOutLabel" class="Label">Locked out</span>
+              <div class="PanelFieldValue AutoWidth"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LockoutStatusControl_LockoutStatusLabel">This account is not locked out.</span></div>
+            </div>
+            <div class="PanelField" id="LastLogin">
+              <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LastLogonCaption" class="Label">Last sign in</span>
+              <div class="PanelFieldValue"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LastLoginLabel">9/05/2026 7:42:18 PM</span></div>
+            </div>
+            <div class="PanelField" id="LastActive">
+              <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LastActiveOnCaption" class="Label">Last active on</span>
+              <div class="PanelFieldValue"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_LastActiveLabel">9/05/2026 7:58:03 PM</span></div>
+            </div>
+            <div class="PanelField">
+              <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassLabel" class="Label">User class</span>
+              <div class="PanelFieldValue">
+                <span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList"><input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_0" type="radio" name="UserClassList" value="WebOnly" checked="checked"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_0">Public user</label><br><input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_1" type="radio" name="UserClassList" value="CasualStaff"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_1">Casual staff user</label><br><input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_2" type="radio" name="UserClassList" value="FullStaff"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_UserClassList_2">Full staff user</label></span>
+              </div>
+            </div>
+          </div>
+          <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ResetPasswordPanel">
+            <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PanelTemplateControl" class="panel panel-border DisplayInlineBlock">
+              <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PanelTemplateControl_BodyContainer" class="panel-body-container">
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PanelTemplateControl_Body" class="panel-body">
+                  <div class="GridTitlePanel pb-2 mb"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_PasswordResetLabel" class="Title" translate="yes">Password Reset</span></div>
+                  <div class="PanelField">
+                    <span>Send this user an email to reset their password.</span>
+                    <br><br>
+                    <span class="pt-lg-2">Website to use for link</span>
+                    <br>
+                    <select name="ResetPasswordDestination" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_ResetPasswordDestination">
+                      <option selected="selected" value="Member Responsive" link="#">Member Responsive</option>
+                      <option value="UT Member Portal" link="#">UT Member Portal</option>
+                    </select>
+                    <a title="Open link" class="mr-lg-5" href="#"><span class="sysicon sysicon-open-link"></span><span class="screen-reader-text">Open link</span></a>
+                    <input type="button" name="InlineResetPassword" value="Send Email" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_InlineResetPassword" title="Send Email" class="FloatRight mt-2 TextButton" translate="yes">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserPanel" class="panel ">
+    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserPanel_Head" class="panel-heading Distinguish"><h2 class="panel-title" translate="yes">User information</h2></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserPanel_BodyContainer" class="panel-body-container">
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserPanel_Body" class="panel-body">
+        <input name="AddedRoles" type="hidden" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AddedRoles">
+        <input name="AddedGroups" type="hidden" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AddedGroups">
+        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_UserSecurityInfoPanel" class="panel " translate="yes" style="border-style:None;">
+          <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_UserSecurityInfoPanel_BodyContainer">
+            <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_UserSecurityInfoPanel_Body">
+              <div class="row">
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Column1" class="col-md-4">
+                  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AccountPanel" class="panel panel-border mb-4">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AccountPanel_BodyContainer" class="panel-body-container">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AccountPanel_Body" class="panel-body">
+                        <div class="GridTitlePanel pb-2"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_AccountLabel" class="Title" translate="yes">Account</span></div>
+                        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Disabled" class="PanelField Right" data-inputid="CheckBoxSet">
+                          <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Disabled_ValueContainer" class="PanelFieldValue"><span data-propertyname="IsDisabled" translate="yes"><input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Disabled_CheckBoxSet" type="checkbox" name="Disabled_CheckBoxSet"></span></div><div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Disabled_CheckBoxSet" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Disabled_Caption">Disabled</label></div>
+                        </div>
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate" class="PanelField Left" data-inputid="Calendarrad_Dp">
+                  <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Caption" class=" CapitalizeFirst">Effective Date</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_ValueContainer" class="PanelFieldValue">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendar" class="CalendarInput2" data-propertyname="EffectiveDate" style="display:inline;">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp_wrapper" class="RadPicker RadPicker_Metro">
+                        <input style="visibility:hidden;display:block;float:right;margin:0 0 -1px -1px;width:1px;height:1px;overflow:hidden;border:0;padding:0;" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp" type="text" class="rdfd_ radPreventDecorate" value="2018-03-12" title="Visually hidden input created for functionality purposes."><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp_dateInput_wrapper" class="RadInput RadInput_Metro">
+                          <input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp_dateInput" class="riTextBox riEnabled" value="12/03/2018" type="text"><div class="rcSelect"><a aria-label="Open the calendar popup." title="Open the calendar popup." href="#" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendarrad_Dp_popupButton" class="rcCalPopup"></a></div>
+                        </div>
+                      </div>
+                    </div><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_EffectiveDate_Calendar_CV" class="ValidationError" style="visibility:hidden;"></span>
+                  </div>
+                </div>
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate" class="PanelField Left" data-inputid="Calendarrad_Dp">
+                  <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Caption" class=" CapitalizeFirst">Expiration Date</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_ValueContainer" class="PanelFieldValue">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendar" class="CalendarInput2" data-propertyname="ExpirationDate" style="display:inline;">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp_wrapper" class="RadPicker RadPicker_Metro">
+                        <input style="visibility:hidden;display:block;float:right;margin:0 0 -1px -1px;width:1px;height:1px;overflow:hidden;border:0;padding:0;" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp" type="text" class="rdfd_ radPreventDecorate" value="2031-09-27" title="Visually hidden input created for functionality purposes."><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp_dateInput_wrapper" class="RadInput RadInput_Metro">
+                          <input id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp_dateInput" class="riTextBox riEnabled" value="27/09/2031" type="text"><div class="rcSelect"><a aria-label="Open the calendar popup." title="Open the calendar popup." href="#" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendarrad_Dp_popupButton" class="rcCalPopup"></a></div>
+                        </div>
+                      </div>
+                    </div><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_ExpirationDate_Calendar_CV" class="ValidationError" style="visibility:hidden;"></span>
+                  </div>
+                </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Column2" class="col-md-4">
+                  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleListContainerUpdatePanel1">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RolePanel" class="panel panel-border mb-4">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RolePanel_BodyContainer" class="panel-body-container">
+                        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RolePanel_Body" class="panel-body">
+                  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList" data-gridid="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_Grid1" data-keycolumnname="RoleKey">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_GridPanel1" style="clear:both;">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_TitlePanel" class="GridTitlePanel">
+                        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_TitleLabelHelper" class="Title"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_TitleLabel">Roles</span></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_TopLeftPanel" class="FloatLeft"></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_TopRightPanel" class="pull-right d-flex align-content-center flex-wrap">
+                          <a title="Assign user to a new role" href="#">Add</a>
+                        </div>
+                      </div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_Grid1" class="RadGrid RadGrid_MetroTouch" style="clear:both;" tabindex="0">
+                        <table class="rgMasterTable CaptionTextInvisible" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_Grid1_ctl00" style="width:100%;table-layout:auto;empty-cells:show;" role="grid">
+                          <colgroup><col><col><col style="display:none;"><col style="display:none;"></colgroup>
+                          <thead><tr role="row"><th scope="col" class="rgHeader" role="columnheader"><div class="PanelField"><span>Role</span></div></th><th scope="col" class=" text-hide rgHeader" role="columnheader">Delete</th><th scope="col" class="rgHeader" style="display:none;" role="columnheader" aria-hidden="true">Hidden</th><th scope="col" class="rgHeader" style="display:none;" role="columnheader" aria-hidden="true">Hidden</th></tr></thead>
+                          <tbody data-cv3-login-rows="Role"><tr class="rgRow" role="row"><td role="gridcell"><div class="PanelField"><div class="PanelFieldValue"><span data-propertyname="RoleKey">RegisteredUser</span></div></div></td><td class="ListerColumnHeader" role="gridcell"><input type="image" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_RoleList_Grid1_ctl00_ctl04_gbcDeleteColumn" title="Delete this item" class="FloatRight" translate="no" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27%3E%3Cpath d=%27M3 3l10 10M13 3L3 13%27 stroke=%27red%27 stroke-width=%273%27/%3E%3C/svg%3E" data-cv3-src="/AsiCommon/Images/icon_delete.png" alt="remove" style="border-width:0px;"></td><td style="display:none;" role="gridcell" aria-hidden="true">8e5c7c1d</td><td style="display:none;" role="gridcell" aria-hidden="true">bc854884</td></tr><tr class="rgNoRecords" style="display:none;" role="presentation"><td colspan="2" style="text-align:left;"><div>There are no records.</div></td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_Column3" class="col-md-4">
+                  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupListContainerUpdatePanel1">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupPanel" class="panel panel-border ">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupPanel_BodyContainer" class="panel-body-container">
+                        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupPanel_Body" class="panel-body">
+                  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList" data-gridid="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_Grid1" data-keycolumnname="GroupKey">
+                    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_GridPanel1" style="clear:both;">
+                      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_TitlePanel" class="GridTitlePanel">
+                        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_TitleLabelHelper" class="Title"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_TitleLabel">Security groups</span></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_TopLeftPanel" class="FloatLeft"></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_TopRightPanel" class="pull-right d-flex align-content-center flex-wrap">
+                          <a title="Add user to a group" href="#">Add</a>
+                        </div>
+                      </div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_Grid1" class="RadGrid RadGrid_MetroTouch" style="clear:both;" tabindex="0">
+                        <table class="rgMasterTable CaptionTextInvisible" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_CommonUserEdit1_GroupList_Grid1_ctl00" style="width:100%;table-layout:auto;empty-cells:show;" role="grid">
+                          <colgroup><col><col><col style="display:none;"></colgroup>
+                          <thead><tr role="row"><th scope="col" class="rgHeader" role="columnheader"><div class="PanelField"><span>Group</span></div></th><th scope="col" class=" text-hide rgHeader" role="columnheader">Delete</th><th scope="col" class="rgHeader" style="display:none;" role="columnheader" aria-hidden="true">Hidden</th></tr></thead>
+                          <tbody data-cv3-login-rows="Group"><tr class="rgNoRecords" role="presentation"><td colspan="2" style="text-align:left;"><div>There are no records.</div></td></tr></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel" class="panel " hidden>
+    <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_Head" class="panel-heading Distinguish Collapsible">
+      <h2 class="panel-title" translate="yes"><a class="collapsed" data-toggle="collapse" href="#ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_BodyContainer" aria-controls="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_BodyContainer" role="button">Staff access</a></h2><div class="panel-heading-options">
+        <a title="Click to collapse/expand Staff access" class="panel-heading-collapse collapsed sysicon sysicon-collapsed" data-toggle="collapse" href="#ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_BodyContainer" aria-controls="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_BodyContainer" role="button"><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_CollapseText" class="panel-heading-collapse-text screen-reader-text">Show Staff access</span></a>
+      </div>
+    </div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_BodyContainer" class="panel-body-container panel-collapse collapse" data-collapsedtext="Show Staff access" data-expandedtext="Hide Staff access">
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserPanel_Body" class="panel-body">
+        <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_PanelTemplateControl1" translate="yes">
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem_Caption" class=" Required">System</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelSystem" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem_DropDownList" data-propertyname="LevelSystem" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelSystem_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership_Caption" class=" Required">Customers</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelMembership" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership_DropDownList" data-propertyname="LevelMembership" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelMembership_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling_Caption" class=" Required">Dues</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelBilling" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling_DropDownList" data-propertyname="LevelDues" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelBilling_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents_Caption" class=" Required">Events</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelEvents" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents_DropDownList" data-propertyname="LevelMeeting" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelEvents_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising_Caption" class=" Required">Fundraising</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelFundRaising" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising_DropDownList" data-propertyname="LevelFundRaising" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelFundRaising_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry_Caption" class=" Required">Orders</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelOrderEntry" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry_DropDownList" data-propertyname="LevelOrderEntry" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelOrderEntry_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR_Caption" class=" Required">Finance</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelCashAR" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR_DropDownList" data-propertyname="LevelCashAR" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCashAR_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification" class="PanelField Left" data-inputid="DropDownList">
+        <div style="display:inline;"><label for="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification_DropDownList" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification_Caption" class=" Required">Certification</label></div><div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification_ValueContainer" class="PanelFieldValue">
+          <select name="StaffUser_LevelCertification" id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification_DropDownList" data-propertyname="LevelCert" required="" aria-required="true" novalidate=""><option value="">(Select)</option><option value="0">0 - No Access</option><option value="1">1 - Basic Display Only</option><option value="2">2 - Reports</option><option value="3">3 - Limited Entry/Edit</option><option value="4">4 - Full Entry/Edit</option><option value="5">5 - Table Maintenance</option><option value="6">6 - Report Changes</option><option selected="selected" value="8">8 - System Setup</option></select><span id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_Usercredentials_StaffUserEdit1_StaffUser_LevelCertification_RequiredFieldValidator" class="Important ValidationError" style="display:none;">Required</span>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ClearFix"></div>
+</div>
+<div id="ctl01_TemplateBody_WebPartManager1_gwpciAccountCCO_ciAccountCCO_ControlErrorPanel_Usercredentials" class="Error" style="Display:None;"></div>
+            </div>
+          </div></div>
+        </div></div>
+      </div>
+
       <!-- ── ADMIN ───────────────────────────────────────────── -->
       <div class="rmpView rmpHidden" id="view-admin">
         <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="admin" data-us-tab-adapter="page-sections" aria-label="Admin sections">
           <button type="button" data-us-tab="interactions" class="is-active">Staff interactions</button>
           <button type="button" data-us-tab="audit">Audit log</button>
-          <button type="button" data-us-tab="login">Portal login</button>
         </div></div></div>
 
         <!-- Query Template Display · CSS class adds us-query-template · Recent-History-Query-Template.html -->
@@ -793,14 +1090,6 @@
           </table></div></div></div></div></div></div>
         </div></div></div>
 
-        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-admin us-tab-login"><div class="panel">
-          <div class="panel-heading Distinguish"><h2 class="panel-title">[[key]] Member portal login</h2></div>
-          <div class="panel-body-container"><div class="panel-body"><div class="FullWidth PanelEditorReadOnlyForm"><div class="row">
-            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Username</span></div><br><div class="PanelFieldValue"><span>sarah.reynolds@personal.com</span></div></div></div>
-            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Account</span></div><br><div class="PanelFieldValue"><span class="us-badge us-badge--success">Active</span></div></div></div>
-            <div class="BreakWord col-md-4"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Last login</span></div><br><div class="PanelFieldValue"><span>09 May 2026 · 7:42 pm</span></div></div></div>
-          </div></div></div></div>
-        </div></div></div>
       </div>
 
     </div>

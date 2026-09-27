@@ -269,8 +269,9 @@
   // - payroll: the employer deducts it from salary (pre-tax) and remits it.
   // The toolbar switches the type (Billing, Balance, Outstanding, payment
   // history) and the arrears (also the Summary alert, bell, Finance tab
-  // badge, tracker and Financial status). Outstanding is removed when there
-  // is nothing to list, as its iPart does not render an empty query.
+  // badge, tracker and Financial status). Outstanding is a placeholder until
+  // the HubQueryTemplate iPart is built; the owing rows stay here for it. When
+  // the grid returns, remove the panel when there is nothing to list.
   const owingRow = (ref, type, description, due, amount, [tone, text, title]) =>
     '<tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="' + ref + '">' + ref + '</a></td><td>' + type +
     '</td><td>' + description + '</td><td>' + due + '</td><td class="cv2-num">' + amount + '</td><td><span class="us-badge us-badge--icon us-badge--' + tone +
@@ -278,7 +279,26 @@
   const historyRow = (ref, date, [tone, text, icon], description, method, amount, index) =>
     '<tr class="' + (index % 2 ? 'rgAltRow' : 'rgRow') + '"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="' + ref + '">' + ref +
     '</a></td><td>' + date + '</td><td><span class="us-badge us-badge--icon' + (tone ? ' us-badge--' + tone : '') + '"' + (icon ? ' data-us-icon="' + icon + '"' : '') + '>' + text +
-    '</span></td><td>' + description + '</td><td>' + method + '</td><td class="cv2-num">' + amount + '</td></tr>';
+    '</span></td><td>' + linkInvoices(description) + '</td><td>' + method + '</td><td class="cv2-num">' + amount + '</td></tr>';
+  const transactionLink = ref => '<a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="' + ref + '">' + ref + '</a>';
+  const linkInvoices = text => text.replace(/\bINV-\d{4}-\d{3}\b/g, transactionLink);
+  // Invoices tab (a sample grid; in the product it waits on HubQueryTemplate).
+  // An invoice row, then one row per payment applied to it. Payment rows
+  // repeat the invoice reference in the first column (as plain text), so
+  // us-iqa-row-groups folds them under the invoice: "3 paid".
+  // invoice: [ref, issued, description, amount, paid, owing, [tone, text], payments]
+  // payment: [date, paymentRef, method, paid, owingAfter]
+  const invoiceRows = invoices => {
+    const rows = [];
+    invoices.forEach(([ref, issued, description, amount, paid, owing, [tone, text], payments = []]) => {
+      rows.push('<td>' + transactionLink(ref) + '</td><td>' + issued + '</td><td>' + description + '</td><td class="cv2-num">' + amount +
+        '</td><td class="cv2-num">' + paid + '</td><td class="cv2-num">' + owing + '</td><td><span class="us-badge us-badge--icon us-badge--' + tone + '">' + text + '</span></td>');
+      payments.forEach(([date, payment, method, amountPaid, owingAfter]) => rows.push('<td>' + ref + '</td><td>' + date + '</td><td>' + transactionLink(payment) + ' · ' + method +
+        '</td><td></td><td class="cv2-num">' + amountPaid + '</td><td class="cv2-num">' + owingAfter + '</td><td><span class="us-badge us-badge--icon us-badge--success">Paid</span></td>'));
+    });
+    return rows.map((cells, index) => '<tr class="' + (index % 2 ? 'rgAltRow' : 'rgRow') + '">' + cells + '</tr>').join('');
+  };
+  const noInvoices = '<tr class="rgNoRecords"><td colspan="7"><div>No invoices to display.</div></td></tr>';
   const refundRow = ['PAY-8105', '12 Nov 2025', ['', 'Refunded', 'refund'], 'Delegate training day · cancelled, refunded to credit CR-0204', 'Credit card', '$25.00'];
   const paymentTypes = {
     auto: {
@@ -292,7 +312,8 @@
       settled: [2, ['PAY-8870', '22 Mar 2026', ['success', 'Paid'], 'Q1 2026 subscription · paid by card after 3 declined debits', 'Credit card', '$185.00']],
       alertTitle: 'Membership suspends 28 May 2026 unless $185.00 is paid',
       alert: 'The Q1 2026 subscription is unpaid after 3 declined direct debits, the last on 15 Mar.',
-      history: null
+      history: null,
+      invoices: () => []
     },
     invoice: {
       label: 'invoice',
@@ -310,9 +331,31 @@
       alert: 'Invoice INV-2026-031 for the Q1 2026 subscription has been unpaid since it fell due on 01 Mar.',
       history: [
         ['PAY-8830', '28 Mar 2026', ['success', 'Paid'], 'Q2 2026 · invoice INV-2026-044', 'BPAY', '$165.00'],
-        ['PAY-8420', '04 Jan 2026', ['success', 'Paid'], 'Q4 2025 · invoice INV-2025-061', 'EFT', '$185.00'],
+        ['PAY-8420', '29 Dec 2025', ['success', 'Paid'], 'Q4 2025 · invoice INV-2025-061 · instalment 3 of 3', 'EFT', '$65.00'],
+        ['PAY-8391', '15 Dec 2025', ['success', 'Paid'], 'Q4 2025 · invoice INV-2025-061 · instalment 2 of 3', 'BPAY', '$60.00'],
+        ['PAY-8366', '01 Dec 2025', ['success', 'Paid'], 'Q4 2025 · invoice INV-2025-061 · instalment 1 of 3', 'BPAY', '$60.00'],
         refundRow,
         ['PAY-8012', '02 Oct 2025', ['success', 'Paid'], 'Q3 2025 · invoice INV-2025-048', 'BPAY', '$185.00']
+      ],
+      // Newest first. Q4 2025 was paid in three instalments under a payment plan.
+      invoices: arrears => [
+        ['INV-2026-058', '01 Jun 2026', 'Q3 2026 subscription · due 01 Jul 2026', '$165.00', '$0.00', '$165.00', ['primary', 'Due']],
+        ['INV-2026-044', '01 Mar 2026', 'Q2 2026 subscription · due 01 Apr 2026', '$165.00', '$165.00', '$0.00', ['success', 'Paid'], [
+          ['28 Mar 2026', 'PAY-8830', 'BPAY', '$165.00', '$0.00']
+        ]],
+        arrears
+          ? ['INV-2026-031', '15 Feb 2026', 'Q1 2026 subscription · due 01 Mar 2026', '$185.00', '$0.00', '$185.00', ['danger', 'Overdue']]
+          : ['INV-2026-031', '15 Feb 2026', 'Q1 2026 subscription · due 01 Mar 2026', '$185.00', '$185.00', '$0.00', ['success', 'Paid'], [
+            ['27 Feb 2026', 'PAY-8702', 'BPAY', '$185.00', '$0.00']
+          ]],
+        ['INV-2025-061', '01 Dec 2025', 'Q4 2025 subscription · due 01 Jan 2026 · payment plan', '$185.00', '$185.00', '$0.00', ['success', 'Paid'], [
+          ['01 Dec 2025', 'PAY-8366', 'BPAY · instalment 1 of 3', '$60.00', '$125.00'],
+          ['15 Dec 2025', 'PAY-8391', 'BPAY · instalment 2 of 3', '$60.00', '$65.00'],
+          ['29 Dec 2025', 'PAY-8420', 'EFT · instalment 3 of 3', '$65.00', '$0.00']
+        ]],
+        ['INV-2025-048', '01 Sep 2025', 'Q3 2025 subscription · due 01 Oct 2025', '$185.00', '$185.00', '$0.00', ['success', 'Paid'], [
+          ['02 Oct 2025', 'PAY-8012', 'BPAY', '$185.00', '$0.00']
+        ]]
       ]
     },
     payroll: {
@@ -331,7 +374,8 @@
         ['RM-2026-08', '16 Apr 2026', ['success', 'Paid'], 'Pay periods 7–8 · Metro Health Services remittance', 'Payroll', '$50.76'],
         ['RM-2026-06', '19 Mar 2026', ['success', 'Paid'], 'Pay periods 5–6 · Metro Health Services remittance', 'Payroll', '$50.76'],
         refundRow
-      ]
+      ],
+      invoices: () => []
     }
   };
   const typeOrder = ['auto', 'invoice', 'payroll'];
@@ -366,13 +410,18 @@
 
   function applyFinanceState() {
     const type = paymentTypes[paymentType];
+    // iMIS replaces a whole grid on refresh; this swaps rows inside it, so
+    // ungroup first (restoring plain rows) and regroup once the rows change.
+    window.UnionSuiteRowGroups?.releaseAll();
     ['cv3-bill-type', 'cv3-bill-frequency', 'cv3-bill-amount', 'cv3-bill-method', 'cv3-bill-next'].forEach((id, index) => setText(id, type.billing[index]));
 
+    // Fills nothing while Outstanding shows the HubQueryTemplate placeholder.
     const rows = inArrears ? type.owing : type.current;
     const body = document.getElementById('cv3-outstanding-rows');
-    if (body) body.innerHTML = rows.map(row => owingRow(...row)).join('');
-    const outstanding = document.getElementById('cv3-outstanding');
-    if (outstanding) outstanding.hidden = !rows.length;
+    if (body) {
+      body.innerHTML = rows.map(row => owingRow(...row)).join('');
+      document.getElementById('cv3-outstanding').hidden = !rows.length;
+    }
 
     const [arrearsText, totalText] = type.totals[inArrears ? 0 : 1];
     const arrears = document.getElementById('cv3-arrears');
@@ -391,6 +440,13 @@
         history.insertBefore(template.firstElementChild, history.rows[position] || null);
       }
     }
+
+    const invoiceBody = document.getElementById('cv3-invoice-rows');
+    if (invoiceBody) {
+      const invoices = type.invoices(inArrears);
+      invoiceBody.innerHTML = invoices.length ? invoiceRows(invoices) : noInvoices;
+    }
+    window.UnionSuiteRowGroups?.refresh();
 
     const financial = document.getElementById('cv3-financial-status');
     if (financial) paintBadge(financial, inArrears ? ['danger', 'Overdue', 'Payment overdue'] : ['success', 'Current', 'Nothing overdue']);
@@ -432,6 +488,25 @@
       fields: [['Description', 'Q3 2026 subscription'], ['Issued', '01 Jun 2026'], ['Due', '01 Jul 2026'], ['Amount', '$165.00'], ['Paid', '$0.00'], ['Owing', '$165.00'], ['Billing method', 'Direct debit · ••••4821'], ['Payments', link('PAY-8902') + ' · scheduled 01 Jul']],
       lines: [['Membership fee · Full Member – RN · Q3 2026', '$185.00'], ['Hardship waiver · $20 per instalment', '−$20.00']],
       history: [['01 Jun 2026', 'Invoice issued', 'System'], ['01 Jun 2026', sent, 'System'], ['01 Jun 2026', 'Direct debit scheduled for 01 Jul 2026', 'System']]
+    },
+    'INV-2026-044': {
+      kind: 'invoice', status: ['success', 'Paid'],
+      fields: [['Description', 'Q2 2026 subscription'], ['Issued', '01 Mar 2026'], ['Due', '01 Apr 2026'], ['Amount', '$165.00'], ['Paid', '$165.00'], ['Owing', '$0.00'], ['Billing method', 'BPAY or EFT'], ['Payments', link('PAY-8830') + ' · 28 Mar 2026 · $165.00']],
+      lines: [['Membership fee · Full Member – RN · Q2 2026', '$185.00'], ['Hardship waiver · $20 per instalment', '−$20.00']],
+      history: [['01 Mar 2026', 'Invoice issued', 'System'], ['01 Mar 2026', sent, 'System'], ['28 Mar 2026', 'Paid in full by BPAY', 'System']]
+    },
+    'INV-2025-061': {
+      kind: 'invoice', status: ['success', 'Paid'],
+      fields: [['Description', 'Q4 2025 subscription'], ['Issued', '01 Dec 2025'], ['Due', '01 Jan 2026'], ['Amount', '$185.00'], ['Paid', '$185.00'], ['Owing', '$0.00'], ['Billing method', 'BPAY or EFT · payment plan, 3 instalments'],
+        ['Payments', link('PAY-8366') + ' · 01 Dec 2025 · $60.00<br>' + link('PAY-8391') + ' · 15 Dec 2025 · $60.00<br>' + link('PAY-8420') + ' · 29 Dec 2025 · $65.00']],
+      lines: [['Membership fee · Full Member – RN · Q4 2025', '$185.00']],
+      history: [['01 Dec 2025', 'Invoice issued', 'System'], ['01 Dec 2025', 'Payment plan agreed · 3 instalments', 'J. Patel'], ['01 Dec 2025', 'Instalment 1 of 3 paid · $60.00 · $125.00 owing', 'System'], ['15 Dec 2025', 'Instalment 2 of 3 paid · $60.00 · $65.00 owing', 'System'], ['29 Dec 2025', 'Instalment 3 of 3 paid · $65.00 · paid in full', 'System']]
+    },
+    'INV-2025-048': {
+      kind: 'invoice', status: ['success', 'Paid'],
+      fields: [['Description', 'Q3 2025 subscription'], ['Issued', '01 Sep 2025'], ['Due', '01 Oct 2025'], ['Amount', '$185.00'], ['Paid', '$185.00'], ['Owing', '$0.00'], ['Billing method', 'BPAY or EFT'], ['Payments', link('PAY-8012') + ' · 02 Oct 2025 · $185.00']],
+      lines: [['Membership fee · Full Member – RN · Q3 2025', '$185.00']],
+      history: [['01 Sep 2025', 'Invoice issued', 'System'], ['01 Sep 2025', sent, 'System'], ['02 Oct 2025', 'Paid in full by BPAY · 1 day late', 'System']]
     },
     'PAY-8902': {
       kind: 'payment', status: ['primary', 'Scheduled'],
@@ -605,8 +680,34 @@
       return;
     }
 
+    // Login Credentials: a member's login (Public user) or a staff login
+    // (Full staff user, the SysAdmin role and the Staff access panel).
+    const loginButton = event.target.closest('#cv3-login-state');
+    if (loginButton) {
+      const staff = loginButton.getAttribute('aria-pressed') !== 'true';
+      const root = document.querySelector('.us-credentials');
+      root.querySelector('[id$="_UserClassList_' + (staff ? 2 : 0) + '"]').checked = true;
+      root.querySelector('[id$="_StaffUserPanel"]').hidden = !staff;
+      root.querySelector('[data-propertyname="RoleKey"]').textContent = staff ? 'SysAdmin' : 'RegisteredUser';
+      loginButton.setAttribute('aria-pressed', String(staff));
+      loginButton.textContent = staff ? 'Login: staff' : 'Login: member';
+      return;
+    }
+
+    // Bootstrap's collapse, which iMIS loads, for the Staff access panel.
+    const collapseLink = event.target.closest('.us-credentials [data-toggle="collapse"]');
+    if (collapseLink) {
+      event.preventDefault();
+      const body = document.querySelector(collapseLink.getAttribute('href'));
+      const open = !body.classList.contains('in');
+      body.classList.toggle('in', open);
+      document.querySelectorAll('.us-credentials [data-toggle="collapse"][href="' + collapseLink.getAttribute('href') + '"]')
+        .forEach(link => link.classList.toggle('collapsed', !open));
+      return;
+    }
+
     if (event.target.closest('#cv3-payment-type')) {
-      paymentType = typeOrder[(typeOrder.indexOf(paymentType) + 1) % typeOrder.length];
+      paymentType =typeOrder[(typeOrder.indexOf(paymentType) + 1) % typeOrder.length];
       applyFinanceState();
       return;
     }
