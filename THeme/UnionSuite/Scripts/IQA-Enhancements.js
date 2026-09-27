@@ -1017,16 +1017,20 @@
         // Sorting's final Add sort row has a numeric priority too, but no
         // saved criterion key. Keep it out of dragging and renumbering.
         if (tab === 'Sorting' && !tr.querySelector('td:first-child input[type="hidden"][value^="SC"]')) return null;
-        const nameEl = tr.querySelector('td:nth-child(2) b');
-        const expression = tr.querySelector('td:nth-child(2) textarea');
-        if (!nameEl && !expression && tab !== 'Sorting') return null;
+        // A numeric Order select is what makes a row a column: the title and
+        // header rows have none. The Property cell cannot decide it, because
+        // iMIS prints the [Source] prefix and bold name only when a query has
+        // several sources; with one source the cell is the bare property name.
         const orderSel = [...tr.querySelectorAll('select')].find(s => s.options.length && [...s.options].every(o => /^\d+$/.test(o.value)));
         if (!orderSel) return null;
-        const src = tr.querySelector('td:nth-child(2) span.small');
+        const cell = tr.querySelector('td:nth-child(2)');
+        const nameEl = cell?.querySelector('b');
+        const expression = cell?.querySelector('textarea');
+        const src = cell?.querySelector('span.small');
         const alias = tr.querySelector('td:nth-child(4) input[type="text"]')?.value.trim();
         const name = nameEl ? nameEl.textContent.trim() : tab === 'Sorting'
-          ? (tr.querySelector('td:nth-child(2)')?.textContent.trim() || 'Sort criterion')
-          : (alias || 'Custom SQL expression');
+          ? (cell?.textContent.trim() || 'Sort criterion')
+          : expression ? (alias || 'Custom SQL expression') : (cell?.textContent.trim() || alias || 'Column');
         return { tr, name, orderSel, src };
       }).filter(Boolean);
     }
