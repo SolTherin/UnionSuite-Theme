@@ -88,6 +88,7 @@ alongside the affected shared assets.
 | `zzDarkMode.css` | Dark palette, native/component overrides and taskbar switch styling; load last |
 | `zUnionSuite.js` | Shared IQA utilities, banner sticky/collapse, Actions disclosure and icon-button tooltips |
 | `Scripts/UnionSuiteTaskbar.js` | Header taskbar and approved Biscuit daily greeting, click reactions and idle animations |
+| `Scripts/HtmlSourceEditor.js` | Shared HTML source editor: highlighting, formatting, tag pairing and `{#…}` field suggestions; styles in `zUnionSuite.css` (`US-HTML-SOURCE`) |
 | `../UnionSuite-Client/Config.js` | Client taskbar settings, including Biscuit's on/off switch; load before the taskbar script |
 
 1. Upload `zUnionSuite.css` and `zUnionSuite.js` to the deployed Union Suite theme
@@ -326,6 +327,42 @@ The two `-Theme.csv` copies replace the corresponding original CSVs for this
 update: those originals were locked by another process and could not be saved.
 The copies preserve all rows and user assignments and update only the relevant
 recommendations and notes. The current condensed `-Updated.csv` was updated in place.
+
+## HTML source editor
+
+[HtmlSourceEditor.js](Scripts/HtmlSourceEditor.js) is a shared helper for editing
+HTML as source text. It registers `window.UnionSuiteHtmlSource` and attaches
+nothing by itself: each page script chooses where to use it. Its styles are the
+`US-HTML-SOURCE` section of `zUnionSuite.css`, with dark values in
+`zzDarkMode.css`. Deploy the script with both stylesheets and the loader.
+
+| Feature | Behaviour |
+|---|---|
+| Highlighting | Tags, attributes, values, comments, entities and `{#…}` fields are colour-coded behind the unchanged textarea. |
+| Format HTML | Button or Shift+Alt+F. Re-indents without changing tags or attributes, adding end tags or touching `pre`, `textarea` and `script` content. Undo with Ctrl+Z. |
+| Tag pairing | The tag under the cursor and its partner are highlighted. A tag that is never closed, or a closing tag with nothing to close, is underlined and listed with its line; **Go to problem** steps through them. Tags HTML lets you leave open (`p`, `li`, `td` and similar) are not reported. |
+| Field suggestions | Type `{#`, or press Ctrl+Space, for the fields a page supplies. `{#…}` placeholders in a namespace the list covers but missing from it are flagged. |
+
+Current use: the IQA Template tab (`IQA-Enhancements.js`), with the native
+"Insert data source field" items as suggestions. The loader loads the helper
+only on the pages listed in its `html-source` entry; add each page that adopts
+it there.
+
+```js
+const source = window.UnionSuiteHtmlSource;
+
+// A RadEditor's HTML view. fieldTool is the insert-field tool's name, 'auto'
+// for any tool whose items are {#…} placeholders, or null for no suggestions.
+const editor = source.attachRadEditor(radEditorElement, { fieldTool: 'auto' });
+
+// Any other HTML textarea. fields() returns [] of fields, or null for none.
+const plain = source.attach(textarea, { fields: () => null });
+
+editor.dispose(); // Restores the textarea and removes every addition.
+```
+
+`format(html)` and `tagPairs(html)` are also available without a textarea.
+Run `node tools/test-html-source-editor.cjs` after changing the helper.
 
 ## Integration verification
 

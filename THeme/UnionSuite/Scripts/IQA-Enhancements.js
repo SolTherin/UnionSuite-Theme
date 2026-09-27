@@ -23,6 +23,9 @@
  *     • DragSort            — Display options toolbar + drag ordering (on by default)
  *     • FilterWorkspace     — compact Filters layout + staged within-group reorder
  *     • SourceWorkspace     — staged business-object reorder with one final refresh
+ *     • TemplateHtml        — Template tab HTML view: highlighting, formatting,
+ *                             tag pairing and {#query.…} field suggestions, from
+ *                             the shared Scripts/HtmlSourceEditor.js
  *
  * The editor is an ASP.NET WebForms page (constant partial postbacks); the
  * shell re-runs every module on PageRequestManager endRequest, and each mount
@@ -2952,8 +2955,63 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
   const SqlEditor = createSqlEditor({ getPath: () => HeaderPath._read().path, getDocumentKey: () => HeaderDocumentKey._read() });
   // END SQL EDITOR V1
 
+  // BEGIN TEMPLATE HTML EDITOR V2
+  /* Template tab, HTML view: highlighting, formatting, tag pairing and
+     {#query.Alias} suggestions from the shared UnionSuite HTML source editor
+     (Scripts/HtmlSourceEditor.js, window.UnionSuiteHtmlSource).
+
+     Suggestions come from the native "Insert data source field" tool. The
+     helper reads its items from the editor configuration rather than the
+     tool's popup, which RadEditor builds only when the dropdown is first
+     opened, so they are ready as soon as the tab loads, in Design mode too. */
+  const TemplateHtml = (() => {
+    const EDITORS = '[id$="_TemplatePanel_Body"] .RadEditor';
+    const OPTIONS = {
+      fieldTool: 'QueryTemplateInsertField',
+      messages: {
+        ready: count => count + (count === 1 ? ' data source field' : ' data source fields')
+          + '. Type {# for suggestions, or press Ctrl+Space.',
+        noFields: 'No data source fields were found. Add columns on the Display tab.',
+        unknown: list => (list.length === 1 ? 'Not a Display column: ' : 'Not Display columns: ')
+          + list.join(', ') + '. Add it on the Display tab, or correct the alias.'
+      }
+    };
+    const controllers = new Map();
+    let waiting = false;
+
+    function mount() {
+      for (const [editorEl, controller] of controllers) {
+        if (!editorEl.isConnected) { controller.dispose(); controllers.delete(editorEl); }
+      }
+      const editors = document.querySelectorAll(EDITORS);
+      if (!editors.length) return;
+      const shared = window.UnionSuiteHtmlSource;
+      if (!shared) {
+        // The loader normally runs the helper first; this covers it arriving late.
+        if (!waiting) {
+          waiting = true;
+          document.addEventListener('unionsuite:html-source-ready', () => { waiting = false; if (getMode()) mount(); }, { once: true });
+        }
+        return;
+      }
+      editors.forEach(editorEl => {
+        if (controllers.has(editorEl)) return;
+        const controller = shared.attachRadEditor(editorEl, OPTIONS);
+        if (controller) controllers.set(editorEl, controller);
+      });
+    }
+
+    function teardown() {
+      for (const controller of controllers.values()) controller.dispose();
+      controllers.clear();
+    }
+
+    return { mount, teardown };
+  })();
+  // END TEMPLATE HTML EDITOR V2
+
   const ALWAYS = [QuickAdd, { mount: () => SqlEditor.captureSources() }];
-  const GATED  = [OverhaulCss, BoSearch, SqlTools, FilterSortDropdowns, UncheckAll, FilterAutocomplete, DragSort, FilterWorkspace, SourceWorkspace, RelationshipWorkspace, SqlEditor];
+  const GATED  = [OverhaulCss, BoSearch, SqlTools, FilterSortDropdowns, UncheckAll, FilterAutocomplete, DragSort, FilterWorkspace, SourceWorkspace, RelationshipWorkspace, SqlEditor, TemplateHtml];
 
   const mountAlways  = () => ALWAYS.forEach(m => safe(() => m.mount?.()));
   const enableGated  = () => { document.body.classList.add('iqa-enhanced'); GATED.forEach(m => safe(() => m.mount?.())); };
@@ -3017,6 +3075,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
               <li>Common SQL syntax errors show a line and column number and disable <strong>Add</strong> until corrected. These basic checks do not replace full SQL validation when running the query.</li></ol>
               <h3>Sorting</h3>
               <ul><li>Type to search on field dropdowns.</li><li>Drag and drop fields to reorder.</li></ul>
+              <h3>Template</h3>
+              <ol><li>In <strong>HTML</strong> view, tags, attributes, values and <strong>{#query.…}</strong> fields are colour-coded.</li>
+              <li>Type <strong>{#</strong> to list the data source fields from the Display tab, or press <strong>Ctrl+Space</strong>. Use the arrow keys and Tab or Enter to insert; Escape closes the list. With the list closed, Tab inserts two spaces.</li>
+              <li>With the cursor on an opening or closing tag, it and its partner are highlighted.</li>
+              <li>A tag that is never closed, or a closing tag with nothing to close, is underlined in red and listed below the editor with its line number. <strong>Go to problem</strong> selects each in turn. Tags HTML lets you leave open, such as <strong>&lt;p&gt;</strong>, <strong>&lt;li&gt;</strong> and <strong>&lt;td&gt;</strong>, are not reported.</li>
+              <li>Fields that are not Display columns are underlined in red and listed below the editor.</li>
+              <li><strong>Format HTML</strong>, or <strong>Shift+Alt+F</strong>, re-indents the template without changing its tags or attributes. Undo with Ctrl+Z.</li></ol>
               <p class="iqa-help-note"><strong>Remember:</strong> applying a new order updates the editor. Click <strong>Save</strong>, press <strong>Ctrl+S</strong>, or press <strong>Command+S</strong> on a Mac when you’re ready to save the query.</p>
             </div>`;
           dialog.querySelector('header button').addEventListener('click', () => dialog.close());

@@ -39,7 +39,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '0.3.1-trial';
+  const RELEASE = '0.3.2-trial';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
@@ -84,6 +84,18 @@
       // only widen the swap.
       critical: false,
       ready: () => typeof window.UnionSuiteTaskbarBookmarks?.initialise === 'function'
+    },
+    {
+      id: 'html-source',
+      path: 'Scripts/HtmlSourceEditor.js',
+      // Shared HTML source editor: highlighting, formatting, tag pairing and
+      // {#…} field suggestions. It attaches nothing by itself, so it is only
+      // loaded on pages whose script uses it; add each new one to this test.
+      // Listed before 'iqa' so it runs first (insertion order is kept) without
+      // an 'after' edge: if it fails, the IQA enhancements still load and the
+      // Template tab simply goes without the source tools.
+      when: () => /\/QueryBuilder\/Design\.aspx$/i.test(location.pathname),
+      ready: () => typeof window.UnionSuiteHtmlSource?.attach === 'function'
     },
     {
       id: 'iqa',

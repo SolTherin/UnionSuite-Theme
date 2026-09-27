@@ -16335,3 +16335,219 @@ input:checked ~ .us-switch__state:after {
   }
 }
 /* US-HOME-TASKS-EMPTY:END */
+
+/* US-HTML-SOURCE:START — HTML source editor (Scripts/HtmlSourceEditor.js).
+   Highlighting, tag pairing, field suggestions and the Format / status row.
+   The highlighted copy sits behind a transparent textarea, so both must share
+   exactly the same font, padding and wrapping; nothing here may change a
+   token's width. Dark values are in zzDarkMode.css. */
+.us-html-source,
+.us-html-complete {
+  --us-html-text: var(--text-strong);
+  --us-html-punct: var(--text-muted);
+  --us-html-tag: #7141ac;
+  --us-html-attr: #066c91;
+  --us-html-value: #9c3425;
+  --us-html-comment: #587747;
+  --us-html-placeholder: var(--text-link);
+  --us-html-placeholder-bg: color-mix(in srgb, var(--text-link) 10%, transparent);
+  --us-html-pair-bg: color-mix(in srgb, var(--us-html-tag) 16%, transparent);
+  --us-html-error: var(--danger);
+  --us-html-error-bg: var(--danger-bg);
+  --us-html-selection: color-mix(in srgb, var(--border-focus) 25%, transparent);
+}
+
+.us-html-source--positioned {
+  position: relative;
+}
+
+.us-html-source > textarea.us-html-source__input,
+.us-html-source__highlight {
+  font: 13px/1.6 var(--face-mono) !important;
+  letter-spacing: normal !important;
+  tab-size: 2;
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  box-sizing: border-box !important;
+  text-align: left;
+}
+
+.us-html-source > textarea.us-html-source__input {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--us-html-text);
+}
+
+.us-html-source > textarea.us-html-source__input::selection {
+  background: var(--us-html-selection);
+}
+
+.us-html-source__highlight {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg-surface);
+  color: var(--us-html-text);
+}
+
+.us-html-source__highlight[hidden],
+.us-html-source__tools[hidden],
+.us-html-source__tools > [hidden] {
+  display: none !important;
+}
+
+.us-html-token--punct {
+  color: var(--us-html-punct);
+}
+
+.us-html-token--tag {
+  color: var(--us-html-tag);
+}
+
+.us-html-token--attr,
+.us-html-token--entity {
+  color: var(--us-html-attr);
+}
+
+.us-html-token--value {
+  color: var(--us-html-value);
+}
+
+.us-html-token--comment {
+  color: var(--us-html-comment);
+}
+
+.us-html-token--placeholder {
+  color: var(--us-html-placeholder);
+  background: var(--us-html-placeholder-bg);
+  border-radius: 2px;
+}
+
+/* Backgrounds and underlines only: a border or padding would move the text
+   out of line with the textarea above it. */
+.us-html-token--tag.is-paired {
+  background: var(--us-html-pair-bg);
+  border-radius: 2px;
+}
+
+.us-html-token--tag.is-unmatched,
+.us-html-token--placeholder.is-unknown {
+  color: var(--us-html-error);
+  background: var(--us-html-error-bg);
+  text-decoration: underline wavy var(--us-html-error);
+  text-decoration-skip-ink: none;
+}
+
+.us-html-source__tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+
+.us-html-source__tools > button {
+  margin: 0;
+}
+
+.us-html-source__status {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-html-source__status[data-error="true"] {
+  color: var(--danger);
+}
+
+.us-html-complete {
+  position: fixed;
+  z-index: 100000;
+  box-sizing: border-box;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  max-height: 240px;
+  overflow: auto;
+  padding: 3px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--us-html-text);
+  box-shadow: var(--shadow-lg);
+  font: 13px/1.4 var(--face-mono);
+}
+
+.us-html-complete[hidden] {
+  display: none;
+}
+
+.us-html-complete > [role="option"] {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-areas:
+    "icon label"
+    "icon detail";
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.us-html-complete > [aria-selected="true"] {
+  background: var(--bg-sunken);
+}
+
+.us-html-complete__icon {
+  grid-area: icon;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+}
+
+.us-html-complete__icon > svg {
+  display: block;
+  width: 10px;
+  height: 18px;
+  overflow: visible;
+  shape-rendering: crispEdges;
+}
+
+.us-html-complete__label {
+  grid-area: label;
+  min-width: 0;
+}
+
+.us-html-complete__namespace {
+  color: var(--text-muted);
+}
+
+.us-html-complete__detail {
+  grid-area: detail;
+  display: block;
+  color: var(--text-muted);
+  font: var(--fs-xs) / 1.4 var(--font-body);
+}
+
+@media (forced-colors: active) {
+  .us-html-source__highlight {
+    display: none;
+  }
+
+  .us-html-source > textarea.us-html-source__input {
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText;
+    caret-color: auto;
+  }
+}
+/* US-HTML-SOURCE:END */
