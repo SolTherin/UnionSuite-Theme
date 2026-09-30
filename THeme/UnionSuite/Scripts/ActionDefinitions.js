@@ -48,14 +48,8 @@
   define('member.add-job',{
     presentation:{label:'Add job',icon:'plus',default:'button',menu:'menu-item'},
     context:{partyId:{...party,validate:recordId}},
-    action:{type:'popup',requires:['getSystemVersion'],recordKey:['partyId'],
-      href:async ({context}) => {
-        const version = Number(await window.getSystemVersion());
-        // The legacy helper returns 0 on lookup failure. Do not silently choose
-        // an old editor when the installed version could not be established.
-        if (!Number.isFinite(version) || version <= 0) throw new Error('The installed system version could not be determined.');
-        return editor(version>=411 ? '/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Popups/Jobs/Select-Workplace.aspx' : '/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Staff/AddJob.aspx', {Ordinal:'',ID:context.partyId});
-      },
+    action:{type:'popup',recordKey:['partyId'],
+      href:({context}) => editor('/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Popups/Jobs/Select-Workplace.aspx',{Ordinal:'',ID:context.partyId}),
       popup:{title:'Add new job',width:'90%',height:'90%'},
       refresh:{when:'close',run:env => refreshReport(env,'.JobsIQA')}
     }
@@ -69,6 +63,15 @@
       }),
       popup:{title:'Add address',width:'70%',height:'70%'},
       refresh:{when:'close',run:env => refreshReport(env,'.AddressIQA')}
+    }
+  });
+  define('member.add-contact-method',{
+    presentation:{label:'Add contact method',icon:'plus',default:'button',menu:'menu-item'},
+    context:{partyId:{...party,validate:recordId}},
+    action:{type:'popup',recordKey:['partyId'],
+      href:({context}) => editor('/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Popups/Add-Contact-Method.aspx',{ID:context.partyId}),
+      popup:{title:'Add contact method',width:'70%',height:'70%'},
+      refresh:{when:'close',run:env => refreshReport(env,'.ContactDetailsIQA')}
     }
   });
   define('home.manage-bulletin',{

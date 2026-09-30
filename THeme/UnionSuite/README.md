@@ -507,13 +507,13 @@ Updating the local theme and archives does not upload them to iMIS.
 
 ### Standard business actions
 
-The dedicated [ActionDefinitions.js](Scripts/ActionDefinitions.js) installs twelve
-definitions for member operations, Job row edit/delete and Manage Bulletin.
+The dedicated [ActionDefinitions.js](Scripts/ActionDefinitions.js) installs fifteen
+definitions for member operations, Add Contact Method, Job row edit/delete and Manage Bulletin.
 Use [the current inventory](../../references/Theme-Button-Function-Inventory.md)
 for every class, context source and handler. Job edit/delete refresh the native
 report containing the clicked control, including after partial replacement.
-Add Job/Address now use native popups; seven other member helpers and
-getSystemVersion still require the existing site functions file.
+Add Job/Address now use native popups; seven other member helpers still
+require the existing site functions file.
 
 The new [client Actions.js](../UnionSuite-Client/Actions.js) is the extension point.
 Home/Case task editor contracts and the permission provider remain client inputs.

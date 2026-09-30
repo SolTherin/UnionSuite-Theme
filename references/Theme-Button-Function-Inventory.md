@@ -4,7 +4,7 @@ Reviewed 16 September 2026 after the unified action implementation. This invento
 
 ## 1. Standard definitions — installed by ActionDefinitions.js
 
-Load `zUnionSuite.js`, required business helpers, `Scripts/ActionDefinitions.js`, then client `Actions.js`. There are **12 standard definitions**. The former header/menu Add Job registrations are consolidated. Any definition may be rendered more than once; generated control IDs are unique per instance.
+Load `zUnionSuite.js`, required business helpers, `Scripts/ActionDefinitions.js`, then client `Actions.js`. There are **15 standard definitions**. The former header/menu Add Job registrations are consolidated. Any definition may be rendered more than once; generated control IDs are unique per instance.
 
 | Key | Author class | Current operation / dependencies |
 |---|---|---|
@@ -15,8 +15,9 @@ Load `zUnionSuite.js`, required business helpers, `Scripts/ActionDefinitions.js`
 | `member.create-quick-case` | `us-action-member-create-quick-case` | Existing `CreateQuickCasePopupFn()`; selected-member ID required |
 | `member.resolve-duplicate` | `us-action-member-resolve-duplicate` | Existing `ResolveDuplicatePopupFn()`; selected-member ID required |
 | `member.assign-workbench` | `us-action-member-assign-workbench` | Existing `AssignWorkbenchToStaffFn()`; selected-member ID required |
-| `member.add-job` | `us-action-member-add-job` | Native popup definition; version-aware Jobs editor and scoped refresh. Retains `getSystemVersion()` dependency; invalid/zero lookup fails instead of selecting an old editor. |
+| `member.add-job` | `us-action-member-add-job` | Native popup to `/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Popups/Jobs/Select-Workplace.aspx` and scoped refresh. No `getSystemVersion()` dependency. |
 | `member.add-address` | `us-action-member-add-address` | Native address popup and scoped refresh. Retains supplied ContentItemKey as definition data; verify per client. |
+| `member.add-contact-method` | `us-action-member-add-contact-method` | Native popup to `/_i4u_/Core/Staff-Site-Layouts/Contact-Layouts/Individual/Popups/Add-Contact-Method.aspx` (70%); refreshes its own report on close, or the single `.ContactDetailsIQA` report from a banner/menu. The `us-contact-methods` section preset applies both classes from one token. |
 | `home.manage-bulletin` | `us-action-home-manage-bulletin` | Navigation to `/_i4u_/Core/Staff-Site-Layouts/Home-Dashboard/Staff-Bulletin.aspx`, new tab |
 | `jobs.edit` | `us-action-jobs-edit` | Native Edit Job popup from data-id/data-seqn/data-workplace; refreshes its own report on close |
 | `jobs.delete` | `us-action-jobs-delete` | Confirmed, awaited DELETE `/api/i4u_UT_Jobs/~<partyId>|<ordinal>` with request verification token; refreshes its own report on success |

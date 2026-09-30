@@ -42,7 +42,7 @@ All new classes below are implemented by Scripts/ActionDefinitions.js. This work
 - [ ] Supply Home and Case task editor/assignee contracts. us-action-home-add-task and us-action-cases-add-task are hooks/examples, not working standard task creators. Keep the preview-only definitions out of production.
 - [ ] Adapt the six Case action examples in Client-Actions.example.js to verified functions. Required missing CaseID or helper dependencies disable controls.
 - [ ] Supply permission provider/endpoint and exact rules before enabling role gates; verify server-side permissions independently.
-- [ ] Verify the address editor's ContentItemKey and getSystemVersion response schema. Seven member helpers plus getSystemVersion remain dependencies.
+- [ ] Verify the address editor's ContentItemKey. Seven member helpers remain dependencies.
 - [ ] Audit published callers before deleting old helpers from i4u_functions.js. This task did not edit that external file or the pasted attachment.
 - [ ] Validate live iMIS popup Save/Cancel/X, request errors, partial replacement, repeated IQAs and refresh recovery; no local test can confirm server-side integration.
 

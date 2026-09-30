@@ -1,7 +1,8 @@
 # iPart CSS class budget and section presets
 
-Status: active WIP. One preset, `us-home-tasks`, is **implemented** in
-`THeme/UnionSuite/zUnionSuite.js` and `zUnionSuite.css`. The wider naming and
+Status: active WIP. Two presets, `us-home-tasks` and `us-contact-methods`, are
+**implemented** in `THeme/UnionSuite/zUnionSuite.js` (and `zUnionSuite.css`
+for `us-home-tasks`). The wider naming and
 registry work below is discussed, not built. This folder records the
 constraint and the options so the next change does not re-derive them.
 
@@ -136,6 +137,16 @@ Authored field becomes 54 characters, from 105:
 
 ```
 us-tab-panel us-tabset-home us-tab-tasks us-home-tasks
+```
+
+`us-contact-methods` expands to `ContactDetailsIQA` and
+`us-action-member-add-contact-method`. Neither is a query-display feature, so
+it needs no identification selector or CSS entry: the action runtime and
+refresh lookup read both classes after expansion. The contact methods field
+becomes 64 characters, from 99:
+
+```
+us-tab-panel us-tabset-profile us-tab-contact us-contact-methods
 ```
 
 Verified in a harness reproducing the iPart wrapper contract: the wrapper gains

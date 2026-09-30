@@ -1121,12 +1121,15 @@ SOFTWARE.
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
   // panel combining tab placement, query features and an action exceeds that,
-  // so a preset spends one token where several were needed. Keep every
-  // expanded name listed in queryDisplaySelector above and in the matching
-  // zUnionSuite.css selector, so identification styling applies on first paint
-  // instead of arriving when this script runs.
+  // so a preset spends one token where several were needed. When a preset
+  // expands to query-display features, list it in queryDisplaySelector above
+  // and in the matching zUnionSuite.css selectors, so identification styling
+  // applies on first paint instead of arriving when this script runs. Action
+  // classes and refresh markers such as ContactDetailsIQA are only read at
+  // runtime and need no selector entry.
   var sectionPresets = {
-    'us-home-tasks': ['us-query-search', 'us-task-completed-filter', 'us-action-home-add-task']
+    'us-home-tasks': ['us-query-search', 'us-task-completed-filter', 'us-action-home-add-task'],
+    'us-contact-methods': ['ContactDetailsIQA', 'us-action-member-add-contact-method']
   };
 
   // Idempotent: once the classes are present no further mutation is recorded,

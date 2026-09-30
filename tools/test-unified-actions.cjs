@@ -13,7 +13,7 @@ const report=(id,{direct=false,classes='JobsIQA us-action-member-add-job',rows=r
   await page.goto('https://theme.test/Party.aspx?ID=103885');
   await page.evaluate(()=>{
    window.nativeCalls=[];window.refreshCalls=[];window.logs=[];window.requests=[];window.busyCount=0;window.maxBusy=0;window.submits=0;
-   window.getSystemVersion=async()=>411;window.confirm=()=>true;
+   window.confirm=()=>true;
    window.ShowDialog_NoReturnValue=(...args)=>nativeCalls.push(args);
    const listeners={beginRequest:[],endRequest:[],pageLoading:[],initializeRequest:[]};
    const prm={active:false,get_isInAsyncPostBack(){return this.active;}};
@@ -37,7 +37,7 @@ const report=(id,{direct=false,classes='JobsIQA us-action-member-add-job',rows=r
   await page.addScriptTag({content:read('THeme/UnionSuite/Scripts/ActionDefinitions.js')});
   console.log('Checking generated controls');
   await page.waitForFunction(()=>document.querySelectorAll('[data-us-command-key="member.add-job"]').length===5);
-  assert.equal(await page.evaluate(()=>UnionSuiteActions.listActions().length),14);
+  assert.equal(await page.evaluate(()=>UnionSuiteActions.listActions().length),15);
   assert.equal(await page.evaluate(()=>typeof UnionSuiteIqaFilters.configureAction),'undefined');
   assert.equal(await page.evaluate(()=>typeof UnionSuiteActions.register),'undefined');
   const missing=page.locator('#b_ResultsGrid button.us-action-jobs-edit').nth(1);
