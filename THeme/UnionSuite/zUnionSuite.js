@@ -7725,7 +7725,26 @@ SOFTWARE.
   e.preventDefault();s.buttons.forEach((b,j)=>b.tabIndex=j===next?0:-1);s.buttons[next].focus({preventScroll:true});
   const target=s.buttons[next],list=target.parentElement,a=target.getBoundingClientRect(),r=list.getBoundingClientRect();if(a.left<r.left)list.scrollLeft+=a.left-r.left;else if(a.right>r.right)list.scrollLeft+=a.right-r.right;
  });
- window.UnionSuiteSections={refresh:schedule,select:(group,key)=>{const s=[...states.values()].find(s=>s.group===group);return s?select(s,key,true):false;}};
+ // Section links: <a href="#" data-us-section-link="group:key" data-us-cco-tab="Tab title">.
+ // The section is remembered first, so it shows whenever its sections render;
+ // then the named CCO tab (matched on its title, as the banner bell does) is
+ // opened if it is not open already. Without a CCO tab the section switches in
+ // place. A native CCO fallback reloads the page, which clears the memory.
+ function open(group,key){memory.set(group,key);const s=[...states.values()].find(s=>s.group===group);return s?select(s,key,true):false;}
+ document.addEventListener('click',e=>{
+  const link=e.target.closest('a[data-us-section-link]');
+  if(!link||link.closest('.us-report-no-styling'))return;
+  const [group,key]=(link.dataset.usSectionLink||'').split(':');
+  if(!valid(group)||!valid(key))return;
+  e.preventDefault();
+  memory.set(group,key);
+  const title=(link.dataset.usCcoTab||'').trim().toLowerCase();
+  const cco=link.closest('.cco');
+  const tab=title&&cco?[...cco.querySelectorAll(':scope > [class*="RadTabStrip"] .rtsLink')].find(a=>(a.querySelector('.rtsTxt')||a).textContent.trim().toLowerCase()===title):null;
+  if(tab&&!tab.classList.contains('rtsSelected')){tab.click();schedule();return;}
+  if(open(group,key))states.forEach(s=>{if(s.group===group)s.buttons[s.keys.indexOf(key)]?.focus({preventScroll:true});});
+ });
+ window.UnionSuiteSections={refresh:schedule,select:(group,key)=>{const s=[...states.values()].find(s=>s.group===group);return s?select(s,key,true):false;},open};
  function start(){refresh();window.addEventListener('resize',()=>scheduleIndicators());document.fonts?.ready.then(()=>scheduleIndicators());new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-us-tabs','data-us-tab','data-us-tab-adapter']});new MutationObserver(schedule).observe(document.body,{attributes:true,attributeFilter:['class']});document.querySelectorAll('.ste-toggle').forEach(n=>new MutationObserver(schedule).observe(n,{attributes:true,attributeFilter:['class']}));}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

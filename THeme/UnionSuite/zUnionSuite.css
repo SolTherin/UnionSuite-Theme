@@ -9204,6 +9204,14 @@ html.us-taskbar-mounted #hd .search-dropdown {
   }
 }
 
+/* us-optional-field: on a field's column in a read-only template (for example
+   a Query Template Display using PanelEditorReadOnlyForm markup), hides the
+   whole field when its value came back empty, since templates have no
+   conditionals. The value is empty when its only element has no content. */
+.us-optional-field:has(.PanelFieldValue > :only-child:empty):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
 /* US-DATA-PANELS:END */
 
 /* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
@@ -11097,6 +11105,11 @@ html.us-taskbar-mounted #hd .search-dropdown {
   .us-badge.us-badge--icon:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
     background: CanvasText;
   }
+}
+
+/* A badge a template filled with nothing (a blank IQA field) is not drawn. */
+.us-badge:empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
 }
 
 /* US-BADGES:END */
