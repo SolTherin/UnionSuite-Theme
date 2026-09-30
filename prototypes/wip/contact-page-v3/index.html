@@ -119,7 +119,6 @@
           <div class="us-banner__fact"><dt>Mobile</dt><dd><a href="tel:+61412345678">0412 345 678</a></dd></div>
           <div class="us-banner__fact"><dt>Employer</dt><dd>Metro Health Services</dd></div>
           <div class="us-banner__fact"><dt>Branch</dt><dd>Sydney Metro</dd></div>
-          <div class="us-banner__fact"><dt>Organiser</dt><dd>M. Chen</dd></div>
         </dl>
       </div>
     </header>
@@ -193,6 +192,9 @@
                 <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred email</span></div><br><div class="PanelFieldValue"><span><a href="mailto:s.reynolds@metrohealth.gov.au">s.reynolds@metrohealth.gov.au</a></span></div></div></div>
                 <div class="BreakWord col-md-6"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Preferred mobile</span></div><br><div class="PanelFieldValue"><span>0412 345 678</span></div></div></div>
                 <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Residential address</span></div><br><div class="PanelFieldValue"><span>42 Acacia Street, Newtown NSW 2042</span></div></div></div>
+                <!-- One line from the Representatives IQA (RepresentativesSummary); the
+                     link opens Profile › Employment (data-us-section-link). -->
+                <div class="BreakWord col-md-12"><div class="ReadOnly PanelField Top"><div style="display:inline;"><span class="Label">Representatives</span></div><br><div class="PanelFieldValue"><span>M. Chen, R. Okafor (organisers) · Tom Walsh (delegate)</span> <a href="#" data-us-section-link="profile:employment" data-us-cco-tab="Profile">View details</a></div></div></div>
               </div></div></div></div>
             </div></div>
           </div>
@@ -299,6 +301,86 @@
               <tr class="rgAltRow"><td>Agency Nursing Co.</td><td>Casual RN</td><td>Casual</td><td>Jan 2010</td><td>Jan 2012</td><td><span class="us-badge">Ended</span></td></tr>
             </tbody>
           </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Query Template Display · the people who represent this member: every
+             organiser (a member can have several) and the workplace delegates.
+             CSS class: us-tab-panel us-tabset-profile us-tab-employment us-query-template ·
+             Display in cards unchecked ·
+             Query Template field: THeme/UnionSuite/guides/usage/templates/List-Templates/Contacts-Query-Template.html
+             (the shared us-contact row; RoleLabel is the representative role,
+             RoleColour its badge colour, WorkplaceName where they cover).
+             No results field: <p>No representatives recorded.</p> -->
+        <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-employment us-query-template"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[users-group]] Representatives</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
+          <section data-item="reps-003117" class=""><div class="QueryTemplateItem">
+            <article class="us-contact" data-us-contact-colour="#DBEAFE" data-us-search="M. Chen Lead organiser Sydney Metro branch m.chen@union.org.au 02 9555 0141 003117">
+              <div class="us-contact__heading">
+                <a class="us-contact__name" href="#">M. Chen</a>
+                <span class="us-badge us-contact__role">Lead organiser</span>
+              </div>
+              <div class="us-contact__workplace">
+                <i class="ti ti-building" aria-hidden="true"></i>
+                <a href="#">Sydney Metro branch</a>
+              </div>
+              <div class="us-contact__details">
+                <div class="us-contact__detail">
+                  <i class="ti ti-mail" aria-hidden="true"></i>
+                  <a href="mailto:m.chen@union.org.au">m.chen@union.org.au</a>
+                </div>
+                <div class="us-contact__detail">
+                  <i class="ti ti-phone" aria-hidden="true"></i>
+                  <a href="tel:+61295550141">02 9555 0141</a>
+                </div>
+              </div>
+            </article>
+          </div></section>
+          <section data-item="reps-003240" class=""><div class="QueryTemplateItem">
+            <article class="us-contact" data-us-contact-colour="#DBEAFE" data-us-search="R. Okafor Organiser Health – public hospitals r.okafor@union.org.au 02 9555 0187 003240">
+              <div class="us-contact__heading">
+                <a class="us-contact__name" href="#">R. Okafor</a>
+                <span class="us-badge us-contact__role">Organiser</span>
+              </div>
+              <div class="us-contact__workplace">
+                <i class="ti ti-building" aria-hidden="true"></i>
+                <a href="#">Health – public hospitals</a>
+              </div>
+              <div class="us-contact__details">
+                <div class="us-contact__detail">
+                  <i class="ti ti-mail" aria-hidden="true"></i>
+                  <a href="mailto:r.okafor@union.org.au">r.okafor@union.org.au</a>
+                </div>
+                <div class="us-contact__detail">
+                  <i class="ti ti-phone" aria-hidden="true"></i>
+                  <a href="tel:+61295550187">02 9555 0187</a>
+                </div>
+              </div>
+            </article>
+          </div></section>
+          <section data-item="reps-005512" class=""><div class="QueryTemplateItem">
+            <article class="us-contact" data-us-contact-colour="#F0F3F7" data-us-search="Tom Walsh Workplace delegate Royal Sydney Hospital – ICU t.walsh@metrohealth.gov.au 0413 220 918 005512">
+              <div class="us-contact__heading">
+                <a class="us-contact__name" href="#">Tom Walsh</a>
+                <span class="us-badge us-contact__role">Workplace delegate</span>
+              </div>
+              <div class="us-contact__workplace">
+                <i class="ti ti-building" aria-hidden="true"></i>
+                <a href="#">Royal Sydney Hospital – ICU</a>
+              </div>
+              <div class="us-contact__details">
+                <div class="us-contact__detail">
+                  <i class="ti ti-mail" aria-hidden="true"></i>
+                  <a href="mailto:t.walsh@metrohealth.gov.au">t.walsh@metrohealth.gov.au</a>
+                </div>
+                <div class="us-contact__detail">
+                  <i class="ti ti-phone" aria-hidden="true"></i>
+                  <a href="tel:+61413220918">0413 220 918</a>
+                </div>
+              </div>
+            </article>
+          </div></section>
+          </div></div></div>
         </div></div></div>
 
         <div class="ContentItemContainer"><div class="us-tab-panel us-tabset-profile us-tab-demographics"><div class="panel">
