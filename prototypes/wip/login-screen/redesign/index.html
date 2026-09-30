@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hub Sign In Redesign</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Red+Hat+Display:ital,wght@0,500;0,700;1,900&display=swap">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body>
+  <!-- The triangle field canvas is injected by ../login.js (shared with the
+       first mockup), which also runs the intro timing, ripples and brand switch. -->
+
+  <main class="stage" data-concept="card">
+    <!-- The wrapper carries the glow behind the panel. It can't be a pseudo-
+         element of the panel itself, because the panel's backdrop blur makes it
+         a stacking context and the glow would paint inside the card. -->
+    <div class="panel-wrap">
+    <section class="signin-panel" aria-labelledby="signin-title">
+
+      <header class="brand">
+        <!-- Hub logo placeholder; the HUB letters knock out to the panel behind. -->
+        <div class="brand__logo login-brand" data-brand="hub">
+          <svg viewBox="0 0 380 150" role="img" aria-label="Union Innovation Hub">
+            <defs>
+              <mask id="hub-knockout" maskUnits="userSpaceOnUse" x="0" y="0" width="380" height="150">
+                <rect x="80" y="50" width="278" height="96" rx="10" transform="skewX(-12)" fill="#fff"/>
+                <text x="199" y="131" text-anchor="middle" class="hub-mark__hub">HUB</text>
+              </mask>
+            </defs>
+            <text x="352" y="38" text-anchor="end" class="hub-mark__union">union innovation</text>
+            <rect x="0" y="0" width="380" height="150" fill="#fff" mask="url(#hub-knockout)"/>
+          </svg>
+        </div>
+        <div class="brand__logo login-brand" data-brand="client" hidden>
+          <img src="../client-logo-example.svg" alt="Example Union" width="300" height="120">
+        </div>
+
+        <!-- Free text, set per site. Up to two lines; longer text wraps. -->
+        <p class="brand__tagline">
+          <span class="login-brand" data-brand="hub">Powered by ACTU</span>
+          <span class="login-brand" data-brand="client" hidden>Standing together for fair work, safe jobs and a better future</span>
+        </p>
+      </header>
+
+      <!-- Sign In iPart stand-in. Everything here exists in the native iPart:
+           labels, inputs, the inline Forgot? links and the submit button. -->
+      <div class="signin">
+        <h1 id="signin-title" class="signin__title">Sign in</h1>
+        <div class="login-form">
+          <div class="field">
+            <div class="field__label-row">
+              <label for="login-username">Username</label>
+              <a class="field__forgot" href="#" aria-label="Forgot username?">Forgot?</a>
+            </div>
+            <input id="login-username" type="text" autocomplete="username">
+          </div>
+          <div class="field">
+            <div class="field__label-row">
+              <label for="login-password">Password</label>
+              <a class="field__forgot" href="#" aria-label="Forgot password?">Forgot?</a>
+            </div>
+            <input id="login-password" type="password" autocomplete="current-password">
+          </div>
+          <button class="login-submit" type="button">Sign In</button>
+        </div>
+      </div>
+
+    </section>
+    <!-- Neon bloom over the panel edge (decorative). -->
+    <div class="panel-neon" aria-hidden="true"></div>
+    </div>
+  </main>
+
+  <!-- Platform credit, like a copyright line. Client sites only: on the Hub's
+       own site the logo already says it. -->
+  <footer class="site-credit login-brand" data-brand="client" hidden>
+    Powered by <strong>Union Innovation Hub</strong>
+  </footer>
+
+  <!-- Preview-only controls; not part of the design. -->
+  <aside class="demo-controls" aria-label="Preview controls">
+    <span class="demo-controls__label">Concept</span>
+    <button type="button" data-concept-option="card" aria-pressed="true">A · Card</button>
+    <button type="button" data-concept-option="split" aria-pressed="false">B · Split</button>
+    <button type="button" data-concept-option="open" aria-pressed="false">C · Open</button>
+    <span class="demo-controls__divider" aria-hidden="true"></span>
+    <button type="button" data-demo="brand" aria-pressed="false">Client brand</button>
+    <button type="button" data-demo="replay">Replay intro</button>
+  </aside>
+
+  <script src="../login.js"></script>
+  <script>
+    // Preview only: switches concept, keeps it in the URL hash, replays intro.
+    (function () {
+      "use strict";
+
+      var CONCEPTS = ["card", "split", "open"];
+      var stage = document.querySelector(".stage");
+      var buttons = document.querySelectorAll("[data-concept-option]");
+      var replay = document.querySelector('[data-demo="replay"]');
+
+      function setConcept(name, playIntro) {
+        stage.setAttribute("data-concept", name);
+        buttons.forEach(function (button) {
+          button.setAttribute("aria-pressed", String(button.getAttribute("data-concept-option") === name));
+        });
+        try {
+          history.replaceState(null, "", "#" + name);
+        } catch (error) {
+          // Some preview contexts disallow history changes; the switch still works.
+        }
+        if (playIntro && replay) {
+          replay.click();
+        }
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setConcept(button.getAttribute("data-concept-option"), true);
+        });
+      });
+
+      var fromHash = window.location.hash.slice(1);
+      setConcept(CONCEPTS.indexOf(fromHash) >= 0 ? fromHash : "card", false);
+    })();
+
+    // Card rim light: the edge and surface nearest the pointer light up.
+    // Full strength over the card, fading out 280px beyond it.
+    (function () {
+      "use strict";
+
+      var FADE_DISTANCE = 280;
+      var panel = document.querySelector(".signin-panel");
+      var lastEvent = null;
+      var frameId = 0;
+
+      function update() {
+        frameId = 0;
+        var box = panel.getBoundingClientRect();
+        var x = lastEvent.clientX;
+        var y = lastEvent.clientY;
+        var dx = Math.max(box.left - x, 0, x - box.right);
+        var dy = Math.max(box.top - y, 0, y - box.bottom);
+        var glow = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / FADE_DISTANCE);
+
+        panel.style.setProperty("--pointer-x", Math.round(x - box.left) + "px");
+        panel.style.setProperty("--pointer-y", Math.round(y - box.top) + "px");
+        panel.style.setProperty("--pointer-glow", glow.toFixed(3));
+      }
+
+      window.addEventListener("pointermove", function (event) {
+        lastEvent = event;
+        if (!frameId) {
+          frameId = requestAnimationFrame(update);
+        }
+      }, { passive: true });
+
+      document.addEventListener("pointerleave", function () {
+        panel.style.setProperty("--pointer-glow", "0");
+      });
+    })();
+  </script>
+</body>
+</html>

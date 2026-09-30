@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120" role="img" aria-label="Example Union">
+  <!-- Fictional placeholder standing in for a client's uploaded logo. -->
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">
+    <path d="M52 14 L88 28 V58 C88 82 72 98 52 106 C32 98 16 82 16 58 V28 Z"/>
+  </g>
+  <path d="M34 60 L48 74 L72 46" fill="none" stroke="#ff9947" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="104" y="58" fill="#ffffff" font-family="Red Hat Display, Open Sans, Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="1">EXAMPLE</text>
+  <text x="105" y="90" fill="#ffffff" fill-opacity="0.85" font-family="Red Hat Display, Open Sans, Arial, sans-serif" font-size="25" font-weight="500" letter-spacing="7">UNION</text>
+</svg>

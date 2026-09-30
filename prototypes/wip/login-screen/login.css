@@ -1,0 +1,487 @@
+/* Hub sign-in page mockup.
+   Tokens mirror THeme/UnionSuite/zUnionSuite.css so the page opens standalone;
+   the shared stylesheet is deliberately not loaded here. */
+
+:root {
+  --teal-950: #001b23;
+  --teal-900: #002632;
+  --teal-800: #003a4c;
+  --teal-700: #00506a;
+  --teal-600: #006f94;
+  --teal-300: #5acbf8;
+  --white: #ffffff;
+  --face-body: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --face-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+
+  /* Read by login.js for the triangle field (hex only). */
+  --login-tri-light: #5acbf8;
+  --login-tri-dark: #00121a;
+
+  --login-field-border: rgba(255, 255, 255, 0.7);
+  --login-field-border-focus: var(--teal-300);
+  --login-field-bg: rgba(0, 27, 35, 0.35);
+  --login-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --login-ease-soft: cubic-bezier(0.33, 0, 0.15, 1); /* slow start, long settle */
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body.login-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background-color: var(--teal-900);
+  background-image:
+    radial-gradient(110% 80% at 88% -10%, rgba(0, 111, 148, 0.32), transparent 60%),
+    linear-gradient(118deg, #03526c 0%, #014054 36%, #002b38 68%, #001c25 100%);
+  color: var(--white);
+  font-family: var(--face-body);
+}
+
+/* ---------- Triangle field ---------- */
+
+.login-field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Layout ---------- */
+
+.login-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 48px 16px;
+  box-sizing: border-box;
+}
+
+/* Soft pool of shade behind the content keeps text legible over the field. */
+.login-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(40% 32% at 50% 50%, rgba(0, 22, 30, 0.35), transparent 100%);
+  pointer-events: none;
+}
+
+.login-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 64px;
+}
+
+/* ---------- Brand ---------- */
+
+/* Brand block: logo, rule, then tagline. The logo is the only part that changes
+   per client; the rule and a "Union Innovation Hub" tagline stay constant. */
+.login-brand {
+  width: 340px;
+  max-width: 100%;
+}
+
+.login-brand[hidden] {
+  display: none;
+}
+
+.login-brand__logo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 144px;
+  transform-origin: center;
+}
+
+.login-brand__logo > svg,
+.login-brand__logo > img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* The Hub mark fills the slot width; client images keep their own proportions. */
+.login-brand__logo > svg {
+  width: 100%;
+}
+
+.login-brand__rule-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 4px;
+  overflow: visible;
+}
+
+.login-brand__union {
+  fill: var(--white);
+  font: italic 600 27px var(--face-body);
+  letter-spacing: 0.2px;
+}
+
+.login-brand__hub {
+  fill: #000;
+  font: italic 900 104px var(--face-display);
+  letter-spacing: -3px;
+}
+
+.login-brand__rule {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+/* Sits between the rule's two angled ends, just below the horizontal run. */
+.login-brand__tagline {
+  margin: -30px 0 0 14%;
+  color: var(--white);
+  font: 500 21px/1.2 var(--face-display);
+  white-space: nowrap;
+}
+
+.login-brand__tagline strong {
+  font-weight: 700;
+}
+
+/* The longer client tagline starts nearer the left end and steps down a size,
+   so it clears the rule's right-hand drop. */
+.login-brand--client .login-brand__tagline {
+  margin-left: 6%;
+  font-size: 16px;
+}
+
+/* ---------- Sign In iPart placeholder ---------- */
+
+.login-ipart {
+  width: 244px;
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  border: 1px solid var(--login-field-border);
+  border-radius: 4px;
+  background: var(--login-field-bg);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.login-input:focus-within {
+  border-color: var(--login-field-border-focus);
+  background: rgba(0, 27, 35, 0.55);
+  box-shadow: 0 0 0 3px rgba(90, 203, 248, 0.22);
+}
+
+.login-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  font: 14px var(--face-body);
+  outline: none;
+}
+
+.login-input input::placeholder {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.login-input__forgot {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+  padding: 0 9px;
+  border-left: 1px solid rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.login-input__forgot:hover,
+.login-input__forgot:focus-visible {
+  color: var(--teal-300);
+  text-decoration: underline;
+}
+
+.login-input__forgot:focus-visible {
+  outline: 2px solid var(--teal-300);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+.login-submit {
+  justify-self: start;
+  min-width: 122px;
+  height: 30px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--teal-300);
+  color: var(--teal-950);
+  font: 600 13px var(--face-body);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms var(--login-ease),
+    box-shadow 160ms ease;
+}
+
+.login-submit:hover {
+  background: #86dafb;
+  box-shadow: 0 4px 16px rgba(90, 203, 248, 0.28);
+}
+
+.login-submit:active {
+  transform: translateY(1px);
+}
+
+.login-submit:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+
+.login-submit.is-busy {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* ---------- Culture selector ---------- */
+
+.login-culture {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1;
+}
+
+.login-culture select {
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  background: rgba(0, 27, 35, 0.5);
+  color: rgba(255, 255, 255, 0.85);
+  font: 12px var(--face-body);
+}
+
+.login-culture option {
+  color: #000;
+}
+
+/* ---------- Intro ---------- */
+
+/* Hidden only when JS is present, so a script failure never hides the form. */
+.js .login-brand__logo,
+.js .login-ipart {
+  opacity: 0;
+}
+
+.js .login-brand__rule {
+  stroke-dashoffset: 1;
+}
+
+.js .login-brand__tagline {
+  clip-path: inset(-20% 100% -20% 0);
+}
+
+.is-ready .login-brand__logo {
+  animation: login-settle 2000ms var(--login-ease-soft) 200ms both;
+}
+
+.is-ready .login-ipart {
+  animation: login-settle 2000ms var(--login-ease-soft) 500ms both;
+}
+
+.is-ready .login-brand__rule {
+  animation: login-draw 900ms var(--login-ease) 750ms both;
+}
+
+/* Wipes in behind the rule with the same easing, so the two travel together. */
+.is-ready .login-brand__tagline {
+  animation: login-wipe 800ms var(--login-ease) 850ms both;
+}
+
+@keyframes login-settle {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+}
+
+@keyframes login-wipe {
+  from {
+    clip-path: inset(-20% 100% -20% 0);
+  }
+
+  to {
+    clip-path: inset(-20% 0 -20% 0);
+  }
+}
+
+@keyframes login-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes login-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-ready .login-brand__logo,
+  .is-ready .login-ipart {
+    animation: login-fade 300ms ease both;
+  }
+
+  .is-ready .login-brand__rule {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .is-ready .login-brand__tagline {
+    animation: none;
+    clip-path: none;
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 720px) {
+  .login-group {
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .login-brand {
+    width: 280px;
+  }
+
+  .login-brand__logo {
+    height: 118px;
+  }
+
+  .login-brand__tagline {
+    margin-top: -25px;
+    font-size: 17px;
+  }
+
+  .login-brand--client .login-brand__tagline {
+    font-size: 13px;
+  }
+
+  .login-ipart {
+    width: min(280px, 100%);
+  }
+
+  .login-submit {
+    justify-self: stretch;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Preview-only controls ---------- */
+
+.demo-controls {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  font: 11px var(--face-body);
+}
+
+.demo-controls__label {
+  padding: 0 4px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.demo-controls button {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-controls button[aria-pressed="false"] {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* The brand switch is a mode, not an effect toggle. */
+.demo-controls button[data-demo="brand"] {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.demo-controls button[data-demo="brand"][aria-pressed="true"] {
+  border-color: var(--teal-300);
+  background: rgba(90, 203, 248, 0.2);
+}

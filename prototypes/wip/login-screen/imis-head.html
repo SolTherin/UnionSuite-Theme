@@ -1,0 +1,1163 @@
+<script>
+/* Hub staff sign-in page, concept A (card): animated triangle background, a
+ * frosted-glass card with a travelling neon rim, and styling for the native
+ * Sign In iPart.
+ *
+ * Paste this whole <script> into the sign-in page's head content. It injects its
+ * own <style> and web fonts. Maintained source: CRM Layouts repo,
+ * prototypes/wip/login-screen/imis-head.html (design: redesign/index.html#card).
+ *
+ * Expected page structure (native iParts):
+ *   One zone with CSS class "SignIn-Container", holding in order:
+ *     - the logo CCO: a logo image, then an optional content item with CSS
+ *       class "Tagline" (free text, per site)
+ *     - the native Sign In iPart (renders .SignInPage)
+ * Per site, change only the logo image and the Tagline text.
+ *
+ * Highlights use the theme's --accent, falling back to iMIS blue.
+ */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+
+  if (root.classList.contains("hub-signin")) {
+    return;
+  }
+
+  // Classes go on <html> before the body parses, so the first paint is already
+  // the new background with the card contents waiting to fade in.
+  root.classList.add("hub-signin", "hub-signin-intro");
+
+  /* ---------- Settings ---------- */
+
+  // Platform credit in the page's bottom-left corner. Set to "" to hide it
+  // (e.g. on the Hub's own site, where the logo already says it).
+  var CREDIT_PREFIX = "Powered by ";
+  var CREDIT_NAME = "Union Innovation Hub";
+
+  var css = `
+html.hub-signin {
+  --hub-signin-accent: var(--accent, #2563c4);
+  --hub-signin-on-accent: #ffffff;
+  --hub-signin-core: color-mix(in srgb, var(--hub-signin-accent) 45%, #ffffff);
+  --hub-signin-tri-light: #5acbf8;
+  --hub-signin-tri-dark: #00121a;
+  --hub-signin-glass: rgba(0, 28, 38, 0.42);
+  --hub-signin-field-bg: rgba(255, 255, 255, 0.06);
+  --hub-signin-field-border: rgba(255, 255, 255, 0.22);
+  --hub-signin-text-strong: rgba(255, 255, 255, 0.92);
+  --hub-signin-text-muted: rgba(255, 255, 255, 0.68);
+  --hub-signin-face-body: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --hub-signin-face-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+  --hub-signin-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --hub-signin-ease-soft: cubic-bezier(0.33, 0, 0.15, 1);
+  --hub-signin-radius: 10px;
+  --hub-signin-card-radius: 18px;
+  --hub-signin-card-width: 380px;
+  --hub-signin-logo-height: 80px;
+  min-height: 100%;
+  background-color: #002632;
+  background-image:
+    radial-gradient(110% 80% at 88% -10%, rgba(0, 111, 148, 0.32), transparent 60%),
+    linear-gradient(118deg, #03526c 0%, #014054 36%, #002b38 68%, #001c25 100%);
+  background-attachment: fixed;
+}
+
+html.hub-signin body {
+  min-height: 100vh;
+  margin: 0;
+  background: transparent;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* The native "graceful loading" fades the whole body in on jQuery ready.
+   The intro replaces it, so the background shows straight away. */
+html.hub-signin body.fade {
+  opacity: 1;
+  transition: none;
+}
+
+/* ---------- Triangle field and stage ---------- */
+
+.hub-signin-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html.hub-signin #aspnetForm {
+  position: relative;
+  z-index: 1;
+}
+
+html.hub-signin #MainPanel,
+html.hub-signin .EmptyMasterContentPanel {
+  background: transparent;
+}
+
+/* #MainPanel matches the native "#MainPanel .EmptyMasterContentPanel"
+   padding rule, which would otherwise win. */
+html.hub-signin #MainPanel .EmptyMasterContentPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 56px 16px;
+  box-sizing: border-box;
+}
+
+/* Rows without the card, such as a JS_CSS row, take no space. */
+html.hub-signin .EmptyMasterContentPanel > div > .row:not(:has(.SignIn-Container)) {
+  display: none;
+}
+
+html.hub-signin .EmptyMasterContentPanel > div > .row:has(.SignIn-Container) {
+  display: block;
+  margin: 0;
+}
+
+html.hub-signin .EmptyMasterContentPanel > div > .row:has(.SignIn-Container) > [class*="col-"] {
+  float: none;
+  width: auto;
+  max-width: none;
+  padding: 0;
+}
+
+/* ---------- Card ----------
+   The zone is the card. Its glass (tint, blur, sheen, grain, pointer spotlight)
+   is a pseudo-element behind the content rather than the zone itself: a
+   backdrop filter on the zone would make it the containing block for the MFA
+   modal inside the Sign In iPart and trap the modal within the card. */
+
+/* The zone's wrapper, sized to the card, carries the glow and the neon. */
+html.hub-signin .ContentItemContainer:has(> .SignIn-Container) {
+  position: relative;
+  width: min(var(--hub-signin-card-width), 100%);
+  margin: 0 auto;
+  padding: 0;
+}
+
+html.hub-signin .SignIn-Container {
+  --pointer-x: 50%;
+  --pointer-y: 0%;
+  position: relative;
+  isolation: isolate;
+  padding: 40px 32px 32px;
+  box-sizing: border-box;
+  border-radius: var(--hub-signin-card-radius);
+  transition: --pointer-glow 400ms ease;
+}
+
+html.hub-signin .SignIn-Container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--hub-signin-glass);
+  background-image:
+    radial-gradient(360px circle at var(--pointer-x) var(--pointer-y),
+      color-mix(in srgb, var(--hub-signin-accent) calc(var(--pointer-glow) * 10%), transparent), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+/* Rim: a 1.5px masked ring with a faint glass edge, two accent arcs
+   travelling around the card, and a highlight nearest the pointer. */
+html.hub-signin .SignIn-Container::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1.5px;
+  border-radius: inherit;
+  background:
+    radial-gradient(200px circle at var(--pointer-x) var(--pointer-y),
+      color-mix(in srgb, var(--hub-signin-core) calc(var(--pointer-glow) * 90%), transparent), transparent 70%),
+    conic-gradient(from var(--rim-angle),
+      transparent 0deg,
+      color-mix(in srgb, var(--hub-signin-accent) 35%, transparent) 50deg,
+      var(--hub-signin-core) 80deg,
+      color-mix(in srgb, var(--hub-signin-accent) 35%, transparent) 110deg,
+      transparent 160deg,
+      transparent 200deg,
+      color-mix(in srgb, var(--hub-signin-accent) 25%, transparent) 240deg,
+      color-mix(in srgb, var(--hub-signin-core) 70%, transparent) 265deg,
+      color-mix(in srgb, var(--hub-signin-accent) 25%, transparent) 290deg,
+      transparent 330deg),
+    linear-gradient(160deg,
+      rgba(255, 255, 255, 0.34),
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.14));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: hub-signin-rim-travel 16s linear infinite;
+}
+
+/* Glow: the arcs heavily blurred behind the card, blooming past its edges
+   and showing through the glass. */
+html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
+  content: "";
+  position: absolute;
+  inset: 2% -3%;
+  z-index: -1;
+  border-radius: 40px;
+  background: conic-gradient(from var(--rim-angle),
+    transparent 0deg,
+    color-mix(in srgb, var(--hub-signin-accent) 55%, transparent) 80deg,
+    transparent 160deg,
+    transparent 200deg,
+    color-mix(in srgb, var(--hub-signin-accent) 40%, transparent) 265deg,
+    transparent 330deg);
+  filter: blur(36px);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: hub-signin-rim-travel 16s linear infinite;
+}
+
+/* Neon bloom over the edge (injected element). The ring mask is on the
+   pseudo-element and the blur on its parent, because an element's own filter
+   runs before its mask and would be clipped away. */
+.hub-signin-neon {
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  border-radius: calc(var(--hub-signin-card-radius) + 1px);
+  filter: blur(6px);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.hub-signin-neon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 4px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--rim-angle),
+    transparent 0deg,
+    color-mix(in srgb, var(--hub-signin-accent) 20%, transparent) 55deg,
+    var(--hub-signin-core) 80deg,
+    color-mix(in srgb, var(--hub-signin-accent) 20%, transparent) 105deg,
+    transparent 150deg,
+    transparent 215deg,
+    color-mix(in srgb, var(--hub-signin-accent) 15%, transparent) 245deg,
+    color-mix(in srgb, var(--hub-signin-core) 75%, transparent) 265deg,
+    color-mix(in srgb, var(--hub-signin-accent) 15%, transparent) 285deg,
+    transparent 320deg);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: hub-signin-rim-travel 16s linear infinite;
+}
+
+@keyframes hub-signin-rim-travel {
+  from {
+    --rim-angle: 200deg;
+  }
+
+  to {
+    --rim-angle: 560deg;
+  }
+}
+
+/* Native wrappers inside the card: no panels, padding or backgrounds. */
+html.hub-signin .SignIn-Container .iMIS-WebPart,
+html.hub-signin .SignIn-Container .ContentItemContainer,
+html.hub-signin .SignIn-Container .panel,
+html.hub-signin .SignIn-Container .panel-body-container,
+html.hub-signin .SignIn-Container .panel-body,
+html.hub-signin .SignIn-Container .cco,
+html.hub-signin .SignIn-Container .RadMultiPage,
+html.hub-signin .SignIn-Container .ContentWizardDisplay .row,
+html.hub-signin .SignIn-Container .ContentWizardDisplay [class*="col-"] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html.hub-signin .SignIn-Container .RadTabStrip,
+html.hub-signin .SignIn-Container .panel-heading {
+  display: none;
+}
+
+/* ---------- Brand: logo and tagline ---------- */
+
+html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child {
+  text-align: center;
+}
+
+html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(240px, 100%);
+  max-height: var(--hub-signin-logo-height);
+  margin: 0 auto;
+  transform-origin: center;
+}
+
+/* Free text, set per site. Wraps to at most two lines. */
+html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) {
+  display: -webkit-box;
+  max-width: 30ch;
+  margin: 14px auto 0;
+  overflow: hidden;
+  color: var(--hub-signin-text-muted);
+  font: 500 15px/1.4 var(--hub-signin-face-display);
+  text-align: center;
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) :is(h1, h2, h3, p) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-transform: none;
+}
+
+html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) :is(h1, h2, h3, p)::before,
+html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) :is(h1, h2, h3, p)::after {
+  content: none;
+}
+
+/* ---------- Sign In iPart ---------- */
+
+/* Divider between the brand and the form, fading at both ends. */
+html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage) {
+  position: relative;
+  margin-top: 28px;
+  padding-top: 28px;
+}
+
+html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+}
+
+html.hub-signin .SignInPage .SignIn {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  color: #fff;
+  font-family: var(--hub-signin-face-body);
+}
+
+/* Visible labels, with the Forgot? link lifted onto the label row. */
+html.hub-signin .SignInPage .PanelField {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+html.hub-signin .SignInPage label.contact-signin-label {
+  position: static;
+  left: auto;
+  color: var(--hub-signin-text-strong);
+  font: 600 13px/20px var(--hub-signin-face-body);
+}
+
+html.hub-signin .SignInPage .forgot-link-field {
+  position: static;
+}
+
+html.hub-signin .SignInPage .forgot-link-field > a,
+html.hub-signin .SignInPage .forgot-link-field > a:hover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hub-signin-core);
+  font: 12px/20px var(--hub-signin-face-body);
+  text-decoration: none;
+  transform: none;
+}
+
+html.hub-signin .SignInPage .forgot-link-field > a:hover,
+html.hub-signin .SignInPage .forgot-link-field > a:focus-visible {
+  text-decoration: underline;
+}
+
+html.hub-signin .SignInPage .forgot-link-field > a:focus-visible {
+  outline: 2px solid var(--hub-signin-core);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+html.hub-signin .SignInPage .forgot-link-field input[type="text"],
+html.hub-signin .SignInPage .forgot-link-field input[type="password"] {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--hub-signin-field-border);
+  border-radius: var(--hub-signin-radius);
+  background: var(--hub-signin-field-bg);
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  font: 15px var(--hub-signin-face-body);
+  outline: none;
+  transform: none;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+html.hub-signin .SignInPage .forgot-link-field input:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+}
+
+html.hub-signin .SignInPage .forgot-link-field input:focus {
+  border-color: var(--hub-signin-core);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hub-signin-accent) 30%, transparent);
+}
+
+/* The labels name the fields, so the native placeholders are hidden. The
+   input's text fill colour also applies to placeholders, so it is cleared. */
+html.hub-signin .SignInPage .forgot-link-field input::placeholder {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Autofill paints its own background; an inset shadow covers it. */
+html.hub-signin .SignInPage .forgot-link-field input:-webkit-autofill {
+  box-shadow: 0 0 0 40px #0a3140 inset;
+  -webkit-box-shadow: 0 0 0 40px #0a3140 inset;
+  caret-color: #fff;
+}
+
+html.hub-signin .SignInPage .ValidationError {
+  color: #ffb3a7;
+  font-size: 12px;
+}
+
+/* A field showing its "Required" message gets a red outline. The ASP.NET
+   validator toggles the message's inline display between none and inline. */
+html.hub-signin .SignInPage .PanelField:has(> .ValidationError:not([style*="none"])) .forgot-link-field input,
+html.hub-signin .SignInPage .PanelField:has(> .ValidationError:not([style*="none"])) .forgot-link-field input:hover {
+  border-color: #ff8a7a;
+}
+
+html.hub-signin .SignInPage .PanelField:has(> .ValidationError:not([style*="none"])) .forgot-link-field input:focus {
+  border-color: #ff8a7a;
+  box-shadow: 0 0 0 3px rgba(255, 138, 122, 0.25);
+}
+
+/* The native pt-4 utility is !important, so this has to be too. */
+html.hub-signin .SignInPage [id$="_commandButtons"] {
+  padding-top: 8px !important;
+}
+
+html.hub-signin .SignInPage .SignIn input[type="submit"] {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--hub-signin-radius);
+  background: var(--hub-signin-accent);
+  box-shadow: none;
+  color: var(--hub-signin-on-accent);
+  font: 700 15px var(--hub-signin-face-body);
+  cursor: pointer;
+  transform: none;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms var(--hub-signin-ease);
+}
+
+html.hub-signin .SignInPage .SignIn input[type="submit"]:hover,
+html.hub-signin .SignInPage .SignIn input[type="submit"]:focus {
+  background: color-mix(in srgb, var(--hub-signin-accent) 85%, #ffffff);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--hub-signin-accent) 35%, transparent);
+  color: var(--hub-signin-on-accent);
+}
+
+html.hub-signin .SignInPage .SignIn input[type="submit"]:active {
+  transform: translateY(1px);
+}
+
+html.hub-signin .SignInPage .SignIn input[type="submit"]:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+html.hub-signin .SignInPage .SignIn input[type="submit"]:disabled {
+  opacity: 0.8;
+  cursor: default;
+}
+
+/* An empty account link row would only add space. */
+html.hub-signin .SignInPage [id$="_accountLinkDiv"]:not(:has(a[href])) {
+  display: none;
+}
+
+/* ---------- Site credit ---------- */
+
+/* Bottom-left of the page, inside the stage's bottom padding, so it never
+   overlaps the card. */
+.hub-signin-credit {
+  position: absolute;
+  left: 20px;
+  bottom: 16px;
+  color: rgba(255, 255, 255, 0.55);
+  font: 12px/1.4 var(--hub-signin-face-body);
+}
+
+.hub-signin-credit strong {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+
+/* ---------- Intro ----------
+   Transitions, not animations: removing .hub-signin-intro starts them, and the
+   rim's travel animation is never interrupted. Hidden only while that class is
+   on <html>; a fail-safe removes it if anything goes wrong. */
+
+html.hub-signin .SignIn-Container::before,
+html.hub-signin .SignIn-Container::after {
+  transition:
+    opacity 1400ms var(--hub-signin-ease-soft) 100ms,
+    transform 1400ms var(--hub-signin-ease-soft) 100ms;
+}
+
+html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
+  transition: opacity 2400ms var(--hub-signin-ease-soft) 600ms;
+}
+
+html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child img {
+  transition:
+    opacity 1800ms var(--hub-signin-ease-soft) 350ms,
+    transform 1800ms var(--hub-signin-ease-soft) 350ms,
+    filter 1800ms var(--hub-signin-ease-soft) 350ms;
+}
+
+html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) {
+  transition:
+    clip-path 900ms var(--hub-signin-ease) 1000ms,
+    opacity 250ms linear 1000ms;
+}
+
+html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
+html.hub-signin .SignInPage .SignIn {
+  transition:
+    opacity 1400ms var(--hub-signin-ease-soft) 700ms,
+    transform 1400ms var(--hub-signin-ease-soft) 700ms;
+}
+
+html.hub-signin-intro .SignIn-Container::before,
+html.hub-signin-intro .SignIn-Container::after {
+  opacity: 0;
+  transform: translateY(12px) scale(0.985);
+}
+
+html.hub-signin-intro .ContentItemContainer:has(> .SignIn-Container)::before,
+html.hub-signin-intro .hub-signin-neon,
+html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before {
+  opacity: 0;
+}
+
+html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:first-child img {
+  opacity: 0;
+  transform: scale(1.08);
+  filter: blur(8px);
+}
+
+/* Chrome can skip the tagline's clip-path on the page's first paint, so it
+   is also hidden with opacity, which fades up as the wipe starts. */
+html.hub-signin-intro .SignIn-Container :is(.Tagline, .TagLine) {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+}
+
+html.hub-signin-intro .SignInPage .SignIn {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* The neon keeps its offset from the card while the card rises in. */
+html.hub-signin-intro .hub-signin-neon {
+  transform: translateY(12px) scale(0.985);
+}
+
+.hub-signin-neon {
+  transition:
+    opacity 1800ms var(--hub-signin-ease-soft) 500ms,
+    transform 1400ms var(--hub-signin-ease-soft) 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.hub-signin .SignIn-Container::before,
+  html.hub-signin .SignIn-Container::after,
+  html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before,
+  .hub-signin-neon,
+  html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child img,
+  html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
+  html.hub-signin .SignInPage .SignIn {
+    transition: opacity 300ms ease;
+  }
+
+  html.hub-signin-intro .SignIn-Container::before,
+  html.hub-signin-intro .SignIn-Container::after,
+  html.hub-signin-intro .hub-signin-neon,
+  html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:first-child img,
+  html.hub-signin-intro .SignInPage .SignIn {
+    transform: none;
+    filter: none;
+  }
+
+  html.hub-signin-intro .SignIn-Container :is(.Tagline, .TagLine) {
+    clip-path: none;
+  }
+
+  /* The light stays where it is rather than travelling. */
+  html.hub-signin .SignIn-Container::after,
+  html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before,
+  .hub-signin-neon::before {
+    animation: none;
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 420px) {
+  html.hub-signin .SignIn-Container {
+    padding: 32px 22px 24px;
+  }
+}
+`;
+
+  // Registered properties: --rim-angle animates smoothly; --pointer-glow
+  // transitions. Kept outside the CSS above so they read clearly.
+  var properties = `
+@property --rim-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 200deg;
+}
+
+@property --pointer-glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+`;
+
+  /* ---------- Styles and fonts ---------- */
+
+  function addLink(rel, href, crossOrigin) {
+    var link = document.createElement("link");
+    link.rel = rel;
+    link.href = href;
+    if (crossOrigin) {
+      link.crossOrigin = "anonymous";
+    }
+    document.head.appendChild(link);
+  }
+
+  addLink("preconnect", "https://fonts.googleapis.com");
+  addLink("preconnect", "https://fonts.gstatic.com", true);
+  addLink("stylesheet", "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Red+Hat+Display:wght@500;700&display=swap");
+
+  var style = document.createElement("style");
+  style.id = "hub-signin-style";
+  style.textContent = properties + css;
+  document.head.appendChild(style);
+
+  /* ---------- Field and timing ---------- */
+
+  var CELL = 64;                 // triangle cell size; recalculated on resize
+  var LIGHT_MAX = 0.2;           // alpha at tone +1
+  var DARK_MAX = 0.42;           // alpha at tone -1
+  var REVEAL_SPREAD = 1.8;       // seconds the intro sweep takes to cross
+  var REVEAL_DURATION = 1.8;     // seconds each triangle takes to fade in
+  var SHIMMER_PERIOD = 16;       // seconds between shimmer passes
+  var POINTER_RADIUS = 170;
+  var RIPPLE_SPEED = 900;        // pixels per second
+  var RIPPLE_LIFE = 1.6;         // seconds
+  var IDLE_FRAME_MS = 32;        // ~30fps when only ambient motion is running
+  var READY_WAIT_MS = 1200;      // longest wait for fonts and the logo image
+  var CARD_GLOW_DISTANCE = 280;  // pointer highlight fades out this far away
+
+  var CARD_SELECTOR = ".SignIn-Container";
+  var LOGO_SELECTOR = ".SignIn-Container > .iMIS-WebPart:first-child img";
+  var FIELD_SELECTOR = ".SignInPage .forgot-link-field input";
+  var SUBMIT_SELECTOR = ".SignInPage .SignIn input[type='submit']";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var failSafe = setTimeout(reveal, 6000);
+
+  var canvas = null;
+  var ctx = null;
+  var colours = null;
+  var triangles = [];
+  var width = 0;
+  var height = 0;
+  var dpr = 1;
+  var startTime = performance.now();
+  var lastDraw = 0;
+  var frameId = 0;
+  var ripples = [];
+  var pointer = { x: 0, y: 0, sx: 0, sy: 0, strength: 0, target: 0 };
+
+  function reveal() {
+    clearTimeout(failSafe);
+    root.classList.remove("hub-signin-intro");
+  }
+
+  /* ---------- Card ---------- */
+
+  // Button text follows the accent: dark on light accents, white on dark ones.
+  // The accent is resolved through a probe, so color-mix() and var() chains
+  // in the theme's --accent are handled by the browser.
+  function applyAccentContrast() {
+    var probe = document.createElement("span");
+    probe.style.display = "none";
+    probe.style.color = "var(--hub-signin-accent)";
+    document.body.appendChild(probe);
+    var value = getComputedStyle(probe).color;
+    probe.remove();
+
+    var parts = (value.match(/[\d.]+/g) || []).map(Number);
+    if (parts.length < 3) {
+      return;
+    }
+    var scale = value.indexOf("color(") === 0 ? 1 : 255;
+    var linear = parts.slice(0, 3).map(function (channel) {
+      var c = channel / scale;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    var luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    root.style.setProperty("--hub-signin-on-accent", luminance > 0.4 ? "#001b23" : "#ffffff");
+  }
+
+  function addCardExtras() {
+    var card = document.querySelector(CARD_SELECTOR);
+    if (card && card.parentElement && !card.parentElement.querySelector(".hub-signin-neon")) {
+      var neon = document.createElement("div");
+      neon.className = "hub-signin-neon";
+      neon.setAttribute("aria-hidden", "true");
+      card.parentElement.appendChild(neon);
+    }
+
+    var stage = document.querySelector(".EmptyMasterContentPanel");
+    if (CREDIT_NAME && stage && !stage.querySelector(".hub-signin-credit")) {
+      var credit = document.createElement("div");
+      var name = document.createElement("strong");
+      credit.className = "hub-signin-credit";
+      name.textContent = CREDIT_NAME;
+      credit.appendChild(document.createTextNode(CREDIT_PREFIX));
+      credit.appendChild(name);
+      stage.appendChild(credit);
+    }
+  }
+
+  // The rim and surface nearest the pointer light up.
+  function updateCardGlow(event) {
+    var card = document.querySelector(CARD_SELECTOR);
+    if (!card) {
+      return;
+    }
+    var box = card.getBoundingClientRect();
+    var x = event.clientX;
+    var y = event.clientY;
+    var dx = Math.max(box.left - x, 0, x - box.right);
+    var dy = Math.max(box.top - y, 0, y - box.bottom);
+    var glow = Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy) / CARD_GLOW_DISTANCE);
+
+    card.style.setProperty("--pointer-x", Math.round(x - box.left) + "px");
+    card.style.setProperty("--pointer-y", Math.round(y - box.top) + "px");
+    card.style.setProperty("--pointer-glow", glow.toFixed(3));
+  }
+
+  /* ---------- Triangle field ---------- */
+
+  function readColours() {
+    var computed = getComputedStyle(root);
+    return {
+      light: hexToRgb(computed.getPropertyValue("--hub-signin-tri-light"), [90, 203, 248]),
+      dark: hexToRgb(computed.getPropertyValue("--hub-signin-tri-dark"), [0, 18, 26])
+    };
+  }
+
+  function hexToRgb(value, fallback) {
+    var match = /^#?([0-9a-f]{6})$/i.exec(value.trim());
+    if (!match) {
+      return fallback;
+    }
+    var n = parseInt(match[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  // Deterministic per-cell random, so resizing keeps the same pattern.
+  function cellRandom(col, row) {
+    var seed = (col * 73856093) ^ (row * 19349663) ^ 0x5bd1e995;
+    return function () {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function smoothstep(edge0, edge1, x) {
+    var t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    CELL = Math.round(Math.min(72, Math.max(40, width / 32)));
+    buildTriangles();
+    draw(performance.now(), true);
+  }
+
+  function buildTriangles() {
+    triangles = [];
+    var cols = Math.ceil(width / CELL) + 1;
+    var rows = Math.ceil(height / CELL) + 1;
+
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < cols; col++) {
+        var rand = cellRandom(col, row);
+        var x = col * CELL;
+        var y = row * CELL;
+        var r = x + CELL;
+        var b = y + CELL;
+
+        if (rand() < 0.5) {
+          addTriangle([x, y, r, y, x, b], rand);
+          addTriangle([r, y, r, b, x, b], rand);
+        } else {
+          addTriangle([x, y, r, y, r, b], rand);
+          addTriangle([x, y, r, b, x, b], rand);
+        }
+      }
+    }
+  }
+
+  function addTriangle(points, rand) {
+    var cx = (points[0] + points[2] + points[4]) / 3;
+    var cy = (points[1] + points[3] + points[5]) / 3;
+
+    // Sweep position: 0 at the left edge, 1 at the right, slanted so the
+    // pattern reaches further right along the top of the screen.
+    var u = cx / width + (cy / height - 0.5) * 0.14;
+
+    // Dense on the left, dissolving into plain gradient towards the right.
+    var mask = 1 - smoothstep(0.26, 0.66, u + (rand() - 0.5) * 0.14);
+
+    // Mostly quiet tones with occasional strong light or dark triangles.
+    var tone = rand() * 2 - 1;
+    tone = (tone < 0 ? -1 : 1) * Math.pow(Math.abs(tone), 1.35);
+    if (tone < 0) {
+      tone *= 1.1;
+    }
+    if (rand() < 0.2) {
+      tone *= 0.15;
+    }
+
+    triangles.push({
+      points: points,
+      cx: cx,
+      cy: cy,
+      u: u,
+      mask: mask,
+      base: tone * mask,
+      grain: 0.35 + rand() * 0.65,
+      phase: rand() * Math.PI * 2,
+      delay: Math.max(0, u) * REVEAL_SPREAD + rand() * 0.35
+    });
+  }
+
+  function motionAllowed() {
+    return !reduceMotion.matches;
+  }
+
+  function draw(now, force) {
+    var animate = motionAllowed();
+    var t = (now - startTime) / 1000;
+    var introRunning = animate && t < REVEAL_SPREAD + REVEAL_DURATION + 0.4;
+
+    // Ease the pointer glow towards its target position and strength.
+    pointer.sx += (pointer.x - pointer.sx) * 0.12;
+    pointer.sy += (pointer.y - pointer.sy) * 0.12;
+    pointer.strength += (pointer.target - pointer.strength) * 0.06;
+
+    ripples = ripples.filter(function (ripple) {
+      return (now - ripple.start) / 1000 < RIPPLE_LIFE;
+    });
+
+    var busy = introRunning ||
+      ripples.length > 0 ||
+      Math.abs(pointer.target - pointer.strength) > 0.01 ||
+      Math.abs(pointer.x - pointer.sx) + Math.abs(pointer.y - pointer.sy) > 0.5;
+
+    if (!force && !busy && now - lastDraw < IDLE_FRAME_MS) {
+      return;
+    }
+    lastDraw = now;
+
+    var shimmerAt = ((t % SHIMMER_PERIOD) / SHIMMER_PERIOD) * 1.8 - 0.4;
+    var pointerOn = animate && pointer.strength > 0.005;
+    var radius2 = 2 * POINTER_RADIUS * POINTER_RADIUS;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    for (var i = 0; i < triangles.length; i++) {
+      var tri = triangles[i];
+      var v = tri.base;
+
+      if (animate) {
+        var p = Math.min(1, Math.max(0, (t - tri.delay) / REVEAL_DURATION));
+        var eased = p * p * (3 - 2 * p);  // ease in and out
+
+        v = v * eased * (1 + 0.2 * Math.sin(t * 0.5 + tri.phase));
+
+        // Faint highlight as each triangle arrives.
+        v += Math.sin(Math.PI * p) * 0.22 * tri.grain * tri.mask;
+
+        var ds = tri.u - shimmerAt;
+        v += 0.3 * tri.grain * Math.exp(-(ds * ds) / 0.003) * (0.3 + 0.7 * tri.mask);
+
+        if (pointerOn) {
+          var px = tri.cx - pointer.sx;
+          var py = tri.cy - pointer.sy;
+          v += pointer.strength * 0.8 * tri.grain * Math.exp(-(px * px + py * py) / radius2);
+        }
+
+        for (var r = 0; r < ripples.length; r++) {
+          var ripple = ripples[r];
+          var age = (now - ripple.start) / 1000;
+          var rx = tri.cx - ripple.x;
+          var ry = tri.cy - ripple.y;
+          var ring = Math.sqrt(rx * rx + ry * ry) - age * RIPPLE_SPEED;
+          v += ripple.amp * tri.grain * Math.exp(-(ring * ring) / 6000) * (1 - age / RIPPLE_LIFE);
+        }
+      }
+
+      if (v > -0.01 && v < 0.01) {
+        continue;
+      }
+
+      var rgb = v > 0 ? colours.light : colours.dark;
+      var alpha = Math.min(1, v > 0 ? v * LIGHT_MAX : -v * DARK_MAX);
+      var pts = tri.points;
+
+      ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + alpha.toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(pts[0], pts[1]);
+      ctx.lineTo(pts[2], pts[3]);
+      ctx.lineTo(pts[4], pts[5]);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function loop(now) {
+    draw(now, false);
+    frameId = requestAnimationFrame(loop);
+  }
+
+  function startLoop() {
+    cancelAnimationFrame(frameId);
+    if (motionAllowed() && !document.hidden) {
+      frameId = requestAnimationFrame(loop);
+    } else {
+      draw(performance.now(), true);
+    }
+  }
+
+  /* ---------- Interaction ---------- */
+
+  function addRipple(element, amp) {
+    if (!element || !motionAllowed()) {
+      return;
+    }
+    var box = element.getBoundingClientRect();
+    ripples.push({
+      x: box.left + box.width / 2,
+      y: box.top + box.height / 2,
+      amp: amp,
+      start: performance.now()
+    });
+  }
+
+  function bindInteraction() {
+    var glowFrame = 0;
+    var lastEvent = null;
+
+    window.addEventListener("pointermove", function (event) {
+      if (pointer.target === 0) {
+        pointer.sx = event.clientX;
+        pointer.sy = event.clientY;
+      }
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.target = event.pointerType === "mouse" ? 1 : 0.7;
+
+      lastEvent = event;
+      if (!glowFrame) {
+        glowFrame = requestAnimationFrame(function () {
+          glowFrame = 0;
+          updateCardGlow(lastEvent);
+        });
+      }
+    }, { passive: true });
+
+    document.addEventListener("pointerleave", function () {
+      pointer.target = 0;
+      var card = document.querySelector(CARD_SELECTOR);
+      if (card) {
+        card.style.setProperty("--pointer-glow", "0");
+      }
+    });
+
+    // Delegated, so the Sign In iPart can re-render in a partial postback.
+    document.addEventListener("focusin", function (event) {
+      if (event.target.matches && event.target.matches(FIELD_SELECTOR)) {
+        addRipple(event.target, 0.35);
+      }
+    });
+
+    document.addEventListener("click", function (event) {
+      if (event.target.matches && event.target.matches(SUBMIT_SELECTOR)) {
+        addRipple(event.target, 0.9);
+      }
+    }, true);
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && event.target.matches && event.target.matches(FIELD_SELECTOR)) {
+        addRipple(document.querySelector(SUBMIT_SELECTOR), 0.9);
+      }
+    });
+
+    var resizeTimer = 0;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 120);
+    });
+
+    document.addEventListener("visibilitychange", startLoop);
+
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener("change", startLoop);
+    }
+
+    var sys = window.Sys;
+    if (sys && sys.WebForms && sys.WebForms.PageRequestManager) {
+      sys.WebForms.PageRequestManager.getInstance().add_endRequest(addCardExtras);
+    }
+  }
+
+  /* ---------- Start ---------- */
+
+  // Resolves when web fonts and the logo image are ready, or after a cap, so
+  // nothing swaps or pops in mid-animation.
+  function whenReady(callback) {
+    var done = false;
+    function finish() {
+      if (!done) {
+        done = true;
+        callback();
+      }
+    }
+
+    var waits = [];
+    if (document.fonts && document.fonts.ready) {
+      waits.push(document.fonts.ready);
+    }
+    var logo = document.querySelector(LOGO_SELECTOR);
+    if (logo && logo.decode) {
+      waits.push(logo.decode().catch(function () {}));
+    }
+
+    Promise.all(waits).then(finish, finish);
+    setTimeout(finish, READY_WAIT_MS);
+  }
+
+  function playIntro() {
+    startTime = performance.now();
+    startLoop();
+    // Next frame, so the hidden state has painted and the transitions run.
+    requestAnimationFrame(reveal);
+  }
+
+  function init() {
+    try {
+      canvas = document.createElement("canvas");
+      canvas.className = "hub-signin-field";
+      canvas.setAttribute("aria-hidden", "true");
+      document.body.insertBefore(canvas, document.body.firstChild);
+      ctx = canvas.getContext("2d");
+      colours = readColours();
+
+      applyAccentContrast();
+      addCardExtras();
+      resize();
+      bindInteraction();
+      whenReady(playIntro);
+    } catch (error) {
+      reveal();
+      if (window.console) {
+        console.warn("Hub sign-in effects did not start.", error);
+      }
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>

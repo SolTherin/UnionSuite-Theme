@@ -1,0 +1,826 @@
+/* Hub sign-in redesign: three layout concepts over the existing triangle field.
+   Tokens mirror THeme/UnionSuite/zUnionSuite.css; the page opens standalone.
+   Concepts are selected by data-concept on .stage: card | split | open. */
+
+:root {
+  --teal-950: #001b23;
+  --teal-900: #002632;
+  --teal-300: #5acbf8;
+  --white: #ffffff;
+  --face-body: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --face-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+
+  /* Read by ../login.js for the triangle field (hex only). */
+  --login-tri-light: #5acbf8;
+  --login-tri-dark: #00121a;
+
+  --text-strong: rgba(255, 255, 255, 0.92);
+  --text-muted: rgba(255, 255, 255, 0.68);
+  --panel-bg: rgba(0, 28, 38, 0.42);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --field-bg: rgba(255, 255, 255, 0.06);
+  --field-border: rgba(255, 255, 255, 0.22);
+  --radius: 10px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-soft: cubic-bezier(0.33, 0, 0.15, 1);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* A column: the stage fills the screen and the site credit sits beneath it. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background-color: var(--teal-900);
+  background-image:
+    radial-gradient(110% 80% at 88% -10%, rgba(0, 111, 148, 0.32), transparent 60%),
+    linear-gradient(118deg, #03526c 0%, #014054 36%, #002b38 68%, #001c25 100%);
+  color: var(--white);
+  font-family: var(--face-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.login-field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Stage ---------- */
+
+.stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: 1 0 auto;
+  place-items: center;
+  padding: 56px 16px;
+  box-sizing: border-box;
+}
+
+/* ---------- Concept A: card (default) ----------
+   One centred panel: brand on top, form below. Alignment is structural, so
+   any logo shape works and the phone layout is the same design. */
+
+.panel-wrap {
+  position: relative;
+  width: min(380px, 100%);
+}
+
+/* Clear frosted glass: the triangle field and the glow behind blur through.
+   Layers: a spotlight that follows the pointer, a top sheen, a faint white
+   grain (a tiled SVG noise, drawn once) for a textured-glass feel, the tint. */
+.signin-panel {
+  position: relative;
+  width: 100%;
+  padding: 40px 32px 32px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  background-color: var(--panel-bg);
+  background-image:
+    radial-gradient(360px circle at var(--pointer-x) var(--pointer-y),
+      rgba(90, 203, 248, calc(var(--pointer-glow) * 0.08)), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.09 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: --pointer-glow 400ms ease;
+}
+
+/* ---------- Card light ----------
+   Rim: a 1.5px ring (masked to the border) with a faint glass edge, two neon
+   arcs travelling slowly around the card, and a highlight nearest the pointer.
+   Glow: the same arcs, heavily blurred behind the panel, so they bloom past the
+   edges and show through the glass as soft colour. */
+
+@property --rim-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 200deg;
+}
+
+@property --pointer-glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.signin-panel {
+  --pointer-x: 50%;
+  --pointer-y: 0%;
+  --rim-core: 191, 240, 255;
+  --rim-colour: 90, 203, 248;
+}
+
+.signin-panel::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1.5px;
+  border-radius: inherit;
+  background:
+    radial-gradient(200px circle at var(--pointer-x) var(--pointer-y),
+      rgba(var(--rim-core), calc(var(--pointer-glow) * 0.9)), transparent 70%),
+    conic-gradient(from var(--rim-angle),
+      rgba(var(--rim-colour), 0) 0deg,
+      rgba(var(--rim-colour), 0.35) 50deg,
+      rgba(var(--rim-core), 1) 80deg,
+      rgba(var(--rim-colour), 0.35) 110deg,
+      rgba(var(--rim-colour), 0) 160deg,
+      rgba(var(--rim-colour), 0) 200deg,
+      rgba(var(--rim-colour), 0.25) 240deg,
+      rgba(var(--rim-core), 0.7) 265deg,
+      rgba(var(--rim-colour), 0.25) 290deg,
+      rgba(var(--rim-colour), 0) 330deg),
+    linear-gradient(160deg,
+      rgba(255, 255, 255, 0.34),
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.14));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: rim-travel 16s linear infinite;
+}
+
+.panel-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 2% -3%;
+  z-index: -1;
+  border-radius: 40px;
+  background: conic-gradient(from var(--rim-angle),
+    rgba(0, 170, 230, 0) 0deg,
+    rgba(0, 170, 230, 0.55) 80deg,
+    rgba(0, 170, 230, 0) 160deg,
+    rgba(0, 170, 230, 0) 200deg,
+    rgba(0, 150, 210, 0.4) 265deg,
+    rgba(0, 170, 230, 0) 330deg);
+  filter: blur(36px);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: rim-travel 16s linear infinite;
+}
+
+/* Neon bloom: the arcs as a ring, blurred so they glow across the edge.
+   The ring mask is on the pseudo-element and the blur on its parent, because
+   an element's own filter runs before its mask and would be clipped away. */
+.panel-neon {
+  position: absolute;
+  inset: -1px;
+  border-radius: 19px;
+  filter: blur(6px);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.panel-neon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 4px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--rim-angle),
+    rgba(90, 203, 248, 0) 0deg,
+    rgba(90, 203, 248, 0.2) 55deg,
+    rgba(150, 228, 255, 1) 80deg,
+    rgba(90, 203, 248, 0.2) 105deg,
+    rgba(90, 203, 248, 0) 150deg,
+    rgba(90, 203, 248, 0) 215deg,
+    rgba(90, 203, 248, 0.15) 245deg,
+    rgba(150, 228, 255, 0.75) 265deg,
+    rgba(90, 203, 248, 0.15) 285deg,
+    rgba(90, 203, 248, 0) 320deg);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rim-travel 16s linear infinite;
+}
+
+@keyframes rim-travel {
+  from {
+    --rim-angle: 200deg;
+  }
+
+  to {
+    --rim-angle: 560deg;
+  }
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Logo slot: any logo is contained at its own proportions. */
+.brand__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 80px;
+}
+
+.brand__logo svg {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+}
+
+.brand__logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(240px, 100%);
+  max-height: 100%;
+}
+
+.hub-mark__union {
+  fill: var(--white);
+  font: italic 600 27px var(--face-body);
+}
+
+.hub-mark__hub {
+  fill: #000;
+  font: italic 900 104px var(--face-display);
+  letter-spacing: -3px;
+}
+
+/* Free text set per site: a credit, a slogan or nothing. It wraps to at most
+   two lines, so any length stays tidy under any logo. */
+.brand__tagline {
+  display: -webkit-box;
+  max-width: 30ch;
+  margin: 14px 0 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font: 500 15px/1.4 var(--face-display);
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.brand__tagline:empty {
+  display: none;
+}
+
+/* ---------- Site credit ---------- */
+
+/* Platform credit in the page's bottom-left corner, like a copyright line.
+   It sits in the page flow, so it never overlaps the sign-in panel. */
+.site-credit {
+  position: relative;
+  z-index: 1;
+  padding: 0 20px 16px;
+  color: rgba(255, 255, 255, 0.55);
+  font: 12px/1.4 var(--face-body);
+}
+
+.site-credit strong {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+
+.signin {
+  position: relative;
+  margin-top: 28px;
+  padding-top: 28px;
+}
+
+/* Divider between brand and form, fading at both ends. */
+.signin::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+}
+
+/* The brand already heads the card, so the title is for screen readers only. */
+.signin__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Form ---------- */
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field__label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.field label {
+  color: var(--text-strong);
+  font: 600 13px var(--face-body);
+}
+
+.field__forgot {
+  color: var(--teal-300);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.field__forgot:hover {
+  text-decoration: underline;
+}
+
+.field__forgot:focus-visible {
+  outline: 2px solid var(--teal-300);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.field input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
+  background: var(--field-bg);
+  color: var(--white);
+  font: 15px var(--face-body);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.field input:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+}
+
+.field input:focus {
+  border-color: var(--teal-300);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px rgba(90, 203, 248, 0.22);
+}
+
+.field input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 40px #0a3140 inset;
+  -webkit-text-fill-color: var(--white);
+  caret-color: var(--white);
+}
+
+.login-submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--teal-300);
+  color: var(--teal-950);
+  font: 700 15px var(--face-body);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms var(--ease);
+}
+
+.login-submit:hover {
+  background: #86dafb;
+  box-shadow: 0 8px 24px rgba(90, 203, 248, 0.3);
+}
+
+.login-submit:active {
+  transform: translateY(1px);
+}
+
+.login-submit:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+}
+
+.login-submit.is-busy {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ---------- Concept B: split ----------
+   One wide panel: brand pane on the left, form on the right, divided by a
+   vertical hairline. Both panes centre within the same panel height. */
+
+.stage[data-concept="split"] .panel-wrap {
+  width: min(760px, 100%);
+}
+
+.stage[data-concept="split"] .signin-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0;
+}
+
+.stage[data-concept="split"] .brand {
+  position: relative;
+  justify-content: center;
+  padding: 48px 40px;
+  border-radius: 18px 0 0 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.stage[data-concept="split"] .brand::after {
+  content: "";
+  position: absolute;
+  top: 12%;
+  right: 0;
+  bottom: 12%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+}
+
+.stage[data-concept="split"] .brand__logo {
+  height: 96px;
+}
+
+.stage[data-concept="split"] .signin {
+  margin: 0;
+  padding: 44px 40px 40px;
+}
+
+.stage[data-concept="split"] .signin::before {
+  display: none;
+}
+
+.stage[data-concept="split"] .signin__title {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 20px;
+  overflow: visible;
+  clip: auto;
+  font: 700 22px/1.2 var(--face-display);
+}
+
+/* ---------- Concept C: open ----------
+   No panel. One left-aligned column set just right of centre, where the
+   pattern has dissolved; logo, tagline and fields share a single left edge. */
+
+.stage[data-concept="open"] {
+  grid-template-columns: 1.15fr auto 0.85fr;
+}
+
+/* A fixed width: a percentage would resolve against the auto-sized grid
+   track and shrink the column to its content. */
+.stage[data-concept="open"] .panel-wrap {
+  grid-column: 2;
+  width: 340px;
+  max-width: 100%;
+}
+
+.stage[data-concept="open"] .signin-panel {
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* No panel, so no card light. */
+.stage[data-concept="open"] .signin-panel::before,
+.stage[data-concept="open"] .panel-wrap::before,
+.stage[data-concept="open"] .panel-neon {
+  display: none;
+}
+
+.stage[data-concept="open"] .brand {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.stage[data-concept="open"] .brand__logo {
+  justify-content: flex-start;
+  height: 96px;
+}
+
+.stage[data-concept="open"] .brand__tagline {
+  margin-top: 16px;
+  font-size: 17px;
+}
+
+.stage[data-concept="open"] .signin {
+  margin-top: 44px;
+  padding-top: 0;
+}
+
+.stage[data-concept="open"] .signin::before {
+  display: none;
+}
+
+.stage[data-concept="open"] .signin__title {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 20px;
+  overflow: visible;
+  clip: auto;
+  font: 700 26px/1.2 var(--face-display);
+}
+
+/* A soft pool of shade under the open column keeps it legible. */
+.stage[data-concept="open"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(34% 48% at 58% 50%, rgba(0, 22, 30, 0.4), transparent 100%);
+  pointer-events: none;
+}
+
+/* ---------- Intro ---------- */
+
+/* Hidden only when JS is present, so a script failure never hides the form. */
+.js .signin-panel,
+.js .brand__logo,
+.js .signin {
+  opacity: 0;
+}
+
+/* Chrome can skip the tagline's clip-path on the first paint, so it is also
+   hidden with opacity, which fades up as the wipe starts. */
+.js .brand__tagline {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+}
+
+.js .panel-wrap::before,
+.js .panel-neon {
+  opacity: 0;
+}
+
+.is-ready .panel-neon {
+  animation: neon-in 1800ms var(--ease-soft) 500ms both;
+}
+
+@keyframes neon-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.is-ready .signin-panel {
+  animation: panel-in 1400ms var(--ease-soft) 100ms both;
+}
+
+/* The glow blooms in after the panel, then keeps travelling. */
+.is-ready .panel-wrap::before {
+  animation:
+    rim-travel 16s linear infinite,
+    glow-in 2400ms var(--ease-soft) 600ms both;
+}
+
+@keyframes glow-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.85;
+  }
+}
+
+.is-ready .brand__logo {
+  animation: settle 1800ms var(--ease-soft) 350ms both;
+}
+
+.is-ready .brand__tagline {
+  animation: wipe 900ms var(--ease) 1000ms both;
+}
+
+.is-ready .signin {
+  animation: rise 1400ms var(--ease-soft) 700ms both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes wipe {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-ready .signin-panel,
+  .is-ready .brand__logo,
+  .is-ready .signin {
+    animation: fade 300ms ease both;
+  }
+
+  .is-ready .brand__tagline {
+    animation: fade 300ms ease both;
+    clip-path: none;
+  }
+
+  /* The light stays where it is rather than travelling. */
+  .signin-panel::before,
+  .panel-neon::before {
+    animation: none;
+  }
+
+  .is-ready .panel-neon {
+    animation: neon-in 300ms ease both;
+  }
+
+  .is-ready .panel-wrap::before {
+    animation: glow-in 300ms ease both;
+  }
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 760px) {
+  .stage[data-concept="split"] .panel-wrap {
+    width: min(380px, 100%);
+  }
+
+  .stage[data-concept="split"] .signin-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .stage[data-concept="split"] .brand {
+    padding: 36px 28px 0;
+    border-radius: 18px 18px 0 0;
+    background: none;
+  }
+
+  .stage[data-concept="split"] .brand::after {
+    display: none;
+  }
+
+  .stage[data-concept="split"] .brand__logo {
+    height: 80px;
+  }
+
+  .stage[data-concept="split"] .signin {
+    padding: 28px;
+  }
+
+  .stage[data-concept="open"] {
+    grid-template-columns: 1fr;
+  }
+
+  .stage[data-concept="open"] .panel-wrap {
+    grid-column: 1;
+  }
+
+  .stage[data-concept="open"]::before {
+    background: radial-gradient(60% 45% at 50% 50%, rgba(0, 22, 30, 0.45), transparent 100%);
+  }
+}
+
+@media (max-width: 420px) {
+  .signin-panel {
+    padding: 32px 22px 24px;
+  }
+}
+
+/* ---------- Preview-only controls ---------- */
+
+.demo-controls {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+  padding: 6px 8px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  font: 11px var(--face-body);
+}
+
+.demo-controls__label {
+  padding: 0 4px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.demo-controls__divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.demo-controls button {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo-controls button[aria-pressed="true"] {
+  border-color: var(--teal-300);
+  background: rgba(90, 203, 248, 0.2);
+}

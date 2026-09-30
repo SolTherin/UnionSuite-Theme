@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hub Sign In</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;1,600&family=Red+Hat+Display:ital,wght@0,500;1,900&display=swap">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body class="login-page">
+  <!-- The triangle field canvas is injected by login.js as the first child of body. -->
+
+  <main class="login-stage">
+    <div class="login-group">
+
+      <!-- Hub brand (our own site). Placeholder for the real Hub logo asset; the
+           HUB letters are a mask knock-out, so the animated field shows through. -->
+      <div class="login-brand login-brand--hub" data-brand="hub">
+        <div class="login-brand__logo">
+          <svg viewBox="0 0 380 150" role="img" aria-label="Union Innovation Hub">
+            <defs>
+              <mask id="hub-knockout" maskUnits="userSpaceOnUse" x="0" y="0" width="380" height="150">
+                <rect x="80" y="50" width="278" height="96" rx="10" transform="skewX(-12)" fill="#fff"/>
+                <text x="199" y="131" text-anchor="middle" class="login-brand__hub">HUB</text>
+              </mask>
+            </defs>
+            <text x="352" y="38" text-anchor="end" class="login-brand__union">union innovation</text>
+            <rect x="0" y="0" width="380" height="150" fill="#fff" mask="url(#hub-knockout)"/>
+          </svg>
+        </div>
+        <svg class="login-brand__rule-art" viewBox="0 0 380 70" aria-hidden="true" focusable="false">
+          <path class="login-brand__rule" d="M12 2 L42 30 L330 30 L362 60" pathLength="1"/>
+        </svg>
+        <p class="login-brand__tagline">Powered by ACTU</p>
+      </div>
+
+      <!-- Client brand. Only the logo image changes per client; the rule and the
+           Union Innovation Hub tagline stay the same on every site. -->
+      <div class="login-brand login-brand--client" data-brand="client" hidden>
+        <div class="login-brand__logo">
+          <img src="client-logo-example.svg" alt="Example Union" width="300" height="120">
+        </div>
+        <svg class="login-brand__rule-art" viewBox="0 0 380 70" aria-hidden="true" focusable="false">
+          <path class="login-brand__rule" d="M12 2 L42 30 L330 30 L362 60" pathLength="1"/>
+        </svg>
+        <p class="login-brand__tagline">Powered by <strong>Union Innovation Hub</strong></p>
+      </div>
+
+      <!-- Placeholder for the iMIS Sign In iPart. Replace with captured native
+           markup before any selector work goes into the shared theme. -->
+      <div class="ContentItemContainer login-ipart">
+        <div class="login-form" role="group" aria-label="Sign in">
+          <div class="login-input">
+            <label class="visually-hidden" for="login-username">Username</label>
+            <input id="login-username" type="text" autocomplete="username" placeholder="Username">
+            <a class="login-input__forgot" href="#" aria-label="Forgot username?">Forgot?</a>
+          </div>
+          <div class="login-input">
+            <label class="visually-hidden" for="login-password">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" placeholder="Password">
+            <a class="login-input__forgot" href="#" aria-label="Forgot password?">Forgot?</a>
+          </div>
+          <button class="login-submit" type="button">Sign In</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <label class="login-culture">
+    <span class="visually-hidden">Language</span>
+    <select>
+      <option>English</option>
+      <option>Français</option>
+    </select>
+  </label>
+
+  <!-- Preview-only controls; not part of the production design. -->
+  <aside class="demo-controls" aria-label="Preview controls">
+    <span class="demo-controls__label">Preview</span>
+    <button type="button" data-demo="replay">Replay intro</button>
+    <button type="button" data-demo="brand" aria-pressed="false">Client brand</button>
+    <button type="button" data-demo="shimmer" aria-pressed="true">Shimmer</button>
+    <button type="button" data-demo="pointer" aria-pressed="true">Pointer glow</button>
+    <button type="button" data-demo="ripple" aria-pressed="true">Form ripple</button>
+  </aside>
+
+  <script src="login.js"></script>
+</body>
+</html>
