@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Hub · Sign-in explorations</title>
+  <style>
+    /* Standalone WIP: values taken from THeme/UnionSuite/zUnionSuite.css.
+       Background art and layout are local explorations, not production tokens. */
+    :root {
+      --teal-950: #001b23;
+      --teal-900: #002632;
+      --teal-800: #003a4c;
+      --teal-600: #006f94;
+      --teal-300: #5acbf8;
+      --accent: #ff9947;
+      --accent-hover: #e07a1f;
+      --white: #ffffff;
+      --face-body: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+      --face-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+      --face-ui: "Inter", system-ui, -apple-system, sans-serif;
+      --muted: #a7c3cc;
+      --line: rgba(173, 221, 237, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-width: 280px;
+      min-height: 100vh;
+      min-height: 100svh;
+      background: var(--teal-950);
+      color: var(--white);
+      font-family: var(--face-body);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--teal-300);
+      outline-offset: 4px;
+    }
+
+    button:disabled {
+      cursor: wait;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #background {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .page {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      width: min(1344px, 100%);
+      margin: 0 auto;
+      padding: 32px 48px;
+      font-family: var(--face-ui);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .masthead-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #c4dde5;
+    }
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal-300);
+      box-shadow: 0 0 16px rgba(90, 203, 248, 0.55);
+    }
+
+    .prototype-label {
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 408px;
+      align-items: center;
+      gap: clamp(48px, 8vw, 128px);
+      flex: 1;
+      width: min(1184px, 100%);
+      margin: 0 auto;
+      padding: 28px 48px 46px;
+    }
+
+    .brand {
+      padding-bottom: 10px;
+    }
+
+    .hub-logo {
+      display: block;
+      width: 224px;
+      max-width: 70%;
+      height: auto;
+      margin: 0 0 35px -5px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--face-display);
+      font-size: clamp(38px, 4.5vw, 62px);
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+      text-wrap: balance;
+    }
+
+    h1 span {
+      color: var(--teal-300);
+    }
+
+    .brand-copy {
+      max-width: 350px;
+      margin: 25px 0 0;
+      color: #c2d9e1;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .brand-credit {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 36px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .brand-credit::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: var(--teal-300);
+    }
+
+    .brand-credit strong {
+      color: #d4e6ec;
+      font-weight: 600;
+    }
+
+    .sign-in-panel {
+      position: relative;
+      padding: 38px;
+      border: 1px solid rgba(175, 222, 235, 0.23);
+      border-radius: 12px;
+      background: linear-gradient(150deg, rgba(18, 65, 80, 0.96), rgba(0, 30, 40, 0.97));
+      box-shadow: 0 24px 80px rgba(0, 12, 20, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .sign-in-panel::before {
+      position: absolute;
+      top: -1px;
+      right: 30px;
+      left: 30px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(177, 231, 247, 0.7), transparent);
+      content: "";
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--teal-300);
+      font-family: var(--face-ui);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-family: var(--face-display);
+      font-size: 29px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+
+    .form-intro {
+      margin: 0 0 30px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-top: 21px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 9px;
+      color: #e5eff3;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .text-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid rgba(169, 205, 220, 0.35);
+      border-radius: 8px;
+      background: rgba(0, 24, 33, 0.6);
+      color: var(--white);
+      font-size: 14px;
+      transition: border-color 160ms, box-shadow 160ms;
+    }
+
+    .text-input::placeholder {
+      color: #95b2bf;
+    }
+
+    .text-input:hover {
+      border-color: #81a8b8;
+    }
+
+    .text-input:focus {
+      border-color: var(--teal-300);
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba(90, 203, 248, 0.15);
+    }
+
+    #password {
+      padding-right: 62px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 4px;
+      right: 5px;
+      min-width: 48px;
+      min-height: 40px;
+      padding: 8px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #bbd8e4;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .password-toggle:hover {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin: 11px 0 23px;
+    }
+
+    .text-button {
+      min-height: 30px;
+      padding: 3px 0;
+      border: 0;
+      background: transparent;
+      color: #a6e1f9;
+      font-size: 12px;
+    }
+
+    .text-button:hover {
+      color: var(--white);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .submit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 20px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--teal-900);
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 160ms, box-shadow 160ms;
+    }
+
+    .submit-button:hover {
+      background: #ffae6c;
+      box-shadow: 0 3px 20px rgba(255, 153, 71, 0.15);
+    }
+
+    .submit-button:active {
+      background: var(--accent-hover);
+    }
+
+    .submit-arrow {
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .demo-note {
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .feedback {
+      margin: 18px 0 0;
+      padding: 12px;
+      border: 1px solid rgba(90, 203, 248, 0.24);
+      border-radius: 8px;
+      background: rgba(90, 203, 248, 0.06);
+      color: #d5edf6;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .explorer {
+      width: min(1248px, calc(100% - 96px));
+      margin: 0 auto 30px;
+      padding: 20px 24px 17px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(0, 23, 31, 0.93);
+      font-family: var(--face-ui);
+    }
+
+    .explorer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .explorer-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      color: #e4eff2;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .explorer-title span {
+      padding: 3px 6px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+    }
+
+    .settings {
+      display: flex;
+      gap: 19px;
+    }
+
+    .setting {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .setting::before {
+      width: 6px;
+      height: 6px;
+      border: 1px solid #91aebc;
+      border-radius: 50%;
+      content: "";
+    }
+
+    .setting[aria-pressed="true"]::before {
+      border-color: var(--teal-300);
+      background: var(--teal-300);
+      box-shadow: 0 0 7px rgba(90, 203, 248, 0.2);
+    }
+
+    .setting:hover {
+      color: var(--white);
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .option {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 59px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.015);
+      cursor: pointer;
+      transition: border-color 160ms, background 160ms;
+    }
+
+    .option:hover {
+      border-color: rgba(90, 203, 248, 0.6);
+      background: rgba(90, 203, 248, 0.04);
+    }
+
+    .option:has(input:checked) {
+      border-color: #5acbf8;
+      background: rgba(90, 203, 248, 0.08);
+    }
+
+    .option:has(input:focus-visible) {
+      outline: 2px solid var(--white);
+      outline-offset: 3px;
+    }
+
+    .option-number {
+      color: #83a7b6;
+      font-size: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .option:has(input:checked) .option-number {
+      color: var(--teal-300);
+    }
+
+    .option-name {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .option-description {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .option-dot {
+      width: 7px;
+      height: 7px;
+      margin-left: auto;
+      flex: 0 0 auto;
+      border: 1px solid #608291;
+      border-radius: 50%;
+    }
+
+    .option:has(input:checked) .option-dot {
+      border-color: var(--teal-300);
+      background: var(--teal-300);
+    }
+
+    .explorer-bottom {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    #effect-hint {
+      margin: 0;
+    }
+
+    .explorer-count {
+      flex: 0 0 auto;
+      color: #c1d8e1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.12em;
+    }
+
+    @media (min-width: 1500px) {
+      .stage {
+        padding-top: 60px;
+        padding-bottom: 80px;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .masthead {
+        padding: 26px 28px;
+      }
+
+      .stage {
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 36px;
+        padding: 20px 28px 36px;
+      }
+
+      .sign-in-panel {
+        padding: 30px;
+      }
+
+      .explorer {
+        width: calc(100% - 56px);
+        padding: 18px;
+      }
+
+      .option {
+        gap: 9px;
+        padding: 10px;
+      }
+
+      .option-dot {
+        display: none;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .masthead {
+        padding: 23px 24px;
+        font-size: 9px;
+      }
+
+      .prototype-label {
+        font-size: 8px;
+      }
+
+      .stage {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+        width: min(460px, 100%);
+        padding: 12px 24px 32px;
+      }
+
+      .brand {
+        padding: 0;
+        text-align: center;
+      }
+
+      .hub-logo {
+        width: 154px;
+        margin: 0 auto 18px;
+      }
+
+      h1 {
+        font-size: clamp(29px, 9vw, 36px);
+      }
+
+      .brand-copy {
+        margin: 16px auto 0;
+        font-size: 13px;
+      }
+
+      .brand-credit {
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .sign-in-panel {
+        padding: 28px;
+      }
+
+      .text-input {
+        font-size: 16px;
+      }
+
+      .explorer {
+        width: calc(100% - 32px);
+        margin-bottom: 16px;
+      }
+
+      .explorer-top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .setting {
+        min-height: 36px;
+        font-size: 11px;
+      }
+
+      .explorer-bottom {
+        gap: 10px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="background" aria-hidden="true"></canvas>
+  <div class="page">
+    <header class="masthead">
+      <div class="masthead-brand"><span class="brand-dot" aria-hidden="true"></span>Union Innovation Hub</div>
+      <span class="prototype-label">Sign-in exploration</span>
+    </header>
+
+    <main class="stage">
+      <section class="brand" aria-labelledby="tagline">
+        <img class="hub-logo" src="data:image/png;base64,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" alt="Union Innovation Hub" width="520" height="272">
+        <h1 id="tagline">Better connected.<br><span>Stronger together.</span></h1>
+        <p class="brand-copy">Your people. Your purpose. Your workspace.<br>Bring it all together with the Hub.</p>
+        <p class="brand-credit">Powered by <strong>ACTU</strong></p>
+      </section>
+
+      <section class="sign-in-panel" aria-labelledby="sign-in-title">
+        <p class="eyebrow">Your workspace awaits</p>
+        <h2 id="sign-in-title">Welcome back.</h2>
+        <p class="form-intro">Sign in and pick up where you left off.</p>
+        <!-- The guard also prevents navigation if the main script fails.
+             No input names, remote endpoints, persistence or authentication. -->
+        <form id="sign-in-form" onsubmit="return false;">
+          <div class="field">
+            <label class="field-label" for="username">Username</label>
+            <input class="text-input" id="username" type="text" placeholder="Enter your username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="password">Password</label>
+            <div class="input-wrap">
+              <input class="text-input" id="password" type="password" placeholder="Your password" autocomplete="current-password" required>
+              <button class="password-toggle" id="password-toggle" type="button" aria-label="Show password" aria-pressed="false" aria-controls="password">Show</button>
+            </div>
+          </div>
+          <div class="forgot-row">
+            <button class="text-button" id="forgot-password" type="button">Forgot password?</button>
+          </div>
+          <button class="submit-button" id="sign-in-button" type="submit"><span id="submit-label">Sign in</span><span class="submit-arrow" aria-hidden="true">→</span></button>
+          <p class="demo-note">Design preview · use sample details only</p>
+          <p class="feedback" id="form-feedback" role="status" hidden></p>
+        </form>
+        <noscript><p class="feedback">Enable JavaScript to explore backgrounds and demo interactions.</p></noscript>
+      </section>
+    </main>
+
+    <aside class="explorer" aria-labelledby="explorer-title">
+      <div class="explorer-top">
+        <h2 class="explorer-title" id="explorer-title"><span>DESIGN LAB</span>Choose a background</h2>
+        <div class="settings" aria-label="Background settings">
+          <button class="setting" id="motion-toggle" type="button" aria-pressed="true" aria-label="Background animation"><span id="motion-label">Motion on</span></button>
+          <button class="setting" id="pointer-toggle" type="button" aria-pressed="true" aria-label="Pointer and click effects"><span id="pointer-label">Interaction on</span></button>
+        </div>
+      </div>
+      <fieldset class="options">
+        <legend class="visually-hidden">Background effect</legend>
+        <label class="option">
+          <input class="visually-hidden" type="radio" name="effect" value="aurora" checked>
+          <span class="option-number" aria-hidden="true">01</span>
+          <span><span class="option-name">Aurora</span><span class="option-description">Ribbons of light</span></span>
+          <span class="option-dot" aria-hidden="true"></span>
+        </label>
+        <label class="option">
+          <input class="visually-hidden" type="radio" name="effect" value="constellation">
+          <span class="option-number" aria-hidden="true">02</span>
+          <span><span class="option-name">Constellation</span><span class="option-description">A connected world</span></span>
+          <span class="option-dot" aria-hidden="true"></span>
+        </label>
+        <label class="option">
+          <input class="visually-hidden" type="radio" name="effect" value="contours">
+          <span class="option-number" aria-hidden="true">03</span>
+          <span><span class="option-name">Contours</span><span class="option-description">A field in motion</span></span>
+          <span class="option-dot" aria-hidden="true"></span>
+        </label>
+        <label class="option">
+          <input class="visually-hidden" type="radio" name="effect" value="prism">
+          <span class="option-number" aria-hidden="true">04</span>
+          <span><span class="option-name">Prism</span><span class="option-description">Light meets geometry</span></span>
+          <span class="option-dot" aria-hidden="true"></span>
+        </label>
+      </fieldset>
+      <div class="explorer-bottom">
+        <p id="effect-hint" role="status">Move your pointer to bend the light. Click the background to send a ripple.</p>
+        <span class="explorer-count" id="effect-count" aria-hidden="true">01 / 04</span>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("background");
+      const context = canvas.getContext("2d", { alpha: false });
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const effectInputs = [...document.querySelectorAll('input[name="effect"]')];
+      const motionButton = document.getElementById("motion-toggle");
+      const pointerButton = document.getElementById("pointer-toggle");
+      const hints = {
+        aurora: "Move your pointer to bend the light. Click the background to send a ripple.",
+        constellation: "Move your pointer to connect the stars. Click the background to send a pulse.",
+        contours: "Move your pointer to sculpt the lines. Click the background to send a wave.",
+        prism: "Move your pointer to illuminate the facets. Click the background to send a shimmer."
+      };
+
+      let effect = "aurora";
+      let motion = !reducedMotion.matches;
+      let interaction = true;
+      let width = 1;
+      let height = 1;
+      let time = 0;
+      let lastFrame = 0;
+      let frameId = null;
+      let stars = [];
+      let triangles = [];
+      const pulses = [];
+      const pointer = { x: 0, y: 0, targetX: 0, targetY: 0, active: false };
+
+      // Fixed seeds prevent a visual jump in particle positions on resize.
+      function seededRandom(seed) {
+        return () => {
+          seed = (seed * 1664525 + 1013904223) >>> 0;
+          return seed / 4294967296;
+        };
+      }
+
+      function buildScene() {
+        const random = seededRandom(812);
+        const starCount = Math.min(100, Math.max(40, Math.round(width * height / 14000)));
+        stars = Array.from({ length: starCount }, () => ({
+          x: random() * width,
+          y: random() * height,
+          radius: random() * 1.6 + 0.6,
+          phase: random() * Math.PI * 2,
+          speed: random() * 0.5 + 0.25
+        }));
+
+        triangles = [];
+        const size = width < 700 ? 60 : 78;
+        const rowHeight = size * Math.sqrt(3) / 2;
+        for (let row = -1; row < height / rowHeight + 1; row += 1) {
+          for (let column = -1; column < width / size + 1; column += 1) {
+            const x = column * size + (row % 2) * size / 2;
+            const y = row * rowHeight;
+            for (let half = 0; half < 2; half += 1) {
+              const vertices = half === 0
+                ? [[x, y], [x + size, y], [x + size / 2, y + rowHeight]]
+                : [[x, y], [x + size / 2, y + rowHeight], [x - size / 2, y + rowHeight]];
+              // Both orientations tessellate regardless of the row offset.
+              triangles.push({
+                vertices,
+                x: vertices.reduce((sum, vertex) => sum + vertex[0], 0) / 3,
+                y: vertices.reduce((sum, vertex) => sum + vertex[1], 0) / 3,
+                shade: random(),
+                phase: random() * 6.28
+              });
+            }
+          }
+        }
+      }
+
+      function glow(x, y, radius, colour, opacity) {
+        const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, `rgba(${colour}, ${opacity})`);
+        gradient.addColorStop(1, `rgba(${colour}, 0)`);
+        context.fillStyle = gradient;
+        context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+
+      function pulseAt(x, y) {
+        let energy = 0;
+        for (const pulse of pulses) {
+          const age = time - pulse.started;
+          const distance = Math.hypot(x - pulse.x, y - pulse.y);
+          energy += Math.exp(-Math.pow((distance - age * 250) / 58, 2)) * Math.max(0, 1 - age / 2.6);
+        }
+        return energy;
+      }
+
+      function pointerAt(x, y, radius = 240) {
+        if (!interaction || !pointer.active) return 0;
+        return Math.max(0, 1 - Math.hypot(x - pointer.x, y - pointer.y) / radius);
+      }
+
+      function drawBase() {
+        context.fillStyle = "#001b23";
+        context.fillRect(0, 0, width, height);
+        glow(width * 0.15, height * 0.18, Math.max(width * 0.7, 600), "0, 111, 148", 0.36);
+        glow(width * 0.92, height * 0.54, width * 0.6, "0, 58, 76", 0.62);
+      }
+
+      function drawAurora() {
+        context.save();
+        context.globalCompositeOperation = "screen";
+        const pointerX = pointer.active && interaction ? (pointer.x / width - 0.5) * 0.09 : 0;
+        const pointerY = pointer.active && interaction ? (pointer.y / height - 0.5) * 0.1 : 0;
+
+        for (let ribbon = 0; ribbon < 3; ribbon += 1) {
+          for (let strand = 0; strand < 36; strand += 1) {
+            const offset = strand / 35;
+            context.beginPath();
+            for (let step = 0; step <= 72; step += 1) {
+              const normalX = step / 72;
+              const x = normalX * (width + 100) - 50;
+              const curve = Math.sin(normalX * 4.6 + time * 0.16 + ribbon * 1.5);
+              const fold = Math.sin(normalX * 8 - time * 0.12 + ribbon) * 0.055;
+              let y = height * (0.42 + ribbon * 0.08 + curve * 0.22 + fold + pointerY);
+              y += (offset - 0.5) * height * (0.12 + Math.sin(normalX * 3 + ribbon) * 0.065);
+              y += pointerX * width * Math.sin(normalX * Math.PI);
+              y += pulseAt(x, y) * 22;
+              if (step === 0) context.moveTo(x, y);
+              else context.lineTo(x, y);
+            }
+            const edge = Math.sin(offset * Math.PI);
+            const gradient = context.createLinearGradient(0, 0, width, height * 0.3);
+            gradient.addColorStop(0, `rgba(63, 181, 217, ${0.018 + edge * 0.027})`);
+            gradient.addColorStop(0.35, `rgba(90, 203, 248, ${0.035 + edge * 0.055})`);
+            gradient.addColorStop(0.68, `rgba(0, 111, 148, ${0.015 + edge * 0.018})`);
+            gradient.addColorStop(1, "rgba(90, 203, 248, 0.008)");
+            context.strokeStyle = gradient;
+            context.lineWidth = 1.2 + edge * 2;
+            context.stroke();
+          }
+        }
+        glow(width * (0.25 + Math.sin(time * 0.08) * 0.06), height * 0.54, width * 0.4, "0, 126, 168", 0.13);
+        for (const star of stars.slice(0, 35)) {
+          const alpha = 0.12 + (Math.sin(time * star.speed + star.phase) + 1) * 0.07;
+          context.fillStyle = `rgba(176, 226, 244, ${alpha})`;
+          context.beginPath();
+          context.arc(star.x, star.y + Math.sin(time * 0.2 + star.phase) * 10, 0.7, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+
+      function drawConstellation() {
+        const points = stars.map(star => {
+          let x = star.x + Math.sin(time * star.speed * 0.22 + star.phase) * 21;
+          let y = star.y + Math.cos(time * star.speed * 0.18 + star.phase) * 20;
+          const attraction = pointerAt(x, y, 260) * 0.065;
+          x += (pointer.x - x) * attraction;
+          y += (pointer.y - y) * attraction;
+          return { ...star, x, y };
+        });
+
+        for (let index = 0; index < points.length; index += 1) {
+          const point = points[index];
+          for (let otherIndex = index + 1; otherIndex < points.length; otherIndex += 1) {
+            const other = points[otherIndex];
+            const distance = Math.hypot(point.x - other.x, point.y - other.y);
+            if (distance > 180) continue;
+            const alpha = (1 - distance / 180) * 0.27;
+            context.strokeStyle = `rgba(90, 203, 248, ${alpha})`;
+            context.lineWidth = 0.8;
+            context.beginPath();
+            context.moveTo(point.x, point.y);
+            context.lineTo(other.x, other.y);
+            context.stroke();
+          }
+
+          const proximity = pointerAt(point.x, point.y, 220);
+          const energy = pulseAt(point.x, point.y);
+          if (proximity > 0) {
+            context.strokeStyle = `rgba(90, 203, 248, ${proximity * 0.5})`;
+            context.beginPath();
+            context.moveTo(point.x, point.y);
+            context.lineTo(pointer.x, pointer.y);
+            context.stroke();
+          }
+          context.fillStyle = `rgba(191, 236, 252, ${Math.min(1, 0.35 + proximity * 0.55 + energy)})`;
+          context.beginPath();
+          context.arc(point.x, point.y, point.radius + proximity + energy * 2, 0, Math.PI * 2);
+          context.fill();
+          if (point.radius > 1.7 || energy > 0.3) {
+            glow(point.x, point.y, 15 + energy * 16, "90, 203, 248", 0.1 + energy * 0.15);
+          }
+        }
+      }
+
+      function drawContours() {
+        context.save();
+        for (let line = 0; line < 49; line += 1) {
+          context.beginPath();
+          for (let step = 0; step <= 85; step += 1) {
+            const x = (step / 85) * (width + 80) - 40;
+            const normalX = x / width;
+            const swell = Math.sin(normalX * 5.4 + time * 0.12 + line * 0.024);
+            const valley = Math.cos(normalX * 9.2 - time * 0.07) * height * 0.037;
+            let y = height * 0.08 + line * height * 0.024 + swell * height * 0.16 + valley;
+            y += pointerAt(x, y, 280) ** 2 * 80;
+            y -= pulseAt(x, y) * 27;
+            if (step === 0) context.moveTo(x, y);
+            else context.lineTo(x, y);
+          }
+          const highlighted = line % 7 === 0;
+          context.strokeStyle = highlighted ? "rgba(117, 219, 253, 0.4)" : "rgba(63, 181, 217, 0.16)";
+          context.lineWidth = highlighted ? 1.2 : 0.7;
+          context.stroke();
+        }
+        context.restore();
+      }
+
+      function drawPrism() {
+        for (const triangle of triangles) {
+          const drift = (Math.sin(time * 0.38 + triangle.phase) + 1) / 2;
+          const sweep = Math.pow((Math.sin(triangle.x / width * 4 + triangle.y / height * 2 - time * 0.23) + 1) / 2, 8);
+          const proximity = pointerAt(triangle.x, triangle.y, 230);
+          const pulse = pulseAt(triangle.x, triangle.y);
+          const density = 0.5 + (1 - triangle.x / width) * 0.5;
+          const opacity = Math.min(0.68, (0.016 + triangle.shade * 0.09 + drift * 0.025 + sweep * 0.11) * density + proximity * 0.28 + pulse * 0.32);
+          context.beginPath();
+          triangle.vertices.forEach(([x, y], index) => {
+            if (index === 0) context.moveTo(x, y);
+            else context.lineTo(x, y);
+          });
+          context.closePath();
+          context.fillStyle = `rgba(90, 203, 248, ${opacity})`;
+          context.fill();
+          context.strokeStyle = "rgba(90, 203, 248, 0.045)";
+          context.lineWidth = 0.6;
+          context.stroke();
+        }
+      }
+
+      function drawPulses() {
+        for (const pulse of pulses) {
+          const age = time - pulse.started;
+          const opacity = Math.max(0, 1 - age / 2.6) * 0.25;
+          context.strokeStyle = `rgba(165, 229, 253, ${opacity})`;
+          context.lineWidth = 1;
+          context.beginPath();
+          context.arc(pulse.x, pulse.y, age * 250, 0, Math.PI * 2);
+          context.stroke();
+        }
+      }
+
+      function render() {
+        if (!context) return;
+        drawBase();
+        if (effect === "aurora") drawAurora();
+        if (effect === "constellation") drawConstellation();
+        if (effect === "contours") drawContours();
+        if (effect === "prism") drawPrism();
+        drawPulses();
+
+        // A quiet region behind the copy preserves readability in all four modes.
+        glow(width * 0.26, height * 0.46, width < 700 ? width * 0.9 : width * 0.34, "0, 27, 35", 0.55);
+        const shade = context.createLinearGradient(0, 0, 0, height);
+        shade.addColorStop(0, "rgba(0, 20, 29, 0.1)");
+        shade.addColorStop(0.7, "rgba(0, 20, 29, 0)");
+        shade.addColorStop(1, "rgba(0, 20, 29, 0.65)");
+        context.fillStyle = shade;
+        context.fillRect(0, 0, width, height);
+      }
+
+      function animate(timestamp) {
+        frameId = null;
+        if (!motion || document.hidden || !context) return;
+        if (lastFrame === 0) lastFrame = timestamp;
+        const elapsed = timestamp - lastFrame;
+        if (elapsed >= 32) {
+          time += Math.min(elapsed, 64) / 1000;
+          lastFrame = timestamp;
+          pointer.x += (pointer.targetX - pointer.x) * 0.1;
+          pointer.y += (pointer.targetY - pointer.y) * 0.1;
+          while (pulses.length && time - pulses[0].started > 2.6) pulses.shift();
+          render();
+        }
+        frameId = requestAnimationFrame(animate);
+      }
+
+      function updateAnimation() {
+        if (frameId !== null) cancelAnimationFrame(frameId);
+        frameId = null;
+        lastFrame = 0;
+        if (motion && !document.hidden && context) frameId = requestAnimationFrame(animate);
+      }
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        if (context) context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        buildScene();
+        render();
+      }
+
+      function updateSettings() {
+        motionButton.setAttribute("aria-pressed", String(motion));
+        pointerButton.setAttribute("aria-pressed", String(interaction));
+        document.getElementById("motion-label").textContent = motion ? "Motion on" : "Motion paused";
+        document.getElementById("pointer-label").textContent = interaction ? "Interaction on" : "Interaction off";
+        document.getElementById("effect-hint").textContent = !context
+          ? "Your browser is showing the static background. Canvas is unavailable."
+          : !motion
+            ? "A still moment. Turn motion on to explore the background effects."
+            : interaction ? hints[effect] : "Ambient motion only. Turn interaction on for pointer and click effects.";
+      }
+
+      function chooseEffect(value) {
+        effect = Object.hasOwn(hints, value) ? value : "aurora";
+        effectInputs.forEach(input => { input.checked = input.value === effect; });
+        document.getElementById("effect-count").textContent = `0${Object.keys(hints).indexOf(effect) + 1} / 04`;
+        pulses.length = 0;
+        updateSettings();
+        render();
+      }
+
+      effectInputs.forEach(input => {
+        input.addEventListener("change", () => {
+          chooseEffect(input.value);
+          // Hash links also work when the file is opened directly from disk.
+          window.location.hash = input.value;
+        });
+      });
+
+      motionButton.addEventListener("click", () => {
+        motion = !motion;
+        pulses.length = 0;
+        pointer.active = false;
+        updateSettings();
+        render();
+        updateAnimation();
+      });
+
+      pointerButton.addEventListener("click", () => {
+        interaction = !interaction;
+        pointer.active = false;
+        pulses.length = 0;
+        updateSettings();
+        render();
+      });
+
+      document.addEventListener("pointermove", event => {
+        if (!motion || !interaction) return;
+        const active = !event.target.closest(".sign-in-panel, .explorer");
+        if (!pointer.active) {
+          pointer.x = event.clientX;
+          pointer.y = event.clientY;
+        }
+        pointer.targetX = event.clientX;
+        pointer.targetY = event.clientY;
+        pointer.active = active;
+      }, { passive: true });
+
+      document.addEventListener("pointerleave", () => { pointer.active = false; });
+      document.addEventListener("pointercancel", () => { pointer.active = false; });
+      document.addEventListener("pointerup", event => {
+        if (event.pointerType !== "mouse") pointer.active = false;
+      });
+      window.addEventListener("blur", () => { pointer.active = false; });
+
+      document.addEventListener("pointerdown", event => {
+        if (!motion || !interaction || event.button !== 0) return;
+        if (event.target.closest("button, input, label, a, .sign-in-panel, .explorer")) return;
+        if (pulses.length >= 5) pulses.shift();
+        pulses.push({ x: event.clientX, y: event.clientY, started: time });
+      }, { passive: true });
+
+      reducedMotion.addEventListener("change", event => {
+        motion = !event.matches;
+        pointer.active = false;
+        pulses.length = 0;
+        updateSettings();
+        render();
+        updateAnimation();
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        pointer.active = false;
+        updateAnimation();
+      });
+      window.addEventListener("resize", resize);
+      window.addEventListener("hashchange", () => chooseEffect(window.location.hash.slice(1)));
+
+      const password = document.getElementById("password");
+      const passwordToggle = document.getElementById("password-toggle");
+      const feedback = document.getElementById("form-feedback");
+      passwordToggle.addEventListener("click", () => {
+        const show = password.type === "password";
+        password.type = show ? "text" : "password";
+        passwordToggle.textContent = show ? "Hide" : "Show";
+        passwordToggle.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        passwordToggle.setAttribute("aria-pressed", String(show));
+      });
+
+      document.getElementById("forgot-password").addEventListener("click", () => {
+        feedback.hidden = false;
+        feedback.textContent = "Password recovery preview: this would open your site's reset-password page. No reset request has been sent.";
+      });
+
+      document.getElementById("sign-in-form").addEventListener("submit", event => {
+        event.preventDefault();
+        const button = document.getElementById("sign-in-button");
+        if (button.disabled) return;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        document.getElementById("submit-label").textContent = "Signing in…";
+        feedback.hidden = false;
+        feedback.textContent = "Previewing the sign-in state…";
+        window.setTimeout(() => {
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          document.getElementById("submit-label").textContent = "Sign in";
+          feedback.textContent = "Preview complete. In the live site, you would now enter your workspace. No details were sent or saved.";
+          password.value = "";
+          password.type = "password";
+          passwordToggle.textContent = "Show";
+          passwordToggle.setAttribute("aria-label", "Show password");
+          passwordToggle.setAttribute("aria-pressed", "false");
+        }, 750);
+      });
+
+      resize();
+      chooseEffect(window.location.hash.slice(1));
+      updateAnimation();
+    })();
+  </script>
+</body>
+</html>
