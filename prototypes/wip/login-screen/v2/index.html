@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!-- Sign-in v2 mockup: the native Staff Sign In markup (trimmed capture, server
+     scripts and state removed) with the shared theme CSS and theme loader.
+     Mockup controls (bottom right) are not part of the embed.
+     ?accent=blue overrides the theme's orange --accent. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign-in v2 mockup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zzDarkMode.css">
+  <script>
+    // The shared theme's --accent is orange; ?accent=blue simulates a client
+    // with a blue accent.
+    if (/accent=blue/.test(location.search)) {
+      document.write('<style>:root { --accent: #2563c4; }</style>');
+    }
+  </script>
+  <!-- The theme loader, as on the live site. It loads Scripts/SignInPage.js
+       because the page has a SignIn-Container zone. -->
+  <script src="../../../../THeme/UnionSuite/index.js"></script>
+  <style>
+    /* Mockup controls only. */
+    .mockup-controls {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 10;
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      background: rgba(0, 20, 28, 0.82);
+      color: rgba(255, 255, 255, 0.85);
+      font: 12px/1.4 "Open Sans", Arial, sans-serif;
+    }
+
+    .mockup-controls__row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .mockup-controls__label {
+      min-width: 64px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .mockup-controls button {
+      padding: 4px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 6px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .mockup-controls button[aria-pressed="true"] {
+      border-color: #5acbf8;
+      background: rgba(90, 203, 248, 0.18);
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      .mockup-controls {
+        left: 16px;
+        right: 16px;
+      }
+    }
+  </style>
+</head>
+<body id="MainBody" class="fade HubWrapper-StaffSignIn">
+<form method="post" action="#" id="aspnetForm" onsubmit="return false;">
+<div id="MainPanel">
+<div id="ctl00_ContentPanel" class="EmptyMasterContentPanel" translate="yes" style="overflow:auto;">
+  <div id="ctl00_UserMessagesUpdatePanel"></div>
+  <div id="ctl00_TemplateBody_PublishUpdatePanel"></div>
+  <div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="ContentItemContainer">
+          <div id="WebPartZone1_Page1" class="WebPartZone SignIn-Container">
+            <div class="iMIS-WebPart">
+              <div id="ste_container_ciLogo" class="ContentItemContainer"><div class="EmbedLogo EmbeddedCCO"><div class="panel ">
+                <div class="panel-heading"></div>
+                <div class="panel-body-container"><div class="panel-body">
+                  <div class="cco tabs-wrapper tabs-horizontal tabs-top">
+                    <div class="RadTabStrip RadTabStrip_Orion RadTabStripTop_Orion RadTabStripTop RadTabStripTop_Orion_Baseline">
+                      <div class="rtsLevel rtsLevel1"><ul class="rtsUL"><li class="rtsLI rtsFirst rtsLast"><a class="rtsLink rtsSelected" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Logo</span></span></span></a></li></ul></div>
+                    </div>
+                    <div class="RadMultiPage RadMultiPage_Default">
+                      <div class="rmpView">
+                        <div class="ContentWizardDisplay ClearFix"><div>
+                          <div class="row"><div class="col-sm-12"><div class="WebPartZone">
+                            <div id="ste_container_Logo" class="ContentItemContainer"><img alt="Union Innovation Hub" src="hub-logo.png"></div>
+                            <div class="Error" style="Display:None;"></div>
+                            <div id="ste_container_Tagline" class="ContentItemContainer"><div class="Tagline">Powered by the ACTU</div></div>
+                            <div class="Error" style="Display:None;"></div>
+                          </div></div></div>
+                        </div></div>
+                      </div>
+                    </div>
+                    <div style="display: block;"></div>
+                  </div>
+                  <div></div>
+                  <span></span>
+                </div></div>
+              </div></div></div>
+            </div>
+            <div class="iMIS-WebPart">
+              <div id="ste_container_ciSignIn" class="ContentItemContainer"><div class="SignInPage"><div class="panel panel-border ">
+                <div class="panel-heading Distinguish"><h2 class="panel-title" translate="yes">Sign In</h2></div>
+                <div class="panel-body-container"><div class="panel-body">
+                  <div id="x_SignInRefreshPanel" style="display: block;">
+                    <div id="x_SignInPanel" class="SignIn">
+                      <div id="x_contentPanel" class="StandardPanel" style="background-color:Transparent;border-style:None;">
+                        <div id="x_ActionPanel">
+                          <div id="x_confirmationMessageContainer" role="alert"></div>
+                          <div style="clear: both;"></div>
+                          <div id="x_signInDiv">
+                            <div class="PanelField">
+                              <label for="x_signInUserName" class="contact-signin-label" translate="yes">Username</label>
+                              <div class="forgot-link-field">
+                                <input type="text" id="x_signInUserName" autocomplete="off" placeholder="Username" aria-required="true">
+                                <a id="x_inlineForgotUsername" aria-label="Click this link if you forgot your username." href="#">Forgot?</a>
+                              </div>
+                              <span id="x_UserNameRequired" class="Error ValidationError" role="alert" style="display:none;">Required</span>
+                            </div>
+                            <div class="PanelField">
+                              <label for="x_signInPassword" class="contact-signin-label" translate="yes">Password</label>
+                              <div class="forgot-link-field">
+                                <input id="x_signInPassword" type="password" autocomplete="off" aria-required="true" placeholder="Password">
+                                <a id="x_inlineForgotPassword" aria-label="Click this link if you forgot your pasword." href="#">Forgot?</a>
+                              </div>
+                              <span id="x_PasswordRequired" class="Error ValidationError" role="alert" style="display:none;">Required</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="x_commandButtons" translate="yes" class="pt-4">
+                        <input type="submit" value="Sign In" id="x_SubmitButton" class="TextButton PrimaryButton SignInButton">
+                      </div>
+                      <div id="x_LinkPanel" translate="yes">
+                        <div id="x_forgotPasswordUserLinkDiv" class="CenterText pb-2">
+                          <span><div><a class="NoWrap" href="#">Forgot username?</a><span> | </span><a class="NoWrap" href="#">Forgot password?</a></div></span>
+                        </div>
+                        <div id="x_accountLinkDiv" class="CenterText pb-2"><a id="x_accountLink"></a></div>
+                      </div>
+                      <div style="clear: both;"></div>
+                    </div>
+                  </div>
+                </div></div>
+              </div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</form>
+
+<div class="mockup-controls" aria-label="Mockup controls">
+  <div class="mockup-controls__row">
+    <span class="mockup-controls__label">Accent</span>
+    <button type="button" data-accent="orange">Orange</button>
+    <button type="button" data-accent="blue">Blue</button>
+  </div>
+  <div class="mockup-controls__row">
+    <span class="mockup-controls__label">Theme</span>
+    <button type="button" data-scheme="light">Light</button>
+    <button type="button" data-scheme="dark">Dark</button>
+  </div>
+  <div class="mockup-controls__row">
+    <span class="mockup-controls__label">Sign in</span>
+    <button type="button" data-outcome="fail">Fails</button>
+    <button type="button" data-outcome="wait">Keeps loading</button>
+  </div>
+  <div class="mockup-controls__row">
+    <span class="mockup-controls__label">Intro</span>
+    <button type="button" data-replay>Replay</button>
+  </div>
+</div>
+
+<script>
+  // Mirrors the native "graceful loading" script.
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.classList.add("loaded", "in");
+  });
+
+  // Mockup controls and a stand-in for the native sign-in request.
+  (function () {
+    var STORAGE_KEY = "union-suite:appearance:v1";
+    var outcome = "fail";
+    var blue = /accent=blue/.test(location.search);
+    var scheme = "light";
+    try {
+      scheme = localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
+    } catch (error) {
+      // Storage unavailable: the theme follows the system setting.
+    }
+
+    function press(attribute, value) {
+      document.querySelectorAll("[" + attribute + "]").forEach(function (button) {
+        button.setAttribute("aria-pressed", String(button.getAttribute(attribute) === value));
+      });
+    }
+
+    press("data-accent", blue ? "blue" : "orange");
+    press("data-scheme", scheme);
+    press("data-outcome", outcome);
+
+    document.querySelector(".mockup-controls").addEventListener("click", function (event) {
+      var button = event.target.closest("button");
+      if (!button) {
+        return;
+      }
+      if (button.dataset.accent) {
+        location.search = button.dataset.accent === "blue" ? "?accent=blue" : "";
+      } else if (button.dataset.scheme) {
+        try {
+          localStorage.setItem(STORAGE_KEY, button.dataset.scheme);
+        } catch (error) {
+          // Nothing to remember it in.
+        }
+        location.reload();
+      } else if (button.dataset.outcome) {
+        outcome = button.dataset.outcome;
+        press("data-outcome", outcome);
+      } else if (button.hasAttribute("data-replay") && window.HubSignIn) {
+        window.HubSignIn.replay();
+      }
+    });
+
+    var submit = document.getElementById("x_SubmitButton");
+    var message = document.getElementById("x_confirmationMessageContainer");
+    var timer = 0;
+
+    function validate(inputId, messageId) {
+      var empty = !document.getElementById(inputId).value;
+      document.getElementById(messageId).style.display = empty ? "inline" : "none";
+      return !empty;
+    }
+
+    submit.addEventListener("click", function () {
+      var valid = validate("x_signInUserName", "x_UserNameRequired") &
+        validate("x_signInPassword", "x_PasswordRequired");
+      message.textContent = "";
+      if (!valid) {
+        return;
+      }
+      // The native code disables the button for the request.
+      setTimeout(function () {
+        submit.disabled = true;
+      });
+      clearTimeout(timer);
+      if (outcome === "fail") {
+        timer = setTimeout(function () {
+          submit.disabled = false;
+          message.innerHTML = '<span class="Error">Sign in failed. Check your username and password.</span>';
+        }, 2800);
+      }
+    });
+
+    // Escape stops a "Keeps loading" request.
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && submit.disabled) {
+        clearTimeout(timer);
+        submit.disabled = false;
+      }
+    });
+  })();
+</script>
+</body>
+</html>

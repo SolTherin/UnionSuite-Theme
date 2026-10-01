@@ -39,7 +39,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '0.3.4-trial';
+  const RELEASE = '0.3.6-trial';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
@@ -47,6 +47,8 @@
      after     ids that must register first. Absent means the module starts
                immediately, in parallel with the other roots.
      when      optional gate. A gated-out module is never preloaded or loaded.
+               It may return a promise, for gates that wait for page markup;
+               those modules are not preloaded.
      ready     registration check. Loading is not success: a file that parses
                and then throws still fires load. null means the file registers
                nothing, so loading is all that can be confirmed.
@@ -113,13 +115,55 @@
       // parent staff page never matches. Same gate as the file's own guard.
       when: () => /\/AsiCommon\/Controls\/BOA\/Design\.aspx$/i.test(location.pathname),
       ready: () => typeof window.BoEnh?.probe === 'function'
+    },
+    {
+      id: 'signin',
+      path: 'Scripts/SignInPage.js',
+      // Sign-in pages are recognised by markup, not URL: the staff sign-in
+      // page's body class, or a "SignIn-Container" zone on any other sign-in
+      // page. The loader runs from the head, before either is parsed, so the
+      // gate waits and loads the file the moment one appears. The body class
+      // arrives first, which keeps the hidden pre-paint (zUnionSuite.css,
+      // US-SIGNIN-PREPAINT) short.
+      when: () => whenElement('body.HubWrapper-StaffSignIn, .SignIn-Container'),
+      critical: false, // Nothing else waits on the sign-in design.
+      ready: () => typeof window.HubSignIn?.replay === 'function'
     }
   ];
+
+  // Resolves true as soon as a matching element is in the document, or false
+  // once the page has parsed without one.
+  function whenElement(selector) {
+    if (document.querySelector(selector)) return Promise.resolve(true);
+    if (document.readyState !== 'loading') return Promise.resolve(false);
+
+    return new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        if (document.querySelector(selector)) finish(true);
+      });
+      const finish = found => {
+        observer.disconnect();
+        document.removeEventListener('DOMContentLoaded', parsed);
+        resolve(found);
+      };
+      const parsed = () => finish(Boolean(document.querySelector(selector)));
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      document.addEventListener('DOMContentLoaded', parsed);
+    });
+  }
 
   if (window.UnionSuiteLoader) return; // One loader per document.
 
   const records = new Map();
   const started = new Map();
+  const gates = new Map();
+
+  // Each gate is evaluated once: true, false, or a promise of either.
+  function gate(module) {
+    if (!module.when) return true;
+    if (!gates.has(module.id)) gates.set(module.id, module.when());
+    return gates.get(module.id);
+  }
 
   function record(module) {
     if (!records.has(module.id)) {
@@ -161,7 +205,7 @@
      the file twice. */
   function preload() {
     MODULES
-      .filter(module => !(module.when && !module.when()))
+      .filter(module => gate(module) === true)
       .filter(module => !module.ready?.())
       .forEach(module => {
         const link = document.createElement('link');
@@ -222,7 +266,7 @@
     const entry = record(module);
 
     const promise = (async () => {
-      if (module.when && !module.when()) {
+      if (!(await gate(module))) {
         entry.state = 'gated';
         entry.detail = 'Not required on this page.';
         return;

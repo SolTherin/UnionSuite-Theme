@@ -16769,3 +16769,36 @@ input:checked ~ .us-switch__state:after {
   }
 }
 /* US-HTML-SOURCE:END */
+
+/* US-SIGNIN-PREPAINT:START — the staff sign-in page before
+   Scripts/SignInPage.js runs. The loader fetches that script after the page
+   starts parsing, so without this the native page shows briefly first.
+   The background matches the script's; keep the two in step. */
+html:has(> body.HubWrapper-StaffSignIn) {
+  min-height: 100%;
+  background-color: #002632;
+  background-image:
+    radial-gradient(110% 80% at 88% -10%, rgba(0, 111, 148, 0.32), transparent 60%),
+    linear-gradient(118deg, #03526c 0%, #014054 36%, #002b38 68%, #001c25 100%);
+  background-attachment: fixed;
+}
+
+/* :root raises this above the dark-mode body surface
+   (zzDarkMode.css), so the background shows in both modes. */
+html:root body.HubWrapper-StaffSignIn {
+  background: transparent;
+}
+
+/* Content stays hidden until the script marks <html>. If the script never
+   arrives, the native page appears after 5s. */
+html:not(.hub-signin) body.HubWrapper-StaffSignIn > * {
+  visibility: hidden;
+  animation: us-signin-prepaint-failsafe 0s linear 5s forwards;
+}
+
+@keyframes us-signin-prepaint-failsafe {
+  to {
+    visibility: visible;
+  }
+}
+/* US-SIGNIN-PREPAINT:END */

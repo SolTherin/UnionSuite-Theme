@@ -1,11 +1,10 @@
-<script>
-/* Hub staff sign-in page, concept A (card): animated triangle background, a
- * frosted-glass card with a travelling neon rim, and styling for the native
- * Sign In iPart.
+/* Hub sign-in page: constellation background, a frosted-glass card with a
+ * travelling neon rim, and styling for the native Sign In iPart.
  *
- * Paste this whole <script> into the sign-in page's head content. It injects its
- * own <style> and web fonts. Maintained source: CRM Layouts repo,
- * prototypes/wip/login-screen/imis-head.html (design: redesign/index.html#card).
+ * Loaded by the theme loader (index.js) only on pages with a
+ * "SignIn-Container" zone; no page head content is needed. It injects its own
+ * <style> and web fonts. Mockup: prototypes/wip/login-screen/v2/index.html.
+ * The earlier pasted head script (v1, triangle field) is in Git history.
  *
  * Expected page structure (native iParts):
  *   One zone with CSS class "SignIn-Container", holding in order:
@@ -41,8 +40,7 @@ html.hub-signin {
   --hub-signin-accent: var(--accent, #2563c4);
   --hub-signin-on-accent: #ffffff;
   --hub-signin-core: color-mix(in srgb, var(--hub-signin-accent) 45%, #ffffff);
-  --hub-signin-tri-light: #5acbf8;
-  --hub-signin-tri-dark: #00121a;
+  --hub-signin-star: #5acbf8;
   --hub-signin-glass: rgba(0, 28, 38, 0.42);
   --hub-signin-field-bg: rgba(255, 255, 255, 0.06);
   --hub-signin-field-border: rgba(255, 255, 255, 0.22);
@@ -56,6 +54,8 @@ html.hub-signin {
   --hub-signin-card-radius: 18px;
   --hub-signin-card-width: 380px;
   --hub-signin-logo-height: 80px;
+  --hub-signin-glow-opacity: 0.6;
+  --hub-signin-neon-opacity: 0.75;
   min-height: 100%;
   background-color: #002632;
   background-image:
@@ -79,7 +79,7 @@ html.hub-signin body.fade {
   transition: none;
 }
 
-/* ---------- Triangle field and stage ---------- */
+/* ---------- Constellation and stage ---------- */
 
 .hub-signin-field {
   position: fixed;
@@ -211,7 +211,7 @@ html.hub-signin .SignIn-Container::after {
 }
 
 /* Glow: the arcs heavily blurred behind the card, blooming past its edges
-   and showing through the glass. */
+   and showing through the glass. Softer than v1. */
 html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
   content: "";
   position: absolute;
@@ -220,13 +220,13 @@ html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
   border-radius: 40px;
   background: conic-gradient(from var(--rim-angle),
     transparent 0deg,
-    color-mix(in srgb, var(--hub-signin-accent) 55%, transparent) 80deg,
+    color-mix(in srgb, var(--hub-signin-accent) 50%, transparent) 80deg,
     transparent 160deg,
     transparent 200deg,
-    color-mix(in srgb, var(--hub-signin-accent) 40%, transparent) 265deg,
+    color-mix(in srgb, var(--hub-signin-accent) 35%, transparent) 265deg,
     transparent 330deg);
   filter: blur(36px);
-  opacity: 0.85;
+  opacity: var(--hub-signin-glow-opacity);
   pointer-events: none;
   animation: hub-signin-rim-travel 16s linear infinite;
 }
@@ -239,8 +239,8 @@ html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
   inset: -1px;
   z-index: 1;
   border-radius: calc(var(--hub-signin-card-radius) + 1px);
-  filter: blur(6px);
-  opacity: 1;
+  filter: blur(5px);
+  opacity: var(--hub-signin-neon-opacity);
   pointer-events: none;
 }
 
@@ -279,6 +279,28 @@ html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
   }
 }
 
+/* While signing in, the glow and neon come up to full and breathe. */
+html.hub-signin-busy .ContentItemContainer:has(> .SignIn-Container)::before {
+  animation:
+    hub-signin-rim-travel 16s linear infinite,
+    hub-signin-busy-breathe 1.2s ease-in-out infinite alternate;
+}
+
+html.hub-signin-busy .hub-signin-neon {
+  opacity: 1;
+  transition: opacity 400ms ease;
+}
+
+@keyframes hub-signin-busy-breathe {
+  from {
+    opacity: var(--hub-signin-glow-opacity);
+  }
+
+  to {
+    opacity: 0.95;
+  }
+}
+
 /* Native wrappers inside the card: no panels, padding or backgrounds. */
 html.hub-signin .SignIn-Container .iMIS-WebPart,
 html.hub-signin .SignIn-Container .ContentItemContainer,
@@ -292,6 +314,26 @@ html.hub-signin .SignIn-Container .ContentWizardDisplay [class*="col-"] {
   margin: 0;
   padding: 0;
   border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Dark mode paints these wrappers with a solid surface colour at higher
+   specificity than the reset above. Repeat the reset so the form shows the
+   card's glass instead of an opaque block. */
+html.hub-signin:root[data-us-color-scheme="dark"] .SignIn-Container :is(
+  .ContentItemContainer,
+  .ContentItemContainer > .panel,
+  .ContentItemContainer > div > .panel,
+  .panel,
+  .panel-border,
+  .panel-body,
+  .panel-body-container,
+  .ContentBorder,
+  .NeutralShading,
+  .card
+) {
+  border-color: transparent;
   background: none;
   box-shadow: none;
 }
@@ -362,6 +404,7 @@ html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before {
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  transform-origin: center;
 }
 
 html.hub-signin .SignInPage .SignIn {
@@ -512,7 +555,7 @@ html.hub-signin .SignInPage .SignIn input[type="submit"] {
 html.hub-signin .SignInPage .SignIn input[type="submit"]:hover,
 html.hub-signin .SignInPage .SignIn input[type="submit"]:focus {
   background: color-mix(in srgb, var(--hub-signin-accent) 85%, #ffffff);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--hub-signin-accent) 35%, transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   color: var(--hub-signin-on-accent);
 }
 
@@ -525,9 +568,30 @@ html.hub-signin .SignInPage .SignIn input[type="submit"]:focus-visible {
   outline-offset: 2px;
 }
 
+/* Signing in: the native code disables the button while the request runs.
+   A light sweep crosses it; the theme's busy ring keeps the label. */
 html.hub-signin .SignInPage .SignIn input[type="submit"]:disabled {
-  opacity: 0.8;
-  cursor: default;
+  background-color: var(--hub-signin-accent);
+  background-image: linear-gradient(100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 70%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  color: var(--hub-signin-on-accent);
+  opacity: 1;
+  cursor: progress;
+  animation: hub-signin-button-sweep 1.2s linear infinite;
+}
+
+@keyframes hub-signin-button-sweep {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
 }
 
 /* An empty account link row would only add space. */
@@ -555,37 +619,61 @@ html.hub-signin .SignInPage [id$="_accountLinkDiv"]:not(:has(a[href])) {
 /* ---------- Intro ----------
    Transitions, not animations: removing .hub-signin-intro starts them, and the
    rim's travel animation is never interrupted. Hidden only while that class is
-   on <html>; a fail-safe removes it if anything goes wrong. */
+   on <html>; a fail-safe removes it if anything goes wrong. The stars light up
+   from the card outwards on the canvas while this runs. */
 
 html.hub-signin .SignIn-Container::before,
 html.hub-signin .SignIn-Container::after {
   transition:
-    opacity 1400ms var(--hub-signin-ease-soft) 100ms,
-    transform 1400ms var(--hub-signin-ease-soft) 100ms;
+    opacity 1400ms var(--hub-signin-ease-soft) 250ms,
+    transform 1400ms var(--hub-signin-ease-soft) 250ms;
 }
 
 html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before {
-  transition: opacity 2400ms var(--hub-signin-ease-soft) 600ms;
+  transition: opacity 2400ms var(--hub-signin-ease-soft) 900ms;
 }
 
 html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child img {
   transition:
-    opacity 1800ms var(--hub-signin-ease-soft) 350ms,
-    transform 1800ms var(--hub-signin-ease-soft) 350ms,
-    filter 1800ms var(--hub-signin-ease-soft) 350ms;
+    opacity 1800ms var(--hub-signin-ease-soft) 450ms,
+    transform 1800ms var(--hub-signin-ease-soft) 450ms,
+    filter 1800ms var(--hub-signin-ease-soft) 450ms;
 }
 
 html.hub-signin .SignIn-Container :is(.Tagline, .TagLine) {
   transition:
-    clip-path 900ms var(--hub-signin-ease) 1000ms,
-    opacity 250ms linear 1000ms;
+    clip-path 900ms var(--hub-signin-ease) 1050ms,
+    opacity 250ms linear 1050ms;
 }
 
-html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
-html.hub-signin .SignInPage .SignIn {
+/* The divider draws out from the centre. */
+html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before {
   transition:
-    opacity 1400ms var(--hub-signin-ease-soft) 700ms,
-    transform 1400ms var(--hub-signin-ease-soft) 700ms;
+    opacity 600ms ease 800ms,
+    transform 1200ms var(--hub-signin-ease) 800ms;
+}
+
+/* The form arrives a row at a time: username, password, button, links. */
+html.hub-signin .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$="_LinkPanel"]) {
+  transition:
+    opacity 1000ms var(--hub-signin-ease-soft),
+    transform 1000ms var(--hub-signin-ease-soft);
+}
+
+html.hub-signin .SignInPage .PanelField:nth-child(1) {
+  transition-delay: 950ms;
+}
+
+html.hub-signin .SignInPage .PanelField:nth-child(2) {
+  transition-delay: 1070ms;
+}
+
+html.hub-signin .SignInPage [id$="_commandButtons"] {
+  transition-delay: 1190ms;
+}
+
+html.hub-signin .SignInPage [id$="_LinkPanel"] {
+  transition-delay: 1310ms;
 }
 
 html.hub-signin-intro .SignIn-Container::before,
@@ -595,9 +683,13 @@ html.hub-signin-intro .SignIn-Container::after {
 }
 
 html.hub-signin-intro .ContentItemContainer:has(> .SignIn-Container)::before,
-html.hub-signin-intro .hub-signin-neon,
+html.hub-signin-intro .hub-signin-neon {
+  opacity: 0;
+}
+
 html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before {
   opacity: 0;
+  transform: scaleX(0);
 }
 
 html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:first-child img {
@@ -613,9 +705,9 @@ html.hub-signin-intro .SignIn-Container :is(.Tagline, .TagLine) {
   clip-path: inset(0 100% 0 0);
 }
 
-html.hub-signin-intro .SignInPage .SignIn {
+html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$="_LinkPanel"]) {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
 }
 
 /* The neon keeps its offset from the card while the card rises in. */
@@ -625,8 +717,8 @@ html.hub-signin-intro .hub-signin-neon {
 
 .hub-signin-neon {
   transition:
-    opacity 1800ms var(--hub-signin-ease-soft) 500ms,
-    transform 1400ms var(--hub-signin-ease-soft) 100ms;
+    opacity 1800ms var(--hub-signin-ease-soft) 700ms,
+    transform 1400ms var(--hub-signin-ease-soft) 250ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -636,7 +728,7 @@ html.hub-signin-intro .hub-signin-neon {
   .hub-signin-neon,
   html.hub-signin .SignIn-Container > .iMIS-WebPart:first-child img,
   html.hub-signin .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
-  html.hub-signin .SignInPage .SignIn {
+  html.hub-signin .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$="_LinkPanel"]) {
     transition: opacity 300ms ease;
   }
 
@@ -644,7 +736,8 @@ html.hub-signin-intro .hub-signin-neon {
   html.hub-signin-intro .SignIn-Container::after,
   html.hub-signin-intro .hub-signin-neon,
   html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:first-child img,
-  html.hub-signin-intro .SignInPage .SignIn {
+  html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
+  html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$="_LinkPanel"]) {
     transform: none;
     filter: none;
   }
@@ -653,12 +746,30 @@ html.hub-signin-intro .hub-signin-neon {
     clip-path: none;
   }
 
-  /* The light stays where it is rather than travelling. */
+  /* The light stays where it is rather than travelling or breathing. */
   html.hub-signin .SignIn-Container::after,
   html.hub-signin .ContentItemContainer:has(> .SignIn-Container)::before,
-  .hub-signin-neon::before {
+  html.hub-signin-busy .ContentItemContainer:has(> .SignIn-Container)::before,
+  .hub-signin-neon::before,
+  html.hub-signin .SignInPage .SignIn input[type="submit"]:disabled {
     animation: none;
   }
+}
+
+/* Hiding is instant; only the reveal animates. The native logo and form can
+   already be on screen when the script adds the intro class, and an animated
+   hide would still be fading them out when the reveal starts, so they would
+   never disappear. Last in the intro rules, so it also beats reduced motion.
+   Pseudo-elements cannot go inside :is(), hence the full list. */
+html.hub-signin-intro .SignIn-Container::before,
+html.hub-signin-intro .SignIn-Container::after,
+html.hub-signin-intro .ContentItemContainer:has(> .SignIn-Container)::before,
+html.hub-signin-intro .hub-signin-neon,
+html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:has(.SignInPage)::before,
+html.hub-signin-intro .SignIn-Container > .iMIS-WebPart:first-child img,
+html.hub-signin-intro .SignIn-Container :is(.Tagline, .TagLine),
+html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$="_LinkPanel"]) {
+  transition: none;
 }
 
 /* ---------- Narrow screens ---------- */
@@ -707,17 +818,26 @@ html.hub-signin-intro .hub-signin-neon {
   style.textContent = properties + css;
   document.head.appendChild(style);
 
-  /* ---------- Field and timing ---------- */
+  /* ---------- Constellation and timing ---------- */
 
-  var CELL = 64;                 // triangle cell size; recalculated on resize
-  var LIGHT_MAX = 0.2;           // alpha at tone +1
-  var DARK_MAX = 0.42;           // alpha at tone -1
-  var REVEAL_SPREAD = 1.8;       // seconds the intro sweep takes to cross
-  var REVEAL_DURATION = 1.8;     // seconds each triangle takes to fade in
-  var SHIMMER_PERIOD = 16;       // seconds between shimmer passes
-  var POINTER_RADIUS = 170;
-  var RIPPLE_SPEED = 900;        // pixels per second
-  var RIPPLE_LIFE = 1.6;         // seconds
+  var STAR_AREA = 11000;         // one star per this many square pixels
+  var STAR_MIN = 50;
+  var STAR_MAX = 140;
+  var LINK_DISTANCE = 150;       // stars closer than this are joined
+  var LINK_ALPHA = 0.3;          // link alpha at zero length
+  var DRIFT = 20;                // pixels each star wanders from its home
+  var POINTER_RADIUS = 220;      // the pointer joins and pulls stars within this
+  var POINTER_PULL = 0.07;
+  var INTRO_START = 0.1;         // seconds before the first star lights
+  var INTRO_SPREAD = 1.5;        // seconds for the lighting to reach the corners
+  var STAR_FADE = 0.6;           // seconds each star takes to light
+  var LINK_DRAW = 0.8;           // seconds each link takes to draw across
+  var PULSE_SPEED = 620;         // pixels per second
+  var PULSE_LIFE = 1.8;          // seconds
+  var SIGNAL_INTERVAL = 0.06;    // seconds between new sparks along links
+  var SIGNAL_LIFE = 0.7;         // seconds a spark takes to cross its link
+  var SPARK_BURST = 14;          // sparks already under way on the Sign In click
+  var SPARK_GRACE_MS = 700;      // sparks keep coming this long after the click without a disabled button
   var IDLE_FRAME_MS = 32;        // ~30fps when only ambient motion is running
   var READY_WAIT_MS = 1200;      // longest wait for fonts and the logo image
   var CARD_GLOW_DISTANCE = 280;  // pointer highlight fades out this far away
@@ -732,15 +852,28 @@ html.hub-signin-intro .hub-signin-neon {
 
   var canvas = null;
   var ctx = null;
-  var colours = null;
-  var triangles = [];
+  var starSprite = null;
+  var accentSprite = null;
+  var starRgb = [90, 203, 248];
+  var accentRgb = [200, 220, 255];
+  var catalogue = [];            // every possible star, in normalised positions
+  var stars = [];                // the stars in use at this screen size
+  var points = [];               // this frame's star positions and energy
+  var links = [];                // this frame's drawn links, for signals
   var width = 0;
   var height = 0;
   var dpr = 1;
   var startTime = performance.now();
   var lastDraw = 0;
+  var lastNow = 0;
   var frameId = 0;
-  var ripples = [];
+  var pulses = [];
+  var signals = [];
+  var signalClock = 0;
+  var sparkUntil = 0;
+  var sparkBurst = 0;
+  var centre = { x: 0, y: 0, reach: 1 };
+  var busy = { target: 0, level: 0 };
   var pointer = { x: 0, y: 0, sx: 0, sy: 0, strength: 0, target: 0 };
 
   function reveal() {
@@ -748,31 +881,66 @@ html.hub-signin-intro .hub-signin-neon {
     root.classList.remove("hub-signin-intro");
   }
 
-  /* ---------- Card ---------- */
+  /* ---------- Colour ---------- */
 
-  // Button text follows the accent: dark on light accents, white on dark ones.
-  // The accent is resolved through a probe, so color-mix() and var() chains
-  // in the theme's --accent are handled by the browser.
-  function applyAccentContrast() {
+  // Resolves any CSS colour (including var() chains and color-mix()) through
+  // a hidden probe, returning [r, g, b] in 0-255.
+  function resolveColour(value, fallback) {
     var probe = document.createElement("span");
     probe.style.display = "none";
-    probe.style.color = "var(--hub-signin-accent)";
+    probe.style.color = value;
     document.body.appendChild(probe);
-    var value = getComputedStyle(probe).color;
+    var computed = getComputedStyle(probe).color;
     probe.remove();
 
-    var parts = (value.match(/[\d.]+/g) || []).map(Number);
+    var parts = (computed.match(/[\d.]+/g) || []).map(Number);
     if (parts.length < 3) {
+      return fallback;
+    }
+    var scale = computed.indexOf("color(") === 0 ? 255 : 1;
+    return parts.slice(0, 3).map(function (channel) {
+      return Math.round(Math.min(255, channel * scale));
+    });
+  }
+
+  // Button text follows the accent: dark on light accents, white on dark ones.
+  function applyAccentContrast() {
+    var rgb = resolveColour("var(--hub-signin-accent)", null);
+    if (!rgb) {
       return;
     }
-    var scale = value.indexOf("color(") === 0 ? 1 : 255;
-    var linear = parts.slice(0, 3).map(function (channel) {
-      var c = channel / scale;
+    var linear = rgb.map(function (channel) {
+      var c = channel / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
     var luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
     root.style.setProperty("--hub-signin-on-accent", luminance > 0.4 ? "#001b23" : "#ffffff");
   }
+
+  // A soft round glow, drawn once and stamped for halos and signals. Tight
+  // sprites keep a bright core and fall off quickly, for the sparks.
+  function makeSprite(rgb, tight) {
+    var size = 64;
+    var sprite = document.createElement("canvas");
+    sprite.width = size;
+    sprite.height = size;
+    var g = sprite.getContext("2d");
+    var gradient = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    var colour = rgb.join(",");
+    gradient.addColorStop(0, "rgba(" + colour + ",1)");
+    if (tight) {
+      gradient.addColorStop(0.15, "rgba(" + colour + ",0.8)");
+      gradient.addColorStop(0.4, "rgba(" + colour + ",0.12)");
+    } else {
+      gradient.addColorStop(0.25, "rgba(" + colour + ",0.45)");
+    }
+    gradient.addColorStop(1, "rgba(" + colour + ",0)");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, size, size);
+    return sprite;
+  }
+
+  /* ---------- Card ---------- */
 
   function addCardExtras() {
     var card = document.querySelector(CARD_SELECTOR);
@@ -813,34 +981,27 @@ html.hub-signin-intro .hub-signin-neon {
     card.style.setProperty("--pointer-glow", glow.toFixed(3));
   }
 
-  /* ---------- Triangle field ---------- */
-
-  function readColours() {
-    var computed = getComputedStyle(root);
-    return {
-      light: hexToRgb(computed.getPropertyValue("--hub-signin-tri-light"), [90, 203, 248]),
-      dark: hexToRgb(computed.getPropertyValue("--hub-signin-tri-dark"), [0, 18, 26])
-    };
+  // The intro lights outwards from the card, and sparks travel towards it.
+  function measureCentre() {
+    var card = document.querySelector(CARD_SELECTOR);
+    var box = card ? card.getBoundingClientRect() : null;
+    centre.x = box && box.width ? box.left + box.width / 2 : width / 2;
+    centre.y = box && box.height ? box.top + box.height / 2 : height / 2;
+    centre.reach = Math.max(
+      Math.hypot(centre.x, centre.y),
+      Math.hypot(width - centre.x, centre.y),
+      Math.hypot(centre.x, height - centre.y),
+      Math.hypot(width - centre.x, height - centre.y)
+    );
   }
 
-  function hexToRgb(value, fallback) {
-    var match = /^#?([0-9a-f]{6})$/i.exec(value.trim());
-    if (!match) {
-      return fallback;
-    }
-    var n = parseInt(match[1], 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
+  /* ---------- Constellation ---------- */
 
-  // Deterministic per-cell random, so resizing keeps the same pattern.
-  function cellRandom(col, row) {
-    var seed = (col * 73856093) ^ (row * 19349663) ^ 0x5bd1e995;
+  // Seeded, so the same stars come back after a resize or reload.
+  function seededRandom(seed) {
     return function () {
-      seed |= 0;
-      seed = (seed + 0x6d2b79f5) | 0;
-      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
     };
   }
 
@@ -849,167 +1010,323 @@ html.hub-signin-intro .hub-signin-neon {
     return t * t * (3 - 2 * t);
   }
 
+  function buildCatalogue() {
+    var random = seededRandom(812);
+    catalogue = [];
+    for (var i = 0; i < STAR_MAX; i++) {
+      catalogue.push({
+        nx: random(),
+        ny: random(),
+        radius: random() * 1.5 + 0.6,
+        phase: random() * Math.PI * 2,
+        speed: random() * 0.5 + 0.25,
+        jitter: random()
+      });
+    }
+  }
+
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
-    CELL = Math.round(Math.min(72, Math.max(40, width / 32)));
-    buildTriangles();
-    draw(performance.now(), true);
-  }
+    measureCentre();
 
-  function buildTriangles() {
-    triangles = [];
-    var cols = Math.ceil(width / CELL) + 1;
-    var rows = Math.ceil(height / CELL) + 1;
-
-    for (var row = 0; row < rows; row++) {
-      for (var col = 0; col < cols; col++) {
-        var rand = cellRandom(col, row);
-        var x = col * CELL;
-        var y = row * CELL;
-        var r = x + CELL;
-        var b = y + CELL;
-
-        if (rand() < 0.5) {
-          addTriangle([x, y, r, y, x, b], rand);
-          addTriangle([r, y, r, b, x, b], rand);
-        } else {
-          addTriangle([x, y, r, y, r, b], rand);
-          addTriangle([x, y, r, b, x, b], rand);
-        }
-      }
-    }
-  }
-
-  function addTriangle(points, rand) {
-    var cx = (points[0] + points[2] + points[4]) / 3;
-    var cy = (points[1] + points[3] + points[5]) / 3;
-
-    // Sweep position: 0 at the left edge, 1 at the right, slanted so the
-    // pattern reaches further right along the top of the screen.
-    var u = cx / width + (cy / height - 0.5) * 0.14;
-
-    // Dense on the left, dissolving into plain gradient towards the right.
-    var mask = 1 - smoothstep(0.26, 0.66, u + (rand() - 0.5) * 0.14);
-
-    // Mostly quiet tones with occasional strong light or dark triangles.
-    var tone = rand() * 2 - 1;
-    tone = (tone < 0 ? -1 : 1) * Math.pow(Math.abs(tone), 1.35);
-    if (tone < 0) {
-      tone *= 1.1;
-    }
-    if (rand() < 0.2) {
-      tone *= 0.15;
-    }
-
-    triangles.push({
-      points: points,
-      cx: cx,
-      cy: cy,
-      u: u,
-      mask: mask,
-      base: tone * mask,
-      grain: 0.35 + rand() * 0.65,
-      phase: rand() * Math.PI * 2,
-      delay: Math.max(0, u) * REVEAL_SPREAD + rand() * 0.35
+    var count = Math.round(Math.min(STAR_MAX, Math.max(STAR_MIN, width * height / STAR_AREA)));
+    stars = catalogue.slice(0, count).map(function (star) {
+      var x = star.nx * width;
+      var y = star.ny * height;
+      var distance = Math.hypot(x - centre.x, y - centre.y) / centre.reach;
+      return {
+        x: x,
+        y: y,
+        radius: star.radius,
+        phase: star.phase,
+        speed: star.speed,
+        delay: INTRO_START + distance * INTRO_SPREAD + star.jitter * 0.25
+      };
     });
+
+    draw(performance.now(), true);
   }
 
   function motionAllowed() {
     return !reduceMotion.matches;
   }
 
+  function pulseEnergy(x, y, now) {
+    var energy = 0;
+    for (var i = 0; i < pulses.length; i++) {
+      var pulse = pulses[i];
+      var age = Math.max(0, (now - pulse.start) / 1000);
+      var ring = Math.hypot(x - pulse.x, y - pulse.y) - age * PULSE_SPEED;
+      energy += pulse.amp * Math.exp(-(ring * ring) / 3600) * (1 - age / PULSE_LIFE);
+    }
+    return energy;
+  }
+
+  // A brief flare as a star lights, given the seconds since it started.
+  function flareAt(since) {
+    var span = STAR_FADE * 1.6;
+    return since > 0 && since < span ? Math.sin(Math.PI * since / span) : 0;
+  }
+
   function draw(now, force) {
     var animate = motionAllowed();
-    var t = (now - startTime) / 1000;
-    var introRunning = animate && t < REVEAL_SPREAD + REVEAL_DURATION + 0.4;
+    var dt = Math.min(0.1, Math.max(0, (now - (lastNow || now)) / 1000));
+    lastNow = now;
 
-    // Ease the pointer glow towards its target position and strength.
+    // Static frames show the finished constellation.
+    var t = animate ? (now - startTime) / 1000 : 1000;
+    var introRunning = animate && t < INTRO_START + INTRO_SPREAD + 0.25 + STAR_FADE + LINK_DRAW;
+
     pointer.sx += (pointer.x - pointer.sx) * 0.12;
     pointer.sy += (pointer.y - pointer.sy) * 0.12;
     pointer.strength += (pointer.target - pointer.strength) * 0.06;
 
-    ripples = ripples.filter(function (ripple) {
-      return (now - ripple.start) / 1000 < RIPPLE_LIFE;
+    busy.level += (busy.target - busy.level) * (busy.target ? 0.04 : 0.05);
+
+    pulses = pulses.filter(function (pulse) {
+      return (now - pulse.start) / 1000 < PULSE_LIFE;
+    });
+    signals = signals.filter(function (signal) {
+      return (now - signal.start) / 1000 < SIGNAL_LIFE;
     });
 
-    var busy = introRunning ||
-      ripples.length > 0 ||
+    var active = introRunning ||
+      pulses.length > 0 ||
+      signals.length > 0 ||
+      busy.level > 0.005 ||
       Math.abs(pointer.target - pointer.strength) > 0.01 ||
       Math.abs(pointer.x - pointer.sx) + Math.abs(pointer.y - pointer.sy) > 0.5;
 
-    if (!force && !busy && now - lastDraw < IDLE_FRAME_MS) {
+    if (!force && !active && now - lastDraw < IDLE_FRAME_MS) {
       return;
     }
     lastDraw = now;
 
-    var shimmerAt = ((t % SHIMMER_PERIOD) / SHIMMER_PERIOD) * 1.8 - 0.4;
     var pointerOn = animate && pointer.strength > 0.005;
-    var radius2 = 2 * POINTER_RADIUS * POINTER_RADIUS;
+    var i;
+
+    // Positions, brightness and energy for this frame.
+    points = [];
+    for (i = 0; i < stars.length; i++) {
+      var star = stars[i];
+      var x = star.x;
+      var y = star.y;
+      var lit = 1;
+      var flare = 0;
+      var energy = 0;
+      var since = 1000;
+
+      if (animate) {
+        x += Math.sin(t * star.speed * 0.22 + star.phase) * DRIFT;
+        y += Math.cos(t * star.speed * 0.18 + star.phase) * DRIFT;
+
+        if (pointerOn) {
+          var near = Math.max(0, 1 - Math.hypot(x - pointer.sx, y - pointer.sy) / POINTER_RADIUS);
+          // Eased off while signing in: the pointer is on the button then, and
+          // stars leaning into it would read as a pull towards the card.
+          var attraction = near * POINTER_PULL * pointer.strength * (1 - busy.level);
+          x += (pointer.sx - x) * attraction;
+          y += (pointer.sy - y) * attraction;
+        }
+
+        since = t - star.delay;
+        lit = smoothstep(0, STAR_FADE, since);
+        flare = flareAt(since);
+        energy = pulseEnergy(x, y, now);
+      }
+
+      var proximity = pointerOn
+        ? Math.max(0, 1 - Math.hypot(x - pointer.sx, y - pointer.sy) / POINTER_RADIUS) * pointer.strength
+        : 0;
+
+      points.push({
+        x: x,
+        y: y,
+        radius: star.radius,
+        since: since,
+        lit: lit,
+        flare: flare,
+        energy: energy,
+        proximity: proximity,
+        twinkle: animate ? 0.85 + 0.15 * Math.sin(t * star.speed * 2 + star.phase) : 1
+      });
+    }
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = 0.8;
 
-    for (var i = 0; i < triangles.length; i++) {
-      var tri = triangles[i];
-      var v = tri.base;
+    var starColour = starRgb.join(",");
+    var accentColour = accentRgb.join(",");
 
-      if (animate) {
-        var p = Math.min(1, Math.max(0, (t - tri.delay) / REVEAL_DURATION));
-        var eased = p * p * (3 - 2 * p);  // ease in and out
-
-        v = v * eased * (1 + 0.2 * Math.sin(t * 0.5 + tri.phase));
-
-        // Faint highlight as each triangle arrives.
-        v += Math.sin(Math.PI * p) * 0.22 * tri.grain * tri.mask;
-
-        var ds = tri.u - shimmerAt;
-        v += 0.3 * tri.grain * Math.exp(-(ds * ds) / 0.003) * (0.3 + 0.7 * tri.mask);
-
-        if (pointerOn) {
-          var px = tri.cx - pointer.sx;
-          var py = tri.cy - pointer.sy;
-          v += pointer.strength * 0.8 * tri.grain * Math.exp(-(px * px + py * py) / radius2);
-        }
-
-        for (var r = 0; r < ripples.length; r++) {
-          var ripple = ripples[r];
-          var age = (now - ripple.start) / 1000;
-          var rx = tri.cx - ripple.x;
-          var ry = tri.cy - ripple.y;
-          var ring = Math.sqrt(rx * rx + ry * ry) - age * RIPPLE_SPEED;
-          v += ripple.amp * tri.grain * Math.exp(-(ring * ring) / 6000) * (1 - age / RIPPLE_LIFE);
-        }
-      }
-
-      if (v > -0.01 && v < 0.01) {
+    // Links draw across from the star that lit first.
+    links = [];
+    for (i = 0; i < points.length; i++) {
+      var a = points[i];
+      if (a.lit <= 0) {
         continue;
       }
+      for (var j = i + 1; j < points.length; j++) {
+        var b = points[j];
+        if (b.lit <= 0) {
+          continue;
+        }
+        var dx = b.x - a.x;
+        var dy = b.y - a.y;
+        if (Math.abs(dx) > LINK_DISTANCE || Math.abs(dy) > LINK_DISTANCE) {
+          continue;
+        }
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > LINK_DISTANCE) {
+          continue;
+        }
 
-      var rgb = v > 0 ? colours.light : colours.dark;
-      var alpha = Math.min(1, v > 0 ? v * LIGHT_MAX : -v * DARK_MAX);
-      var pts = tri.points;
+        // A link draws once the later of its two stars has lit.
+        var progress = animate
+          ? smoothstep(0, LINK_DRAW, Math.min(a.since, b.since) - STAR_FADE * 0.4)
+          : 1;
+        if (progress <= 0.001) {
+          continue;
+        }
 
-      ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + alpha.toFixed(3) + ")";
+        var boost = Math.min(1.5, (a.energy + b.energy) * 0.9 + (a.proximity + b.proximity) * 0.6);
+        var alpha = (1 - distance / LINK_DISTANCE) * LINK_ALPHA * (1 + boost) * Math.min(a.lit, b.lit);
+        var from = a.since >= b.since ? a : b;
+        var to = from === a ? b : a;
+
+        ctx.strokeStyle = "rgba(" + starColour + "," + Math.min(0.9, alpha).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(from.x + (to.x - from.x) * progress, from.y + (to.y - from.y) * progress);
+        ctx.stroke();
+
+        if (progress >= 0.99) {
+          links.push(i, j);
+        }
+      }
+
+      // Nearby stars reach out to the pointer.
+      if (a.proximity > 0) {
+        ctx.strokeStyle = "rgba(" + accentColour + "," + (a.proximity * 0.45 * a.lit).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(pointer.sx, pointer.sy);
+        ctx.stroke();
+      }
+    }
+
+    // Stars, with a halo on bright ones and as each lights.
+    for (i = 0; i < points.length; i++) {
+      var point = points[i];
+      if (point.lit <= 0) {
+        continue;
+      }
+      var glow = Math.min(1.2, point.energy + point.flare * 0.8 + point.proximity * 0.5);
+      var radius = point.radius * (0.6 + 0.4 * point.lit) + point.proximity + glow * 1.6;
+
+      if (point.radius > 1.7 || glow > 0.05) {
+        var halo = 10 + point.radius * 4 + glow * 18;
+        ctx.globalAlpha = Math.min(1, (0.12 + glow * 0.35) * point.lit);
+        ctx.drawImage(starSprite, point.x - halo, point.y - halo, halo * 2, halo * 2);
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.fillStyle = "rgba(191,236,252," + Math.min(1, (0.4 + glow * 0.6 + point.proximity * 0.4) * point.lit * point.twinkle).toFixed(3) + ")";
       ctx.beginPath();
-      ctx.moveTo(pts[0], pts[1]);
-      ctx.lineTo(pts[2], pts[3]);
-      ctx.lineTo(pts[4], pts[5]);
-      ctx.closePath();
+      ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Signing in: sparks run along links towards the card. They start on the
+    // Sign In click with a burst already under way, and carry on while the
+    // native code has the button disabled.
+    var sparking = busy.target || now < sparkUntil;
+    if (animate && sparking && links.length) {
+      signalClock += dt;
+      while (sparkBurst > 0) {
+        sparkBurst--;
+        addSignal(now - Math.random() * SIGNAL_LIFE * 600);
+      }
+      while (signalClock > SIGNAL_INTERVAL) {
+        signalClock -= SIGNAL_INTERVAL;
+        addSignal(now);
+      }
+    } else {
+      sparkBurst = 0;
+    }
+
+    for (i = 0; i < signals.length; i++) {
+      var signal = signals[i];
+      var start = points[signal.from];
+      var end = points[signal.to];
+      if (!start || !end) {
+        continue;
+      }
+      // A spark can be added after this frame's timestamp, so clamp at 0.
+      var s = Math.max(0, (now - signal.start) / 1000 / SIGNAL_LIFE);
+      var eased = s * s * (3 - 2 * s);
+      var sx = start.x + (end.x - start.x) * eased;
+      var sy = start.y + (end.y - start.y) * eased;
+      ctx.globalAlpha = Math.sin(Math.PI * s) * 0.9;
+      ctx.drawImage(accentSprite, sx - 7, sy - 7, 14, 14);
+
+      // A small white-hot core.
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Faint rings show where each pulse is.
+    for (i = 0; i < pulses.length; i++) {
+      var pulse = pulses[i];
+      // A pulse added on a click can be newer than this frame's timestamp, and
+      // a negative radius makes arc() throw and stop the animation.
+      var age = Math.max(0, (now - pulse.start) / 1000);
+      ctx.strokeStyle = "rgba(" + accentColour + "," + (Math.max(0, 1 - age / PULSE_LIFE) * 0.18 * pulse.amp).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(pulse.x, pulse.y, age * PULSE_SPEED, 0, Math.PI * 2);
+      ctx.stroke();
     }
   }
 
+  // A spark on a random drawn link, travelling from the end further from the
+  // card to the nearer end.
+  function addSignal(start) {
+    var pick = Math.floor(Math.random() * links.length / 2) * 2;
+    var first = links[pick];
+    var second = links[pick + 1];
+    var firstCloser = Math.hypot(points[first].x - centre.x, points[first].y - centre.y) <
+      Math.hypot(points[second].x - centre.x, points[second].y - centre.y);
+    signals.push({
+      from: firstCloser ? second : first,
+      to: firstCloser ? first : second,
+      start: start
+    });
+  }
+
+  // Called on the Sign In click (or Enter in a field). If validation stops the
+  // request, the button is never disabled and the sparks die out after this.
+  function startSparks() {
+    sparkUntil = performance.now() + SPARK_GRACE_MS;
+    sparkBurst = SPARK_BURST;
+    measureCentre();
+  }
+
+  // The next frame is booked first, so one bad frame can't stop the animation.
   function loop(now) {
-    draw(now, false);
     frameId = requestAnimationFrame(loop);
+    draw(now, false);
   }
 
   function startLoop() {
     cancelAnimationFrame(frameId);
+    lastNow = 0;
     if (motionAllowed() && !document.hidden) {
       frameId = requestAnimationFrame(loop);
     } else {
@@ -1019,16 +1336,53 @@ html.hub-signin-intro .hub-signin-neon {
 
   /* ---------- Interaction ---------- */
 
-  function addRipple(element, amp) {
-    if (!element || !motionAllowed()) {
+  function addPulse(x, y, amp) {
+    if (motionAllowed()) {
+      pulses.push({ x: x, y: y, amp: amp, start: performance.now() });
+    }
+  }
+
+  function addPulseFrom(element, amp) {
+    if (element) {
+      var box = element.getBoundingClientRect();
+      addPulse(box.left + box.width / 2, box.top + box.height / 2, amp);
+    }
+  }
+
+  // The native Sign In code disables the button while it signs in (the theme's
+  // busy ring watches the same state). Credentials are never read.
+  function setBusy(on) {
+    if (on === (busy.target === 1)) {
       return;
     }
-    var box = element.getBoundingClientRect();
-    ripples.push({
-      x: box.left + box.width / 2,
-      y: box.top + box.height / 2,
-      amp: amp,
-      start: performance.now()
+    busy.target = on ? 1 : 0;
+    root.classList.toggle("hub-signin-busy", on);
+    if (on) {
+      measureCentre();
+    } else {
+      // Released (failed sign-in, MFA): the sparks stop at once and a ring
+      // goes out from the card.
+      signals = [];
+      sparkUntil = 0;
+      sparkBurst = 0;
+      addPulse(centre.x, centre.y, 0.8);
+    }
+  }
+
+  function watchBusy() {
+    new MutationObserver(function () {
+      var button = document.querySelector(SUBMIT_SELECTOR);
+      setBusy(Boolean(button && button.disabled));
+    }).observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["disabled"]
+    });
+
+    // Back/forward cache restores the page as it was left.
+    window.addEventListener("pageshow", function () {
+      setBusy(false);
     });
   }
 
@@ -1062,22 +1416,31 @@ html.hub-signin-intro .hub-signin-neon {
       }
     });
 
+    // Clicking the open background sends a pulse through the stars.
+    document.addEventListener("pointerdown", function (event) {
+      if (event.target.closest && !event.target.closest(CARD_SELECTOR + ", a, button, input, select, textarea, .modal")) {
+        addPulse(event.clientX, event.clientY, 0.6);
+      }
+    });
+
     // Delegated, so the Sign In iPart can re-render in a partial postback.
     document.addEventListener("focusin", function (event) {
       if (event.target.matches && event.target.matches(FIELD_SELECTOR)) {
-        addRipple(event.target, 0.35);
+        addPulseFrom(event.target, 0.35);
       }
     });
 
     document.addEventListener("click", function (event) {
-      if (event.target.matches && event.target.matches(SUBMIT_SELECTOR)) {
-        addRipple(event.target, 0.9);
+      if (event.target.matches && event.target.matches(SUBMIT_SELECTOR) && !event.target.disabled) {
+        addPulseFrom(event.target, 0.9);
+        startSparks();
       }
     }, true);
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Enter" && event.target.matches && event.target.matches(FIELD_SELECTOR)) {
-        addRipple(document.querySelector(SUBMIT_SELECTOR), 0.9);
+        addPulseFrom(document.querySelector(SUBMIT_SELECTOR), 0.9);
+        startSparks();
       }
     });
 
@@ -1127,24 +1490,51 @@ html.hub-signin-intro .hub-signin-neon {
 
   function playIntro() {
     startTime = performance.now();
+    measureCentre();
+    resize();
     startLoop();
     // Next frame, so the hidden state has painted and the transitions run.
     requestAnimationFrame(reveal);
   }
 
+  // Exposed for the mockup's Replay control.
+  window.HubSignIn = {
+    replay: function () {
+      root.classList.add("hub-signin-intro");
+      // Force the hidden state to apply before it is removed again.
+      void root.offsetWidth;
+      playIntro();
+    }
+  };
+
   function init() {
+    // The loader only loads this file on sign-in pages, but if it is ever
+    // included elsewhere, undo everything rather than restyle the page.
+    if (!document.querySelector(CARD_SELECTOR)) {
+      clearTimeout(failSafe);
+      root.classList.remove("hub-signin", "hub-signin-intro");
+      style.remove();
+      return;
+    }
+
     try {
       canvas = document.createElement("canvas");
       canvas.className = "hub-signin-field";
       canvas.setAttribute("aria-hidden", "true");
       document.body.insertBefore(canvas, document.body.firstChild);
       ctx = canvas.getContext("2d");
-      colours = readColours();
 
+      starRgb = resolveColour("var(--hub-signin-star)", starRgb);
+      starSprite = makeSprite(starRgb);
+      accentRgb = resolveColour("var(--hub-signin-core)", accentRgb);
+      accentSprite = makeSprite(accentRgb, true);
+
+      buildCatalogue();
       applyAccentContrast();
       addCardExtras();
       resize();
       bindInteraction();
+      watchBusy();
       whenReady(playIntro);
     } catch (error) {
       reveal();
@@ -1160,4 +1550,3 @@ html.hub-signin-intro .hub-signin-neon {
     init();
   }
 })();
-</script>
