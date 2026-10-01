@@ -74,6 +74,21 @@ static frame of the field.
 Backdrop blur over the animated field costs GPU time, so check it on low-end
 hardware before production.
 
+## Easter eggs
+
+`SignInPage.js` includes two easter eggs, each with a switch in `EGGS` and all
+their words in `EGG_MESSAGES`:
+
+- **Gravity well:** press and hold on the open background; stars that come
+  close are caught and follow the well, which grows as it catches more, with
+  messages at 20/40/75/90/100%. Catching every star sets off a supernova.
+- **Shooting star:** 1 in 5 visits, or after 45s idle; clicking it opens a
+  dialog with the next of five curiosity quotes.
+
+They never fire from the card or its controls, or while signing in, and are off
+under reduced motion. Design notes, tuning and test results are in
+[`eggs/README.md`](eggs/README.md).
+
 ## iMIS installation
 
 Nothing goes in the page's head content. The theme loader (`index.js`) loads
@@ -140,6 +155,7 @@ so screenshots taken straight after a load can show the intro's hidden state.
 - `THeme/UnionSuite/Scripts/SignInPage.js`: the sign-in page design
 - `THeme/UnionSuite/index.js`: the loader entry (`signin` module)
 - `v2/index.html`, `v2/hub-logo.png`: the mockup
+- `eggs/`: the easter eggs mockup (the v2 card with controls that show each egg)
 - `ideas/`: the background explorations, including the constellation
 - `redesign/index.html`, `redesign/redesign.css`, `login.js`: the design mockup
   with concepts A–C (`#card`, `#split`, `#open`) and the original triangle

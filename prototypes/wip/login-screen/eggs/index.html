@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!-- Sign-in easter eggs mockup: the v2 card (native Staff Sign In markup with
+     the shared theme CSS and theme loader) with controls that show the easter
+     eggs in Scripts/SignInPage.js (the gravity well with its supernova, and
+     the shooting star) through window.HubSignIn.eggs. The card markup is
+     copied from ../v2/index.html. ?accent=blue overrides the theme's orange
+     --accent. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign-in easter eggs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="eggs.css">
+  <script>
+    if (/accent=blue/.test(location.search)) {
+      document.write('<style>:root { --accent: #2563c4; }</style>');
+    }
+  </script>
+  <script src="../../../../THeme/UnionSuite/index.js"></script>
+</head>
+<body id="MainBody" class="fade HubWrapper-StaffSignIn">
+<form method="post" action="#" id="aspnetForm" onsubmit="return false;">
+<div id="MainPanel">
+<div id="ctl00_ContentPanel" class="EmptyMasterContentPanel" translate="yes" style="overflow:auto;">
+  <div id="ctl00_UserMessagesUpdatePanel"></div>
+  <div id="ctl00_TemplateBody_PublishUpdatePanel"></div>
+  <div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="ContentItemContainer">
+          <div id="WebPartZone1_Page1" class="WebPartZone SignIn-Container">
+            <div class="iMIS-WebPart">
+              <div id="ste_container_ciLogo" class="ContentItemContainer"><div class="EmbedLogo EmbeddedCCO"><div class="panel ">
+                <div class="panel-heading"></div>
+                <div class="panel-body-container"><div class="panel-body">
+                  <div class="cco tabs-wrapper tabs-horizontal tabs-top">
+                    <div class="RadTabStrip RadTabStrip_Orion RadTabStripTop_Orion RadTabStripTop RadTabStripTop_Orion_Baseline">
+                      <div class="rtsLevel rtsLevel1"><ul class="rtsUL"><li class="rtsLI rtsFirst rtsLast"><a class="rtsLink rtsSelected" href="#"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Logo</span></span></span></a></li></ul></div>
+                    </div>
+                    <div class="RadMultiPage RadMultiPage_Default">
+                      <div class="rmpView">
+                        <div class="ContentWizardDisplay ClearFix"><div>
+                          <div class="row"><div class="col-sm-12"><div class="WebPartZone">
+                            <div id="ste_container_Logo" class="ContentItemContainer"><img alt="Union Innovation Hub" src="../v2/hub-logo.png"></div>
+                            <div class="Error" style="Display:None;"></div>
+                            <div id="ste_container_Tagline" class="ContentItemContainer"><div class="Tagline">Powered by the ACTU</div></div>
+                            <div class="Error" style="Display:None;"></div>
+                          </div></div></div>
+                        </div></div>
+                      </div>
+                    </div>
+                    <div style="display: block;"></div>
+                  </div>
+                  <div></div>
+                  <span></span>
+                </div></div>
+              </div></div></div>
+            </div>
+            <div class="iMIS-WebPart">
+              <div id="ste_container_ciSignIn" class="ContentItemContainer"><div class="SignInPage"><div class="panel panel-border ">
+                <div class="panel-heading Distinguish"><h2 class="panel-title" translate="yes">Sign In</h2></div>
+                <div class="panel-body-container"><div class="panel-body">
+                  <div id="x_SignInRefreshPanel" style="display: block;">
+                    <div id="x_SignInPanel" class="SignIn">
+                      <div id="x_contentPanel" class="StandardPanel" style="background-color:Transparent;border-style:None;">
+                        <div id="x_ActionPanel">
+                          <div id="x_confirmationMessageContainer" role="alert"></div>
+                          <div style="clear: both;"></div>
+                          <div id="x_signInDiv">
+                            <div class="PanelField">
+                              <label for="x_signInUserName" class="contact-signin-label" translate="yes">Username</label>
+                              <div class="forgot-link-field">
+                                <input type="text" id="x_signInUserName" autocomplete="off" placeholder="Username" aria-required="true">
+                                <a id="x_inlineForgotUsername" aria-label="Click this link if you forgot your username." href="#">Forgot?</a>
+                              </div>
+                              <span id="x_UserNameRequired" class="Error ValidationError" role="alert" style="display:none;">Required</span>
+                            </div>
+                            <div class="PanelField">
+                              <label for="x_signInPassword" class="contact-signin-label" translate="yes">Password</label>
+                              <div class="forgot-link-field">
+                                <input id="x_signInPassword" type="password" autocomplete="off" aria-required="true" placeholder="Password">
+                                <a id="x_inlineForgotPassword" aria-label="Click this link if you forgot your pasword." href="#">Forgot?</a>
+                              </div>
+                              <span id="x_PasswordRequired" class="Error ValidationError" role="alert" style="display:none;">Required</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="x_commandButtons" translate="yes" class="pt-4">
+                        <input type="submit" value="Sign In" id="x_SubmitButton" class="TextButton PrimaryButton SignInButton">
+                      </div>
+                      <div id="x_LinkPanel" translate="yes">
+                        <div id="x_forgotPasswordUserLinkDiv" class="CenterText pb-2">
+                          <span><div><a class="NoWrap" href="#">Forgot username?</a><span> | </span><a class="NoWrap" href="#">Forgot password?</a></div></span>
+                        </div>
+                        <div id="x_accountLinkDiv" class="CenterText pb-2"><a id="x_accountLink"></a></div>
+                      </div>
+                      <div style="clear: both;"></div>
+                    </div>
+                  </div>
+                </div></div>
+              </div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</form>
+
+<aside class="mockup-controls" aria-labelledby="mockup-controls-title">
+  <div class="mockup-controls__head">
+    <h2 id="mockup-controls-title">Easter eggs</h2>
+    <button type="button" class="mockup-controls__collapse" aria-expanded="true" aria-controls="mockup-controls-list">Hide</button>
+  </div>
+  <ol id="mockup-controls-list" class="mockup-controls__list">
+    <li>
+      <strong>Gravity well</strong>
+      <span>Press and hold on the background, then drag to sweep stars up. Let go to scatter.</span>
+      <button type="button" data-egg="gravity">Show me</button>
+    </li>
+    <li>
+      <strong>Supernova</strong>
+      <span>Catch every star in one hold. The well grows as you catch more, with messages along the way (once per session).</span>
+      <button type="button" data-egg="supernova">Show me</button>
+      <button type="button" data-egg="resetMessages">Reset messages</button>
+    </li>
+    <li>
+      <strong>Shooting star</strong>
+      <span>1 in 5 visits, or after 45s idle. Click it to catch it.</span>
+      <button type="button" data-egg="shootingStar">Send one</button>
+    </li>
+  </ol>
+  <p class="mockup-controls__foot">
+    <button type="button" data-replay>Replay intro</button>
+  </p>
+</aside>
+
+<script>
+  // Mirrors the native "graceful loading" script.
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.classList.add("loaded", "in");
+  });
+
+  // Mockup controls, and a stand-in for the native sign-in request (fails
+  // after 2.8s), so the eggs can be checked to stay quiet while signing in.
+  (function () {
+    var panel = document.querySelector(".mockup-controls");
+    var list = document.getElementById("mockup-controls-list");
+    var collapse = panel.querySelector(".mockup-controls__collapse");
+
+    collapse.addEventListener("click", function () {
+      var open = list.hidden;
+      list.hidden = !open;
+      collapse.setAttribute("aria-expanded", String(open));
+      collapse.textContent = open ? "Hide" : "Show";
+    });
+
+    panel.addEventListener("click", function (event) {
+      var button = event.target.closest("button");
+      var signIn = window.HubSignIn;
+      if (!button || !signIn || !signIn.eggs) {
+        return;
+      }
+      if (button.dataset.egg) {
+        signIn.eggs[button.dataset.egg]();
+      } else if (button.hasAttribute("data-replay")) {
+        signIn.replay();
+      }
+    });
+
+    var submit = document.getElementById("x_SubmitButton");
+    var message = document.getElementById("x_confirmationMessageContainer");
+
+    function validate(inputId, messageId) {
+      var empty = !document.getElementById(inputId).value;
+      document.getElementById(messageId).style.display = empty ? "inline" : "none";
+      return !empty;
+    }
+
+    submit.addEventListener("click", function () {
+      var valid = validate("x_signInUserName", "x_UserNameRequired") &
+        validate("x_signInPassword", "x_PasswordRequired");
+      message.textContent = "";
+      if (!valid) {
+        return;
+      }
+      setTimeout(function () {
+        submit.disabled = true;
+      });
+      setTimeout(function () {
+        submit.disabled = false;
+        message.innerHTML = '<span class="Error">Sign in failed. Check your username and password.</span>';
+      }, 2800);
+    });
+  })();
+</script>
+</body>
+</html>

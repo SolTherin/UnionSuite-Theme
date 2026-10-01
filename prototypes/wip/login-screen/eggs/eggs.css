@@ -1,0 +1,78 @@
+/* Sign-in easter eggs mockup: the controls panel only. The eggs themselves,
+   and their styles, are in Scripts/SignInPage.js. */
+
+.mockup-controls {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 280px;
+  max-width: calc(100% - 32px);
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(0, 20, 28, 0.86);
+  color: rgba(255, 255, 255, 0.85);
+  font: 12px/1.4 "Open Sans", Arial, sans-serif;
+}
+
+.mockup-controls__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mockup-controls h2 {
+  margin: 0;
+  color: #fff;
+  font: 700 13px "Open Sans", Arial, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mockup-controls__list {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0 0 0 18px;
+}
+
+.mockup-controls__list li {
+  display: grid;
+  gap: 4px;
+}
+
+.mockup-controls__list strong {
+  color: #fff;
+}
+
+.mockup-controls__list span {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.mockup-controls__foot {
+  margin: 12px 0 0;
+}
+
+.mockup-controls button {
+  justify-self: start;
+  padding: 3px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mockup-controls button:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.mockup-controls button[aria-pressed="true"] {
+  border-color: #5acbf8;
+  background: rgba(90, 203, 248, 0.18);
+  color: #fff;
+}

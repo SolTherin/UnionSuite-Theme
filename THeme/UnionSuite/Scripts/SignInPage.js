@@ -14,6 +14,15 @@
  * Per site, change only the logo image and the Tagline text.
  *
  * Highlights use the theme's --accent, falling back to iMIS blue.
+ *
+ * Easter eggs (switches and words under Settings):
+ *   - Gravity well: press and hold on the open background. Stars that come
+ *     close are caught and follow the well; it grows as it catches more, with
+ *     messages along the way. Catch every star for a supernova.
+ *   - Shooting star: 1 in 5 visits, or after 45s idle, one crosses the open
+ *     space beside the card. Clicking it opens a curiosity quote.
+ * They never fire from the card or its controls, or while signing in, and are
+ * off under reduced motion. Mockup: prototypes/wip/login-screen/eggs/.
  */
 (function () {
   "use strict";
@@ -34,6 +43,53 @@
   // (e.g. on the Hub's own site, where the logo already says it).
   var CREDIT_PREFIX = "Powered by ";
   var CREDIT_NAME = "Union Innovation Hub";
+
+  // Easter eggs. Set either to false to switch it off.
+  var EGGS = {
+    gravity: true,
+    shootingStar: true
+  };
+
+  // Every word the easter eggs show. Inserted as plain text.
+  var EGG_MESSAGES = {
+    // Each catch shows the next quote in turn (remembered between visits).
+    shootingStar: {
+      heading: "You caught a shooting star",
+      quotes: [
+        {
+          text: "The important thing is not to stop questioning. Curiosity has its own reason for existing.",
+          cite: "Albert Einstein"
+        },
+        {
+          text: "Research is formalized curiosity. It is poking and prying with a purpose.",
+          cite: "Zora Neale Hurston"
+        },
+        {
+          text: "Be less curious about people and more curious about ideas.",
+          cite: "Marie Curie"
+        },
+        {
+          text: "Curiosity will conquer fear even more than bravery will.",
+          cite: "James Stephens"
+        },
+        {
+          text: "Millions saw the apple fall, but Newton was the one who asked why.",
+          cite: "Bernard Baruch"
+        }
+      ],
+      button: "Close"
+    },
+    // Shown above the gravity well as the share of caught stars passes each
+    // mark, once per browser session each. The counter shows from the mark
+    // with showCount.
+    milestones: [
+      { at: 0.2, text: "This is unexpected" },
+      { at: 0.4, text: "I see you\u2019re determined" },
+      { at: 0.75, text: "You can do it!", showCount: true },
+      { at: 0.9, text: "Almost there\u2026" },
+      { at: 1, text: "Nailed it!" }
+    ]
+  };
 
   var css = `
 html.hub-signin {
@@ -772,6 +828,118 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
   transition: none;
 }
 
+/* ---------- Easter eggs ---------- */
+
+/* While a gravity well is held, nothing on the page can be selected. */
+html.hub-signin.hub-signin-holding,
+html.hub-signin.hub-signin-holding * {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grabbing;
+}
+
+/* Milestone messages are drawn on the canvas; this repeats them for screen
+   readers without showing them twice. */
+.hub-signin-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The shooting-star dialog, in the card's glass. */
+.hub-signin-dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 32px 28px 24px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--hub-signin-card-radius);
+  background: rgba(0, 28, 38, 0.82);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    0 0 40px color-mix(in srgb, var(--hub-signin-accent) 25%, transparent);
+  color: #fff;
+  font: 15px/1.5 var(--hub-signin-face-body);
+  text-align: center;
+}
+
+.hub-signin-dialog::backdrop {
+  background: rgba(0, 12, 18, 0.55);
+}
+
+.hub-signin-dialog[open] {
+  animation: hub-signin-dialog-in 500ms var(--hub-signin-ease) both;
+}
+
+@keyframes hub-signin-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hub-signin-dialog__heading {
+  margin: 0 0 18px;
+  color: var(--hub-signin-core);
+  font: 600 12px/1.4 var(--hub-signin-face-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hub-signin-dialog__quote {
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  color: #fff;
+  font: 500 19px/1.45 var(--hub-signin-face-display);
+}
+
+.hub-signin-dialog__quote p {
+  margin: 0 0 6px;
+  font-style: italic;
+}
+
+.hub-signin-dialog__quote footer {
+  color: rgba(255, 255, 255, 0.6);
+  font: 13px var(--hub-signin-face-body);
+}
+
+.hub-signin-dialog__quote footer::before {
+  content: "— ";
+}
+
+.hub-signin-dialog__close {
+  height: 40px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--hub-signin-radius);
+  background: var(--hub-signin-accent);
+  color: var(--hub-signin-on-accent);
+  font: 600 14px var(--hub-signin-face-body);
+  cursor: pointer;
+}
+
+.hub-signin-dialog__close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-signin-dialog[open] {
+    animation: none;
+  }
+}
+
 /* ---------- Narrow screens ---------- */
 
 @media (max-width: 420px) {
@@ -842,10 +1010,43 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
   var READY_WAIT_MS = 1200;      // longest wait for fonts and the logo image
   var CARD_GLOW_DISTANCE = 280;  // pointer highlight fades out this far away
 
+  // Gravity well. It starts small and grows by a step for every 5% of stars
+  // caught. Reach: free stars feel the pull within this. Catch: stars this
+  // close are caught and follow the well from anywhere until release.
+  var HOLD_MS = 280;             // press this long to open a well
+  var HOLD_SLOP = 10;            // moving further than this first cancels it
+  var GROW_EVERY = 0.05;
+  var REACH_START = 150;
+  var REACH_STEP = 9;            // px per step (330 with every star caught)
+  var CATCH_START = 30;
+  var CATCH_STEP = 5;            // px per step (130 with every star caught)
+  var GROW_EASE = 1.5;           // how quickly it eases to its new size (per second)
+  var WELL_PULL = 1600;          // px/s² at the reach's edge, rising inwards
+  var CAUGHT_PULL = 2400;        // caught stars follow the well from anywhere
+  var WELL_SWIRL = 0.75;         // sideways share of the pull, for orbits
+  var CORE_SHARE = 0.55;         // stars are pushed back out inside this share of the catch
+  var SPRING = 7;                // pull home on each star's offset
+  var DAMPING = 2.6;
+  var SCATTER = 640;             // px/s kick on release, at the well
+  var MILESTONE_LIFE = 2.6;      // seconds a milestone message shows
+  var COLLAPSE = 1.1;            // supernova: seconds to collapse
+  var BURST_SPEED = 900;         // supernova: average outward px/s
+  var FLASH = 0.9;               // supernova: seconds of flash
+
+  // Shooting star.
+  var SHOOT_CHANCE = 0.2;        // chance of one on page load
+  var SHOOT_IDLE_MS = 45000;     // or after this long without input
+  var SHOOT_LIFE = 1.7;          // seconds across the sky
+  var SHOOT_GRACE = 0.35;        // catchable this long after it fades
+
+  var MILESTONE_KEY = "hub-signin:milestones";
+  var QUOTE_KEY = "hub-signin:quote";
+
   var CARD_SELECTOR = ".SignIn-Container";
   var LOGO_SELECTOR = ".SignIn-Container > .iMIS-WebPart:first-child img";
   var FIELD_SELECTOR = ".SignInPage .forgot-link-field input";
   var SUBMIT_SELECTOR = ".SignInPage .SignIn input[type='submit']";
+  var BACKGROUND_IGNORE = CARD_SELECTOR + ", a, button, input, select, textarea, dialog, .modal";
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var failSafe = setTimeout(reveal, 6000);
@@ -874,7 +1075,13 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
   var sparkBurst = 0;
   var centre = { x: 0, y: 0, reach: 1 };
   var busy = { target: 0, level: 0 };
-  var pointer = { x: 0, y: 0, sx: 0, sy: 0, strength: 0, target: 0 };
+  var pointer = { x: 0, y: 0, sx: 0, sy: 0, strength: 0, target: 0, touch: false };
+  var press = null;              // a pointer press on the open background
+  var well = null;               // the gravity well while held
+  var supernova = null;          // every star caught: collapse, then burst
+  var milestone = null;          // the milestone message showing
+  var shooting = null;           // a shooting star crossing
+  var idleTimer = 0;
 
   function reveal() {
     clearTimeout(failSafe);
@@ -1044,7 +1251,13 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
         radius: star.radius,
         phase: star.phase,
         speed: star.speed,
-        delay: INTRO_START + distance * INTRO_SPREAD + star.jitter * 0.25
+        delay: INTRO_START + distance * INTRO_SPREAD + star.jitter * 0.25,
+        // Offset from home, moved by the gravity well and sprung back.
+        ox: 0,
+        oy: 0,
+        vx: 0,
+        vy: 0,
+        caught: false
       };
     });
 
@@ -1087,6 +1300,8 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
 
     busy.level += (busy.target - busy.level) * (busy.target ? 0.04 : 0.05);
 
+    updateEggs(dt, now, animate);
+
     pulses = pulses.filter(function (pulse) {
       return (now - pulse.start) / 1000 < PULSE_LIFE;
     });
@@ -1098,6 +1313,7 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       pulses.length > 0 ||
       signals.length > 0 ||
       busy.level > 0.005 ||
+      eggsActive() ||
       Math.abs(pointer.target - pointer.strength) > 0.01 ||
       Math.abs(pointer.x - pointer.sx) + Math.abs(pointer.y - pointer.sy) > 0.5;
 
@@ -1106,7 +1322,8 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
     }
     lastDraw = now;
 
-    var pointerOn = animate && pointer.strength > 0.005;
+    var pointerOn = animate && pointer.strength > 0.005 && !well && !supernova;
+    var collapse = collapseLevel(now);
     var i;
 
     // Positions, brightness and energy for this frame.
@@ -1133,10 +1350,18 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
           y += (pointer.sy - y) * attraction;
         }
 
+        x += star.ox;
+        y += star.oy;
+
         since = t - star.delay;
         lit = smoothstep(0, STAR_FADE, since);
         flare = flareAt(since);
         energy = pulseEnergy(x, y, now);
+      }
+
+      if (collapse > 0) {
+        x += (supernova.x - x) * collapse;
+        y += (supernova.y - y) * collapse;
       }
 
       var proximity = pointerOn
@@ -1149,7 +1374,8 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
         radius: star.radius,
         since: since,
         lit: lit,
-        flare: flare,
+        caught: star.caught,
+        flare: flare + collapse * 0.8,
         energy: energy,
         proximity: proximity,
         twinkle: animate ? 0.85 + 0.15 * Math.sin(t * star.speed * 2 + star.phase) : 1
@@ -1194,11 +1420,12 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
         }
 
         var boost = Math.min(1.5, (a.energy + b.energy) * 0.9 + (a.proximity + b.proximity) * 0.6);
-        var alpha = (1 - distance / LINK_DISTANCE) * LINK_ALPHA * (1 + boost) * Math.min(a.lit, b.lit);
+        var alpha = (1 - distance / LINK_DISTANCE) * LINK_ALPHA * (1 + boost) * Math.min(a.lit, b.lit) * (1 - collapse);
         var from = a.since >= b.since ? a : b;
         var to = from === a ? b : a;
 
-        ctx.strokeStyle = "rgba(" + starColour + "," + Math.min(0.9, alpha).toFixed(3) + ")";
+        // Stars caught by the gravity well link in the accent colour.
+        ctx.strokeStyle = "rgba(" + (a.caught && b.caught ? accentColour : starColour) + "," + Math.min(0.9, alpha).toFixed(3) + ")";
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
         ctx.lineTo(from.x + (to.x - from.x) * progress, from.y + (to.y - from.y) * progress);
@@ -1225,13 +1452,13 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       if (point.lit <= 0) {
         continue;
       }
-      var glow = Math.min(1.2, point.energy + point.flare * 0.8 + point.proximity * 0.5);
+      var glow = Math.min(1.2, point.energy + point.flare * 0.8 + point.proximity * 0.5 + (point.caught ? 0.35 : 0));
       var radius = point.radius * (0.6 + 0.4 * point.lit) + point.proximity + glow * 1.6;
 
       if (point.radius > 1.7 || glow > 0.05) {
         var halo = 10 + point.radius * 4 + glow * 18;
         ctx.globalAlpha = Math.min(1, (0.12 + glow * 0.35) * point.lit);
-        ctx.drawImage(starSprite, point.x - halo, point.y - halo, halo * 2, halo * 2);
+        ctx.drawImage(point.caught ? accentSprite : starSprite, point.x - halo, point.y - halo, halo * 2, halo * 2);
         ctx.globalAlpha = 1;
       }
 
@@ -1281,6 +1508,11 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+
+    drawWell(collapse);
+    drawMilestone(now);
+    drawSupernovaFlash(now);
+    drawShootingStar(now);
 
     // Faint rings show where each pulse is.
     for (i = 0; i < pulses.length; i++) {
@@ -1333,6 +1565,605 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       draw(performance.now(), true);
     }
   }
+
+  /* ---------- Easter eggs ---------- */
+
+  function eggRgba(rgb, alpha) {
+    return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + Math.max(0, Math.min(1, alpha)).toFixed(3) + ")";
+  }
+
+  function onBackground(event) {
+    return Boolean(event.target.closest) && !event.target.closest(BACKGROUND_IGNORE);
+  }
+
+  // Called once per frame from draw().
+  function updateEggs(dt, now, animate) {
+    if (well && !supernova) {
+      well.x += (pointer.x - well.x) * 0.25;
+      well.y += (pointer.y - well.y) * 0.25;
+      well.level = Math.min(1, well.level + dt * 2.5);
+      growWell(dt, now);
+      if (stars.length && caughtCount() === stars.length) {
+        supernova = { x: well.x, y: well.y, start: now, burst: false };
+      }
+    }
+    if (supernova && !supernova.burst && (now - supernova.start) / 1000 >= COLLAPSE) {
+      burstSupernova(now);
+    }
+    if (supernova && supernova.burst && (now - supernova.burstAt) / 1000 > FLASH + 2) {
+      supernova = null;
+    }
+    if (animate) {
+      stepPhysics(dt);
+    }
+  }
+
+  // Keeps the canvas at full frame rate while anything egg-related moves.
+  function eggsActive() {
+    return Boolean(well || supernova || shooting || milestone) || !physicsSettled();
+  }
+
+  /* Gravity well */
+
+  // Each star carries an offset from its drifting home, pulled back by a
+  // spring. Within the well's reach a star is pulled in with a sideways
+  // swirl, so it orbits rather than piles up; once it comes within the catch
+  // radius it is caught and follows the well anywhere until release.
+  function stepPhysics(dt) {
+    for (var i = 0; i < stars.length; i++) {
+      var star = stars[i];
+      var ax = 0;
+      var ay = 0;
+
+      if (well && !supernova) {
+        var dx = well.x - (star.x + star.ox);
+        var dy = well.y - (star.y + star.oy);
+        var d = Math.hypot(dx, dy) + 0.01;
+        if (d < well.catchRadius) {
+          star.caught = true;
+        }
+        var strength = 0;
+        if (star.caught) {
+          strength = CAUGHT_PULL * Math.min(1, 0.35 + d / well.reach) * well.level;
+        } else if (d < well.reach) {
+          strength = WELL_PULL * (1 - d / well.reach) * well.level;
+        }
+        if (strength) {
+          var nx = dx / d;
+          var ny = dy / d;
+          var core = well.catchRadius * CORE_SHARE;
+          if (d < core) {
+            strength *= -1.4 * (1 - d / core);
+          }
+          ax += nx * strength - ny * strength * WELL_SWIRL;
+          ay += ny * strength + nx * strength * WELL_SWIRL;
+        }
+      }
+
+      var spring = star.caught ? 0 : SPRING;
+      ax += -spring * star.ox - DAMPING * star.vx;
+      ay += -spring * star.oy - DAMPING * star.vy;
+
+      star.vx += ax * dt;
+      star.vy += ay * dt;
+      star.ox += star.vx * dt;
+      star.oy += star.vy * dt;
+    }
+  }
+
+  function physicsSettled() {
+    for (var i = 0; i < stars.length; i++) {
+      var star = stars[i];
+      if (Math.abs(star.vx) + Math.abs(star.vy) > 2 || Math.abs(star.ox) + Math.abs(star.oy) > 0.5) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function caughtCount() {
+    var count = 0;
+    for (var i = 0; i < stars.length; i++) {
+      if (stars[i].caught) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // The well's size for a share of stars caught: one step per 5%.
+  function wellSizeFor(share) {
+    var steps = Math.floor(share / GROW_EVERY + 1e-9);
+    return {
+      reach: REACH_START + steps * REACH_STEP,
+      catchRadius: CATCH_START + steps * CATCH_STEP,
+      steps: steps
+    };
+  }
+
+  // Eases the well towards its size for the stars caught so far, with a
+  // small pulse each time it steps up, and checks the milestone messages.
+  function growWell(dt, now) {
+    var share = stars.length ? caughtCount() / stars.length : 0;
+    var size = wellSizeFor(share);
+    var ease = 1 - Math.exp(-GROW_EASE * dt);
+    well.reach += (size.reach - well.reach) * ease;
+    well.catchRadius += (size.catchRadius - well.catchRadius) * ease;
+    if (size.steps > well.steps) {
+      well.steps = size.steps;
+      addPulse(well.x, well.y, 0.3);
+    }
+    well.share = share;
+    checkMilestones(share, now);
+  }
+
+  function openWell(x, y) {
+    if (!EGGS.gravity || !motionAllowed() || busy.target || supernova) {
+      return;
+    }
+    well = {
+      x: x,
+      y: y,
+      level: 0,
+      reach: REACH_START,
+      catchRadius: CATCH_START,
+      steps: 0,
+      share: 0,
+      counting: false
+    };
+    root.classList.add("hub-signin-holding");
+    var selection = window.getSelection && window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
+    addPulse(x, y, 0.4);
+  }
+
+  function releaseWell() {
+    if (!well || supernova) {
+      return;
+    }
+    for (var i = 0; i < stars.length; i++) {
+      var star = stars[i];
+      var dx = star.x + star.ox - well.x;
+      var dy = star.y + star.oy - well.y;
+      var d = Math.hypot(dx, dy) + 0.01;
+      var reach = well.reach * 1.2;
+      if (star.caught || d < reach) {
+        var kick = SCATTER * Math.max(0.35, 1 - d / reach);
+        star.vx += dx / d * kick;
+        star.vy += dy / d * kick;
+      }
+      star.caught = false;
+    }
+    addPulse(well.x, well.y, 0.9);
+    well = null;
+    root.classList.remove("hub-signin-holding");
+  }
+
+  /* Milestone messages */
+
+  var seenMilestones = readSeenMilestones();
+
+  function readSeenMilestones() {
+    try {
+      return JSON.parse(sessionStorage.getItem(MILESTONE_KEY)) || [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function rememberMilestone(at) {
+    seenMilestones.push(at);
+    try {
+      sessionStorage.setItem(MILESTONE_KEY, JSON.stringify(seenMilestones));
+    } catch (error) {
+      // No storage (private mode): each shows once per page instead.
+    }
+  }
+
+  // When a hold passes a mark for the first time this session, its message
+  // shows. If one frame passes several (a fast sweep), only the highest
+  // shows; the rest count as seen. The counter turns on at its mark every
+  // hold, whether or not the message has been seen.
+  function checkMilestones(share, now) {
+    var newest = null;
+    EGG_MESSAGES.milestones.forEach(function (mark) {
+      if (share + 1e-9 < mark.at) {
+        return;
+      }
+      if (mark.showCount) {
+        well.counting = true;
+      }
+      if (seenMilestones.indexOf(mark.at) === -1) {
+        rememberMilestone(mark.at);
+        newest = mark;
+      }
+    });
+    if (newest && newest.text) {
+      milestone = { text: newest.text, start: now };
+      announce(newest.text);
+    }
+  }
+
+  // Milestones are drawn on the canvas; this repeats them for screen readers.
+  var announcer = null;
+
+  function announce(text) {
+    if (!announcer) {
+      announcer = document.createElement("div");
+      announcer.className = "hub-signin-announcer";
+      announcer.setAttribute("role", "status");
+      document.body.appendChild(announcer);
+    }
+    announcer.textContent = text;
+  }
+
+  /* Supernova (every star caught) */
+
+  // The caught stars collapse into one point under "Nailed it!", then burst
+  // back out to their homes with a flash.
+  function burstSupernova(now) {
+    supernova.burst = true;
+    supernova.burstAt = now;
+    for (var i = 0; i < stars.length; i++) {
+      var star = stars[i];
+      var angle = Math.random() * Math.PI * 2;
+      var speed = BURST_SPEED * (0.5 + Math.random());
+      star.ox = supernova.x - star.x;
+      star.oy = supernova.y - star.y;
+      star.vx = Math.cos(angle) * speed;
+      star.vy = Math.sin(angle) * speed;
+      star.caught = false;
+    }
+    pulses.push({ x: supernova.x, y: supernova.y, amp: 2, start: now });
+    pulses.push({ x: supernova.x, y: supernova.y, amp: 1.2, start: now + 250 });
+    well = null;
+    root.classList.remove("hub-signin-holding");
+  }
+
+  // 0 → 1 while collapsing; the stars are drawn pulled into the core by this.
+  function collapseLevel(now) {
+    if (!supernova || supernova.burst) {
+      return 0;
+    }
+    return smoothstep(0, COLLAPSE, (now - supernova.start) / 1000);
+  }
+
+  /* Shooting star */
+
+  // The largest open area beside the card (left, right or above), so the
+  // shooting star never crosses behind the card, where it can't be clicked.
+  function openRegion() {
+    var card = document.querySelector(CARD_SELECTOR);
+    var box = card ? card.getBoundingClientRect() : null;
+    var margin = 32;
+    if (!box || !box.width) {
+      return { x: margin, y: margin, w: width - margin * 2, h: height - margin * 2 };
+    }
+    var options = [
+      { x: margin, y: margin, w: box.left - margin * 2, h: height - margin * 2 },
+      { x: box.right + margin, y: margin, w: width - box.right - margin * 2, h: height - margin * 2 },
+      { x: margin, y: margin, w: width - margin * 2, h: box.top - margin * 2 }
+    ];
+    var best = options[0];
+    options.forEach(function (option) {
+      if (Math.max(0, option.w) * Math.max(0, option.h) > Math.max(0, best.w) * Math.max(0, best.h)) {
+        best = option;
+      }
+    });
+    if (best.w < 160 || best.h < 90) {
+      return { x: margin, y: margin, w: width - margin * 2, h: Math.max(120, box.top - margin * 2) };
+    }
+    return best;
+  }
+
+  function launchShootingStar() {
+    if (!EGGS.shootingStar || !motionAllowed() || shooting || busy.target || document.hidden) {
+      return;
+    }
+    // Starts high on one side of the open space and falls across it.
+    var region = openRegion();
+    var fromLeft = Math.random() < 0.5;
+    var direction = fromLeft ? 1 : -1;
+    var angle = 0.38 + Math.random() * 0.2;    // radians below horizontal
+    var distance = Math.min(region.w * 0.7, 640);
+    shooting = {
+      x: region.x + region.w * (fromLeft ? 0.08 + Math.random() * 0.12 : 0.8 + Math.random() * 0.12),
+      y: region.y + region.h * (0.08 + Math.random() * 0.2),
+      dx: direction * Math.cos(angle) * distance,
+      dy: Math.sin(angle) * distance,
+      start: performance.now()
+    };
+  }
+
+  function shootingHead(now) {
+    if (!shooting) {
+      return null;
+    }
+    var s = (now - shooting.start) / 1000 / SHOOT_LIFE;
+    if (s > 1 + SHOOT_GRACE / SHOOT_LIFE) {
+      shooting = null;
+      return null;
+    }
+    var eased = 1 - Math.pow(1 - Math.min(1, s), 2);
+    return {
+      x: shooting.x + shooting.dx * eased,
+      y: shooting.y + shooting.dy * eased,
+      alpha: s < 1 ? Math.sin(Math.PI * Math.min(1, s * 1.15)) : 0
+    };
+  }
+
+  // Returns true when the click caught it.
+  function catchShootingStar(x, y) {
+    var head = shootingHead(performance.now());
+    if (!head || Math.hypot(head.x - x, head.y - y) > (pointer.touch ? 48 : 36)) {
+      return false;
+    }
+    addPulse(head.x, head.y, 1);
+    shooting = null;
+    openShootingStarDialog();
+    return true;
+  }
+
+  function armIdleShootingStar() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      launchShootingStar();
+      armIdleShootingStar();
+    }, SHOOT_IDLE_MS);
+  }
+
+  function startShootingStars() {
+    armIdleShootingStar();
+    if (Math.random() < SHOOT_CHANCE) {
+      setTimeout(launchShootingStar, 6000 + Math.random() * 8000);
+    }
+  }
+
+  var quoteIndex = -1;
+
+  // The next quote in turn. The position is remembered between visits, so
+  // each catch shows a different one; without storage it cycles per page.
+  function nextQuote(quotes) {
+    if (!quotes || !quotes.length) {
+      return null;
+    }
+    if (quoteIndex < 0) {
+      try {
+        quoteIndex = parseInt(localStorage.getItem(QUOTE_KEY), 10);
+      } catch (error) {
+        quoteIndex = NaN;
+      }
+      if (isNaN(quoteIndex)) {
+        quoteIndex = -1;
+      }
+    }
+    quoteIndex = (quoteIndex + 1) % quotes.length;
+    try {
+      localStorage.setItem(QUOTE_KEY, String(quoteIndex));
+    } catch (error) {
+      // Nothing to remember it in.
+    }
+    return quotes[quoteIndex];
+  }
+
+  var dialog = null;
+
+  // Built from EGG_MESSAGES with textContent, so the words can be edited
+  // freely. The dialog sits outside the page's form, so closing it never
+  // posts back.
+  function openShootingStarDialog() {
+    var words = EGG_MESSAGES.shootingStar;
+    if (!dialog) {
+      dialog = document.createElement("dialog");
+      dialog.className = "hub-signin-dialog";
+      document.body.appendChild(dialog);
+    }
+    dialog.textContent = "";
+
+    var form = document.createElement("form");
+    form.method = "dialog";
+
+    if (words.heading) {
+      var heading = document.createElement("h2");
+      heading.className = "hub-signin-dialog__heading";
+      heading.id = "hub-signin-dialog-heading";
+      heading.textContent = words.heading;
+      form.appendChild(heading);
+      dialog.setAttribute("aria-labelledby", heading.id);
+    }
+
+    var chosen = nextQuote(words.quotes);
+    if (chosen && chosen.text) {
+      var quote = document.createElement("blockquote");
+      quote.className = "hub-signin-dialog__quote";
+      var line = document.createElement("p");
+      line.textContent = "“" + chosen.text + "”";
+      quote.appendChild(line);
+      if (chosen.cite) {
+        var cite = document.createElement("footer");
+        cite.textContent = chosen.cite;
+        quote.appendChild(cite);
+      }
+      form.appendChild(quote);
+    }
+
+    var close = document.createElement("button");
+    close.type = "submit";
+    close.className = "hub-signin-dialog__close";
+    close.textContent = words.button || "Close";
+    form.appendChild(close);
+
+    dialog.appendChild(form);
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+  }
+
+  /* Egg drawing */
+
+  // Where the well's text sits: above its catch radius, or above the
+  // collapsing supernova.
+  function wellAnchor() {
+    if (supernova && !supernova.burst) {
+      return { x: supernova.x, y: supernova.y - 60 };
+    }
+    if (well) {
+      return { x: well.x, y: well.y - well.catchRadius - 14 };
+    }
+    return null;
+  }
+
+  // The glow grows with the catch radius, so the growth is visible. From the
+  // counter's mark, the count shows above the well.
+  function drawWell(collapse) {
+    var at = supernova && !supernova.burst ? supernova : well;
+    if (!at) {
+      return;
+    }
+    var level = well ? well.level : 1;
+    var catchRadius = well ? well.catchRadius : CATCH_START;
+    var share = well ? well.share : 1;
+    var size = catchRadius * 1.6 + collapse * 120;
+    ctx.globalAlpha = Math.min(1, (0.45 + share * 0.35 + collapse * 0.5) * level);
+    ctx.drawImage(accentSprite, at.x - size / 2, at.y - size / 2, size, size);
+    ctx.globalAlpha = 1;
+
+    if (well && !supernova && well.counting) {
+      var anchor = wellAnchor();
+      ctx.font = "600 12px 'Open Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,0.75)";
+      ctx.fillText(caughtCount() + " / " + stars.length, anchor.x, anchor.y);
+    }
+  }
+
+  // A milestone message fades in above the well, holds, then fades, staying
+  // with the well as it moves (and above the supernova at 100%).
+  function drawMilestone(now) {
+    if (!milestone) {
+      return;
+    }
+    var s = (now - milestone.start) / 1000;
+    if (s > MILESTONE_LIFE) {
+      milestone = null;
+      return;
+    }
+    var anchor = wellAnchor();
+    if (anchor) {
+      milestone.x = anchor.x;
+      milestone.y = anchor.y;
+    }
+    if (milestone.x === undefined) {
+      return;
+    }
+    var alpha = smoothstep(0, 0.25, s) * (1 - smoothstep(MILESTONE_LIFE - 0.6, MILESTONE_LIFE, s));
+    var rise = (1 - smoothstep(0, 0.4, s)) * 6;
+    var y = milestone.y - (well && well.counting && !supernova ? 20 : 0) - rise;
+
+    ctx.save();
+    ctx.font = "700 16px 'Red Hat Display', 'Open Sans', sans-serif";
+    ctx.textAlign = "center";
+    ctx.shadowColor = eggRgba(accentRgb, 0.9 * alpha);
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = eggRgba([255, 255, 255], alpha);
+    ctx.fillText(milestone.text, milestone.x, y);
+    ctx.restore();
+  }
+
+  function drawSupernovaFlash(now) {
+    if (!supernova || !supernova.burst) {
+      return;
+    }
+    var s = (now - supernova.burstAt) / 1000;
+    if (s > FLASH) {
+      return;
+    }
+    var level = 1 - s / FLASH;
+    var radius = 40 + s * 900;
+    var flash = ctx.createRadialGradient(supernova.x, supernova.y, 0, supernova.x, supernova.y, radius);
+    flash.addColorStop(0, "rgba(255,255,255," + (0.9 * level).toFixed(3) + ")");
+    flash.addColorStop(0.3, eggRgba(accentRgb, 0.45 * level));
+    flash.addColorStop(1, eggRgba(accentRgb, 0));
+    ctx.fillStyle = flash;
+    ctx.beginPath();
+    ctx.arc(supernova.x, supernova.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawShootingStar(now) {
+    var head = shootingHead(now);
+    if (!head || head.alpha <= 0) {
+      return;
+    }
+    var length = Math.hypot(shooting.dx, shooting.dy);
+    var tx = head.x - shooting.dx / length * 130;
+    var ty = head.y - shooting.dy / length * 130;
+    var trail = ctx.createLinearGradient(head.x, head.y, tx, ty);
+    trail.addColorStop(0, "rgba(255,255,255," + (0.9 * head.alpha).toFixed(3) + ")");
+    trail.addColorStop(0.3, eggRgba(accentRgb, 0.4 * head.alpha));
+    trail.addColorStop(1, eggRgba(accentRgb, 0));
+    ctx.strokeStyle = trail;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(head.x, head.y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+    ctx.lineWidth = 0.8;
+    ctx.globalAlpha = head.alpha;
+    ctx.drawImage(accentSprite, head.x - 14, head.y - 14, 28, 28);
+    ctx.globalAlpha = 1;
+  }
+
+  // For the eggs mockup's "Show me" controls.
+  var eggControls = {
+    gravity: function () {
+      var region = openRegion();
+      pointer.x = region.x + region.w / 2;
+      pointer.y = region.y + region.h / 2;
+      openWell(pointer.x, pointer.y);
+      setTimeout(releaseWell, 2400);
+    },
+    // Opens a well and catches every star at once, to show the supernova.
+    supernova: function () {
+      var region = openRegion();
+      pointer.x = region.x + region.w / 2;
+      pointer.y = region.y + region.h / 2;
+      openWell(pointer.x, pointer.y);
+      if (well) {
+        well.level = 1;
+        stars.forEach(function (star) {
+          star.caught = true;
+        });
+      }
+    },
+    shootingStar: function () {
+      shooting = null;
+      launchShootingStar();
+    },
+    // Milestone messages show once per session; this lets them show again.
+    resetMessages: function () {
+      seenMilestones = [];
+      try {
+        sessionStorage.removeItem(MILESTONE_KEY);
+      } catch (error) {
+        // Nothing stored.
+      }
+    },
+    state: function () {
+      return {
+        well: Boolean(well),
+        caught: caughtCount(),
+        stars: stars.length,
+        supernova: supernova ? (supernova.burst ? "burst" : "collapsing") : null,
+        milestone: milestone && milestone.text,
+        shootingStar: shootingHead(performance.now())
+      };
+    }
+  };
 
   /* ---------- Interaction ---------- */
 
@@ -1397,7 +2228,14 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       }
       pointer.x = event.clientX;
       pointer.y = event.clientY;
-      pointer.target = event.pointerType === "mouse" ? 1 : 0.7;
+      pointer.touch = event.pointerType !== "mouse";
+      pointer.target = pointer.touch ? 0.7 : 1;
+      armIdleShootingStar();
+
+      if (press && !well && Math.hypot(event.clientX - press.x, event.clientY - press.y) > HOLD_SLOP) {
+        clearTimeout(press.timer);
+        press.moved = true;
+      }
 
       lastEvent = event;
       if (!glowFrame) {
@@ -1416,12 +2254,63 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       }
     });
 
-    // Clicking the open background sends a pulse through the stars.
+    // A press on the open background: a quick click catches the shooting
+    // star or sends a pulse through the stars; holding opens a gravity well.
     document.addEventListener("pointerdown", function (event) {
-      if (event.target.closest && !event.target.closest(CARD_SELECTOR + ", a, button, input, select, textarea, .modal")) {
+      if (!onBackground(event) || busy.target) {
+        return;
+      }
+      pointer.touch = event.pointerType !== "mouse";
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      press = { x: event.clientX, y: event.clientY, moved: false };
+      press.timer = setTimeout(function () {
+        if (press && !press.moved) {
+          openWell(press.x, press.y);
+        }
+      }, HOLD_MS);
+    });
+
+    function endPress(event) {
+      if (!press) {
+        return;
+      }
+      clearTimeout(press.timer);
+      var held = Boolean(well);
+      var moved = press.moved;
+      press = null;
+      if (held) {
+        releaseWell();
+        return;
+      }
+      if (moved || event.type === "pointercancel") {
+        return;
+      }
+      if (!catchShootingStar(event.clientX, event.clientY)) {
         addPulse(event.clientX, event.clientY, 0.6);
       }
+    }
+
+    document.addEventListener("pointerup", endPress);
+    document.addEventListener("pointercancel", endPress);
+
+    // A press on the background would otherwise start a text selection, and
+    // dragging the well would highlight the card's labels. Only background
+    // presses are stopped, so text in the card can still be selected.
+    document.addEventListener("mousedown", function (event) {
+      if (onBackground(event)) {
+        event.preventDefault();
+      }
     });
+
+    // Holding on touch screens would otherwise open the context menu.
+    document.addEventListener("contextmenu", function (event) {
+      if (well) {
+        event.preventDefault();
+      }
+    });
+
+    document.addEventListener("keydown", armIdleShootingStar);
 
     // Delegated, so the Sign In iPart can re-render in a partial postback.
     document.addEventListener("focusin", function (event) {
@@ -1497,14 +2386,15 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
     requestAnimationFrame(reveal);
   }
 
-  // Exposed for the mockup's Replay control.
+  // Exposed for the mockups' controls.
   window.HubSignIn = {
     replay: function () {
       root.classList.add("hub-signin-intro");
       // Force the hidden state to apply before it is removed again.
       void root.offsetWidth;
       playIntro();
-    }
+    },
+    eggs: eggControls
   };
 
   function init() {
@@ -1536,6 +2426,7 @@ html.hub-signin-intro .SignInPage :is(.PanelField, [id$="_commandButtons"], [id$
       bindInteraction();
       watchBusy();
       whenReady(playIntro);
+      startShootingStars();
     } catch (error) {
       reveal();
       if (window.console) {
