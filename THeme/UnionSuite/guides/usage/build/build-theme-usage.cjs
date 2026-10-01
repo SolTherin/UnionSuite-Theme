@@ -84,13 +84,14 @@ for (const [key, value] of declarations(tokenCss)) {
 }
 function tokenCategory(name) {
   if (name.startsWith('--seed-')) return 'Brand seeds';
+  if (name.startsWith('--activity-')) return 'Activity types';
   if (/^--(teal-|accent-\d|neutral-|white$|page$|status-)/.test(name)) return 'Palette & status';
   if (/^--(brand-|accent$|accent-hover$|bg-|text-|border|focus-|success|warning|danger|info)/.test(name)) return 'Semantic colours';
   if (/^--(face-|font-|fs-|lh-|fw-)/.test(name)) return 'Typography';
   if (/^--(space-|radius|shadow)/.test(name)) return 'Spacing & shape';
   return 'Layout & layering';
 }
-const colourName = name => /^--(seed-|teal-|accent|neutral-|white$|page$|status-|brand-|bg-|text-|border|success|warning|danger|info)/.test(name);
+const colourName = name => /^--(seed-|teal-|accent|neutral-|white$|page$|status-|brand-|bg-|text-|border|success|warning|danger|info|activity-)/.test(name);
 let tokenRows = '';
 for (const [name, values] of rootTokens) {
   const swatch = colourName(name) ? `<span class="token-dot" style="background:var(${name})" aria-hidden="true"></span>` : '';

@@ -731,17 +731,19 @@
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet">
             <section data-item="activity-0"><div class="QueryTemplateItem">
               <div class="us-activity-feed"
-                   data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Activity"
+                   data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact Profile/Activity"
                    data-us-activity-filter="ID" data-us-activity-value="004821"
                    data-us-activity-start="StartDate" data-us-activity-days="90"
                    data-us-activity-history="#activity-history"
                    data-us-activity-today="2026-05-14">
                 <ul class="us-activity__sources" hidden>
-                  <li data-source="interactions" data-query="Interactions" data-type="interaction" data-history="#iqa-interactions"></li>
-                  <li data-source="calls-out" data-query="Outbound Calls" data-type="call" data-direction="out" data-history="#iqa-calls"></li>
-                  <li data-source="emails-out" data-query="Outbound Emails" data-type="email" data-direction="out" data-history="#iqa-emails"></li>
-                  <li data-source="emails-in" data-query="Inbound Emails" data-type="email" data-direction="in"></li>
-                  <li data-source="meetings" data-query="Meetings" data-type="meeting" data-history="#iqa-meetings"></li>
+                  <li data-source="interactions" data-query="Interactions" data-details="Interactions Details" data-type="interaction" data-history="#iqa-interactions"></li>
+                  <li data-source="zidebar-notes" data-query="Zidebar Notes" data-details="Zidebar Notes Details" data-type="note"></li>
+                  <li data-source="calls-out" data-query="Outbound Calls" data-details="Outbound Calls Details" data-detail-label="Additional notes" data-type="call" data-direction="out" data-history="#iqa-calls"></li>
+                  <li data-source="emails-out" data-query="Outbound Emails" data-details="Outbound Emails Details" data-events="Outbound Emails History" data-events-label="Delivery history" data-type="email" data-direction="out" data-history="#iqa-emails" data-record-popup="true"></li>
+                  <li data-source="emails-resent" data-query="Outbound Email Resends" data-details="Outbound Email Resends Details" data-type="email" data-direction="out" data-record-popup="true"></li>
+                  <li data-source="emails-in" data-query="Inbound Emails" data-details="Inbound Emails Details" data-type="email" data-direction="in"></li>
+                  <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-type="meeting" data-history="#iqa-meetings"></li>
                 </ul>
               </div>
             </div></section>

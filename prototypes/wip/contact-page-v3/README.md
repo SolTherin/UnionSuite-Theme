@@ -84,7 +84,7 @@ Toolbar controls (prototype only):
 
 Fixtures: tab counts come from a sample Tab Counts response (Finance "!" danger,
 Cases 2 warning); alerts, trackers and the
-five activity source IQAs come from offline `fetch` responses in
+six activity source IQAs come from offline `fetch` responses in
 `contact-page.js`. The activity responses honour `ID`, `StartDate`, `limit` and
 `offset`, and answer after 150–450ms each.
 
@@ -103,8 +103,8 @@ Browser state used by the candidate and fixtures:
 | `index.html` | Page composition with native iMIS wrapper fixtures. Links the real `99-Orion.css`, `zUnionSuite.css`, client CSS, `zzDarkMode.css`, `zUnionSuite.js`, `Scripts/ActionDefinitions.js` and client `Actions.js`, then the candidate files. `theme-candidate-iqa-columns.js` loads before `zUnionSuite.js`.  Also links `../activity-cards/activity-cards.candidate.css` and `.js` (the record cards the activity feed renders; its `fold()` also animates the adjustment rows), `../dues-adjustments/dues-adjustments.candidate.css` and `.js` (the Active and upcoming adjustments list, item 33), and the theme's `Tabler/tabler-icons.min.css` (the icon sheet directly: the `Tabler.css` shim is an `@import` the standalone build does not follow). |
 | `THEME-CHANGES.md` | Checklist of every change to make in the theme, by target file, with the decisions that shape the move. |
 | `build-standalone.cjs` / `Contact-Page-v3-Standalone.html` | Reproducible single-file export of `index.html` with local CSS, JS and available image assets embedded. |
-| `theme-candidate.css` | Proposed CSS, sections 1–17, 21–23, 25, 27–31 and 32 (items 19 and 20 are in section 3; item 18 is script only). Each section names its target in the theme and uses the theme's own selectors, so an approved section moves across unchanged. |
-| `theme-candidate.js` | Proposed `US-IQA-ROW-GROUPS`, `US-CCO-RAIL-COLLAPSE`, `US-BANNER-ALERTS`, `US-CCO-SIDEBAR`, `US-BANNER-ROW`, `US-IQA-SCROLL-EDGES`, `US-ATTENTION-HIDE-ZERO`, `US-ACTIVITY-FEED` and `US-BANNER-POSITIONS` blocks for `zUnionSuite.js`. |
+| `theme-candidate.css` | Proposed CSS, sections 1–17, 21–23, 25, 27–31, 32 and 37 (items 19 and 20 are in section 3; item 18 is script only). Each section names its target in the theme and uses the theme's own selectors, so an approved section moves across unchanged. |
+| `theme-candidate.js` | Proposed `US-IQA-ROW-GROUPS`, `US-CCO-RAIL-COLLAPSE`, `US-BANNER-ALERTS`, `US-CCO-SIDEBAR`, `US-BANNER-ROW`, `US-IQA-SCROLL-EDGES`, `US-ATTENTION-HIDE-ZERO`, `US-ACTIVITY-FEED`, `US-BANNER-POSITIONS` and `US-ACTIVITY-EVENTS` blocks for `zUnionSuite.js`. |
 | `theme-candidate-iqa-columns.js` | Candidate replacement for the whole `US-IQA-COLUMNS` block (item 18). |
 | `theme-candidate-tabs.js` | Candidate replacement for the whole `US-NATIVE-TABS` block (open decision 5): `UnionSuiteTabs` 1.1 labels its own Sections picker. Generated from the theme block with only `label()`, its call and the version changed. Loads before `zUnionSuite.js`. |
 | `theme-candidate-heading-menus.js` | Candidate `US-ACTION-HEADING-MENUS` (item 31): dropdowns in panel headings, configured like heading buttons. Loads straight after `zUnionSuite.js`, before `ActionDefinitions.js` and the client `Actions.js`, so menus can be registered there. |
@@ -153,7 +153,8 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 | 34 | Active positions in the banner (proposed, not yet approved), 26 September 2026: elected roles and committee seats must be apparent on every tab, not only in Engagement › Roles and CPD. One badge in the banner's status area, beside the member status pill, names the most senior active position and counts the rest ("Branch committee +1"); one position shows just its label. The status area is what stays when the banner condenses, so the badge is visible scrolled or not. Neutral glass pill at the status pill's 28px (a role icon and a chevron), so the status colour stays the only membership signal. Clicking opens a popup (the alert bell's surface) listing each active position, its body and dates ("Since Mar 2020 · term ends Mar 2027"), and "View all roles →", which selects Engagement and its Roles and CPD section (`UnionSuiteSections.select`). Hidden when there are none or the query fails. Condensed below 900px it shows the icon and the number ("2") so the banner keeps one line; tablets (601–899px) keep the name at 300px so the badge wraps instead of squeezing it; phones anchor the popup to the start of the status row. Owner decisions, 26 September 2026: one badge (not one per role, not a generic "Elected official" count), naming the most senior role; a popup with a link through, not a jump straight to the tab; branch committee ranks above workplace delegate. Sourced from the positions records with dates, not the Attributes badges (Profile shows "EBA bargaining rep" for a role that ended in Dec 2023). See [Active positions](#active-positions). | Roles on Engagement only → a badge on every tab | Opt-in per banner template | CSS section 34 in `US-BANNER-COMPONENT` (after the alert bell); `US-BANNER-POSITIONS` JS; `Banner-Contact-Template.html`; an Active Positions IQA |
 | 35 | Login Credentials (merged for testing, not yet approved; tab name from the owner), 27 September 2026: a CCO section, before Admin, holding the native **User credentials** control (one Content Web User Control iPart, CSS class `us-credentials us-credentials--hide-contact`). Contact information is hidden by the modifier (the banner repeats it; the page is also used outside the profile, where it shows as a card); User credentials, User information and Staff access become the page's cards; credentials fields sit in one label/value grid beside a Password reset card; Account, Roles and Security groups are three equal cards with outline Add buttons; the legacy delete images become trash icon buttons; Staff access selects form a grid, open by default, with a **Set all to** dropdown in its heading (JS). Replaces the mock Admin > Portal login tab. Design record, open decisions and the tab name: [user-credentials](../user-credentials/README.md). | — | Contact page | `US-CREDENTIALS` in `zUnionSuite.css`, `zzDarkMode.css` and `zUnionSuite.js`; guide 06g |
 | 36 | Representatives (proposed, not yet approved), 28 September 2026: the people who represent the member (every organiser, as a member can have several, and the workplace delegates) in a Query Template Display on Profile › Employment, after Jobs (owner, 28 September 2026: Summary was getting busy). Summary keeps one line, a Representatives field in Contact summary (`RepresentativesSummary`, e.g. "M. Chen, R. Okafor (organisers) · Tom Walsh (delegate)") with a View details link that opens Profile › Employment through the theme's new section links (`data-us-section-link`, guide "Link to a section on another CCO tab"). Reuses the shared `us-contact` row (`Contacts-Query-Template.html`): RoleLabel is the representative role, RoleColour its badge, WorkplaceName where they cover. CSS class `us-tab-panel us-tabset-profile us-tab-employment us-query-template`; No results "No representatives recorded." The banner no longer shows an Organiser fact (owner, 28 September 2026: a member may have several). | — | Contact page | Page composition; a Representatives IQA |
-| 32 | Recent activity feed (proposed, not yet approved): one list on the Activity tab built from five IQAs (Interactions, Outbound calls, Outbound emails, Inbound emails, Meetings) with `GET /api/query`, replacing the Notes and Communications sub-tabs (Documents stays). Each row is a record card from the activity cards workbench (`prototypes/wip/activity-cards/`, `US-RECORD-CARDS`): the owner's original card structure on theme tokens (type line, headline, preview, date column; colour only on the rail icon and for importance). Search and date range fold behind the heading's filter button; the type filters (slim section switcher) stay visible, and a chosen type shows a "View all …" link to its IQA page. See [Activity feed](#activity-feed). | Notes panel + communications grid → one feed | Opt-in: a `.us-activity-feed` element | CSS section 32 (the feed chrome); the card CSS and `US-RECORD-CARDS` from `prototypes/wip/activity-cards/`; `US-ACTIVITY-FEED` JS |
+| 37 | Activity history (proposed, design only, 1 October 2026): a sent email's delivery attempts ("10 Sep, 1:00 pm Queued", "Delivered", "Bounced") inside its opened activity card, between the details fields and the note. One card per send (owner decision, 1 October 2026): the original send and each resend are separate cards, each dated by its own send, so a resend sits at its own date in the timeline. iMIS records a resend as a `Resent` event on the original recipient row, so a second source on the Emails type (`data-source="emails-resent"`, IQA `Outbound Email Resends`, Category `Resend`) lists one card per `Resent` event; the original's history IQA leaves that event out. Both email sources set `data-record-popup="true"`, so View full details opens the native email preview (`InteractionPreview.aspx`) in the iMIS popup. A third IQA per source (`data-events="Outbound Emails History"`, heading `data-events-label="Delivery history"`), run for one record when its card opens, beside the details IQA and filtered the same way (`ID`, `ActivityKey`); one row per attempt, oldest first: `EventDate`, `Event`, optional `EventDetail` and `EventTone` (success, warning, danger). A small dated list, a dot per attempt on a thin line; a bounce is red, a delivery green. Loading and Retry as the details; no rows, nothing shown. Field contract: [Activity-IQA-Specs.md](Activity-IQA-Specs.md#46-sent-email-delivery-history-proposed); business objects and IQA definitions: [Outbound-Emails-Build.md](Outbound-Emails-Build.md). | — | Contact page (feed host) | `US-ACTIVITY-EVENTS` in `theme-candidate.js`; section 37 in `theme-candidate.css`; `data-record-popup` in `US-ACTIVITY-FEED` (promoted) |
+| 32 | Recent activity feed (proposed, not yet approved): one list on the Activity tab built from six IQAs (Interactions, Zidebar Notes, Outbound calls, Outbound emails, Inbound emails, Meetings) with `GET /api/query`, replacing the Notes and Communications sub-tabs (Documents stays). Each row is a record card from the activity cards workbench (`prototypes/wip/activity-cards/`, `US-RECORD-CARDS`): the owner's original card structure on theme tokens (type line, headline, preview, date column; colour only on the rail icon and for importance). Search and date range fold behind the heading's filter button; the type filters (slim section switcher) stay visible, and a chosen type shows a "View all …" link to its IQA page. See [Activity feed](#activity-feed). | Notes panel + communications grid → one feed | Opt-in: a `.us-activity-feed` element | CSS section 32 (the feed chrome); the card CSS and `US-RECORD-CARDS` from `prototypes/wip/activity-cards/`; `US-ACTIVITY-FEED` JS |
 | 31 | Heading menus: a dropdown in a panel heading, configured exactly like a heading button. One definition with the button's shape and `action: {type: 'menu', items: [action keys]}`, placed by its `us-action-*` class in the iPart CSS class field. It renders as the theme's `.us-actions` dropdown (Quick Actions' motion and keyboard handling); each item is an ordinary control with the item action's class, so the action runtime labels, checks and runs it. The toggle matches the heading's outline buttons (32px). The top level draws the side line and travelling glint of the theme's submenus when it opens (same line keyframe and timing); deeper levels are unchanged. The line spans the items exactly and grows with the list as it unfolds, the glint riding its tip; items start 5px past the line, so the hover fill never covers it. Used for Manage billing and Add adjustment. | Three heading buttons → one menu | Opt-in per iPart, by class | `US-UNIFIED-ACTIONS` (accept type `menu`; render it in the heading slot); CSS section 31 in `US-ACTION-MENUS` |
 
 ### Collapsible rail
@@ -460,11 +461,18 @@ Displays merged in the browser.
   its query, type (`call`, `email`, `meeting`, `sms`, `note`, `interaction`)
   and optional direction. No inline script, so the RiSE content filter has
   nothing to break.
-- **Field contract (every source IQA):** `ActivityKey`, `ActivityDate`,
-  `Subject`, `Summary` required; `Detail`, `StaffName`, `With`, `Duration`,
-  `Outcome`, `OutcomeTone`, `CaseRef`, `CaseUrl`, `RecordUrl`,
-  `AttachmentCount`, `Direction` optional. Sorted newest first; filtered on
-  the contact and the named `StartDate` filter.
+- **Field contract (1 October 2026):** two IQAs per type. The fixed core
+  IQA returns `ActivityKey`, `ActivityDate`, `Subject`, `Summary`,
+  `Detail`, `CreatedBy` and `Priority` (values may be blank), plus optional
+  `Category`, `FollowUpDate`, `FollowUpActioned`, `Pinned`, `DoNotCall` (a
+  follow-up badge, a pin icon and a do-not-call alert), `CaseRef`, `CaseUrl`, `RecordUrl` and `Direction`;
+  no status column; sorted newest first and filtered on the contact and the named
+  `StartDate` filter. It draws the collapsed card, the note and View full
+  details. The client-editable details IQA (`data-details`) is read for one
+  record, filtered on `ID` and `ActivityKey`, when its card first opens;
+  its `Additional-*` columns fill the opened card's fields. The sample data
+  moves With, Duration and attachment counts there. Full rules and the client
+  process: [Activity-IQA-Specs.md](Activity-IQA-Specs.md).
 - **Behaviour:** loads on first sight, one request per source in parallel.
   Rows merge newest first and show only once no source with unloaded rows
   could hold a newer one, so Show more and the type filters page every source
@@ -508,15 +516,16 @@ Displays merged in the browser.
   loaded from `prototypes/wip/activity-cards/`). The feed builds the same
   markup as that folder's `templates/Activity-Card.html`; the card script
   expands cards and the feed remembers which are open across re-renders.
-  Subject is optional (most calls and interactions have none);
-  `PriorityFlag` (High or Urgent) shows a flag.
+  Subject may be blank (most calls and interactions have none);
+  `Priority` High or Urgent shows a flag.
 - **View all:** each source `<li>` can carry `data-history`, the IQA page for
   its type; while that type is chosen, "View all calls" (emails, meetings…)
   shows at the end of the type filters and fades in and out.
 - **To confirm in iMIS:** REST access to each IQA for staff, the real
   start-date filter names (`GET /api/QueryParameterDefinition`), paging cost
   on large histories against the current UNION query, and plain-text email
-  bodies.
+  bodies. The six IQAs are specified in
+  [Activity-IQA-Specs.md](Activity-IQA-Specs.md) (draft, 30 September 2026).
 
 ## Owner decisions
 
@@ -943,6 +952,9 @@ performance on long tabs with many blocks.
     (active delegate positions at the member's employer or site, and the
     organisers for their branch or sector), or a mix. It decides the IQA, not
     the layout.
+14. Activity history (item 37): whether the latest attempt shows on the
+    collapsed card when it needs attention (a red "Bounced" flag, like Do
+    not call), and which business object holds the delivery attempts.
 
 ## Next ideas
 

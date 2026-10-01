@@ -13,7 +13,7 @@ with the markup and field contract below. Add working templates and class recipe
 to the guide only then.
 
 The owner wants one recent-activity block containing records from separate
-tables. The first deployment combines five IQAs: Interactions, Outbound calls,
+tables. The first deployment combines six IQAs: Interactions, Zidebar Notes, Outbound calls,
 Outbound emails, Inbound emails and Meetings. The supplied design shows one
 header, search and date controls, type filters with counts, month groups, and
 chronological cards with their own details and actions. The owner reports poor
@@ -70,47 +70,69 @@ Its template is the feed element, so iMIS fills in the record value:
 
 ```html
 <div class="us-activity-feed"
-     data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Activity"
+     data-us-activity-folder="$/_i4u_/SandBox/CRM Layouts/Contact Profile/Activity"
      data-us-activity-filter="ID" data-us-activity-value="{#query.ID}"
      data-us-activity-start="StartDate" data-us-activity-days="90"
      data-us-activity-history="…full history page…">
   <ul class="us-activity__sources" hidden>
-    <li data-source="interactions" data-query="Interactions" data-type="interaction"></li>
-    <li data-source="calls-out" data-query="Outbound Calls" data-type="call" data-direction="out"></li>
-    <li data-source="emails-out" data-query="Outbound Emails" data-type="email" data-direction="out"></li>
-    <li data-source="emails-in" data-query="Inbound Emails" data-type="email" data-direction="in"></li>
-    <li data-source="meetings" data-query="Meetings" data-type="meeting"></li>
+    <li data-source="interactions" data-query="Interactions" data-details="Interactions Details" data-type="interaction"></li>
+    <li data-source="zidebar-notes" data-query="Zidebar Notes" data-details="Zidebar Notes Details" data-type="note"></li>
+    <li data-source="calls-out" data-query="Outbound Calls" data-details="Outbound Calls Details" data-type="call" data-direction="out"></li>
+    <li data-source="emails-out" data-query="Outbound Emails" data-details="Outbound Emails Details" data-type="email" data-direction="out"></li>
+    <li data-source="emails-in" data-query="Inbound Emails" data-details="Inbound Emails Details" data-type="email" data-direction="in"></li>
+    <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-type="meeting"></li>
   </ul>
 </div>
 ```
 
+Each source names two IQAs (1 October 2026): `data-query`, the fixed core
+IQA the list is built from, and `data-details`, a client-editable IQA read
+for one record when its card first opens. Its `Additional-*` columns become
+the labelled fields in the opened card. The full column, filter and client
+configuration rules are in
+[Activity-IQA-Specs.md](prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
+
 A source `<li>` can also carry `data-history`: the IQA page for its type,
 shown as "View all calls" (emails, meetings…) while that type is chosen.
+A source `<li>` can also carry `data-record-popup="true"` (or `1`, `yes`):
+its View full details link then opens `RecordUrl` in the native iMIS popup
+(`ShowDialog_NoReturnValue`, 80% × 80%, titled with the card's Subject), as the
+theme's popup actions do, instead of navigating the page. Use it for pages
+built to run in a dialog, such as the email preview
+(`/iParts/Common/InteractionLog/InteractionPreview.aspx`). Another site, a URL
+with a fragment, a missing popup service or a popup error leave the link to
+navigate normally. Without the attribute every source navigates.
 Each row renders as a record card (`US-RECORD-CARDS`, from
 `prototypes/wip/activity-cards/`).
 
 Optional attributes: `data-us-activity-limit` (rows per request, default 20),
 `data-us-activity-page` (rows per Show more, default 10),
-`data-us-activity-time-zone` (default `Australia/Sydney`). An unsubstituted
+`data-us-activity-time-zone` (default `Australia/Sydney`),
+`data-us-activity-details-folder` (default: the core folder). An unsubstituted
 placeholder value leaves the feed inactive.
 
-Every source IQA is sorted newest first, filtered on the record filter and the
+Every core IQA is sorted newest first, filtered on the record filter and the
 named start-date filter, and returns:
 
 | Alias | Required | Purpose |
 |---|---|---|
-| `ActivityKey` | yes | Unique within the source; source + key identifies a card |
+| `ActivityKey` | yes | Unique within the source; source + key identifies a card and filters its details |
 | `ActivityDate` | yes | The business date of the activity (not last-modified). Server-local time; the same server for every source, so order is consistent |
-| `Subject` | no | Card headline; most records have none |
-| `Summary` | yes | The note text (the preview under a subject) |
-| `Detail` | no | Plain-text body shown on expand; cap its length in the IQA |
-| `StaffName`, `With`, `Duration`, `Outcome` | no | Card meta and details |
-| `OutcomeTone` | no | `success`, `warning`, `danger` or `primary` |
+| `Subject` | yes (may be blank) | Card headline; most records have none |
+| `Summary` | yes (may be blank) | The preview line. A row needs a Subject or a Summary |
+| `Detail` | yes (may be blank) | Plain-text note shown on expand; cap its length in the IQA |
+| `CreatedBy` | yes (may be blank) | "by …" on the type line |
+| `Priority` | yes (may be blank) | `High` or `Urgent` shows a flag |
+| `Category` | no | Sub-type after the type name, such as an interaction's Interaction Type |
+| `FollowUpDate`, `FollowUpActioned` | no | A follow-up task: badge "Follow-up 22 May", amber "Overdue 12 May", or "Follow-up done" |
+| `Pinned` | no | Pin icon and amber edge |
+| `DoNotCall` | no | Red no-entry alert icon |
 | `CaseRef`, `CaseUrl` | no | Linked record |
-| `RecordUrl` | no | Native view page for Open record |
-| `AttachmentCount` | no | Attachment count |
+| `RecordUrl` | no | Native view page for View full details (a popup when the source has `data-record-popup`) |
 | `Direction` | no | `In` or `Out`; overrides the source's `data-direction` |
-| `PriorityFlag` | no | `High` or `Urgent`: a coloured flag on the card |
+
+Everything else (a status or outcome, with whom, duration, attachments, workbench…)
+belongs in the type's details IQA as `Additional-*` columns.
 
 Values render as text, never HTML. Links must be same-site `http(s)` URLs.
 Type and direction come from the source definition, so Inbound and Outbound
@@ -158,9 +180,10 @@ a performance improvement.
 
 ## 7. Implementation and acceptance
 
-1. Build the five IQAs to the field contract and confirm REST access for staff,
+1. Build the six IQAs to the field contract and confirm REST access for staff,
    the start-date filter names (`GET /api/QueryParameterDefinition?QueryPath=…`)
-   and plain-text email bodies.
+   and plain-text email bodies. Specification:
+   [Activity-IQA-Specs.md](prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
 2. Settle the card layout in the activity cards workbench.
 3. Measure paging cost on large histories against the UNION query.
 4. Promote `US-ACTIVITY-FEED` and its CSS, then document it in the usage guide.

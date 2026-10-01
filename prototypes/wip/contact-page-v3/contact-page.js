@@ -62,29 +62,31 @@
   // Activity feed source IQAs (item 32), one list per query name, in the
   // US-ACTIVITY-FEED field contract. The sample page's "today" is 14 May 2026.
   // Toolbar "Activity: one failing" makes the Meetings query return HTTP 500.
-  const activityFolder = '$/_i4u_/SandBox/CRM Layouts/Contact_Page/Activity/';
-  const activityRow = (ActivityKey, ActivityDate, StaffName, Subject, Summary, extra = {}) =>
-    ({ ActivityKey, ActivityDate, StaffName, Subject, Summary, RecordUrl: '#activity-record', ...extra });
+  const activityFolder = '$/_i4u_/SandBox/CRM Layouts/Contact Profile/Activity/';
+  // Core columns: every row carries the required ones, blank where unused.
+  const activityRow = (ActivityKey, ActivityDate, CreatedBy, Subject, Summary, extra = {}) =>
+    ({ ActivityKey, ActivityDate, Subject, Summary, Detail: '', CreatedBy, Priority: '', RecordUrl: '#activity-record', ...extra });
   const grievance = { CaseRef: 'WG-2026-041', CaseUrl: '#cases' };
   const entitlement = { CaseRef: 'MQ-2026-019', CaseUrl: '#cases' };
   const member = 's.reynolds@metrohealth.gov.au';
-  const completed = { Outcome: 'Completed' };
-  const leftMessage = { Outcome: 'Left message', OutcomeTone: 'warning' };
+  const completed = { Status: 'Completed' };
+  const leftMessage = { Status: 'Left message', StatusTone: 'warning' };
   const activity = {
     'Interactions': [
-      activityRow('I-3107', '2026-05-08T16:20:00', 'Member portal', '', 'Submitted through the member portal: leaving nursing to travel from July.', { Outcome: 'Pending', OutcomeTone: 'warning', Detail: 'Resignation requested effective 30 June 2026. Reason given: leaving nursing to travel. Retention call to be made before processing.' }),
+      activityRow('I-3107', '2026-05-08T16:20:00', 'Member portal', '', 'Submitted through the member portal: leaving nursing to travel from July.', { Status: 'Pending', StatusTone: 'warning', Detail: 'Resignation requested effective 30 June 2026. Reason given: leaving nursing to travel. Retention call to be made before processing.' }),
       activityRow('I-3094', '2026-04-30T11:05:00', 'M. Chen', '', 'Signed statement for the overtime grievance saved to Documents.', { ...grievance, AttachmentCount: 1 }),
-      activityRow('I-3080', '2026-04-28T09:40:00', 'M. Chen', '', 'Employer did not respond within 14 days; escalated for a formal dispute notice.', { PriorityFlag: 'Urgent', ...grievance, Outcome: 'Escalated', OutcomeTone: 'danger' }),
+      activityRow('I-3080', '2026-04-28T09:40:00', 'M. Chen', '', 'Employer did not respond within 14 days; escalated for a formal dispute notice.', { Priority: 'Urgent', ...grievance, Status: 'Escalated', StatusTone: 'danger' }),
       activityRow('I-3051', '2026-04-10T14:15:00', 'A. Smith', '', 'Member asked how clause 14.3 limits rostered overtime.', entitlement),
       activityRow('I-2988', '2026-03-15T14:34:00', 'J. Patel', '', 'Member is in financial difficulty after extended sick leave; will pay $185.00 by 30 March.', { Detail: 'Called member re overdue Q1 payment. Member advised she is experiencing financial difficulty following extended sick leave. Agreed to a payment arrangement – will pay by 30 March.' }),
       activityRow('I-2950', '2026-02-02T10:12:00', 'M. Chen', '', 'Manager rostering excessive overtime without consent; rights under EBA clause 14.3 explained.', { ...grievance, Detail: 'Initial intake call for workplace grievance. Member alleges manager has been rostering her for excessive overtime without consent. Advised member of rights under the EBA clause 14.3. Will escalate to industrial officer.' }),
       activityRow('I-2911', '2026-01-12T09:00:00', 'System', '', 'Opted out of the newsletter list through the member portal.'),
       activityRow('I-2702', '2025-10-21T13:30:00', 'A. Smith', '', 'Added to the shortlist for the next delegate training intake.'),
       activityRow('I-2455', '2025-06-02T10:00:00', 'System', '', 'Registration certificate for 2025–26 saved to Documents.', { AttachmentCount: 1 }),
-      activityRow('I-2101', '2024-06-03T15:10:00', 'A. Smith', '', 'Resolved informally with the nurse unit manager; member satisfied.', { CaseRef: 'WG-2024-112', CaseUrl: '#cases', Outcome: 'Closed' })
+      activityRow('I-2101', '2024-06-03T15:10:00', 'A. Smith', '', 'Resolved informally with the nurse unit manager; member satisfied.', { CaseRef: 'WG-2024-112', CaseUrl: '#cases', Status: 'Closed' })
     ],
     'Outbound Calls': [
-      activityRow('C-5521', '2026-05-12T10:15:00', 'J. Patel', '', 'No answer; voicemail about the $185.00 still outstanding.', { PriorityFlag: 'High', ...leftMessage, With: 'Member', Duration: '1m 04s' }),
+      activityRow('C-5527', '2026-05-13T11:20:00', 'B. Nguyen', '', 'EBA campaign call: member asked not to be called about the campaign again.', { DoNotCall: true, Status: 'Completed', With: 'Member', Duration: '2m 10s' }),
+      activityRow('C-5521', '2026-05-12T10:15:00', 'J. Patel', '', 'No answer; voicemail about the $185.00 still outstanding.', { Priority: 'High', ...leftMessage, With: 'Member', Duration: '1m 04s' }),
       activityRow('C-5498', '2026-05-09T15:30:00', 'A. Smith', '', 'Discussed leave without pay and retired membership instead of resigning.', { ...completed, With: 'Member', Duration: '14m 05s', Detail: 'Member plans to travel for 12 months and may return to nursing. Explained leave without pay (no fees, cover paused) and retired membership. Member will decide by 20 May.' }),
       activityRow('C-5460', '2026-04-29T12:10:00', 'M. Chen', '', 'Explained the escalation and the next steps with the employer.', { ...grievance, ...completed, With: 'Member', Duration: '9m 12s' }),
       activityRow('C-5433', '2026-04-14T11:00:00', 'A. Smith', '', 'Walked through the overtime limits and how to decline extra shifts.', { ...entitlement, ...completed, With: 'Member', Duration: '7m 30s' }),
@@ -95,22 +97,28 @@
     ],
     'Outbound Emails': [
       activityRow('E-9921', '2026-05-10T08:00:00', 'System', 'Overdue payment reminder – Q1 2026', '$185.00 outstanding; pay online or call to arrange a payment plan.', { With: member }),
-      activityRow('E-9905', '2026-05-09T16:02:00', 'A. Smith', 'Your resignation request', 'Acknowledged the request and set out the notice period and alternatives.', { With: member, AttachmentCount: 1, Outcome: 'Opened' }),
+      activityRow('E-9905', '2026-05-09T16:02:00', 'A. Smith', 'Your resignation request', 'Acknowledged the request and set out the notice period and alternatives.', { With: member, AttachmentCount: 1, Status: 'Opened' }),
       activityRow('E-9870', '2026-05-04T07:30:00', 'System', 'Branch meeting — 20 May', 'Invitation to the Sydney Metro branch meeting.', { With: member }),
-      activityRow('E-9844', '2026-04-30T11:20:00', 'M. Chen', 'WG-2026-041: statement received', 'Confirmed the signed statement and the next steps.', { ...grievance, With: member, Outcome: 'Opened' }),
+      activityRow('E-9844', '2026-04-30T11:20:00', 'M. Chen', 'WG-2026-041: statement received', 'Confirmed the signed statement and the next steps.', { ...grievance, With: member, Status: 'Opened' }),
       activityRow('E-9820', '2026-04-22T07:30:00', 'System', 'EBA bargaining update #4', 'Employer’s revised offer and the members’ response.', { With: member }),
-      activityRow('E-9790', '2026-04-14T11:30:00', 'A. Smith', 'EBA entitlement: clause 14.3', 'Written summary of the overtime limits, with the clause attached.', { ...entitlement, With: member, AttachmentCount: 1, Outcome: 'Opened' }),
+      activityRow('E-9790', '2026-04-14T11:30:00', 'A. Smith', 'EBA entitlement: clause 14.3', 'Written summary of the overtime limits, with the clause attached.', { ...entitlement, With: member, AttachmentCount: 1, Status: 'Opened' }),
       activityRow('E-9760', '2026-04-08T07:30:00', 'System', 'EBA bargaining update #3', 'Progress on rostering and overtime claims.', { With: member }),
       activityRow('E-9731', '2026-03-25T07:30:00', 'System', 'EBA bargaining update #2', 'Summary of the second bargaining meeting.', { With: member }),
-      activityRow('E-9702', '2026-03-16T09:05:00', 'J. Patel', 'Payment arrangement confirmation', 'Confirms payment of $185.00 by 30 March.', { With: member, Outcome: 'Opened' }),
+      activityRow('E-9702', '2026-03-16T09:05:00', 'J. Patel', 'Payment arrangement confirmation', 'Confirms payment of $185.00 by 30 March.', { With: member, Status: 'Opened' }),
       activityRow('E-9660', '2026-03-15T16:00:00', 'System', 'Direct debit suspended', 'Direct debit suspended after three declined attempts.', { With: member }),
       activityRow('E-9611', '2026-03-08T06:00:00', 'System', 'Direct debit declined (attempt 2)', 'Second attempt for invoice INV-2026-031 declined.', { With: member }),
       activityRow('E-9590', '2026-03-01T06:00:00', 'System', 'Direct debit declined (attempt 1)', 'First attempt for invoice INV-2026-031 declined.', { With: member }),
       activityRow('E-9540', '2026-02-15T06:00:00', 'System', 'Invoice INV-2026-031 – Q1 2026', 'Q1 2026 subscription, $185.00, due 01 March.', { With: member, AttachmentCount: 1 }),
       activityRow('E-9400', '2026-01-12T09:00:00', 'System', 'Annual renewal notice 2026', 'Renewal notice sent to the primary email address.', { With: member }),
       activityRow('E-9102', '2025-10-01T06:00:00', 'System', 'Receipt R-52611', 'Receipt for the Q3 2025 direct debit.', { With: member }),
-      activityRow('E-8870', '2025-08-14T07:30:00', 'System', 'EBA ballot information', 'Ballot pack and voting instructions.', { With: 's.reynolds@metrohealth.gov.au', Outcome: 'Bounced', OutcomeTone: 'danger' }),
+      activityRow('E-8870', '2025-08-14T07:30:00', 'System', 'EBA ballot information', 'Ballot pack and voting instructions.', { With: 's.reynolds@metrohealth.gov.au', Status: 'Bounced', StatusTone: 'danger' }),
       activityRow('E-8600', '2025-06-20T12:05:00', 'System', 'Receipt R-51240', 'Receipt for the card payment taken by phone.', { With: member })
+    ],
+    // A resend is its own card (a second source on the Emails type), dated by
+    // the resend and marked with the Resend category.
+    'Outbound Email Resends': [
+      activityRow('E-9921-R1', '2026-05-11T08:00:00', 'System', 'Overdue payment reminder – Q1 2026', '$185.00 outstanding; pay online or call to arrange a payment plan.', { Category: 'Resend' }),
+      activityRow('E-9905-R1', '2026-05-11T00:00:00', 'A. Smith', 'Your resignation request', 'Acknowledged the request and set out the notice period and alternatives.', { Category: 'Resend' })
     ],
     'Inbound Emails': [
       activityRow('R-4410', '2026-05-08T16:25:00', 'Membership team', 'Resignation', 'Leaving nursing to travel from July; please confirm the next steps.', { With: member }),
@@ -121,11 +129,97 @@
       activityRow('R-4050', '2025-08-21T08:15:00', 'J. Patel', 'Re: email address', 'Confirmed the corrected email address.', { With: member })
     ],
     'Meetings': [
-      activityRow('M-770', '2026-05-06T17:30:00', 'M. Chen', 'Grievance meeting with the employer', 'Employer agreed to review overtime rostering on the ward.', { ...grievance, With: 'Member, M. Chen, Metro Health HR', Duration: '60 min', Outcome: 'Follow-up booked', OutcomeTone: 'primary' }),
+      activityRow('M-770', '2026-05-06T17:30:00', 'M. Chen', 'Grievance meeting with the employer', 'Employer agreed to review overtime rostering on the ward.', { ...grievance, With: 'Member, M. Chen, Metro Health HR', Duration: '60 min', Status: 'Follow-up booked', StatusTone: 'primary' }),
       activityRow('M-742', '2026-04-02T12:30:00', 'A. Smith', 'Ward delegate lunch', 'Rostering concerns raised by four members on the ward.', { With: 'Member, ward delegates', Duration: '45 min' }),
       activityRow('M-701', '2026-02-19T18:00:00', 'A. Smith', 'Branch meeting', 'Attended the Sydney Metro branch meeting; EBA claims endorsed.', { With: 'Branch members', Duration: '90 min' }),
       activityRow('M-640', '2025-09-10T14:00:00', 'A. Smith', 'Workplace visit — Ward 4B', 'Met members on the ward about staffing levels.', { With: 'Member, ward members', Duration: '40 min' })
+    ],
+    'Zidebar Notes': [
+      activityRow('N-812', '2026-05-11T09:30:00', 'A. Smith', 'Roster change agreed', 'Manager agreed to move the member off night shifts from June.', { ...grievance }),
+      activityRow('N-797', '2026-04-16T15:05:00', 'J. Patel', '', 'Payment plan noted on the account; next review after the March debit.', { AttachmentCount: 1 }),
+      activityRow('N-760', '2026-02-03T11:40:00', 'M. Chen', '', 'Member prefers calls after 3 pm on weekdays; avoid rostered sleep days.'),
+      activityRow('N-702', '2025-11-20T10:10:00', 'A. Smith', 'Delegate training interest', 'Keen to attend the next delegate training intake; confirm dates in February.')
     ]
+  };
+  // Client details IQAs (data-details), one per source, answering for one
+  // ActivityKey with Additional-* columns. The With, Duration,
+  // AttachmentCount and Status values written in the rows above move here, as
+  // the core IQAs do not return them (Status becomes an Outcome field; its
+  // tone is dropped); some records add client fields of their own.
+  const detailColumns = { Status: 'Additional-Outcome', With: 'Additional-With', Duration: 'Additional-Duration', AttachmentCount: 'Additional-Attachments' };
+  const activityDetails = {};
+  Object.entries(activity).forEach(([name, rows]) => {
+    const details = activityDetails[name + ' Details'] = {};
+    rows.forEach(row => {
+      const extra = {};
+      Object.entries(detailColumns).forEach(([from, to]) => {
+        if (from in row) extra[to] = row[from];
+        delete row[from];
+      });
+      delete row.StatusTone;
+      details[row.ActivityKey] = extra;
+    });
+  });
+  // Interactions: the Add Interaction form's Interaction Type is the core
+  // Category, and its follow-up (a task) and Pin Interaction are the core
+  // FollowUpDate, FollowUpActioned and Pinned. The follow-up note is a
+  // client detail. Sample "today" is 14 May: I-3107's follow-up is open,
+  // I-3080's overdue and I-2988's done; I-3094 and I-2950 are pinned.
+  const interactionTypes = {
+    'I-3107': 'Other', 'I-3094': 'Note', 'I-3080': 'Email', 'I-3051': 'Call', 'I-2988': 'Call',
+    'I-2950': 'Call', 'I-2911': 'Other', 'I-2702': 'In Person', 'I-2455': 'Note', 'I-2101': 'Site Meeting'
+  };
+  const interactionFlags = {
+    'I-3107': { FollowUpDate: '2026-05-22T00:00:00', FollowUpActioned: false },
+    'I-3080': { FollowUpDate: '2026-05-12T00:00:00', FollowUpActioned: false },
+    'I-2988': { FollowUpDate: '2026-03-30T00:00:00', FollowUpActioned: true },
+    'I-3094': { Pinned: true },
+    'I-2950': { Pinned: true }
+  };
+  activity.Interactions.forEach(row => {
+    Object.assign(row, { Category: interactionTypes[row.ActivityKey] || '', FollowUpDate: '', FollowUpActioned: false, Pinned: false },
+      interactionFlags[row.ActivityKey]);
+  });
+  Object.assign(activityDetails['Interactions Details']['I-3107'], {
+    'Additional-Handled by': 'Retention team',
+    'Additional-Workbench': 'Resignations',
+    'Additional-Follow up note': 'Retention call before processing'
+  });
+  Object.assign(activityDetails['Interactions Details']['I-3080'], {
+    'Additional-Handled by': 'M. Chen',
+    'Additional-Workbench': 'Disputes',
+    'Additional-Follow up note': 'Chase the employer for a written response'
+  });
+  Object.assign(activityDetails['Zidebar Notes Details']['N-812'], {
+    'Additional-Category': 'Rostering',
+    'Additional-Visible to member': true
+  });
+  // A resend card's details: the address the copy went to.
+  Object.assign(activityDetails['Outbound Email Resends Details']['E-9921-R1'], { 'Additional-To': member });
+  Object.assign(activityDetails['Outbound Email Resends Details']['E-9905-R1'], { 'Additional-To': member });
+  // Delivery history (US-ACTIVITY-EVENTS, item 37): one row per attempt of
+  // that send, oldest first. A resend is its own card, so the original's
+  // history never lists it (the history IQA excludes the Resent event).
+  const attempt = (EventDate, Event, extra = {}) => ({ EventDate, Event, ...extra });
+  const activityHistory = {
+    'Outbound Emails History': {
+      'E-9905': [
+        attempt('2026-05-09T16:02:00', 'Queued'),
+        attempt('2026-05-09T16:03:00', 'Delivered', { EventTone: 'success' })
+      ],
+      'E-9921': [
+        attempt('2026-05-10T08:00:00', 'Queued'),
+        attempt('2026-05-10T08:00:00', 'Bounced', { EventTone: 'danger', EventDetail: 'Mailbox full.' })
+      ],
+      'E-9870': [
+        attempt('2026-05-04T07:30:00', 'Queued'),
+        attempt('2026-05-04T07:31:00', 'Delivered', { EventTone: 'success' })
+      ],
+      'E-8870': [
+        attempt('2025-08-14T07:30:00', 'Queued'),
+        attempt('2025-08-14T07:32:00', 'Bounced', { EventTone: 'danger', EventDetail: 'Address no longer exists.' })
+      ]
+    }
   };
   let activityFailing = false;
 
@@ -161,6 +255,19 @@
       await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 300));
       if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
       if (activityFailing && name === 'Meetings') return { ok: false, status: 500, json: async () => ({}) };
+      if (name.endsWith(' History')) {
+        // One record's attempts, filtered on ID and ActivityKey, oldest first.
+        const key = url.searchParams.get('ActivityKey');
+        const rows = url.searchParams.get('ID') === '004821' ? activityHistory[name]?.[key] || [] : [];
+        return { ok: true, status: 200, json: async () => ({ TotalCount: rows.length, Offset: 0, Limit: 50, Count: rows.length, HasNext: false, Items: { $values: rows } }) };
+      }
+      if (name.endsWith(' Details')) {
+        // One record's client details, filtered on ID and ActivityKey.
+        const key = url.searchParams.get('ActivityKey');
+        const details = url.searchParams.get('ID') === '004821' ? activityDetails[name]?.[key] : null;
+        const rows = details ? [{ ActivityKey: key, ...details }] : [];
+        return { ok: true, status: 200, json: async () => ({ TotalCount: rows.length, Offset: 0, Limit: 1, Count: rows.length, HasNext: false, Items: { $values: rows } }) };
+      }
       const start = url.searchParams.get('StartDate') || '';
       const rows = (url.searchParams.get('ID') === '004821' ? activity[name] || [] : [])
         .filter(row => row.ActivityDate.slice(0, 10) >= start)

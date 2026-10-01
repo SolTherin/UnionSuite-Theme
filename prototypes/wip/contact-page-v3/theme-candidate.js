@@ -1,7 +1,7 @@
 /* ==========================================================================
    CONTACT PAGE v3 — THEME CANDIDATE SCRIPT (not installed)
    Proposed additions to THeme/UnionSuite/zUnionSuite.js. Styles are in
-   theme-candidate.css (sections 8, 10, 12, 16, 17 and 32).
+   theme-candidate.css (sections 8, 10, 12, 16, 17, 32 and 37).
    ========================================================================== */
 
 /* US-IQA-ROW-GROUPS:START — expandable related rows in a native Query Menu.
@@ -1746,7 +1746,7 @@
    Author markup, usually the template of a one-row Query Template Display so
    iMIS fills in the record (item 32):
      <div class="us-activity-feed"
-          data-us-activity-folder="$/…/Contact_Page/Activity"
+          data-us-activity-folder="$/…/Contact Profile/Activity"
           data-us-activity-filter="ID" data-us-activity-value="{#query.ID}"
           data-us-activity-start="StartDate" data-us-activity-days="90"
           data-us-activity-history="…full history page…">
@@ -3119,3 +3119,198 @@
   else update();
 })();
 /* US-BANNER-POSITIONS:END */
+
+/* US-ACTIVITY-EVENTS:START — an activity's attempt history, such as a sent
+   email send's delivery attempts (item 37, proposed; design only, not promoted).
+   Opt in per source on the activity feed host: data-events names a third IQA
+   (beside data-query and data-details), and data-events-label its heading
+   (default "History"):
+     <li data-source="emails-out" data-query="Outbound Emails"
+         data-details="Outbound Emails Details"
+         data-events="Outbound Emails History"
+         data-events-label="Delivery history" …></li>
+   The history IQA is run for one record when its card opens, beside the
+   details IQA, filtered on the feed's record filter and ActivityKey, and
+   returns one row per attempt, oldest first (at most 50):
+     required  EventDate (a date/time column), Event ("Queued", "Delivered")
+     optional  EventDetail (a short note, such as a bounce reason),
+               EventTone (success|warning|danger)
+   It shows between the details fields and the note as a small dated list,
+   dots joined by a line. Loading and Retry work as the details do; no rows
+   show nothing. Loaded once per record and kept while the page is open. Each
+   send is its own card, dated by its own core ActivityDate: a resend is a
+   second source on the same type (Category Resend), and the original's
+   history IQA leaves the resend out. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteActivityEvents) return;
+
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const TONES = ['success', 'warning', 'danger'];
+  const loaded = new Map();
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(unwrap(value)).trim();
+
+  function el(tag, className, content) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (content !== undefined) node.textContent = content;
+    return node;
+  }
+
+  function field(row, name) {
+    const key = Object.keys(row || {}).find(item => item.toLowerCase() === name.toLowerCase());
+    return key ? unwrap(row[key]) : undefined;
+  }
+
+  // The card's feed, its source definition and its record key.
+  function context(record) {
+    const feed = record.closest('.us-activity-feed');
+    const [sourceKey, ...rest] = (record.dataset.usActivityId || '').split(':');
+    const source = feed?.querySelector(`.us-activity__sources > li[data-source="${CSS.escape(sourceKey)}"]`);
+    const query = text(source?.dataset.events);
+    if (!feed || !query || !rest.length) return null;
+    return {
+      feed,
+      id: record.dataset.usActivityId,
+      key: rest.join(':'),
+      query,
+      label: text(source.dataset.eventsLabel) || 'History'
+    };
+  }
+
+  // "10 Sep, 1:00 pm"; the time is left out at midnight, and the year only
+  // shows outside the feed's current year.
+  function when(value, feed) {
+    const match = text(value).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+    if (!match) return text(value);
+    const [, year, month, day, hour = '00', minute = '00'] = match;
+    const today = text(feed.dataset.usActivityToday) || new Date().toISOString().slice(0, 10);
+    let label = Number(day) + ' ' + MONTHS[Number(month) - 1] + (year === today.slice(0, 4) ? '' : ' ' + year);
+    if (hour !== '00' || minute !== '00') {
+      const h = Number(hour);
+      label += ', ' + (h % 12 || 12) + ':' + minute + ' ' + (h < 12 ? 'am' : 'pm');
+    }
+    return label;
+  }
+
+  async function request(ctx) {
+    const { feed } = ctx;
+    // The history IQA has a fixed column contract, so it stays with the core
+    // IQAs, not in the client-editable details folder.
+    const folder = text(feed.dataset.usActivityFolder).replace(/\/+$/, '');
+    const params = new URLSearchParams({ QueryName: folder + '/' + ctx.query, limit: '50', offset: '0' });
+    params.set(text(feed.dataset.usActivityFilter) || 'ID', text(feed.dataset.usActivityValue));
+    params.set('ActivityKey', ctx.key);
+    const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+    const response = await fetch('/api/query?' + params, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', ...(token ? { RequestVerificationToken: token } : {}) }
+    });
+    if (!response.ok) throw Error('HTTP ' + response.status);
+    const data = await response.json();
+    const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+    if (!Array.isArray(rows)) throw Error('Unexpected response');
+    return rows.map(row => ({
+      date: field(row, 'EventDate'),
+      event: text(field(row, 'Event')),
+      detail: text(field(row, 'EventDetail')),
+      tone: TONES.includes(text(field(row, 'EventTone')).toLowerCase()) ? text(field(row, 'EventTone')).toLowerCase() : ''
+    })).filter(row => row.event);
+  }
+
+  function fill(block, ctx) {
+    const entry = loaded.get(ctx.id);
+    block.replaceChildren();
+    if (entry.status === 'loading') {
+      const status = el('p', 'us-record__extra-status', 'Loading ' + ctx.label.toLowerCase() + '…');
+      status.setAttribute('role', 'status');
+      block.append(status);
+    } else if (entry.status === 'failed') {
+      const status = el('p', 'us-record__extra-status', ctx.label + ' could not be loaded. ');
+      status.setAttribute('role', 'status');
+      const again = el('button', 'TextButton SmallButton us-record__events-retry', 'Retry');
+      again.type = 'button';
+      status.append(again);
+      block.append(status);
+    } else if (entry.rows.length) {
+      const list = el('ol', 'us-record__events-list');
+      entry.rows.forEach(row => {
+        const item = el('li', 'us-record__event');
+        if (row.tone) item.dataset.usEventTone = row.tone;
+        item.append(el('span', 'us-record__event-date', when(row.date, ctx.feed)), el('span', 'us-record__event-name', row.event));
+        if (row.detail) item.append(el('span', 'us-record__event-detail', row.detail));
+        list.append(item);
+      });
+      block.append(el('p', 'us-record__note-label', ctx.label), list);
+    }
+    block.hidden = !block.childElementCount;
+  }
+
+  // Every open card of this record gets the block (the feed can redraw a
+  // card while its details are open).
+  function paint(ctx) {
+    ctx.feed.querySelectorAll(`.us-record[data-us-activity-id="${CSS.escape(ctx.id)}"]`).forEach(record => {
+      const block = record.querySelector('.us-record__events');
+      if (block) fill(block, ctx);
+    });
+  }
+
+  function load(ctx) {
+    const current = loaded.get(ctx.id);
+    if (current && current.status !== 'failed') return;
+    const entry = { status: 'loading', rows: [] };
+    loaded.set(ctx.id, entry);
+    paint(ctx);
+    request(ctx).then(rows => {
+      entry.status = 'ready';
+      entry.rows = rows;
+    }, error => {
+      entry.status = 'failed';
+      console.warn('[US-ACTIVITY-EVENTS] History did not load:', ctx.query, ctx.key, error);
+    }).then(() => {
+      if (loaded.get(ctx.id) === entry) paint(ctx);
+    });
+  }
+
+  // Adds the block after the details fields, so the card's fold measures it.
+  function attach(record) {
+    const ctx = context(record);
+    const detail = record.querySelector('.us-record__detail');
+    if (!ctx || !detail || detail.querySelector('.us-record__events')) return ctx;
+    const block = el('div', 'us-record__events');
+    block.hidden = true;
+    const extra = detail.querySelector('.us-record__extra');
+    detail.insertBefore(block, extra ? extra.nextSibling : detail.firstChild);
+    if (loaded.has(ctx.id)) fill(block, ctx);
+    return ctx;
+  }
+
+  // Capture phase: before the card opens, so the loading line is part of
+  // the height it folds open to.
+  document.addEventListener('click', event => {
+    const record = event.target.closest('.us-activity-feed .us-record');
+    if (!record) return;
+    if (event.target.closest('.us-record__events-retry')) {
+      const ctx = context(record);
+      if (ctx) load(ctx);
+      return;
+    }
+    const onToggle = event.target.closest('.us-record__toggle') ||
+      (event.target.closest('.us-record__head') && !event.target.closest('a, button, input, select, textarea'));
+    if (!onToggle || record.querySelector('.us-record__toggle')?.getAttribute('aria-expanded') === 'true') return;
+    const ctx = attach(record);
+    if (ctx) load(ctx);
+  }, true);
+
+  // Cards redrawn already open (a reload, a range change) get their block.
+  new MutationObserver(() => {
+    document.querySelectorAll('.us-activity-feed .us-record.is-expanded').forEach(attach);
+  }).observe(document.documentElement, { subtree: true, childList: true });
+
+  window.UnionSuiteActivityEvents = { version: '0.1' };
+})();
+/* US-ACTIVITY-EVENTS:END */

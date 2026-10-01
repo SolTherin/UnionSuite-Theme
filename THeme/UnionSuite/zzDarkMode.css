@@ -38,6 +38,22 @@
     --danger-bg: #472d31;
     --info: #83d7f5;
     --info-bg: #203d4b;
+    /* Activity types: the same hue families as the light pairs, each icon
+       above 7:1 on its tint. */
+    --activity-interaction: #8ccfe0;
+    --activity-interaction-bg: #173640;
+    --activity-call: #aac2ff;
+    --activity-call-bg: #1e2a4d;
+    --activity-email: #cdc5f7;
+    --activity-email-bg: #302c4a;
+    --activity-meeting: #9ed789;
+    --activity-meeting-bg: #243d2d;
+    --activity-note: #c2ccd6;
+    --activity-note-bg: #2a333d;
+    --activity-sms: #8fdcc4;
+    --activity-sms-bg: #1a3a31;
+    --activity-case: #f3a8d4;
+    --activity-case-bg: #45233a;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 20%);
     --shadow: 0 2px 5px rgb(0 0 0 / 24%);
     --shadow-lg: 0 12px 30px rgb(0 0 0 / 30%);
@@ -994,20 +1010,8 @@
     background: var(--dm-selected);
   }
 
-  /* Record cards (US-RECORD-CARDS): tints the dark palette does not define. */
-  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="email"] {
-    --us-record-hue: #cdc5f7;
-    --us-record-tint: #302c4a;
-  }
-
-  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="sms"] {
-    --us-record-hue: var(--dm-accent-text);
-    --us-record-tint: var(--dm-accent-bg);
-  }
-
-  :root[data-us-color-scheme="dark"] .us-record[data-us-record-type="case"] {
-    --us-record-tint: var(--info-bg);
-  }
+  /* Record cards (US-RECORD-CARDS): the activity type colours are the
+     --activity-* tokens, set for dark in the palette block above. */
 
   /* Group titles keep the muted label voice; the dark theme brightens every h3. */
   :root[data-us-color-scheme="dark"] .us-records__group-title {

@@ -8449,25 +8449,48 @@ SOFTWARE.
    Author markup, usually the template of a one-row Query Template Display so
    iMIS fills in the record (item 32):
      <div class="us-activity-feed"
-          data-us-activity-folder="$/…/Contact_Page/Activity"
+          data-us-activity-folder="$/…/Contact Profile/Activity"
           data-us-activity-filter="ID" data-us-activity-value="{#query.ID}"
           data-us-activity-start="StartDate" data-us-activity-days="90"
           data-us-activity-history="…full history page…">
        <ul class="us-activity__sources" hidden>
          <li data-source="calls-out" data-query="Outbound Calls"
+             data-details="Outbound Calls Details"
              data-type="call" data-direction="out"></li>
          …one li per IQA…
        </ul>
      </div>
    Types: call, email, meeting, sms, note, interaction (data-label and
-   data-plural name any other type). Every IQA is sorted newest first and
-   filtered on the record filter and the named start-date filter, with these
-   output aliases:
-     required  ActivityKey, ActivityDate, Summary
-     optional  Subject (most records have none), Detail, StaffName, With,
-               Duration, Outcome, OutcomeTone, PriorityFlag (High|Urgent)
-               (success|warning|danger|primary), CaseRef, CaseUrl, RecordUrl,
-               AttachmentCount, Direction (In|Out; overrides data-direction)
+   data-plural name any other type). Every core IQA is sorted newest first
+   and filtered on the record filter and the named start-date filter. Its
+   fixed columns draw the collapsed card, the note and the View button:
+     required  ActivityKey, ActivityDate, Subject, Summary, Detail,
+               CreatedBy, Priority (a value may be blank; a row needs a
+               key, a date and a Subject or Summary)
+     optional  Category (a sub-type after the type, such as an
+               interaction's Call or Site Meeting), CaseRef, CaseUrl,
+               RecordUrl, Direction (In|Out; overrides data-direction),
+               FollowUpDate and FollowUpActioned (a follow-up task),
+               Pinned and DoNotCall (true|1|yes)
+   Priority shows a flag for High or Urgent only. A FollowUpDate shows a
+   follow-up badge: "Follow-up 22 May" while open, amber "Overdue 12 May"
+   once the date has passed, "Follow-up done" when FollowUpActioned is true.
+   DoNotCall shows a red no-entry alert icon. Pinned shows a pin icon and an
+   accent edge; while a type whose records
+   can be pinned (Interactions) is chosen, a pin toggle in the search field
+   filters to pinned records, paging like a type filter. Anything else about a record, including a status
+   or outcome, belongs in its details.
+   Client details: data-details on a source names a second IQA, run for one
+   record when its card first opens and filtered on the record filter and
+   ActivityKey. Every Additional-* column it returns (Additional-Deadline,
+   Additional-Handled by) is shown in the details, labelled with the text
+   after the prefix, in the IQA's column order; blank values are left out.
+   Dates show as "22 May 2026", true/false as Yes/No. The core IQAs stay
+   fixed; clients add or remove details columns in the details IQAs only.
+   data-us-activity-details-folder puts those IQAs in another folder (default:
+   data-us-activity-folder). data-detail-label on a source heads its Detail
+   note when the card opens ("Additional notes" on calls, whose Summary is
+   the call summary); a record without a note shows neither.
    Optional: data-us-activity-limit (rows per request, default 20),
    data-us-activity-page (rows per Show more, default 10),
    data-us-activity-time-zone (default Australia/Sydney) and
@@ -8475,13 +8498,18 @@ SOFTWARE.
    On a source <li>, data-history is the IQA page for its type: while that
    type is chosen, a "View all calls" (emails, meetings…) link to it shows
    at the end of the type filters.
+   data-record-popup (true|1|yes) on a source opens its RecordUrl in the native
+   iMIS popup (ShowDialog_NoReturnValue, as the theme's popup actions do)
+   instead of navigating the page; without the popup service the link
+   navigates as usual. Use it for pages built to run in a dialog, such as the
+   email preview (InteractionPreview.aspx).
    The feed loads when it is first visible: one GET /api/query per source, in
    parallel. Rows merge newest first. A row shows only once no source that
    still holds unloaded rows could have a newer one, so Show more and the type
    filter page every source correctly. A date range change keeps what is
    loaded (narrowing folds the older cards away; widening pages on) and only
-   re-queries the counts. Search covers the loaded rows only, says so, and
-   faintly highlights matches. Cards fold in and out as filters change, and
+   re-queries the counts. Search covers the loaded rows (and the details of
+   cards already opened) only, says so, and faintly highlights matches. Cards fold in and out as filters change, and
    the type switcher's underline slides to the chosen type. A failed source is reported, never
    counted as zero. Values render as text, never as HTML.
    Each row is a record card (US-RECORD-CARDS): the same markup as the
@@ -8503,7 +8531,9 @@ SOFTWARE.
     meeting: { label: 'Meeting', plural: 'Meetings' },
     sms: { label: 'SMS', plural: 'SMS', inward: 'Received', outward: 'Sent' },
     note: { label: 'Note', plural: 'Notes' },
-    interaction: { label: 'Interaction', plural: 'Interactions' }
+    // pins: records of this type can be pinned, so the search field offers a
+    // pinned-only toggle while it is chosen.
+    interaction: { label: 'Interaction', plural: 'Interactions', pins: true }
   };
   const RANGES = [
     [90, 'Last 90 days'],
@@ -8511,7 +8541,6 @@ SOFTWARE.
     [365, 'Last 12 months'],
     [0, 'All time']
   ];
-  const TONES = ['success', 'warning', 'danger', 'primary'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   // Tabler "search" outline (MIT), as drawn by the theme's report search.
   const SEARCH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
@@ -8564,6 +8593,29 @@ SOFTWARE.
     }
   }
 
+  // View full details for a source with data-record-popup: open the record in
+  // the native iMIS popup, as the theme's popup actions do. Any case the popup
+  // cannot handle (no popup service, another site, a fragment, an error) leaves
+  // the link to navigate normally.
+  let recordPopupCount = 0;
+  function openRecordPopup(event, link, row) {
+    if (typeof window.ShowDialog_NoReturnValue !== 'function') return;
+    let target;
+    try {
+      target = new URL(link.getAttribute('href'), document.baseURI);
+    } catch (error) {
+      return;
+    }
+    if (target.origin !== window.location.origin || target.hash) return;
+    try {
+      window.ShowDialog_NoReturnValue(target.href, null, '80%', '80%', row.subject || 'Details',
+        null, 'E', null, 'UnionSuite-activity-record-' + (++recordPopupCount), false, false, () => {}, link);
+      event.preventDefault();
+    } catch (error) {
+      console.error('[UnionSuiteActivityFeed] The record popup could not open', error);
+    }
+  }
+
   function typeInfo(source) {
     const known = TYPES[source.type] || { label: source.type, plural: source.type };
     return {
@@ -8594,10 +8646,14 @@ SOFTWARE.
         direction: text(item.dataset.direction).toLowerCase(),
         label: text(item.dataset.label),
         plural: text(item.dataset.plural),
-        history: safeUrl(item.dataset.history)
+        history: safeUrl(item.dataset.history),
+        details: text(item.dataset.details),
+        detailLabel: text(item.dataset.detailLabel),
+        recordPopup: /^(true|1|yes)$/i.test(text(item.dataset.recordPopup))
       });
     });
     if (!sources.length) return null;
+    const detailsFolder = text(root.dataset.usActivityDetailsFolder).replace(/\/+$/, '');
 
     const number = (raw, fallback) => {
       const parsed = Number.parseInt(raw, 10);
@@ -8606,6 +8662,7 @@ SOFTWARE.
     const days = Number.parseInt(root.dataset.usActivityDays, 10);
     return {
       folder,
+      detailsFolder: /^\$\/.+/.test(detailsFolder) ? detailsFolder : folder,
       filter,
       value,
       sources,
@@ -8679,42 +8736,48 @@ SOFTWARE.
     const summary = text(field(row, 'Summary'));
     if (!key || !date || !(subject || summary)) return null;
     const direction = text(field(row, 'Direction')).toLowerCase() || source.direction;
-    const tone = text(field(row, 'OutcomeTone')).toLowerCase();
-    const attachments = Number.parseInt(text(field(row, 'AttachmentCount')), 10);
+    const priority = text(field(row, 'Priority'));
+    const yes = name => /^(true|1|yes)$/i.test(text(field(row, name)));
     return {
       id: source.key + ':' + key,
+      key,
       source,
       date,
       subject,
       summary,
       detail: text(field(row, 'Detail')),
-      staff: text(field(row, 'StaffName')),
-      with: text(field(row, 'With')),
-      duration: text(field(row, 'Duration')),
-      outcome: text(field(row, 'Outcome')),
-      tone: TONES.includes(tone) ? tone : '',
-      priority: /^(high|urgent)$/i.test(text(field(row, 'PriorityFlag'))) ? text(field(row, 'PriorityFlag')) : '',
+      createdBy: text(field(row, 'CreatedBy')),
+      category: text(field(row, 'Category')),
+      followUp: parseDate(field(row, 'FollowUpDate'), timeZone),
+      followUpDone: yes('FollowUpActioned'),
+      pinned: yes('Pinned'),
+      doNotCall: yes('DoNotCall'),
+      priority: /^(high|urgent)$/i.test(priority) ? priority : '',
       caseRef: text(field(row, 'CaseRef')),
       caseUrl: safeUrl(field(row, 'CaseUrl')),
       recordUrl: safeUrl(field(row, 'RecordUrl')),
-      attachments: Number.isSafeInteger(attachments) && attachments > 0 ? attachments : 0,
       direction: direction.startsWith('in') ? 'in' : direction.startsWith('out') ? 'out' : ''
     };
   }
 
   async function request(state, source, page = {}) {
     const { cfg } = state;
+    const params = new URLSearchParams({
+      QueryName: cfg.folder + '/' + source.def.query,
+      limit: String(page.limit ?? cfg.limit),
+      offset: String(page.offset ?? source.offset)
+    });
+    params.set(cfg.filter, cfg.value);
+    if (state.days) params.set(cfg.start, startDate(cfg, state.days));
+    return query(params);
+  }
+
+  // One GET /api/query: its rows and paging totals.
+  async function query(params) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 30000);
     try {
       const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
-      const params = new URLSearchParams({
-        QueryName: cfg.folder + '/' + source.def.query,
-        limit: String(page.limit ?? cfg.limit),
-        offset: String(page.offset ?? source.offset)
-      });
-      params.set(cfg.filter, cfg.value);
-      if (state.days) params.set(cfg.start, startDate(cfg, state.days));
       const response = await fetch(apiRoot() + 'query?' + params, {
         method: 'GET',
         credentials: 'same-origin',
@@ -8737,6 +8800,108 @@ SOFTWARE.
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  // Client details: the Additional-* columns of a source's details IQA, read
+  // for one record when its card first opens and kept for the feed's life.
+  const DETAIL_PREFIX = /^additional[-_]/i;
+
+  // "Additional-Handled by" keeps the author's wording; a name without
+  // spaces, such as "Additional-HandledBy", is split into "Handled by".
+  // Acronyms (ID, EBA) keep their capitals.
+  function detailLabel(name) {
+    const rest = name.replace(DETAIL_PREFIX, '').trim();
+    if (!rest || /\s/.test(rest)) return rest;
+    const words = rest.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
+    }).join(' ');
+  }
+
+  // Values are shown as text. Dates read as "22 May 2026" (with the time
+  // when it is not midnight); true and false read as Yes and No.
+  function detailValue(value, cfg) {
+    const raw = text(value);
+    if (/^(true|false)$/i.test(raw)) return /^true$/i.test(raw) ? 'Yes' : 'No';
+    const date = /^\d{4}-\d{2}-\d{2}(?:[T ]|$)/.test(raw) ? parseDate(raw, cfg.timeZone) : null;
+    if (!date) return raw;
+    const day = date.day + ' ' + MONTHS[date.month - 1].slice(0, 3) + ' ' + date.year;
+    return date.hour || date.minute ? day + ', ' + timeText(date) : day;
+  }
+
+  function detailFields(row, cfg) {
+    const properties = unwrap(row?.Properties)?.$values;
+    const entries = Array.isArray(properties)
+      ? properties.map(item => [String(item.Name), unwrap(item.Value)])
+      : Object.entries(row || {}).map(([name, value]) => [name, unwrap(value)]);
+    return entries
+      .filter(([name]) => DETAIL_PREFIX.test(name))
+      .map(([name, value]) => ({ label: detailLabel(name), value: detailValue(value, cfg) }))
+      .filter(detailField => detailField.label && detailField.value);
+  }
+
+  function findRow(state, id) {
+    for (const source of state.sources) {
+      const row = source.rows.find(item => item.id === id);
+      if (row) return row;
+    }
+    return null;
+  }
+
+  // Starts loading a record's details unless they are loaded or loading. A
+  // failed load starts again (the Retry button).
+  function ensureDetails(state, row) {
+    if (!row?.source.details) return;
+    const current = state.details.get(row.id);
+    if (current && current.status !== 'failed') return;
+    const entry = { status: 'loading', fields: [] };
+    state.details.set(row.id, entry);
+    paintDetails(state, row);
+    const { cfg } = state;
+    const params = new URLSearchParams({
+      QueryName: cfg.detailsFolder + '/' + row.source.details,
+      limit: '1',
+      offset: '0'
+    });
+    params.set(cfg.filter, cfg.value);
+    params.set('ActivityKey', row.key);
+    query(params).then(page => {
+      entry.status = 'ready';
+      entry.fields = page.rows.length ? detailFields(page.rows[0], cfg) : [];
+    }, error => {
+      entry.status = 'failed';
+      console.warn('[US-ACTIVITY-FEED] Details did not load:', row.source.details, row.key, error);
+    }).then(() => {
+      if (states.get(state.root) === state && state.details.get(row.id) === entry) paintDetails(state, row);
+    });
+  }
+
+  // Draws a record's details slot on its current card, if it has one.
+  function paintDetails(state, row) {
+    const slot = state.cards?.get(row.id)?.querySelector('.us-record__extra');
+    if (slot) fillDetails(slot, state.details.get(row.id));
+  }
+
+  function fillDetails(slot, entry) {
+    slot.replaceChildren();
+    if (entry?.status === 'loading') {
+      const status = el('p', 'us-record__extra-status', 'Loading details…');
+      status.setAttribute('role', 'status');
+      slot.append(status);
+    } else if (entry?.status === 'failed') {
+      const status = el('p', 'us-record__extra-status', 'Details could not be loaded. ');
+      status.setAttribute('role', 'status');
+      const again = el('button', 'TextButton SmallButton us-record__extra-retry', 'Retry');
+      again.type = 'button';
+      status.append(again);
+      slot.append(status);
+    } else if (entry?.fields.length) {
+      const facts = el('dl', 'us-record__facts');
+      entry.fields.forEach(detailField => fact(facts, detailField.label, detailField.value));
+      slot.append(facts);
+    }
+    slot.hidden = !slot.childElementCount;
   }
 
   const resetSource = source => Object.assign(source, { rows: [], ids: new Set(), offset: 0, total: null, more: false, status: 'loading', error: '' });
@@ -8789,22 +8954,29 @@ SOFTWARE.
 
   // Type and direction words match too ("email", "inbound"), as a shortcut
   // beside the type filters, which stay the way to page a whole type.
-  function matchesSearch(row, query) {
+  // Details count once loaded; search never loads them.
+  function matchesSearch(row, query, details) {
     if (!query) return true;
     const info = typeInfo(row.source);
     const direction = row.direction === 'in' ? info.inward : row.direction === 'out' ? info.outward : '';
-    return [row.subject, row.summary, row.detail, row.staff, row.with, row.caseRef, row.outcome, info.label, info.plural, direction]
+    const extra = details?.status === 'ready' ? details.fields.map(detailField => detailField.value) : [];
+    const flags = [row.followUp ? 'follow-up task' : '', row.pinned ? 'pinned' : '', row.doNotCall ? 'do not call' : ''];
+    return [row.subject, row.summary, row.detail, row.createdBy, row.caseRef, row.category, info.label, info.plural, direction, ...flags, ...extra]
       .some(value => value.toLowerCase().includes(query));
   }
 
+  // Pinned only applies while a type whose records can be pinned is chosen.
+  const pinnedOnly = state => state.pinned && Boolean(TYPES[state.type]?.pins);
+
   function visibleRows(state) {
     const query = state.query.toLowerCase();
-    return settledRows(state).filter(row => matchesSearch(row, query));
+    const pinned = pinnedOnly(state);
+    return settledRows(state).filter(row => (!pinned || row.pinned) && matchesSearch(row, query, state.details.get(row.id)));
   }
 
   // Loads more pages, from whichever source holds back the merge, until the
-  // requested number of rows can be shown. Search never loads more: it
-  // covers the loaded rows only.
+  // requested number of rows can be shown. Pinned only pages like a type
+  // filter; search never loads more: it covers the loaded rows only.
   async function fill(state) {
     if (state.filling) {
       state.refill = true;
@@ -8956,7 +9128,14 @@ SOFTWARE.
     input.autocomplete = 'off';
     input.placeholder = 'Search loaded activity';
     input.setAttribute('aria-label', 'Search loaded activity');
-    search.append(input);
+    // Pinned only: a pin toggle at the end of the search field, shown while
+    // a type whose records can be pinned (Interactions) is chosen.
+    const pinnedToggle = el('button', 'us-activity__pinned');
+    pinnedToggle.type = 'button';
+    pinnedToggle.hidden = true;
+    pinnedToggle.setAttribute('aria-pressed', 'false');
+    pinnedToggle.setAttribute('aria-label', 'Pinned only');
+    search.append(input, pinnedToggle);
 
     const range = el('select', 'us-activity__range');
     range.setAttribute('aria-label', 'Date range');
@@ -9003,7 +9182,7 @@ SOFTWARE.
     }
 
     root.append(bar, notice, body, footer);
-    Object.assign(state, { id, types, typeHistory, input, range, controls, filterToggle, filtersOpen: false, notice, body, status, more });
+    Object.assign(state, { id, types, typeHistory, input, pinnedToggle, range, controls, filterToggle, filtersOpen: false, notice, body, status, more });
   }
 
   // The theme's own filter button (US-QUERY-SEARCH markup and classes) in the
@@ -9049,8 +9228,9 @@ SOFTWARE.
     state.fitted = true;
     state.root.toggleAttribute('data-us-activity-wide', wide);
     state.filterToggle.closest('.us-activity__utilities').hidden = wide;
-    // A search in progress keeps the fields open when the feed narrows.
-    if (!wide && state.query) state.filtersOpen = true;
+    // A search or pinned filter in progress keeps the fields open when the
+    // feed narrows.
+    if (!wide && (state.query || state.pinned)) state.filtersOpen = true;
     state.controls.getAnimations().forEach(animation => animation.cancel());
     state.controls.style.overflow = '';
     state.controls.hidden = !wide && !state.filtersOpen;
@@ -9062,9 +9242,11 @@ SOFTWARE.
     state.filtersOpen = open;
     labelToggle(filterToggle, open);
     if (!open && controls.contains(document.activeElement)) filterToggle.focus();
-    if (!open && state.query) {
+    // Closing clears the filters it hides: the search and pinned only.
+    if (!open && (state.query || state.pinned)) {
       state.input.value = '';
       state.query = '';
+      state.pinned = false;
       state.shown = state.cfg.page;
       render(state);
       fill(state);
@@ -9089,9 +9271,23 @@ SOFTWARE.
     list.append(group);
   }
 
-  // One record card: the type line (type · direction · linked record · by
-  // whom, then priority and status flags), the headline (Subject, when there
-  // is one) and the note, and the date column; details below.
+  // A follow-up turns the record into a task: open until actioned, overdue
+  // once its date has passed (today still counts as open).
+  function followUpBadge(row, cfg, thisYear) {
+    if (!row.followUp) return null;
+    const today = cfg.today || startDate(cfg, 0);
+    const state = row.followUpDone ? 'done' : row.followUp.sort.slice(0, 10) < today ? 'overdue' : 'open';
+    const when = row.followUp.sort.slice(0, 10) === today ? 'today' : shortDate(row.followUp, thisYear);
+    const label = state === 'done' ? 'Follow-up done' : state === 'overdue' ? 'Overdue ' + when : 'Follow-up ' + when;
+    const badge = el('span', 'us-badge us-record__follow-up' + (state === 'overdue' ? ' us-badge--warning' : ''), label);
+    badge.dataset.usFollowUp = state;
+    badge.title = state === 'done' ? 'Follow-up task actioned' : 'Follow-up task due ' + shortDate(row.followUp, 0);
+    return badge;
+  }
+
+  // One record card: the type line (type · category · direction · linked
+  // record · by whom, then the priority, follow-up and pinned flags), the headline (Subject, when
+  // there is one) and the summary, and the date column; details below.
   function item(state, row, thisYear) {
     const info = typeInfo(row.source);
     const expanded = state.expanded.has(row.id);
@@ -9105,15 +9301,41 @@ SOFTWARE.
 
     const tags = el('p', 'us-record__tags');
     tags.append(el('span', 'us-record__type', info.label));
+    if (row.category) tags.append(el('span', 'us-record__category', row.category));
     if (row.direction) tags.append(el('span', 'us-record__direction', row.direction === 'in' ? info.inward : info.outward));
     if (row.caseRef) {
       const link = el(row.caseUrl ? 'a' : 'span', 'us-record__link', row.caseRef);
       if (row.caseUrl) link.href = row.caseUrl;
       tags.append(link);
     }
-    if (row.staff) tags.append(el('span', 'us-record__by', row.staff));
+    if (row.createdBy) tags.append(el('span', 'us-record__by', row.createdBy));
+    // Do not call: the member asked not to be called again (for example on
+    // a campaign call). An alert icon leading the type line (after the pin,
+    // when both), so alerts line up down the list.
+    if (row.doNotCall) {
+      record.dataset.usRecordDoNotCall = '';
+      const alert = el('span', 'us-record__do-not-call');
+      alert.setAttribute('role', 'img');
+      alert.setAttribute('aria-label', 'Do not call');
+      alert.title = 'Do not call: the member asked not to be called again';
+      tags.prepend(alert);
+    }
     if (row.priority) tags.append(el('span', 'us-badge us-record__priority', row.priority));
-    if (row.outcome) tags.append(el('span', 'us-badge us-record__status' + (row.tone ? ' us-badge--' + row.tone : ''), row.outcome));
+    const followUp = followUpBadge(row, state.cfg, thisYear);
+    if (followUp) {
+      record.dataset.usRecordFollowUp = followUp.dataset.usFollowUp;
+      tags.append(followUp);
+    }
+    // Pinned: the pin leads the type line, at the card's top left, as on
+    // the Summary page's pinned notes.
+    if (row.pinned) {
+      record.dataset.usRecordPinned = '';
+      const pin = el('span', 'us-record__pin');
+      pin.setAttribute('role', 'img');
+      pin.setAttribute('aria-label', 'Pinned');
+      pin.title = 'Pinned';
+      tags.prepend(pin);
+    }
 
     const side = el('div', 'us-record__side');
     const when = el('time', 'us-record__date', shortDate(row.date, thisYear));
@@ -9131,20 +9353,30 @@ SOFTWARE.
     const head = el('div', 'us-record__head');
     head.append(tags, el('h3', 'us-record__title', row.subject), el('p', 'us-record__text', row.summary), side);
 
+    // Details: the client's fields (loaded when the card opens), the note,
+    // then View full details.
     const detail = el('div', 'us-record__detail');
     detail.hidden = !expanded;
-    const facts = el('dl', 'us-record__facts');
-    fact(facts, 'Handled by', row.staff);
-    fact(facts, 'With', row.with);
-    fact(facts, 'Duration', row.duration);
-    fact(facts, 'Outcome', row.outcome);
-    if (facts.childElementCount) detail.append(facts);
-    if (row.detail) detail.append(el('p', 'us-record__body', row.detail));
-    if (row.attachments) detail.append(el('p', 'us-record__files', row.attachments === 1 ? '1 attachment' : row.attachments + ' attachments'));
+    const extra = el('div', 'us-record__extra');
+    fillDetails(extra, state.details.get(row.id));
+    detail.append(extra);
+    // A source's data-detail-label ("Additional notes" on calls) heads the
+    // note, telling it apart from the summary above; no note, no heading.
+    if (row.detail && row.source.detailLabel) {
+      const note = el('div', 'us-record__note');
+      note.append(el('p', 'us-record__note-label', row.source.detailLabel), el('p', 'us-record__body', row.detail));
+      detail.append(note);
+    } else if (row.detail) {
+      detail.append(el('p', 'us-record__body', row.detail));
+    }
     if (row.recordUrl) {
       const more = el('p', 'us-record__more');
       const open = el('a', 'TextButton SmallButton us-outline-button', 'View full details');
       open.href = row.recordUrl;
+      if (row.source.recordPopup) {
+        open.setAttribute('aria-haspopup', 'dialog');
+        open.addEventListener('click', event => openRecordPopup(event, open, row));
+      }
       more.append(open);
       detail.append(more);
     }
@@ -9162,7 +9394,8 @@ SOFTWARE.
   }
 
   function emptyMessage(state) {
-    const what = state.type === 'all' ? 'activity' : typeInfo(sourceOfType(state, state.type)).plural.toLowerCase();
+    const plural = state.type === 'all' ? 'activity' : typeInfo(sourceOfType(state, state.type)).plural.toLowerCase();
+    const what = pinnedOnly(state) ? 'pinned ' + plural : plural;
     return state.days ? 'No ' + what + ' in the ' + rangeLabel(state).toLowerCase() + '.' : 'No ' + what + ' recorded.';
   }
 
@@ -9248,6 +9481,7 @@ SOFTWARE.
         if (newCard) {
           card = item(state, row, thisYear);
           state.cards.set(row.id, card);
+          if (state.expanded.has(row.id)) ensureDetails(state, row);
         }
         place(list, card, previousCard);
         // Cards inside a new group arrive with it.
@@ -9373,6 +9607,11 @@ SOFTWARE.
 
     showTypeHistory(state);
 
+    const pinned = pinnedOnly(state);
+    state.pinnedToggle.hidden = !TYPES[state.type]?.pins;
+    state.pinnedToggle.setAttribute('aria-pressed', String(pinned));
+    state.pinnedToggle.title = pinned ? 'Show all' : 'Show pinned only';
+
     const failed = state.sources.filter(source => source.status === 'failed');
     state.notice.hidden = !failed.length;
     if (failed.length) {
@@ -9395,6 +9634,8 @@ SOFTWARE.
     } else if (state.query) {
       const loaded = relevantSources(state).reduce((sum, source) => sum + source.rows.length, 0);
       summary = visible.length + ' of ' + loaded + ' loaded ' + (loaded === 1 ? 'activity matches' : 'activities match') + ' your search';
+    } else if (rows.length && pinned) {
+      summary = 'Showing ' + rows.length + ' pinned · ' + rangeLabel(state).toLowerCase();
     } else if (rows.length) {
       summary = 'Showing ' + rows.length + (total === null ? '' : ' of ' + total) + ' · ' + rangeLabel(state).toLowerCase();
     }
@@ -9416,9 +9657,11 @@ SOFTWARE.
       generation: 0,
       type: 'all',
       query: '',
+      pinned: false,
       days: cfg.days,
       shown: cfg.page,
       expanded: new Set(),
+      details: new Map(),
       loaded: false,
       sources: cfg.sources.map(def => ({ def, rows: [], ids: new Set(), offset: 0, total: null, more: false, status: 'idle', error: '' }))
     };
@@ -9448,6 +9691,14 @@ SOFTWARE.
       const button = event.target.closest('button[data-us-tab]');
       if (!button || button.dataset.usTab === state.type) return;
       state.type = button.dataset.usTab;
+      state.pinned = false;
+      state.shown = state.cfg.page;
+      render(state);
+      fill(state);
+    });
+
+    state.pinnedToggle.addEventListener('click', () => {
+      state.pinned = !state.pinned;
       state.shown = state.cfg.page;
       render(state);
       fill(state);
@@ -9485,15 +9736,24 @@ SOFTWARE.
         fill(state);
         return;
       }
-      // US-RECORD-CARDS expands cards (its handler is on the document, so this
-      // runs first); the feed notes which are open so re-renders keep them.
       const record = event.target.closest('.us-record');
+      if (record && event.target.closest('.us-record__extra-retry') && state.body.contains(record)) {
+        ensureDetails(state, findRow(state, record.dataset.usActivityId));
+        return;
+      }
+      // US-RECORD-CARDS expands cards (its handler is on the document, so this
+      // runs first); the feed notes which are open so re-renders keep them,
+      // and loads a card's details the first time it opens.
       const onToggle = event.target.closest('.us-record__toggle') ||
         (event.target.closest('.us-record__head') && !event.target.closest('a, button, input, select, textarea'));
       if (!record || !onToggle || !state.body.contains(record)) return;
       const id = record.dataset.usActivityId;
-      if (record.querySelector('.us-record__toggle').getAttribute('aria-expanded') === 'true') state.expanded.delete(id);
-      else state.expanded.add(id);
+      if (record.querySelector('.us-record__toggle').getAttribute('aria-expanded') === 'true') {
+        state.expanded.delete(id);
+      } else {
+        state.expanded.add(id);
+        ensureDetails(state, findRow(state, id));
+      }
     });
   }
 
