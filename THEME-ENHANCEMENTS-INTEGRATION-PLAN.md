@@ -248,6 +248,7 @@ Current trial registration markers for contract 1, using current filenames. "Loa
 | `Scripts/UnionSuiteTaskbar.js` | `window.UnionSuiteTaskbar.initialise` | `zUnionSuite.js`, for `UnionSuiteAppearance` |
 | `Scripts/UnionSuiteTaskbar-Bookmarks.js` | `window.UnionSuiteTaskbarBookmarks.initialise` | `Scripts/UnionSuiteTaskbar.js`; it replaces that script's quick-links region |
 | `Scripts/IQA-Enhancements.js` | **none** | — |
+| `Scripts/BO-Enhancements.js` | `window.BoEnh.probe` | — (gated to `AsiCommon/Controls/BOA/Design.aspx`, which runs in a RadWindow iframe) |
 | `UnionSuite-Client/Actions.js` | none declared | shared runtime and `ActionDefinitions.js` |
 
 `IQA-Enhancements.js` registers no global of its own: it returns early off `QueryBuilder/Design.aspx` and the `window.*` names it touches are native page functions it calls, not exports. Until it is ported to `IqaEditor.js` its execution cannot be verified by the loader, so gate it by URL and accept loading as the only signal. Give the ported file a registration marker.

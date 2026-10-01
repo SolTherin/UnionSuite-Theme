@@ -2,7 +2,8 @@
  * BO Enhancements - combined script
  * -----------------------------------------------------------------------------
  * Sibling of IQA-Enhancements.js, for the iMIS Business Object designer page.
- * Delivered via the shared CDN inject. Dependency-free.
+ * Loaded by the theme loader (THeme/UnionSuite/index.js, module id 'bo'),
+ * which must be included in the designer iframe. Dependency-free.
  *
  * STATUS: Database tab in progress, tested by console paste in the designer
  *   iframe. Properties / Definition / Preview tabs not yet probed.
@@ -36,10 +37,9 @@
 (function () {
   'use strict';
 
-  /* ---- page gate: TIGHTEN after probing the real designer URL ----------- */
-  const PAGE_GATE = /\/(BOA|BusinessObject)/i;
-  const BROWSER_PAGE = /\/BOA\/Default\.aspx$/i;          // the list page, not the designer
-  if (!PAGE_GATE.test(location.pathname) || BROWSER_PAGE.test(location.pathname)) return;
+  /* ---- page gate: the designer document (inside its RadWindow iframe) ----
+     Keep in step with the 'bo' entry's `when` in the theme loader (index.js). */
+  if (!/\/AsiCommon\/Controls\/BOA\/Design\.aspx$/i.test(location.pathname)) return;
   if (window.BoEnh?.destroy) window.BoEnh.destroy();     // re-paste/re-inject replaces the old copy
 
   /* ---- target selectors: TIGHTEN after probing -------------------------- */

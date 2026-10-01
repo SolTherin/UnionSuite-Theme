@@ -104,6 +104,15 @@
       // its own guard keeps it off every unrelated page's network.
       when: () => /\/QueryBuilder\/Design\.aspx$/i.test(location.pathname),
       ready: null // Registers no global; its window.* names are native page functions.
+    },
+    {
+      id: 'bo',
+      path: 'Scripts/BO-Enhancements.js',
+      // Business Object designer. It opens in a RadWindow iframe, so this only
+      // matches when the loader is included in that frame's own document; the
+      // parent staff page never matches. Same gate as the file's own guard.
+      when: () => /\/AsiCommon\/Controls\/BOA\/Design\.aspx$/i.test(location.pathname),
+      ready: () => typeof window.BoEnh?.probe === 'function'
     }
   ];
 
