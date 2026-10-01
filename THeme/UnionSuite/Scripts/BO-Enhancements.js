@@ -122,39 +122,35 @@
   /* Base CSS for the shell's own UI (pill, bars, search boxes). Owned by the
    * shell, not a gated module - the pill must stay styled while mode is off. */
   const BASE_CSS = `
-        /* Enhance toggle + help: same look as the IQA editor's header pill */
-        #boEnhanceToggle { position: static; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-          vertical-align: middle; min-height: var(--bo-action-height, 35px); box-sizing: border-box; margin: 0 8px 0 0;
-          padding: 7px 12px; border-radius: 999px; font: inherit; font-weight: 600; line-height: 1.2; white-space: nowrap;
-          cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #334155; box-shadow: none; user-select: none;
-          transition: background-color .2s cubic-bezier(.2,0,0,1), border-color .2s cubic-bezier(.2,0,0,1), color .2s cubic-bezier(.2,0,0,1); }
-        #boEnhanceToggle.bo-enh-floating { position: fixed; top: 8px; right: 12px; z-index: 99999; }
-        #boEnhanceToggle:focus-visible { outline: 2px solid #0b62c4; outline-offset: 2px; }
-        #boEnhanceToggle .dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #94a3b8;
-          transition: background-color .2s cubic-bezier(.2,0,0,1); }
-        #boEnhanceToggle.on { background: #0f172a; color: #fff; border-color: #0f172a; }
-        #boEnhanceToggle.on .dot { background: #22c55e; }
-        #boEnhanceHelp { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
-          width: 28px; height: 28px; margin: 0 8px 0 0; padding: 0; border: 1px solid #cbd5e1; border-radius: 50%;
-          background: #fff; color: #526173; font: 600 16px/1 sans-serif; cursor: pointer;
-          transition: background-color .2s cubic-bezier(.2,0,0,1), color .2s cubic-bezier(.2,0,0,1); }
-        #boEnhanceHelp:hover { background: #edf6fc; color: #087ba7; }
-        #boEnhanceHelp:focus-visible, #boEnhanceHelpDialog button:focus-visible { outline: 2px solid #087ba7; outline-offset: 2px; }
-        #boEnhanceHelpDialog { width: min(740px, 92vw); max-height: 88vh; padding: 0; border: 1px solid #cbd5e1; border-radius: 8px;
-          box-sizing: border-box; background: #fff; color: #243343; font: 14px/1.55 -apple-system, Segoe UI, Roboto, sans-serif;
-          box-shadow: 0 12px 40px rgba(0,0,0,.2); text-align: left; }
+        /* Enhance switch + help. The theme's own classes (us-switch, TextButton
+           us-icon-button / us-outline-button) supply the look, matching the IQA
+           editor header; only layout and the help dialog are set here. The
+           group's auto left margin keeps it beside Publish when the header
+           spreads its children. */
+        .bo-editor-actions { display: inline-flex; align-items: center; gap: var(--space-2, 8px);
+          margin: 0 var(--space-2, 8px) 0 auto; }
+        .bo-editor-actions.bo-enh-floating { position: fixed; top: 8px; right: 12px; z-index: 99999; margin: 0; }
+        #boEnhanceToggle { margin: 0; }
+        #boEnhanceToggle > span:not([class]) { white-space: nowrap; }
+        #boEnhanceHelp { flex: 0 0 auto; font-size: var(--fs-md, 16px); font-weight: var(--fw-semi, 600); line-height: 1; }
+        #boEnhanceHelpDialog { width: min(740px, 92vw); max-height: 88vh; padding: 0; box-sizing: border-box;
+          border: 1px solid var(--border, #e2e5e9); border-radius: var(--radius, 8px); background: var(--bg-surface, #fff);
+          color: var(--text-base, #545962);
+          font: var(--fw-normal, 400) var(--fs-base, 14px)/var(--lh-loose, 1.65) var(--font-body, "Open Sans", "Helvetica Neue", Arial, sans-serif);
+          box-shadow: var(--shadow-lg, 0 8px 20px rgba(0, 27, 35, .16)); text-align: left; }
         #boEnhanceHelpDialog[open] { display: flex; flex-direction: column; }
-        #boEnhanceHelpDialog::backdrop { background: rgba(15,23,42,.4); }
-        #boEnhanceHelpDialog header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0;
-          padding: 16px 22px; border-bottom: 1px solid #e2e8f0; }
-        #boEnhanceHelpDialog h2 { margin: 0; font-size: 20px; color: inherit; }
-        #boEnhanceHelpDialog header button { border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 12px; background: #fff;
-          color: #243343; font: inherit; cursor: pointer; }
-        #boEnhanceHelpDialog .bo-help-content { overflow: auto; min-height: 0; padding: 8px 24px 24px; }
-        #boEnhanceHelpDialog h3 { margin: 20px 0 8px; font-size: 16px; color: #183a50; }
+        #boEnhanceHelpDialog::backdrop { background: rgb(0 27 35 / .4); }
+        #boEnhanceHelpDialog header { display: flex; align-items: center; justify-content: space-between;
+          gap: var(--space-4, 16px); flex-shrink: 0; padding: var(--space-4, 16px) var(--space-5, 20px);
+          border-bottom: 1px solid var(--border, #e2e5e9); }
+        #boEnhanceHelpDialog h2 { margin: 0; color: var(--text-strong, #1c2024);
+          font: var(--fw-semi, 600) var(--fs-xl, 22px)/var(--lh-tight, 1.25) var(--font-display, "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif); }
+        #boEnhanceHelpDialog .bo-help-content { overflow: auto; min-height: 0; padding: var(--space-2, 8px) var(--space-6, 24px) var(--space-6, 24px); }
+        #boEnhanceHelpDialog h3 { margin: var(--space-5, 20px) 0 var(--space-2, 8px); color: var(--text-strong, #1c2024); font-size: var(--fs-md, 16px); }
         #boEnhanceHelpDialog ul, #boEnhanceHelpDialog ol { margin: 0; padding-left: 22px; }
-        #boEnhanceHelpDialog li { margin: 6px 0; }
-        #boEnhanceHelpDialog .bo-help-note { margin: 22px 0 0; padding: 12px; background: #edf6fc; border-radius: 4px; }
+        #boEnhanceHelpDialog li { margin: var(--space-1, 4px) 0; }
+        #boEnhanceHelpDialog .bo-help-note { margin: var(--space-5, 20px) 0 0; padding: var(--space-3, 12px);
+          border-radius: var(--radius-sm, 4px); background: var(--info-bg, #e4f0f4); }
 
         /* SearchSelect (Joins column dropdowns) */
         .bo-ss { display: inline-block; vertical-align: middle; max-width: 100%; }
@@ -188,7 +184,6 @@
         tr.bo-enh-hidden { display: none !important; }
         .bo-enh-sfilter { display: block; box-sizing: border-box; width: 100%; margin: 0 0 4px; padding: 4px 8px;
           border: 1px solid #aab; border-radius: 4px; font: 13px system-ui, sans-serif; }
-        @media (prefers-reduced-motion: reduce) { #boEnhanceToggle, #boEnhanceToggle .dot, #boEnhanceHelp { transition: none; } }
   `;
 
   const Overhaul = {
@@ -789,7 +784,7 @@
       .find((el) => !el.closest('.bo-enh') && (el.value || el.textContent || '').trim().toLowerCase() === 'publish');
   }
 
-  const HELP_HTML = `<header><h2 id="boEnhanceHelpTitle">Business Object enhancements</h2><button type="button" autofocus>Close</button></header>
+  const HELP_HTML = `<header><h2 id="boEnhanceHelpTitle">Business Object enhancements</h2><button type="button" class="TextButton us-outline-button" autofocus>Close</button></header>
     <div class="bo-help-content">
       <h3>Throughout the designer</h3>
       <ul><li>Turn the improvements on or off using <strong>Enhance</strong>. Turning it off restores the standard designer straight away, with no reload.</li></ul>
@@ -802,11 +797,11 @@
       <p class="bo-help-note"><strong>Remember:</strong> nothing here saves for you. Click <strong>Save</strong> when you're ready, then <strong>Publish</strong>.</p>
     </div>`;
 
-  function ensureHelp(p) {
+  function ensureHelp(group) {
     let b = document.getElementById('boEnhanceHelp');
     if (!b) {
       b = document.createElement('button');
-      b.type = 'button'; b.id = 'boEnhanceHelp'; b.className = 'bo-enh'; b.textContent = '?';
+      b.type = 'button'; b.id = 'boEnhanceHelp'; b.className = 'TextButton us-icon-button'; b.textContent = '?';
       b.title = 'About Business Object enhancements'; b.setAttribute('aria-label', 'Help with Business Object enhancements');
       b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-controls', 'boEnhanceHelpDialog');
       b.addEventListener('click', () => {
@@ -828,35 +823,38 @@
         if (!d.open) { d.querySelector('.bo-help-content').scrollTop = 0; d.showModal(); }
       });
     }
-    if (p.nextElementSibling !== b) p.after(b);
+    if (b.parentNode !== group) group.appendChild(b);
   }
 
+  /* Enhance switch + help, grouped and placed just before Publish (re-placed
+   * after every postback). Same markup as the IQA editor's theme switch: the
+   * native checkbox drives the theme's track and thumb. Floats top-right if
+   * Publish can't be found. */
   function pill() {
     injectStyle('bo-enh-base-css', BASE_CSS);
-    let p = document.getElementById('boEnhanceToggle');
-    if (!p) {
-      p = document.createElement('button');
-      p.type = 'button'; p.id = 'boEnhanceToggle'; p.className = 'bo-enh';
-      p.title = 'Toggle Business Object enhancements';
-      p.setAttribute('role', 'switch'); p.setAttribute('aria-label', 'Business Object enhancements');
-      p.addEventListener('click', () => { setMode(!getMode()); run(); });
+    let group = document.getElementById('boEnhanceActions');
+    if (!group) {
+      group = document.createElement('span');
+      group.id = 'boEnhanceActions'; group.className = 'bo-enh bo-editor-actions';
+      group.innerHTML = '<label id="boEnhanceToggle" class="us-switch us-switch--primary" ' +
+          'title="Turn the Business Object designer enhancements on or off">' +
+        '<input type="checkbox" role="switch" id="boEnhanceToggleInput">' +
+        '<span class="us-switch__track" aria-hidden="true"></span>' +
+        '<span>Enhance</span>' +
+        '</label>';
+      group.querySelector('input').addEventListener('change', (e) => { setMode(e.target.checked); run(); });
+      ensureHelp(group);
     }
-    /* Sit just before Publish (re-placed after every postback); float top-right if it can't be found. */
     const pub = publishButton();
     if (pub) {
-      p.classList.remove('bo-enh-floating');
-      if (p.nextElementSibling !== pub && document.getElementById('boEnhanceHelp')?.nextElementSibling !== pub) pub.before(p);
-      const h = pub.getBoundingClientRect().height;
-      if (h > 0) p.style.setProperty('--bo-action-height', h + 'px');
+      group.classList.remove('bo-enh-floating');
+      if (group.nextElementSibling !== pub) pub.before(group);
     } else {
-      p.classList.add('bo-enh-floating');
-      if (p.parentNode !== document.body) document.body.appendChild(p);
+      group.classList.add('bo-enh-floating');
+      if (group.parentNode !== document.body) document.body.appendChild(group);
     }
-    const on = getMode();
-    p.classList.toggle('on', on);
-    p.setAttribute('aria-checked', String(on));
-    p.innerHTML = '<span class="dot" aria-hidden="true"></span><span>Enhance: ' + (on ? 'On' : 'Off') + '</span>';
-    ensureHelp(p);
+    const input = document.getElementById('boEnhanceToggleInput');
+    if (input) input.checked = getMode();
   }
 
   let busy = false;
@@ -898,8 +896,7 @@
   const prm = () => window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
   function destroy() {
     GATED.slice().reverse().forEach((m) => safe(() => m.unmount()));
-    removeById('boEnhanceToggle');
-    removeById('boEnhanceHelp');
+    removeById('boEnhanceActions');
     removeById('boEnhanceHelpDialog');
     removeById('bo-enh-base-css');
     safe(() => prm()?.remove_endRequest(onEndRequest));
