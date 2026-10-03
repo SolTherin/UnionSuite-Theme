@@ -1,6 +1,9 @@
 <!-- Agreement meetings · Query Template Display on the existing Meetings IQA.
-     The IQA is unchanged.
-     iPart CSS class: us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting
+     IQA fix needed: it has no filter, so it lists every agreement's meetings.
+     Add AgreementOrdinal Equal @url:AgreementNum (URL parameter).
+     iPart CSS class: us-agreement-meetings (add us-panel-fill when it shares a row)
+       Section preset in zUnionSuite.js, standing in for
+       us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting
      Native title: Meetings. Display in cards / columns: unchecked. Header blank.
      Footer: <div class="us-query-footer"><span data-us-task-summary></span></div>
      (as on Tasks: us-task-progress shows "x upcoming" in the heading and

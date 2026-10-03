@@ -10,9 +10,12 @@ Use your actual deployed theme folder in these paths:
 <link rel="stylesheet" href="/App_Themes/YOUR_THEME/zUnionSuite.css">
 <!-- Retain client CSS here, then load the dark palette last. -->
 <link rel="stylesheet" href="/App_Themes/YOUR_THEME/zzDarkMode.css">
-<script src="/App_Themes/YOUR_CLIENT_THEME/Config.js" defer></script>
-<script src="/App_Themes/YOUR_THEME/Scripts/UnionSuiteTaskbar.js" defer></script>
 ```
+
+The theme loader (`index.js`, the site's one header include) loads
+`UnionSuiteTaskbar.js`; do not include it separately. The client `Config.js`
+is not loaded by the loader yet, so taskbar settings go in an inline script
+before the loader include.
 
 Keep the existing native header search markup. The taskbar mounts beside
 `.searchfieldplus-dropdown` for authenticated client contexts; native search is

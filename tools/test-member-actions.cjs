@@ -4,7 +4,11 @@ const source=fs.readFileSync('THeme/UnionSuite/Scripts/ActionDefinitions.js','ut
 const window={UnionSuiteActions:{define(key,value){assert.equal(value.owner,'UnionSuite');assert.equal(value.source,'ActionDefinitions.js:'+key);defs.set(key,value);}}};
 const context=vm.createContext({window,URL,location:{origin:'https://theme.test'}});
 (async()=>{
- vm.runInContext(source,context);assert.equal(defs.size,15);
+ vm.runInContext(source,context);
+ // Fifteen standard definitions, plus the agreement page set (3 October 2026).
+ const registered=[...defs.keys()];
+ assert.equal(registered.filter(key=>!key.startsWith('agreements.')).length,15);
+ assert.equal(registered.filter(key=>key.startsWith('agreements.')).length,28);
  const names=['EmailMemberPopupFn','SMSMemberPopupFn','AddNotePopupFn','CreateCasePopupFn','CreateQuickCasePopupFn','ResolveDuplicatePopupFn','AssignWorkbenchToStaffFn'];
  const keys=['member.email','member.sms','member.add-note','member.create-case','member.create-quick-case','member.resolve-duplicate','member.assign-workbench'];
  for(let i=0;i<keys.length;i++){

@@ -1,9 +1,10 @@
 # Agreement page — session handover
 
-Date: 2 October 2026
-Branch: `theme/contact-page-v3` (the folder is untracked; nothing committed)
-Status: WIP prototype built and checked offline. Not approved. Nothing has
-been deployed to iMIS, promoted to the theme or added to the usage guide.
+Date: 2 October 2026; updated 3 October 2026
+Branch: `theme/contact-page-v3`
+Status: the candidate CSS and JS were promoted into the theme on 3 October
+2026 (README "Proposed theme changes"); the prototype pages now load the
+theme alone. Not yet in the usage guide, and not yet deployed to iMIS.
 
 Read [README.md](README.md) for the design: the old → theme mapping, the
 proposed theme changes and the full open decisions. This file records where

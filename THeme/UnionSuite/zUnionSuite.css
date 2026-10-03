@@ -1179,7 +1179,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
@@ -1229,7 +1229,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0 0 18px;
@@ -1252,7 +1252,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1280,7 +1280,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
 :is(
@@ -1290,7 +1290,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   display: none;
@@ -1303,7 +1303,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1324,7 +1324,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1348,7 +1348,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description > :is(div, p):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1362,7 +1362,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
@@ -1375,7 +1375,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)) + .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
@@ -1390,7 +1390,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
 :where(
@@ -1400,7 +1400,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -2653,6 +2653,35 @@ SOFTWARE.
 
 /* US-PANEL-TONES:END */
 
+/* US-PANEL-FILL:START — us-panel-fill. Opt-in per iPart (owner, 3 October
+   2026). Add us-panel-fill to the iPart CSS class of each panel in a row of
+   columns: the panels then stretch to the row's height, so a short panel
+   leaves no gap under it. Layout rows are already flex, so the columns are
+   equal; these rules let every wrapper between the column and the panel fill
+   it. The iMIS path is col > .ContentItemContainer > .WebPartZone >
+   .iMIS-WebPart > .ContentItemContainer > .us-panel-fill > .panel; fewer
+   wrappers also work. Only wrappers inside the nearest column take part: the
+   :not(:has(...)) leaves out outer wrappers (a CCO's) whose fill iPart sits
+   in a deeper column. */
+
+:is([class*="col-"], .ContentItemContainer, .WebPartZone, .iMIS-WebPart):has(.us-panel-fill):not(:has([class*="col-"] .us-panel-fill)) {
+  display: flex;
+  flex-direction: column;
+}
+
+:is(.ContentItemContainer, .WebPartZone, .iMIS-WebPart):has(.us-panel-fill):not(:has([class*="col-"] .us-panel-fill)),
+.us-panel-fill,
+.us-panel-fill > .panel {
+  flex: 1 1 auto;
+}
+
+.us-panel-fill {
+  display: flex;
+  flex-direction: column;
+}
+
+/* US-PANEL-FILL:END */
+
 /* US-HOME-WELCOME:START — authored Content HTML, independent of the iPart shell. */
 
 /* iPart CSS class: iMIS creates this owner immediately around the panel.
@@ -2874,6 +2903,34 @@ SOFTWARE.
 }
 
 /* US-TASK-COMPLETED-FILTER:END */
+
+/* US-TASK-PROGRESS:START — us-task-progress. Opt-in per iPart.
+   us-task-progress: "x of y complete" in the panel heading, counted from
+   every row on the page (completed ones the filter hides included); for
+   us-meetings "x upcoming". No progress bar (owner, 2 October 2026). Used on
+   Tasks, Milestones and Meetings (owner, 3 October 2026: counts in the
+   heading). The footer's "n outstanding" says the same thing, so it is kept
+   for screen readers only. */
+
+.us-task-progress__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: center;
+  margin-inline-end: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.us-task-progress .us-query-footer:has(> [data-us-task-summary]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* US-TASK-PROGRESS:END */
 
 /* US-BANNER-PAGE-LAYOUT:START */
 
@@ -4439,6 +4496,168 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
 @media (forced-colors: active) {
   .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     border-color: ButtonText;
+  }
+}
+
+/* us-banner__surface--rows. Record banner in two rows (the v1
+   agreement layout, owner, 2 October 2026): ID chip, title, status and
+   Actions on the first row, which stays when the banner condenses; the
+   description and facts on the second. The second row is filled from a
+   client-editable details IQA (US-BANNER-FACTS). With
+   us-banner__surface--status, the status pill and the left rail take a tone
+   from data-us-record-status, so no colour field is needed. */
+
+.us-banner .us-banner__surface--rows .us-banner__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.us-banner .us-banner__surface--rows .us-banner__identity > .us-banner__record-copy {
+  margin-inline-end: 0;
+}
+
+.us-banner .us-banner__surface--rows .us-banner__title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semi);
+}
+
+.us-banner .us-banner__surface.us-banner__surface--rows[class] .us-banner__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-8);
+  margin-top: var(--space-3);
+  padding-top: 0;
+  border-top: 0;
+}
+
+.us-banner .us-banner__surface--rows .us-banner__details:empty {
+  display: none;
+}
+
+.us-banner .us-banner__surface--rows .us-banner__lead {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+.us-banner .us-banner__surface--rows .us-banner__lead-label {
+  margin: 0 0 2px;
+  color: color-mix(in srgb, var(--banner-muted) 65%, transparent);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.us-banner .us-banner__surface.us-banner__surface--rows[class] .us-banner__facts {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.us-banner .us-banner__surface--rows .us-banner__fact dd > .us-banner__badge {
+  padding-block: 0;
+  border-radius: var(--radius-sm);
+  font-weight: var(--fw-bold);
+}
+
+/* Wide screens: always two rows. Outranks the theme's one-row placement
+   (data-us-banner-fit="row"), which puts the details beside the title. */
+@media (min-width: 900px) {
+  .us-banner .us-banner__surface.us-banner__surface--rows[class] > .us-banner__summary > .us-banner__identity {
+    grid-column: 1 / span 2;
+  }
+
+  .us-banner .us-banner__surface.us-banner__surface--rows[class] > :is(.us-banner__details, .us-banner__fold:has(> .us-banner__fold-inner > .us-banner__details)) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+}
+
+/* Status tone, by status text. Unlisted statuses keep the theme's neutral
+   rail and a plain pill. Extend the lists for a client's statuses. */
+.us-banner .us-banner__surface--rows:is(
+  [data-us-record-status="active" i],
+  [data-us-record-status="approved" i],
+  [data-us-record-status="signed" i],
+  [data-us-record-status="ratified" i],
+  [data-us-record-status="finalised" i],
+  [data-us-record-status="completed" i]
+) {
+  --record-tone: var(--success);
+  --record-tone-bg: var(--success-bg);
+}
+
+.us-banner .us-banner__surface--rows:is(
+  [data-us-record-status="pending" i],
+  [data-us-record-status="draft" i],
+  [data-us-record-status="new" i],
+  [data-us-record-status="open" i],
+  [data-us-record-status="in progress" i],
+  [data-us-record-status="negotiating" i],
+  [data-us-record-status="in negotiation" i]
+) {
+  --record-tone: var(--warning);
+  --record-tone-bg: var(--warning-bg);
+}
+
+.us-banner .us-banner__surface--rows:is(
+  [data-us-record-status="expired" i],
+  [data-us-record-status="terminated" i],
+  [data-us-record-status="disputed" i],
+  [data-us-record-status="lapsed" i],
+  [data-us-record-status="overdue" i]
+) {
+  --record-tone: var(--danger);
+  --record-tone-bg: var(--danger-bg);
+}
+
+/* The rail takes the same tone as the status pill's text and dot and the
+   Resolution alert's edge (owner, 3 October 2026: they must match);
+   outranks the theme's status rail colour. */
+.us-banner .us-banner__surface.us-banner__surface--rows.us-banner__surface--status[class][data-us-record-status] {
+  border-left-color: var(--record-tone, var(--member-status-colour));
+}
+
+.us-banner .us-banner__surface.us-banner__surface--rows.us-banner__surface--status[class][data-us-record-status]::before {
+  border-right-color: transparent;
+}
+
+/* v1 status pill: tinted, with a dot, at text height. */
+.us-banner .us-banner__surface--rows.us-banner__surface--status .us-banner__badge--record-status {
+  gap: 6px;
+  min-height: 0;
+  padding: 3px 10px;
+  border-color: transparent;
+  background: var(--record-tone-bg, color-mix(in srgb, var(--banner-text) 15%, transparent));
+  color: var(--record-tone, var(--banner-text));
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
+.us-banner .us-banner__surface--rows.us-banner__surface--status .us-banner__badge--record-status::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (max-width: 950px), (pointer: coarse) {
+  .us-banner .us-banner__surface--rows.us-banner__surface--status .us-banner__badge--record-status {
+    min-height: 0;
+    padding-block: 3px;
   }
 }
 
@@ -6670,6 +6889,32 @@ button.us-busy-hide-label > *:not(:where(.us-report-no-styling, .us-report-no-st
 }
 
 .us-query-refresh-overlay > .section-loader-spinning-circles {
+  --size: .5px;
+}
+
+/* A single row refreshing in place (reloadRow, US-ROW-PATCH): the theme's
+   loader over the row, on a light veil; the rest of the list stays usable. */
+.us-row-refreshing {
+  pointer-events: none;
+  cursor: progress;
+}
+
+.us-row-refresh-surface {
+  position: relative;
+}
+
+.us-row-refresh-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+}
+
+.us-row-refresh-overlay > .section-loader-spinning-circles {
   --size: .5px;
 }
 
@@ -9238,6 +9483,140 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-DATA-PANELS:END */
 
+/* US-FIELDS:START — us-fields. Read-only fields from a single-record Query
+   Template, for records that are not a panel source (Agreement details, Key
+   dates, Resolution). Same label voice and value weight as read-only panel
+   fields; the grid fills the panel width. A blank value shows an em dash. */
+
+.us-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0 var(--space-4);
+  margin: 0;
+}
+
+.us-fields__field {
+  min-width: 0;
+  padding-block: 6px;
+}
+
+.us-fields__field--wide {
+  grid-column: 1 / -1;
+}
+
+/* One field per row, for short lists read top to bottom (Key dates). */
+.us-fields--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.us-fields dt {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.us-fields dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+}
+
+.us-fields dd:empty::before {
+  content: "—";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+/* us-field-groups: the us-fields panel built from an IQA's column names by
+   US-FIELD-GROUPS. A named group gets a sub-heading with a hairline beside it;
+   a numbered group only starts a new line. The optional status alert (the
+   Alert-* columns) sits above the fields. */
+.us-field-groups__group + .us-field-groups__group {
+  margin-top: var(--space-2);
+}
+
+.us-field-groups__group + .us-field-groups__group:has(> .us-field-groups__heading) {
+  margin-top: var(--space-4);
+}
+
+/* The native message colours (US-MESSAGES) with the us-alerts leading edge. */
+.us-field-groups__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: 10px 14px;
+  border-color: color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+}
+
+.us-field-groups__alert-icon {
+  flex: 0 0 auto;
+  color: var(--message-border);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.us-field-groups__alert-copy {
+  min-width: 0;
+}
+
+.us-field-groups__alert-title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  line-height: 1.4;
+}
+
+.us-field-groups__alert-message {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Sub-headings at 14px bold in the brand colour (owner, 3 October 2026), so
+   they stand apart from the values (14px medium); the panel title keeps
+   its grey header bar and icon.
+   The hairline runs from the heading text to the panel edge, tinted to
+   match. Dark mode takes the dark palette's light brand tint; its colour
+   is restated there because zzDarkMode.css sets every h1–h6 to
+   --text-strong (0,2,1). Target for the dark rule: zzDarkMode.css. */
+.us-field-groups {
+  --us-field-groups-heading: var(--brand-700);
+}
+
+.us-field-groups__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-1);
+  color: var(--us-field-groups-heading);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+.us-field-groups__heading::after {
+  content: "";
+  flex: 1 1 auto;
+  border-top: 1px solid color-mix(in srgb, var(--us-field-groups-heading) 35%, transparent);
+}
+
+.us-field-groups__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* US-FIELDS:END */
+
 /* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
    that shows the native iMIS "User credentials" control. iMIS puts the class
    on a div around the whole control, so every rule starts from it.
@@ -10786,6 +11165,46 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-CCO-SWITCH:END */
 
+/* US-AVATARS:START — us-avatar. Initials in a tinted circle. US-AVATARS
+   (zUnionSuite.js) writes the initials from data-us-avatar-name. The tint follows the nearest data-us-contact-type:
+   staff blue (info; the brand accent is orange, too close to the externals),
+   members green, externals amber, anything else neutral. */
+
+.us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-avatar-hue: var(--text-muted);
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-avatar-hue) 14%, var(--bg-surface));
+  color: var(--us-avatar-hue);
+  font: var(--fw-semi) 11px/1 var(--font-ui);
+  letter-spacing: .02em;
+  user-select: none;
+}
+
+.us-avatar--md:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+
+[data-us-contact-type="staff" i] .us-avatar {
+  --us-avatar-hue: var(--info);
+}
+
+[data-us-contact-type="member" i] .us-avatar {
+  --us-avatar-hue: var(--success);
+}
+
+[data-us-contact-type="external" i] .us-avatar {
+  --us-avatar-hue: var(--warning);
+}
+
+/* US-AVATARS:END */
+
 /* US-CONTACTS:START — one authored contact result; native panel shell remains native. */
 .us-contact:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: relative;
@@ -10819,9 +11238,10 @@ html.us-taskbar-mounted #hd .search-dropdown {
   margin-bottom: 8px;
 }
 
+/* 13px medium, as the compact task title (owner, 2 October 2026). */
 .us-contact .us-contact__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
   color: var(--text-strong);
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -10969,7 +11389,964 @@ html.us-taskbar-mounted #hd .search-dropdown {
   }
 }
 
+/* Contact type and group badges under the name. */
+.us-contact__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.us-contact__tags:not(:has(.us-badge:not(:empty))) {
+  display: none;
+}
+
 /* US-CONTACTS:END */
+
+/* US-CONTACT-TILES:START — us-contacts-tiles. Tiles of at least 230px fill the
+   panel, five across at most (owner, 3 October 2026). Avatar, then the name
+   with email, phone and edit as small icon buttons at its right, then one
+   muted "role · group" line that runs under the buttons too, so it is rarely
+   cut short. No badges, so a full grid stays calm. */
+
+.us-contacts-tiles .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+  display: grid;
+  /* The minimum is a fifth of the row (less four gaps) when that is wider
+     than 230px, so no more than five tiles fit across. */
+  grid-template-columns: repeat(auto-fill, minmax(max(230px, calc((100% - 4 * var(--space-2)) / 5)), 1fr));
+  gap: var(--space-2);
+}
+
+.us-contacts-tiles .QueryTemplateSet > section:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+}
+
+/* The search status and placeholders span the whole grid. */
+.us-contacts-tiles .QueryTemplateSet > :not(section) {
+  grid-column: 1 / -1;
+}
+
+.us-contact-tile:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "avatar name actions"
+    "avatar meta meta";
+  align-items: center;
+  column-gap: 10px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px 8px 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  transition: border-color .12s, box-shadow .12s;
+}
+
+.us-contact-tile:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--text-strong) 8%, transparent);
+}
+
+.us-contact-tile .us-avatar {
+  grid-area: avatar;
+}
+
+/* The body only groups name and meta in the markup; each takes its own area. */
+.us-contact-tile__body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+.us-contact-tile__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: name;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-tile__meta > :empty {
+  display: none;
+}
+
+.us-contact-tile__role:not(:empty) + .us-contact-tile__group:not(:empty)::before {
+  content: " · ";
+}
+
+.us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  grid-area: actions;
+  align-items: center;
+  margin: -4px 0;
+}
+
+/* As in the roster, specific enough to outweigh the dark-mode link rule. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+/* A blank email or phone has no button. As specific as the display rule
+   above, which otherwise wins and leaves a live link with nothing in it. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach[data-us-contact-value=""]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* The theme's 36px edit button, pulled in to match the 28px reach buttons. */
+.us-contact-tile .us-contact-tile__edit:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: -4px -4px -4px 0;
+}
+
+
+/* ── us-contacts-facets ─────────────────────────────────────────
+   US-CONTACT-FACETS (zUnionSuite.js) puts the strip in the
+   panel body above the results. It sticks to the top while the list scrolls
+   (us-list-scroll), so the chips stay in reach on a 20-contact agreement. */
+
+.us-contact-facets:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: grid;
+  gap: 7px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fw-normal) var(--fs-xs)/1.4 var(--font-ui);
+}
+
+.us-contact-facets[hidden] {
+  display: none;
+}
+
+/* Summary line: the count on the left, Clear on the right. */
+.us-contact-facets__summary:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  min-height: 18px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-facets__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-facets__clear:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .12s;
+}
+
+.us-contact-facets__clear:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link-hover);
+  text-decoration-color: currentColor;
+}
+
+.us-contact-facets__clear[hidden] {
+  display: none;
+}
+
+/* One row per facet: a short label, then the chips. */
+.us-contact-facets__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  column-gap: var(--space-2);
+}
+
+.us-contact-facets__row[hidden] {
+  display: none;
+}
+
+.us-contact-facets__label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-top: 5px;
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.us-contact-facets__chips:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+/* Chips: a pill with the value and a quiet count. One pressed per row. */
+.us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-xs)/1 var(--font-ui);
+  cursor: pointer;
+  transition: border-color .12s, background-color .12s, color .12s;
+}
+
+.us-contact-chip > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-chip__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-chip:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--border-strong);
+  background: var(--bg-subtle, var(--bg-sunken));
+  color: var(--text-strong);
+}
+
+/* The pressed tint is mixed from the link colour, which the dark sheet
+   already lightens, so one rule serves both modes. */
+.us-contact-chip[aria-pressed="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--text-link);
+  background: color-mix(in srgb, var(--text-link) 14%, var(--bg-surface));
+  color: var(--text-strong);
+}
+
+.us-contact-chip[aria-pressed="true"] .us-contact-chip__count {
+  color: color-mix(in srgb, var(--text-strong) 70%, transparent);
+}
+
+.us-contact-chip:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Nobody matches this value together with the other facet's selection. */
+.us-contact-chip[aria-disabled="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-style: dashed;
+  background: var(--bg-surface);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* The overflow chip for long role lists. */
+.us-contact-chip--more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.us-contact-chip[hidden] {
+  display: none;
+}
+
+/* While a group chip is active every visible row is in that group, so the
+   group headings repeat the chip and step aside. */
+.us-contacts-facets .QueryTemplateSet[data-us-contact-facet-group] > .us-contact-group {
+  display: none;
+}
+
+/* Rows the facets exclude. The theme's search and the group headings both
+   treat a hidden section as off the page, so their counts follow. */
+.us-contacts-facets .QueryTemplateSet > section[hidden] {
+  display: none !important;
+}
+
+/* The strip sits beside the results, outside the roster's own container, so
+   the panel body container measures the width for it. */
+.us-contacts-facets .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-contacts-facets / inline-size;
+}
+
+/* Narrow (the 380px rail): the label moves above the chips and each row
+   becomes one line that scrolls sideways, fading at the edge, so the strip
+   stays about 110px tall however many roles there are. */
+@container us-contacts-facets (max-width: 479.98px) {
+  .us-contact-facets__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .us-contact-facets__label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    padding-top: 0;
+  }
+
+  .us-contact-facets__chips:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2px 28px 2px 2px;
+    margin: -2px;
+    scrollbar-width: none;
+    scroll-padding-inline: 2px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+
+  .us-contact-facets__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    height: 30px;
+    padding: 0 11px;
+  }
+}
+
+
+/* ── us-contacts-group-tint ────────────────────────────────
+   The avatar tint follows the group, not the type (owner, 3 October 2026).
+   US-CONTACT-FACETS numbers the groups in IQA order; the first four take
+   the theme's hues and a blank group stays neutral. Wins over the type
+   rules by one class and by load order. The info hue is the brand teal in
+   light mode and lightens in dark; the purple is lifted for dark here
+   because the dark sheet does not remap it. */
+
+.us-contacts-group-tint .us-avatar {
+  --us-avatar-hue: var(--text-muted);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="0"] .us-avatar {
+  --us-avatar-hue: var(--info);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="1"] .us-avatar {
+  --us-avatar-hue: var(--us-group-purple, var(--status-purple));
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="2"] .us-avatar {
+  --us-avatar-hue: var(--success);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="3"] .us-avatar {
+  --us-avatar-hue: var(--warning);
+}
+
+
+
+/* ── us-contact-tile--card ──────────────────────────────────
+   The tile: nothing is clipped. The name and the role · group · type
+   line wrap, and email and phone are plain text on a third line (email goes
+   through iMIS, so no mailto: or tel: links). The avatar sits with the
+   name; the pencil is the only action. */
+
+.us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-areas:
+    "avatar name actions"
+    "avatar type actions"
+    "meta meta meta"
+    "reach reach reach";
+  grid-template-rows: auto auto 1fr auto;
+  row-gap: 0;
+  align-items: start;
+}
+
+/* The type: system data, quiet, directly under the name. */
+.us-contact-tile--card .us-contact-tile__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: type;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+}
+
+/* Role · group: the person's place on this agreement, left aligned under
+   the avatar on its own line. */
+.us-contact-tile--card .us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  align-self: start;
+  margin: 6px 0 0;
+  color: var(--text-base);
+}
+
+.us-contact-tile--card .us-contact-tile__meta:not(:has(> :not(:empty))) {
+  display: none;
+}
+
+/* Cards in a row share the tallest card's height, so a long email that
+   wraps cannot stagger the grid. */
+.us-contacts-tiles .QueryTemplateSet > section > .QueryTemplateItem:has(> .us-contact-tile--card):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.us-contact-tile--card .us-avatar {
+  align-self: center;
+}
+
+.us-contact-tile--card .us-contact-tile__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 20px;
+}
+
+.us-contact-tile--card .us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* The edit button spans the name and type rows, so its 36px height no
+   longer pushes the type away from the name. */
+.us-contact-tile--card .us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin: -6px -4px 0 0;
+}
+
+.us-contact-tile__type:empty {
+  display: none;
+}
+
+/* Email, then phone, as two lines across the full card width, each with
+   its icon in a fixed column, so every card puts them in the same place
+   (owner, 3 October 2026). A missing method keeps its icon beside an empty
+   space rather than moving the other line up. */
+.us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: reach;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 2px;
+  align-self: end;
+  min-width: 0;
+  margin: 8px 0 0;
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
+.us-contact-tile__reach > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 6px;
+  min-width: 0;
+  min-height: 17px;
+}
+
+/* The value is only as wide as its text, so the copy flash fits it. */
+.us-contact-tile__reach > span > span {
+  justify-self: start;
+  max-width: 100%;
+  margin: 0 -3px;
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+}
+
+.us-contact-tile__phone > span {
+  white-space: nowrap;
+}
+
+.us-contact-tile__reach i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* The icon is a copy button (US-CONTACT-COPY). It is larger than the
+   14px column and pulled back by its margin, so the icon stays in place. */
+.us-contact-tile__reach .us-contact-tile__copy:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  margin: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: copy;
+}
+
+.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled) i {
+  color: var(--text-strong);
+}
+
+.us-contact-tile__copy:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* A missing method: the icon stays, quieter, and does nothing. */
+.us-contact-tile__copy:disabled:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  cursor: default;
+}
+
+.us-contact-tile__copy:disabled i {
+  opacity: .55;
+}
+
+/* Copied: a green copy icon, and the line flashes once. */
+.us-contact-tile__copy[data-us-copied] i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--success);
+  opacity: 1;
+}
+
+.us-contact-tile__reach > span[data-us-copied] > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  animation: us-contact-copied 900ms ease-out;
+}
+
+@keyframes us-contact-copied {
+  from { background: color-mix(in srgb, var(--success) 22%, transparent); }
+  to { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-contact-tile__reach > span[data-us-copied] > span {
+    animation: none;
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+  }
+}
+
+.us-contact-copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+
+/* ── Group filter behind the funnel (us-contacts-group-filter) ───
+   The group chips sit first in the theme's filter disclosure, above the
+   search field, with the field's inset. The count moves beside the panel
+   title, and a pressed group adds a dot to the funnel so the filter is
+   visible while the disclosure is closed. */
+
+.us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: static;
+  padding: 0 0 12px;
+  border: 0;
+  background: transparent;
+}
+
+/* With room, the group chips and the search field share one row (owner,
+   3 October 2026): chips left, field right, the suggestions under the field
+   and the hint under both. The panel is the container, so this follows the
+   panel's width, not the window's. Too many groups to fit wrap within their
+   column; a narrow panel keeps the stack above. */
+.us-contacts-group-filter > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-contacts-panel / inline-size;
+}
+
+@container us-contacts-panel (min-width: 760px) {
+  .us-contacts-group-filter > .panel > .us-query-search-controls:has(> .us-contact-facets--filter):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr);
+    grid-template-areas:
+      "chips search"
+      ".     suggest"
+      "hint  hint";
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+
+  .us-contacts-group-filter .us-query-search-controls > .us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: chips;
+    padding: 0;
+  }
+
+  .us-contacts-group-filter .us-query-search-controls > .us-query-filter-fields {
+    grid-area: search;
+  }
+
+  .us-contacts-group-filter .us-query-search-controls > .us-contact-suggest {
+    grid-area: suggest;
+  }
+
+  .us-contacts-group-filter .us-query-search-controls > .us-query-search-hint {
+    grid-area: hint;
+  }
+}
+
+.us-contact-facets__heading-count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-sm)/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-facets__heading-count .us-contact-facets__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-facets__clear--icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.us-contact-facets__clear--icon:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.us-contact-facets__token > small {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Suggestions under the search field: each match labelled by its
+   attribute, as the v1 page did. In flow inside the disclosure. */
+.us-contact-suggest:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  max-height: 264px;
+  margin: 6px 0 0;
+  padding: 4px 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--text-strong) 10%, transparent);
+  scrollbar-width: thin;
+}
+
+.us-contact-suggest[hidden] {
+  display: none;
+}
+
+.us-contact-suggest__option:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 10px;
+  padding: 7px 12px;
+  color: var(--text-strong);
+  font: var(--fw-normal) var(--fs-sm)/1.4 var(--font-ui);
+  cursor: pointer;
+}
+
+.us-contact-suggest__option:is(:hover, .is-active):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-contact-suggest__kind:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-contact-suggest__value {
+  overflow-wrap: anywhere;
+}
+
+.us-contact-suggest__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contacts-facets[data-us-contact-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-contacts-facets[data-us-contact-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-contact-chip,
+  .us-contact-facets__clear {
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-contact-chip[aria-pressed="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-width: 2px;
+  }
+}
+
+
+/* ── us-agreement-contacts ───────────────────────
+   Each piece is keyed to its own
+   class from the preset, so any part works alone. */
+
+/* Group colour. The tile and its heading both carry the group's tone (from
+   the IQA) or its index (IQA order), so one --us-group-hue drives the avatar
+   and the heading dot. Tone rules come after index rules, so a set tone
+   wins; a blank group has neither and stays neutral. */
+.us-contacts-group-tone [data-us-contact-group-index="0"] { --us-group-hue: var(--info); }
+.us-contacts-group-tone [data-us-contact-group-index="1"] { --us-group-hue: var(--us-group-purple, var(--status-purple)); }
+.us-contacts-group-tone [data-us-contact-group-index="2"] { --us-group-hue: var(--success); }
+.us-contacts-group-tone [data-us-contact-group-index="3"] { --us-group-hue: var(--warning); }
+.us-contacts-group-tone [data-us-contact-group-tone="info" i] { --us-group-hue: var(--info); }
+.us-contacts-group-tone [data-us-contact-group-tone="purple" i] { --us-group-hue: var(--us-group-purple, var(--status-purple)); }
+.us-contacts-group-tone [data-us-contact-group-tone="success" i] { --us-group-hue: var(--success); }
+.us-contacts-group-tone [data-us-contact-group-tone="warning" i] { --us-group-hue: var(--warning); }
+.us-contacts-group-tone [data-us-contact-group-tone="danger" i] { --us-group-hue: var(--danger); }
+.us-contacts-group-tone [data-us-contact-group-tone="neutral" i] { --us-group-hue: var(--text-muted); }
+
+.us-contacts-group-tone .us-avatar {
+  --us-avatar-hue: var(--us-group-hue, var(--text-muted));
+}
+
+/* Room for the Lead ring, kept on every card so names line up. */
+.us-contacts-group-tone .us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  column-gap: 13px;
+}
+
+/* Group headings across the tile grid, with the group's colour dot. */
+.us-contacts-grouped.us-contacts-tiles .us-contact-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-items: center;
+  margin-top: var(--space-2);
+  padding: 4px 2px 6px;
+}
+
+.us-contacts-grouped.us-contacts-tiles .QueryTemplateSet > .us-contact-group:first-child {
+  margin-top: 0;
+}
+
+.us-contacts-group-tone .us-contact-group::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--us-group-hue, var(--text-faint));
+}
+
+/* The name opens the contact's record; a blank link stays plain text. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a[href]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a[href]:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* The Lead (owner, 3 October 2026): the initials badge turns solid in the
+   group colour with a ring around it, wears a small crown, and on first
+   paint a single sheen crosses it. The crown is the Tabler crown glyph
+   in the theme's icon font. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  overflow: visible;
+  background: var(--us-avatar-hue);
+  color: var(--bg-surface);
+  box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 3.5px color-mix(in srgb, var(--us-avatar-hue) 55%, transparent);
+  isolation: isolate;
+}
+
+/* The crown, top right, on a surface-coloured disc so it reads on any tint. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: "\ed12";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--text-strong) 18%, transparent);
+  color: var(--warning-fill);
+  font: normal 14px/1 "tabler-icons";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One sheen across the badge when it appears, then still. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, #fff 45%, transparent) 50%, transparent 70%) var(--us-avatar-hue);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  animation: us-contact-lead-sheen 1.6s cubic-bezier(.16, 1, .3, 1) .3s both;
+}
+
+@keyframes us-contact-lead-sheen {
+  from { background-position: 100% 0; }
+  to { background-position: -50% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar {
+    border: 2px solid CanvasText;
+  }
+}
+
+
+/* ── Agreement contacts card hierarchy (owner, 3 October 2026) ──────────
+   After the hierarchy critique: one line under the name, beside the
+   avatar, so the avatar's height is shared and the card loses a row.
+   Role first and stronger (the agreement signal staff scan for), the
+   system type last and muted. The line runs under the pencil too, so
+   long roles rarely wrap. The group joins the line only when there are
+   no group headings to say it. */
+
+.us-contacts-grouped .us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-areas:
+    "avatar name actions"
+    "avatar meta meta"
+    "reach reach reach";
+  grid-template-rows: auto auto 1fr;
+}
+
+/* The 36px pencil sits in the name row without making it taller. */
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin: -8px -4px -8px 0;
+}
+
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__meta--inline:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  align-self: start;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__role:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+}
+
+/* One separator before every filled part after the first filled part. */
+.us-contact-tile__meta--inline > :not(:empty) ~ :not(:empty)::before {
+  content: " · ";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+/* While headings say the group, the card does not. A pressed group chip
+   only hides the headings, so the group stays off the cards then too. */
+.us-contacts-grouped .QueryTemplateSet:has(> .us-contact-group) .us-contact-tile__meta--inline .us-contact-tile__group {
+  display: none;
+}
+
+/* Contact rows start right after the line. */
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 8px;
+}
+
+/* A missing email or phone reads as deliberately empty. */
+.us-contacts-grouped .us-contact-tile__reach > span > span:empty::before {
+  content: "—" / "";
+  color: var(--text-faint);
+}
+
+/* Avatar initials: the group hue pulled toward the strong text colour so
+   every tone clears 4.5:1 on its own tint, in both modes. */
+.us-contacts-group-tone .us-contact-tile:not([data-us-contact-lead="true" i]):not([data-us-contact-lead="1"]) .us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: color-mix(in srgb, var(--us-avatar-hue) 72%, var(--text-strong));
+}
+
+/* US-CONTACT-TILES:END */
 
 /* US-LIST-SCROLL:START — independent optional Query Template Display body scrolling. */
 [data-us-list-scroll-frame]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -11134,6 +12511,19 @@ html.us-taskbar-mounted #hd .search-dropdown {
 /* A badge a template filled with nothing (a blank IQA field) is not drawn. */
 .us-badge:empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
+}
+
+/* Term status (StatusClass from the existing IQA) sets the badge tone. */
+.us-term-status[data-us-term-status="included" i] {
+  border-color: transparent;
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.us-term-status[data-us-term-status="negotiating" i] {
+  border-color: transparent;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 /* US-BADGES:END */
@@ -11537,7 +12927,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    when iMIS omits QueryTemplateSet for no results; nested iParts are excluded. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding: var(--space-3) var(--iqa-inset,var(--space-4));
 }
@@ -11568,7 +12958,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 /* No-results HTML is author supplied; trim paragraph margins within its own body. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:has(> .QueryTemplateSet)):not(:where(.us-report-no-styling, .us-report-no-styling *)) > p {
   margin: 0;
   color: var(--iqa-muted);
@@ -11586,7 +12976,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   .us-list--no-shell,
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)):not(:where(.us-list *, .us-list--rows *, .us-list--timeline *, .us-list--compact *, .us-list--no-shell *))
 ) {
   --list-gap: var(--space-3);
@@ -11874,6 +13264,333 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-CONTENT-LISTS:END */
 
+/* US-MEETINGS:START — us-meetings. A month/day tile beside each meeting. Past
+   meetings come from the IQA (IsPast) as data-us-task-completed, so
+   us-task-completed-filter hides them until "Show past meetings" is pressed;
+   shown, they are muted. */
+
+.us-meeting {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.us-meeting__tile {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+  color: var(--accent);
+  font: inherit;
+  line-height: 1.1;
+  text-align: center;
+  text-decoration: none;
+}
+
+a.us-meeting__tile:is(:hover, :focus-visible) {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.us-meeting__month {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.us-meeting__day {
+  color: var(--text-strong);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+}
+
+.us-meeting__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.us-meeting .us-meeting__title {
+  justify-content: flex-start;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-align: start;
+  text-decoration: none;
+}
+
+.us-meeting .us-meeting__title:hover {
+  text-decoration: underline;
+}
+
+.us-meeting__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-meeting__meta > :empty {
+  display: none;
+}
+
+.us-meeting[data-us-task-completed="true"] .us-meeting__tile {
+  border-color: var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.us-meeting[data-us-task-completed="true"] :is(.us-meeting__day, .us-meeting__title) {
+  color: var(--text-muted);
+}
+
+/* No upcoming meetings (owner, 3 October 2026). When the completed filter
+   hides every meeting as past, US-PAST-EMPTY puts this placeholder in the
+   list: what is missing, how many past meetings are hidden, and a button
+   that presses the panel's history toggle. The theme's "No matching
+   results" line would mislead here, so it is hidden while this shows. */
+.us-past-empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-4) var(--space-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.us-past-empty__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-bottom: 4px;
+  color: var(--text-faint);
+  font-size: 22px;
+}
+
+.us-past-empty__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.us-past-empty__text:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  font-size: var(--fs-xs);
+}
+
+.us-past-empty__show:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: var(--space-2);
+}
+
+[data-us-past-empty] .us-query-search-status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* US-MEETINGS:END */
+
+/* US-ATTACHMENTS:START — us-attachments. File tile with the extension, name,
+   meta line, tag badges and row actions. Edit opens an inline name and tag
+   editor (US-ATTACHMENTS JS). */
+
+.us-attachment {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.us-attachment__file {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+  color: var(--accent);
+}
+
+.us-attachment__file i {
+  font-size: 18px;
+}
+
+.us-attachment__ext {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.us-attachment__ext:empty {
+  display: none;
+}
+
+.us-attachment__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.us-attachment__name {
+  overflow-wrap: anywhere;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.us-attachment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-attachment__meta > :empty {
+  display: none;
+}
+
+.us-attachment__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.us-attachment__tags:empty {
+  display: none;
+}
+
+.us-attachment__actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+.us-attachment[data-us-editing] .us-attachment__actions {
+  display: none;
+}
+
+.us-attachment__editor {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.us-attachment__editor-label {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.us-attachment__chips {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 4px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+
+.us-attachment__chips:focus-within {
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+.us-attachment__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.us-attachment__chip button {
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.us-attachment__chips input {
+  flex: 1 1 120px;
+  min-width: 0;
+  height: 26px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.us-attachment__suggestions {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  max-height: 200px;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow);
+  list-style: none;
+}
+
+.us-attachment__suggestions[hidden] {
+  display: none;
+}
+
+.us-attachment__suggestions [role="option"] {
+  padding: 6px 10px;
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.us-attachment__suggestions [role="option"]:is(:hover, [aria-selected="true"]) {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-attachment__editor-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.us-attachment__error {
+  color: var(--danger);
+  font-size: var(--fs-xs);
+}
+
+/* US-ATTACHMENTS:END */
+
 /* US-NOTES:START — compact notes (v1 layout): us-notes on a Query Template
    Display iPart (with us-query-template), using
    Member-Notes-Compact-Query-Template.html. One meta line (author · date ·
@@ -11895,14 +13612,16 @@ html.us-taskbar-mounted #hd .search-dropdown {
   margin: 0 0 6px;
 }
 
+/* Lighter list type (owner, 2 October 2026): a medium author and a paler date
+   line, as the compact task row. The note body keeps its reading colour. */
 .us-note__author:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--text-strong);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-semi);
+  font-weight: var(--fw-medium);
 }
 
 .us-note__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  color: var(--text-muted);
+  color: var(--text-faint);
   font-size: var(--fs-xs);
 }
 
@@ -11949,6 +13668,161 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--warning-fill);
   /* Tabler "pin" outline (MIT). */
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4'/%3E%3Cpath d='M9 15l-4.5 4.5'/%3E%3Cpath d='M14.5 4l5.5 5.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* With no category badge, the next badge takes its place at the right. */
+.us-note__type:empty + .us-badge:not(:empty),
+.us-note__type:empty + .us-badge:empty + .us-note__restricted {
+  margin-inline-start: auto;
+}
+
+/* Restricted notes (AccessClass = restricted) show the Restricted badge, in
+   the compact note and in the note card. */
+:is(.us-note, .us-record):not([data-us-note-access="restricted" i]) .us-note__restricted {
+  display: none;
+}
+
+/* us-notes--ledger. Notes as a ledger for long lists (owner, 3 October
+   2026): Display in cards off, one row per note
+   separated by a rule instead of a card, so a list of many notes stays dense.
+   The date sits in its own column and dates line up down the list; the author
+   opens the row, the badges and the view icon keep to the right, and the note
+   underneath, three lines until More opens it (US-NOTES-LEDGER in zUnionSuite.js). Below about 440px the note takes the full row width under the date
+   and author. */
+
+/* The theme spaces Query Template sections with --list-gap; the ledger has
+   rules between rows instead, so a hovered row meets the rule on both sides. */
+.us-notes--ledger .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-notes-ledger / inline-size;
+  --list-gap: 0px;
+}
+
+.us-notes--ledger .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.us-notes--ledger .QueryTemplateSet > section:first-child .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-top: 0;
+}
+
+.us-note--ledger:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  grid-template-areas:
+    "date meta"
+    "date body"
+    "date more";
+  gap: 2px var(--space-3);
+  padding: 10px 6px;
+}
+
+.us-note--ledger:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+/* Date over time in the first column; both line up down the list. */
+.us-note--ledger .us-note__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
+  grid-area: date;
+  padding-top: 1px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.us-note--ledger .us-note__time:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-note--ledger .us-note__time:empty {
+  display: none;
+}
+
+.us-note--ledger .us-note__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  margin: 0;
+  min-height: 18px;
+}
+
+.us-note--ledger .us-note__author:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  line-height: 18px;
+}
+
+/* Badges and Open share the right end of the author line. */
+.us-note--ledger .us-note__aside:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+/* The view action (agreements.preview-note) is painted by the theme as an
+   icon button; the ledger only sits it after the badges. Its 36px square
+   would lift the author off the date line, so it overhangs the 18px line
+   instead; the row padding absorbs the overhang. */
+.us-note--ledger .us-note__aside .us-note__open:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-block: -9px;
+  margin-inline-start: 2px;
+}
+
+/* Three lines of the note; More (shown by US-NOTES-LEDGER only when the note
+   overflows) opens the rest, keeping the line breaks as written. */
+.us-note--ledger .us-note__body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: -webkit-box;
+  grid-area: body;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.us-note--ledger.is-expanded .us-note__body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  white-space: pre-line;
+  -webkit-line-clamp: unset;
+  line-clamp: none;
+}
+
+.us-note--ledger .us-note__more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: more;
+  justify-self: start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: var(--fw-medium) var(--fs-xs)/18px var(--font-ui);
+  cursor: pointer;
+}
+
+.us-note--ledger .us-note__more[hidden] {
+  display: none;
+}
+
+.us-note--ledger .us-note__more:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  text-decoration: underline;
+}
+
+.us-note--ledger .us-note__more:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+/* A narrow panel keeps the date column for the author line only, and the
+   note takes the full width beneath both. */
+@container us-notes-ledger (max-width: 439.98px) {
+  .us-note--ledger:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "date meta"
+      "body body"
+      "more more";
+    row-gap: 4px;
+  }
 }
 
 /* US-NOTES:END */
@@ -14624,10 +16498,14 @@ html.us-taskbar-mounted #hd .search-dropdown {
   outline-offset: 2px;
 }
 
-/* Accepted detail row: title, a one-line note, and the member beside the due or
-   actioned date. Opt in with us-task--detail on the row; lists using the original
-   two-line task row are unaffected, because every rule below carries the modifier.
-   Requires Tasks-Detail-Query-Template.html, whose markup supplies the title link,
+/* Detail row (compact, owner 2 October 2026): two lines, as the original
+   agreement tasks. The title, then the date and member together; an optional
+   one-line note between them; an optional us-task__aside on the right for
+   badges and a view button. Opt in with us-task--detail on the row; lists
+   using the original two-line task row are unaffected, because every rule
+   below carries the modifier. Gaps are margins rather than column-gap, so a
+   blank date or an absent aside leaves no stranded gap. Requires
+   Tasks-Detail-Query-Template.html, whose markup supplies the title link,
    note, member and date elements these rules place. */
 .QueryTemplateSet:has(.us-task--detail):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   container-type: inline-size;
@@ -14636,23 +16514,29 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 .us-task--detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: grid;
-  grid-template-columns: auto minmax(18ch, 1fr) max-content;
+  grid-template-columns: auto max-content minmax(0, 1fr) auto;
   grid-template-areas:
-    "check title title"
-    "check note  note"
-    "check meta  due";
-  align-items: start;
+    "check title title aside"
+    "check note  note  aside"
+    "check due   meta  aside";
+  align-items: center;
   align-content: center;
-  column-gap: 12px;
+  /* Both gaps stated: the phone rule sets gap: 8px on .us-task. */
+  column-gap: 0;
   row-gap: 0;
-  min-height: 56px;
-  padding: 10px 20px;
+  min-height: 52px;
+  padding: 8px 20px;
 }
 
-/* Aligned to the title line rather than the middle of a three-line row, so the
-   tick and the thing it completes read as one unit. */
 .us-task--detail > .us-task__check:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: check;
+  align-self: center;
+  margin: 0 12px 0 0;
+}
+
+/* A row with a note runs to three lines; the tick then stays with the title,
+   so the tick and the thing it completes read as one unit. */
+.us-task--detail:has(.us-task__note:not(:empty)) > .us-task__check:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   align-self: start;
   margin-top: -5px;
 }
@@ -14664,15 +16548,16 @@ html.us-taskbar-mounted #hd .search-dropdown {
   display: contents;
 }
 
-/* The title wins every tie for width and is the affordance for opening the task.
+/* The title wins every tie for width and is the affordance for opening the
+   task. Medium weight, so a long list scans without every row shouting.
    Matched as a.us-task__title on purpose: dark mode colours links inside
    .panel-body at (0,3,1), so a class-only rule loses and titles turn link blue. */
 .us-task--detail a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: title;
   justify-content: flex-start;
   max-width: 62ch;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
   line-height: 1.4;
   color: var(--text-strong);
   text-decoration: none;
@@ -14698,33 +16583,34 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--text-muted);
 }
 
+/* The second line, date then member, is paler than the title. */
 .us-task--detail .us-task__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: meta;
   display: flex;
   flex-wrap: wrap;
+  align-self: baseline;
   align-items: baseline;
   gap: 4px 12px;
-  margin-top: 6px;
+  margin-top: 2px;
   min-width: 0;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-faint);
 }
 
-/* The member is the scan token after the title, so it carries the weight. The
-   person icon labels it without spending a word. */
+/* The person icon labels the member without spending a word. */
 .us-task--detail .us-task__member:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: inline-flex;
   align-items: baseline;
   gap: 5px;
   min-width: 0;
-  font-weight: 500;
-  color: var(--text-strong);
+  font-weight: var(--fw-normal);
+  color: inherit;
 }
 
 .us-task--detail .us-task__member > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   flex: none;
   align-self: center;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
   color: var(--text-muted);
   transition: color 120ms;
@@ -14752,15 +16638,16 @@ html.us-taskbar-mounted #hd .search-dropdown {
   cursor: default;
 }
 
-/* Capped in px, not rem: native iMIS sets html{font-size:62.5%}, so a rem cap is
-   10px-based on a real page and squeezed the date to two lines. 190px clears the
-   longest real label, "Actioned 30 September 2026" (172px at 12px), so the date
-   never takes the title's width and never wraps. */
+/* The date leads the second line, before the member, and takes the width
+   its text needs. */
 .us-task--detail .us-task__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: due;
   align-self: baseline;
-  max-width: 190px;
-  padding-left: 12px;
+  max-width: none;
+  margin: 2px 12px 0 0;
+  padding-left: 0;
+  text-align: start;
+  color: var(--text-faint);
 }
 
 /* A blank query value must not leave an empty line or a stranded icon: row rhythm
@@ -14802,6 +16689,41 @@ html.us-taskbar-mounted #hd .search-dropdown {
   text-decoration: line-through;
 }
 
+/* Optional aside on the right: badges and a view button. */
+.us-task__aside:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: aside;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: 12px;
+}
+
+.us-task__aside:empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-task__aside .us-badge:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-2xs);
+  white-space: nowrap;
+}
+
+/* The view button is secondary to the title link, so it stays quiet until
+   hovered. */
+.us-task__aside .us-icon-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+}
+
+.us-task__aside .us-icon-button:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--accent);
+}
+
+/* A completed row keeps its badges but drops their colour, like its title. */
+.us-task--detail:is(.us-task--complete, [data-us-task-completed="true" i]) .us-task__aside .us-badge:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  opacity: 0.55;
+}
+
 /* Shown in place when a completion cannot be saved, so a rejected write is
    visible on the task rather than only in the console. */
 .us-task__save-error:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -14812,11 +16734,16 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--danger);
 }
 
-/* A phone-width list cannot honour the title's minimum measure alongside a long
-   date, so the title column gives way there instead of overflowing the row. */
+/* A narrow list cannot fit a long date beside the member, so the member drops
+   below the date. */
 @container us-tasks (max-width: 479.98px) {
   .us-task--detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    grid-template-columns: auto minmax(0, 1fr) max-content;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "check title aside"
+      "check note  aside"
+      "check due   aside"
+      "check meta  aside";
   }
 }
 
@@ -15018,6 +16945,210 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* US-TASK-ROWS:END */
+
+/* US-MILESTONES:START — us-milestones. A progress rail above the list (built
+   by US-MILESTONES JS from the rows), then one row per milestone: status dot,
+   title, date and status select. Completed rows carry data-us-task-completed,
+   so us-task-completed-filter hides them until "Show completed" is pressed. */
+
+.us-milestones__rail {
+  --milestone-node: 28px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 0 0 var(--space-3);
+  padding: 4px 0 var(--space-3);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  list-style: none;
+}
+
+.us-milestones__rail::before,
+.us-milestones__rail::after {
+  content: "";
+  position: absolute;
+  top: calc(4px + var(--milestone-node) / 2 - 1px);
+  inset-inline-start: calc(var(--milestone-node) / 2);
+  height: 2px;
+  border-radius: var(--radius-pill);
+}
+
+.us-milestones__rail::before {
+  inset-inline-end: calc(var(--milestone-node) / 2);
+  background: var(--border);
+}
+
+/* Progress scales the full-length line, so it animates without layout. */
+.us-milestones__rail::after {
+  width: calc(100% - var(--milestone-node));
+  background: var(--success-fill);
+  transform: scaleX(var(--milestones-progress, 0));
+  transform-origin: left center;
+  transition: transform 0.3s ease;
+}
+
+/* Nodes share the panel width; a long rail (more than about eight
+   milestones in a half-width panel) scrolls sideways instead. */
+.us-milestones__node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 44px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.us-milestones__circle {
+  display: grid;
+  place-items: center;
+  width: var(--milestone-node);
+  height: var(--milestone-node);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+}
+
+.us-milestones__node[data-us-milestone-status="current"] .us-milestones__circle {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.us-milestones__node[data-us-milestone-status="done"] .us-milestones__circle {
+  border-color: var(--success-fill);
+  background: var(--success-fill);
+  color: var(--text-on-accent);
+}
+
+.us-milestones__circle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.us-milestones__label {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-tight);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.us-milestone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* Palette for the shared completion effect (UnionSuiteTaskRows.celebrate). */
+  --task-confetti-1: var(--accent);
+  --task-confetti-2: var(--brand-500);
+  --task-confetti-3: var(--success);
+}
+
+.us-milestone__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.us-milestone[data-us-milestone-status="current"] .us-milestone__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.us-milestone[data-us-milestone-status="done"] .us-milestone__dot {
+  background: var(--success-fill);
+}
+
+.us-milestone__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The title is the open action, drawn by the action runtime in link mode
+   (us-command); keep it a left-aligned title, as task titles are. */
+.us-milestone .us-milestone__title {
+  justify-content: flex-start;
+  overflow-wrap: anywhere;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  text-align: start;
+  text-decoration: none;
+}
+
+.us-milestone .us-milestone__title:hover {
+  text-decoration: underline;
+}
+
+.us-milestone[data-us-milestone-status="done"] .us-milestone__title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.us-milestone__date {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-milestone__date:empty {
+  display: none;
+}
+
+.us-milestones .us-milestone__status {
+  flex: none;
+  width: auto;
+  height: 28px;
+  padding-block: 0;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+}
+
+.us-milestone[data-us-milestone-status="current"] .us-milestone__status {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.us-milestone[data-us-milestone-status="done"] .us-milestone__status {
+  border-color: var(--success-fill);
+  color: var(--success);
+}
+
+.us-milestone[aria-busy="true"] .us-milestone__status {
+  opacity: 0.6;
+}
+
+.us-milestone__error {
+  flex-basis: 100%;
+  color: var(--danger);
+  font-size: var(--fs-xs);
+}
+
+.us-milestone:has(.us-milestone__error) {
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-milestones__rail::after {
+    transition: none;
+  }
+}
+
+/* US-MILESTONES:END */
 
 /* US-TASKBAR-PIP:START */
 
@@ -16224,6 +18355,23 @@ html.us-taskbar-mounted #hd .search-dropdown {
     animation: none;
     outline: 0;
   }
+}
+
+/* Banner record ID copy feedback. Theme-wide: every banner with the
+   record ID chip (the agreement and case templates). - The flash never showed
+   on the chip: the chip's background shorthand (.us-banner
+   .us-banner__record-id, 0,2,0) outranks .us-copy-flash (0,1,0). The glow is
+   laid over the chip as a background image, so the chip colour shows through
+   as it fades. - No "Copied" label beside the chip's copy button (owner, 3
+   October 2026): it ran over the title. The tick, the flash and the live
+   region's "Copied" still confirm the copy. */
+
+.us-banner .us-banner__record-id.us-copy-flash {
+  background-image: linear-gradient(var(--us-copy-glow), var(--us-copy-glow));
+}
+
+.us-banner .us-banner__record-copy :is(button.us-copy, button.us-banner__copy) > .us-copy-label {
+  display: none;
 }
 
 /* US-COPY:END */

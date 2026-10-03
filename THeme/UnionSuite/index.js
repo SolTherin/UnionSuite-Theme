@@ -1,4 +1,4 @@
-/* UnionSuite loader — TRIAL.
+/* UnionSuite loader.
 
    One header include that resolves its own location and loads the theme's
    scripts as a dependency graph. Every file is preloaded at once so the
@@ -27,9 +27,10 @@
    The ?t= parameter is ignored here: child paths resolve against this file's
    directory, which drops the query.
 
-   This is a spike, not the planned loader. Context classification, the client
-   folder and the remaining feature files in
-   THEME-ENHANCEMENTS-INTEGRATION-PLAN.md are out of scope here.
+   Confirmed as the theme's header include on 3 October 2026, after the trial
+   on the dev tenant (THEME-ENHANCEMENTS-INTEGRATION-PLAN.md, "Loader trial:
+   step 1 results"). Context classification, the client folder and the
+   remaining feature files in that plan are still to come.
 
    Read window.UnionSuiteLoader.status() in the console to see what happened. */
 (function () {
@@ -39,7 +40,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '0.3.7-trial';
+  const RELEASE = '1.0.1';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
@@ -356,17 +357,19 @@
       return state === 'failed' || state === 'blocked';
     };
 
-    // ready settles once the critical modules are in place, and reports only
-    // on those. Non-critical work continues behind it rather than holding
-    // the page.
+    // ready settles once the critical modules are in place. Non-critical work
+    // continues behind it rather than holding the page. One report, when
+    // everything has settled; a critical failure also warns as soon as ready
+    // settles, so it is not held back by the non-critical files.
     ready = Promise.all([...settled].filter(([module]) => isCritical(module)).map(([, done]) => done))
       .then(() => {
-        report('critical ready');
-        return !MODULES.filter(isCritical).some(failed);
+        const ok = !MODULES.filter(isCritical).some(failed);
+        if (!ok) report('critical modules failed');
+        return ok;
       });
 
     complete = Promise.all([...settled.values()]).then(() => {
-      if (MODULES.some(module => !isCritical(module))) report('complete');
+      report('complete');
       return broken().length === 0;
     });
   }

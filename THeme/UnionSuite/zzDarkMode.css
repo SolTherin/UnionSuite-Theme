@@ -502,6 +502,9 @@
     color: var(--text-base);
   }
 
+  /* List titles keep their own colours (agreement page, 3 October 2026);
+     milestone, meeting and contact names still take the hover colour, and
+     a contact tile name has its own hover rule. */
   :root[data-us-color-scheme="dark"] :is(.panel-body, .rgRow, .rgAltRow, .us-list__body) a:not(:where(
     .TextButton,
     .btn,
@@ -509,6 +512,12 @@
     .AccentButton,
     .LinkButton,
     .us-panel-action,
+    .us-task__title,
+    .us-task__member-name,
+    .us-milestone__title,
+    .us-meeting__title,
+    .us-contact__name,
+    .us-contact-tile__name a,
     .us-banner *,
     .us-report-no-styling,
     .us-report-no-styling *
@@ -523,6 +532,12 @@
     .AccentButton,
     .LinkButton,
     .us-panel-action,
+    .us-task__title,
+    .us-task__member-name,
+    .us-milestone__title,
+    .us-meeting__title,
+    .us-contact__name,
+    .us-contact-tile__name a,
     .us-banner *,
     .us-report-no-styling,
     .us-report-no-styling *
@@ -537,6 +552,8 @@
     .AccentButton,
     .LinkButton,
     .us-panel-action,
+    .us-task__title,
+    .us-task__member-name,
     .us-banner *,
     .us-report-no-styling,
     .us-report-no-styling *
@@ -1052,5 +1069,24 @@
     --us-html-value: #f5b89c;
     --us-html-comment: #9ed789;
     --us-html-pair-bg: color-mix(in srgb, var(--us-html-tag) 26%, transparent);
+  }
+
+  /* Field group headings (US-FIELDS) take the light brand tint; restated
+     here because the h1-h6 rule above sets --text-strong. Contact group
+     colours (US-CONTACT-TILES) lighten the purple. */
+  :root[data-us-color-scheme="dark"] .us-field-groups {
+    --us-field-groups-heading: var(--text-link);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-field-groups .us-field-groups__heading {
+    color: var(--us-field-groups-heading);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-contacts-group-tint {
+    --us-group-purple: color-mix(in srgb, var(--status-purple) 40%, #fff);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-contacts-group-tone {
+    --us-group-purple: color-mix(in srgb, var(--status-purple) 40%, #fff);
   }
 }

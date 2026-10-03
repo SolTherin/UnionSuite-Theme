@@ -88,6 +88,9 @@
   // ?meetings=past drops the upcoming samples, to preview the No upcoming
   // meetings placeholder (US-PAST-EMPTY).
   const pastMeetingsOnly = url.searchParams.get('meetings') === 'past';
+  // ?tasks=done marks every task complete, to preview the No outstanding
+  // tasks placeholder (US-PAST-EMPTY).
+  const allTasksDone = url.searchParams.get('tasks') === 'done';
   // ?resolution=open previews an agreement not yet resolved: status
   // Negotiating in the banner, Summary and Details, and a blank Resolution.
   const resolutionOpen = url.searchParams.get('resolution') === 'open';
@@ -105,7 +108,7 @@
 
   // Which template fills which list, and whether "Display in cards" is on.
   const lists = [
-    {set: 'ap-tasks', template: 'Agreement-Tasks-Query-Template.html', rows: rows.tasks},
+    {set: 'ap-tasks', template: 'Agreement-Tasks-Query-Template.html', rows: allTasksDone ? rows.tasks.map(row => ({...row, TAskCheckCSS: 'done', TaskStatusCSS: 'actioned', OverdueText: ''})) : rows.tasks},
     {set: 'ap-milestones', template: 'Agreement-Milestones-Query-Template.html', rows: rows.milestones},
     {set: 'ap-contacts', template: 'Agreement-Contacts-Grouped-Tiles-Query-Template.html', rows: rows.contacts},
     {set: 'ap-attachments', template: 'Agreement-Attachments-Query-Template.html', rows: rows.attachments},
@@ -150,9 +153,10 @@
   }
 
   async function renderLists(only) {
+    // No refresh calls here: in iMIS nothing outside the theme calls them, so
+    // the theme must notice the rendered rows on its own (it did not, for the
+    // milestone rail, until 3 October 2026).
     await Promise.all(lists.filter(list => !only || only.includes(list.set)).map(renderList));
-    window.UnionSuiteQueryStates?.refresh();
-    window.UnionSuiteMilestones?.refresh();
   }
 
   // A refreshed iPart comes back from the page with its (empty) fixture list;
@@ -182,6 +186,11 @@
       if (name.endsWith('/ZenFileTags')) return reply(items(tags));
       // Client-editable banner details: Description, Additional-* facts and a
       // Tone-* badge colour, in the order the IQA returns them.
+      // One contact, for the tile refresh after Edit contact (US-ROW-PATCH).
+      if (name.endsWith('/API - Manage Agreement - Contacts Single')) {
+        const contact = rows.contacts.find(row => row.Ordinal === target.searchParams.get('Ordinal'));
+        return reply(items(contact ? [contact] : []), 200, 600);
+      }
       if (name.endsWith('/API - Manage Agreement - Banner Details')) return reply(items([{
         Description: 'New collective bargaining agreement for Stark Industries.',
         'Additional-Agreement type': 'EBA_SupportedBargaining',
@@ -207,7 +216,7 @@
         'Classification-Subtags': '',
         '1-Agreement link': 'https://www.fairwork.com/Agreement123'
       }]), 200, 250);
-      if (name.endsWith('/Agreement Key Dates')) return reply(items([{
+      if (name.endsWith('/Agreement Key Dates') || name.endsWith('/API - Manage Agreement - Key Dates')) return reply(items([{
         'Bargaining-Start': '2026-01-01T00:00:00',
         'Bargaining-Completed': '2026-05-21T00:00:00',
         'Bargaining-Approved': '',

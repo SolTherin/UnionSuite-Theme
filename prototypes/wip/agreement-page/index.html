@@ -1,9 +1,8 @@
 <!doctype html>
 <!--
   Agreement page — WIP layout prototype. Sample data from the iMIS test page
-  (A107). Styling and behaviour come from the linked shared theme;
-  theme-candidate*.css/js hold the proposed theme additions;
-  agreement-actions.candidate.js holds the proposed agreement actions;
+  (A107). Styling and behaviour come from the linked shared theme, which
+  now includes the agreement additions (promoted 3 October 2026);
   agreement-page.css/js are prototype-only (toolbar, offline fixtures, CCO
   tab simulation). Native iMIS wrappers below are fixtures, not author
   templates: the author templates are in templates/. See README.md.
@@ -20,10 +19,6 @@
   <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
   <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
   <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
-  <link rel="stylesheet" href="theme-candidate.css">
-  <link rel="stylesheet" href="notes-reading.candidate.css">
-  <link rel="stylesheet" href="contacts-options.candidate.css">
-  <link rel="stylesheet" href="contacts-directory.candidate.css">
   <link rel="stylesheet" href="agreement-page.css">
 </head>
 <body class="us-banner-page ap-page">
@@ -147,18 +142,18 @@
         <div class="row ap-row">
           <div class="col-md-6">
             <!-- Query Template Display (Tasks IQA) · CSS class:
-                 us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task us-panel-fill
+                 us-agreement-tasks us-panel-fill
                  · templates/Agreement-Tasks-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciTasks"><div class="us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task us-panel-fill"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciTasks"><div class="us-agreement-tasks us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[square-check]] Tasks</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-tasks"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
           </div>
           <div class="col-md-6">
             <!-- Query Template Display (Milestones IQA) · CSS class:
-                 us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone us-panel-fill
+                 us-agreement-milestones us-panel-fill
                  · templates/Agreement-Milestones-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciMilestones"><div class="us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone us-panel-fill"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciMilestones"><div class="us-agreement-milestones us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[flag]] Milestones</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-milestones"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
@@ -166,7 +161,7 @@
         </div>
 
         <!-- Query Template Display (Contacts IQA) · CSS class:
-             us-agreement-contacts (preset; contacts-preset.candidate.js)
+             us-agreement-contacts (section preset)
              · templates/Agreement-Contacts-Grouped-Tiles-Query-Template.html
              Settled 3 October 2026 (README decision 10, option 7). -->
         <div class="ContentItemContainer" id="ste_container_ciContacts"><div class="us-agreement-contacts"><div class="panel">
@@ -180,18 +175,18 @@
         <div class="row ap-row">
           <div class="col-md-6">
             <!-- Query Template Display (Attachments IQA) · CSS class:
-                 us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment us-panel-fill
+                 us-agreement-attachments us-panel-fill
                  · templates/Agreement-Attachments-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciAttachments"><div class="us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment us-panel-fill"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciAttachments"><div class="us-agreement-attachments us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[paperclip]] Attachments</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-attachments"></div></div></div>
             </div></div></div>
           </div>
           <div class="col-md-6">
             <!-- Query Template Display (Meetings IQA) · CSS class:
-                 us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting us-panel-fill
+                 us-agreement-meetings us-panel-fill
                  · templates/Agreement-Meetings-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciMeetings"><div class="us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting us-panel-fill"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciMeetings"><div class="us-agreement-meetings us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[calendar]] Meetings</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-meetings"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
@@ -199,9 +194,9 @@
         </div>
 
         <!-- Query Template Display (Notes IQA, plus CreatedTime) · Display in cards: unchecked · CSS class:
-             us-query-template us-notes us-notes--ledger us-query-search us-list-scroll us-action-agreements-add-note
+             us-agreement-notes
              · templates/Agreement-Notes-Ledger-Query-Template.html (option 4, owner 3 October 2026) -->
-        <div class="ContentItemContainer" id="ste_container_ciNotes"><div class="us-query-template us-notes us-notes--ledger us-query-search us-list-scroll us-action-agreements-add-note"><div class="panel">
+        <div class="ContentItemContainer" id="ste_container_ciNotes"><div class="us-agreement-notes"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[notes]] Notes</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-notes"></div></div></div>
         </div></div></div>
@@ -227,9 +222,9 @@
       <!-- ── TERMS & SCHEDULE ────────────────────────────────── -->
       <div class="rmpView rmpHidden" id="view-terms">
         <!-- Query Template Display (Terms IQA) · CSS class:
-             us-query-template us-query-search us-list-scroll us-action-agreements-add-term us-action-agreements-remove-terms
+             us-agreement-terms
              · templates/Agreement-Terms-Query-Template.html -->
-        <div class="ContentItemContainer" id="ste_container_ciTerms"><div class="us-query-template us-query-search us-list-scroll us-action-agreements-add-term us-action-agreements-remove-terms"><div class="panel">
+        <div class="ContentItemContainer" id="ste_container_ciTerms"><div class="us-agreement-terms"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-terms"></div></div></div>
         </div></div></div>
@@ -299,17 +294,8 @@
 
 <!-- Offline fixture first: page URL, sample rows and fetch stubs. -->
 <script src="agreement-page.js"></script>
-<!-- Candidate US-TASK-ROWS 1.1 must load first: the theme copy then steps aside. -->
-<script src="theme-candidate-task-rows.js"></script>
-<!-- The contacts preset expands before the theme sets up search and actions. -->
-<script src="contacts-preset.candidate.js"></script>
 <script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
 <script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
-<script src="agreement-actions.candidate.js"></script>
 <script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
-<script src="theme-candidate.js"></script>
-<script src="notes-reading.candidate.js"></script>
-<script src="contacts-options.candidate.js"></script>
-<script src="contacts-directory.candidate.js"></script>
 </body>
 </html>

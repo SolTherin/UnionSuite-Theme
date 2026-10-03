@@ -20,8 +20,7 @@
        are not a scrolling box inside a scrolling page.
 
      iPart CSS class: us-agreement-contacts
-       One preset class (contacts-preset.candidate.js; promotion target:
-       sectionPresets in zUnionSuite.js) standing in for
+       One section preset class (zUnionSuite.js) standing in for
        us-query-template us-contacts-tiles us-contacts-grouped
        us-contacts-facets us-contacts-group-filter us-contacts-group-tone
        us-query-search us-action-agreements-add-contact
@@ -54,22 +53,32 @@
      ContactGroupOrder       the group's display order (the IQA sorts on it; not shown)
      ContactGroupTone        info | purple | success | warning | danger | neutral; blank uses the IQA order
      ContactEmail            email, as text; its icon copies it; blank leaves the icon, disabled
-     ContactPhone            phone, as text; its icon copies it; blank leaves the icon, disabled -->
+     ContactPhone            phone, as text; its icon copies it; blank leaves the icon, disabled
+
+     Refresh after Edit contact (owner, 3 October 2026): the tile names the
+     Contacts Single API IQA (data-us-row-query; filters AgreementNum from the
+     page address and Ordinal from this row) and marks each value with its
+     column (data-us-field, data-us-field-attrs). Closing the edit popup runs
+     that one query and updates the tile (US-ROW-PATCH). The IQA must return
+     the same column names as the list's IQA; a contact it no longer returns
+     is removed from the list. -->
 <article class="us-contact-tile us-contact-tile--card" data-us-contact-id="{#query.ContactId}" data-us-contact-name="{#query.ContactName}"
   data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-group="{#query.ContactGroup}" data-us-contact-group-tone="{#query.ContactGroupTone}"
   data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
-  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
-  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}"
+  data-us-row-query="$/_i4u_/Core/CA/v2/API - Manage Agreement - Contacts Single" data-us-row-filters="AgreementNum Ordinal={#query.Ordinal}"
+  data-us-field-attrs="data-us-contact-id:ContactId data-us-contact-name:ContactName data-us-contact-lead:ContactIsLead data-us-contact-group:ContactGroup data-us-contact-group-tone:ContactGroupTone data-us-contact-role:ContactRole data-us-contact-type:ContactType data-us-search:ContactName+ContactRole+ContactType+ContactGroup+ContactEmail+ContactPhone">
+  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" data-us-field-attrs="data-us-avatar-name:ContactName" aria-hidden="true"></span>
   <div class="us-contact-tile__body">
-    <p class="us-contact-tile__name"><a href="{#query.ContactUrl}">{#query.ContactName}</a></p>
+    <p class="us-contact-tile__name"><a href="{#query.ContactUrl}" data-us-field="ContactName" data-us-field-attrs="href:ContactUrl">{#query.ContactName}</a></p>
     <p class="us-contact-tile__meta us-contact-tile__meta--inline">
-      <span class="us-contact-tile__role">{#query.ContactRole}</span>
-      <span class="us-contact-tile__group">{#query.ContactGroup}</span>
-      <span class="us-contact-tile__type">{#query.ContactType}</span>
+      <span class="us-contact-tile__role" data-us-field="ContactRole">{#query.ContactRole}</span>
+      <span class="us-contact-tile__group" data-us-field="ContactGroup">{#query.ContactGroup}</span>
+      <span class="us-contact-tile__type" data-us-field="ContactType">{#query.ContactType}</span>
     </p>
     <p class="us-contact-tile__reach">
-      <span class="us-contact-tile__email"><button type="button" class="us-contact-tile__copy" aria-label="Copy email address" title="Copy email address"><i class="ti ti-mail" aria-hidden="true"></i></button><span>{#query.ContactEmail}</span></span>
-      <span class="us-contact-tile__phone"><button type="button" class="us-contact-tile__copy" aria-label="Copy phone number" title="Copy phone number"><i class="ti ti-phone" aria-hidden="true"></i></button><span>{#query.ContactPhone}</span></span>
+      <span class="us-contact-tile__email"><button type="button" class="us-contact-tile__copy" aria-label="Copy email address" title="Copy email address"><i class="ti ti-mail" aria-hidden="true"></i></button><span data-us-field="ContactEmail">{#query.ContactEmail}</span></span>
+      <span class="us-contact-tile__phone"><button type="button" class="us-contact-tile__copy" aria-label="Copy phone number" title="Copy phone number"><i class="ti ti-phone" aria-hidden="true"></i></button><span data-us-field="ContactPhone">{#query.ContactPhone}</span></span>
     </p>
   </div>
   <div class="us-contact-tile__actions">

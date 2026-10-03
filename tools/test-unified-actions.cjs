@@ -37,7 +37,9 @@ const report=(id,{direct=false,classes='JobsIQA us-action-member-add-job',rows=r
   await page.addScriptTag({content:read('THeme/UnionSuite/Scripts/ActionDefinitions.js')});
   console.log('Checking generated controls');
   await page.waitForFunction(()=>document.querySelectorAll('[data-us-command-key="member.add-job"]').length===5);
-  assert.equal(await page.evaluate(()=>UnionSuiteActions.listActions().length),15);
+  // Fifteen standard definitions, plus the agreement page set (3 October 2026).
+  assert.equal(await page.evaluate(()=>UnionSuiteActions.listActions().filter(item=>!item.key.startsWith('agreements.')).length),15);
+  assert.equal(await page.evaluate(()=>UnionSuiteActions.listActions().filter(item=>item.key.startsWith('agreements.')).length),28);
   assert.equal(await page.evaluate(()=>typeof UnionSuiteIqaFilters.configureAction),'undefined');
   assert.equal(await page.evaluate(()=>typeof UnionSuiteActions.register),'undefined');
   const missing=page.locator('#b_ResultsGrid button.us-action-jobs-edit').nth(1);

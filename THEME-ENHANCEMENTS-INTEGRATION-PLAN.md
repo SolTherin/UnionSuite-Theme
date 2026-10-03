@@ -4,6 +4,8 @@ Reviewed 20 September 2026. **Option C taskbar design approved and locked for im
 
 Updated 21 September 2026: a trial loader has been built and exercised against the dev tenant. See [Loader trial: step 1 results](#loader-trial-step-1-results). The trial confirms the delivery mechanism only; feature migration remains planned.
 
+Updated 3 October 2026: **the loader is confirmed** as the theme's header include, after the trial (owner). `THeme/UnionSuite/index.js` is no longer marked as a trial and its release is `1.0.0`. The installation steps in the usage guide and the theme README now use it. Context classification, the client folder and the file renames below are still planned.
+
 Updated 22 September 2026: the agreed target combines the taskbar, bookmarks, navigation catalogue handling and Recents in `Taskbar.js`, keeps destination definitions in `Data/Navigation.json`, and groups shared helpers in `Shared.js`. The feature name is **Quick Navigation**, with **Go to…** retained on the taskbar button. DevTools becomes one file controlled by a single **Dev Mode** switch available only while Easy Edit is active. These are planning decisions; the runtime files have not yet been merged or renamed.
 
 This maps the iMIS Enhanced implementation plan into the existing UnionSuite theme. The current request changes the delivery destination from a separate enhancement suite to this theme. Existing feature scope and behaviour remain the starting point; CDN-only delivery and a second taskbar are not prerequisites.
@@ -187,7 +189,7 @@ Approved by James on 20 September 2026. This section is the implementation basel
 
 ## Updated loader structure
 
-Proposed header include after implementation, using the actual deployed theme URL:
+Header include (confirmed 3 October 2026), using the actual deployed theme URL:
 
 ```html
 <script>

@@ -72,15 +72,10 @@ The page-layout class does not enable sticky or collapsing behaviour by itself.
 
 1. Upload and load the updated `zUnionSuite.css` after native Orion and before
    `zzClientSpecific.css`.
-2. Upload `zUnionSuite.js` and include it once through the shared site template.
-   It now supplies both report and banner behaviour. Example deployment URL:
-
-   ```html
-   <script src="/App_Themes/UnionSuite/zUnionSuite.js" defer></script>
-   ```
-
-   Adjust the actual theme/application path. A JS file in the theme folder is
-   not automatically a loaded script.
+2. Upload `zUnionSuite.js`; the theme loader (`index.js`, the site's one
+   header include) loads it. It supplies both report and banner behaviour.
+   Bump `RELEASE` in `index.js` so browsers fetch the new file. A JS file in
+   the theme folder is not loaded unless the loader lists it.
 3. Remove the old banner style/script iPart or external `Banner-Behaviour.js`
    include once the updated theme assets are loaded. Keep the visible banner
    HTML, then reload and verify `window.UnionSuiteBanners.getStatus()`, scroll,

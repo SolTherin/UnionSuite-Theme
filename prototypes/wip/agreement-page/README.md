@@ -94,6 +94,30 @@ deprecated `/api/iqa`.
 
 ## Proposed theme changes
 
+**Promoted into the theme, 3 October 2026 (owner).** Every change below now
+lives in the shared theme files, and `index.html` and `index-v2.html` load
+the theme alone:
+
+- JS: `zUnionSuite.js` (US-TASK-ROWS 1.1, US-QUERY-STATES, US-PAST-EMPTY,
+  US-TASK-PROGRESS, US-MILESTONES, US-ATTACHMENTS, US-NOTES-LEDGER,
+  US-BANNER-FACTS, US-FIELD-GROUPS, US-AVATARS, US-CONTACT-GROUPS,
+  US-CONTACT-FACETS, US-CONTACT-COPY; the seven `us-agreement-*` section
+  presets) and `Scripts/ActionDefinitions.js` (the agreement actions).
+- CSS: `zUnionSuite.css` (new blocks US-TASK-PROGRESS, US-MILESTONES,
+  US-MEETINGS, US-ATTACHMENTS, US-FIELDS, US-PANEL-FILL, US-AVATARS,
+  US-CONTACT-TILES; T3 and T6 merged into the existing task, note and
+  contact rules; A5, A6, A8 and N1 added to their components) and
+  `zzDarkMode.css` (list titles keep their colours; field group headings
+  and contact group colours).
+- Not promoted: the contacts roster (C3), which was not chosen, and the
+  notes reading option (`notes-reading.candidate.*`).
+
+Checked against the pre-promotion version in headless Edge: every tab of
+both layouts, light and dark, is pixel-identical, and the task tick,
+milestone status, search, attachment editor, contact filters, past-meetings
+placeholder and unresolved Summary behave the same. Still to do: the usage
+guide (templates, field definitions and component sections).
+
 | # | Change | Scope | Target |
 | --- | --- | --- | --- |
 | T1 | `US-TASK-ROWS` 1.1: `UnionSuiteTaskRows.defineSaver(key, fn)`, picked per row by `data-us-task-save`; rows without it keep the `i4u_UT_Interactions` write. `UnionSuiteTaskRows.celebrate(element)` exposes the Home task completion effect for other controls. Replaces canvas-confetti (owner, 2 October 2026). | Site-wide, no change for existing rows | Replace the `US-TASK-ROWS` block |

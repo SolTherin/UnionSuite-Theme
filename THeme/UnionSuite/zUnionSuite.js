@@ -464,7 +464,83 @@ SOFTWARE.
     if (node.matches('[aria-pressed]')) selectors.push('[aria-pressed]');
     return {node, selectors, start:node.selectionStart, end:node.selectionEnd};
   }
+  // One result row instead of the whole Query Template (owner, 3 October
+  // 2026, as the old agreement contacts refreshed an edited card). options.row
+  // is a selector inside the result set, such as [data-ordinal="183"]; the row
+  // is the set's child that contains the first match. The page is fetched as
+  // for a full refresh, and only that row is swapped, so values the IQA works
+  // out stay the IQA's. A row gone from the results is removed; a row that
+  // cannot be found on the page falls back to the full refresh.
+  // A refreshing row shows the theme's loader over itself (owner, 3 October
+  // 2026); the rest of the list stays usable. The overlay goes on the row's
+  // own element, so it takes its corners. Returns the function that ends it.
+  function rowBusy(result) {
+    const surface = result.querySelector(':scope > .QueryTemplateItem > *, :scope > .QueryTemplateItem > .card-body > *') || result;
+    const overlay = document.createElement('div');
+    overlay.className = 'us-row-refresh-overlay';
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-label', 'Refreshing');
+    overlay.innerHTML = '<span class="section-loader-spinning-circles" aria-hidden="true"></span>';
+    result.setAttribute('aria-busy', 'true');
+    result.classList.add('us-row-refreshing');
+    surface.classList.add('us-row-refresh-surface');
+    surface.append(overlay);
+    return () => {
+      overlay.remove();
+      surface.classList.remove('us-row-refresh-surface');
+      result.removeAttribute('aria-busy');
+      result.classList.remove('us-row-refreshing');
+    };
+  }
+  function rowOf(set, selector) {
+    let node = null;
+    try { node = set.querySelector(selector); } catch (_) { return null; }
+    return node ? [...set.children].find(child => child.contains(node)) || null : null;
+  }
+  async function reloadRow(ref, options, requestedPage) {
+    const {timeout=30000, signal} = options;
+    if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
+    if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
+    const live = templateParts(current(ref));
+    const row = typeof options.row === 'string' ? rowOf(live.set, options.row) : null;
+    if (!row) return reloadTemplate(ref, {...options, row: null}, requestedPage);
+    const url = new URL(options.url || pageUrl(), location.href);
+    if (url.origin !== location.origin || url.username || url.password) throw new Error('Query Template refresh requires a same-origin page URL.');
+    url.hash = '';
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal?.aborted) abort();
+    signal?.addEventListener('abort', abort, {once:true});
+    window.addEventListener('pagehide', abort, {once:true});
+    const timer = setTimeout(abort, timeout);
+    const idle = rowBusy(row);
+    try {
+      const response = await fetch(url.href, {credentials:'same-origin', cache:'no-store', redirect:'error', signal:controller.signal});
+      if (!response.ok) throw new Error('Query Template refresh failed (HTTP ' + response.status + ').');
+      if (!/\btext\/html\b/i.test(response.headers.get('content-type') || '')) throw new Error('Query Template refresh did not return HTML.');
+      if (response.redirected || (response.url && new URL(response.url).href !== url.href)) throw new Error('Query Template refresh returned a different page.');
+      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+      if (doc.querySelector('input.SignInButton')) throw new Error('Sign in again before refreshing the Query Template.');
+      const matches = doc.querySelectorAll('#' + CSS.escape(live.container.id));
+      if (matches.length !== 1) throw new Error('The refreshed page has no unique matching Query Template iPart.');
+      const fresh = templateParts(matches[0]);
+      if (controller.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
+      if (location.href !== requestedPage || !row.isConnected) throw new Error('The Query Template changed while its refresh was pending.');
+      const replacement = rowOf(fresh.set, options.row);
+      if (replacement) row.replaceWith(document.importNode(replacement, true));
+      else row.remove();
+      refreshTemplateTheme();
+      live.container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container:live.container, row:options.row}}));
+      return {status:'refreshed', controlId:live.container.id, row:options.row};
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      window.removeEventListener('pagehide', abort);
+      idle();
+    }
+  }
   async function reloadTemplate(ref, options, requestedPage) {
+    if (options.row) return reloadRow(ref, options, requestedPage);
     const {timeout=30000, signal, initialize} = options;
     if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
     if (initialize != null && typeof initialize !== 'function') throw new TypeError('initialize must be a function.');
@@ -624,11 +700,170 @@ SOFTWARE.
     }
     return progress;
   }
-  window.UnionSuiteRefresh = Object.freeze({version:'1.1', capture, forOrigin:facade, plan, queryTemplate,
+  window.UnionSuiteRefresh = Object.freeze({version:'1.1', capture, forOrigin:facade, plan, queryTemplate, rowBusy,
     iqa:(selector,options={}) => facade(options.origin).iqa(selector, options),
     native:(origin,options) => enqueue(() => reportControl(origin),options)});
 })();
 /* US-ACTION-REFRESH:END */
+
+/* US-CF-EMAIL:START — Cloudflare-protected email addresses in refreshed content.
+   The tenant sits behind Cloudflare's Email Address Obfuscation: every
+   address in served HTML becomes <a class="__cf_email__" data-cfemail="…">
+   [email protected]</a>, and mailto links point at
+   /cdn-cgi/l/email-protection#…. Cloudflare's script decodes them once, on
+   page load, so content the theme fetches afterwards (an in-place Query
+   Template refresh, a CCO tab) kept the placeholder (owner, 3 October 2026).
+   This decodes the same way whenever such content is added: the protected
+   link becomes the plain address again, and a protected mailto link gets
+   its address back. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteCfEmail) return;
+
+  // The first byte is the key; each following byte XORed with it is a
+  // character. As Cloudflare's own decoder, including the UTF-8 step.
+  function decode(hex) {
+    const key = parseInt(hex.slice(0, 2), 16);
+    let text = '';
+    for (let i = 2; i < hex.length; i += 2) text += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16) ^ key);
+    try { return decodeURIComponent(escape(text)); } catch (_) { return text; }
+  }
+
+  function fix(root) {
+    if (!(root instanceof Element) && root !== document) return;
+    const protectedNodes = root instanceof Element && root.matches('[data-cfemail]') ? [root] : [];
+    protectedNodes.push(...root.querySelectorAll('[data-cfemail]'));
+    protectedNodes.forEach(node => {
+      const address = decode(node.getAttribute('data-cfemail'));
+      if (node.matches('a.__cf_email__')) node.replaceWith(document.createTextNode(address));
+      else {
+        node.textContent = address;
+        node.removeAttribute('data-cfemail');
+      }
+    });
+    root.querySelectorAll('a[href*="/cdn-cgi/l/email-protection#"]').forEach(link => {
+      const hash = link.getAttribute('href').split('#')[1];
+      if (hash && /^[0-9a-f]+$/i.test(hash)) link.setAttribute('href', 'mailto:' + decode(hash));
+    });
+  }
+
+  new MutationObserver(records => {
+    records.forEach(record => record.addedNodes.forEach(fix));
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => fix(document), {once: true});
+  else fix(document);
+
+  window.UnionSuiteCfEmail = Object.freeze({decode, fix, version: '1.0'});
+})();
+/* US-CF-EMAIL:END */
+
+/* US-ROW-PATCH:START — refresh one result row from its own API IQA.
+   For a row an action has just edited (owner, 3 October 2026): one small
+   /api/query call for that record instead of the whole page. The row's
+   template names the IQA and marks what each element shows; the IQA returns
+   the same column names as the list's IQA, so the values stay the IQA's.
+   - data-us-row-query: the IQA path, on the row's outer element.
+   - data-us-row-filters: space-separated filters. Name=value uses the value
+     (a template field); a bare Name takes the page URL parameter of the same
+     name, as AgreementNum does.
+   - data-us-field="Column": the element's text is that column.
+   - data-us-field-attrs="attr:Column attr:ColA+ColB": attributes; columns
+     joined with + are joined with spaces (a search string).
+   A record no longer returned removes the row. UnionSuiteRowPatch.refresh(row)
+   returns 'patched' or 'removed', and throws when the query fails. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteRowPatch) return;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(unwrap(value));
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  function filters(row) {
+    const page = new URLSearchParams(location.search);
+    return (row.getAttribute('data-us-row-filters') || '').trim().split(/\s+/).filter(Boolean).map(part => {
+      const at = part.indexOf('=');
+      const name = at < 0 ? part : part.slice(0, at);
+      const value = at < 0 ? page.get(name) : part.slice(at + 1);
+      if (!name || !value || /^[\[{]/.test(value)) throw new Error('Row refresh filter ' + name + ' has no value.');
+      return [name, value];
+    });
+  }
+
+  async function query(row) {
+    const path = (row.getAttribute('data-us-row-query') || '').trim();
+    if (!/^\$\/.+/.test(path)) throw new Error('The row names no API IQA.');
+    const params = new URLSearchParams({QueryName: path, limit: '1', offset: '0'});
+    filters(row).forEach(([name, value]) => params.set(name, value));
+    const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+      });
+      if (!response.ok) throw new Error('Row refresh failed (HTTP ' + response.status + ').');
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw new Error('Row refresh returned an unexpected response.');
+      return rows[0] || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function patch(row, record) {
+    const get = column => text(record[column]);
+    const marked = [row, ...row.querySelectorAll('[data-us-field], [data-us-field-attrs]')];
+    marked.forEach(node => {
+      const field = node.getAttribute('data-us-field');
+      if (field && node.textContent !== get(field)) node.textContent = get(field);
+      (node.getAttribute('data-us-field-attrs') || '').trim().split(/\s+/).filter(Boolean).forEach(spec => {
+        const at = spec.indexOf(':');
+        if (at < 1) return;
+        const value = spec.slice(at + 1).split('+').map(get).filter(Boolean).join(' ');
+        if (node.getAttribute(spec.slice(0, at)) !== value) node.setAttribute(spec.slice(0, at), value);
+      });
+    });
+  }
+
+  // The row's outer element in its result set, so a removal takes the whole
+  // result (section) with it.
+  function resultOf(row) {
+    const set = row.closest('.QueryTemplateSet');
+    return set ? [...set.children].find(child => child.contains(row)) || row : row;
+  }
+
+  async function refresh(row) {
+    if (!(row instanceof Element) || !row.hasAttribute('data-us-row-query')) throw new TypeError('Row refresh needs a row with data-us-row-query.');
+    const result = resultOf(row);
+    const idle = window.UnionSuiteRefresh?.rowBusy ? window.UnionSuiteRefresh.rowBusy(result) : () => {};
+    try {
+      const record = await query(row);
+      if (!record) {
+        result.remove();
+        return 'removed';
+      }
+      patch(row, record);
+      row.dispatchEvent(new CustomEvent('us:row-patched', {bubbles: true, detail: {row}}));
+      return 'patched';
+    } finally {
+      idle();
+    }
+  }
+
+  window.UnionSuiteRowPatch = Object.freeze({refresh, version: '1.0'});
+})();
+/* US-ROW-PATCH:END */
 
 /* US-UNIFIED-ACTIONS:START — one definition, per-control context, one lifecycle. */
 (function () {
@@ -1116,7 +1351,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -1129,7 +1364,16 @@ SOFTWARE.
   // runtime and need no selector entry.
   var sectionPresets = {
     'us-home-tasks': ['us-query-search', 'us-task-completed-filter', 'us-action-home-add-task'],
-    'us-contact-methods': ['ContactDetailsIQA', 'us-action-member-add-contact-method']
+    'us-contact-methods': ['ContactDetailsIQA', 'us-action-member-add-contact-method'],
+    // Agreement page panels (3 October 2026): each needs more than the field holds.
+    'us-agreement-tasks': ['us-query-template', 'us-query-search', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-task'],
+    'us-agreement-milestones': ['us-query-template', 'us-milestones', 'us-task-completed-filter', 'us-task-progress', 'us-action-agreements-add-milestone'],
+    'us-agreement-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-meeting'],
+    'us-agreement-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-list-scroll', 'us-action-agreements-upload-attachment'],
+    'us-agreement-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-note'],
+    'us-agreement-terms': ['us-query-template', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-term', 'us-action-agreements-remove-terms'],
+    // The contacts scripts also read this class for the agreement's search wording.
+    'us-agreement-contacts': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-facets', 'us-contacts-group-filter', 'us-contacts-group-tone', 'us-query-search', 'us-action-agreements-add-contact', 'us-action-agreements-email-contacts']
   };
 
   // Idempotent: once the classes are present no further mutation is recorded,
@@ -2514,6 +2758,813 @@ SOFTWARE.
 })();
 /* US-CONTACTS:END */
 
+/* US-AVATARS:START — initials from data-us-avatar-name.
+   Takes the first letter of the first and last words of the name, skipping
+   titles such as Dr and Ms, and writes them only when they change. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteAvatars) return;
+
+  const titles = /^(dr|mr|mrs|ms|miss|prof|sir|hon)\.?$/i;
+
+  function initials(name) {
+    const words = String(name || '').trim().split(/\s+/).filter(word => word && !titles.test(word));
+    if (!words.length) return '';
+    const first = words[0][0];
+    const last = words.length > 1 ? words[words.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  function paint(root) {
+    root.querySelectorAll('.us-avatar[data-us-avatar-name]').forEach(avatar => {
+      const text = initials(avatar.getAttribute('data-us-avatar-name'));
+      if (avatar.textContent !== text) avatar.textContent = text;
+    });
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      paint(document);
+    });
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' && record.addedNodes.length)) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  // A row refreshed from its API IQA (US-ROW-PATCH) may change only attributes.
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteAvatars = Object.freeze({refresh: schedule, initials, version: '1.0'});
+})();
+/* US-AVATARS:END */
+
+/* US-CONTACT-GROUPS:START — group headings for us-contacts-roster and
+   us-contacts-grouped (tiles). Blank groups gather under "No group".
+   The IQA sorts by ContactGroup, so each run of rows with the same
+   data-us-contact-group gets one heading with a count. A heading hides
+   when search hides every row under it. Headings are not sections, so the
+   theme's search and result counts ignore them. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteContactGroups) return;
+
+  // A row is the roster row or a tile: whatever carries the group.
+  function rowOf(section) {
+    return section.querySelector('[data-us-contact-group]');
+  }
+
+  function groupOf(section) {
+    const row = rowOf(section);
+    return row ? (row.getAttribute('data-us-contact-group') || '').trim() || 'No group' : null;
+  }
+
+  function build(set) {
+    const sections = [...set.children].filter(child => child.localName === 'section');
+    const runs = [];
+    sections.forEach(section => {
+      const group = groupOf(section);
+      if (group === null) return;
+      const last = runs[runs.length - 1];
+      if (last && last.group === group) last.sections.push(section);
+      else runs.push({group, sections: [section]});
+    });
+
+    // Headings only help when there is something to group: more than four
+    // contacts, and at least one group with more than one person.
+    // On the agreement panel (us-agreement-contacts) headings also need at
+    // least two groups with two or more people, so a mostly-singleton list
+    // is not a heading per card; the cards then show the group themselves.
+    const shared = runs.filter(run => run.sections.length >= 2).length;
+    const strict = !!set.closest('.us-agreement-contacts');
+    if (sections.length <= 4 || runs.every(run => run.sections.length === 1) || (strict && shared < 2)) {
+      set.querySelectorAll(':scope > .us-contact-group').forEach(heading => heading.remove());
+      return;
+    }
+
+    // Rebuild only when the grouping changed: headings in place, same names.
+    const existing = [...set.querySelectorAll(':scope > .us-contact-group')];
+    const current = existing.map(heading => heading.getAttribute('data-us-contact-group')).join('\n');
+    const wanted = runs.map(run => run.group).join('\n');
+    const placed = existing.length === runs.length &&
+      runs.every((run, index) => existing[index].nextElementSibling === run.sections[0]);
+    if (current !== wanted || !placed) {
+      existing.forEach(heading => heading.remove());
+      runs.forEach(run => {
+        const heading = document.createElement('h3');
+        heading.className = 'us-contact-group';
+        heading.setAttribute('data-us-contact-group', run.group);
+        const name = document.createElement('span');
+        name.textContent = run.group;
+        const count = document.createElement('span');
+        count.className = 'us-contact-group__count';
+        heading.append(name, count);
+        run.sections[0].before(heading);
+      });
+    }
+
+    // Counts and visibility follow the search.
+    const headings = [...set.querySelectorAll(':scope > .us-contact-group')];
+    runs.forEach((run, index) => {
+      const heading = headings[index];
+      const shown = run.sections.filter(section => !section.hasAttribute('data-us-query-search-hidden') && !section.hidden).length;
+      // The heading carries the group's tone and index, for its colour dot.
+      const first = rowOf(run.sections[0]);
+      ['data-us-contact-group-tone', 'data-us-contact-group-index'].forEach(name => {
+        const value = first.getAttribute(name);
+        if (value === null) heading.removeAttribute(name);
+        else if (heading.getAttribute(name) !== value) heading.setAttribute(name, value);
+      });
+      const count = heading.querySelector('.us-contact-group__count');
+      const text = String(shown);
+      if (count.textContent !== text) count.textContent = text;
+      if (heading.hidden !== !shown) heading.hidden = !shown;
+    });
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-contacts-roster .QueryTemplateSet, .us-contacts-grouped .QueryTemplateSet').forEach(set => {
+        if (!set.closest('.us-report-no-styling')) build(set);
+      });
+    });
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section')) ||
+        record.attributeName === 'data-us-query-search-hidden')) schedule();
+  }).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['data-us-query-search-hidden']
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  // A row refreshed from its API IQA (US-ROW-PATCH) may change only attributes.
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteContactGroups = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-CONTACT-GROUPS:END */
+
+/* US-CONTACT-FACETS:START — filters over a contacts list.
+   Reads data-us-contact-group, -role, -type and -name from each row (a
+   roster row or a tile), so the filters follow whatever the client
+   configures. One filter value per attribute; attributes combine. Chips
+   exist only when the list has more than four contacts.
+
+   Two placements, chosen by the wrapper's classes:
+   us-contacts-facets                a strip above the list: a summary line
+                                     with Clear, a Group row and a Role row
+                                     of chips (roles past six behind "+N more").
+   us-contacts-facets us-contacts-group-filter
+                                     group chips inside the theme's filter
+                                     disclosure (us-query-search's funnel),
+                                     the count beside the panel title, and
+                                     suggestions under the search field as
+                                     the user types: matching names, roles,
+                                     groups and types, each labelled by its
+                                     attribute (the v1 page's behaviour).
+                                     Picking one filters on that attribute
+                                     exactly and clears the typed text.
+
+   Groups are numbered in IQA order (data-us-contact-group-index) for
+   us-contacts-group-tint. A row the filters exclude gets the hidden
+   attribute; the theme's search and US-CONTACT-GROUPS both treat a hidden
+   section as off the page, so their counts follow without a change. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteContactFacets) return;
+
+  const MIN_ROWS = 5;
+  const VISIBLE_ROLES = 6;
+  const MAX_SUGGESTIONS = 10;
+  const SUGGESTION_CAPS = {group: 3, role: 4, type: 2, name: 10};
+  const BLANK_GROUP = 'No group';
+  // us-agreement-contacts: suggest the person's place on the agreement, not
+  // the system type, and say so in the field.
+  const AGREEMENT_PLACEHOLDER = 'Search name, role or group';
+  const FACETS = ['group', 'role', 'type', 'name'];
+  const LABELS = {group: 'Group', role: 'Role', type: 'Type', name: 'Name'};
+  const states = new WeakMap();
+  let suggestId = 0;
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function wrapperOf(set) {
+    return set.closest('.us-contacts-facets');
+  }
+
+  function attribute(element, name) {
+    return (element.getAttribute('data-us-contact-' + name) || '').trim();
+  }
+
+  // A row is whatever carries the group in the section. The name falls back
+  // to the row's own name element when the template has no attribute.
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, row: section.querySelector('[data-us-contact-group]')}))
+      .filter(entry => entry.row)
+      .map(entry => {
+        const nameNode = entry.row.querySelector('.us-contact-tile__name, .us-contact-row__name');
+        return {
+          section: entry.section,
+          element: entry.row,
+          group: attribute(entry.row, 'group') || BLANK_GROUP,
+          role: attribute(entry.row, 'role'),
+          type: attribute(entry.row, 'type'),
+          name: attribute(entry.row, 'name') || (nameNode ? nameNode.textContent.trim() : '')
+        };
+      });
+  }
+
+  // Values in first-seen order for groups (the IQA sorts by group) and by
+  // count, then name, for roles, so the common roles come first.
+  function tally(rows, key, order) {
+    const counts = new Map();
+    rows.forEach(row => {
+      if (!row[key]) return;
+      counts.set(row[key], (counts.get(row[key]) || 0) + 1);
+    });
+    const values = [...counts.keys()];
+    if (order === 'count') values.sort((a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b));
+    return values;
+  }
+
+  // Groups are numbered in the order the IQA returns them, blank last and
+  // unnumbered, so us-contacts-group-tint can colour the first few.
+  function numberGroups(rows, groups) {
+    const named = groups.filter(group => group !== BLANK_GROUP);
+    rows.forEach(row => {
+      const index = named.indexOf(row.group);
+      if (index < 0) row.element.removeAttribute('data-us-contact-group-index');
+      else if (row.element.getAttribute('data-us-contact-group-index') !== String(index)) {
+        row.element.setAttribute('data-us-contact-group-index', String(index));
+      }
+    });
+  }
+
+  function matches(state, row, except) {
+    return FACETS.every(facet => facet === except || !state.filters[facet] || row[facet] === state.filters[facet]);
+  }
+
+  function activeFacets(state) {
+    return FACETS.filter(facet => state.filters[facet]);
+  }
+
+  function clearFilters(state) {
+    FACETS.forEach(facet => { state.filters[facet] = null; });
+    state.moreRoles = false;
+  }
+
+  function chip(value) {
+    const button = el('button', 'us-contact-chip');
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('data-us-contact-facet-value', value);
+    button.append(el('span', '', value), el('span', 'us-contact-chip__count', ''));
+    return button;
+  }
+
+  function facetRow(facet, label) {
+    const row = el('div', 'us-contact-facets__row');
+    row.setAttribute('data-us-contact-facet', facet);
+    row.append(el('span', 'us-contact-facets__label', label), el('div', 'us-contact-facets__chips'));
+    return row;
+  }
+
+  function clearButton(text) {
+    const clear = el('button', 'us-contact-facets__clear', text);
+    clear.type = 'button';
+    clear.hidden = true;
+    return clear;
+  }
+
+  // The chips, and in strip mode the summary line too.
+  function buildStrip(state) {
+    const node = el('div', 'us-contact-facets' + (state.groupFilter ? ' us-contact-facets--filter' : ''));
+    if (!state.groupFilter) {
+      const summary = el('p', 'us-contact-facets__summary');
+      summary.setAttribute('role', 'status');
+      summary.setAttribute('aria-live', 'polite');
+      summary.setAttribute('aria-atomic', 'true');
+      summary.append(el('span', 'us-contact-facets__count', ''), clearButton('Clear'));
+      node.append(summary);
+    }
+    node.append(facetRow('group', 'Group'));
+    if (!state.groupFilter) node.append(facetRow('role', 'Role'));
+    return node;
+  }
+
+  // Beside the panel title: the count, the active filters and a clear.
+  function buildHeadingCount() {
+    const node = el('span', 'us-contact-facets__heading-count');
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
+    node.setAttribute('aria-atomic', 'true');
+    const clear = clearButton('');
+    clear.className = 'us-contact-facets__clear us-contact-facets__clear--icon';
+    clear.setAttribute('aria-label', 'Clear the contact filters');
+    clear.title = 'Clear the contact filters';
+    const icon = el('i', 'ti ti-x');
+    icon.setAttribute('aria-hidden', 'true');
+    clear.append(icon);
+    node.append(el('span', 'us-contact-facets__count', ''), clear);
+    return node;
+  }
+
+  // The suggestion list under the search field.
+  function buildSuggest() {
+    const node = el('div', 'us-contact-suggest');
+    node.id = 'us-contact-suggest-' + (++suggestId);
+    node.setAttribute('role', 'listbox');
+    node.hidden = true;
+    return node;
+  }
+
+  function onClick(set, event) {
+    const state = states.get(set);
+    if (!state) return;
+    const target = event.target.closest('button');
+    if (!target) return;
+    if (target.classList.contains('us-contact-facets__clear')) {
+      clearFilters(state);
+      // On the agreement panel the clear also empties the text search.
+      const wrapper = wrapperOf(set);
+      if (state.input && state.input.value && wrapper && wrapper.classList.contains('us-agreement-contacts')) {
+        state.input.value = '';
+        state.input.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+    } else if (target.classList.contains('us-contact-chip--more')) {
+      state.moreRoles = !state.moreRoles;
+    } else if (target.classList.contains('us-contact-chip')) {
+      if (target.getAttribute('aria-disabled') === 'true') return;
+      const facet = target.closest('[data-us-contact-facet]').getAttribute('data-us-contact-facet');
+      const value = target.getAttribute('data-us-contact-facet-value');
+      state.filters[facet] = state.filters[facet] === value ? null : value;
+    } else {
+      return;
+    }
+    apply(set);
+  }
+
+  // Chips are rebuilt only when the values change; counts and pressed state
+  // update in place, so focus stays on the chip just pressed.
+  function syncChips(container, values, extra) {
+    const current = [...container.querySelectorAll('.us-contact-chip:not(.us-contact-chip--more)')];
+    const same = current.length === values.length &&
+      current.every((node, index) => node.getAttribute('data-us-contact-facet-value') === values[index]);
+    if (same) return;
+    container.replaceChildren(...values.map(chip));
+    if (extra) container.append(extra);
+  }
+
+  // Where the chips live: the theme's filter disclosure in group-filter
+  // mode (when it exists yet), otherwise above the results.
+  function mount(state, set) {
+    const wrapper = wrapperOf(set);
+    let home = null, first = false;
+    if (state.groupFilter && wrapper) {
+      const controls = wrapper.querySelector(':scope > .panel > .us-query-search-controls');
+      if (controls) { home = controls; first = true; }
+      else if (!wrapper.classList.contains('us-query-search')) home = set.parentElement;
+    } else {
+      home = set.parentElement;
+    }
+    if (!home) { state.strip.remove(); return; }
+    if (first) { if (home.firstElementChild !== state.strip) home.prepend(state.strip); }
+    else if (state.strip.nextElementSibling !== set || state.strip.parentElement !== home) set.before(state.strip);
+  }
+
+  function mountHeadingCount(state, set) {
+    const wrapper = wrapperOf(set);
+    const title = wrapper && wrapper.querySelector(':scope > .panel > .panel-heading > .panel-title');
+    if (!title) { state.headingCount.remove(); return; }
+    if (title.nextElementSibling !== state.headingCount) title.after(state.headingCount);
+  }
+
+  /* Suggestions: the theme owns the search input; this listens beside it.
+     The list sits in flow under the field row, inside the disclosure. */
+  function mountSuggest(state, set) {
+    const wrapper = wrapperOf(set);
+    const controls = wrapper && wrapper.querySelector(':scope > .panel > .us-query-search-controls');
+    const fields = controls && controls.querySelector(':scope > .us-query-filter-fields');
+    const input = fields && fields.querySelector('.us-query-search-field input');
+    if (!input) { state.suggest.remove(); state.input = null; return; }
+    if (fields.nextElementSibling !== state.suggest) fields.after(state.suggest);
+    if (wrapper.classList.contains('us-agreement-contacts') && input.placeholder !== AGREEMENT_PLACEHOLDER) {
+      input.placeholder = AGREEMENT_PLACEHOLDER;
+    }
+    if (state.input === input) return;
+    state.input = input;
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-haspopup', 'listbox');
+    input.setAttribute('aria-expanded', 'false');
+    input.addEventListener('input', () => suggest(state, set));
+    input.addEventListener('focus', () => suggest(state, set));
+    input.addEventListener('blur', () => window.setTimeout(() => closeSuggest(state), 150));
+    input.addEventListener('keydown', event => onSuggestKey(state, set, event));
+  }
+
+  // Attribute matches first, since they are the quick filters, each capped
+  // so a common letter shows a mix; names fill what is left.
+  function suggestions(state, set, query) {
+    const rows = rowsOf(set);
+    const found = [];
+    const wrapper = wrapperOf(set);
+    const facets = wrapper && wrapper.classList.contains('us-agreement-contacts')
+      ? ['group', 'role', 'name'] : ['group', 'role', 'type', 'name'];
+    facets.forEach(facet => {
+      const room = Math.min(SUGGESTION_CAPS[facet], MAX_SUGGESTIONS - found.length);
+      const counts = new Map();
+      rows.forEach(row => {
+        const value = facet === 'group' && row.group === BLANK_GROUP ? '' : row[facet];
+        if (!value || !value.toLowerCase().includes(query)) return;
+        if (state.filters[facet] === value) return;
+        counts.set(value, (counts.get(value) || 0) + 1);
+      });
+      [...counts.keys()].sort((a, b) => a.localeCompare(b)).slice(0, room).forEach(value => {
+        found.push({facet, value, count: counts.get(value)});
+      });
+    });
+    return found.slice(0, MAX_SUGGESTIONS);
+  }
+
+  function suggest(state, set) {
+    const input = state.input;
+    const query = input.value.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!query) { closeSuggest(state); return; }
+    const items = suggestions(state, set, query);
+    if (!items.length) { closeSuggest(state); return; }
+    state.suggest.replaceChildren(...items.map((item, index) => {
+      const option = el('div', 'us-contact-suggest__option');
+      option.id = state.suggest.id + '-' + index;
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      option.setAttribute('data-us-contact-facet', item.facet);
+      option.setAttribute('data-us-contact-facet-value', item.value);
+      option.append(
+        el('span', 'us-contact-suggest__kind', LABELS[item.facet]),
+        el('span', 'us-contact-suggest__value', item.value),
+        el('span', 'us-contact-suggest__count', item.facet === 'name' ? '' : String(item.count)));
+      option.addEventListener('mousedown', event => event.preventDefault());
+      option.addEventListener('click', () => pick(state, set, item.facet, item.value));
+      return option;
+    }));
+    state.suggest.hidden = false;
+    state.activeOption = -1;
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-controls', state.suggest.id);
+    input.removeAttribute('aria-activedescendant');
+  }
+
+  function closeSuggest(state) {
+    if (!state.suggest.hidden) state.suggest.hidden = true;
+    state.activeOption = -1;
+    if (state.input) {
+      state.input.setAttribute('aria-expanded', 'false');
+      state.input.removeAttribute('aria-activedescendant');
+    }
+  }
+
+  function onSuggestKey(state, set, event) {
+    const options = [...state.suggest.querySelectorAll('[role="option"]')];
+    if (state.suggest.hidden || !options.length) {
+      if (event.key === 'Escape' && state.input.value) return;
+      return;
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      state.activeOption = (state.activeOption + step + options.length) % options.length;
+      options.forEach((option, index) => {
+        const active = index === state.activeOption;
+        option.setAttribute('aria-selected', String(active));
+        option.classList.toggle('is-active', active);
+        if (active) {
+          state.input.setAttribute('aria-activedescendant', option.id);
+          option.scrollIntoView({block: 'nearest'});
+        }
+      });
+    } else if (event.key === 'Enter' && state.activeOption >= 0) {
+      event.preventDefault();
+      const option = options[state.activeOption];
+      pick(state, set, option.getAttribute('data-us-contact-facet'), option.getAttribute('data-us-contact-facet-value'));
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      closeSuggest(state);
+    }
+  }
+
+  // An exact filter on one attribute; the typed text has done its job.
+  function pick(state, set, facet, value) {
+    state.filters[facet] = value;
+    closeSuggest(state);
+    if (state.input) {
+      state.input.value = '';
+      state.input.dispatchEvent(new Event('input', {bubbles: true}));
+      state.input.focus({preventScroll: true});
+    }
+    apply(set);
+  }
+
+  // The heading tokens: the group bare, the rest labelled, because a type
+  // and a group can share a word ("External").
+  function summaryTokens(state) {
+    return activeFacets(state).map(facet => {
+      const token = el('span', 'us-contact-facets__token');
+      if (facet !== 'group') token.append(el('small', '', LABELS[facet] + ' '));
+      token.append(document.createTextNode(state.filters[facet]));
+      return token;
+    });
+  }
+
+  function apply(set) {
+    const state = states.get(set);
+    if (!state) return;
+    const wrapper = wrapperOf(set);
+    const rows = rowsOf(set);
+    const total = rows.length;
+    const groups = tally(rows, 'group');
+    numberGroups(rows, groups);
+    // A contact with no record link keeps a plain-text name.
+    set.querySelectorAll('a[href=""]').forEach(link => link.removeAttribute('href'));
+    const noun = total === 1 ? 'contact' : 'contacts';
+    if (state.groupFilter) { mountHeadingCount(state, set); mountSuggest(state, set); }
+
+    // Too few to filter: plain rows, nothing hidden by the chips.
+    if (total < MIN_ROWS) {
+      rows.forEach(row => { if (row.section.hidden) row.section.hidden = false; });
+      clearFilters(state);
+      set.removeAttribute('data-us-contact-facet-group');
+      if (wrapper) wrapper.removeAttribute('data-us-contact-facet-active');
+      state.strip.remove();
+      if (state.groupFilter) {
+        state.headingCount.querySelector('.us-contact-facets__count').replaceChildren(total + ' ' + noun);
+        state.headingCount.querySelector('.us-contact-facets__clear').hidden = true;
+      }
+      refreshGroups();
+      return;
+    }
+    mount(state, set);
+
+    const roles = state.groupFilter ? [] : tally(rows, 'role', 'count');
+    if (state.filters.group && !groups.includes(state.filters.group)) state.filters.group = null;
+    FACETS.filter(facet => facet !== 'group').forEach(facet => {
+      if (state.filters[facet] && !rows.some(row => row[facet] === state.filters[facet])) state.filters[facet] = null;
+    });
+
+    const groupRow = state.strip.querySelector('[data-us-contact-facet="group"]');
+    const roleRow = state.strip.querySelector('[data-us-contact-facet="role"]');
+    groupRow.hidden = groups.length < 2;
+    syncChips(groupRow.querySelector('.us-contact-facets__chips'), groups);
+
+    let more = null;
+    if (roleRow) {
+      roleRow.hidden = roles.length < 2;
+      more = roleRow.querySelector('.us-contact-chip--more');
+      if (!more) {
+        more = el('button', 'us-contact-chip us-contact-chip--more');
+        more.type = 'button';
+      }
+      syncChips(roleRow.querySelector('.us-contact-facets__chips'), roles, more);
+    }
+
+    // Counts within the other filters' choices.
+    const paint = (row, facet) => {
+      row.querySelectorAll('.us-contact-chip:not(.us-contact-chip--more)').forEach(node => {
+        const value = node.getAttribute('data-us-contact-facet-value');
+        const count = rows.filter(r => r[facet] === value && matches(state, r, facet)).length;
+        const pressed = state.filters[facet] === value;
+        node.querySelector('.us-contact-chip__count').textContent = String(count);
+        node.setAttribute('aria-pressed', String(pressed));
+        if (count || pressed) node.removeAttribute('aria-disabled');
+        else node.setAttribute('aria-disabled', 'true');
+      });
+    };
+    paint(groupRow, 'group');
+    if (roleRow) {
+      paint(roleRow, 'role');
+      // The role overflow: the pressed role is always among the visible chips.
+      const roleChips = [...roleRow.querySelectorAll('.us-contact-chip:not(.us-contact-chip--more)')];
+      const hiddenCount = Math.max(0, roleChips.length - VISIBLE_ROLES);
+      roleChips.forEach((node, index) => {
+        const overflow = index >= VISIBLE_ROLES && !state.moreRoles &&
+          node.getAttribute('aria-pressed') !== 'true';
+        if (node.hidden !== overflow) node.hidden = overflow;
+      });
+      more.hidden = !hiddenCount;
+      more.textContent = state.moreRoles ? 'Fewer' : '+' + hiddenCount + ' more';
+      more.setAttribute('aria-expanded', String(state.moreRoles));
+    }
+
+    // Rows, then the summary wherever it lives.
+    // On the agreement panel the count also follows the theme's text
+    // search, which marks the rows it hides with data-us-query-search-hidden.
+    const agreement = !!wrapper && wrapper.classList.contains('us-agreement-contacts');
+    let shown = 0, searching = false;
+    rows.forEach(row => {
+      const match = matches(state, row);
+      const searchHidden = agreement && row.section.hasAttribute('data-us-query-search-hidden');
+      if (searchHidden) searching = true;
+      if (match && !searchHidden) shown++;
+      if (row.section.hidden !== !match) row.section.hidden = !match;
+    });
+    const active = activeFacets(state);
+    const filtered = active.length || searching;
+    const summaryHome = state.groupFilter ? state.headingCount : state.strip;
+    const count = summaryHome.querySelector('.us-contact-facets__count');
+    if (state.groupFilter) {
+      // The noun says what is counted (owner, 3 October 2026): 7 contacts.
+      const parts = filtered ? [shown + ' of ' + total + ' ' + noun] : [total + ' ' + noun];
+      count.replaceChildren(parts[0]);
+      summaryTokens(state).forEach(token => count.append(' · ', token));
+    } else {
+      count.textContent = active.length
+        ? shown + ' of ' + total + ' ' + noun + ' · ' + active.map(facet => state.filters[facet]).join(' · ')
+        : total + ' ' + noun;
+    }
+    summaryHome.querySelector('.us-contact-facets__clear').hidden = !filtered;
+    set.toggleAttribute('data-us-contact-facet-group', !!state.filters.group);
+    if (wrapper) wrapper.toggleAttribute('data-us-contact-facet-active', !!active.length);
+    refreshGroups();
+  }
+
+  function refreshGroups() {
+    if (window.UnionSuiteContactGroups) window.UnionSuiteContactGroups.refresh();
+  }
+
+  function stateFor(set) {
+    let state = states.get(set);
+    const wrapper = wrapperOf(set);
+    const groupFilter = !!wrapper && wrapper.classList.contains('us-contacts-group-filter');
+    if (state && state.groupFilter !== groupFilter) {
+      state.strip.remove();
+      state.headingCount.remove();
+      state.suggest.remove();
+      state = null;
+    }
+    if (!state) {
+      state = {
+        filters: {group: null, role: null, type: null, name: null},
+        moreRoles: false, groupFilter, strip: null,
+        headingCount: buildHeadingCount(), suggest: buildSuggest(), input: null, activeOption: -1
+      };
+      state.strip = buildStrip(state);
+      state.strip.addEventListener('click', event => onClick(set, event));
+      state.headingCount.addEventListener('click', event => onClick(set, event));
+      states.set(set, state);
+    }
+    return state;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-contacts-facets .QueryTemplateSet').forEach(set => {
+        if (set.closest('.us-report-no-styling')) return;
+        stateFor(set);
+        apply(set);
+      });
+    });
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section' || node.localName === 'div')) ||
+        (record.type === 'attributes' && record.target.closest && record.target.closest('.us-agreement-contacts')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-query-search-hidden']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  // A row refreshed from its API IQA (US-ROW-PATCH) may change only attributes.
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteContactFacets = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-CONTACT-FACETS:END */
+
+/* US-CONTACT-COPY:START — copy a contact's email or phone from its icon.
+   The icon is a .us-contact-tile__copy button before the value. Pressing it
+   copies the value, swaps the icon for a green copy icon and flashes the
+   line, with no visible text; a hidden status line tells screen readers.
+   A button whose value is blank is disabled, so it does nothing. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteContactCopy) return;
+
+  const FLASH_MS = 1400;
+  const timers = new WeakMap();
+  let status = null;
+
+  function valueOf(button) {
+    const value = button.nextElementSibling;
+    return value ? value.textContent.trim() : '';
+  }
+
+  function sync(root) {
+    root.querySelectorAll('.us-contact-tile__copy').forEach(button => {
+      const empty = !valueOf(button);
+      if (button.disabled !== empty) button.disabled = empty;
+    });
+  }
+
+  function announce(text) {
+    if (!status) {
+      status = document.createElement('p');
+      status.className = 'us-contact-copy-status';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      document.body.append(status);
+    }
+    status.textContent = '';
+    requestAnimationFrame(() => { status.textContent = text; });
+  }
+
+  async function write(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      // Older or insecure contexts: a hidden field and execCommand.
+      const field = document.createElement('textarea');
+      field.value = text;
+      field.setAttribute('readonly', '');
+      field.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+      document.body.append(field);
+      field.select();
+      const done = document.execCommand && document.execCommand('copy');
+      field.remove();
+      return !!done;
+    }
+  }
+
+  function flash(button) {
+    const line = button.parentElement;
+    const icon = button.querySelector('i');
+    if (!icon.dataset.usIcon) icon.dataset.usIcon = icon.className;
+    clearTimeout(timers.get(button));
+    // Restart the flash even on a quick second press.
+    line.removeAttribute('data-us-copied');
+    void line.offsetWidth;
+    line.setAttribute('data-us-copied', '');
+    button.setAttribute('data-us-copied', '');
+    icon.className = 'ti ti-copy';
+    timers.set(button, setTimeout(() => {
+      line.removeAttribute('data-us-copied');
+      button.removeAttribute('data-us-copied');
+      icon.className = icon.dataset.usIcon;
+    }, FLASH_MS));
+  }
+
+  document.addEventListener('click', async event => {
+    const button = event.target.closest('.us-contact-tile__copy');
+    if (!button || button.disabled || button.closest('.us-report-no-styling')) return;
+    const value = valueOf(button);
+    if (!value) return;
+    if (await write(value)) {
+      flash(button);
+      announce(button.getAttribute('aria-label').replace(/^Copy/, 'Copied') + ': ' + value);
+    } else {
+      announce('Could not copy. Select the text instead.');
+    }
+  });
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; sync(document); });
+  }
+  new MutationObserver(schedule).observe(document.documentElement, {subtree: true, childList: true, characterData: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  // A row refreshed from its API IQA (US-ROW-PATCH) may change only attributes.
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteContactCopy = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-CONTACT-COPY:END */
+
 /* US-LIST-SCROLL:START */
 (function () {
   'use strict';
@@ -3597,6 +4648,527 @@ SOFTWARE.
 })();
 /* US-BANNER-POSITIONS:END */
 
+/* US-BANNER-FACTS:START — banner details row from a client-editable IQA.
+   Put data-us-facts-query on .us-banner__details. The banner's own Query
+   Template keeps the fixed identity (ID, title, status, actions); this IQA,
+   run for the same record, fills the details row, so clients change what the
+   banner shows by editing the IQA's columns only (the contact page's details
+   IQA convention, US-ACTIVITY-FEED):
+   - Description: optional; shown first with the label "Description"
+     (data-us-facts-description-label renames it), clipped with More past
+     data-us-facts-description-limit characters (default 300).
+   - Every Additional-* column is a fact, labelled with the text after the
+     prefix ("Additional-Agreement type" → Agreement type), in column order.
+     Blank values are left out; ISO dates read "1 Jan 2026"; true/false Yes/No.
+   - Tone-<same name> (success, warning, danger, info) shows that fact as a
+     badge, for example Tone-Priority beside Additional-Priority.
+   Filter: data-us-facts-filter names the IQA filter. Its value is
+   data-us-facts-value, or else the page URL parameter of the same name.
+   A failed or empty query leaves the details row out. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteBannerFacts) {
+    window.UnionSuiteBannerFacts.refresh();
+    return;
+  }
+
+  const SELECTOR = '.us-banner .us-banner__details[data-us-facts-query]';
+  const PREFIX = /^additional[-_]/i;
+  const TONE = /^tone[-_]/i;
+  const TONES = ['success', 'warning', 'danger', 'info'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const loaded = new WeakMap();
+  let queued = false;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  // Columns in IQA order, from either row shape (/api/query rows are flat).
+  function columns(row) {
+    const properties = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(properties)) return properties.map(item => [String(item.Name), unwrap(item.Value)]);
+    return Object.entries(row || {}).filter(([name]) => name !== '$type').map(([name, value]) => [name, unwrap(value)]);
+  }
+
+  // "Additional-Last updated" keeps the author's wording; "Additional-LeadStaff"
+  // becomes "Lead staff". Acronyms (ID, EBA) keep their capitals.
+  function label(rest) {
+    const name = rest.trim();
+    if (!name || /\s/.test(name)) return name;
+    const words = name.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
+    }).join(' ');
+  }
+
+  function value(raw) {
+    const string = text(raw);
+    if (/^(true|false)$/i.test(string)) return /^true$/i.test(string) ? 'Yes' : 'No';
+    const iso = string.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ]|$)/);
+    if (iso) return Number(iso[3]) + ' ' + MONTHS[Number(iso[2]) - 1] + ' ' + iso[1];
+    return string;
+  }
+
+  function config(details) {
+    const query = text(details.dataset.usFactsQuery);
+    const filter = text(details.dataset.usFactsFilter);
+    let filterValue = text(details.dataset.usFactsValue);
+    if (!filterValue && filter) filterValue = text(new URLSearchParams(location.search).get(filter));
+    // Unsubstituted placeholders mean the banner has no record yet.
+    if (!/^\$\/.+/.test(query) || !filter || !filterValue || /^[\[{]/.test(filterValue)) return null;
+    return {query, filter, value: filterValue};
+  }
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  async function request(cfg) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const params = new URLSearchParams({QueryName: cfg.query, limit: '1', offset: '0'});
+      params.set(cfg.filter, cfg.value);
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+      });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw Error('Unexpected response');
+      return rows[0] || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function render(details, row) {
+    const entries = columns(row);
+    const find = name => entries.find(([column]) => column.toLowerCase() === name.toLowerCase());
+    const nodes = [];
+
+    const description = text(find('Description')?.[1]);
+    if (description) {
+      const lead = document.createElement('div');
+      lead.className = 'us-banner__lead';
+      const heading = document.createElement('p');
+      heading.className = 'us-banner__lead-label';
+      heading.textContent = details.dataset.usFactsDescriptionLabel || 'Description';
+      const body = document.createElement('p');
+      body.className = 'us-banner__description';
+      body.setAttribute('data-us-description-limit', details.dataset.usFactsDescriptionLimit || '300');
+      const full = document.createElement('span');
+      full.setAttribute('data-us-description-full', '');
+      full.textContent = description;
+      body.append(full);
+      lead.append(heading, body);
+      nodes.push(lead);
+    }
+
+    const facts = entries
+      .filter(([column]) => PREFIX.test(column))
+      .map(([column, raw]) => {
+        const rest = column.replace(PREFIX, '');
+        const toneEntry = entries.find(([other]) => TONE.test(other) && other.replace(TONE, '').toLowerCase() === rest.toLowerCase());
+        const tone = text(toneEntry?.[1]).toLowerCase();
+        return {label: label(rest), value: value(raw), tone: TONES.includes(tone) ? tone : ''};
+      })
+      .filter(fact => fact.label && fact.value);
+
+    if (facts.length) {
+      const list = document.createElement('dl');
+      list.className = 'us-banner__facts';
+      facts.forEach(fact => {
+        const item = document.createElement('div');
+        item.className = 'us-banner__fact';
+        const term = document.createElement('dt');
+        term.textContent = fact.label;
+        const definition = document.createElement('dd');
+        if (fact.tone) {
+          const badge = document.createElement('span');
+          badge.className = 'us-banner__badge us-banner__badge--' + fact.tone;
+          badge.textContent = fact.value;
+          definition.append(badge);
+        } else {
+          definition.textContent = fact.value;
+        }
+        item.append(term, definition);
+        list.append(item);
+      });
+      nodes.push(list);
+    }
+
+    details.replaceChildren(...nodes);
+    details.setAttribute('data-us-facts-state', nodes.length ? 'ready' : 'empty');
+  }
+
+  async function load(details, cfg, force = false) {
+    const key = cfg.query + '|' + cfg.filter + '|' + cfg.value;
+    if (!force && loaded.get(details) === key) return;
+    loaded.set(details, key);
+    details.setAttribute('data-us-facts-state', 'loading');
+    details.setAttribute('aria-busy', 'true');
+    try {
+      const row = await request(cfg);
+      if (loaded.get(details) !== key) return;
+      if (row) render(details, row);
+      else {
+        details.replaceChildren();
+        details.setAttribute('data-us-facts-state', 'empty');
+      }
+    } catch (error) {
+      if (loaded.get(details) !== key) return;
+      details.replaceChildren();
+      details.setAttribute('data-us-facts-state', 'error');
+      console.warn('[UnionSuiteBannerFacts] The banner details could not be loaded:', error.message);
+    } finally {
+      details.removeAttribute('aria-busy');
+    }
+  }
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(SELECTOR).forEach(details => {
+      if (details.closest('.us-report-no-styling')) return;
+      const cfg = config(details);
+      if (cfg) void load(details, cfg);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    setTimeout(refresh, 0);
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || record.attributeName?.startsWith('data-us-facts'))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true,
+    attributeFilter: ['data-us-facts-query', 'data-us-facts-filter', 'data-us-facts-value']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  // Run the details IQA again, for example after an edit popup saves.
+  function reload() {
+    document.querySelectorAll(SELECTOR).forEach(details => {
+      if (details.closest('.us-report-no-styling')) return;
+      const cfg = config(details);
+      if (cfg) void load(details, cfg, true);
+    });
+  }
+
+  window.UnionSuiteBannerFacts = Object.freeze({refresh: schedule, reload, version: '1.0'});
+})();
+/* US-BANNER-FACTS:END */
+
+/* US-FIELD-GROUPS:START — read-only field panel from a client-editable IQA.
+   Put data-us-fields-query on a .us-field-groups element. The IQA returns one
+   row; its column names lay the panel out, so clients change the panel by
+   editing the IQA's columns only (the same idea as US-BANNER-FACTS):
+   - Every column is a field, in column order, labelled with its name.
+   - Group-Label puts the field under a sub-heading: "Dates-Start date" shows
+     Start date under "Dates". The name splits at the first hyphen only, so
+     "Dates-Re-negotiation" keeps its hyphen; a column without a group cannot
+     have a hyphen in its label.
+   - A group whose name is a number ("1-ID", "2-Start date") starts a new line
+     with no sub-heading.
+   - Columns of the same group are gathered together, groups in the order
+     their first column appears. Columns without a group come first.
+   - Tone-<Label> (success, warning, danger, info) shows the field with that
+     label as a badge, for example Tone-Priority beside Details-Priority.
+   - Alert-Title, Alert-Message and Alert-Tone show a status alert above the
+     fields (the v1 Resolution banner): the title in bold, the message below,
+     coloured by the tone (success, warning, danger, info; else neutral). A
+     blank Alert-Title leaves the alert out. Alert-Only true shows the alert
+     and no fields, for a record with nothing to show yet (an agreement not
+     yet resolved; owner, 3 October 2026).
+   Tone and Alert are reserved and are never group names.
+   Values: blank shows an em dash; ISO dates read "1 Jan 2026"; true/false
+   Yes/No; a web address or email becomes a link. A link or a value longer
+   than 60 characters takes the full row. Values are shown as plain text.
+   Layout: add us-field-groups--single for one field per line (Key dates).
+   Filter: data-us-fields-filter names the IQA filter. Its value is
+   data-us-fields-value, or else the page URL parameter of the same name. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteFieldGroups) {
+    window.UnionSuiteFieldGroups.refresh();
+    return;
+  }
+
+  const SELECTOR = '.us-field-groups[data-us-fields-query]';
+  const TONES = {success: 'success', warning: 'warning', danger: 'danger', info: 'primary'};
+  // Alert tone → native iMIS message class (styled by US-MESSAGES) and icon.
+  const ALERTS = {
+    success: ['AsiSuccess', 'circle-check'],
+    info: ['AsiInformation', 'info-circle'],
+    warning: ['AsiWarning', 'hourglass-high'],
+    danger: ['AsiError', 'alert-circle'],
+    neutral: ['AsiNeutral', 'info-circle']
+  };
+  const WIDE_LENGTH = 60;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const loaded = new WeakMap();
+  let queued = false;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  // Columns in IQA order, from either row shape (/api/query rows are flat).
+  function columns(row) {
+    const properties = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(properties)) return properties.map(item => [String(item.Name), unwrap(item.Value)]);
+    return Object.entries(row || {}).filter(([name]) => name !== '$type').map(([name, value]) => [name, unwrap(value)]);
+  }
+
+  // "Dates-Start date" → group "Dates", name "Start date". Split at the first
+  // hyphen only; a leading or trailing hyphen is part of the name.
+  function parse(column) {
+    const at = column.indexOf('-');
+    const group = at > 0 ? column.slice(0, at).trim() : '';
+    const name = at > 0 ? column.slice(at + 1).trim() : '';
+    return group && name ? {group, name} : {group: '', name: column.trim()};
+  }
+
+  // "Last updated" keeps the author's wording; "LeadStaff" becomes
+  // "Lead staff". Acronyms (ID, EBA) keep their capitals.
+  function label(name) {
+    if (!name || /\s/.test(name)) return name;
+    const words = name.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
+    }).join(' ');
+  }
+
+  // The text to show, and a link target when the value is an address.
+  function format(raw) {
+    const string = text(raw);
+    if (/^(true|false)$/i.test(string)) return {text: /^true$/i.test(string) ? 'Yes' : 'No'};
+    const iso = string.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ]|$)/);
+    if (iso) return {text: Number(iso[3]) + ' ' + MONTHS[Number(iso[2]) - 1] + ' ' + iso[1]};
+    if (/^https?:\/\/\S+$/i.test(string)) return {text: string.replace(/^https?:\/\//i, '').replace(/\/$/, ''), href: string};
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(string)) return {text: string, href: 'mailto:' + string};
+    return {text: string};
+  }
+
+  // Groups in first-appearance order, ungrouped fields first. Tone columns
+  // colour the field of the same name and Alert columns build the alert,
+  // instead of becoming fields.
+  function layoutOf(row) {
+    const tones = new Map();
+    const alert = {};
+    const groups = new Map([['', {heading: '', fields: []}]]);
+    columns(row).forEach(([column, raw]) => {
+      const {group, name} = parse(column);
+      if (/^tone$/i.test(group)) {
+        tones.set(name.toLowerCase(), text(raw).toLowerCase());
+        return;
+      }
+      if (/^alert$/i.test(group)) {
+        alert[name.toLowerCase()] = text(raw);
+        return;
+      }
+      const key = group.toLowerCase();
+      if (!groups.has(key)) groups.set(key, {heading: /^\d+$/.test(group) ? '' : label(group), fields: []});
+      groups.get(key).fields.push({key: name.toLowerCase(), label: label(name), value: format(raw)});
+    });
+    groups.forEach(group => group.fields.forEach(field => { field.tone = TONES[tones.get(field.key)] || ''; }));
+    return {
+      alert: alert.title ? alert : null,
+      groups: [...groups.values()].filter(group => group.fields.length)
+    };
+  }
+
+  function alertNode(alert) {
+    const [className, icon] = ALERTS[(alert.tone || '').toLowerCase()] || ALERTS.neutral;
+    const node = document.createElement('div');
+    node.className = 'us-field-groups__alert ' + className;
+    const mark = document.createElement('i');
+    mark.className = 'ti ti-' + icon + ' us-field-groups__alert-icon';
+    mark.setAttribute('aria-hidden', 'true');
+    const copy = document.createElement('div');
+    copy.className = 'us-field-groups__alert-copy';
+    const title = document.createElement('p');
+    title.className = 'us-field-groups__alert-title';
+    title.textContent = alert.title;
+    copy.append(title);
+    if (alert.message) {
+      const message = document.createElement('p');
+      message.className = 'us-field-groups__alert-message';
+      message.textContent = alert.message;
+      copy.append(message);
+    }
+    node.append(mark, copy);
+    return node;
+  }
+
+  function fieldNode(field) {
+    const item = document.createElement('div');
+    item.className = 'us-fields__field';
+    if (field.value.href || field.value.text.length > WIDE_LENGTH) item.classList.add('us-fields__field--wide');
+    const term = document.createElement('dt');
+    term.textContent = field.label;
+    const definition = document.createElement('dd');
+    // A blank value leaves the dd empty, which the A4 CSS shows as an em dash.
+    if (field.value.href) {
+      const link = document.createElement('a');
+      link.href = field.value.href;
+      link.textContent = field.value.text;
+      if (!field.value.href.startsWith('mailto:')) {
+        link.target = '_blank';
+        link.rel = 'noopener';
+      }
+      definition.append(link);
+    } else if (field.tone && field.value.text) {
+      const badge = document.createElement('span');
+      badge.className = 'us-badge us-badge--' + field.tone;
+      badge.textContent = field.value.text;
+      definition.append(badge);
+    } else if (field.value.text) {
+      definition.textContent = field.value.text;
+    }
+    item.append(term, definition);
+    return item;
+  }
+
+  function note(message) {
+    const node = document.createElement('p');
+    node.className = 'us-field-groups__note';
+    node.textContent = message;
+    return node;
+  }
+
+  function render(root, row) {
+    const single = root.classList.contains('us-field-groups--single');
+    const layout = layoutOf(row);
+    const nodes = layout.groups.map(group => {
+      const section = document.createElement('div');
+      section.className = 'us-field-groups__group';
+      if (group.heading) {
+        const heading = document.createElement('h3');
+        heading.className = 'us-field-groups__heading';
+        heading.textContent = group.heading;
+        section.append(heading);
+      }
+      const list = document.createElement('dl');
+      list.className = single ? 'us-fields us-fields--single' : 'us-fields';
+      list.append(...group.fields.map(fieldNode));
+      section.append(list);
+      return section;
+    });
+    if (layout.alert) {
+      if (/^(true|1|yes)$/i.test(layout.alert.only || '')) nodes.length = 0;
+      nodes.unshift(alertNode(layout.alert));
+    }
+    root.replaceChildren(...(nodes.length ? nodes : [note('No details recorded.')]));
+    root.setAttribute('data-us-fields-state', nodes.length ? 'ready' : 'empty');
+  }
+
+  function config(root) {
+    const query = text(root.dataset.usFieldsQuery);
+    const filter = text(root.dataset.usFieldsFilter);
+    let filterValue = text(root.dataset.usFieldsValue);
+    if (!filterValue && filter) filterValue = text(new URLSearchParams(location.search).get(filter));
+    // Unsubstituted placeholders mean the page has no record yet.
+    if (!/^\$\/.+/.test(query) || !filter || !filterValue || /^[\[{]/.test(filterValue)) return null;
+    return {query, filter, value: filterValue};
+  }
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  async function request(cfg) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const params = new URLSearchParams({QueryName: cfg.query, limit: '1', offset: '0'});
+      params.set(cfg.filter, cfg.value);
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+      });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw Error('Unexpected response');
+      return rows[0] || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function load(root, cfg, force = false) {
+    const key = cfg.query + '|' + cfg.filter + '|' + cfg.value;
+    if (!force && loaded.get(root) === key) return;
+    loaded.set(root, key);
+    root.setAttribute('data-us-fields-state', 'loading');
+    root.setAttribute('aria-busy', 'true');
+    try {
+      const row = await request(cfg);
+      if (loaded.get(root) !== key) return;
+      if (row) render(root, row);
+      else {
+        root.replaceChildren(note('No details recorded.'));
+        root.setAttribute('data-us-fields-state', 'empty');
+      }
+    } catch (error) {
+      if (loaded.get(root) !== key) return;
+      root.replaceChildren(note('These details could not be loaded.'));
+      root.setAttribute('data-us-fields-state', 'error');
+      console.warn('[UnionSuiteFieldGroups] The details could not be loaded:', error.message);
+    } finally {
+      root.removeAttribute('aria-busy');
+    }
+  }
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(SELECTOR).forEach(root => {
+      if (root.closest('.us-report-no-styling')) return;
+      const cfg = config(root);
+      if (cfg) void load(root, cfg);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    setTimeout(refresh, 0);
+  }
+
+  // Load one panel again, for example after its edit popup saves.
+  function reload(root) {
+    const cfg = root?.matches?.(SELECTOR) ? config(root) : null;
+    if (cfg) void load(root, cfg, true);
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || record.attributeName?.startsWith('data-us-fields'))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true,
+    attributeFilter: ['data-us-fields-query', 'data-us-fields-filter', 'data-us-fields-value']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  window.UnionSuiteFieldGroups = Object.freeze({refresh: schedule, reload, version: '1.0'});
+})();
+/* US-FIELD-GROUPS:END */
+
 /* US-ACTION-ICONS:START */
 (function () {
   'use strict';
@@ -3606,6 +5178,14 @@ SOFTWARE.
   function control(node) {
     var item = node && node.closest && node.closest(selector);
     return item && item.getAttribute('aria-label').trim() && item.matches('.TextButton,.btn') && !item.matches(':disabled,[disabled],.disabled,.aspNetDisabled,[aria-disabled="true"],fieldset[disabled] *') ? item : null;
+  }
+  // The theme tooltip replaces the browser's own: a title on the control would
+  // add a second, native tooltip a moment later (owner, 3 October 2026). The
+  // text stays in aria-label; the last title is kept in data-us-title.
+  function quiet(item) {
+    if (!item.hasAttribute('title')) return;
+    item.setAttribute('data-us-title', item.getAttribute('title'));
+    item.removeAttribute('title');
   }
   function hide() {
     if (tooltip) tooltip.hidden = true;
@@ -3633,27 +5213,41 @@ SOFTWARE.
     }
     if (owner !== item) overTooltip = false;
     owner = item;
+    quiet(item);
     tooltip.toggleAttribute('data-us-taskbar-tooltip', !!item.closest('#injected-taskbar'));
     tooltip.textContent = item.getAttribute('aria-label');
     tooltip.hidden = false;
     position();
     if (!observer && window.MutationObserver) observer = new MutationObserver(function () {
       if (owner && (!owner.isConnected || !control(owner))) hide();
-      else if (owner && tooltip.textContent !== owner.getAttribute('aria-label')) {
-        tooltip.textContent = owner.getAttribute('aria-label'); position();
+      else if (owner) {
+        // A control that rewrites its title while hovered (a toggle) is quietened again.
+        quiet(owner);
+        if (tooltip.textContent !== owner.getAttribute('aria-label')) {
+          tooltip.textContent = owner.getAttribute('aria-label'); position();
+        }
       }
     });
-    if (observer) observer.observe(document.body, {childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'aria-disabled', 'aria-label', 'class']});
+    if (observer) observer.observe(document.body, {childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'aria-disabled', 'aria-label', 'class', 'title']});
   }
   function update() { show(focused || hovered || (overTooltip ? owner : null)); }
   function defer() { clearTimeout(timer); timer = setTimeout(update, 120); }
+  // While the pointer is over a control, a title it rewrites (a toggle, after
+  // a click has hidden the tooltip) is quietened too.
+  var titleWatch = window.MutationObserver ? new MutationObserver(function () {
+    if (hovered && control(hovered)) quiet(hovered);
+  }) : null;
   document.addEventListener('pointerover', function (event) {
     var item = control(event.target);
-    if (item && item !== hovered) { hovered = item; dismissed = null; clearTimeout(timer); show(item); }
+    if (item && item !== hovered) {
+      hovered = item; dismissed = null; clearTimeout(timer); show(item);
+      if (titleWatch) { titleWatch.disconnect(); titleWatch.observe(item, {attributes: true, attributeFilter: ['title']}); }
+    }
   });
   document.addEventListener('pointerout', function (event) {
     if (hovered && !hovered.contains(event.relatedTarget)) {
       hovered = null;
+      if (titleWatch) titleWatch.disconnect();
       defer();
     }
   });
@@ -7434,6 +9028,13 @@ SOFTWARE.
       entry.uninitialized = uninitialized(targetView);
       entry.orphans = orphans();
       entry.status = 'shown';
+      // Tell the rest of the theme the tab is in place. The query-panel pass
+      // (section presets, heading actions, search and completed toggles) runs
+      // on page load and after partial postbacks, and a tab of Query Template
+      // panels alone raises neither, so its panels came back bare (owner,
+      // 3 October 2026).
+      window.UnionSuiteIqaFilters?.refresh();
+      targetView.dispatchEvent(new CustomEvent('us:cco-tab-shown', {bubbles: true, detail: {cco: cco.prefix, tab: entry.tab, view: targetView}}));
     } catch (error) {
       entry.status = 'fallback';
       entry.error = brief(error);
@@ -8050,7 +9651,12 @@ SOFTWARE.
 })();
 /* US-ATTENTION-HIDE-ZERO:END */
 
-/* US-TASK-ROWS:START — local checkbox/animation only; persistence is not connected. */
+/* US-TASK-ROWS:START — task checkbox, completion effect and save.
+   1.1 (agreement page, 3 October 2026): a row can name its own save target
+   with data-us-task-save="<key>", registered once with
+   UnionSuiteTaskRows.defineSaver(key, fn); rows without it keep the
+   i4u_UT_Interactions write. UnionSuiteTaskRows.celebrate(element) plays the
+   completion effect for other controls, such as a milestone status. */
 (function () {
   'use strict';
   if (window.UnionSuiteTaskRows) {window.UnionSuiteTaskRows.refresh();return;}
@@ -8186,7 +9792,23 @@ SOFTWARE.
       ]}
     };
   }
+  // A row names another save target with data-us-task-save="<key>". Each key
+  // is registered once with defineSaver; rows without the attribute keep the
+  // i4u_UT_Interactions write below.
+  const savers=new Map();
+  function defineSaver(key, run) {
+    if(typeof key!=='string'||!/^[a-z][a-z0-9.-]*$/.test(key))throw new TypeError('Task saver keys use lowercase letters, digits, dots and dashes.');
+    if(typeof run!=='function')throw new TypeError('A task saver needs a function.');
+    if(savers.has(key))throw new Error('Task saver '+key+' is already registered.');
+    savers.set(key,run);
+  }
   async function save(root, done) {
+    const saverKey=(root.getAttribute('data-us-task-save')||'').trim();
+    if(saverKey) {
+      const saver=savers.get(saverKey);
+      if(!saver) throw new Error('No task saver is registered for '+saverKey+'.');
+      return saver({root, done});
+    }
     const id=identity(root);
     if(!id) return;
     const token=document.querySelector('#__RequestVerificationToken');
@@ -8301,7 +9923,16 @@ SOFTWARE.
   addEventListener('scroll',()=>runs.forEach(run=>run.stopMotion()),true);
   addEventListener('resize',()=>runs.forEach(run=>run.stopMotion()));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)runs.forEach(run=>run.stopMotion());});
-  window.UnionSuiteTaskRows={refresh:schedule};
+  // The completion effect for other controls, such as a milestone status.
+  // Resolves when the effect ends; does nothing under reduced motion. Colours
+  // come from the --task-confetti-* properties on the element.
+  function celebrateElement(element) {
+    if(!(element instanceof Element)||reducedMotion.matches||typeof element.animate!=='function')return Promise.resolve();
+    const animations=[],particles=[];
+    const duration=celebrate(element,animations,particles);
+    return new Promise(resolve=>setTimeout(()=>{particles.forEach(node=>node.remove());resolve();},duration));
+  }
+  window.UnionSuiteTaskRows={refresh:schedule,defineSaver,celebrate:celebrateElement,version:'1.1'};
   function start() {
     sync();
     new MutationObserver(records => {
@@ -8315,6 +9946,721 @@ SOFTWARE.
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* US-TASK-ROWS:END */
+
+/* US-QUERY-STATES:START — derive data-us-task-completed from existing fields.
+   The agreement IQAs are kept as they are (owner, 2 October 2026): templates
+   change, queries do not. Where a theme component needs a value the old
+   queries do not return directly, this derives it in the browser:
+   - task and milestone completion from the old CSS-class fields ("done");
+   - past meetings from the meeting date.
+   Both end up as data-us-task-completed, which us-task-completed-filter and
+   US-TASK-ROWS already understand. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteQueryStates) return;
+
+  // ISO (2026-05-20), dd/MM/yyyy (20/05/2026) or d/MM/yyyy dates; null otherwise.
+  function parseDate(value) {
+    const text = String(value || '').trim();
+    const dmy = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const parts = dmy ? [dmy[3], dmy[2], dmy[1]] : iso ? [iso[1], iso[2], iso[3]] : null;
+    if (!parts) return null;
+    const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function today() {
+    // Previews can pin "today" (UnionSuiteQueryStatesConfig.today) so
+    // past and upcoming stay fixed in sample data.
+    const pinned = parseDate(window.UnionSuiteQueryStatesConfig?.today);
+    const date = pinned || new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function set(node, completed) {
+    const value = String(completed);
+    if (node.getAttribute('data-us-task-completed') !== value) node.setAttribute('data-us-task-completed', value);
+  }
+
+  function sync(scope = document) {
+    // Task rows: data-us-task-state carries the old TAskCheckCSS value.
+    scope.querySelectorAll('.us-task[data-us-task-state]').forEach(task => {
+      if (task.hasAttribute('data-us-task-changing')) return;
+      set(task, /^(done|true|1)$/i.test(task.getAttribute('data-us-task-state').trim()));
+      task.removeAttribute('data-us-task-state');
+    });
+    scope.querySelectorAll('.us-milestone[data-us-milestone-status]').forEach(milestone => {
+      set(milestone, milestone.getAttribute('data-us-milestone-status').trim().toLowerCase() === 'done');
+    });
+    const now = today();
+    scope.querySelectorAll('.us-meeting[data-us-meeting-date]').forEach(meeting => {
+      const date = parseDate(meeting.getAttribute('data-us-meeting-date'));
+      set(meeting, !!date && date < now);
+    });
+  }
+
+  // The completed toggle is generic; name what it shows for these lists.
+  // Meetings are past rather than done, so they also swap the theme's
+  // checkbox for a history icon (owner, 3 October 2026).
+  const toggleLabels = [
+    ['.us-milestones', 'Show completed milestones'],
+    ['.us-meetings', 'Show past meetings', 'ti-history']
+  ];
+
+  function labelToggles() {
+    toggleLabels.forEach(([selector, label, iconName]) => {
+      document.querySelectorAll(selector + ' .us-task-completed-toggle').forEach(toggle => {
+        if (toggle.title !== label) {
+          toggle.title = label;
+          toggle.setAttribute('aria-label', label);
+        }
+        const icon = toggle.querySelector('i.ti');
+        if (iconName && icon && !icon.classList.contains(iconName)) icon.className = 'ti ' + iconName;
+      });
+    });
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      sync();
+      labelToggles();
+    });
+  }
+
+  // Runs once now, before DOMContentLoaded, so US-TASK-ROWS sees settled state.
+  sync();
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || record.attributeName === 'data-us-task-state')) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-task-state']});
+  document.addEventListener('DOMContentLoaded', schedule);
+
+  window.UnionSuiteQueryStates = Object.freeze({refresh: schedule, parseDate});
+})();
+/* US-QUERY-STATES:END */
+
+/* US-PAST-EMPTY:START — placeholder when the completed filter hides every row.
+   Lists opt in through the table below. The placeholder shows only while
+   the toggle is off, no search text is entered and every row on the page
+   is marked completed (for meetings: past). Its button presses the panel's
+   own toggle, so the theme keeps the state. */
+(function () {
+  'use strict';
+  if (window.UnionSuitePastEmpty) return;
+
+  const lists = [
+    {
+      selector: '.us-meetings',
+      icon: 'ti-calendar-off',
+      title: 'No upcoming meetings',
+      hidden: count => count + (count === 1 ? ' past meeting is' : ' past meetings are') + ' hidden.',
+      action: 'Show past meetings'
+    },
+    // Task lists (owner, 3 October 2026). The Home tasks list has its own
+    // empty state (US-HOME-TASKS-EMPTY), so it is left out.
+    {
+      selector: ':has(.us-task):not(.us-home-tasks)',
+      icon: 'ti-circle-check',
+      title: 'No outstanding tasks',
+      hidden: count => count + (count === 1 ? ' completed task is' : ' completed tasks are') + ' hidden.',
+      action: 'Show completed tasks'
+    }
+  ];
+
+  function rowsOf(set) {
+    return [...set.children].filter(row => row.matches('.QueryTemplateItem') ||
+      (row.localName === 'section' && row.querySelector(':scope > .QueryTemplateItem')));
+  }
+
+  function build(config, wrapper) {
+    const empty = document.createElement('div');
+    empty.className = 'us-past-empty';
+    empty.setAttribute('role', 'status');
+    empty.innerHTML = '<i class="ti us-past-empty__icon" aria-hidden="true"></i>' +
+      '<p class="us-past-empty__title"></p><p class="us-past-empty__text"></p>' +
+      '<button type="button" class="TextButton SmallButton us-outline-button us-past-empty__show"></button>';
+    empty.querySelector('.us-past-empty__icon').classList.add(config.icon);
+    empty.querySelector('.us-past-empty__title').textContent = config.title;
+    const show = empty.querySelector('.us-past-empty__show');
+    show.textContent = config.action;
+    show.addEventListener('click', () => {
+      const toggle = wrapper.querySelector('.us-task-completed-toggle');
+      if (!toggle) return;
+      toggle.click();
+      // The placeholder goes once past rows show; keep focus on the toggle.
+      toggle.focus({preventScroll: true});
+    });
+    return empty;
+  }
+
+  function update(config, wrapper) {
+    const set = wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
+    const toggle = wrapper.querySelector('.us-task-completed-toggle');
+    let empty = wrapper.querySelector('.us-past-empty');
+    const rows = set ? rowsOf(set) : [];
+    const query = wrapper.querySelector('.us-query-search-controls input')?.value.trim();
+    const allPast = rows.length > 0 && rows.every(row => row.hasAttribute('data-us-task-completed-row'));
+    const show = !!toggle && toggle.getAttribute('aria-pressed') !== 'true' && !query && allPast;
+
+    if (!show) {
+      empty?.remove();
+      wrapper.removeAttribute('data-us-past-empty');
+      return;
+    }
+    if (!empty) {
+      empty = build(config, wrapper);
+      set.after(empty);
+    }
+    const text = config.hidden(rows.length);
+    const line = empty.querySelector('.us-past-empty__text');
+    // Write only on change: a text change would reschedule this update.
+    if (line.textContent !== text) line.textContent = text;
+    if (!wrapper.hasAttribute('data-us-past-empty')) wrapper.setAttribute('data-us-past-empty', '');
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      lists.forEach(config => {
+        document.querySelectorAll(config.selector + '.us-task-completed-filter').forEach(wrapper => {
+          if (!wrapper.closest('.us-report-no-styling')) update(config, wrapper);
+        });
+      });
+    });
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' ||
+      record.attributeName === 'aria-pressed' ||
+      record.attributeName === 'data-us-task-completed-row')) schedule();
+  }).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['aria-pressed', 'data-us-task-completed-row']
+  });
+  document.addEventListener('input', event => {
+    if (event.target.closest?.('.us-query-search-controls')) schedule();
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuitePastEmpty = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-PAST-EMPTY:END */
+
+/* US-TASK-PROGRESS:START — us-task-progress count.
+   The heading count for lists with a completed state (owner, 3 October
+   2026: counts go in the heading): tasks and milestones read "x of y
+   complete", meetings "x upcoming". */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTaskProgress) return;
+
+  const ROWS = '.us-task, .us-milestone, .us-meeting';
+
+  function setOf(wrapper) {
+    return wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
+  }
+
+  // A row being ticked counts as its new state, so the count moves with the tick
+  // rather than after the save and exit animation. Milestones and meetings get
+  // data-us-task-completed from US-QUERY-STATES (done; past).
+  function isComplete(row) {
+    return /^(true|1)$/i.test(row.getAttribute('data-us-task-changing') || row.getAttribute('data-us-task-completed') || '');
+  }
+
+  function label(wrapper, done, total) {
+    if (wrapper.matches('.us-meetings')) return (total - done) + ' upcoming';
+    return done + ' of ' + total + ' complete';
+  }
+
+  function renderProgress(wrapper) {
+    const set = setOf(wrapper);
+    const header = wrapper.querySelector(':scope > .panel > .panel-heading');
+    if (!set || !header) return;
+    const rows = [...set.querySelectorAll(ROWS)].filter(row => row.closest('.QueryTemplateSet') === set);
+    const done = rows.filter(isComplete).length;
+
+    let count = header.querySelector('.us-task-progress__count');
+    if (!rows.length) {
+      count?.remove();
+      return;
+    }
+    if (!count) {
+      count = document.createElement('span');
+      count.className = 'us-task-progress__count';
+      const actions = header.querySelector(':scope > .us-panel-actions');
+      if (actions) actions.prepend(count);
+      else header.append(count);
+    }
+    const text = label(wrapper, done, rows.length);
+    // Write only on change: a childList mutation reschedules this render.
+    if (count.textContent !== text) count.textContent = text;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-task-progress').forEach(wrapper => {
+        if (!wrapper.closest('.us-report-no-styling')) renderProgress(wrapper);
+      });
+    });
+  }
+
+  document.addEventListener('us:panel-actions-ready', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || /^data-us-task-(completed|changing)$/.test(record.attributeName))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-task-completed', 'data-us-task-changing']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteTaskProgress = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-TASK-PROGRESS:END */
+
+/* US-MILESTONES:START — progress rail and status select for us-milestones lists. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteMilestones) return;
+
+  const wrapperSelector = '.us-milestones';
+  const labels = {future: 'Not started', current: 'In progress', done: 'Complete'};
+  const saveActions = {future: 'Not Complete', current: 'In Progress', done: 'Complete'};
+  const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>';
+
+  function status(milestone) {
+    const value = (milestone.getAttribute('data-us-milestone-status') || '').trim().toLowerCase();
+    return labels[value] ? value : 'future';
+  }
+
+  function setOf(wrapper) {
+    return wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
+  }
+
+  // The rail is a summary of every milestone, including completed ones the
+  // filter hides, so it is built from all rows in result order.
+  function renderRail(wrapper) {
+    const set = setOf(wrapper);
+    const body = set?.parentElement;
+    if (!body) return;
+    const milestones = [...set.querySelectorAll('.us-milestone')];
+    let rail = body.querySelector(':scope > .us-milestones__rail');
+    if (!milestones.length) {
+      rail?.remove();
+      return;
+    }
+    if (!rail) {
+      rail = document.createElement('ol');
+      rail.className = 'us-milestones__rail';
+      rail.setAttribute('aria-label', 'Milestone progress');
+      body.prepend(rail);
+    }
+    const states = milestones.map(status);
+    // Progress reaches the last completed node, as the old rail did.
+    const lastDone = states.lastIndexOf('done');
+    rail.style.setProperty('--milestones-progress', milestones.length > 1 && lastDone > 0 ? String(lastDone / (milestones.length - 1)) : '0');
+    rail.replaceChildren(...milestones.map((milestone, index) => {
+      const state = states[index];
+      const title = milestone.querySelector('.us-milestone__title')?.textContent.trim() || 'Milestone';
+      const node = document.createElement('li');
+      node.className = 'us-milestones__node';
+      node.setAttribute('data-us-milestone-status', state);
+      node.title = title + ' — ' + labels[state];
+      const circle = document.createElement('span');
+      circle.className = 'us-milestones__circle';
+      circle.setAttribute('aria-hidden', 'true');
+      if (state === 'done') circle.innerHTML = tick;
+      else circle.textContent = String(index + 1);
+      const label = document.createElement('span');
+      label.className = 'us-milestones__label';
+      label.textContent = title;
+      const hidden = document.createElement('span');
+      hidden.className = 'sr-only';
+      hidden.textContent = ', ' + labels[state];
+      label.append(hidden);
+      node.append(circle, label);
+      return node;
+    }));
+  }
+
+  function syncSelects(wrapper) {
+    wrapper.querySelectorAll('.us-milestone').forEach(milestone => {
+      const select = milestone.querySelector('.us-milestone__status');
+      if (select && !milestone.hasAttribute('aria-busy') && select.value !== status(milestone)) select.value = status(milestone);
+    });
+  }
+
+  function syncAll() {
+    document.querySelectorAll(wrapperSelector).forEach(wrapper => {
+      if (wrapper.closest('.us-report-no-styling')) return;
+      syncSelects(wrapper);
+      renderRail(wrapper);
+    });
+  }
+
+  function apply(milestone, state) {
+    milestone.setAttribute('data-us-milestone-status', state);
+    window.UnionSuiteQueryStates?.refresh();
+    const wrapper = milestone.closest(wrapperSelector);
+    if (wrapper) renderRail(wrapper);
+  }
+
+  function reportFailure(milestone) {
+    milestone.querySelectorAll(':scope > .us-milestone__error').forEach(node => node.remove());
+    const message = document.createElement('span');
+    message.className = 'us-milestone__error';
+    message.setAttribute('role', 'status');
+    message.textContent = 'Not saved. Try again.';
+    milestone.append(message);
+    setTimeout(() => message.remove(), 6000);
+  }
+
+  async function change(select) {
+    const milestone = select.closest('.us-milestone');
+    const ordinal = (milestone?.getAttribute('data-us-milestone-ordinal') || '').trim();
+    const previous = status(milestone);
+    const next = labels[select.value] ? select.value : 'future';
+    if (!milestone || next === previous) return;
+    if (!/^\d+$/.test(ordinal)) {
+      select.value = previous;
+      reportFailure(milestone);
+      return;
+    }
+    milestone.setAttribute('aria-busy', 'true');
+    // Optimistic, as tasks are: the effect plays while the save is in flight.
+    // A completed milestone stays in place until the save settles, then the
+    // completed filter hides it unless completed milestones are shown.
+    const celebration = next === 'done' ? window.UnionSuiteTaskRows?.celebrate?.(select) : null;
+    milestone.setAttribute('data-us-milestone-status', next);
+    const wrapper = milestone.closest(wrapperSelector);
+    if (wrapper) renderRail(wrapper);
+    let saved = true;
+    try {
+      await window.UnionSuiteAgreements.saveItemStatus(ordinal, saveActions[next], 'Milestone');
+    } catch (error) {
+      saved = false;
+      console.warn(error.message);
+    }
+    await celebration;
+    milestone.removeAttribute('aria-busy');
+    if (saved) apply(milestone, next);
+    else {
+      select.value = previous;
+      apply(milestone, previous);
+      reportFailure(milestone);
+    }
+  }
+
+  document.addEventListener('change', event => {
+    const select = event.target.closest(wrapperSelector + ' .us-milestone__status');
+    if (select && !select.closest('.us-report-no-styling')) void change(select);
+  });
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      syncAll();
+    });
+  }
+
+  document.addEventListener('us:query-template-refreshed', schedule);
+  // On a cached reload this runs before the panel's section preset
+  // (us-agreement-milestones) adds us-milestones, so the first pass finds no
+  // list. us:panel-actions-ready follows that expansion. The observer catches
+  // rows that arrive later (a CCO tab opening, an in-place refresh), and
+  // ignores the rail's own rebuilds.
+  document.addEventListener('us:panel-actions-ready', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 &&
+      (node.matches('.us-milestone') || node.querySelector('.us-milestone'))))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  window.UnionSuiteMilestones = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-MILESTONES:END */
+
+/* US-ATTACHMENTS:START — inline name and tag editor for us-attachments rows. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteAttachments) return;
+
+  // Tag list for suggestions. The IQA path is the existing sandbox query;
+  // it moves with the other agreement IQAs for production.
+  const tagQuery = '$/_i4u_/SandBox/CA/ZenFileTags';
+  let tagCache = null;
+
+  // /api/query rows are flat alias-keyed objects; older endpoints return
+  // Name/Value property lists. Read either, ignoring case.
+  function propertyValue(item, name) {
+    const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+    const properties = unwrap(item?.Properties)?.$values;
+    if (Array.isArray(properties)) {
+      const match = properties.find(entry => String(entry.Name).toLowerCase() === name.toLowerCase());
+      return match ? unwrap(match.Value) : undefined;
+    }
+    const key = Object.keys(item || {}).find(entry => entry.toLowerCase() === name.toLowerCase());
+    return key ? unwrap(item[key]) : undefined;
+  }
+
+  async function loadTags() {
+    if (tagCache) return tagCache;
+    try {
+      const token = document.getElementById('__RequestVerificationToken')?.value || '';
+      const params = new URLSearchParams({QueryName: tagQuery, limit: '500'});
+      const response = await fetch('/api/query?' + params, {credentials: 'same-origin', headers: {RequestVerificationToken: token}});
+      if (!response.ok) throw new Error('Attachment tags could not be read (HTTP ' + response.status + ').');
+      const data = await response.json();
+      tagCache = (data?.Items?.$values || [])
+        .map(item => ({ordinal: String(propertyValue(item, 'Ordinal') ?? ''), name: String(propertyValue(item, 'TagName') ?? '').trim()}))
+        .filter(tag => tag.name && tag.ordinal);
+    } catch (error) {
+      console.warn(error.message);
+      tagCache = [];
+    }
+    return tagCache;
+  }
+
+  function split(value) {
+    return String(value || '').split(',').map(part => part.trim()).filter(Boolean);
+  }
+
+  function chip(name, ordinal) {
+    const node = document.createElement('span');
+    node.className = 'us-badge us-attachment__chip';
+    node.dataset.ordinal = ordinal;
+    node.append(name);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', 'Remove tag ' + name);
+    remove.textContent = '×';
+    remove.addEventListener('click', () => node.remove());
+    node.append(remove);
+    return node;
+  }
+
+  function renderTags(row, names) {
+    const tags = row.querySelector('.us-attachment__tags');
+    if (!tags) return;
+    tags.replaceChildren(...names.map(name => {
+      const badge = document.createElement('span');
+      badge.className = 'us-badge';
+      badge.textContent = name;
+      return badge;
+    }));
+  }
+
+  function close(row, focusEdit) {
+    row.querySelector('.us-attachment__editor')?.remove();
+    row.removeAttribute('data-us-editing');
+    if (focusEdit) row.querySelector('.us-action-agreements-edit-attachment')?.focus({preventScroll: true});
+  }
+
+  async function save(row, editor) {
+    const name = editor.querySelector('.us-attachment__name-input').value.trim() || row.dataset.usFileName || '';
+    // One chip per tag ordinal; a duplicate pick is ignored.
+    const seen = new Set();
+    const chips = [...editor.querySelectorAll('.us-attachment__chip')].filter(node => {
+      if (seen.has(node.dataset.ordinal)) return false;
+      seen.add(node.dataset.ordinal);
+      return true;
+    });
+    const tagNames = chips.map(node => node.firstChild.textContent.trim());
+    const tagOrdinals = chips.map(node => node.dataset.ordinal);
+    const removed = [...new Set(split(row.dataset.usFileTagOrdinals))].filter(ordinal => !tagOrdinals.includes(ordinal));
+    const previous = {name: row.dataset.usFileName, tags: row.dataset.usFileTags, ordinals: row.dataset.usFileTagOrdinals};
+    const saveButton = editor.querySelector('.us-attachment__save');
+    saveButton.disabled = true;
+    editor.setAttribute('aria-busy', 'true');
+    try {
+      await window.UnionSuiteAgreements.cloudToolz('/ca/update-attachment', {
+        method: 'POST',
+        body: JSON.stringify({
+          FileOrdinal: row.dataset.ordinal,
+          FileName: name,
+          NewTagOrdinals: tagOrdinals.join(','),
+          RemovedTagOrdinals: removed.join(',')
+        })
+      });
+    } catch (error) {
+      console.warn(error.message);
+      saveButton.disabled = false;
+      editor.removeAttribute('aria-busy');
+      let message = editor.querySelector('.us-attachment__error');
+      if (!message) {
+        message = document.createElement('p');
+        message.className = 'us-attachment__error';
+        message.setAttribute('role', 'status');
+        editor.append(message);
+      }
+      message.textContent = 'Not saved. Try again.';
+      Object.assign(row.dataset, {usFileName: previous.name, usFileTags: previous.tags, usFileTagOrdinals: previous.ordinals});
+      return;
+    }
+    row.dataset.usFileName = name;
+    row.dataset.usFileTags = tagNames.join(',');
+    row.dataset.usFileTagOrdinals = tagOrdinals.join(',');
+    row.setAttribute('data-us-search', name + ' ' + tagNames.join(' '));
+    const nameNode = row.querySelector('.us-attachment__name');
+    if (nameNode) nameNode.textContent = name;
+    renderTags(row, tagNames);
+    close(row, true);
+  }
+
+  function wireSuggestions(editor) {
+    const box = editor.querySelector('.us-attachment__chips');
+    const input = box.querySelector('input');
+    const list = box.querySelector('.us-attachment__suggestions');
+    let options = [];
+    let active = -1;
+
+    function hide() {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      active = -1;
+    }
+
+    function pick(tag) {
+      box.insertBefore(chip(tag.name, tag.ordinal), input);
+      input.value = '';
+      hide();
+      input.focus();
+    }
+
+    async function show() {
+      const tags = await loadTags();
+      const query = input.value.trim().toLowerCase();
+      const chosen = new Set([...box.querySelectorAll('.us-attachment__chip')].map(node => node.dataset.ordinal));
+      options = tags.filter(tag => !chosen.has(tag.ordinal) && (!query || tag.name.toLowerCase().includes(query))).slice(0, 8);
+      list.replaceChildren(...options.map((tag, index) => {
+        const option = document.createElement('li');
+        option.id = list.id + '-' + index;
+        option.setAttribute('role', 'option');
+        option.textContent = tag.name;
+        // mousedown keeps focus in the input, so blur does not close the list first.
+        option.addEventListener('mousedown', event => {
+          event.preventDefault();
+          pick(tag);
+        });
+        return option;
+      }));
+      list.hidden = !options.length;
+      input.setAttribute('aria-expanded', String(!!options.length));
+      active = -1;
+    }
+
+    function move(step) {
+      if (list.hidden || !options.length) return;
+      active = (active + step + options.length) % options.length;
+      [...list.children].forEach((option, index) => option.setAttribute('aria-selected', String(index === active)));
+      input.setAttribute('aria-activedescendant', list.children[active].id);
+    }
+
+    input.addEventListener('focus', show);
+    input.addEventListener('input', show);
+    input.addEventListener('blur', () => setTimeout(hide, 120));
+    input.addEventListener('keydown', event => {
+      if (event.key === 'ArrowDown') { event.preventDefault(); move(1); }
+      else if (event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
+      else if (event.key === 'Enter') {
+        // Never submit the iMIS form. Only existing tags can be chosen.
+        event.preventDefault();
+        if (active >= 0) pick(options[active]);
+        else {
+          const exact = options.find(tag => tag.name.toLowerCase() === input.value.trim().toLowerCase());
+          if (exact) pick(exact);
+        }
+      } else if (event.key === 'Backspace' && !input.value) {
+        box.querySelector('.us-attachment__chip:last-of-type')?.remove();
+      }
+    });
+    box.addEventListener('click', event => { if (event.target === box) input.focus(); });
+  }
+
+  let editorId = 0;
+  function edit(row) {
+    if (!row || row.hasAttribute('data-us-editing')) return {editing: true};
+    const id = 'us-attachment-editor-' + (++editorId);
+    const names = split(row.dataset.usFileTags);
+    const ordinals = split(row.dataset.usFileTagOrdinals);
+    const editor = document.createElement('div');
+    editor.className = 'us-attachment__editor';
+    editor.innerHTML = `
+      <label class="us-attachment__editor-label" for="${id}-name">File name</label>
+      <input type="text" class="us-attachment__name-input" id="${id}-name" autocomplete="off">
+      <span class="us-attachment__editor-label" id="${id}-tags-label">Tags</span>
+      <div class="us-attachment__chips">
+        <input type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+          aria-controls="${id}-suggestions" aria-labelledby="${id}-tags-label" placeholder="Add tag…" autocomplete="off">
+        <ul class="us-attachment__suggestions" id="${id}-suggestions" role="listbox" hidden></ul>
+      </div>
+      <div class="us-attachment__editor-actions">
+        <button type="button" class="TextButton PrimaryButton SmallButton us-attachment__save">Save</button>
+        <button type="button" class="TextButton SmallButton us-attachment__cancel">Cancel</button>
+      </div>`;
+    editor.querySelector('.us-attachment__name-input').value = row.dataset.usFileName || '';
+    const box = editor.querySelector('.us-attachment__chips');
+    const input = box.querySelector('input');
+    // Names and ordinals arrive as parallel CSV lists from the existing IQA.
+    names.forEach((name, index) => { if (ordinals[index]) box.insertBefore(chip(name, ordinals[index]), input); });
+    editor.querySelector('.us-attachment__save').addEventListener('click', () => void save(row, editor));
+    editor.querySelector('.us-attachment__cancel').addEventListener('click', () => close(row, true));
+    editor.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.stopPropagation(); close(row, true); }
+      if (event.key === 'Enter' && event.target.matches('.us-attachment__name-input')) { event.preventDefault(); void save(row, editor); }
+    });
+    wireSuggestions(editor);
+    row.setAttribute('data-us-editing', '');
+    (row.querySelector('.us-attachment__copy') || row).append(editor);
+    editor.querySelector('.us-attachment__name-input').focus();
+    void loadTags();
+    return {editing: true};
+  }
+
+  // Render CSV tags as badges when a row arrives without them.
+  function syncTags(scope = document) {
+    scope.querySelectorAll('.us-attachment[data-us-file-tags]').forEach(row => {
+      const tags = row.querySelector('.us-attachment__tags');
+      if (tags && !tags.children.length && !row.hasAttribute('data-us-editing')) renderTags(row, split(row.dataset.usFileTags));
+    });
+  }
+
+  // Rows can arrive after load (paging, refresh, late rendering), so watch for them.
+  let tagsScheduled = false;
+  function scheduleTags() {
+    if (tagsScheduled) return;
+    tagsScheduled = true;
+    requestAnimationFrame(() => {
+      tagsScheduled = false;
+      syncTags();
+    });
+  }
+  new MutationObserver(records => {
+    if (records.some(record => record.addedNodes.length)) scheduleTags();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleTags, {once: true});
+  else scheduleTags();
+
+  window.UnionSuiteAttachments = Object.freeze({edit, version: '1.0'});
+})();
+/* US-ATTACHMENTS:END */
 /* US-RECORD-CARDS:START — expand and collapse record cards.
    One delegated handler for every .us-record, whether a Query Template
    rendered it or US-ACTIVITY-FEED did, so templates need no script. The
@@ -8443,6 +10789,97 @@ SOFTWARE.
   };
 })();
 /* US-RECORD-CARDS:END */
+
+/* US-NOTES-LEDGER:START — More control for capped notes in us-notes--ledger.
+   The note body is capped at three lines by CSS. This shows the More button
+   of a row only when its note actually overflows the cap, and toggles the row
+   open (is-expanded) and closed again. Rows are measured when they appear and
+   when the window changes width. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteNotesLedger) return;
+
+  function measure(row) {
+    const body = row.querySelector('.us-note__body');
+    const more = row.querySelector('.us-note__more');
+    if (!body || !more) return;
+    // Measure against the cap, so an open row is closed for the reading.
+    const open = row.classList.contains('is-expanded');
+    if (open) row.classList.remove('is-expanded');
+    const overflows = body.scrollHeight > body.clientHeight + 1;
+    if (open) row.classList.add('is-expanded');
+    more.hidden = !overflows && !open;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-notes--ledger .us-note--ledger').forEach(row => {
+        if (!row.closest('.us-report-no-styling')) measure(row);
+      });
+    });
+  }
+
+  // The record card's fold timing (US-RECORD-CARDS in zUnionSuite.js).
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const DURATION = 220;
+  const running = new WeakMap();
+
+  function reducedMotion() {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // Opening grows the body from three lines to its full height. Closing
+  // shrinks it with the full text still showing, and the three-line cap (and
+  // its ellipsis) returns only when the fold ends, so the text never jumps.
+  function toggle(row, open) {
+    const body = row.querySelector('.us-note__body');
+    // Measured before cancelling, so a click mid-fold reverses from where it is.
+    const before = body.getBoundingClientRect().height;
+    running.get(body)?.cancel();
+    row.classList.toggle('is-expanded', open);
+    const after = body.getBoundingClientRect().height;
+    if (reducedMotion() || !body.animate || Math.abs(after - before) < 1) return;
+
+    if (!open) row.classList.add('is-expanded');
+    body.style.overflow = 'hidden';
+    const animation = body.animate(
+      [{height: before + 'px'}, {height: after + 'px'}],
+      {duration: DURATION, easing: EASE}
+    );
+    running.set(body, animation);
+    const settle = () => {
+      if (running.get(body) !== animation) return;
+      running.delete(body);
+      body.style.overflow = '';
+      if (!open) row.classList.remove('is-expanded');
+    };
+    animation.finished.then(settle, settle);
+  }
+
+  document.addEventListener('click', event => {
+    const more = event.target.closest('.us-notes--ledger .us-note__more');
+    if (!more) return;
+    const row = more.closest('.us-note--ledger');
+    const open = more.getAttribute('aria-expanded') !== 'true';
+    more.setAttribute('aria-expanded', String(open));
+    more.textContent = open ? 'Less' : 'More';
+    toggle(row, open);
+  });
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList')) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  window.addEventListener('resize', schedule, {passive: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteNotesLedger = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-NOTES-LEDGER:END */
 /* US-ACTIVITY-FEED:START — one recent-activity list built from several IQAs.
    Author markup, usually the template of a one-row Query Template Display so
    iMIS fills in the record (item 32):

@@ -98,12 +98,23 @@ alongside the affected shared assets.
    the full report styling and available Filters/Export icons; no report class
    is required. Existing native `TextButton`/`btn`
    controls receive the shared colour mapping without an opt-in class.
-3. Include the script once through the site's shared template or shared script
-   include. A file placed in the theme folder is not a verified script include.
-   For a deployment whose theme folder is named `UnionSuite`, use:
+3. Load the scripts through the theme loader, `index.js` (confirmed on the dev
+   tenant, 3 October 2026). It is the only header include: it loads
+   `zUnionSuite.js`, `Scripts/ActionDefinitions.js`, the taskbar and the
+   page-specific scripts in dependency order. Deploy the include once; later
+   releases ship in the theme folder, with `RELEASE` in `index.js` bumped.
+   A file placed in the theme folder is not loaded unless the loader lists it.
+   For a deployment whose script folder is `UnionSuite-Core`, use:
 
    ```html
-   <script src="/App_Themes/UnionSuite/zUnionSuite.js" defer></script>
+   <script>
+     (function () {
+       var s = document.createElement('script');
+       s.src = '/App_Themes/UnionSuite-Core/index.js?t=' + Math.floor(Date.now() / 1200000);
+       s.async = true;
+       document.head.appendChild(s);
+     })();
+   </script>
    ```
 
    Adjust the theme folder or application path to the actual deployment. Use
@@ -508,7 +519,9 @@ Updating the local theme and archives does not upload them to iMIS.
 ### Standard business actions
 
 The dedicated [ActionDefinitions.js](Scripts/ActionDefinitions.js) installs fifteen
-definitions for member operations, Add Contact Method, Job row edit/delete and Manage Bulletin.
+definitions for member operations, Add Contact Method, Job row edit/delete and Manage Bulletin,
+plus the agreement page set: 28 `agreements.*` definitions, the CloudToolz call and the
+agreement task saver (3 October 2026).
 Use [the current inventory](../../references/Theme-Button-Function-Inventory.md)
 for every class, context source and handler. Job edit/delete refresh the native
 report containing the clicked control, including after partial replacement.
