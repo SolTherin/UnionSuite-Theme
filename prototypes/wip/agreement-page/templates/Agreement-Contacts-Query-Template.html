@@ -1,0 +1,39 @@
+<!-- Agreement contacts · Query Template Display on the existing Contacts IQA.
+     The IQA is unchanged. Uses the theme's us-contact card.
+     iPart CSS class: us-query-template us-query-search us-list-scroll us-action-agreements-add-contact
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+
+     Fields (aliases from the current template):
+     Ordinal (required)      contact row ordinal; opens the edit popup
+     ContactName (required)  name
+     ContactRole             role badge (Lead, Consultant …); blank hides it
+     ContactType             Staff | Member | External; blank hides it
+     ContactGroup            group (Bargaining Team, SBU …); blank hides it
+     ContactEmail            email; blank hides the line
+     ContactPhone            phone; blank hides the line
+
+     Replaces filterContacts() and its suggestions (us-query-search) and the
+     CA_syncContactCards / CA_reloadContactCard reloads (action refresh). -->
+<article class="us-contact"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <div class="us-contact__heading">
+    <a class="us-contact__name">{#query.ContactName}</a>
+    <span class="us-badge us-contact__role">{#query.ContactRole}</span>
+    <button type="button" class="us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+  </div>
+  <div class="us-contact__tags">
+    <span class="us-badge us-badge--primary">{#query.ContactType}</span>
+    <span class="us-badge">{#query.ContactGroup}</span>
+  </div>
+  <div class="us-contact__details">
+    <div class="us-contact__detail">
+      <i class="ti ti-mail" aria-hidden="true"></i>
+      <a href="mailto:{#query.ContactEmail}">{#query.ContactEmail}</a>
+    </div>
+    <div class="us-contact__detail">
+      <i class="ti ti-phone" aria-hidden="true"></i>
+      <a href="tel:{#query.ContactPhone}">{#query.ContactPhone}</a>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,801 @@
+/* Agreement contacts — option 5 under review (contacts-compare.html).
+   Not installed and not loaded by the agreement page.
+   C5 us-contacts-facets   a facet strip over the roster rows: one chip per
+                           group and per role, with counts, to filter the list.
+   Sits on top of C3 (the rows) and C0 (the avatar) in
+   contacts-options.candidate.css. Theme tokens only. */
+
+
+/* ── C5. us-contacts-facets ────────────────────────────────────
+   Target: US-CONTACTS, beside us-contacts-roster.
+   US-CONTACT-FACETS (contacts-directory.candidate.js) puts the strip in the
+   panel body above the results. It sticks to the top while the list scrolls
+   (us-list-scroll), so the chips stay in reach on a 20-contact agreement. */
+
+.us-contact-facets:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: grid;
+  gap: 7px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fw-normal) var(--fs-xs)/1.4 var(--font-ui);
+}
+
+.us-contact-facets[hidden] {
+  display: none;
+}
+
+/* Summary line: the count on the left, Clear on the right. */
+.us-contact-facets__summary:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  min-height: 18px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-facets__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-facets__clear:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .12s;
+}
+
+.us-contact-facets__clear:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link-hover);
+  text-decoration-color: currentColor;
+}
+
+.us-contact-facets__clear[hidden] {
+  display: none;
+}
+
+/* One row per facet: a short label, then the chips. */
+.us-contact-facets__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  column-gap: var(--space-2);
+}
+
+.us-contact-facets__row[hidden] {
+  display: none;
+}
+
+.us-contact-facets__label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-top: 5px;
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.us-contact-facets__chips:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+/* Chips: a pill with the value and a quiet count. One pressed per row. */
+.us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-xs)/1 var(--font-ui);
+  cursor: pointer;
+  transition: border-color .12s, background-color .12s, color .12s;
+}
+
+.us-contact-chip > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-chip__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-chip:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--border-strong);
+  background: var(--bg-subtle, var(--bg-sunken));
+  color: var(--text-strong);
+}
+
+/* The pressed tint is mixed from the link colour, which the dark sheet
+   already lightens, so one rule serves both modes. */
+.us-contact-chip[aria-pressed="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--text-link);
+  background: color-mix(in srgb, var(--text-link) 14%, var(--bg-surface));
+  color: var(--text-strong);
+}
+
+.us-contact-chip[aria-pressed="true"] .us-contact-chip__count {
+  color: color-mix(in srgb, var(--text-strong) 70%, transparent);
+}
+
+.us-contact-chip:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Nobody matches this value together with the other facet's selection. */
+.us-contact-chip[aria-disabled="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-style: dashed;
+  background: var(--bg-surface);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+/* The overflow chip for long role lists. */
+.us-contact-chip--more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.us-contact-chip[hidden] {
+  display: none;
+}
+
+/* While a group chip is active every visible row is in that group, so the
+   group headings repeat the chip and step aside. */
+.us-contacts-facets .QueryTemplateSet[data-us-contact-facet-group] > .us-contact-group {
+  display: none;
+}
+
+/* Rows the facets exclude. The theme's search and the group headings both
+   treat a hidden section as off the page, so their counts follow. */
+.us-contacts-facets .QueryTemplateSet > section[hidden] {
+  display: none !important;
+}
+
+/* The strip sits beside the results, outside the roster's own container, so
+   the panel body container measures the width for it. */
+.us-contacts-facets .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-contacts-facets / inline-size;
+}
+
+/* Narrow (the 380px rail): the label moves above the chips and each row
+   becomes one line that scrolls sideways, fading at the edge, so the strip
+   stays about 110px tall however many roles there are. */
+@container us-contacts-facets (max-width: 479.98px) {
+  .us-contact-facets__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .us-contact-facets__label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    padding-top: 0;
+  }
+
+  .us-contact-facets__chips:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2px 28px 2px 2px;
+    margin: -2px;
+    scrollbar-width: none;
+    scroll-padding-inline: 2px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+
+  .us-contact-facets__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    flex: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    height: 30px;
+    padding: 0 11px;
+  }
+}
+
+
+/* ── C6. us-contacts-group-tint ────────────────────────────────
+   Target: beside C0 us-avatar.
+   The avatar tint follows the group, not the type (owner, 3 October 2026).
+   US-CONTACT-FACETS numbers the groups in IQA order; the first four take
+   the theme's hues and a blank group stays neutral. Wins over the type
+   rules by one class and by load order. The info hue is the brand teal in
+   light mode and lightens in dark; the purple is lifted for dark here
+   because the dark sheet does not remap it. */
+
+.us-contacts-group-tint .us-avatar {
+  --us-avatar-hue: var(--text-muted);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="0"] .us-avatar {
+  --us-avatar-hue: var(--info);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="1"] .us-avatar {
+  --us-avatar-hue: var(--us-group-purple, var(--status-purple));
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="2"] .us-avatar {
+  --us-avatar-hue: var(--success);
+}
+
+.us-contacts-group-tint [data-us-contact-group-index="3"] .us-avatar {
+  --us-avatar-hue: var(--warning);
+}
+
+:root[data-us-color-scheme="dark"] .us-contacts-group-tint {
+  --us-group-purple: color-mix(in srgb, var(--status-purple) 40%, #fff);
+}
+
+
+/* ── C7. us-contact-tile--card ──────────────────────────────────
+   Target: US-CONTACTS beside us-contacts-tiles.
+   Option 6's tile: nothing is clipped. The name and the role · group · type
+   line wrap, and email and phone are plain text on a third line (email goes
+   through iMIS, so no mailto: or tel: links). The avatar sits with the
+   name; the pencil is the only action. */
+
+.us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-areas:
+    "avatar name actions"
+    "avatar type actions"
+    "meta meta meta"
+    "reach reach reach";
+  grid-template-rows: auto auto 1fr auto;
+  row-gap: 0;
+  align-items: start;
+}
+
+/* The type: system data, quiet, directly under the name. */
+.us-contact-tile--card .us-contact-tile__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: type;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+}
+
+/* Role · group: the person's place on this agreement, left aligned under
+   the avatar on its own line. */
+.us-contact-tile--card .us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  align-self: start;
+  margin: 6px 0 0;
+  color: var(--text-base);
+}
+
+.us-contact-tile--card .us-contact-tile__meta:not(:has(> :not(:empty))) {
+  display: none;
+}
+
+/* Cards in a row share the tallest card's height, so a long email that
+   wraps cannot stagger the grid. */
+.us-contacts-tiles .QueryTemplateSet > section > .QueryTemplateItem:has(> .us-contact-tile--card):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.us-contact-tile--card .us-avatar {
+  align-self: center;
+}
+
+.us-contact-tile--card .us-contact-tile__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 20px;
+}
+
+.us-contact-tile--card .us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* The edit button spans the name and type rows, so its 36px height no
+   longer pushes the type away from the name. */
+.us-contact-tile--card .us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin: -6px -4px 0 0;
+}
+
+.us-contact-tile__type:empty {
+  display: none;
+}
+
+/* Email, then phone, as two lines across the full card width, each with
+   its icon in a fixed column, so every card puts them in the same place
+   (owner, 3 October 2026). A missing method keeps its icon beside an empty
+   space rather than moving the other line up. */
+.us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: reach;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 2px;
+  align-self: end;
+  min-width: 0;
+  margin: 8px 0 0;
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
+.us-contact-tile__reach > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 6px;
+  min-width: 0;
+  min-height: 17px;
+}
+
+/* The value is only as wide as its text, so the copy flash fits it. */
+.us-contact-tile__reach > span > span {
+  justify-self: start;
+  max-width: 100%;
+  margin: 0 -3px;
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+}
+
+.us-contact-tile__phone > span {
+  white-space: nowrap;
+}
+
+.us-contact-tile__reach i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* The icon is a copy button (US-CONTACT-COPY). It is larger than the
+   14px column and pulled back by its margin, so the icon stays in place. */
+.us-contact-tile__reach .us-contact-tile__copy:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  margin: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: copy;
+}
+
+.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled) i {
+  color: var(--text-strong);
+}
+
+.us-contact-tile__copy:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* A missing method: the icon stays, quieter, and does nothing. */
+.us-contact-tile__copy:disabled:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  cursor: default;
+}
+
+.us-contact-tile__copy:disabled i {
+  opacity: .55;
+}
+
+/* Copied: a green copy icon, and the line flashes once. */
+.us-contact-tile__copy[data-us-copied] i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--success);
+  opacity: 1;
+}
+
+.us-contact-tile__reach > span[data-us-copied] > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  animation: us-contact-copied 900ms ease-out;
+}
+
+@keyframes us-contact-copied {
+  from { background: color-mix(in srgb, var(--success) 22%, transparent); }
+  to { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-contact-tile__reach > span[data-us-copied] > span {
+    animation: none;
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+  }
+}
+
+.us-contact-copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+
+/* ── Group filter behind the funnel (us-contacts-group-filter) ───
+   Target: beside C5.
+   The group chips sit first in the theme's filter disclosure, above the
+   search field, with the field's inset. The count moves beside the panel
+   title, and a pressed group adds a dot to the funnel so the filter is
+   visible while the disclosure is closed. */
+
+.us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: static;
+  padding: 0 0 12px;
+  border: 0;
+  background: transparent;
+}
+
+.us-contact-facets__heading-count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-sm)/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contact-facets__heading-count .us-contact-facets__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-facets__clear--icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.us-contact-facets__clear--icon:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.us-contact-facets__token > small {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Suggestions under the search field: each match labelled by its
+   attribute, as the v1 page did. In flow inside the disclosure. */
+.us-contact-suggest:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  max-height: 264px;
+  margin: 6px 0 0;
+  padding: 4px 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--text-strong) 10%, transparent);
+  scrollbar-width: thin;
+}
+
+.us-contact-suggest[hidden] {
+  display: none;
+}
+
+.us-contact-suggest__option:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 10px;
+  padding: 7px 12px;
+  color: var(--text-strong);
+  font: var(--fw-normal) var(--fs-sm)/1.4 var(--font-ui);
+  cursor: pointer;
+}
+
+.us-contact-suggest__option:is(:hover, .is-active):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-contact-suggest__kind:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-contact-suggest__value {
+  overflow-wrap: anywhere;
+}
+
+.us-contact-suggest__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-contacts-facets[data-us-contact-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-contacts-facets[data-us-contact-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-contact-chip,
+  .us-contact-facets__clear {
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-contact-chip[aria-pressed="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border-width: 2px;
+  }
+}
+
+
+/* ── C8. Option 7: us-agreement-contacts ───────────────────────
+   Target: US-CONTACTS, beside C5 to C7. Each piece is keyed to its own
+   class from the preset, so any part can be promoted alone. */
+
+/* Group colour. The tile and its heading both carry the group's tone (from
+   the IQA) or its index (IQA order), so one --us-group-hue drives the avatar
+   and the heading dot. Tone rules come after index rules, so a set tone
+   wins; a blank group has neither and stays neutral. */
+.us-contacts-group-tone [data-us-contact-group-index="0"] { --us-group-hue: var(--info); }
+.us-contacts-group-tone [data-us-contact-group-index="1"] { --us-group-hue: var(--us-group-purple, var(--status-purple)); }
+.us-contacts-group-tone [data-us-contact-group-index="2"] { --us-group-hue: var(--success); }
+.us-contacts-group-tone [data-us-contact-group-index="3"] { --us-group-hue: var(--warning); }
+.us-contacts-group-tone [data-us-contact-group-tone="info" i] { --us-group-hue: var(--info); }
+.us-contacts-group-tone [data-us-contact-group-tone="purple" i] { --us-group-hue: var(--us-group-purple, var(--status-purple)); }
+.us-contacts-group-tone [data-us-contact-group-tone="success" i] { --us-group-hue: var(--success); }
+.us-contacts-group-tone [data-us-contact-group-tone="warning" i] { --us-group-hue: var(--warning); }
+.us-contacts-group-tone [data-us-contact-group-tone="danger" i] { --us-group-hue: var(--danger); }
+.us-contacts-group-tone [data-us-contact-group-tone="neutral" i] { --us-group-hue: var(--text-muted); }
+
+.us-contacts-group-tone .us-avatar {
+  --us-avatar-hue: var(--us-group-hue, var(--text-muted));
+}
+
+/* Room for the Lead ring, kept on every card so names line up. */
+.us-contacts-group-tone .us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  column-gap: 13px;
+}
+
+:root[data-us-color-scheme="dark"] .us-contacts-group-tone {
+  --us-group-purple: color-mix(in srgb, var(--status-purple) 40%, #fff);
+}
+
+/* Group headings across the tile grid, with the group's colour dot. */
+.us-contacts-grouped.us-contacts-tiles .us-contact-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-items: center;
+  margin-top: var(--space-2);
+  padding: 4px 2px 6px;
+}
+
+.us-contacts-grouped.us-contacts-tiles .QueryTemplateSet > .us-contact-group:first-child {
+  margin-top: 0;
+}
+
+.us-contacts-group-tone .us-contact-group::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--us-group-hue, var(--text-faint));
+}
+
+/* The name opens the contact's record; a blank link stays plain text. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a[href]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__name a[href]:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* The Lead (owner, 3 October 2026): the initials badge turns solid in the
+   group colour with a ring around it, wears a small crown, and on first
+   paint a single sheen crosses it. The crown is the Tabler crown glyph
+   in the theme's icon font. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  overflow: visible;
+  background: var(--us-avatar-hue);
+  color: var(--bg-surface);
+  box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 3.5px color-mix(in srgb, var(--us-avatar-hue) 55%, transparent);
+  isolation: isolate;
+}
+
+/* The crown, top right, on a surface-coloured disc so it reads on any tint. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: "\ed12";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--text-strong) 18%, transparent);
+  color: var(--warning-fill);
+  font: normal 14px/1 "tabler-icons";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One sheen across the badge when it appears, then still. */
+:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, #fff 45%, transparent) 50%, transparent 70%) var(--us-avatar-hue);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  animation: us-contact-lead-sheen 1.6s cubic-bezier(.16, 1, .3, 1) .3s both;
+}
+
+@keyframes us-contact-lead-sheen {
+  from { background-position: 100% 0; }
+  to { background-position: -50% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar {
+    border: 2px solid CanvasText;
+  }
+}
+
+
+/* ── C9. Option 7 card hierarchy (owner, 3 October 2026) ──────────
+   After the hierarchy critique: one line under the name, beside the
+   avatar, so the avatar's height is shared and the card loses a row.
+   Role first and stronger (the agreement signal staff scan for), the
+   system type last and muted. The line runs under the pencil too, so
+   long roles rarely wrap. The group joins the line only when there are
+   no group headings to say it. */
+
+.us-contacts-grouped .us-contact-tile--card:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-areas:
+    "avatar name actions"
+    "avatar meta meta"
+    "reach reach reach";
+  grid-template-rows: auto auto 1fr;
+}
+
+/* The 36px pencil sits in the name row without making it taller. */
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin: -8px -4px -8px 0;
+}
+
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__meta--inline:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  align-self: start;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__role:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+}
+
+.us-contact-tile__meta--inline .us-contact-tile__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+}
+
+/* One separator before every filled part after the first filled part. */
+.us-contact-tile__meta--inline > :not(:empty) ~ :not(:empty)::before {
+  content: " · ";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+/* While headings say the group, the card does not. A pressed group chip
+   only hides the headings, so the group stays off the cards then too. */
+.us-contacts-grouped .QueryTemplateSet:has(> .us-contact-group) .us-contact-tile__meta--inline .us-contact-tile__group {
+  display: none;
+}
+
+/* Contact rows start right after the line. */
+.us-contacts-grouped .us-contact-tile--card .us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 8px;
+}
+
+/* A missing email or phone reads as deliberately empty. */
+.us-contacts-grouped .us-contact-tile__reach > span > span:empty::before {
+  content: "—" / "";
+  color: var(--text-faint);
+}
+
+/* Avatar initials: the group hue pulled toward the strong text colour so
+   every tone clears 4.5:1 on its own tint, in both modes. */
+.us-contacts-group-tone .us-contact-tile:not([data-us-contact-lead="true" i]):not([data-us-contact-lead="1"]) .us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: color-mix(in srgb, var(--us-avatar-hue) 72%, var(--text-strong));
+}

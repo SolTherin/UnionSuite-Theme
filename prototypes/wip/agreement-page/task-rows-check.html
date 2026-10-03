@@ -1,0 +1,84 @@
+<!doctype html>
+<!--
+  Theme-wide check for candidate T3 (compact task rows). Renders the guide's
+  Tasks-Detail-Query-Template.html rows, as the contact page uses them, with the
+  current theme on the left and the theme plus theme-candidate.css on the right.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Rows Check</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .check-grid h2 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <p><button type="button" id="check-mode">Mode: light</button></p>
+  <div class="check-grid">
+    <section><h2>Current theme</h2><div class="panel"><div class="panel-body"><div class="QueryTemplateSet" id="before"></div></div></div></section>
+    <section><h2>With candidate T3</h2><iframe class="after-frame" title="With candidate" style="width:100%;height:400px;border:0"></iframe></section>
+    <section><h2>With candidate T3, 360px panel</h2><iframe class="after-frame" title="With candidate, narrow" style="width:360px;max-width:100%;height:560px;border:0"></iframe></section>
+  </div>
+
+<script>
+  const rows = [
+    {IsCompleted: 'false', DueState: 'overdue', TaskTitle: 'Call back about the roster dispute', TaskNote: 'Member says the new roster cuts two shifts a fortnight.', MemberName: 'Sarah Reynolds', TaskDateLabel: 'Due 28 Sep 2026 - Overdue'},
+    {IsCompleted: 'false', DueState: 'today', TaskTitle: 'Send the delegate nomination form', TaskNote: '', MemberName: 'Sarah Reynolds', TaskDateLabel: 'Due today'},
+    {IsCompleted: 'false', DueState: '', TaskTitle: 'Review the redundancy offer before the meeting with HR next Thursday afternoon', TaskNote: 'Compare against clause 14.3 of the agreement.', MemberName: '', TaskDateLabel: 'Due 14 Oct 2026'},
+    {IsCompleted: 'true', DueState: '', TaskTitle: 'Confirm branch committee attendance', TaskNote: '', MemberName: 'Sarah Reynolds', TaskDateLabel: 'Actioned 30 September 2026'},
+    {IsCompleted: 'false', DueState: '', TaskTitle: 'No date on this one', TaskNote: '', MemberName: 'Dani Sundara', TaskDateLabel: ''}
+  ];
+
+  async function render() {
+    const template = await (await fetch('../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html')).text();
+    const escape = value => String(value).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+    const html = rows.map(row => '<div class="QueryTemplateItem">' +
+      template.replace(/\{#query\.(\w+)\}/g, (_, name) => escape(row[name] ?? '')) + '</div>').join('');
+    document.getElementById('before').innerHTML = html;
+    document.querySelectorAll('#before .us-task').forEach(task => {
+      task.querySelector('.us-task__check').setAttribute('aria-checked', task.getAttribute('data-us-task-completed'));
+    });
+    const head = [...document.querySelectorAll('link[rel=stylesheet]')].map(link => link.outerHTML).join('');
+    const srcdoc = '<!doctype html><html lang="en-AU"><head><base href="' + location.href + '">' + head +
+      '<link rel="stylesheet" href="theme-candidate.css"><style>body{margin:0;background:var(--bg-page)}</style></head><body>' +
+      '<div class="panel"><div class="panel-body"><div class="QueryTemplateSet">' + document.getElementById('before').innerHTML +
+      '</div></div></div></body></html>';
+    document.querySelectorAll('.after-frame').forEach(frame => { frame.srcdoc = srcdoc; });
+  }
+
+  document.getElementById('check-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    const apply = root => dark ? root.setAttribute('data-us-color-scheme', 'dark') : root.removeAttribute('data-us-color-scheme');
+    apply(document.documentElement);
+    document.querySelectorAll('.after-frame').forEach(frame => apply(frame.contentDocument.documentElement));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  render();
+</script>
+</body>
+</html>

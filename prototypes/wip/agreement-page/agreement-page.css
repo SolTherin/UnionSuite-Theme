@@ -1,0 +1,101 @@
+/* Prototype page layout only. Component styling comes from the linked shared
+   theme and theme-candidate.css. */
+
+body.ap-page {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.5 var(--font-ui);
+}
+
+.ap-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-size: 13px;
+}
+
+.ap-tag {
+  color: var(--text-muted);
+}
+
+.ap-toggle {
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  font: 600 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.ap-toggle:first-of-type {
+  margin-inline-start: auto;
+}
+
+.ap-toggle[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-surface));
+}
+
+.ap-page .main {
+  padding-bottom: 48px;
+}
+
+/* The fixture has no iMIS zone wrapper around the CCO row, so the Bootstrap
+   row gutter would otherwise push the page sideways. */
+.ap-page .ContentPanel {
+  overflow-x: clip;
+}
+
+.ap-page .ContentPanel > div > .row + .row {
+  margin-top: 20px;
+}
+
+/* Native CCO views: Telerik hides these; the fixture has no Telerik script. */
+.ap-page .rmpHidden {
+  display: none;
+}
+
+.ap-page .rmpView > .ContentItemContainer + .ContentItemContainer,
+.ap-page .rmpView > .row + .ContentItemContainer,
+.ap-page .rmpView > .ContentItemContainer + .row,
+.ap-page .rmpView > .row + .row {
+  margin-top: 20px;
+}
+
+.ap-row {
+  margin-bottom: 0;
+}
+
+.ap-num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.ap-toast {
+  position: fixed;
+  z-index: 1000;
+  bottom: 20px;
+  left: 50%;
+  max-width: min(90vw, 640px);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.ap-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}

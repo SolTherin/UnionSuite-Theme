@@ -1,0 +1,43 @@
+<!-- Agreement notes as a ledger (option under review; see notes-compare.html).
+     Query Template Display on the Notes IQA, which gains one column,
+     CreatedTime (the created datetime formatted as a time).
+     One row per note, no cards: the date in its own column so dates line up
+     down the list, the author first on the row, the badges and a view icon at the
+     right, the note underneath capped at three lines with a More control
+     (US-NOTES-LEDGER in theme-candidate.js, which shows More only when the
+     note overflows). Styles: N1 in theme-candidate.css.
+     iPart CSS class: us-query-template us-notes us-notes--ledger us-query-search us-list-scroll us-action-agreements-add-note
+     Actions: us-action-agreements-preview-note on each row (icon presentation), defined
+     in agreement-actions.candidate.js.
+     Native title: Notes. Display in cards: unchecked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No notes yet."
+
+     Fields (the same aliases as Agreement-Notes-Query-Template.html):
+     Ordinal (required)      note ordinal; the eye icon (agreements.preview-note, an
+                             icon-only row action in agreement-actions.candidate.js) opens it
+     Note (required)         note text; three lines, all of it after More
+     CreatedBy               author name
+     CreatedOn               date text, in the date column
+     CreatedTime             time text (e.g. "10:42 am"), under the date; a new IQA
+                             column formatted from the note's created datetime;
+                             blank collapses
+     Category                Agreement | Task | Milestones …; blank hides the badge
+     Priority                "High" or blank; blank hides the badge
+     AccessClass             "restricted" or blank; restricted notes show a Restricted badge -->
+<div class="us-note us-note--ledger" data-us-search="{#query.Note} {#query.CreatedBy} {#query.Category}" data-us-note-access="{#query.AccessClass}">
+  <span class="us-note__when">
+    <span class="us-note__date">{#query.CreatedOn}</span>
+    <span class="us-note__time">{#query.CreatedTime}</span>
+  </span>
+  <p class="us-note__meta">
+    <strong class="us-note__author">{#query.CreatedBy}</strong>
+    <span class="us-note__aside">
+      <span class="us-badge us-note__type">{#query.Category}</span>
+      <span class="us-badge us-badge--danger">{#query.Priority}</span>
+      <span class="us-badge us-note__restricted">Restricted</span>
+      <button type="button" class="us-note__open us-action-agreements-preview-note" data-ordinal="{#query.Ordinal}"></button>
+    </span>
+  </p>
+  <p class="us-note__body">{#query.Note}</p>
+  <button type="button" class="us-note__more" aria-expanded="false" hidden>More</button>
+</div>

@@ -1,0 +1,41 @@
+<!-- Agreement notes as activity feed note cards (option under review; see
+     notes-compare.html). Query Template Display on the existing Notes IQA,
+     which is unchanged. The card is the record card from
+     prototypes/wip/activity-cards/ (US-RECORD-CARDS), as the contact page
+     activity feed renders it.
+     iPart CSS class: us-query-template us-records us-query-search us-list-scroll us-action-agreements-add-note
+     Native title: Notes. Display in cards: unchecked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No notes yet."
+
+     Fields (the same aliases as Agreement-Notes-Query-Template.html):
+     Ordinal (required)      note ordinal; Open note opens it
+     Note (required)         note text; two lines on the card, all of it when the card opens
+     CreatedBy               author name, on the type line
+     CreatedOn               date text, at the right; the IQA has no time, so the time line collapses
+     Category                Agreement | Task | Milestones …; the type label; blank collapses
+     Priority                "High" or blank; the priority flag
+     AccessClass             "restricted" or blank; restricted notes show a Restricted badge -->
+<article class="us-record" data-us-record-type="note" data-us-record-priority="{#query.Priority}"
+  data-us-note-access="{#query.AccessClass}" data-us-search="{#query.Note} {#query.CreatedBy} {#query.Category}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__type">{#query.Category}</span>
+        <span class="us-record__by">{#query.CreatedBy}</span>
+        <span class="us-badge us-record__priority">{#query.Priority}</span>
+        <span class="us-badge us-record__status us-note__restricted">Restricted</span>
+      </p>
+      <p class="us-record__text">{#query.Note}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.CreatedOn}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <p class="us-record__more"><a class="TextButton SmallButton us-outline-button us-action-agreements-view-note" href="#" data-ordinal="{#query.Ordinal}">Open note</a></p>
+    </div>
+  </div>
+</article>

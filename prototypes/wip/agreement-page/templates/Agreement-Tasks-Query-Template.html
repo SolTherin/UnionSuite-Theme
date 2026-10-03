@@ -1,0 +1,50 @@
+<!-- Agreement tasks · Query Template Display on the existing Tasks IQA
+     ("Query Template - Manage Agreement - Tasks"). The IQA is unchanged.
+     iPart CSS class: us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task
+     Native title: Tasks. Display in cards / columns: unchecked. Header blank.
+     Footer: <div class="us-query-footer"><span data-us-task-summary></span></div>
+     (the theme writes "n outstanding" into it, as on the Home tasks list;
+     us-task-progress keeps it for screen readers and shows "x of y complete"
+     in the heading instead).
+     Rows per page: 30. No results: "No tasks for this agreement."
+
+     Fields (aliases from the current template; ActionedCSS and
+     PriorityBadgeClass are no longer used):
+     Ordinal (required)      note ordinal (SeqN); saves and opens the task
+     Note (required)         task title
+     TAskCheckCSS            "done" when actioned, otherwise blank; read as completion
+     TaskStatusCSS           actioned | outstanding | overdue; only overdue colours the date
+     Deadline                due date text; blank leaves the date empty
+     OverdueText             " - Overdue" or blank, so the state is in words, not colour alone
+     AssignedTo              assignee name ("Unassigned" when blank)
+     PriorityBadge           "High Priority" or blank; blank hides the badge
+
+     Ticking the box plays the theme's completion effect and saves through
+     CloudToolz /ca/complete-task (data-us-task-save="agreements.item-status").
+     The title and the eye button both open the task.
+     Replaces the old toggleTask() and confetti; the count, assignee
+     search and view button return through theme options. -->
+<div class="us-task us-task--detail" data-us-task-completed="false" data-us-task-state="{#query.TAskCheckCSS}"
+  data-us-task-due-state="{#query.TaskStatusCSS}" data-us-task-save="agreements.item-status" data-us-task-note-type="Task"
+  data-us-task-ordinal="{#query.Ordinal}" data-us-search="{#query.Note} {#query.AssignedTo} {#query.PriorityBadge}">
+  <button type="button" class="us-task__check" data-us-task-toggle
+    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.Note}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>
+  </button>
+  <div class="us-task__open">
+    <span class="us-task__copy">
+      <a class="us-task__title us-action-agreements-view-task" href="#" data-ordinal="{#query.Ordinal}">{#query.Note}</a>
+    </span>
+    <span class="us-task__meta">
+      <span class="us-task__member">
+        <i class="ti ti-user-filled" aria-hidden="true"></i>
+        <a class="us-task__member-name">{#query.AssignedTo}</a>
+      </span>
+    </span>
+    <span class="us-task__date">{#query.Deadline}{#query.OverdueText}</span>
+  </div>
+  <span class="us-task__aside">
+    <span class="us-badge us-badge--danger">{#query.PriorityBadge}</span>
+    <button type="button" class="us-action-agreements-preview-task" data-ordinal="{#query.Ordinal}"></button>
+  </span>
+</div>

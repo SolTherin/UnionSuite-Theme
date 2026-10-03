@@ -1,0 +1,44 @@
+<!-- Agreement contacts as a filterable directory (option under review; see
+     contacts-compare.html, option 5). Query Template Display on the Contacts
+     IQA, unchanged. The roster row (option 3) with a facet strip above the
+     list: one chip per group and one per role, each with a count. Tap a chip
+     to see everyone in that group or with that role; the two facets combine.
+     The strip appears only when the agreement has more than four contacts,
+     so a case with one or two contacts shows plain rows.
+     US-CONTACT-FACETS (contacts-directory.candidate.js) builds the strip from
+     data-us-contact-group and data-us-contact-role, so groups stay
+     client-configurable: nothing is hard-coded. US-CONTACT-GROUPS
+     (contacts-options.candidate.js) still puts group headings over the rows;
+     they step aside while a group chip is active. The IQA sorts by
+     ContactGroup, then ContactName.
+     Styles: contacts-options.candidate.css (row, avatar) and
+     contacts-directory.candidate.css (strip).
+     iPart CSS class: us-query-template us-contacts-roster us-contacts-facets us-query-search us-list-scroll us-action-agreements-add-contact
+       This is over the iPart field's 100-character limit, so the theme would
+       ship a preset, us-agreement-contacts, expanding to those classes
+       (sectionPresets in zUnionSuite.js already does this for us-home-tasks).
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+
+     Fields (the same aliases as Agreement-Contacts-Query-Template.html):
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
+     ContactName (required)  name; also the avatar initials
+     ContactRole             role, after the name, and a role chip; blank collapses
+     ContactType             Staff | Member | External; the avatar tint and the type column
+     ContactGroup            group heading and a group chip; blank rows gather under "Other"
+     ContactEmail            email; blank leaves its column empty
+     ContactPhone            phone; blank leaves its column empty -->
+<article class="us-contact-row" data-us-contact-group="{#query.ContactGroup}" data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  <p class="us-contact-row__who">
+    <strong class="us-contact-row__name">{#query.ContactName}</strong>
+    <span class="us-contact-row__role">{#query.ContactRole}</span>
+  </p>
+  <span class="us-contact-row__type">{#query.ContactType}</span>
+  <span class="us-contact-row__reach">
+    <a class="us-contact-row__email" href="mailto:{#query.ContactEmail}"><i class="ti ti-mail" aria-hidden="true"></i><span>{#query.ContactEmail}</span></a>
+    <a class="us-contact-row__phone" href="tel:{#query.ContactPhone}"><i class="ti ti-phone" aria-hidden="true"></i><span>{#query.ContactPhone}</span></a>
+  </span>
+  <button type="button" class="us-contact-row__edit us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+</article>

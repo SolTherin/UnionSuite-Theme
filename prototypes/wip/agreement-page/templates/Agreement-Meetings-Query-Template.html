@@ -1,0 +1,33 @@
+<!-- Agreement meetings · Query Template Display on the existing Meetings IQA.
+     The IQA is unchanged.
+     iPart CSS class: us-query-template us-meetings us-task-completed-filter us-list-scroll us-action-agreements-add-meeting
+     Native title: Meetings. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No meetings scheduled."
+
+     Fields (aliases from the current template):
+     Ordinal (required)      meeting ordinal; opens the meeting
+     Date-ISO (required)     yyyy-MM-dd; past meetings are worked out from it
+                             and hidden until "Show past meetings"
+     Date-Month (required)   short month (Aug)
+     Date-Day (required)     day of month (4)
+     MeetingType (required)  first half of the title (General, Hearing …)
+     Matter (required)       second half of the title (EADispute …)
+     Date-Time               time text; blank hides it
+     Location                location or link text; blank hides it
+
+     No Upcoming badge (owner, 3 October 2026): the list shows upcoming
+     meetings by default, so the tag said nothing. The IQA's MeetingBadge
+     column is no longer used and can be dropped. -->
+<div class="us-meeting" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingType} {#query.Matter} {#query.Location}">
+  <span class="us-meeting__tile" aria-hidden="true">
+    <span class="us-meeting__month">{#query.Date-Month}</span>
+    <span class="us-meeting__day">{#query.Date-Day}</span>
+  </span>
+  <span class="us-meeting__copy">
+    <a class="us-meeting__title us-action-agreements-view-meeting" href="#" data-ordinal="{#query.Ordinal}">{#query.MeetingType} – {#query.Matter}</a>
+    <span class="us-meeting__meta">
+      <span>{#query.Date-Time}</span>
+      <span>{#query.Location}</span>
+    </span>
+  </span>
+</div>

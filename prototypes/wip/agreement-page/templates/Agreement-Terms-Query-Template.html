@@ -1,0 +1,27 @@
+<!-- Agreement terms · Query Template Display on the existing Terms IQA.
+     The IQA is unchanged. Uses the theme's list shell (us-list) and badges.
+     iPart CSS class: us-query-template us-query-search us-list-scroll us-action-agreements-add-term us-action-agreements-remove-terms
+     Native title: Terms and clauses covered. Display in cards: checked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No terms recorded."
+
+     Fields (aliases from the current template):
+     Ordinal (required)      term ordinal; opens the term editor
+     Term (required)         term title
+     Category                category badge; blank hides it
+     StatusClass             included | negotiating | not-included (old class value; sets the badge tone)
+     StatusLabel             Included | Negotiating | Not Included
+     Amount                  amount text; blank hides it
+     Comment                 description
+
+     Editing opens the existing Add-or-Update-Term popup; the old inline term
+     editor never saved, so it is not carried over. -->
+<div class="us-list__heading" data-us-search="{#query.Term} {#query.Category} {#query.StatusLabel} {#query.Comment}">
+  <h3 class="us-list__title">{#query.Term}</h3>
+  <p class="us-list__meta">
+    <span class="us-badge">{#query.Category}</span>
+    <span class="us-badge us-term-status" data-us-term-status="{#query.StatusClass}">{#query.StatusLabel}</span>
+    <span>{#query.Amount}</span>
+    <button type="button" class="us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
+  </p>
+</div>
+<div class="us-list__body"><p>{#query.Comment}</p></div>

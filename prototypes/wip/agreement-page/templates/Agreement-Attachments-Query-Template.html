@@ -1,0 +1,35 @@
+<!-- Agreement attachments · Query Template Display on the existing Attachments IQA.
+     The IQA is unchanged.
+     iPart CSS class: us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment
+     Native title: Attachments. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No attachments yet."
+
+     Fields (aliases from the current template; the IQA has no size or
+     extension, so the old "- MB" and "-" placeholders are dropped):
+     Ordinal (required)      file ordinal (download and edit)
+     UniqueID (required)     SharePoint unique ID
+     EntityCode (required)   SharePoint branch
+     FileName (required)     display name
+     CreatedBy               uploader name
+     CreatedOn               upload date
+     TagNames                tag names, comma-separated (rendered as badges)
+     TagOrdinals             tag ordinals, comma-separated, same order as TagNames
+
+     View and Download call CloudToolz /flowz/sharepoint/download. Edit opens
+     the inline name and tag editor (us-attachments) and saves through
+     CloudToolz /ca/update-attachment. -->
+<div class="us-attachment" data-ordinal="{#query.Ordinal}" data-us-file-id="{#query.UniqueID}" data-us-file-branch="{#query.EntityCode}"
+  data-us-file-name="{#query.FileName}" data-us-file-tags="{#query.TagNames}" data-us-file-tag-ordinals="{#query.TagOrdinals}"
+  data-us-search="{#query.FileName} {#query.TagNames}">
+  <span class="us-attachment__file" aria-hidden="true"><i class="ti ti-file-text"></i></span>
+  <div class="us-attachment__copy">
+    <span class="us-attachment__name">{#query.FileName}</span>
+    <p class="us-attachment__meta"><span>{#query.CreatedBy}</span><span>{#query.CreatedOn}</span></p>
+    <div class="us-attachment__tags"></div>
+  </div>
+  <div class="us-attachment__actions">
+    <button type="button" class="us-action-agreements-view-attachment" data-ordinal="{#query.Ordinal}">View</button>
+    <button type="button" class="us-action-agreements-download-attachment" data-ordinal="{#query.Ordinal}">Download</button>
+    <button type="button" class="us-action-agreements-edit-attachment" data-ordinal="{#query.Ordinal}">Edit name and tags</button>
+  </div>
+</div>

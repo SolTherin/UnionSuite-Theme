@@ -1,0 +1,78 @@
+<!-- Agreement contacts, grouped tiles (option under review; see
+     contacts-compare.html, option 7). Option 6 with the review's
+     recommendations (owner, 3 October 2026):
+     - Group headings over the tiles, each with a colour dot and a count, so
+       the group colours explain themselves. Headings step aside while a
+       group filter is on, and when the list is four contacts or fewer or
+       every group has one person.
+     - Stable group colours: the Contacts IQA supplies ContactGroupTone per
+       group (set once on the group setup), so SBU is the same colour on every
+       agreement. A blank tone falls back to the IQA order.
+     - The Lead is listed first in their group (the IQA sorts on
+       ContactIsLead) and marked with a star on the avatar.
+     - The name opens the contact's record (ContactUrl, as the theme's
+       MemberUrl does; blank leaves plain text).
+     - The send button emails the contacts on screen: with a filter on, it
+       passes their ContactId values to the email page (placeholder).
+     - Search suggestions offer names, roles and groups, not the system
+       type, and the field says so.
+     - No us-list-scroll: the Overview tab scrolls as a page, so the tiles
+       are not a scrolling box inside a scrolling page.
+
+     iPart CSS class: us-agreement-contacts
+       One preset class (contacts-preset.candidate.js; promotion target:
+       sectionPresets in zUnionSuite.js) standing in for
+       us-query-template us-contacts-tiles us-contacts-grouped
+       us-contacts-facets us-contacts-group-filter us-contacts-group-tone
+       us-query-search us-action-agreements-add-contact
+       us-action-agreements-email-contacts
+       which is far over the iPart field's 100-character limit.
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+     IQA sort: ContactGroupOrder, then ContactIsLead (descending), then ContactName.
+
+     Card (owner, 3 October 2026, after the hierarchy critique): avatar
+     (group colour, crown for the Lead), name (link) and edit; under the
+     name one line, role first and stronger, then the system type, muted:
+     "Lead · Staff". The group is left off the card while group headings
+     say it, and comes back on that line ("Lead · Bargaining Team · Staff")
+     when there are no headings: four contacts or fewer, or fewer than two
+     groups with two or more people. Then email and phone, each always in
+     the same place, the icon copying the value (US-CONTACT-COPY); a missing
+     value shows a muted dash.
+     The title count follows the search as well as the group filter.
+
+     Fields:
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
+     ContactId (required)    the contact's iMIS ID; sent by the email action when filtered
+     ContactName (required)  name; also the avatar initials
+     ContactUrl              the contact's record; blank leaves the name as plain text
+     ContactIsLead           true or 1 for the agreement's Lead; blank or false otherwise
+     ContactRole             role, first on the line under the name; blank collapses
+     ContactType             Staff | Member | Delegate | External; last on that line, muted; blank collapses
+     ContactGroup            group: heading and chip; on the card only when there are no headings; blank gathers under "No group"
+     ContactGroupOrder       the group's display order (the IQA sorts on it; not shown)
+     ContactGroupTone        info | purple | success | warning | danger | neutral; blank uses the IQA order
+     ContactEmail            email, as text; its icon copies it; blank leaves the icon, disabled
+     ContactPhone            phone, as text; its icon copies it; blank leaves the icon, disabled -->
+<article class="us-contact-tile us-contact-tile--card" data-us-contact-id="{#query.ContactId}" data-us-contact-name="{#query.ContactName}"
+  data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-group="{#query.ContactGroup}" data-us-contact-group-tone="{#query.ContactGroupTone}"
+  data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  <div class="us-contact-tile__body">
+    <p class="us-contact-tile__name"><a href="{#query.ContactUrl}">{#query.ContactName}</a></p>
+    <p class="us-contact-tile__meta us-contact-tile__meta--inline">
+      <span class="us-contact-tile__role">{#query.ContactRole}</span>
+      <span class="us-contact-tile__group">{#query.ContactGroup}</span>
+      <span class="us-contact-tile__type">{#query.ContactType}</span>
+    </p>
+    <p class="us-contact-tile__reach">
+      <span class="us-contact-tile__email"><button type="button" class="us-contact-tile__copy" aria-label="Copy email address" title="Copy email address"><i class="ti ti-mail" aria-hidden="true"></i></button><span>{#query.ContactEmail}</span></span>
+      <span class="us-contact-tile__phone"><button type="button" class="us-contact-tile__copy" aria-label="Copy phone number" title="Copy phone number"><i class="ti ti-phone" aria-hidden="true"></i></button><span>{#query.ContactPhone}</span></span>
+    </p>
+  </div>
+  <div class="us-contact-tile__actions">
+    <button type="button" class="us-contact-tile__edit us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+  </div>
+</article>

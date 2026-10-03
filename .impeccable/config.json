@@ -47,6 +47,15 @@
         ],
         "createdAt": "2026-09-27T12:02:21.365Z",
         "reason": "Claude: index.html is a fixture of captured native iMIS markup (inline styles verbatim from iMIS); its spacing rhythm comes from the shared theme CSS, verified in screenshots"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/contacts-compare.html"
+        ],
+        "createdAt": "2026-10-03T01:14:50.530Z",
+        "reason": "Claude triage: the finding is the comparison harness's own option headings and descriptions (15px/13px) measured against the theme panel title (16px); the page is a side-by-side fixture, not a candidate surface, and the candidate templates and CSS scan clean"
       }
     ]
   }

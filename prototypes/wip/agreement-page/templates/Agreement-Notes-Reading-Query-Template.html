@@ -1,0 +1,34 @@
+<!-- Agreement notes: reading list (option 5, WIP; see notes-compare.html).
+     Query Template Display on the Notes IQA.
+     iPart CSS class: us-query-template us-notes us-notes--reading us-query-search us-action-agreements-add-note
+     Native title: Notes. Display in cards: unchecked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No notes yet."
+     This variant uses page scrolling, with no us-list-scroll wrapper.
+     Requires notes-reading.candidate.css/js, shared theme and agreement action definitions.
+     Each view button keeps the existing agreements.preview-note popup action.
+     These candidate files are not production theme assets.
+
+     Every referenced field must be selected in the IQA, even if its value is blank:
+     Ordinal (required): note ordinal, e.g. 808; opens the native note record.
+     Note (required): plain note text; line breaks preserved; expands after three lines.
+     CreatedBy: author name, e.g. Christina Zerk; blank hides the name.
+     CreatedOn: formatted date, e.g. 20/08/2026; blank hides the date.
+     CreatedTime: optional time value, e.g. 3:47 pm; blank hides the time.
+                  Select a formatted datetime column or '' AS CreatedTime.
+     Category: Agreement | Task | Milestones or other text; blank hides the label.
+     Priority: High or blank; blank hides the priority badge.
+     AccessClass: restricted or blank; only restricted shows the Restricted badge.
+     Restricted is a visual label, not an access-control mechanism. -->
+<div class="us-note us-note--reading" data-us-search="{#query.Note} {#query.CreatedBy} {#query.Category}" data-us-note-access="{#query.AccessClass}">
+  <div class="us-note__heading">
+    <p class="us-note__meta">
+      <span class="us-note__author">{#query.CreatedBy}</span>
+      <span class="us-note__when"><span class="us-note__date">{#query.CreatedOn}</span><span class="us-note__time">{#query.CreatedTime}</span></span>
+      <span class="us-note__category">{#query.Category}</span>
+      <span class="us-note__flags"><span class="us-badge us-badge--danger">{#query.Priority}</span><span class="us-badge us-note__restricted">Restricted</span></span>
+    </p>
+    <button type="button" class="us-note__open us-action-agreements-preview-note" data-ordinal="{#query.Ordinal}"></button>
+  </div>
+  <p class="us-note__body">{#query.Note}</p>
+  <button type="button" class="us-note__read-toggle" aria-expanded="false" hidden>Read more</button>
+</div>

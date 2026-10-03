@@ -1,0 +1,30 @@
+<!-- Agreement milestones · Query Template Display on the existing Milestones IQA
+     ("Query Template - Manage Agreement - Milestones"). The IQA is unchanged.
+     iPart CSS class: us-query-template us-milestones us-task-completed-filter us-action-agreements-add-milestone
+     Native title: Milestones. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30 (the progress rail shows the rows on the page).
+     No results: "No milestones yet."
+
+     Fields (aliases from the current template; Status is no longer
+     shown because the status select carries it):
+     Ordinal (required)      note ordinal; saves the status and opens the milestone
+     Note (required)         milestone title
+     StatusCSS (required)    future | current | done
+     Deadline                date text; blank hides it
+
+     The theme builds the progress rail from these rows. Choosing Complete plays
+     the task completion effect and saves through CloudToolz /ca/complete-task.
+     Replaces the old milestone-nodes rail, Milestone Log and status select CSS. -->
+<div class="us-milestone" data-us-milestone-status="{#query.StatusCSS}" data-us-milestone-ordinal="{#query.Ordinal}"
+  data-us-search="{#query.Note}">
+  <span class="us-milestone__dot" aria-hidden="true"></span>
+  <span class="us-milestone__copy">
+    <a class="us-milestone__title us-action-agreements-view-milestone" href="#" data-ordinal="{#query.Ordinal}">{#query.Note}</a>
+    <span class="us-milestone__date">{#query.Deadline}</span>
+  </span>
+  <select class="us-milestone__status" aria-label="Status: {#query.Note}">
+    <option value="future">Not started</option>
+    <option value="current">In progress</option>
+    <option value="done">Complete</option>
+  </select>
+</div>

@@ -1,0 +1,329 @@
+<!doctype html>
+<!--
+  Agreement notes, five ways, filled from the same nine sample notes (the
+  Notes rows in agreement-page.js):
+  1. Original: the v1 mock-up's notes card in its own styling, in an isolated
+     frame (always light), with its sample notes replaced by these.
+  2. Current theme: us-notes with Display in cards, through
+     templates/Agreement-Notes-Query-Template.html.
+  3. Activity feed card: the record card from prototypes/wip/activity-cards/
+     (US-RECORD-CARDS), through templates/Agreement-Notes-Card-Query-Template.html.
+  4. Ledger: us-notes--ledger (N1 in theme-candidate.css), through
+     templates/Agreement-Notes-Ledger-Query-Template.html.
+  5. Reading list: us-notes--reading, through notes-reading.candidate.css/js
+     and templates/Agreement-Notes-Reading-Query-Template.html.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notes Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="theme-candidate.css">
+  <link rel="stylesheet" href="notes-reading.candidate.css">
+  <link rel="stylesheet" href="../activity-cards/activity-cards.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.nc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .nc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .nc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .nc-toolbar select,
+    .nc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .nc-toolbar .nc-mode {
+      margin-inline-start: auto;
+    }
+
+    .nc-stage {
+      display: grid;
+      gap: 28px;
+      max-width: var(--nc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .nc-option > h2 {
+      margin: 0 0 4px;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .nc-option > p {
+      margin: 0 0 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .nc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    .nc-frame {
+      display: block;
+      width: 100%;
+      height: 480px;
+      border: 0;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body class="nc-page">
+
+<div class="nc-toolbar" aria-label="Comparison controls">
+  <strong>Agreement notes</strong>
+  <a href="#nc-reading-title">Option 5</a>
+  <label>Panel width
+    <select id="nc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Activity tab)</option>
+    </select>
+  </label>
+  <label>Card rail
+    <select id="nc-rail">
+      <option value="">Icons</option>
+      <option value="us-records--neutral-rail">Icons, no colour</option>
+      <option value="us-records--dots">Dots</option>
+      <option value="us-records--no-rail">None</option>
+    </select>
+  </label>
+  <button type="button" class="nc-mode" id="nc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="nc-stage">
+
+  <section class="nc-option" aria-labelledby="nc-original-title">
+    <h2 id="nc-original-title">1. Original (v1 mock-up)</h2>
+    <p>The v1 notes card in its own styling, always light. Avatar, date, author and priority, then the note and its category tag.</p>
+    <iframe class="nc-frame" id="nc-original" title="Original notes" src="../../Agreement%20Management/Agreement-Management-Prototype.html"></iframe>
+  </section>
+
+  <section class="nc-option" aria-labelledby="nc-current-title">
+    <h2 id="nc-current-title">2. Current theme (us-notes)</h2>
+    <p>The prototype today: one card per note, author and date, then Open and the badges, then the note.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-notes"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Notes</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="nc-current"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="nc-option" aria-labelledby="nc-card-title">
+    <h2 id="nc-card-title">3. Activity feed note card (us-records)</h2>
+    <p>The card the contact page activity feed uses: type and author on top, the note below, the date on the right. Show details opens the full note and Open note.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-records" id="nc-card-wrapper"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Notes</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="nc-card"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="nc-option" aria-labelledby="nc-ledger-title">
+    <h2 id="nc-ledger-title">4. Ledger rows (us-notes--ledger)</h2>
+    <p>Proposed for long lists: no cards, one row per note under a rule. The date in its own column so dates line up, the author first, badges and a view icon at the right, the note underneath, capped at three lines with More to read the rest. The magnifier in the heading is the theme’s search filter (us-query-search). Needs one new IQA column, CreatedTime.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-notes us-notes--ledger us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Notes</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="nc-ledger"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="nc-option" aria-labelledby="nc-reading-title">
+    <h2 id="nc-reading-title">5. Reading list (us-notes--reading)</h2>
+    <p>A quieter author/date line, plain category labels and clearer note text. Light dividers separate entries; long notes expand in place. High and Restricted stay visible. <a href="index.html?notes=reading#activity">View option 5 in the Agreement page</a>.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-notes us-notes--reading us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Notes</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="nc-reading"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // The Notes rows from agreement-page.js, plus long examples and a CreatedTime.
+  const notes = [
+    {Ordinal: '808', CreatedOn: '1/10/2026', CreatedTime: '9:14 am', CreatedBy: 'Hub TestLastName', Priority: '', AccessClass: '', Note: 'Task goes here', Category: 'Task'},
+    {Ordinal: '773', CreatedOn: '20/08/2026', CreatedTime: '3:47 pm', CreatedBy: 'Christina Zerk', Priority: '', AccessClass: '', Note: 'New milestone', Category: 'Milestones'},
+    {Ordinal: '684', CreatedOn: '4/06/2026', CreatedTime: '11:02 am', CreatedBy: 'Andrew O Newnham', Priority: '', AccessClass: '', Note: 'test', Category: 'Agreement'},
+    {Ordinal: '639', CreatedOn: '11/05/2026', CreatedTime: '4:30 pm', CreatedBy: 'Hub TestLastName', Priority: 'High', AccessClass: '', Note: 'Have Alicia review the latest proposal', Category: ''},
+    {Ordinal: '634', CreatedOn: '10/05/2026', CreatedTime: '10:15 am', CreatedBy: 'Hub TestLastName', Priority: '', AccessClass: 'restricted', Note: 'Received feedback from some members that the latest increase schedule will impact them significantly', Category: 'Agreement'},
+    {Ordinal: '621', CreatedOn: '5/05/2026', CreatedTime: '2:05 pm', CreatedBy: 'Hub TestLastName', Priority: '', AccessClass: '', Note: 'Spoke to Lawyer X regarding the initial contract documents', Category: 'Agreement'},
+    // Longer notes, to see the three-line cap and More in option 4.
+    {Ordinal: '602', CreatedOn: '28/04/2026', CreatedTime: '1:20 pm', CreatedBy: 'Christina Zerk', Priority: '', AccessClass: '', Note: 'Met with the employer bargaining team at their offices. They tabled a revised classification structure that collapses levels 3 and 4 into a single band, with the new band paid at the current level 3 rate plus 1.5%. Our delegates are concerned this is a pay cut for anyone currently at level 4, which is about forty members at this site. We asked for the modelling behind the proposal and they agreed to send it by the end of next week. We also raised the outstanding rostering grievance from February, which they say is still with their legal team. Next meeting is pencilled in for the 12th.', Category: 'Agreement'},
+    {Ordinal: '588', CreatedOn: '14/04/2026', CreatedTime: '8:55 am', CreatedBy: 'Andrew O Newnham', Priority: 'High', AccessClass: 'restricted', Note: 'Confidential: a member has reported that the site manager has been asking individual staff to sign a new individual flexibility arrangement before the agreement is finalised.\nWe need to confirm how many have been approached and whether anyone has signed. Do not raise this with the employer until we have spoken to the members directly.\nFollow up with the delegate on Thursday.', Category: 'Agreement'},
+    {Ordinal: '571', CreatedOn: '2/04/2026', CreatedTime: '4:12 pm', CreatedBy: 'Hub TestLastName', Priority: '', AccessClass: '', Note: 'Sent the members the summary of the log of claims. Feedback due by the 16th so we can finalise the position before the first formal bargaining meeting.', Category: 'Milestones'}
+  ];
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // The Query Template Display's substitution; an unselected field fails loudly.
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  async function template(name) {
+    const response = await fetch('templates/' + name, {cache: 'no-cache'});
+    // Drop the leading comment, as iMIS stores only the markup.
+    return (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+  }
+
+  async function renderTheme() {
+    const current = await template('Agreement-Notes-Query-Template.html');
+    document.getElementById('nc-current').innerHTML = notes.map((row, index) =>
+      `<section data-item="notes-${index}" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">${fill(current, row)}</div></div></section>`).join('');
+    const card = await template('Agreement-Notes-Card-Query-Template.html');
+    document.getElementById('nc-card').innerHTML = notes.map((row, index) =>
+      `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(card, row)}</div></section>`).join('');
+    const ledger = await template('Agreement-Notes-Ledger-Query-Template.html');
+    document.getElementById('nc-ledger').innerHTML = notes.map((row, index) =>
+      `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(ledger, row)}</div></section>`).join('');
+    const reading = await template('Agreement-Notes-Reading-Query-Template.html');
+    document.getElementById('nc-reading').innerHTML = notes.map((row, index) =>
+      `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(reading, row)}</div></section>`).join('');
+  }
+
+  // The v1 note markup (avatar, time, author, priority; body; tag), filled from
+  // the same rows so only the layout differs.
+  function originalNote(row) {
+    const initials = row.CreatedBy.split(/\s+/).filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+    const tones = ['blue', 'purple', 'green', 'amber'];
+    const tone = tones[[...row.CreatedBy].reduce((sum, char) => sum + char.charCodeAt(0), 0) % tones.length];
+    return `<div class="note-card">
+      <div class="note-header"><button type="button" class="note-view-btn" title="View note">👁</button>
+        <div class="avatar ${tone}">${escapeHtml(initials)}</div>
+        <span class="note-time">${escapeHtml(row.CreatedOn)}</span>
+        <span class="note-author">${escapeHtml(row.CreatedBy)}</span>
+        ${row.Priority ? `<span class="note-priority">${escapeHtml(row.Priority)}</span>` : ''}
+      </div>
+      <div class="note-body">${escapeHtml(row.Note)}
+        ${row.Category ? `<div><span class="note-tag">${escapeHtml(row.Category)}</span></div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  // Keep only the v1 notes card in its frame, with its own styles.
+  function trimOriginal() {
+    const frame = document.getElementById('nc-original');
+    const doc = frame.contentDocument;
+    const list = doc && doc.getElementById('noteList');
+    if (!list || doc.body.hasAttribute('data-nc-trimmed')) return;
+    doc.body.setAttribute('data-nc-trimmed', '');
+    list.innerHTML = notes.map(originalNote).join('');
+    // v1 scrolls the list at 144px; show every note, as the other options do.
+    list.style.maxHeight = 'none';
+    const card = list.closest('.card');
+    const holder = doc.createElement('div');
+    holder.style.padding = '1px';
+    holder.append(card);
+    doc.body.replaceChildren(holder);
+    doc.body.style.margin = '0';
+    doc.body.style.background = 'transparent';
+    doc.documentElement.style.background = 'transparent';
+    // Measured from the card, not the document, so the frame can also shrink.
+    const fit = () => { frame.style.height = Math.ceil(holder.getBoundingClientRect().height) + 'px'; };
+    fit();
+    new ResizeObserver(fit).observe(holder);
+  }
+
+  // A cached frame can finish loading before this script runs.
+  const originalFrame = document.getElementById('nc-original');
+  originalFrame.addEventListener('load', trimOriginal);
+  const originalDoc = originalFrame.contentDocument;
+  if (originalDoc && originalDoc.readyState === 'complete' && originalDoc.location.href !== 'about:blank') trimOriginal();
+
+  document.getElementById('nc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--nc-width', event.target.value);
+    // The existing ledger only listens to window resizing; this workbench
+    // changes the panel itself. Refresh its overflow controls as well.
+    window.UnionSuiteNotesLedger?.refresh();
+  });
+
+  const railOptions = [...document.getElementById('nc-rail').options].map(option => option.value).filter(Boolean);
+  document.getElementById('nc-rail').addEventListener('change', event => {
+    const wrapper = document.getElementById('nc-card-wrapper');
+    wrapper.classList.remove(...railOptions);
+    if (event.target.value) wrapper.classList.add(event.target.value);
+  });
+
+  document.getElementById('nc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  // Opened from disk, the browser blocks the template fetches and the v1
+  // frame; say so in place of empty panels.
+  function showServeHint() {
+    const url = 'http://localhost:8778/prototypes/wip/agreement-page/notes-compare.html';
+    const hint = document.createElement('p');
+    hint.className = 'nc-hint';
+    hint.innerHTML = 'Options 2 to 5 need this page served, not opened from disk. Serve the project root and open <a href="' + url + '">' + url + '</a>.';
+    document.querySelector('.nc-stage').prepend(hint);
+  }
+
+  if (location.protocol === 'file:') showServeHint();
+  else renderTheme().catch(showServeHint);
+</script>
+<script src="../activity-cards/activity-cards.candidate.js"></script>
+<!-- The theme script gives option 4 its search toggle and paints the row actions
+     (the agreement definitions supply the eye icon); the candidate script, the More
+     control. Without AgreementID and AgreementNum in the URL the actions stay
+     disabled, which is fine for a layout comparison. -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="agreement-actions.candidate.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="theme-candidate.js"></script>
+<script src="notes-reading.candidate.js"></script>
+</body>
+</html>

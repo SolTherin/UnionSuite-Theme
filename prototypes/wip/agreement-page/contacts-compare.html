@@ -1,0 +1,440 @@
+<!doctype html>
+<!--
+  Agreement contacts, four ways, filled from the same sample contacts (15 by
+  default, or the agreement page's 6), sorted by group then name as the
+  roster needs the IQA to sort:
+  1. Current theme: us-contact rows, templates/Agreement-Contacts-Query-Template.html.
+  2. Original: the v1 mock-up's contacts card in its own styling, in an
+     isolated frame (always light), with its contacts replaced by these.
+  3. Grouped roster: C3 us-contacts-roster,
+     templates/Agreement-Contacts-Roster-Query-Template.html.
+  4. Quiet tiles: C4 us-contacts-tiles,
+     templates/Agreement-Contacts-Tiles-Query-Template.html.
+  5. Filterable directory: C5 us-contacts-facets over the C3 rows,
+     templates/Agreement-Contacts-Directory-Query-Template.html.
+  6. Tiles with a group filter: C7 us-contact-tile--card (nothing clipped,
+     email and phone as text) with the group chips behind the theme's
+     funnel (us-contacts-group-filter), the count beside the title, and C6
+     us-contacts-group-tint (the avatar follows the group, not the type),
+     templates/Agreement-Contacts-Tiles-Directory-Query-Template.html.
+  7. Grouped tiles: option 6 with the review's recommendations, one preset
+     class (us-agreement-contacts, contacts-preset.candidate.js, which loads
+     before the theme script),
+     templates/Agreement-Contacts-Grouped-Tiles-Query-Template.html.
+  The sample rows carry the IQA columns option 7 needs (ContactId,
+  ContactUrl, ContactIsLead, ContactGroupOrder, ContactGroupTone) and are
+  sorted as the shared Contacts IQA would sort them: group order, Lead
+  first, then name.
+  Options 3 and 4 use contacts-options.candidate.css and .js; options 5 and
+  6 add contacts-directory.candidate.css and .js (none loaded by the
+  agreement page). The 15-contact sample is the one that exercises the chips; the
+  6-contact sample has one role per person, and at 4 or fewer the strip
+  stays away. The panels leave out us-list-scroll so every contact
+  shows; on the page the list scrolls at 414px.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contacts Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="theme-candidate.css">
+  <link rel="stylesheet" href="contacts-options.candidate.css">
+  <link rel="stylesheet" href="contacts-directory.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.cc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .cc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .cc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .cc-toolbar nav {
+      display: inline-flex;
+      gap: 10px;
+    }
+
+    .cc-toolbar select,
+    .cc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .cc-toolbar .cc-mode {
+      margin-inline-start: auto;
+    }
+
+    .cc-stage {
+      display: grid;
+      gap: 28px;
+      max-width: var(--cc-width, 940px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .cc-option {
+      scroll-margin-top: 56px;
+    }
+
+    .cc-option > h2 {
+      margin: 0 0 4px;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .cc-option > p {
+      margin: 0 0 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .cc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    .cc-frame {
+      display: block;
+      width: 100%;
+      height: 480px;
+      border: 0;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body class="cc-page">
+
+<div class="cc-toolbar" aria-label="Comparison controls">
+  <strong>Agreement contacts</strong>
+  <nav aria-label="Options">
+    <a href="#cc-current-title">1</a>
+    <a href="#cc-original-title">2</a>
+    <a href="#cc-roster-title">3</a>
+    <a href="#cc-tiles-title">4</a>
+    <a href="#cc-directory-title">5</a>
+    <a href="#cc-tiles-directory-title">6</a>
+    <a href="#cc-grouped-title">7</a>
+  </nav>
+  <label>Contacts
+    <select id="cc-count">
+      <option value="15" selected>15</option>
+      <option value="6">6 (agreement page)</option>
+    </select>
+  </label>
+  <label>Panel width
+    <select id="cc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="940px" selected>Overview tab (940px)</option>
+      <option value="1200px">Wide (1200px)</option>
+    </select>
+  </label>
+  <button type="button" class="cc-mode" id="cc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="cc-stage">
+
+  <section class="cc-option" aria-labelledby="cc-current-title">
+    <h2 id="cc-current-title">1. Current theme (us-contact)</h2>
+    <p>The agreement page today: one full-width row per contact. Name, role badge and edit, then type and group badges, then email and phone.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-current"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-original-title">
+    <h2 id="cc-original-title">2. Original (v1 mock-up)</h2>
+    <p>The v1 contacts card in its own styling, always light. A grid of cards: coloured avatar, name, role, type and group badges, then phone and email.</p>
+    <iframe class="cc-frame" id="cc-original" title="Original contacts" src="../../Agreement%20Management/Agreement-Management-Prototype.html"></iframe>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-roster-title">
+    <h2 id="cc-roster-title">3. Grouped roster (us-contacts-roster)</h2>
+    <p>A directory for long lists. Contacts sit under their group with a count. One row each, with columns that line up: avatar tinted by type, name and role, type, email, phone, edit. Below about 620px, email and phone drop under the name. Needs the IQA sorted by group.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-contacts-roster us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-roster"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-tiles-title">
+    <h2 id="cc-tiles-title">4. Quiet tiles (us-contacts-tiles)</h2>
+    <p>The v1 look, calmer. Each tile has an avatar tinted by type, the name, and one muted "role · group" line. There are no badges. Email, phone and edit are icon buttons, and the address or number shows on hover. The IQA is unchanged.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-contacts-tiles us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-tiles"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-directory-title">
+    <h2 id="cc-directory-title">5. Filterable directory (us-contacts-facets)</h2>
+    <p>The roster rows with a filter strip over them: one chip per group and one per role, each with a count. Press a chip to see everyone in that group or with that role; a group and a role combine, and the other facet's counts follow. Roles past the first six sit behind "more". The strip stays put while the list scrolls, and does not appear at all on an agreement with four contacts or fewer. The theme's search still works on top. Groups and roles come from the data, so nothing is hard-coded. IQA sorted by group, as in option 3.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-contacts-roster us-contacts-facets us-query-search"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-directory"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-tiles-directory-title">
+    <h2 id="cc-tiles-directory-title">6. Tiles with a group filter (us-contacts-tiles + us-contacts-group-filter)</h2>
+    <p>A short card per contact: name with the type (system: Staff, Member, Delegate, External) under it; then, left aligned under the avatar, role · group (the person's place on this agreement), wrapping instead of clipping; then email and phone as plain text, each always in the same place with its icon (no mailto: or tel: links; email goes through iMIS so it is tracked). The group quick filter sits behind the funnel with the search, groups only, one chip per group with a count. Typing in the search lists matching names, roles, groups and types, each labelled by attribute as v1 did; pick one to filter on that attribute exactly. The count sits beside the title and reads "4 of 15 · Employer · ROLE Consultant" with a clear while filters are on; the funnel gets a dot. The send button in the heading is the placeholder for the email contacts action (it opens the Email negotiating team page until the destination is decided; without an AgreementID in the URL it stays disabled here). The avatar is tinted by group, not type: groups take the theme's hues in IQA order (teal, purple, green, amber) and a blank group stays grey. Chips appear only with more than four contacts.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-contacts-tiles us-contacts-facets us-contacts-group-filter us-contacts-group-tint us-query-search us-action-agreements-email-contacts"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-tiles-directory"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" aria-labelledby="cc-grouped-title">
+    <h2 id="cc-grouped-title">7. Grouped tiles (us-agreement-contacts)</h2>
+    <p>Option 6 with the review's recommendations. Group headings over the tiles, each with its colour dot and count, hidden while a group filter is on or when the list is small. Group colours come from the IQA (ContactGroupTone), so a group keeps its colour on every agreement. The Lead is first in their group, with a solid initials badge, a crown and a one-off sheen. The name opens the contact's record (Ben Okafor has no link, so his stays plain). With a filter on, the send button emails only the contacts on screen. Search suggests names, roles and groups, not the system type. No list scrolling: the tab scrolls as a page. The whole class list is one preset class.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-contacts"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Contacts</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cc-grouped"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // The agreement page's six contacts (agreement-page.js).
+  const pageContacts = [
+    {Ordinal: '183', ContactName: 'Mary O\'Conner', ContactRole: 'Lead', ContactType: 'Staff', ContactGroup: 'Bargaining Team', ContactPhone: '(917) 653-6240', ContactEmail: ''},
+    {Ordinal: '194', ContactName: 'Al Soria', ContactRole: 'Consultant', ContactType: 'Staff', ContactGroup: 'All', ContactPhone: '', ContactEmail: 'asoria@mailinator.com'},
+    {Ordinal: '195', ContactName: 'Dani Sundara', ContactRole: 'General', ContactType: 'Staff', ContactGroup: 'SBU', ContactPhone: '0400 123 457', ContactEmail: 'danisundara@mailinator.com'},
+    {Ordinal: '186', ContactName: 'Frank Grimes', ContactRole: 'Consultant', ContactType: 'External', ContactGroup: 'External', ContactPhone: '0400 123 456', ContactEmail: 'frank@grimes.com.au'},
+    {Ordinal: '197', ContactName: 'Tony Williams', ContactRole: 'Consultant', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '(429) 183-3413', ContactEmail: 'tonywilliams@mailinator.com'},
+    {Ordinal: '198', ContactName: 'Tony Fin Stark', ContactRole: 'Consultant', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '', ContactEmail: 'work@email.com'}
+  ];
+
+  // Fifteen, a realistic large agreement: the bargaining team, site
+  // delegates, the employer side, and one contact with no group.
+  const manyContacts = [
+    {Ordinal: '183', ContactName: 'Mary O\'Conner', ContactRole: 'Lead', ContactType: 'Staff', ContactGroup: 'Bargaining Team', ContactPhone: '(917) 653-6240', ContactEmail: ''},
+    {Ordinal: '194', ContactName: 'Al Soria', ContactRole: 'Consultant', ContactType: 'Staff', ContactGroup: 'Bargaining Team', ContactPhone: '', ContactEmail: 'asoria@mailinator.com'},
+    {Ordinal: '201', ContactName: 'Priya Raman', ContactRole: 'Industrial Officer', ContactType: 'Staff', ContactGroup: 'Bargaining Team', ContactPhone: '03 9662 4410', ContactEmail: 'priya.raman@example.org.au'},
+    {Ordinal: '202', ContactName: 'Josh Whitaker', ContactRole: 'Organiser', ContactType: 'Staff', ContactGroup: 'Bargaining Team', ContactPhone: '0411 208 371', ContactEmail: 'josh.whitaker@example.org.au'},
+    {Ordinal: '195', ContactName: 'Dani Sundara', ContactRole: 'General', ContactType: 'Staff', ContactGroup: 'SBU', ContactPhone: '0400 123 457', ContactEmail: 'danisundara@mailinator.com'},
+    {Ordinal: '197', ContactName: 'Tony Williams', ContactRole: 'Delegate', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '(429) 183-3413', ContactEmail: 'tonywilliams@mailinator.com'},
+    {Ordinal: '198', ContactName: 'Tony Fin Stark', ContactRole: 'Delegate', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '', ContactEmail: 'work@email.com'},
+    {Ordinal: '203', ContactName: 'Leilani Kahale', ContactRole: 'Senior Delegate', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '0422 615 908', ContactEmail: 'l.kahale@example.com'},
+    {Ordinal: '204', ContactName: 'Marco Bianchi', ContactRole: 'Delegate (night shift)', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '0433 090 112', ContactEmail: ''},
+    {Ordinal: '205', ContactName: 'Sophie Tran', ContactRole: 'Health and Safety Rep', ContactType: 'Member', ContactGroup: 'SBU', ContactPhone: '', ContactEmail: 'sophie.tran@example.com'},
+    {Ordinal: '186', ContactName: 'Frank Grimes', ContactRole: 'Consultant', ContactType: 'External', ContactGroup: 'Employer', ContactPhone: '0400 123 456', ContactEmail: 'frank@grimes.com.au'},
+    {Ordinal: '206', ContactName: 'Dr. Helen Ashby', ContactRole: 'HR Director', ContactType: 'External', ContactGroup: 'Employer', ContactPhone: '03 9530 2200', ContactEmail: 'helen.ashby@starkindustries.example'},
+    {Ordinal: '207', ContactName: 'Raj Patel', ContactRole: 'Employer Counsel', ContactType: 'External', ContactGroup: 'Employer', ContactPhone: '03 9608 1170', ContactEmail: 'rpatel@patel-legal.example'},
+    {Ordinal: '208', ContactName: 'Claire Nguyen', ContactRole: 'Payroll Manager', ContactType: 'External', ContactGroup: 'Employer', ContactPhone: '', ContactEmail: 'payroll@starkindustries.example'},
+    {Ordinal: '209', ContactName: 'Ben Okafor', ContactRole: 'Observer', ContactType: 'Member', ContactGroup: '', ContactPhone: '0455 771 230', ContactEmail: ''}
+  ];
+
+  // Columns the Contacts IQA supplies for option 7. The group order and
+  // tone come from the group setup, so they are the same on every agreement.
+  // Ben Okafor has no record link, to show the plain-text name.
+  const groupSetup = {
+    'Bargaining Team': {order: 1, tone: 'info'},
+    'SBU': {order: 2, tone: 'success'},
+    'Employer': {order: 3, tone: 'purple'},
+    'All': {order: 4, tone: 'neutral'},
+    'External': {order: 5, tone: 'warning'}
+  };
+  function withIqaColumns(row) {
+    const group = groupSetup[row.ContactGroup] || {order: '', tone: ''};
+    const id = '10' + row.Ordinal;
+    return {
+      ...row,
+      ContactId: id,
+      ContactUrl: row.ContactName === 'Ben Okafor' ? '' : '/Party.aspx?ID=' + id,
+      ContactIsLead: row.ContactRole === 'Lead' ? 'true' : 'false',
+      ContactGroupOrder: String(group.order),
+      ContactGroupTone: group.tone
+    };
+  }
+
+  // The shared Contacts IQA sort: group order (blank groups last), the Lead
+  // first, then name.
+  function sorted(contacts) {
+    const order = row => row.ContactGroupOrder === '' ? Infinity : Number(row.ContactGroupOrder);
+    return contacts.map(withIqaColumns).sort((a, b) =>
+      order(a) - order(b) ||
+      (b.ContactIsLead === 'true') - (a.ContactIsLead === 'true') ||
+      a.ContactName.localeCompare(b.ContactName));
+  }
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // The Query Template Display's substitution; an unselected field fails loudly.
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  const templateCache = new Map();
+  async function template(name) {
+    if (!templateCache.has(name)) {
+      const response = await fetch('templates/' + name, {cache: 'no-cache'});
+      // Drop the leading comment, as iMIS stores only the markup.
+      templateCache.set(name, (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, ''));
+    }
+    return templateCache.get(name);
+  }
+
+  function contacts() {
+    return sorted(document.getElementById('cc-count').value === '6' ? pageContacts : manyContacts);
+  }
+
+  async function renderTheme() {
+    const rows = contacts();
+    const options = [
+      ['cc-current', 'Agreement-Contacts-Query-Template.html'],
+      ['cc-roster', 'Agreement-Contacts-Roster-Query-Template.html'],
+      ['cc-tiles', 'Agreement-Contacts-Tiles-Query-Template.html'],
+      ['cc-directory', 'Agreement-Contacts-Directory-Query-Template.html'],
+      ['cc-tiles-directory', 'Agreement-Contacts-Tiles-Directory-Query-Template.html'],
+      ['cc-grouped', 'Agreement-Contacts-Grouped-Tiles-Query-Template.html']
+    ];
+    for (const [id, name] of options) {
+      const markup = await template(name);
+      document.getElementById(id).innerHTML = rows.map((row, index) =>
+        `<section data-item="${id}-${index}"><div class="QueryTemplateItem">${fill(markup, row)}</div></section>`).join('');
+    }
+  }
+
+  // The v1 contact markup (avatar, name, role, badges, phone, email), filled
+  // from the same rows so only the layout differs.
+  function originalContact(row) {
+    const words = row.ContactName.split(/\s+/).filter(word => !/^(dr|mr|mrs|ms)\.?$/i.test(word));
+    const initials = (words[0][0] + (words.length > 1 ? words[words.length - 1][0] : '')).toUpperCase();
+    const tones = ['blue', 'teal', 'orange', 'indigo'];
+    const tone = tones[[...row.ContactName].reduce((sum, char) => sum + char.charCodeAt(0), 0) % tones.length];
+    return `<div class="contact-card">
+      <div class="avatar-lg ${tone}">${escapeHtml(initials)}</div>
+      <div class="contact-info">
+        <div class="c-name">${escapeHtml(row.ContactName)}</div>
+        <div class="c-role">${escapeHtml(row.ContactRole)}</div>
+        <div class="c-badges">
+          ${row.ContactType ? `<span class="c-badge type">${escapeHtml(row.ContactType)}</span>` : ''}
+          ${row.ContactGroup ? `<span class="c-badge group">${escapeHtml(row.ContactGroup)}</span>` : ''}
+        </div>
+        ${row.ContactPhone ? `<div class="c-detail">📞 ${escapeHtml(row.ContactPhone)}</div>` : ''}
+        ${row.ContactEmail ? `<div class="c-detail">✉️ ${escapeHtml(row.ContactEmail)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  // Keep only the v1 contacts card in its frame, with its own styles.
+  function trimOriginal() {
+    const frame = document.getElementById('cc-original');
+    const doc = frame.contentDocument;
+    const grid = doc && doc.getElementById('contactGrid');
+    if (!grid) return;
+    grid.innerHTML = contacts().map(originalContact).join('');
+    if (doc.body.hasAttribute('data-cc-trimmed')) return;
+    doc.body.setAttribute('data-cc-trimmed', '');
+    const card = grid.closest('.card');
+    const holder = doc.createElement('div');
+    holder.style.padding = '1px';
+    holder.append(card);
+    doc.body.replaceChildren(holder);
+    doc.body.style.margin = '0';
+    doc.body.style.background = 'transparent';
+    doc.documentElement.style.background = 'transparent';
+    // Measured from the card, not the document, so the frame can also shrink.
+    const fit = () => { frame.style.height = Math.ceil(holder.getBoundingClientRect().height) + 'px'; };
+    fit();
+    new ResizeObserver(fit).observe(holder);
+  }
+
+  // Opened from disk, the browser blocks the template fetches and the v1
+  // frame; say so in place of empty panels.
+  function showServeHint() {
+    const url = 'http://localhost:8778/prototypes/wip/agreement-page/contacts-compare.html';
+    const hint = document.createElement('p');
+    hint.className = 'cc-hint';
+    hint.innerHTML = 'This page needs to be served, not opened from disk. Serve the project root and open <a href="' + url + '">' + url + '</a>.';
+    document.querySelector('.cc-stage').prepend(hint);
+  }
+
+  // A cached frame can finish loading before this script runs.
+  const originalFrame = document.getElementById('cc-original');
+  originalFrame.addEventListener('load', trimOriginal);
+  const originalDoc = originalFrame.contentDocument;
+  if (originalDoc && originalDoc.readyState === 'complete' && originalDoc.location.href !== 'about:blank') trimOriginal();
+
+  document.getElementById('cc-count').addEventListener('change', () => {
+    renderTheme().catch(showServeHint);
+    trimOriginal();
+  });
+
+  document.getElementById('cc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--cc-width', event.target.value);
+  });
+
+  document.getElementById('cc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  if (location.protocol === 'file:') showServeHint();
+  else renderTheme().catch(showServeHint);
+</script>
+<!-- The theme script gives the search toggles and paints the edit actions
+     (the agreement definitions supply the pencil). Without AgreementID and
+     AgreementNum in the URL the edit actions stay disabled, which is fine
+     for a layout comparison. -->
+<!-- The option 7 preset expands before the theme sets up search and actions. -->
+<script src="contacts-preset.candidate.js"></script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="agreement-actions.candidate.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="theme-candidate.js"></script>
+<script src="contacts-options.candidate.js"></script>
+<script src="contacts-directory.candidate.js"></script>
+</body>
+</html>

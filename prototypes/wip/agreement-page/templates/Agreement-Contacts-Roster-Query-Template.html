@@ -1,0 +1,34 @@
+<!-- Agreement contacts as a grouped roster (option under review; see
+     contacts-compare.html). Query Template Display on the Contacts IQA.
+     One dense row per contact: avatar, name and role, type, email, phone and
+     edit, in columns that line up down the list. US-CONTACT-GROUPS
+     (contacts-options.candidate.js) puts a heading above each run of rows
+     with the same ContactGroup, so the IQA must sort by ContactGroup, then
+     ContactName. Below about 620px the email and phone drop under the name.
+     Styles: contacts-options.candidate.css.
+     iPart CSS class: us-query-template us-contacts-roster us-query-search us-list-scroll us-action-agreements-add-contact
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+
+     Fields (the same aliases as Agreement-Contacts-Query-Template.html):
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
+     ContactName (required)  name; also the avatar initials
+     ContactRole             role, after the name; blank collapses
+     ContactType             Staff | Member | External; the avatar tint and the type column
+     ContactGroup            group heading; blank rows gather under "Other"
+     ContactEmail            email; blank leaves its column empty
+     ContactPhone            phone; blank leaves its column empty -->
+<article class="us-contact-row" data-us-contact-group="{#query.ContactGroup}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  <p class="us-contact-row__who">
+    <strong class="us-contact-row__name">{#query.ContactName}</strong>
+    <span class="us-contact-row__role">{#query.ContactRole}</span>
+  </p>
+  <span class="us-contact-row__type">{#query.ContactType}</span>
+  <span class="us-contact-row__reach">
+    <a class="us-contact-row__email" href="mailto:{#query.ContactEmail}"><i class="ti ti-mail" aria-hidden="true"></i><span>{#query.ContactEmail}</span></a>
+    <a class="us-contact-row__phone" href="tel:{#query.ContactPhone}"><i class="ti ti-phone" aria-hidden="true"></i><span>{#query.ContactPhone}</span></a>
+  </span>
+  <button type="button" class="us-contact-row__edit us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+</article>

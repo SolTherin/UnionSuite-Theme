@@ -1,0 +1,63 @@
+<!-- Agreement banner · Query Template Display on the existing Banner primary IQA
+     (unchanged). One record. Two-row record banner (us-banner__surface--rows).
+     iPart CSS class: us-banner us-banner-collapsible
+     Page CSS class (optional): us-banner-page
+     Native title and description blank; border disabled. Header/Footer blank.
+     Rows per page: 1. No results: "Agreement not found."
+
+     Top row (fixed, from this IQA; aliases from the current template):
+     AgreementID (required)  record ID; also the copy button target text
+     Name (required)         agreement name
+     Status (required)       status pill text; also sets the pill and left
+                             rail tone (Active green, Pending amber, Expired
+                             red …; other statuses neutral; list in A6 CSS)
+
+     Second row (client-configurable): filled by US-BANNER-FACTS from the
+     Agreement Banner Details IQA named in data-us-facts-query, filtered on
+     the AgreementNum filter with the page's AgreementNum URL parameter.
+     Clients change the details by editing that IQA's columns only:
+     - Description             optional, shown first under "Description"
+     - Additional-<Label>      one fact per column, in column order, labelled
+                               with the text after the prefix; blank is left out
+     - Tone-<Label>            optional badge tone for the fact of the same
+                               label: success, warning, danger or info
+     Example: Description, Additional-Agreement type, Additional-Priority,
+     Tone-Priority (CASE PriorityDesc WHEN 'High' THEN 'danger' …),
+     Additional-Opened, Additional-Lead, Additional-Last updated.
+     Confirm the filter name with GET /api/QueryParameterDefinition.
+
+     The Actions menu replaces the old toggleActions() dropdown. Each item is a
+     registered agreement action (agreement-actions.candidate.js). -->
+<header class="us-banner__surface us-banner__surface--glass us-banner__surface--status us-banner__surface--rows" data-us-record-status="{#query.Status}">
+  <div class="us-banner__summary">
+    <div class="us-banner__identity">
+      <span class="us-banner__record-copy"><span class="us-banner__record-id" id="agreement-banner-id">{#query.AgreementID}</span><button type="button" class="us-copy" data-us-copy-target="agreement-banner-id" aria-label="Copy agreement ID" title="Copy agreement ID"></button></span>
+      <h1 class="us-banner__title">{#query.Name}</h1>
+    </div>
+    <div class="us-banner__status">
+      <span class="us-banner__badge us-banner__badge--record-status">{#query.Status}</span>
+    </div>
+    <div class="us-banner__actions">
+      <div class="us-actions">
+        <button type="button" class="us-actions__toggle">Actions</button>
+        <ul class="us-actions__list">
+          <li><h6 class="us-actions__heading">Add entry</h6></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-add-note">Add note</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-add-contact">Add contact</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-add-meeting">Add meeting</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-add-task">Add task</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-add-milestone">Add milestone</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">Agreement</h6></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-edit">Update details</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-clone">Clone agreement</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">Communication</h6></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-email-team">Email negotiating team</button></li>
+          <li><button type="button" class="us-actions__item us-action-agreements-email-members">Email members</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="us-banner__details" data-us-facts-query="$/_i4u_/SandBox/CA/Agreement Banner Details" data-us-facts-filter="AgreementNum"></div>
+</header>

@@ -1,0 +1,26 @@
+<!-- Agreement notes · Query Template Display on the existing Notes IQA.
+     The IQA is unchanged. Uses the theme's compact notes (us-notes).
+     iPart CSS class: us-query-template us-notes us-query-search us-list-scroll us-action-agreements-add-note
+     Native title: Notes. Display in cards: checked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No notes yet."
+
+     Fields (aliases from the current template; HighPriorityClass is no
+     longer used):
+     Ordinal (required)      note ordinal; opens the note
+     Note (required)         note text
+     CreatedBy               author name
+     CreatedOn               date text
+     Category                Agreement | Task | Milestones …; blank hides the badge
+     Priority                "High" or blank; blank hides the badge
+     AccessClass             "restricted" or blank; restricted notes show a Restricted badge -->
+<div class="us-note" data-us-search="{#query.Note} {#query.CreatedBy} {#query.Category}" data-us-note-access="{#query.AccessClass}">
+  <p class="us-note__meta">
+    <strong class="us-note__author">{#query.CreatedBy}</strong>
+    <span class="us-note__date">{#query.CreatedOn}</span>
+    <a class="us-action-agreements-view-note" href="#" data-ordinal="{#query.Ordinal}">Open</a>
+    <span class="us-badge us-note__type">{#query.Category}</span>
+    <span class="us-badge us-badge--danger">{#query.Priority}</span>
+    <span class="us-badge us-note__restricted">Restricted</span>
+  </p>
+  <p class="us-note__body">{#query.Note}</p>
+</div>

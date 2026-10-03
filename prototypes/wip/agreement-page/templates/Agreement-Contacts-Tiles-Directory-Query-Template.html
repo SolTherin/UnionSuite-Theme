@@ -1,0 +1,61 @@
+<!-- Agreement contacts as tiles with a group filter (option under review; see
+     contacts-compare.html, option 6). Query Template Display on the Contacts
+     IQA, unchanged.
+     A short card per contact (owner, 3 October 2026): avatar, name and
+     edit; the type (system: Staff, Member, Delegate, External) under the
+     name; then, left aligned under the avatar, role · group (the person's
+     place on this agreement: Lead, Consultant …; SBU, Bargaining Team …),
+     wrapping rather than clipping; then email and phone as plain text, each
+     always in the same place with its icon (no mailto: or tel: links; email
+     goes out through iMIS so it is tracked). The group quick filter sits behind the theme's funnel with
+     the search: one chip per group with a count, groups only. Typing in the
+     search lists matching names, roles, groups and types, each labelled by
+     attribute as the v1 page did; picking one filters on that attribute
+     exactly. The contact count sits beside the panel title and shows
+     "4 of 15 · Employer · ROLE Consultant" with a clear while filters are
+     on. Chips appear only with more than four contacts; the count always
+     does.
+     The avatar tint follows the GROUP (owner, 3 October 2026):
+     US-CONTACT-FACETS numbers the groups in IQA order and
+     us-contacts-group-tint paints the first four from the theme's hues; a
+     blank group stays neutral.
+     Scripts: contacts-options.candidate.js (initials) and
+     contacts-directory.candidate.js (chips, count, group numbering).
+     Styles: contacts-options.candidate.css (tile, avatar) and
+     contacts-directory.candidate.css (card lines, chips, count, tint).
+     iPart CSS class: us-query-template us-contacts-tiles us-contacts-facets us-contacts-group-filter us-contacts-group-tint us-query-search us-list-scroll us-action-agreements-add-contact us-action-agreements-email-contacts
+       Over the iPart field's 100-character limit; promotion needs a preset
+       (see the option 5 template). us-action-agreements-email-contacts puts
+       the send button in the heading: a placeholder for the email contacts
+       action (agreement-actions.candidate.js), which must go through iMIS
+       so the emails are tracked.
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+
+     Fields (the same aliases as Agreement-Contacts-Query-Template.html):
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
+     ContactName (required)  name; also the avatar initials
+     ContactRole             role, first in the role · group line; blank collapses
+     ContactType             Staff | Member | Delegate | External; the line under the name; blank collapses
+     ContactGroup            group, after the role, a group chip and the avatar tint; blank collapses
+     ContactEmail            email, as text; its icon copies it (US-CONTACT-COPY); blank leaves the icon, disabled
+     ContactPhone            phone, as text; its icon copies it; blank leaves the icon, disabled -->
+<article class="us-contact-tile us-contact-tile--card" data-us-contact-name="{#query.ContactName}" data-us-contact-group="{#query.ContactGroup}" data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  <div class="us-contact-tile__body">
+    <p class="us-contact-tile__name">{#query.ContactName}</p>
+    <p class="us-contact-tile__type">{#query.ContactType}</p>
+    <p class="us-contact-tile__meta">
+      <span class="us-contact-tile__role">{#query.ContactRole}</span>
+      <span class="us-contact-tile__group">{#query.ContactGroup}</span>
+    </p>
+    <p class="us-contact-tile__reach">
+      <span class="us-contact-tile__email"><button type="button" class="us-contact-tile__copy" aria-label="Copy email address" title="Copy email address"><i class="ti ti-mail" aria-hidden="true"></i></button><span>{#query.ContactEmail}</span></span>
+      <span class="us-contact-tile__phone"><button type="button" class="us-contact-tile__copy" aria-label="Copy phone number" title="Copy phone number"><i class="ti ti-phone" aria-hidden="true"></i></button><span>{#query.ContactPhone}</span></span>
+    </p>
+  </div>
+  <div class="us-contact-tile__actions">
+    <button type="button" class="us-contact-tile__edit us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+  </div>
+</article>

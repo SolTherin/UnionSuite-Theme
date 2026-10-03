@@ -1,0 +1,38 @@
+<!-- Agreement contacts as quiet tiles (option under review; see
+     contacts-compare.html). Query Template Display on the existing Contacts
+     IQA, which is unchanged. The v1 card look, calmer: an avatar tinted by
+     type, the name, one muted "role · group" line, and email, phone and edit
+     as small icon buttons (the address or number shows on hover and is read
+     out by screen readers). Tiles fill the panel width, about 230px each.
+     Styles: contacts-options.candidate.css; initials from
+     contacts-options.candidate.js.
+     iPart CSS class: us-query-template us-contacts-tiles us-query-search us-list-scroll us-action-agreements-add-contact
+     Native title: Contacts. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No contacts on this agreement."
+
+     Fields (the same aliases as Agreement-Contacts-Query-Template.html):
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
+     ContactName (required)  name; also the avatar initials
+     ContactRole             role; blank collapses
+     ContactType             Staff | Member | External; the avatar tint, and its hover title
+     ContactGroup            group, after the role; blank collapses
+     ContactEmail            email; blank hides the mail button
+     ContactPhone            phone; blank hides the phone button -->
+<article class="us-contact-tile" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" title="{#query.ContactType}" aria-hidden="true"></span>
+  <div class="us-contact-tile__body">
+    <p class="us-contact-tile__name">{#query.ContactName}</p>
+    <p class="us-contact-tile__meta">
+      <span class="us-contact-tile__role">{#query.ContactRole}</span>
+      <span class="us-contact-tile__group">{#query.ContactGroup}</span>
+    </p>
+  </div>
+  <div class="us-contact-tile__actions">
+    <a class="us-contact-tile__reach" href="mailto:{#query.ContactEmail}" data-us-contact-value="{#query.ContactEmail}"
+      title="{#query.ContactEmail}" aria-label="Email {#query.ContactEmail}"><i class="ti ti-mail" aria-hidden="true"></i></a>
+    <a class="us-contact-tile__reach" href="tel:{#query.ContactPhone}" data-us-contact-value="{#query.ContactPhone}"
+      title="{#query.ContactPhone}" aria-label="Call {#query.ContactPhone}"><i class="ti ti-phone" aria-hidden="true"></i></a>
+    <button type="button" class="us-contact-tile__edit us-action-agreements-edit-contact" data-ordinal="{#query.Ordinal}">Edit contact</button>
+  </div>
+</article>

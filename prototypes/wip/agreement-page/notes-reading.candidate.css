@@ -1,0 +1,134 @@
+/* Option 5: a notes reading list. WIP only; not installed in UnionSuite.
+   Reuses the theme panel, tokens, badges and native record actions.
+   Target if approved: US-NOTES in zUnionSuite.css. */
+
+.us-notes--reading .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+}
+
+.us-notes--reading .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.us-notes--reading .QueryTemplateSet > section:last-child .QueryTemplateItem {
+  border-bottom: 0;
+}
+
+.us-note--reading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: var(--space-3) var(--space-1);
+}
+
+.us-note--reading .us-note__heading {
+  position: relative;
+  padding-inline-end: 44px;
+}
+
+.us-note--reading .us-note__meta {
+  min-width: 0;
+  min-height: 24px;
+  margin: 0;
+  gap: 2px var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.us-note--reading .us-note__author,
+.us-note--reading .us-note__date,
+.us-note--reading .us-note__category {
+  color: inherit;
+  font-size: inherit;
+  font-weight: var(--fw-normal);
+}
+
+.us-note--reading .us-note__when {
+  display: inline-flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-note--reading .us-note__time:not(:empty)::before {
+  content: "· ";
+}
+
+.us-note--reading .us-note__category:not(:empty)::before {
+  content: "· ";
+}
+
+.us-note--reading :is(.us-note__author, .us-note__date, .us-note__time, .us-note__category):empty {
+  display: none;
+}
+
+.us-note--reading .us-note__flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.us-note--reading .us-note__flags .us-badge {
+  margin: 0;
+}
+
+.us-note--reading .us-note__open {
+  position: absolute;
+  top: -6px;
+  inset-inline-end: 0;
+}
+
+/* The note has the primary reading colour; metadata stays subordinate.
+   Limit the reading measure without constraining the panel or row actions. */
+.us-note--reading .us-note__body {
+  max-width: 88ch;
+  margin: var(--space-1) 0 0;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-normal);
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Full text is the no-JavaScript fallback. Only an initialised row is capped. */
+.us-note--reading.is-collapsible:not(.is-expanded) .us-note__body {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.us-note--reading .us-note__read-toggle {
+  display: block;
+  min-height: 24px;
+  margin-top: var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-strong);
+  font: var(--fw-medium) var(--fs-xs)/20px var(--font-ui);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.us-note--reading .us-note__read-toggle[hidden] {
+  display: none;
+}
+
+.us-note--reading .us-note__read-toggle:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.us-note--reading .us-note__read-toggle:hover {
+  text-decoration-thickness: 2px;
+}

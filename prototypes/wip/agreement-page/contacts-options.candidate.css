@@ -1,0 +1,351 @@
+/* Agreement contacts — options under review (contacts-compare.html).
+   Not installed and not loaded by the agreement page. Two layouts for long
+   contact lists (10 to 15 people), on the unchanged Contacts IQA fields:
+   C3 us-contacts-roster   a grouped, column-aligned directory
+   C4 us-contacts-tiles    v1-style cards, calmer
+   Both share the avatar (C0). Theme tokens only, so a chosen option can move
+   into zUnionSuite.css unchanged. */
+
+
+/* ── C0. us-avatar ─────────────────────────────────────────────
+   Target: new block before US-CONTACTS.
+   Initials in a tinted circle. US-AVATARS (contacts-options.candidate.js)
+   writes the initials from data-us-avatar-name. The tint follows the
+   nearest data-us-contact-type: staff blue (info; the brand accent is
+   orange, too close to the externals), members green, externals amber,
+   anything else neutral. */
+
+.us-avatar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-avatar-hue: var(--text-muted);
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-avatar-hue) 14%, var(--bg-surface));
+  color: var(--us-avatar-hue);
+  font: var(--fw-semi) 11px/1 var(--font-ui);
+  letter-spacing: .02em;
+  user-select: none;
+}
+
+.us-avatar--md:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+
+[data-us-contact-type="staff" i] .us-avatar {
+  --us-avatar-hue: var(--info);
+}
+
+[data-us-contact-type="member" i] .us-avatar {
+  --us-avatar-hue: var(--success);
+}
+
+[data-us-contact-type="external" i] .us-avatar {
+  --us-avatar-hue: var(--warning);
+}
+
+
+/* ── C3. us-contacts-roster ────────────────────────────────────
+   Target: US-CONTACTS, as a second layout beside us-contact.
+   One row per contact under a rule, columns aligned down the list, group
+   headings from US-CONTACT-GROUPS. Wide: avatar, name and role, type,
+   email, phone, edit. Below about 620px the type hides (the avatar tint
+   still shows it) and email and phone share a line under the name. */
+
+.us-contacts-roster .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+  container: us-contacts-roster / inline-size;
+}
+
+.us-contacts-roster .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* The first row under a heading has the heading as its edge. */
+.us-contacts-roster .us-contact-group + section .QueryTemplateItem,
+.us-contacts-roster .QueryTemplateSet > section:first-child .QueryTemplateItem {
+  border-top: 0;
+}
+
+.us-contact-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  padding: var(--space-3) 6px 6px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-contact-group:first-child {
+  padding-top: 2px;
+}
+
+.us-contact-group[hidden] {
+  display: none;
+}
+
+.us-contact-group__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+}
+
+.us-contact-row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1.3fr) 76px minmax(0, 1.5fr) 128px 28px;
+  grid-template-areas: "avatar who type email phone edit";
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: 7px 6px;
+  font-size: var(--fs-sm);
+}
+
+.us-contact-row:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-contact-row .us-avatar {
+  grid-area: avatar;
+}
+
+.us-contact-row__who:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+  grid-area: who;
+  min-width: 0;
+  margin: 0;
+}
+
+.us-contact-row__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-weight: var(--fw-medium);
+}
+
+.us-contact-row__role:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-contact-row__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: type;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Wide: email and phone are columns of the row itself. */
+.us-contact-row__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+.us-contact-row__email:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: email;
+}
+
+.us-contact-row__phone:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: phone;
+}
+
+/* Selectors on the email and phone links outweigh the dark-mode panel-body
+   link rule, which the theme loads after this block, so they stay quiet in
+   both modes. */
+.us-contacts-roster .us-contact-row .us-contact-row__reach a:is(.us-contact-row__email, .us-contact-row__phone):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  text-decoration: none;
+}
+
+.us-contact-row .us-contact-row__reach a > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-row .us-contact-row__reach a > i {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+
+.us-contacts-roster .us-contact-row .us-contact-row__reach a:is(.us-contact-row__email, .us-contact-row__phone):hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-link);
+  text-decoration: underline;
+}
+
+/* A blank email or phone keeps its column but shows nothing. */
+.us-contact-row__reach a:has(> span:empty) {
+  visibility: hidden;
+}
+
+/* The theme paints the edit action as a 36px icon button; it overhangs the
+   row padding so rows stay compact. */
+.us-contact-row .us-contact-row__edit:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: edit;
+  justify-self: end;
+  margin-block: -6px;
+}
+
+@container us-contacts-roster (max-width: 619.98px) {
+  .us-contact-row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 28px minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "avatar who   edit"
+      "avatar reach edit";
+    row-gap: 2px;
+  }
+
+  .us-contact-row__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: none;
+  }
+
+  .us-contact-row__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-3);
+    grid-area: reach;
+    min-width: 0;
+  }
+
+  /* As specific as the display rule above, or a blank email leaves a gap. */
+  .us-contacts-roster .us-contact-row .us-contact-row__reach a:has(> span:empty) {
+    display: none;
+  }
+}
+
+
+/* ── C4. us-contacts-tiles ─────────────────────────────────────
+   Target: US-CONTACTS, as a third layout beside us-contact.
+   Tiles of about 230px fill the panel. Avatar, then the name with email,
+   phone and edit as small icon buttons at its right, then one muted
+   "role · group" line that runs under the buttons too, so it is rarely
+   cut short. No badges, so a full grid stays calm. */
+
+.us-contacts-tiles .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-2);
+}
+
+.us-contacts-tiles .QueryTemplateSet > section:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+}
+
+/* The search status and placeholders span the whole grid. */
+.us-contacts-tiles .QueryTemplateSet > :not(section) {
+  grid-column: 1 / -1;
+}
+
+.us-contact-tile:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "avatar name actions"
+    "avatar meta meta";
+  align-items: center;
+  column-gap: 10px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px 8px 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  transition: border-color .12s, box-shadow .12s;
+}
+
+.us-contact-tile:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--border-strong);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--text-strong) 8%, transparent);
+}
+
+.us-contact-tile .us-avatar {
+  grid-area: avatar;
+}
+
+/* The body only groups name and meta in the markup; each takes its own area. */
+.us-contact-tile__body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: contents;
+}
+
+.us-contact-tile__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: name;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-tile__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: meta;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-contact-tile__meta > :empty {
+  display: none;
+}
+
+.us-contact-tile__role:not(:empty) + .us-contact-tile__group:not(:empty)::before {
+  content: " · ";
+}
+
+.us-contact-tile__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  grid-area: actions;
+  align-items: center;
+  margin: -4px 0;
+}
+
+/* As in the roster, specific enough to outweigh the dark-mode link rule. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+/* A blank email or phone has no button. As specific as the display rule
+   above, which otherwise wins and leaves a live link with nothing in it. */
+.us-contacts-tiles .us-contact-tile .us-contact-tile__actions a.us-contact-tile__reach[data-us-contact-value=""]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* The theme's 36px edit button, pulled in to match the 28px reach buttons. */
+.us-contact-tile .us-contact-tile__edit:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: -4px -4px -4px 0;
+}
