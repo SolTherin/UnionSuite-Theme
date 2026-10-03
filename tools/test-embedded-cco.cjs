@@ -1,4 +1,4 @@
-const fs=require('node:fs'),assert=require('node:assert/strict'),example=require('../THeme/UnionSuite/guides/usage/build/embedded-cco-example.cjs');
+const fs=require('node:fs'),assert=require('node:assert/strict'),example=require('../THeme/UnionSuite-Guides/usage/build/embedded-cco-example.cjs');
 const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});
@@ -30,7 +30,7 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
   }
   // Check the user-facing controls in the generated offline guide.
   await page.setViewportSize({width:1440,height:1050});
-  await page.setContent(fs.readFileSync('THeme/UnionSuite/Usage-Guide.html','utf8'),{waitUntil:'domcontentloaded',timeout:60000});
+  await page.setContent(fs.readFileSync('THeme/UnionSuite-Guides/Usage-Guide.html','utf8'),{waitUntil:'domcontentloaded',timeout:60000});
   await page.locator('#embedded-cco').evaluate(n=>n.scrollIntoView({block:'start',behavior:'instant'}));
   const frame=page.frameLocator('#embedded-cco-demo'),outer=frame.locator('#embedded-example-cco > .RadTabStrip');
   assert.equal(await outer.isVisible(),false);

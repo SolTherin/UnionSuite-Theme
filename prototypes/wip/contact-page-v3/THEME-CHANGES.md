@@ -191,6 +191,10 @@ selectors, so it moves across unchanged.
       registry, as in the prototype.
 - [x] Item 23: add `US-IQA-SCROLL-EDGES` beside `US-IQA-COLUMNS`.
 - [x] Item 27: replace `US-COPY` with `theme-candidate-copy.js`.
+- [x] Item 28 revision (2 October 2026): in `zUnionSuite.css` section 28,
+      the quarter-row width cap is replaced by the full-width auto-fit grid
+      (up to five per row) and its wrapped-row dividers.
+      `--us-attention-shown` is dropped from `US-ATTENTION-HIDE-ZERO`.
 - [ ] Item 28: fold `US-ATTENTION-HIDE-ZERO` into the `US-ATTENTION` loader,
       so zero cards are filtered as they render.
       Not done in the merge: `US-ATTENTION-HIDE-ZERO` is its own block,
@@ -219,8 +223,8 @@ selectors, so it moves across unchanged.
       Template updated (26 September 2026), with the `ContactType` field
       definition. The banner IQA still needs the `ContactType` alias.
 - [ ] Item 13: add `Member-Notes-Compact-Query-Template.html` to
-      `guides/usage/templates/List-Templates/`, with its field definitions in
-      `guides/usage/source/query-field-definitions.cjs`. Decide whether it
+      `UnionSuite-Guides/usage/templates/List-Templates/`, with its field definitions in
+      `UnionSuite-Guides/usage/source/query-field-definitions.cjs`. Decide whether it
       replaces the existing notes template (README open decision 7).
 - [x] Item 17: add the `UnionSuiteCcoSidebarConfig` setting to the client
       `Config.js`.
@@ -238,7 +242,8 @@ selectors, so it moves across unchanged.
       resignation template carries their buttons.
 - [x] Item 28: the tracker width cap (section 28) needs
       `--us-attention-shown` set where the `US-ATTENTION` loader filters
-      zero cards.
+      zero cards. Superseded 2 October 2026: the cap and the property are
+      gone (see the item 28 revision).
 - [x] Item 34: add the positions placeholder to `Banner-Contact-Template.html`
       (in `.us-banner__status`, after the status badge). Build the Active
       Positions IQA (README [Active positions](README.md#active-positions)):
@@ -312,7 +317,7 @@ selectors, so it moves across unchanged.
 
 ## Usage guide
 
-- [ ] Document in `THeme/UnionSuite/guides/usage/`: `us-cco-cards`,
+- [ ] Document in `THeme/UnionSuite-Guides/usage/`: `us-cco-cards`,
       `us-cco-collapsible`, `us-cco-rail` (what it includes, and that a
       page-level rail CCO with nothing after it fills to the window bottom on
       short tabs, `US-CCO-RAIL-FILL`), the

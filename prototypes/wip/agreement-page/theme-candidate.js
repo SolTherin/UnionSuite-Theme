@@ -231,10 +231,8 @@
     if (!body) return;
     const milestones = [...set.querySelectorAll('.us-milestone')];
     let rail = body.querySelector(':scope > .us-milestones__rail');
-    let summary = body.querySelector(':scope > .us-milestones__summary');
     if (!milestones.length) {
       rail?.remove();
-      summary?.remove();
       return;
     }
     if (!rail) {
@@ -243,13 +241,7 @@
       rail.setAttribute('aria-label', 'Milestone progress');
       body.prepend(rail);
     }
-    if (!summary) {
-      summary = document.createElement('p');
-      summary.className = 'us-milestones__summary';
-      rail.after(summary);
-    }
     const states = milestones.map(status);
-    const done = states.filter(state => state === 'done').length;
     // Progress reaches the last completed node, as the old rail did.
     const lastDone = states.lastIndexOf('done');
     rail.style.setProperty('--milestones-progress', milestones.length > 1 && lastDone > 0 ? String(lastDone / (milestones.length - 1)) : '0');
@@ -275,7 +267,6 @@
       node.append(circle, label);
       return node;
     }));
-    summary.textContent = done + ' of ' + milestones.length + ' complete';
   }
 
   function syncSelects(wrapper) {
@@ -847,32 +838,342 @@
 })();
 /* US-BANNER-FACTS:END */
 
+/* US-FIELD-GROUPS:START — read-only field panel from a client-editable IQA.
+   Put data-us-fields-query on a .us-field-groups element. The IQA returns one
+   row; its column names lay the panel out, so clients change the panel by
+   editing the IQA's columns only (the same idea as US-BANNER-FACTS):
+   - Every column is a field, in column order, labelled with its name.
+   - Group-Label puts the field under a sub-heading: "Dates-Start date" shows
+     Start date under "Dates". The name splits at the first hyphen only, so
+     "Dates-Re-negotiation" keeps its hyphen; a column without a group cannot
+     have a hyphen in its label.
+   - A group whose name is a number ("1-ID", "2-Start date") starts a new line
+     with no sub-heading.
+   - Columns of the same group are gathered together, groups in the order
+     their first column appears. Columns without a group come first.
+   - Tone-<Label> (success, warning, danger, info) shows the field with that
+     label as a badge, for example Tone-Priority beside Details-Priority.
+   - Alert-Title, Alert-Message and Alert-Tone show a status alert above the
+     fields (the v1 Resolution banner): the title in bold, the message below,
+     coloured by the tone (success, warning, danger, info; else neutral). A
+     blank Alert-Title leaves the alert out. Alert-Only true shows the alert
+     and no fields, for a record with nothing to show yet (an agreement not
+     yet resolved; owner, 3 October 2026).
+   Tone and Alert are reserved and are never group names.
+   Values: blank shows an em dash; ISO dates read "1 Jan 2026"; true/false
+   Yes/No; a web address or email becomes a link. A link or a value longer
+   than 60 characters takes the full row. Values are shown as plain text.
+   Layout: add us-field-groups--single for one field per line (Key dates).
+   Filter: data-us-fields-filter names the IQA filter. Its value is
+   data-us-fields-value, or else the page URL parameter of the same name. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteFieldGroups) {
+    window.UnionSuiteFieldGroups.refresh();
+    return;
+  }
+
+  const SELECTOR = '.us-field-groups[data-us-fields-query]';
+  const TONES = {success: 'success', warning: 'warning', danger: 'danger', info: 'primary'};
+  // Alert tone → native iMIS message class (styled by US-MESSAGES) and icon.
+  const ALERTS = {
+    success: ['AsiSuccess', 'circle-check'],
+    info: ['AsiInformation', 'info-circle'],
+    warning: ['AsiWarning', 'hourglass-high'],
+    danger: ['AsiError', 'alert-circle'],
+    neutral: ['AsiNeutral', 'info-circle']
+  };
+  const WIDE_LENGTH = 60;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const loaded = new WeakMap();
+  let queued = false;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  // Columns in IQA order, from either row shape (/api/query rows are flat).
+  function columns(row) {
+    const properties = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(properties)) return properties.map(item => [String(item.Name), unwrap(item.Value)]);
+    return Object.entries(row || {}).filter(([name]) => name !== '$type').map(([name, value]) => [name, unwrap(value)]);
+  }
+
+  // "Dates-Start date" → group "Dates", name "Start date". Split at the first
+  // hyphen only; a leading or trailing hyphen is part of the name.
+  function parse(column) {
+    const at = column.indexOf('-');
+    const group = at > 0 ? column.slice(0, at).trim() : '';
+    const name = at > 0 ? column.slice(at + 1).trim() : '';
+    return group && name ? {group, name} : {group: '', name: column.trim()};
+  }
+
+  // "Last updated" keeps the author's wording; "LeadStaff" becomes
+  // "Lead staff". Acronyms (ID, EBA) keep their capitals.
+  function label(name) {
+    if (!name || /\s/.test(name)) return name;
+    const words = name.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
+    }).join(' ');
+  }
+
+  // The text to show, and a link target when the value is an address.
+  function format(raw) {
+    const string = text(raw);
+    if (/^(true|false)$/i.test(string)) return {text: /^true$/i.test(string) ? 'Yes' : 'No'};
+    const iso = string.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ]|$)/);
+    if (iso) return {text: Number(iso[3]) + ' ' + MONTHS[Number(iso[2]) - 1] + ' ' + iso[1]};
+    if (/^https?:\/\/\S+$/i.test(string)) return {text: string.replace(/^https?:\/\//i, '').replace(/\/$/, ''), href: string};
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(string)) return {text: string, href: 'mailto:' + string};
+    return {text: string};
+  }
+
+  // Groups in first-appearance order, ungrouped fields first. Tone columns
+  // colour the field of the same name and Alert columns build the alert,
+  // instead of becoming fields.
+  function layoutOf(row) {
+    const tones = new Map();
+    const alert = {};
+    const groups = new Map([['', {heading: '', fields: []}]]);
+    columns(row).forEach(([column, raw]) => {
+      const {group, name} = parse(column);
+      if (/^tone$/i.test(group)) {
+        tones.set(name.toLowerCase(), text(raw).toLowerCase());
+        return;
+      }
+      if (/^alert$/i.test(group)) {
+        alert[name.toLowerCase()] = text(raw);
+        return;
+      }
+      const key = group.toLowerCase();
+      if (!groups.has(key)) groups.set(key, {heading: /^\d+$/.test(group) ? '' : label(group), fields: []});
+      groups.get(key).fields.push({key: name.toLowerCase(), label: label(name), value: format(raw)});
+    });
+    groups.forEach(group => group.fields.forEach(field => { field.tone = TONES[tones.get(field.key)] || ''; }));
+    return {
+      alert: alert.title ? alert : null,
+      groups: [...groups.values()].filter(group => group.fields.length)
+    };
+  }
+
+  function alertNode(alert) {
+    const [className, icon] = ALERTS[(alert.tone || '').toLowerCase()] || ALERTS.neutral;
+    const node = document.createElement('div');
+    node.className = 'us-field-groups__alert ' + className;
+    const mark = document.createElement('i');
+    mark.className = 'ti ti-' + icon + ' us-field-groups__alert-icon';
+    mark.setAttribute('aria-hidden', 'true');
+    const copy = document.createElement('div');
+    copy.className = 'us-field-groups__alert-copy';
+    const title = document.createElement('p');
+    title.className = 'us-field-groups__alert-title';
+    title.textContent = alert.title;
+    copy.append(title);
+    if (alert.message) {
+      const message = document.createElement('p');
+      message.className = 'us-field-groups__alert-message';
+      message.textContent = alert.message;
+      copy.append(message);
+    }
+    node.append(mark, copy);
+    return node;
+  }
+
+  function fieldNode(field) {
+    const item = document.createElement('div');
+    item.className = 'us-fields__field';
+    if (field.value.href || field.value.text.length > WIDE_LENGTH) item.classList.add('us-fields__field--wide');
+    const term = document.createElement('dt');
+    term.textContent = field.label;
+    const definition = document.createElement('dd');
+    // A blank value leaves the dd empty, which the A4 CSS shows as an em dash.
+    if (field.value.href) {
+      const link = document.createElement('a');
+      link.href = field.value.href;
+      link.textContent = field.value.text;
+      if (!field.value.href.startsWith('mailto:')) {
+        link.target = '_blank';
+        link.rel = 'noopener';
+      }
+      definition.append(link);
+    } else if (field.tone && field.value.text) {
+      const badge = document.createElement('span');
+      badge.className = 'us-badge us-badge--' + field.tone;
+      badge.textContent = field.value.text;
+      definition.append(badge);
+    } else if (field.value.text) {
+      definition.textContent = field.value.text;
+    }
+    item.append(term, definition);
+    return item;
+  }
+
+  function note(message) {
+    const node = document.createElement('p');
+    node.className = 'us-field-groups__note';
+    node.textContent = message;
+    return node;
+  }
+
+  function render(root, row) {
+    const single = root.classList.contains('us-field-groups--single');
+    const layout = layoutOf(row);
+    const nodes = layout.groups.map(group => {
+      const section = document.createElement('div');
+      section.className = 'us-field-groups__group';
+      if (group.heading) {
+        const heading = document.createElement('h3');
+        heading.className = 'us-field-groups__heading';
+        heading.textContent = group.heading;
+        section.append(heading);
+      }
+      const list = document.createElement('dl');
+      list.className = single ? 'us-fields us-fields--single' : 'us-fields';
+      list.append(...group.fields.map(fieldNode));
+      section.append(list);
+      return section;
+    });
+    if (layout.alert) {
+      if (/^(true|1|yes)$/i.test(layout.alert.only || '')) nodes.length = 0;
+      nodes.unshift(alertNode(layout.alert));
+    }
+    root.replaceChildren(...(nodes.length ? nodes : [note('No details recorded.')]));
+    root.setAttribute('data-us-fields-state', nodes.length ? 'ready' : 'empty');
+  }
+
+  function config(root) {
+    const query = text(root.dataset.usFieldsQuery);
+    const filter = text(root.dataset.usFieldsFilter);
+    let filterValue = text(root.dataset.usFieldsValue);
+    if (!filterValue && filter) filterValue = text(new URLSearchParams(location.search).get(filter));
+    // Unsubstituted placeholders mean the page has no record yet.
+    if (!/^\$\/.+/.test(query) || !filter || !filterValue || /^[\[{]/.test(filterValue)) return null;
+    return {query, filter, value: filterValue};
+  }
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  async function request(cfg) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const params = new URLSearchParams({QueryName: cfg.query, limit: '1', offset: '0'});
+      params.set(cfg.filter, cfg.value);
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+      });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw Error('Unexpected response');
+      return rows[0] || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function load(root, cfg, force = false) {
+    const key = cfg.query + '|' + cfg.filter + '|' + cfg.value;
+    if (!force && loaded.get(root) === key) return;
+    loaded.set(root, key);
+    root.setAttribute('data-us-fields-state', 'loading');
+    root.setAttribute('aria-busy', 'true');
+    try {
+      const row = await request(cfg);
+      if (loaded.get(root) !== key) return;
+      if (row) render(root, row);
+      else {
+        root.replaceChildren(note('No details recorded.'));
+        root.setAttribute('data-us-fields-state', 'empty');
+      }
+    } catch (error) {
+      if (loaded.get(root) !== key) return;
+      root.replaceChildren(note('These details could not be loaded.'));
+      root.setAttribute('data-us-fields-state', 'error');
+      console.warn('[UnionSuiteFieldGroups] The details could not be loaded:', error.message);
+    } finally {
+      root.removeAttribute('aria-busy');
+    }
+  }
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(SELECTOR).forEach(root => {
+      if (root.closest('.us-report-no-styling')) return;
+      const cfg = config(root);
+      if (cfg) void load(root, cfg);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    setTimeout(refresh, 0);
+  }
+
+  // Load one panel again, for example after its edit popup saves.
+  function reload(root) {
+    const cfg = root?.matches?.(SELECTOR) ? config(root) : null;
+    if (cfg) void load(root, cfg, true);
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || record.attributeName?.startsWith('data-us-fields'))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true,
+    attributeFilter: ['data-us-fields-query', 'data-us-fields-filter', 'data-us-fields-value']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  window.UnionSuiteFieldGroups = Object.freeze({refresh: schedule, reload, version: '0.1-candidate'});
+})();
+/* US-FIELD-GROUPS:END */
+
 /* US-TASK-PROGRESS:START — us-task-progress count.
    Target: US-QUERY-SEARCH in zUnionSuite.js, where it would read the counts
-   directly instead of from the DOM. */
+   directly instead of from the DOM. The heading count for lists with a
+   completed state (owner, 3 October 2026: counts go in the heading):
+   tasks and milestones read "x of y complete", meetings "x upcoming". */
 (function () {
   'use strict';
   if (window.UnionSuiteTaskProgress) return;
+
+  const ROWS = '.us-task, .us-milestone, .us-meeting';
 
   function setOf(wrapper) {
     return wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
   }
 
   // A row being ticked counts as its new state, so the count moves with the tick
-  // rather than after the save and exit animation.
-  function isComplete(task) {
-    return /^(true|1)$/i.test(task.getAttribute('data-us-task-changing') || task.getAttribute('data-us-task-completed') || '');
+  // rather than after the save and exit animation. Milestones and meetings get
+  // data-us-task-completed from US-QUERY-STATES (done; past).
+  function isComplete(row) {
+    return /^(true|1)$/i.test(row.getAttribute('data-us-task-changing') || row.getAttribute('data-us-task-completed') || '');
+  }
+
+  function label(wrapper, done, total) {
+    if (wrapper.matches('.us-meetings')) return (total - done) + ' upcoming';
+    return done + ' of ' + total + ' complete';
   }
 
   function renderProgress(wrapper) {
     const set = setOf(wrapper);
     const header = wrapper.querySelector(':scope > .panel > .panel-heading');
     if (!set || !header) return;
-    const tasks = [...set.querySelectorAll('.us-task')].filter(task => task.closest('.QueryTemplateSet') === set);
-    const done = tasks.filter(isComplete).length;
+    const rows = [...set.querySelectorAll(ROWS)].filter(row => row.closest('.QueryTemplateSet') === set);
+    const done = rows.filter(isComplete).length;
 
     let count = header.querySelector('.us-task-progress__count');
-    if (!tasks.length) {
+    if (!rows.length) {
       count?.remove();
       return;
     }
@@ -883,7 +1184,7 @@
       if (actions) actions.prepend(count);
       else header.append(count);
     }
-    const text = done + ' of ' + tasks.length + ' complete';
+    const text = label(wrapper, done, rows.length);
     // Write only on change: a childList mutation reschedules this render.
     if (count.textContent !== text) count.textContent = text;
   }

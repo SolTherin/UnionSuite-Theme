@@ -7,7 +7,7 @@ with offline fixtures. **Not in the theme, not approved and not deployed.** The
 card layout is being decided in the activity cards workbench
 (`prototypes/wip/activity-cards/`).
 
-The [Theme Usage Guide](THeme/UnionSuite/Usage-Guide.html) lists this feature and
+The [Theme Usage Guide](THeme/UnionSuite-Guides/Usage-Guide.html) lists this feature and
 its proposed classes under planned work. When it is promoted, update that entry
 with the markup and field contract below. Add working templates and class recipes
 to the guide only then.
@@ -112,19 +112,21 @@ Optional attributes: `data-us-activity-limit` (rows per request, default 20),
 placeholder value leaves the feed inactive.
 
 Every core IQA is sorted newest first, filtered on the record filter and the
-named start-date filter, and returns:
+named start-date filter, and returns only the columns its type has data for
+(a missing column is treated as blank, so IQAs are never padded with `''`):
 
 | Alias | Required | Purpose |
 |---|---|---|
 | `ActivityKey` | yes | Unique within the source; source + key identifies a card and filters its details |
 | `ActivityDate` | yes | The business date of the activity (not last-modified). Server-local time; the same server for every source, so order is consistent |
-| `Subject` | yes (may be blank) | Card headline; most records have none |
-| `Summary` | yes (may be blank) | The preview line. A row needs a Subject or a Summary |
-| `Detail` | yes (may be blank) | Plain-text note shown on expand; cap its length in the IQA |
-| `CreatedBy` | yes (may be blank) | "by …" on the type line |
-| `Priority` | yes (may be blank) | `High` or `Urgent` shows a flag |
+| `Subject` | Subject or Summary | Card headline; most records have none |
+| `Summary` | Subject or Summary | The preview line. A row needs a value in one of the two |
+| `Detail` | no | Plain-text note shown on expand; cap its length in the IQA |
+| `CreatedBy` | no | "by …" on the type line |
+| `Priority` | no | `High` or `Urgent` shows a flag |
 | `Category` | no | Sub-type after the type name, such as an interaction's Interaction Type |
-| `FollowUpDate`, `FollowUpActioned` | no | A follow-up task: badge "Follow-up 22 May", amber "Overdue 12 May", or "Follow-up done" |
+| `FollowUpRequired`, `FollowUpDate`, `FollowUpActioned` | no | A follow-up task (`FollowUpRequired` true; without that column, any `FollowUpDate`): badge "Follow-up 22 May", amber "Overdue 12 May", or "Follow-up done" |
+| `FollowUpNotes` | no | What the task needs, under a "Follow-up" heading when the card opens; searchable |
 | `Pinned` | no | Pin icon and amber edge |
 | `DoNotCall` | no | Red no-entry alert icon |
 | `CaseRef`, `CaseUrl` | no | Linked record |

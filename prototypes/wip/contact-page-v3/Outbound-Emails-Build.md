@@ -73,7 +73,7 @@ Findings (dev tenant, 1 October 2026):
 - **A resend is an event**, not a new send: a `Resent` event (code 10) on the original
   recipient row, with the address it went to in `EventReason`. One exists (the test send).
 - **No plain-text body:** `Text` is empty on 159 of 160 logs; `Html` is stored (up to
-  11,000+ characters). The cards leave `Summary` and `Detail` blank and the native preview
+  11,000+ characters). The core IQAs return no `Summary` or `Detail` and the native preview
   shows the email.
 - **No campaign data:** `SourceProcess` is NULL on every log and `SourceCodeKey` is unused.
   Attachments are left out (decision).
@@ -99,7 +99,7 @@ Each **send** is its own card: the original send and every resend.
 
 | Feed source | IQA | Card is | `ActivityKey` | `Category` |
 |---|---|---|---|---|
-| `emails-out` | `Outbound Emails` | an original send (one recipient row) | recipient key | `''` |
+| `emails-out` | `Outbound Emails` | an original send (one recipient row) | recipient key | — (left out) |
 | `emails-resent` | `Outbound Email Resends` | a resend (one `Resent` event) | event key | `Resend` |
 
 Both use `data-type="email"`, so they share the Emails tab and its count (the feed sums
@@ -271,10 +271,12 @@ Sources: `_i4u_UT_OutboundEmails`; the sender (left join).
 | `ActivityKey` | `RecipientKey` |
 | `ActivityDate` | `SentDate` |
 | `Subject` | `Subject` |
-| `Summary`, `Detail` | `''` |
 | `CreatedBy` | sender `FullName` |
-| `Priority`, `Category`, `CaseRef`, `CaseUrl` | `''` |
 | `RecordUrl` | expression above |
+
+These are all its columns. Earlier builds also returned `Summary`, `Detail`, `Priority`,
+`Category`, `CaseRef` and `CaseUrl` as `''`; remove them (the feed treats a missing column
+as blank).
 
 Sort: `SentDate` descending, then `RecipientKey` descending.
 
@@ -321,10 +323,12 @@ person who resent it).
 | `ActivityKey` | `EventKey` |
 | `ActivityDate` | `EventDate` |
 | `Subject` | `Subject` |
-| `Summary`, `Detail`, `Priority`, `CaseRef`, `CaseUrl` | `''` |
 | `CreatedBy` | sender `FullName` |
 | `Category` | `'Resend'` |
 | `RecordUrl` | expression above, on `[vBo_i4u_UT_OutboundEmails_History]` |
+
+These are all its columns. Earlier builds also returned `Summary`, `Detail`, `Priority`,
+`CaseRef` and `CaseUrl` as `''`; remove them.
 
 Sort: `EventDate` descending, then `EventKey` descending.
 
@@ -392,10 +396,11 @@ WARN / FAIL table and keeps everything it fetched in `window.outboundEmailProbe`
 
 - filter names (`QueryParameterDefinition`), `ID` required, `StartDate` optional and
   working, `ActivityKey` required on details and history;
-- the core columns, no extra columns, unique non-blank keys, readable dates, newest first,
+- exactly each core IQA's columns (a missing or misspelt alias fails; a leftover `''`
+  padding column warns), unique non-blank keys, readable dates, newest first,
   non-overlapping pages, `TotalCount` (and with `limit=1`);
-- `Category` (blank or `Resend`), `RecordUrl` (the native preview for this contact and
-  recipient), blank `Summary`/`Detail`, no HTML, a sender name;
+- `Category` (absent or `Resend`), `RecordUrl` (the native preview for this contact and
+  recipient), no HTML, a sender name;
 - details: one row, the `Additional-*` labels as returned (also answers the alias-format
   question), the expected fields;
 - history: oldest first, no `Resent`, valid `EventTone` matching the event, and the test

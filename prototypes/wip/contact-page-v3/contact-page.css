@@ -47,9 +47,7 @@ body.cv2-page {
   margin-top: 20px;
 }
 
-/* Four contact trackers fit one row on desktop. */
 .cv2-trackers {
-  --us-attention-columns: 4;
   margin-bottom: 20px;
 }
 

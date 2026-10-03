@@ -14,7 +14,7 @@ It covers:
   `zzDarkMode.css` and the client `Override.css`
 - Code readability and CSS formatting requirements for project-owned source
 - The iPart wrapper contract (an iPart CSS class inserts an extra `<div>`)
-- The guide workflow — `THeme/UnionSuite/guides/usage/` is the documentation
+- The guide workflow — `THeme/UnionSuite-Guides/usage/` is the documentation
   source of truth; update it alongside features and rebuild with
   `node tools/build-theme-usage.cjs`, then run its `--check` and
   `node tools/check-usage-sources.cjs`

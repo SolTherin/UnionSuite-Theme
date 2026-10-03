@@ -61,7 +61,8 @@
       iqa: '/iMIS/QueryBuilder/Design.aspx?iMode=Edit&TemplateType=E&iUniformKey={key}&iOperation=Edit&DocumentTypeCode=IQD&IsPopup=true',
       content: '/AsiCommon/Controls/ContentManagement/ContentDesigner/ContentRecordEdit.aspx?iMode=Edit&iUniformKey={key}&iOperation=Edit&TemplateType=E&DocumentTypeCode=CON&IsPopup=true'
     },
-    dialogSize: { width: '70%', height: '70%' },
+    // Matches the native iMIS editor dialogs (Edit Panel and others open at 95%).
+    dialogSize: { width: '95%', height: '95%' },
     settingsEntity: 'i4u_UT_UserSettings',
     settingsKey: 'Taskbar-Bookmarks',
     // One row per user is expected; read a few so duplicates are visible.
@@ -200,6 +201,10 @@
   let saveChain = Promise.resolve();
   let hasUnsavedChange = false;
   let barVisible = false;
+  // Unique ids for Recents folder paths, the shared copy buttons' targets.
+  let recentPathCount = 0;
+  // The bookmarks bar slide in progress (see slideBar), or null.
+  let barSlide = null;
   let scope = 'mine';
   let mounted = null;
   let observer = null;
@@ -479,9 +484,31 @@
   padding: 5px;
 }
 
-.us-bookmarks-toggle[aria-expanded="true"] {
-  background: var(--bg-sunken);
-  color: var(--text-strong);
+/* The theme's one "on" state for heading icon toggles (the IQA filter
+   button, Show completed tasks): selected fill, link-coloured icon, tinted
+   border and a pressed inset. The --iqa-* aliases are declared on IQA
+   owners only, so the taskbar maps them to the same root tokens itself. */
+.us-bookmarks-toggle {
+  --iqa-selected: var(--brand-100, #d0e4ea);
+  --iqa-link: var(--text-link, #006f94);
+}
+
+.us-bookmarks-toggle[aria-expanded="true"],
+.us-bookmarks-toggle[aria-expanded="true"]:hover {
+  background: var(--iqa-selected);
+  border-color: color-mix(in srgb, var(--iqa-link) 28%, transparent);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
+  color: var(--iqa-link);
+}
+
+:root[data-us-color-scheme="dark"] .us-bookmarks-toggle {
+  --iqa-selected: var(--dm-selected);
+}
+
+@media (forced-colors: active) {
+  .us-bookmarks-toggle[aria-expanded="true"] {
+    border: 2px solid Highlight;
+  }
 }
 
 .us-bookmarks-bar {
@@ -492,6 +519,12 @@
 
 .us-bookmarks-bar[hidden] {
   display: none;
+}
+
+/* While the bar slides open or closed its height is animated, so the
+   bookmarks are clipped rather than spilling over the page. */
+.us-bookmarks-bar.is-sliding {
+  overflow: hidden;
 }
 
 .us-bookmarks-bar .us-bookmarks-label {
@@ -812,8 +845,36 @@
   cursor: pointer;
 }
 
-.us-recent-item:hover {
+/* Each row holds the open button and a copy button (the shared us-copy). */
+.us-recent-row {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+}
+
+.us-recent-row:hover {
   background: var(--bg-sunken);
+}
+
+.us-recent-row > .us-recent-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.us-recent-row > .us-recent-copy {
+  margin-right: 4px;
+  --copy-hover: var(--bg-surface);
+}
+
+/* The popover clips anything past its edge, so the shared "Copied" label
+   shows on the copy button's left, over the open arrow. */
+.us-recent-row > .us-recent-copy > .us-copy-label {
+  inset-inline-start: auto;
+  inset-inline-end: calc(50% + 12px);
+}
+
+.us-recent-row:has(> .us-recent-copy[data-us-copy-state]) .us-recent-item > .ti {
+  visibility: hidden;
 }
 
 .us-recent-item > span {
@@ -1629,7 +1690,8 @@
       toggle.setAttribute('aria-expanded', String(barVisible));
     }
 
-    bar.hidden = !barVisible;
+    // A running slide owns the bar's visibility until it finishes.
+    if (!barSlide) bar.hidden = !barVisible;
     bar.replaceChildren();
     const nav = document.createElement('nav');
     nav.id = 'us-tb-bookmarks-bar-nav';
@@ -1653,6 +1715,56 @@
     nav.append(barItems);
     if (mounted && mounted.recentsButton) nav.append(mounted.recentsButton);
     bar.append(nav);
+  }
+
+  // Slides the bookmarks bar open or closed from the toggle. The bar's height,
+  // vertical padding and top border grow from zero, so the page below moves
+  // with it rather than jumping. Reduced motion shows or hides it at once.
+  function slideBar(show) {
+    const bar = query('#us-tb-bookmarks-bar');
+    if (!bar) return;
+    // Reversing mid-slide starts from wherever the bar has got to.
+    const from = barSlide ? bar.getBoundingClientRect().height : null;
+    if (barSlide) barSlide.cancel();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof bar.animate !== 'function') {
+      bar.hidden = !show;
+      return;
+    }
+
+    bar.hidden = false;
+    const style = getComputedStyle(bar);
+    const open = {
+      height: style.height,
+      paddingTop: style.paddingTop,
+      paddingBottom: style.paddingBottom,
+      borderTopWidth: style.borderTopWidth,
+      opacity: 1
+    };
+    const closed = { height: '0px', paddingTop: '0px', paddingBottom: '0px', borderTopWidth: '0px', opacity: 0 };
+    const total = bar.getBoundingClientRect().height || 1;
+    const progress = from === null ? (show ? 0 : 1) : Math.min(1, from / total);
+    const remaining = show ? 1 - progress : progress;
+
+    bar.classList.add('is-sliding');
+    const animation = bar.animate(show ? [closed, open] : [open, closed], {
+      duration: 220,
+      easing: 'cubic-bezier(.2, .8, .2, 1)'
+    });
+    // Skip ahead when a reverse starts part of the way through.
+    animation.currentTime = 220 * (1 - remaining);
+    barSlide = animation;
+
+    const settle = () => {
+      if (barSlide !== animation) return;
+      barSlide = null;
+      bar.classList.remove('is-sliding');
+      bar.hidden = !barVisible;
+    };
+    animation.onfinish = settle;
+    animation.oncancel = () => {
+      if (barSlide === animation) barSlide = null;
+      bar.classList.remove('is-sliding');
+    };
   }
 
   function updateBookmarks(message) {
@@ -2128,7 +2240,26 @@
     );
     // The visible folder may be clipped, so the tooltip carries the full path.
     if (item.Path) node.title = title + '\n' + item.Path;
-    return node;
+
+    // A button cannot hold another button, so the row wraps the open button
+    // and a copy button. The theme's shared US-COPY controller (zUnionSuite.js)
+    // copies the folder text, shows its tick and "Copied", and flashes the
+    // folder, as copy buttons do elsewhere.
+    const row = document.createElement('div');
+    row.className = 'us-recent-row';
+    row.append(node);
+    const path = node.querySelector('.us-recent-item__path');
+    if (path) {
+      path.id = 'us-tb-recent-path-' + (++recentPathCount);
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'us-copy us-recent-copy';
+      copy.dataset.usCopyTarget = path.id;
+      copy.setAttribute('aria-label', 'Copy folder path: ' + folder);
+      copy.title = 'Copy folder path';
+      row.append(copy);
+    }
+    return row;
   }
 
   function openRecentItem(section, item, title) {
@@ -2185,6 +2316,7 @@
         barVisible = !barVisible;
         writeBarVisible(barVisible);
         renderBookmarks();
+        slideBar(barVisible);
         query('#us-tb-bookmarks-toggle').focus();
       }
     );

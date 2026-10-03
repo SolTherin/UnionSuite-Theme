@@ -14,7 +14,7 @@ awaiting live acceptance. Behaviour is the `US-CCO-SWITCH` section of
 mode, so `zzDarkMode.css` needs no change), and the site-wide setting is in
 `THeme/UnionSuite-Client/Config.js`. The usage guide documents it at
 `#cco-tab-switching`. The 23 offline scenarios are in
-`THeme/UnionSuite/guides/usage/tests/test-cco-switch.cjs`. Keep this spec here
+`THeme/UnionSuite-Guides/usage/tests/test-cco-switch.cjs`. Keep this spec here
 until the live checklist passes on the deployed theme.
 
 **Implementing it:** read the [implementation guide](IMPLEMENTATION.md). It covers

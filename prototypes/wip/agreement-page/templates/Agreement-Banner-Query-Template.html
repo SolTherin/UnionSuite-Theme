@@ -13,8 +13,12 @@
                              red …; other statuses neutral; list in A6 CSS)
 
      Second row (client-configurable): filled by US-BANNER-FACTS from the
-     Agreement Banner Details IQA named in data-us-facts-query, filtered on
-     the AgreementNum filter with the page's AgreementNum URL parameter.
+     Banner Details IQA named in data-us-facts-query (built 3 October 2026
+     in $/_i4u_/Core/CA/v2/; "API -" because only the API reads it),
+     filtered with
+     the page's AgreementNum URL parameter: in that IQA, Ordinal Equal,
+     prompted and required, search label AgreementNum (the table's key;
+     owner, 3 October 2026).
      Clients change the details by editing that IQA's columns only:
      - Description             optional, shown first under "Description"
      - Additional-<Label>      one fact per column, in column order, labelled
@@ -59,5 +63,5 @@
       </div>
     </div>
   </div>
-  <div class="us-banner__details" data-us-facts-query="$/_i4u_/SandBox/CA/Agreement Banner Details" data-us-facts-filter="AgreementNum"></div>
+  <div class="us-banner__details" data-us-facts-query="$/_i4u_/Core/CA/v2/API - Manage Agreement - Banner Details" data-us-facts-filter="AgreementNum"></div>
 </header>

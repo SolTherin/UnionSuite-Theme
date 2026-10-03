@@ -37,6 +37,7 @@
   <span class="ap-tag">WIP · sample data · live theme CSS/JS + candidate</span>
   <button type="button" class="ap-toggle" id="ap-save-failing" aria-pressed="false">Saves: succeed</button>
   <button type="button" class="ap-toggle" id="ap-color-scheme" aria-pressed="false">Mode: light</button>
+  <a href="index-v2.html">Compare: layout v2</a>
   <a href="../../Agreement%20Management/Agreement-Management-Prototype.html">Open v1 mock-up</a>
 </div>
 
@@ -45,7 +46,7 @@
 
   <!-- ═══ Banner · Query Template Display (Banner primary IQA, one record) ·
        CSS class: us-banner us-banner-collapsible · templates/Agreement-Banner-Query-Template.html.
-       The second row loads from the Agreement Banner Details IQA (US-BANNER-FACTS). ═══ -->
+       The second row loads from the Banner Details API IQA in $/_i4u_/Core/CA/v2/ (US-BANNER-FACTS). ═══ -->
   <div><div class="row"><div class="col-sm-12"><div class="ContentItemContainer" id="ste_container_ciBanner"><div class="WebPartZone"><div class="iMIS-WebPart"><div class="ContentItemContainer"><div class="us-banner us-banner-collapsible">
     <header class="us-banner__surface us-banner__surface--glass us-banner__surface--status us-banner__surface--rows" data-us-record-status="Active">
       <div class="us-banner__summary">
@@ -78,7 +79,7 @@
           </div>
         </div>
       </div>
-      <div class="us-banner__details" data-us-facts-query="$/_i4u_/SandBox/CA/Agreement Banner Details" data-us-facts-filter="AgreementNum"></div>
+      <div class="us-banner__details" data-us-facts-query="$/_i4u_/Core/CA/v2/API - Manage Agreement - Banner Details" data-us-facts-filter="AgreementNum"></div>
     </header>
   </div></div></div></div></div></div></div></div>
 
@@ -104,59 +105,39 @@
       <!-- ── OVERVIEW ────────────────────────────────────────── -->
       <div class="rmpView" id="view-overview">
 
-        <!-- Query Template Display (AgreementDetails IQA, one record) ·
-             CSS class: us-query-template us-action-agreements-edit · templates/Agreement-Details-Query-Template.html -->
+        <!-- Query Template Display (Agreement Details IQA, one record) ·
+             CSS class: us-query-template us-action-agreements-edit · templates/Agreement-Field-Groups-Query-Template.html
+             The fields come from the IQA's column names (US-FIELD-GROUPS). -->
         <div class="ContentItemContainer" id="ste_container_ciDetails"><div class="us-query-template us-action-agreements-edit"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[folder]] Agreement details</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
             <section data-item="details-0"><div class="QueryTemplateItem">
-              <dl class="us-fields">
-                <div class="us-fields__field"><dt>Agreement number</dt><dd>A107</dd></div>
-                <div class="us-fields__field"><dt>Type</dt><dd>EBA_SupportedBargaining</dd></div>
-                <div class="us-fields__field"><dt>Status</dt><dd>Active</dd></div>
-                <div class="us-fields__field"><dt>Industry</dt><dd>AGR</dd></div>
-                <div class="us-fields__field"><dt>Sector</dt><dd>Federal</dd></div>
-                <div class="us-fields__field"><dt>Lead staff</dt><dd>Mary O'Conner</dd></div>
-                <div class="us-fields__field"><dt>Workbench</dt><dd>Avengers</dd></div>
-                <div class="us-fields__field"><dt>Tags</dt><dd></dd></div>
-                <div class="us-fields__field"><dt>Subtags</dt><dd></dd></div>
-                <div class="us-fields__field us-fields__field--wide"><dt>Agreement link</dt><dd><a href="https://www.fairwork.com/Agreement123" target="_blank" rel="noopener">www.fairwork.com/Agreement123</a></dd></div>
-              </dl>
+              <div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/CA/Agreement Details" data-us-fields-filter="AgreementNum"></div>
             </div></section>
           </div></div></div>
         </div></div></div>
 
         <div class="row ap-row">
           <div class="col-md-6">
-            <!-- Query Template Display (KeyDates IQA) · CSS class: us-query-template us-action-agreements-edit-key-dates -->
-            <div class="ContentItemContainer" id="ste_container_ciKeyDates"><div class="us-query-template us-action-agreements-edit-key-dates"><div class="panel">
+            <!-- Query Template Display (Agreement Key Dates IQA, one record) ·
+                 CSS class: us-query-template us-action-agreements-edit-key-dates us-panel-fill · templates/Agreement-Field-Groups-Query-Template.html -->
+            <div class="ContentItemContainer" id="ste_container_ciKeyDates"><div class="us-query-template us-action-agreements-edit-key-dates us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[calendar-event]] Key dates</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
                 <section data-item="dates-0"><div class="QueryTemplateItem">
-                  <dl class="us-fields us-fields--single">
-                    <div class="us-fields__field"><dt>Start</dt><dd>1 Jan 2026</dd></div>
-                    <div class="us-fields__field"><dt>Completed</dt><dd>21 May 2026</dd></div>
-                    <div class="us-fields__field"><dt>Approved</dt><dd></dd></div>
-                    <div class="us-fields__field"><dt>Expiry</dt><dd></dd></div>
-                    <div class="us-fields__field"><dt>Renegotiation</dt><dd>29 Oct 2026</dd></div>
-                  </dl>
+                  <div class="us-field-groups us-field-groups--single" data-us-fields-query="$/_i4u_/SandBox/CA/Agreement Key Dates" data-us-fields-filter="AgreementNum"></div>
                 </div></section>
               </div></div></div>
             </div></div></div>
           </div>
           <div class="col-md-6">
-            <!-- Query Template Display (Resolution IQA) · CSS class: us-query-template us-action-agreements-record-resolution -->
-            <div class="ContentItemContainer" id="ste_container_ciResolution"><div class="us-query-template us-action-agreements-record-resolution"><div class="panel">
+            <!-- Query Template Display (Agreement Resolution IQA, one record) ·
+                 CSS class: us-query-template us-action-agreements-record-resolution us-panel-fill · templates/Agreement-Field-Groups-Query-Template.html -->
+            <div class="ContentItemContainer" id="ste_container_ciResolution"><div class="us-query-template us-action-agreements-record-resolution us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[trophy]] Resolution</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList">
                 <section data-item="resolution-0"><div class="QueryTemplateItem">
-                  <dl class="us-fields">
-                    <div class="us-fields__field"><dt>Outcome type</dt><dd>All Terms Agreed</dd></div>
-                    <div class="us-fields__field"><dt>Approved date</dt><dd></dd></div>
-                    <div class="us-fields__field"><dt>Approved by</dt><dd>23116</dd></div>
-                    <div class="us-fields__field"><dt>Signed by</dt><dd>18108</dd></div>
-                    <div class="us-fields__field us-fields__field--wide"><dt>Outcome</dt><dd>Successfully completed with all terms agreed</dd></div>
-                  </dl>
+                  <div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/CA/Agreement Resolution" data-us-fields-filter="AgreementNum"></div>
                 </div></section>
               </div></div></div>
             </div></div></div>
@@ -166,20 +147,20 @@
         <div class="row ap-row">
           <div class="col-md-6">
             <!-- Query Template Display (Tasks IQA) · CSS class:
-                 us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task
+                 us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task us-panel-fill
                  · templates/Agreement-Tasks-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciTasks"><div class="us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciTasks"><div class="us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[square-check]] Tasks</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-tasks"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
           </div>
           <div class="col-md-6">
             <!-- Query Template Display (Milestones IQA) · CSS class:
-                 us-query-template us-milestones us-task-completed-filter us-action-agreements-add-milestone
+                 us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone us-panel-fill
                  · templates/Agreement-Milestones-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciMilestones"><div class="us-query-template us-milestones us-task-completed-filter us-action-agreements-add-milestone"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciMilestones"><div class="us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[flag]] Milestones</h2></div>
-              <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-milestones"></div></div></div>
+              <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-milestones"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
           </div>
         </div>
@@ -199,20 +180,20 @@
         <div class="row ap-row">
           <div class="col-md-6">
             <!-- Query Template Display (Attachments IQA) · CSS class:
-                 us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment
+                 us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment us-panel-fill
                  · templates/Agreement-Attachments-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciAttachments"><div class="us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciAttachments"><div class="us-query-template us-attachments us-query-search us-list-scroll us-action-agreements-upload-attachment us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[paperclip]] Attachments</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-attachments"></div></div></div>
             </div></div></div>
           </div>
           <div class="col-md-6">
             <!-- Query Template Display (Meetings IQA) · CSS class:
-                 us-query-template us-meetings us-task-completed-filter us-list-scroll us-action-agreements-add-meeting
+                 us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting us-panel-fill
                  · templates/Agreement-Meetings-Query-Template.html -->
-            <div class="ContentItemContainer" id="ste_container_ciMeetings"><div class="us-query-template us-meetings us-task-completed-filter us-list-scroll us-action-agreements-add-meeting"><div class="panel">
+            <div class="ContentItemContainer" id="ste_container_ciMeetings"><div class="us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[calendar]] Meetings</h2></div>
-              <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-meetings"></div></div></div>
+              <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-meetings"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
             </div></div></div>
           </div>
         </div>
@@ -255,11 +236,11 @@
 
         <div class="row ap-row">
           <div class="col-md-5">
-            <!-- BeyondForm iPart (unchanged) · CSS class: us-query-template us-form
+            <!-- BeyondForm iPart (unchanged) · CSS class: us-query-template us-form us-panel-fill
                  (us-query-template gives it the shared card shell; us-form styles the fields).
                  Native title: Add scheduled increase. The separate "Increase anchor"
                  Content iPart is no longer needed. -->
-            <div class="ContentItemContainer"><div class="us-query-template us-form"><div class="panel">
+            <div class="ContentItemContainer"><div class="us-query-template us-form us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[trending-up]] Add scheduled increase</h2></div>
               <div class="panel-body-container"><div class="panel-body">
                 <div class="rendered-form">
@@ -272,8 +253,8 @@
             </div></div></div>
           </div>
           <div class="col-md-7">
-            <!-- Query Menu (Scheduled Increases) · no CSS class needed. -->
-            <div class="ContentItemContainer"><div class="panel">
+            <!-- Query Menu (Scheduled Increases) · CSS class: us-panel-fill. -->
+            <div class="ContentItemContainer"><div class="us-panel-fill"><div class="panel">
               <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
               <div class="panel-body-container"><div class="panel-body"><div id="ap-increases_ContentPanel"><div id="ap-increases_ListerPanel"><div data-gridid="ap-increases"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
                 <thead><tr><th class="rgHeader" scope="col">Class</th><th class="rgHeader" scope="col">Total increase (%)</th></tr></thead>
@@ -284,7 +265,7 @@
                   <tr class="rgAltRow"><td>Test</td><td class="ap-num">2.00</td></tr>
                 </tbody>
               </table></div></div></div></div></div></div>
-            </div></div>
+            </div></div></div>
           </div>
         </div>
       </div>

@@ -1970,18 +1970,26 @@
    "Nothing needs attention" line instead of a row of zeros.
    Target: US-ATTENTION.
    -------------------------------------------------------------------------- */
-/* No card grows past a quarter of the row (--us-attention-slots): with one
-   or two trackers left the box narrows to them, instead of one card
-   stretching the full width with its count and chevron far apart. Four fill
-   the row as before. The box never drops below 440px, so its own container
-   stays wider than the theme's 420px stacked layout, and on phones that
-   floor is the full width anyway. The all-clear line keeps the floor too.
-   US-ATTENTION-HIDE-ZERO sets --us-attention-shown. The width changes
-   instantly (owner, 26 September 2026): it changes once, as the counts
-   load, and animating width would relayout the page on every frame. */
-.us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  --us-attention-slots: 4;
-  width: min(100%, max(440px, 100% * var(--us-attention-shown, 4) / var(--us-attention-slots)));
+/* Revised 2 October 2026 (owner) and promoted to zUnionSuite.css: the box
+   fills the row and the visible cards share it, up to five per row; a sixth
+   wraps to a new row. auto-fit drops the tracks that hidden zero cards would
+   have used, so four visible cards take a quarter each and one takes the
+   whole row. The 180px floor keeps cards readable before the theme's 700px
+   two-column layout takes over. */
+@container us-attention (min-width: 701px) {
+  .us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-attention__items {
+    grid-template-columns: repeat(auto-fit, minmax(max(180px, 20%), 1fr));
+    /* Hidden cards make nth-child unreliable, so every card draws its top
+       and start rules and the list tucks 1px under the header and the box
+       edge. A wrapped row then gets its divider; the first row's rules sit
+       on lines that are already there. */
+    margin: -1px 0 0 -1px;
+  }
+
+  .us-attention--hide-zero:not(:where(.us-report-no-styling, .us-report-no-styling *)) > .us-attention__items > li:not([hidden]) {
+    border-top: 1px solid var(--border);
+    border-inline-start: 1px solid var(--border);
+  }
 }
 
 .us-attention--hide-zero > .us-attention__items[hidden],

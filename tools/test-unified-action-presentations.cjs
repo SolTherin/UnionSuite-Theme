@@ -7,7 +7,7 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
  try{
   const page=await browser.newPage({viewport:{width:1280,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route(/^https?:/,r=>r.abort());
-  await page.goto(pathToFileURL(path.resolve('THeme/UnionSuite/Usage-Guide.html')).href+'#unified-action-route');
+  await page.goto(pathToFileURL(path.resolve('THeme/UnionSuite-Guides/Usage-Guide.html')).href+'#unified-action-route');
   const demo=page.frameLocator('#unified-action-demo');
   const edit=demo.locator('#B_ResultsGrid .us-action-example-edit').first();await edit.click();
   assert.match(await demo.locator('#example-context').innerText(),/Member 202, job 22/);

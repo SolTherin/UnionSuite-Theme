@@ -19,8 +19,8 @@ THeme/**/*.zip
 /Custom CCO iPart/
 
 # Generated guides and component previews; rebuild from maintained sources
-/THeme/UnionSuite/Usage-Guide.html
-/THeme/UnionSuite/Theme-Config.html
+/THeme/UnionSuite-Guides/Usage-Guide.html
+/THeme/UnionSuite-Guides/Theme-Config.html
 /references/*.html
 !/references/index.html
 # Approved unimplemented designs remain directly reviewable after checkout

@@ -61,7 +61,7 @@ The preview's Replay, Scratch head and Curious tilt buttons are not injected
 into the production header. They call the same maintained code:
 `UnionSuiteTaskbar.playPipIdle('scratch' | 'curious')` accepts only a visible
 visit and does not advance the click count or revive a dismissed greeting.
-See [the guide](../Usage-Guide.html#taskbar-pip) for accessibility, exact timing,
+See [the guide](../../UnionSuite-Guides/Usage-Guide.html#taskbar-pip) for accessibility, exact timing,
 installation and copyable configuration.
 
 ## Quick Search
@@ -104,7 +104,7 @@ The document-level `UnionSuiteAppearance` API follows the device on first use,
 persists explicit choices per browser/origin, and supports `toggle()`, `reset()`,
 `setPreference('light'|'dark'|'system')`, `getState()` and `refresh()`.
 Load the same assets in themed iframe/popup documents; CSS cannot cross frames.
-The shared guide's [dark mode section](../Usage-Guide.html#taskbar-dark-mode)
+The shared guide's [dark mode section](../../UnionSuite-Guides/Usage-Guide.html#taskbar-dark-mode)
 has the exact order, lifecycle, palette ownership and native coverage limits.
 
 Verify authenticated search, real query permissions, record navigation and partial

@@ -11,7 +11,7 @@ const script = text => text.replace(/<\/script/gi, '<\\/script');
 const specimens = require('../prototypes/approved/task-rows/task-specimens.cjs');
 
 // Both variants are supported templates now: the accepted row and the older one.
-const supportedDirectory = 'THeme/UnionSuite/guides/usage/templates/List-Templates/';
+const supportedDirectory = 'THeme/UnionSuite-Guides/usage/templates/List-Templates/';
 const template = file => read(supportedDirectory + file).replace(/<!--[\s\S]*?-->\s*/g, '').trim();
 
 function themeStyles() {
@@ -24,7 +24,7 @@ function themeStyles() {
   return [
     // Native base first: it sets html{font-size:62.5%}, so anything sized in rem
     // behaves here exactly as it does on a real iMIS page.
-    read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'),
+    read('THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css'),
     read('THeme/UnionSuite/99-Orion.css'),
     read('THeme/UnionSuite/zUnionSuite.css'),
     read('THeme/UnionSuite-Client/Branding.css'),

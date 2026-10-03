@@ -376,9 +376,8 @@
   // - payroll: the employer deducts it from salary (pre-tax) and remits it.
   // The toolbar switches the type (Billing, Balance, Outstanding, payment
   // history) and the arrears (also the Summary alert, bell, Finance tab
-  // badge, tracker and Financial status). Outstanding is a placeholder until
-  // the HubQueryTemplate iPart is built; the owing rows stay here for it. When
-  // the grid returns, remove the panel when there is nothing to list.
+  // badge, tracker and Financial status). Outstanding is removed when there
+  // is nothing to list, as its iPart does not render an empty query.
   const owingRow = (ref, type, description, due, amount, [tone, text, title]) =>
     '<tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="' + ref + '">' + ref + '</a></td><td>' + type +
     '</td><td>' + description + '</td><td>' + due + '</td><td class="cv2-num">' + amount + '</td><td><span class="us-badge us-badge--icon us-badge--' + tone +
@@ -522,7 +521,6 @@
     window.UnionSuiteRowGroups?.releaseAll();
     ['cv3-bill-type', 'cv3-bill-frequency', 'cv3-bill-amount', 'cv3-bill-method', 'cv3-bill-next'].forEach((id, index) => setText(id, type.billing[index]));
 
-    // Fills nothing while Outstanding shows the HubQueryTemplate placeholder.
     const rows = inArrears ? type.owing : type.current;
     const body = document.getElementById('cv3-outstanding-rows');
     if (body) {

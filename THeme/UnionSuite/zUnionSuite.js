@@ -8017,8 +8017,6 @@ SOFTWARE.
     });
     const allClear = items.length > 0 && shown === 0;
     if (items.length) list.style.setProperty('--us-attention-columns', String(Math.max(1, shown)));
-    // The box narrows to the visible cards (CSS section 28).
-    root.style.setProperty('--us-attention-shown', String(shown));
     list.hidden = allClear;
 
     let clear = root.querySelector(':scope > .us-attention__clear');
@@ -8464,17 +8462,20 @@ SOFTWARE.
    data-plural name any other type). Every core IQA is sorted newest first
    and filtered on the record filter and the named start-date filter. Its
    fixed columns draw the collapsed card, the note and the View button:
-     required  ActivityKey, ActivityDate, Subject, Summary, Detail,
-               CreatedBy, Priority (a value may be blank; a row needs a
-               key, a date and a Subject or Summary)
-     optional  Category (a sub-type after the type, such as an
+     required  ActivityKey, ActivityDate, and Subject or Summary (a row
+               needs a key, a date and a value in one of the two)
+     optional  Detail, CreatedBy, Priority, Category (a sub-type after the type, such as an
                interaction's Call or Site Meeting), CaseRef, CaseUrl,
                RecordUrl, Direction (In|Out; overrides data-direction),
-               FollowUpDate and FollowUpActioned (a follow-up task),
+               FollowUpRequired, FollowUpDate, FollowUpNotes and
+               FollowUpActioned (a follow-up task),
                Pinned and DoNotCall (true|1|yes)
-   Priority shows a flag for High or Urgent only. A FollowUpDate shows a
-   follow-up badge: "Follow-up 22 May" while open, amber "Overdue 12 May"
-   once the date has passed, "Follow-up done" when FollowUpActioned is true.
+   Priority shows a flag for High or Urgent only. A follow-up task
+   (FollowUpRequired true; without that column, any FollowUpDate) shows a
+   badge: "Follow-up 22 May" while open (no date when FollowUpDate is
+   blank), amber "Overdue 12 May" once the date has passed, "Follow-up
+   done" when FollowUpActioned is true. FollowUpNotes shows under a
+   "Follow-up" heading when the card opens, and is searchable.
    DoNotCall shows a red no-entry alert icon. Pinned shows a pin icon and an
    accent edge; while a type whose records
    can be pinned (Interactions) is chosen, a pin toggle in the search field
@@ -8738,6 +8739,10 @@ SOFTWARE.
     const direction = text(field(row, 'Direction')).toLowerCase() || source.direction;
     const priority = text(field(row, 'Priority'));
     const yes = name => /^(true|1|yes)$/i.test(text(field(row, name)));
+    // FollowUpRequired, when the IQA returns it, decides whether the record
+    // is a follow-up task; without that column a FollowUpDate alone does.
+    const followUpDate = parseDate(field(row, 'FollowUpDate'), timeZone);
+    const task = field(row, 'FollowUpRequired') === undefined ? Boolean(followUpDate) : yes('FollowUpRequired');
     return {
       id: source.key + ':' + key,
       key,
@@ -8748,8 +8753,10 @@ SOFTWARE.
       detail: text(field(row, 'Detail')),
       createdBy: text(field(row, 'CreatedBy')),
       category: text(field(row, 'Category')),
-      followUp: parseDate(field(row, 'FollowUpDate'), timeZone),
-      followUpDone: yes('FollowUpActioned'),
+      task,
+      followUp: task ? followUpDate : null,
+      followUpDone: task && yes('FollowUpActioned'),
+      followUpNotes: task ? text(field(row, 'FollowUpNotes')) : '',
       pinned: yes('Pinned'),
       doNotCall: yes('DoNotCall'),
       priority: /^(high|urgent)$/i.test(priority) ? priority : '',
@@ -8960,8 +8967,8 @@ SOFTWARE.
     const info = typeInfo(row.source);
     const direction = row.direction === 'in' ? info.inward : row.direction === 'out' ? info.outward : '';
     const extra = details?.status === 'ready' ? details.fields.map(detailField => detailField.value) : [];
-    const flags = [row.followUp ? 'follow-up task' : '', row.pinned ? 'pinned' : '', row.doNotCall ? 'do not call' : ''];
-    return [row.subject, row.summary, row.detail, row.createdBy, row.caseRef, row.category, info.label, info.plural, direction, ...flags, ...extra]
+    const flags = [row.task ? 'follow-up task' : '', row.pinned ? 'pinned' : '', row.doNotCall ? 'do not call' : ''];
+    return [row.subject, row.summary, row.detail, row.followUpNotes, row.createdBy, row.caseRef, row.category, info.label, info.plural, direction, ...flags, ...extra]
       .some(value => value.toLowerCase().includes(query));
   }
 
@@ -9272,16 +9279,18 @@ SOFTWARE.
   }
 
   // A follow-up turns the record into a task: open until actioned, overdue
-  // once its date has passed (today still counts as open).
+  // once its date has passed (today still counts as open). A task without
+  // a date stays open and shows no date.
   function followUpBadge(row, cfg, thisYear) {
-    if (!row.followUp) return null;
+    if (!row.task) return null;
     const today = cfg.today || startDate(cfg, 0);
-    const state = row.followUpDone ? 'done' : row.followUp.sort.slice(0, 10) < today ? 'overdue' : 'open';
-    const when = row.followUp.sort.slice(0, 10) === today ? 'today' : shortDate(row.followUp, thisYear);
-    const label = state === 'done' ? 'Follow-up done' : state === 'overdue' ? 'Overdue ' + when : 'Follow-up ' + when;
+    const due = row.followUp?.sort.slice(0, 10) || '';
+    const state = row.followUpDone ? 'done' : due && due < today ? 'overdue' : 'open';
+    const when = !due ? '' : due === today ? ' today' : ' ' + shortDate(row.followUp, thisYear);
+    const label = state === 'done' ? 'Follow-up done' : state === 'overdue' ? 'Overdue' + when : 'Follow-up' + when;
     const badge = el('span', 'us-badge us-record__follow-up' + (state === 'overdue' ? ' us-badge--warning' : ''), label);
     badge.dataset.usFollowUp = state;
-    badge.title = state === 'done' ? 'Follow-up task actioned' : 'Follow-up task due ' + shortDate(row.followUp, 0);
+    badge.title = state === 'done' ? 'Follow-up task actioned' : due ? 'Follow-up task due ' + shortDate(row.followUp, 0) : 'Follow-up task';
     return badge;
   }
 
@@ -9360,6 +9369,13 @@ SOFTWARE.
     const extra = el('div', 'us-record__extra');
     fillDetails(extra, state.details.get(row.id));
     detail.append(extra);
+    // The follow-up task's notes (what needs doing), headed so they read
+    // apart from the record's own note.
+    if (row.followUpNotes) {
+      const task = el('div', 'us-record__note us-record__note--follow-up');
+      task.append(el('p', 'us-record__note-label', 'Follow-up'), el('p', 'us-record__body', row.followUpNotes));
+      detail.append(task);
+    }
     // A source's data-detail-label ("Additional notes" on calls) heads the
     // note, telling it apart from the summary above; no note, no heading.
     if (row.detail && row.source.detailLabel) {

@@ -42,7 +42,7 @@ features the theme lacks proposed as theme candidates.
 | `index.html` prototype | Five CCO tabs (Overview, Activity, Coverage, Terms & Schedule, Reports) built from native iMIS wrapper fixtures, the live theme CSS/JS and the candidates. Each iPart's type, CSS class and template is in the comment above it. |
 | Query Templates (`templates/`) | Banner, Tasks, Milestones, Contacts, Attachments, Meetings, Notes, Terms. All use the aliases from the live templates the owner supplied. Each header lists iPart settings and fields. |
 | Agreement actions | `agreement-actions.candidate.js`: every `CA_*` launcher as a registered `us-action-agreements-*` action (same popup URLs), the CloudToolz helper (base URL via `/api/query`), and the task saver. |
-| Theme candidates | `theme-candidate-task-rows.js` (T1), `theme-candidate.js` (T2 query states, A1 milestones, A3 attachment editor, B1 banner facts loader), `theme-candidate.css` (A1–A6). |
+| Theme candidates | `theme-candidate-task-rows.js` (T1), `theme-candidate.js` (T2 query states, A1 milestones, A3 attachment editor, B1 banner facts loader, B2 field groups loader), `theme-candidate.css` (A1–A6). |
 | Fixture | `agreement-page.js` renders sample rows through the real templates and answers CloudToolz, ZenTokens and the tag and banner details IQAs offline. |
 
 ## Verified (offline prototype only)
@@ -78,16 +78,21 @@ Checked in the browser at 1280–1366px, light and dark, no console errors:
 
 ## Waiting on the owner
 
-1. **Banner details IQA**: confirm the path and filter. Proposed
-   `$/_i4u_/SandBox/CA/Agreement Banner Details` on `AgreementNum`, made from
+1. **Banner details IQA**: built by the owner, 3 October 2026, at
+   `$/_i4u_/Core/CA/v2/API - Manage Agreement - Banner Details`;
+   still to check its filter (`AgreementNum`, the ordinal) and columns, made from
    Banner secondary with re-aliased columns (`Description`,
    `Additional-Agreement type`, `Additional-Priority`, `Tone-Priority`,
    `Additional-Opened`, `Additional-Lead`, `Additional-Last updated`).
 2. **Agreement statuses**: the full list, to set each status tone (A6).
-3. **Agreement Details, Key Dates, Resolution**: which iPart renders the
-   `RawData` blocks (`.summary-display-item` markup) and their field aliases.
-   The prototype shows them as `us-fields` Query Templates; their templates
-   are not written yet.
+3. **Agreement Details, Key Dates, Resolution**: layout settled (owner,
+   3 October 2026) and built as candidate B2 (`US-FIELD-GROUPS`): each panel
+   is laid out by its IQA's column names (`Group-Label` sub-heading, `1-Label`
+   new line, `Tone-Label` badge, `Alert-*` status alert as on v1's Resolution
+   card, — for blank). Build notes in `Field-Groups-IQA-Build.md`. One shared template,
+   `templates/Agreement-Field-Groups-Query-Template.html`. Needed: the three
+   IQAs with re-aliased columns (filter `AgreementNum`: the agreement's
+   `Ordinal`, search label `AgreementNum`), and the filter name confirmed.
 4. **Tasks filter**: the old hidden Tasks iPart listed other agreements'
    tasks; the new iPart's IQA must filter on `AgreementNum` from the URL.
 5. Contacts layout is settled: option 7, grouped tiles (owner, 3 October

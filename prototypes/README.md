@@ -2,13 +2,13 @@
 
 Keep current ideas and accepted implementation specifications in Git. The
 maintained guide and implemented author templates live in
-`THeme/UnionSuite/guides/usage/`.
+`THeme/UnionSuite-Guides/usage/`.
 
 | Stage | Location | Exit condition |
 |---|---|---|
 | Work in progress | `wip/` | A direction is approved or the experiment is abandoned |
 | Approved, awaiting implementation | `approved/` | Behaviour is implemented, tested and documented |
-| Implemented | Production theme plus `guides/usage/` | Ongoing maintenance belongs to these canonical sources |
+| Implemented | Production theme plus `UnionSuite-Guides/usage/` | Ongoing maintenance belongs to these canonical sources |
 | Superseded research | Repository-root `archive/` | Ignored by Git; retain locally only if useful |
 
 Approval moves a design to `approved/`, not to the archive. Each active design

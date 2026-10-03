@@ -99,7 +99,7 @@ step or supported behaviour, update the maintained usage guide sources in the sa
 change, rebuild the deliverables, and verify the build. Generated files are not
 independent sources of truth and do not need to be committed.
 
-- **Canonical guide directory: `THeme/UnionSuite/guides/usage/`.** Keep maintained
+- **Canonical guide directory: `THeme/UnionSuite-Guides/usage/`.** Keep maintained
   documentation, author templates, field definitions, catalogues, supported
   examples, build implementations and guide tests together there. Keep it current
   with the theme; do not create another maintained guide or template copy in
@@ -108,20 +108,20 @@ independent sources of truth and do not need to be committed.
   `templates/` owns copyable author templates; `examples/` owns supported offline
   documentation fixtures and simulations; `build/` owns generators; `tests/` owns
   guide checks; `vendor/` contains required native reference assets.
-- The current generated deliverable is `THeme/UnionSuite/Usage-Guide.html`.
-  Edit `THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html` and its
+- The current generated deliverable is `THeme/UnionSuite-Guides/Usage-Guide.html`.
+  Edit `THeme/UnionSuite-Guides/usage/source/Usage-Guide.source.html` and its
   neighbouring CSS/JS, never the generated HTML. Some small recipes live directly
   in the source HTML; do not assume every example has a separate template file.
 - The approved direction for the next publication change is a small guide index
-  at `Usage-Guide.html`, with topic pages and shared assets in `guides/usage/`.
+  at `Usage-Guide.html`, with topic pages and shared assets in `UnionSuite-Guides/usage/`.
   The current source-consolidation change does not implement that chapter split.
   When implementing it, retain whole-guide search, old anchor links, exact
   copy/download content, complete live seed previews, interactive examples and
   full-guide printing. A folder bundle must work offline; any optional single-file
   export must be generated from the same sources. Keep current and planned output
   structures clearly distinguished.
-- Banner HTML templates are maintained in `guides/usage/templates/` within the
-  shared theme directory. Shared behaviour for
+- Banner HTML templates are maintained in `THeme/UnionSuite-Guides/usage/templates/`,
+  beside the shared theme directory. Shared behaviour for
   reports and banners is maintained in `THeme/UnionSuite/zUnionSuite.js`; tokens
   and component CSS are maintained in `zUnionSuite.css`. The banner compatibility
   embed and standalone JS are generated from the shared theme, never edited
@@ -130,7 +130,7 @@ independent sources of truth and do not need to be committed.
   `node tools/build-theme-usage.cjs --check` and
   `node tools/check-usage-sources.cjs` from the project root. The old `tools/`
   commands are compatibility entry points; edit their implementations under
-  `THeme/UnionSuite/guides/usage/build/`.
+  `THeme/UnionSuite-Guides/usage/build/`.
 - If banner source changes, first run `node tools/build-banner-preview.cjs`
   to regenerate compatibility copies and the preview from shared theme JS.
 - The five-seed editor and combined component sample live in the guide sources;
@@ -150,7 +150,7 @@ independent sources of truth and do not need to be committed.
   exact/suggested output aliases, required/optional values, descriptions, blank
   behaviour and examples. Include iPart classes/settings and separate Header,
   Footer and No results placement. Keep the shared definitions in
-  `THeme/UnionSuite/guides/usage/source/query-field-definitions.cjs` aligned with the HTML;
+  `THeme/UnionSuite-Guides/usage/source/query-field-definitions.cjs` aligned with the HTML;
   the usage build checks field coverage. Identify literal banner placeholders
   and static templates explicitly rather than presenting them as IQA syntax.
 - Every field referenced in Query Template HTML must be selected in the IQA
@@ -183,7 +183,7 @@ independent sources of truth and do not need to be committed.
   feature is implemented, verified and represented in the canonical guide.
 - **Implemented:** production CSS/JS remains in its established theme owner;
   promote reusable author templates, documentation and supported examples into
-  `THeme/UnionSuite/guides/usage/`. Update the guide and implementation status in
+  `THeme/UnionSuite-Guides/usage/`. Update the guide and implementation status in
   the same change. Research UI must not become an alternative implementation.
 - **Archived:** move superseded comparisons, abandoned ideas, obsolete probes and
   research into repository-root `archive/`, which is ignored by Git. Archive only

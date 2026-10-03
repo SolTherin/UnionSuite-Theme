@@ -24,7 +24,7 @@ function themeStyles() {
   );
   return [
     // Native base first: it sets html{font-size:62.5%}, as on a real iMIS page.
-    read('THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'),
+    read('THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css'),
     read('THeme/UnionSuite/99-Orion.css'),
     read('THeme/UnionSuite/zUnionSuite.css'),
     read('THeme/UnionSuite-Client/Branding.css'),

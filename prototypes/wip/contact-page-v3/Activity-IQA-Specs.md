@@ -65,21 +65,30 @@ source and its cards open to the note and the button only.
 
 ### 2.1 Columns
 
-Every core IQA returns exactly these aliases. "Required" means the column
-must exist; its value may be blank (use a custom SQL column of `''`) unless
-the rule says otherwise. Values render as plain text, never HTML.
+Each core IQA returns only the columns its type has data for. A column that
+is left out is treated as blank, so never pad an IQA with `''` columns: each
+one is sent on every row. Only three things are required:
+
+- `ActivityKey` and `ActivityDate`, both with a value
+- `Subject` or `Summary` (either or both columns); each row needs a value in
+  one of them
+
+Section 4 gives the exact columns for each type. Values render as plain
+text, never HTML.
 
 | Alias | Required | Shown | Rule |
 |---|---|---|---|
 | `ActivityKey` | Yes, with a value | — | Unique within this IQA, for example the record's Ordinal. The details IQA is filtered on it. Rows without one are skipped |
 | `ActivityDate` | Yes, with a value | Date column, month groups | When the activity happened, not when the record was last modified. Return the date/time column itself, not formatted text (the feed reads `YYYY-MM-DD` with an optional time). Rows without a readable date are skipped |
-| `Subject` | Yes | Headline | Blank for most calls and interactions |
-| `Summary` | Yes | Preview line | Keep it short, for example `LEFT(…, 300)`. A row needs a Subject or a Summary, or it is skipped |
-| `Detail` | Yes | The note, when the card opens | Plain text. Cap it, for example `LEFT(…, 2000)`; the full record stays on its own page |
-| `CreatedBy` | Yes | "by …" on the type line | Who recorded or sent it, or `System` for automated records |
-| `Priority` | Yes | Flag on the type line | Only `High` and `Urgent` show a flag; any other value, including `Normal`, shows none |
+| `Subject` | Subject or Summary | Headline | Only for types with a title or subject |
+| `Summary` | Subject or Summary | Preview line | Keep it short, for example `LEFT(…, 300)`. A row with neither a Subject nor a Summary is skipped |
+| `Detail` | No | The note, when the card opens | Plain text. Cap it, for example `LEFT(…, 2000)`; the full record stays on its own page |
+| `CreatedBy` | No | "by …" on the type line | Who recorded or sent it, or `System` for automated records |
+| `Priority` | No | Flag on the type line | Only `High` and `Urgent` show a flag; any other value, including `Normal`, shows none. Leave it out for types without a priority |
 | `Category` | No | After the type name on the type line ("INTERACTION · Call") | A sub-type within the source, such as an interaction's Interaction Type. Searchable |
-| `FollowUpDate` | No | Follow-up badge on the type line | A date here makes the record a follow-up task (section 2.4). Return the date column itself |
+| `FollowUpRequired` | No | Follow-up badge on the type line | `true`, `1` or `yes` makes the record a follow-up task (section 2.4). When the IQA returns this column it alone decides; without it, any `FollowUpDate` makes a task |
+| `FollowUpDate` | No | Follow-up badge | The task's deadline. Return the date column itself. A task without one shows **Follow-up** with no date |
+| `FollowUpNotes` | No | Under a "Follow-up" heading when the card opens | What needs to be done. Plain text; searchable while the card is collapsed. Shown only on a follow-up task |
 | `FollowUpActioned` | No | Follow-up badge | `true`, `1` or `yes` marks the follow-up done |
 | `Pinned` | No | Pin at the card’s top left and an amber left edge | `true`, `1` or `yes` marks a pinned record (pinned notes on the Summary page) |
 | `DoNotCall` | No | Red no-entry alert icon leading the type line | `true`, `1` or `yes`: the member asked not to be called again, for example on a campaign call |
@@ -115,8 +124,8 @@ No other prompted filter may be required.
   recipients, attendees, linked cases) must be aggregated or left out.
   Duplicates use up the page limit and show as repeated cards.
 - **Paging:** the feed asks for `limit=20` per source and `limit=1` for the
-  type counts, which read `TotalCount`. Select only the columns above: every
-  extra column is sent for every row.
+  type counts, which read `TotalCount`. Select only the type's columns from
+  section 4: every extra column is sent for every row.
 
 ### 2.4 Follow-up and pinned flags
 
@@ -126,9 +135,9 @@ line, so they come from the core IQA:
 
 | Flag | Shown as | When |
 |---|---|---|
-| Follow-up open | Neutral badge with a clock: **Follow-up 22 May** (**Follow-up today** on the day) | `FollowUpDate` set, not actioned, date today or later |
-| Follow-up overdue | Amber badge with a clock: **Overdue 12 May** | `FollowUpDate` before today, not actioned |
-| Follow-up done | Muted badge with a tick: **Follow-up done** | `FollowUpActioned` true |
+| Follow-up open | Neutral badge with a clock: **Follow-up 22 May** (**Follow-up today** on the day; **Follow-up** with no deadline) | A task, not actioned, deadline today, later or blank |
+| Follow-up overdue | Amber badge with a clock: **Overdue 12 May** | A task, not actioned, `FollowUpDate` before today |
+| Follow-up done | Muted badge with a tick: **Follow-up done** | A task with `FollowUpActioned` true |
 | Pinned | Amber pin at the card’s top left, before the type, and an amber left edge on the card, matching the Summary page’s pinned notes. The pin is labelled "Pinned" for screen readers and on hover | `Pinned` true |
 | Do not call | Red no-entry icon leading the type line (after the pin, when both), labelled "Do not call" | `DoNotCall` true |
 
@@ -136,8 +145,12 @@ A follow-up is a badge because it carries a date and a state; pinned is an
 icon because it carries neither. Searching "follow-up" or "pinned" finds
 these records, and while Interactions is chosen a pin toggle at the end of
 the search field shows pinned records only, paging on until enough are
-found. Other types leave the three columns out. The follow-up note
-belongs in the details IQA (`Additional-Follow up note`).
+found. Other types leave these columns out.
+
+A record is a task when `FollowUpRequired` is true. A `FollowUpRequired` of
+false hides the badge and the follow-up notes even when a date or notes
+are stored. `FollowUpNotes` shows in the opened card under a **Follow-up**
+heading, before the record's own note.
 
 ## 3. Details IQAs
 
@@ -199,9 +212,11 @@ The IQA should return one row. If it returns several, the first is used.
 
 ## 4. The six types
 
-The business objects behind every type except Interactions are not yet
-confirmed (section 7, question 2). Each table gives what the core columns
-should represent and suggested details columns.
+The business objects behind every type except Interactions and outbound
+emails are not yet confirmed (section 7, question 2). Each table is the
+type's complete core column list: build exactly these, and leave out a row
+marked "if tracked" when the source has no such field. Suggested details
+columns follow each table.
 
 ### 4.1 Interactions
 
@@ -211,14 +226,16 @@ Source: `i4u_UT_Interactions`.
 |---|---|---|
 | `ActivityKey` | `Ordinal` | `3107` |
 | `ActivityDate` | Interaction date and time | `2026-05-08T16:20:00` |
-| `Subject` | Title where one exists, else blank | |
+| `Subject` | Title, if tracked | |
 | `Summary` | Note, first 300 characters | Submitted through the member portal: leaving nursing to travel from July. |
 | `Detail` | Full note, capped | |
 | `CreatedBy` | Staff member who recorded it; `System` or `Member portal` for automated rows | Member portal |
 | `Category` | Interaction Type (Call, Email, In Person, Note, Other, Site Meeting…) | Other |
 | `Priority` | Priority | `Urgent` |
-| `FollowUpDate` | Follow Up Date | `2026-05-22` |
-| `FollowUpActioned` | Actioned | `false` |
+| `FollowUpRequired` | `FollowUpRequired` | `true` |
+| `FollowUpDate` | `FollowUpDate` (the deadline) | `2026-05-22` |
+| `FollowUpNotes` | `FollowUpNotes` (what needs to be done) | Confirm the last shift with the ward manager. |
+| `FollowUpActioned` | `FollowUpActioned` | `false` |
 | `Pinned` | Pin Interaction | `true` |
 | `CaseRef` | The linked case's `CaseID`, through `CaseOrdinal` (below) | `C202` |
 | `CaseUrl` | `/Cases_ManageCase?CaseID=<CaseID>&CaseNum=<case Ordinal>`, or `''` with no case | `/Cases_ManageCase?CaseID=C202&CaseNum=198` |
@@ -249,8 +266,8 @@ query (keep `Ordinal` unique there; a duplicate would repeat the
 interaction). In an IQA, add the cases business object as a second source
 with a left outer relation on `CaseOrdinal` = `Ordinal`.
 
-Suggested details: `Additional-Follow up note`, `Additional-Handled by`,
-`Additional-Workbench`, `Additional-Attachments`.
+Suggested details: `Additional-Handled by`, `Additional-Workbench`,
+`Additional-Attachments`.
 
 If calls or meetings are stored as interactions of a particular type, filter
 them out here so nothing appears twice.
@@ -264,12 +281,12 @@ party ID.
 |---|---|---|
 | `ActivityKey` | Note Ordinal | `812` |
 | `ActivityDate` | Note date and time | `2026-05-11T09:30:00` |
-| `Subject` | Note title, else blank | Roster change agreed |
+| `Subject` | Note title, if tracked | Roster change agreed |
 | `Summary` | Note text, first 300 characters | Manager agreed to move the member off night shifts from June. |
 | `Detail` | Full note text, capped | |
 | `CreatedBy` | Staff member who wrote it | A. Smith |
-| `Priority` | Priority, if tracked; else `''` | |
-| `CaseRef`, `CaseUrl` | Linked case, if notes carry one | |
+| `Priority` | Priority, if tracked | |
+| `CaseRef`, `CaseUrl` | Linked case, if tracked | |
 | `RecordUrl` | `/_i4u_/Core/Zidebar/NoteDetails.aspx?NoteOrdinal=` plus the Ordinal (section 7, question 3) | |
 
 Suggested details: `Additional-Category`, `Additional-Visible to member`,
@@ -285,7 +302,6 @@ while the card is collapsed:
 |---|---|---|
 | `ActivityKey` | Call record key | `5521` |
 | `ActivityDate` | Call start time | `2026-05-12T10:15:00` |
-| `Subject` | `''` | |
 | `Summary` | Call Summary, in full (it is clamped to two lines while collapsed and shown in full when the card opens) | No answer; voicemail about the $185.00 still outstanding. |
 | `Detail` | Additional Notes, in full or capped (see below). The host source sets `data-detail-label="Additional notes"`, so the notes are headed when the card opens; a call without notes shows no heading | |
 | `CreatedBy` | Caller | J. Patel |
@@ -311,7 +327,7 @@ contract. Two sources share the Emails type and its count:
 
 | Source | Core IQA | One card per | `ActivityKey` | `Category` |
 |---|---|---|---|---|
-| `emails-out` | `Outbound Emails` | recipient row (an original send) | the recipient key | `''` |
+| `emails-out` | `Outbound Emails` | recipient row (an original send) | the recipient key | — (left out) |
 | `emails-resent` | `Outbound Email Resends` | `Resent` event | the event key | `Resend` |
 
 iMIS records a resend as a `Resent` event on the original recipient row, with
@@ -324,11 +340,12 @@ included, and a send with no address (queued only) is left out.
 | `ActivityKey` | Recipient key (original) or event key (resend) | |
 | `ActivityDate` | The send's own time: the recipient row's created time, or the resend event's time | `2026-05-10T08:00:00` |
 | `Subject` | Email subject | Overdue payment reminder – Q1 2026 |
-| `Summary` | Blank: only HTML bodies are stored (section 7, question 4) | |
-| `Detail` | Blank, as `Summary` | |
 | `CreatedBy` | The sender's full name | James Driscoll |
-| `Category` | `Resend` on resends, otherwise blank | |
+| `Category` | `'Resend'`, on `Outbound Email Resends` only | Resend |
 | `RecordUrl` | The native email preview (below) | |
+
+No `Summary` or `Detail`: only HTML bodies are stored (section 7, question
+4), so the full email opens in the preview instead.
 
 `RecordUrl` is a custom expression built from the keys:
 `/iParts/Common/InteractionLog/InteractionPreview.aspx?CommunicationLogId=<log key>&PartyId=<ID>&RecipientId=<recipient key>`.
@@ -510,8 +527,8 @@ are not shown, so key and helper columns can stay in the display list.
    `NoteOrdinal` alone, or does it also need the contact ID (the Agreement
    page passes `AgreementID`)?
 4. **Email bodies.** Answered for sent emails (1 October 2026): only HTML is
-   stored (`Text` is empty on 159 of 160 logs), so `Summary` and `Detail` stay
-   blank and the full email opens in the native preview popup. The feed shows
+   stored (`Text` is empty on 159 of 160 logs), so the email IQAs return no
+   `Summary` or `Detail` and the full email opens in the native preview popup. The feed shows
    text only; stripping HTML in SQL is costly on large histories.
 5. **Zidebar tasks and pins.** Can Zidebar notes also be follow-up tasks
    (`&Task=true`) or pinned? If so, their core IQA returns the same three
@@ -557,7 +574,7 @@ Core IQAs:
 | Filters | `QueryParameterDefinition` lists `ID` (required) and `StartDate` (optional), and nothing else required |
 | No start date | A request without `StartDate` returns 200, not 400 |
 | Start date | Every row's `ActivityDate` is on or after it; `TotalCount` falls |
-| Columns | Every row has all seven required columns, a key, a readable date and a Subject or Summary; no HTML |
+| Columns | Exactly the type's columns from section 4, aliases spelt as written (a misspelt optional alias silently shows nothing); every row has a key, a readable date and a Subject or Summary; no `''` padding; no HTML |
 | Order | Newest first; equal dates in the same order on repeated runs |
 | Paging | `offset=0,limit=10` then `offset=10,limit=10` gives the same 20 rows as `offset=0,limit=20` |
 | Uniqueness | No repeated `ActivityKey` across all pages |

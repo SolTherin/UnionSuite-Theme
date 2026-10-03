@@ -107,12 +107,6 @@
   -webkit-line-clamp: 2;
 }
 
-.us-milestones__summary {
-  margin: 0 0 var(--space-2);
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
-}
-
 .us-milestone {
   display: flex;
   align-items: center;
@@ -595,6 +589,129 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font-weight: var(--fw-normal);
 }
 
+/* us-field-groups: the us-fields panel built from an IQA's column names by
+   US-FIELD-GROUPS. A named group gets a sub-heading with a hairline beside it;
+   a numbered group only starts a new line. The optional status alert (the
+   Alert-* columns) sits above the fields. */
+.us-field-groups__group + .us-field-groups__group {
+  margin-top: var(--space-2);
+}
+
+.us-field-groups__group + .us-field-groups__group:has(> .us-field-groups__heading) {
+  margin-top: var(--space-4);
+}
+
+/* The native message colours (US-MESSAGES) with the us-alerts leading edge. */
+.us-field-groups__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: 10px 14px;
+  border-color: color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+}
+
+.us-field-groups__alert-icon {
+  flex: 0 0 auto;
+  color: var(--message-border);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.us-field-groups__alert-copy {
+  min-width: 0;
+}
+
+.us-field-groups__alert-title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  line-height: 1.4;
+}
+
+.us-field-groups__alert-message {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* Sub-headings at 14px bold in the brand colour (owner, 3 October 2026), so
+   they stand apart from the values (14px medium); the panel title keeps
+   its grey header bar and icon.
+   The hairline runs from the heading text to the panel edge, tinted to
+   match. Dark mode takes the dark palette's light brand tint; its colour
+   is restated there because zzDarkMode.css sets every h1–h6 to
+   --text-strong (0,2,1). Target for the dark rule: zzDarkMode.css. */
+.us-field-groups {
+  --us-field-groups-heading: var(--brand-700);
+}
+
+@media screen {
+  :root[data-us-color-scheme="dark"] .us-field-groups {
+    --us-field-groups-heading: var(--text-link);
+  }
+
+  :root[data-us-color-scheme="dark"] .us-field-groups .us-field-groups__heading {
+    color: var(--us-field-groups-heading);
+  }
+}
+
+.us-field-groups__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-1);
+  color: var(--us-field-groups-heading);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+.us-field-groups__heading::after {
+  content: "";
+  flex: 1 1 auto;
+  border-top: 1px solid color-mix(in srgb, var(--us-field-groups-heading) 35%, transparent);
+}
+
+.us-field-groups__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+
+/* ── A7. us-panel-fill ─────────────────────────────────────────
+   Target: new block in zUnionSuite.css, beside the panel layout rules.
+   Opt-in per iPart (owner, 3 October 2026). Add us-panel-fill to the iPart
+   CSS class of each panel in a row of columns: the panels then stretch to
+   the row's height, so a short panel leaves no gap under it. Layout rows
+   are already flex, so the columns are equal; these rules let every wrapper
+   between the column and the panel fill it. The iMIS path is
+   col > .ContentItemContainer > .WebPartZone > .iMIS-WebPart >
+   .ContentItemContainer > .us-panel-fill > .panel; fewer wrappers also work.
+   Only wrappers inside the nearest column take part: the :not(:has(...))
+   leaves out outer wrappers (a CCO's) whose fill iPart sits in a deeper
+   column. */
+
+:is([class*="col-"], .ContentItemContainer, .WebPartZone, .iMIS-WebPart):has(.us-panel-fill):not(:has([class*="col-"] .us-panel-fill)) {
+  display: flex;
+  flex-direction: column;
+}
+
+:is(.ContentItemContainer, .WebPartZone, .iMIS-WebPart):has(.us-panel-fill):not(:has([class*="col-"] .us-panel-fill)),
+.us-panel-fill,
+.us-panel-fill > .panel {
+  flex: 1 1 auto;
+}
+
+.us-panel-fill {
+  display: flex;
+  flex-direction: column;
+}
+
 
 /* ── A5. Agreement template details ────────────────────────────
    Target: alongside the matching theme components. Small additions the
@@ -735,7 +852,6 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 ) {
   --record-tone: var(--success);
   --record-tone-bg: var(--success-bg);
-  --record-tone-fill: var(--success-fill);
 }
 
 .us-banner .us-banner__surface--rows:is(
@@ -749,7 +865,6 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 ) {
   --record-tone: var(--warning);
   --record-tone-bg: var(--warning-bg);
-  --record-tone-fill: var(--warning-fill);
 }
 
 .us-banner .us-banner__surface--rows:is(
@@ -761,12 +876,13 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 ) {
   --record-tone: var(--danger);
   --record-tone-bg: var(--danger-bg);
-  --record-tone-fill: var(--danger);
 }
 
-/* The rail takes the tone; outranks the theme's status rail colour. */
+/* The rail takes the same tone as the status pill's text and dot and the
+   Resolution alert's edge (owner, 3 October 2026: they must match);
+   outranks the theme's status rail colour. */
 .us-banner .us-banner__surface.us-banner__surface--rows.us-banner__surface--status[class][data-us-record-status] {
-  border-left-color: var(--record-tone-fill, var(--member-status-colour));
+  border-left-color: var(--record-tone, var(--member-status-colour));
 }
 
 .us-banner .us-banner__surface.us-banner__surface--rows.us-banner__surface--status[class][data-us-record-status]::before {
@@ -799,6 +915,26 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
     min-height: 0;
     padding-block: 3px;
   }
+}
+
+
+/* ── A8. Banner record ID copy feedback ────────────────────────
+   Target: US-COPY in zUnionSuite.css. Theme-wide: every banner with the
+   record ID chip (the agreement and case templates).
+   - The flash never showed on the chip: the chip's background shorthand
+     (.us-banner .us-banner__record-id, 0,2,0) outranks .us-copy-flash
+     (0,1,0). The glow is laid over the chip as a background image, so
+     the chip colour shows through as it fades.
+   - No "Copied" label beside the chip's copy button (owner, 3 October
+     2026): it ran over the title. The tick, the flash and the live
+     region's "Copied" still confirm the copy. */
+
+.us-banner .us-banner__record-id.us-copy-flash {
+  background-image: linear-gradient(var(--us-copy-glow), var(--us-copy-glow));
+}
+
+.us-banner .us-banner__record-copy :is(button.us-copy, button.us-banner__copy) > .us-copy-label {
+  display: none;
 }
 
 
@@ -921,9 +1057,11 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 /* ── T4. us-task-progress ──────────────────────────────────────
    Target: US-QUERY-SEARCH, beside us-task-completed-filter. Opt-in per iPart.
    us-task-progress: "x of y complete" in the panel heading, counted from
-   every task on the page (completed ones the filter hides included). No
-   progress bar (owner, 2 October 2026). The footer's "n outstanding" says
-   the same thing, so it is kept for screen readers only. */
+   every row on the page (completed ones the filter hides included); for
+   us-meetings "x upcoming". No progress bar (owner, 2 October 2026). Used
+   on Tasks, Milestones and Meetings (owner, 3 October 2026: counts in the
+   heading). The footer's "n outstanding" says the same thing, so it is
+   kept for screen readers only. */
 
 .us-task-progress__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   align-self: center;

@@ -98,7 +98,7 @@ const fixture = `<div id="hd"><div class="searchfieldplus-dropdown"><div class="
     assert.equal(await page.locator('#injected-taskbar').count(),0,'Missing authentication context does not replace native search');
     // Inspect the generated offline guide's actual interactive taskbar frame.
     await page.setViewportSize({width:1280,height:900});
-    await page.setContent(fs.readFileSync('THeme/UnionSuite/Usage-Guide.html','utf8'));
+    await page.setContent(fs.readFileSync('THeme/UnionSuite-Guides/Usage-Guide.html','utf8'));
     await page.locator('#taskbar-colours-demo').evaluate(frame => frame.scrollIntoView());
     const demo = page.frameLocator('#taskbar-colours-demo');
     await demo.locator('#us-taskbar-search').fill('Morgan');
@@ -106,7 +106,7 @@ const fixture = `<div id="hd"><div class="searchfieldplus-dropdown"><div class="
     await page.locator('#taskbar-colours-demo').evaluate(frame => frame.scrollIntoView());
     const preview = await browser.newPage({viewport:{width:1100,height:650}});
     await preview.route('**/*', route => route.abort());
-    await preview.setContent(require('../THeme/UnionSuite/guides/usage/build/taskbar-preview.cjs').frameDocument());
+    await preview.setContent(require('../THeme/UnionSuite-Guides/usage/build/taskbar-preview.cjs').frameDocument());
     await preview.locator('#us-taskbar-search').fill('Morgan');
     await preview.locator('.tb-dd-name').filter({hasText:'Morgan Engineering'}).waitFor();
     await preview.screenshot({path:'.tmp-iqa-integration/taskbar-guide.png'});

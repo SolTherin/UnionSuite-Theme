@@ -27,7 +27,7 @@ function frame(variant) {
     '/* SHARED_STYLES */': styles,
     '/* FRAME_STYLES */': read('prototypes/approved/taskbar/Taskbar-Workshop.frame.css') + '\n' + read('prototypes/approved/taskbar/Popup-Shell.css'),
     '/* APPEARANCE_SCRIPT */': script(appearance),
-    '/* FIXTURE_SCRIPT */': script(read('THeme/UnionSuite/guides/usage/source/taskbar-example.js').replaceAll('union-suite:preview:', 'union-suite:workshop:' + variant + ':')),
+    '/* FIXTURE_SCRIPT */': script(read('THeme/UnionSuite-Guides/usage/source/taskbar-example.js').replaceAll('union-suite:preview:', 'union-suite:workshop:' + variant + ':')),
     '/* TASKBAR_SCRIPT */': script(read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js')),
     '/* FUSE_SCRIPT */': variant === 'proposal' ? script(read(fusePath)) : '',
     '/* FRAME_SCRIPT */': script(read('prototypes/approved/taskbar/Taskbar-Workshop.frame.js'))

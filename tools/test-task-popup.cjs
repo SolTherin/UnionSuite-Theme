@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
 const read = file => fs.readFileSync(file, 'utf8');
-const template = read('THeme/UnionSuite/guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html');
+const template = read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html');
 const taskUrl = '/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx?ID=104019&Ordinal=219';
 const row = template.replace(/\{#query\.(\w+)\}/g, (_, key) => ({
   TaskTitle: 'Call Alex about renewal', TaskUrl: taskUrl, MemberName: 'Alex',

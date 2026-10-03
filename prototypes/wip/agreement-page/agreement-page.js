@@ -88,6 +88,20 @@
   // ?meetings=past drops the upcoming samples, to preview the No upcoming
   // meetings placeholder (US-PAST-EMPTY).
   const pastMeetingsOnly = url.searchParams.get('meetings') === 'past';
+  // ?resolution=open previews an agreement not yet resolved: status
+  // Negotiating in the banner, Summary and Details, and a blank Resolution.
+  const resolutionOpen = url.searchParams.get('resolution') === 'open';
+  const status = resolutionOpen
+    ? {text: 'Negotiating', tone: 'warning', message: 'This agreement has not yet been finalised.'}
+    : {text: 'Active', tone: 'success', message: 'This agreement has been finalised.'};
+  // The banner's top row is page markup here (in iMIS, the Banner primary
+  // IQA fills it), so the preview restates the status on it.
+  if (resolutionOpen) {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.us-banner__surface[data-us-record-status]').forEach(surface => surface.setAttribute('data-us-record-status', status.text));
+      document.querySelectorAll('.us-banner__badge--record-status').forEach(badge => { badge.textContent = status.text; });
+    });
+  }
 
   // Which template fills which list, and whether "Display in cards" is on.
   const lists = [
@@ -168,7 +182,7 @@
       if (name.endsWith('/ZenFileTags')) return reply(items(tags));
       // Client-editable banner details: Description, Additional-* facts and a
       // Tone-* badge colour, in the order the IQA returns them.
-      if (name.endsWith('/Agreement Banner Details')) return reply(items([{
+      if (name.endsWith('/API - Manage Agreement - Banner Details')) return reply(items([{
         Description: 'New collective bargaining agreement for Stark Industries.',
         'Additional-Agreement type': 'EBA_SupportedBargaining',
         'Additional-Priority': 'High',
@@ -177,6 +191,53 @@
         'Additional-Lead': "Mary O'Conner",
         'Additional-Last updated': '2026-10-01T00:00:00'
       }]), 200, 300);
+      // Client-editable field panels (US-FIELD-GROUPS). Column names lay the
+      // panel out: Group-Label for a sub-heading, a number for a new line
+      // without one, Tone-<Label> for a badge.
+      if (name.endsWith('/Agreement Details')) return reply(items([{
+        'Agreement number': 'A107',
+        Type: 'EBA_SupportedBargaining',
+        Status: status.text,
+        'Tone-Status': status.tone,
+        'Lead staff': "Mary O'Conner",
+        'Coverage-Industry': 'AGR',
+        'Coverage-Sector': 'Federal',
+        'Coverage-Workbench': 'Avengers',
+        'Classification-Tags': '',
+        'Classification-Subtags': '',
+        '1-Agreement link': 'https://www.fairwork.com/Agreement123'
+      }]), 200, 250);
+      if (name.endsWith('/Agreement Key Dates')) return reply(items([{
+        'Bargaining-Start': '2026-01-01T00:00:00',
+        'Bargaining-Completed': '2026-05-21T00:00:00',
+        'Bargaining-Approved': '',
+        'Term-Expiry': '',
+        'Term-Re-negotiation': '2026-10-29T00:00:00'
+      }]), 200, 250);
+      // Summary leads Overview: the status alert, then key details (owner,
+      // 3 October 2026). Resolution, on Details, has no alert.
+      if (name.endsWith('/Agreement Summary')) return reply(items([{
+        'Alert-Title': status.text,
+        'Alert-Message': status.message,
+        'Alert-Tone': status.tone,
+        'Outcome type': resolutionOpen ? '' : 'All Terms Agreed',
+        Start: '2026-01-01T00:00:00',
+        Expiry: '',
+        Renegotiation: '2026-10-29T00:00:00'
+      }]), 200, 250);
+      if (name.endsWith('/Agreement Resolution')) return reply(items([resolutionOpen ? {
+        'Outcome type': '',
+        'Approved date': '',
+        '1-Approved by': '',
+        '1-Signed by': '',
+        '2-Outcome': ''
+      } : {
+        'Outcome type': 'All Terms Agreed',
+        'Approved date': '',
+        '1-Approved by': '23116',
+        '1-Signed by': '18108',
+        '2-Outcome': 'Successfully completed with all terms agreed'
+      }]), 200, 250);
     }
     if (target.pathname === '/api/ZenTokens') return reply({});
     if (target.origin === cloudToolz) {

@@ -16,12 +16,12 @@ iPart classes are in [the theme README](THeme/UnionSuite/README.md). This local
 integration has not itself published the assets or modified a live page.
 
 For current author instructions use the
-[standalone Theme Usage Guide](THeme/UnionSuite/Usage-Guide.html). Banner styling
+[standalone Theme Usage Guide](THeme/UnionSuite-Guides/Usage-Guide.html). Banner styling
 now lives in `zUnionSuite.css`, in separate page-layout and component sections.
 The existing separate script supplies sticky/condensing modes and Actions
 disclosure; its compatibility embed now contains no CSS. Tab switching remains
 deferred. See the
-[banner implementation guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md). The measured findings
+[banner implementation guide](THeme/UnionSuite-Guides/usage/examples/Banner-README.md). The measured findings
 below remain historical evidence, not a list of today's implemented features.
 
 ---

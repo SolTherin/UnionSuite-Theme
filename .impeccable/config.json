@@ -56,6 +56,15 @@
         ],
         "createdAt": "2026-10-03T01:14:50.530Z",
         "reason": "Claude triage: the finding is the comparison harness's own option headings and descriptions (15px/13px) measured against the theme panel title (16px); the page is a side-by-side fixture, not a candidate surface, and the candidate templates and CSS scan clean"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/theme-candidate.css"
+        ],
+        "createdAt": "2026-10-03T05:02:01.703Z",
+        "reason": "Theme convention: the Resolution status alert copies the existing US-ALERTS leading edge in THeme/UnionSuite/zUnionSuite.css (border-inline-start 4px solid var(--message-border)), so it matches the contact Summary alerts"
       }
     ]
   }

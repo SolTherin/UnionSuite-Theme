@@ -52,7 +52,7 @@ Repeated controls are valid. Competing definitions for one key, or two keys clai
 
 ## 4. Case examples — not installed by the standard theme
 
-`THeme/UnionSuite/guides/usage/examples/Client-Actions.example.js` provides six definitions to adapt:
+`THeme/UnionSuite-Guides/usage/examples/Client-Actions.example.js` provides six definitions to adapt:
 
 | Key / class suffix after `us-action-cases-` | Example operation |
 |---|---|

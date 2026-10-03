@@ -2,7 +2,7 @@
 
 Status: WIP visual/interaction mockup. Not implemented in the shared theme.
 
-The current Stats cards (`THeme/UnionSuite/guides/usage/templates/Home/Stats/`)
+The current Stats cards (`THeme/UnionSuite-Guides/usage/templates/Home/Stats/`)
 are read-only. This mockup brings back click-to-filter: selecting a member
 category, membership type or financial status recalculates every card.
 

@@ -111,10 +111,14 @@ Expected structure:
   - the native Sign In iPart (`.SignInPage`)
 
 Per site, change only the logo image and the Tagline text. Set `CREDIT_NAME` in
-`SignInPage.js` to `""` to hide the credit (e.g. on the Hub's own site).
+`SignInPage.js` to `""` to hide the credit (e.g. on the Hub's own site). The
+credit is a linked logo (`CREDIT_URL`), with no text, that cross-fades from `CREDIT_LOGO` to
+`CREDIT_LOGO_HOVER` on hover or keyboard focus; `CREDIT_NAME` is its alt text.
 
-The script injects its own `<style>` and Google Fonts, adds the canvas, neon
-element and credit, and restyles the native page. If it is ever loaded on a
+The page's styles live in `zUnionSuite.css` (`US-SIGNIN`), scoped to
+`html.hub-signin` and the script's own elements, so upload the CSS with the
+script. The script adds Google Fonts, marks `<html>`, and adds the canvas, neon
+element and credit. If it is ever loaded on a
 page without the zone, it removes itself.
 
 Implementation notes:

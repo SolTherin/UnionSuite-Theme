@@ -10,7 +10,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contact Page v3</title>
-  <link rel="stylesheet" href="../../../THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
   <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
   <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
   <!-- Tabler icons, as the theme loads them (the icon sheet directly: the Tabler.css shim is an @import the standalone build does not follow). -->
@@ -169,13 +169,17 @@
           </div>
         </div></div>
 
-        <!-- Contact trackers: the home-page Needs Attention component, scoped to this contact.
-             No-header mode: the <header> is omitted. Proposed folder; the loader
-             does not yet pass the contact ID (see README). -->
+        <!-- Contact trackers: the home-page Needs Attention component, scoped to this contact,
+             with the same header shell. Up to five cards share the row. Proposed folder;
+             the loader does not yet pass the contact ID (see README). -->
         <div class="ContentItemContainer">
           <section class="us-attention us-attention--hide-zero cv2-trackers"
             data-us-iqa-folder="$/_i4u_/SandBox/CRM Layouts/Contact_Page/Trackers"
             aria-label="Needs Attention">
+            <header class="us-attention__heading">
+              <h2>Needs Attention</h2>
+              <span>Member queues</span>
+            </header>
             <ul class="us-attention__items" aria-label="Member queues"></ul>
             <p class="us-attention__status" role="status" aria-live="polite">Loading counts…</p>
             <button type="button" class="TextButton us-attention__retry" hidden>Retry</button>
@@ -307,7 +311,7 @@
              organiser (a member can have several) and the workplace delegates.
              CSS class: us-tab-panel us-tabset-profile us-tab-employment us-query-template ·
              Display in cards unchecked ·
-             Query Template field: THeme/UnionSuite/guides/usage/templates/List-Templates/Contacts-Query-Template.html
+             Query Template field: THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html
              (the shared us-contact row; RoleLabel is the representative role,
              RoleColour its badge colour, WorkplaceName where they cover).
              No results field: <p>No representatives recorded.</p> -->
@@ -438,25 +442,25 @@
           </div>
         </div>
 
-        <!-- Placeholder until HubQueryTemplate is built (27 September 2026).
-             Outstanding lists what the member owes, whatever the payment type:
-             open and overdue invoices (invoice), failed debits (auto debit),
-             deductions the employer did not remit (payroll). Payment data lives
-             in CloudToolz, so a Query Menu cannot feed it; the HubQueryTemplate
-             iPart will, from Template/ContactLayout/OutstandingInvoices. Plan:
-             …\Claude\iParts\HubQueryTemplate\PLAN.md, Appendix A.
-             Content HTML: templates/Placeholder-Content.html (us-placeholder).
-             Planned CSS class: us-panel-tone-auto us-action-finance-make-payment -->
-        <div class="ContentItemContainer" id="cv3-outstanding"><div class="panel">
+        <!-- What the member owes, whatever the payment type: open and overdue
+             invoices (invoice), failed debits (auto debit), deductions the
+             employer did not remit (payroll). Not rendered when empty.
+             Sample grid: payment data lives in CloudToolz, so on the live site
+             this waits on the HubQueryTemplate iPart (Template/ContactLayout/
+             OutstandingInvoices; plan: …\Claude\iParts\HubQueryTemplate\PLAN.md,
+             Appendix A). Until then the live page uses the placeholder,
+             templates/Placeholder-Content.html (us-placeholder); the prototype
+             keeps the grid (owner, 2 October 2026).
+             CSS class: us-panel-tone-auto us-action-finance-make-payment -->
+        <div class="ContentItemContainer" id="cv3-outstanding"><div class="us-panel-tone-auto us-action-finance-make-payment"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[report-money]] Outstanding</h2></div>
-          <div class="panel-body-container"><div class="panel-body">
-            <div class="us-placeholder">
-              <span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-receipt"></i></span>
-              <h3>Outstanding payments coming soon</h3>
-              <p>Open invoices, failed debits and unremitted deductions will appear here.</p>
-            </div>
-          </div></div>
-        </div></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cv2-outstanding_ContentPanel"><div id="cv2-outstanding_ListerPanel"><div data-gridid="cv2-outstanding"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Reference</th><th class="rgHeader" scope="col">Type</th><th class="rgHeader" scope="col">Description</th><th class="rgHeader" scope="col">Due</th><th class="rgHeader" scope="col">Amount</th><th class="rgHeader" scope="col">Status</th></tr></thead>
+            <tbody id="cv3-outstanding-rows">
+              <tr class="rgRow"><td><a href="#" class="us-action-finance-view-transaction" data-id="004821" data-transaction="PAY-8654">PAY-8654</a></td><td>Failed debit</td><td>Q1 2026 subscription · 3 attempts declined</td><td>01 Mar 2026</td><td class="cv2-num">$185.00</td><td><span class="us-badge us-badge--danger us-badge--icon" title="74 days overdue">Overdue</span></td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
 
         <!-- Query Template Display · active and upcoming adjustments; always shown (item 33).
              CSS class: us-query-template us-adjustments us-panel-tone-info us-action-finance-add-adjustment

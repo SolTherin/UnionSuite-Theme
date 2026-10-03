@@ -4,8 +4,8 @@ const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 const read=f=>fs.readFileSync(f,'utf8');
 const source=read('THeme/UnionSuite/zUnionSuite.js');
 const script=source.split('/* US-BANNER-BEHAVIOUR:START */')[0]+'\n'+source.match(/\/\* US-TASK-ROWS:START[\s\S]*?US-TASK-ROWS:END \*\//)[0];
-const css=['THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'');
-const template=read('THeme/UnionSuite/guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html');
+const css=['THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css','THeme/UnionSuite/99-Orion.css','THeme/UnionSuite/zUnionSuite.css','THeme/UnionSuite-Client/Branding.css'].map(read).join('\n').replace(/@import\s+[^;]+;/g,'');
+const template=read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html');
 // The third row has no interaction identity: that list stays local, as before.
 const records=[
  {TaskTitle:'Call Alex about renewal',TaskUrl:'#task',TaskNote:'Confirm the tier.',MemberName:'Alex Morgan',MemberUrl:'#member',IsCompleted:'false',DueState:'overdue',TaskDateLabel:'Overdue 10 September 2026',DueLabel:'Overdue 10 September 2026',TaskPartyId:'104019',TaskOrdinal:'219'},

@@ -44,8 +44,11 @@
     history: 'Outbound Emails History'
   };
 
-  const requiredCoreColumns = ['ActivityKey', 'ActivityDate', 'Subject', 'Summary', 'Detail', 'CreatedBy', 'Priority'];
-  const optionalCoreColumns = ['Category', 'CaseRef', 'CaseUrl', 'RecordUrl'];
+  // Each core IQA returns exactly its type's columns (Activity-IQA-Specs.md 4.4).
+  const coreColumns = {
+    send: ['ActivityKey', 'ActivityDate', 'Subject', 'CreatedBy', 'RecordUrl'],
+    resend: ['ActivityKey', 'ActivityDate', 'Subject', 'CreatedBy', 'Category', 'RecordUrl']
+  };
   const expectedDetails = {
     [iqa.sendDetails]: ['To', 'Status', 'Type', 'Message type', 'Last event', 'Last event detail'],
     [iqa.resendDetails]: ['To', 'Original to']
@@ -171,10 +174,11 @@
     }
 
     const columns = Object.keys(rows[0]);
-    const missing = requiredCoreColumns.filter(column => !columns.includes(column));
-    expect(!missing.length, query, 'Required core columns present', missing.length ? 'missing: ' + missing.join(', ') : columns.join(', '));
-    const extra = columns.filter(column => !requiredCoreColumns.includes(column) && !optionalCoreColumns.includes(column));
-    expect(!extra.length, query, 'No extra columns (each is sent on every row)', extra.join(', '), 'WARN');
+    const expected = coreColumns[kind];
+    const missing = expected.filter(column => !columns.includes(column));
+    expect(!missing.length, query, 'Core columns present (a misspelt alias shows as missing)', missing.length ? 'missing: ' + missing.join(', ') : columns.join(', '));
+    const extra = columns.filter(column => !expected.includes(column));
+    expect(!extra.length, query, 'No extra or padding columns (each is sent on every row)', extra.join(', '), 'WARN');
 
     const keys = rows.map(row => text(row.ActivityKey));
     expect(keys.every(Boolean), query, 'Every ActivityKey has a value', `${keys.filter(key => !key).length} blank`);
@@ -199,7 +203,6 @@
 
     expect(rows.every(row => text(row.Subject) || text(row.Summary)), query, 'Each row has a Subject or Summary (the feed skips others)');
     expect(!rows.some(row => ['Subject', 'Summary', 'Detail'].some(column => looksLikeHtml(row[column]))), query, 'No HTML in Subject, Summary or Detail', '', 'WARN');
-    expect(rows.every(row => !text(row.Summary) && !text(row.Detail)), query, 'Summary and Detail are blank (decision)', '', 'WARN');
     expect(rows.every(row => text(row.CreatedBy)), query, 'CreatedBy (sender) has a value', `${rows.filter(row => !text(row.CreatedBy)).length} blank`, 'WARN');
 
     const category = kind === 'resend' ? 'Resend' : '';

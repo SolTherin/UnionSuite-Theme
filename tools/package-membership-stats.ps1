@@ -23,7 +23,7 @@ $files = @(@{Source='prototypes/Home/Stats/README.md';Entry='README.md'})
 foreach ($card in $cards) { $files += @{Source=('prototypes/Home/Stats/' + $card);Entry=('cards/' + $card)} }
 $files += @{Source='THeme/UnionSuite/zUnionSuite.css';Entry='THeme/UnionSuite/zUnionSuite.css'}
 $files += @{Source='THeme/UnionSuite/zUnionSuite.js';Entry='THeme/UnionSuite/zUnionSuite.js'}
-$files += @{Source='THeme/UnionSuite/Usage-Guide.html';Entry='THeme/UnionSuite/Usage-Guide.html'}
+$files += @{Source='THeme/UnionSuite-Guides/Usage-Guide.html';Entry='THeme/UnionSuite-Guides/Usage-Guide.html'}
 Write-Archive $bundlePath $files
 $themeFiles = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'THeme/UnionSuite') -File -Recurse | ForEach-Object {
     $relative = $_.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')

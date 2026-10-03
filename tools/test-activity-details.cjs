@@ -20,8 +20,10 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   await page.goto('https://theme.test/Party.aspx?ID=004821');
   await page.evaluate(folder=>{
    const core={
-    Interactions:[{ActivityKey:'I-2',ActivityDate:'2026-05-08T16:20:00',Subject:'',Summary:'Resignation submitted.',Detail:'Effective 30 June 2026.',CreatedBy:'Member portal',Category:'Site Meeting',Priority:'Urgent',RecordUrl:'/record/2',FollowUpDate:'2026-05-12T00:00:00',FollowUpActioned:false,Pinned:true,Status:'Ignored',StaffName:'Ignored',Outcome:'Ignored'},
-     {ActivityKey:'I-1',ActivityDate:'2026-04-01T10:00:00',Subject:'',Summary:'Checked in with the member.',Detail:'',CreatedBy:'J. Patel',Category:'Call',Priority:'',FollowUpDate:'2026-04-10',FollowUpActioned:'1',Pinned:'0',DoNotCall:'yes'}],
+    Interactions:[{ActivityKey:'I-2',ActivityDate:'2026-05-08T16:20:00',Subject:'',Summary:'Resignation submitted.',Detail:'Effective 30 June 2026.',CreatedBy:'Member portal',Category:'Site Meeting',Priority:'Urgent',RecordUrl:'/record/2',FollowUpRequired:true,FollowUpDate:'2026-05-12T00:00:00',FollowUpNotes:'Confirm the last shift with the ward manager.',FollowUpActioned:false,Pinned:true,Status:'Ignored',StaffName:'Ignored',Outcome:'Ignored'},
+     {ActivityKey:'I-1',ActivityDate:'2026-04-01T10:00:00',Subject:'',Summary:'Checked in with the member.',Detail:'',CreatedBy:'J. Patel',Category:'Call',Priority:'',FollowUpRequired:'1',FollowUpDate:'2026-04-10',FollowUpActioned:'1',Pinned:'0',DoNotCall:'yes'},
+     {ActivityKey:'I-0',ActivityDate:'2026-03-01T10:00:00',Summary:'Not a task.',FollowUpRequired:false,FollowUpDate:'2026-03-05',FollowUpNotes:'Stale note.'},
+     {ActivityKey:'I-00',ActivityDate:'2026-02-01T10:00:00',Summary:'Task without a deadline.',FollowUpRequired:'true',FollowUpDate:null}],
     Meetings:[{ActivityKey:'M-1',ActivityDate:'2026-05-06T17:30:00',Subject:'Branch meeting',Summary:'Claims endorsed.',Detail:'',CreatedBy:'A. Smith',Category:'',Priority:'Normal',FollowUpDate:'2026-05-14T00:00:00'}]
    };
    const details={'I-2':{ActivityKey:'I-2','Additional-Handled by':'Retention team','Additional-WorkbenchID':'RES','Additional-Deadline':'2026-05-22T00:00:00','Additional-Due':'2026-05-12T17:00:00','Additional-Follow up':'','Additional_Booked':false,Helper:'not shown'}};
@@ -46,10 +48,10 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
 
   // The note (Detail) is in every card from the start, hidden until it opens,
   // and search finds a collapsed card by it.
-  assert.equal(await card.locator('.us-record__body').textContent(),'Effective 30 June 2026.');
+  assert.equal(await card.locator('.us-record__body').last().textContent(),'Effective 30 June 2026.');
   assert.equal(await card.locator('.us-record__detail').getAttribute('hidden'),'');
   // The source's data-detail-label heads the note; no note, no heading.
-  assert.equal(await card.locator('.us-record__note > .us-record__note-label').textContent(),'Additional notes');
+  assert.equal(await card.locator('.us-record__note:not(.us-record__note--follow-up) > .us-record__note-label').textContent(),'Additional notes');
   assert.equal(await page.locator('[data-us-activity-id="interactions:I-1"] :is(.us-record__note, .us-record__note-label, .us-record__body)').count(),0);
   assert.equal(await meeting.locator('.us-record__note-label').count(),0);
   await search.fill('30 june');
@@ -74,6 +76,16 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   assert.equal(await meeting.locator('.us-record__follow-up').textContent(),'Follow-up today');
   assert.equal(await done.locator('.us-record__follow-up').textContent(),'Follow-up done');
   assert.equal(await done.locator('.us-record__follow-up').getAttribute('data-us-follow-up'),'done');
+  // FollowUpRequired decides: false hides a dated follow-up and its notes;
+  // true with no date is an open task with no date.
+  const notTask=page.locator('[data-us-activity-id="interactions:I-0"]'),undated=page.locator('[data-us-activity-id="interactions:I-00"]');
+  assert.equal(await notTask.locator('.us-record__follow-up').count(),0,'FollowUpRequired false is not a task');
+  assert.equal(await notTask.locator('.us-record__note--follow-up').count(),0);
+  assert.equal(await undated.locator('.us-record__follow-up').textContent(),'Follow-up');
+  assert.equal(await undated.getAttribute('data-us-record-follow-up'),'open');
+  // FollowUpNotes: headed "Follow-up", before the record's own note.
+  assert.deepEqual(await card.locator('.us-record__note-label').allTextContents(),['Follow-up','Additional notes']);
+  assert.equal(await card.locator('.us-record__note--follow-up .us-record__body').textContent(),'Confirm the last shift with the ward manager.');
   assert.equal(await card.locator('.us-record__pin').getAttribute('aria-label'),'Pinned');
   assert.equal(await card.getAttribute('data-us-record-pinned'),'');
   assert.equal(await done.locator('.us-record__pin').count(),0,'Pinned 0 shows no pin');
@@ -95,7 +107,7 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   await page.evaluate(()=>{failDetails=true;});
   await card.locator('.us-record__toggle').click();
   await card.locator('.us-record__extra-retry').waitFor();
-  assert.equal(await card.locator('.us-record__body').textContent(),'Effective 30 June 2026.');
+  assert.equal(await card.locator('.us-record__body').last().textContent(),'Effective 30 June 2026.');
   assert.equal(await card.locator('.us-record__more a').getAttribute('href'),'/record/2');
   await page.evaluate(()=>{failDetails=false;});
   await card.locator('.us-record__extra-retry').click();
@@ -141,6 +153,15 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   await tab('all');
   await meeting.waitFor();
 
+  // Follow-up notes are searchable while the card is collapsed.
+  // Waits on the settled list, as cleared search re-adds cards gradually.
+  const settled=count=>page.waitForFunction(count=>[...document.querySelectorAll('.us-activity-feed .us-record')].filter(r=>!r.closest('[data-us-activity-leaving]')).length===count,count);
+  await search.fill('ward manager');
+  await settled(1);
+  assert.deepEqual(await shown(),['interactions:I-2']);
+  await search.fill('');
+  await settled(5);
+
   // Flags are searchable by their wording.
   await search.fill('do not call');
   await page.waitForFunction(()=>!document.querySelector('[data-us-activity-id="meetings:M-1"]')||document.querySelector('[data-us-activity-id="meetings:M-1"]').closest('[data-us-activity-leaving]'));
@@ -154,6 +175,6 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   assert.equal(await card.count(),1);
 
   assert.deepEqual(errors,[]);
-  console.log('PASS activity core columns (category, follow-up badge, pinned icon, do-not-call alert, no status), slimline search, pinned-only toggle on Interactions, note in every card (labelled when the source asks, unlabelled and absent when blank) and searchable while collapsed, details on first open (ID + ActivityKey, once), Additional-* labels and formatting, blank and unprefixed columns hidden, Retry, no-details source and search over loaded details.');
+  console.log('PASS activity core columns (category, follow-up badge and notes gated by FollowUpRequired, pinned icon, do-not-call alert, no status), slimline search, pinned-only toggle on Interactions, note in every card (labelled when the source asks, unlabelled and absent when blank) and searchable while collapsed, details on first open (ID + ActivityKey, once), Additional-* labels and formatting, blank and unprefixed columns hidden, Retry, no-details source and search over loaded details.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

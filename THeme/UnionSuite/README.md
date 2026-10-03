@@ -1,11 +1,11 @@
 # Union Suite theme
 
-Open [Theme-Config.html](Theme-Config.html) for the client branding workspace:
+Open [Theme-Config.html](../UnionSuite-Guides/Theme-Config.html) for the client branding workspace:
 five seed colours, optional advanced overrides and focused live component
 examples. It works offline; edits update the page immediately and are discarded
 on reload. Persistence is deferred. The usage-guide build also rebuilds this page.
 
-Open [Usage-Guide.html](Usage-Guide.html) for the maintained, standalone author
+Open [Usage-Guide.html](../UnionSuite-Guides/Usage-Guide.html) for the maintained, standalone author
 handbook: branding and tokens, class placement, banner and report recipes,
 copyable/downloadable templates, troubleshooting and feature status. It works
 offline and can be shared as one HTML file.
@@ -13,15 +13,15 @@ offline and can be shared as one HTML file.
 **iPart CSS classes change the DOM:** iMIS adds a separate classed div inside
 ContentItemContainer around the native output. Support direct and wrapped
 panels in selectors, JavaScript detection and previews. See
-[the wrapper examples](Usage-Guide.html#ipart-class-wrapper) before changing an
+[the wrapper examples](../UnionSuite-Guides/Usage-Guide.html#ipart-class-wrapper) before changing an
 iPart's shell or header actions.
 
-The [guides/usage directory](guides/usage/README.md) is the documentation source of truth.
-Update `guides/usage/source/Usage-Guide.source.html` alongside feature changes, then run
+The [UnionSuite-Guides/usage directory](../UnionSuite-Guides/usage/README.md) is the documentation source of truth.
+Update `../UnionSuite-Guides/usage/source/Usage-Guide.source.html` alongside feature changes, then run
 `node tools/build-theme-usage.cjs` from the project root. The generator imports
 tokens and templates from their maintained source files. Run the same command
 with `--check` to detect a stale deliverable, then run `node tools/check-usage-sources.cjs`.
-See [guides/usage/README.md](guides/usage/README.md) for source ownership and the
+See [UnionSuite-Guides/usage/README.md](../UnionSuite-Guides/usage/README.md) for source ownership and the
 maintenance workflow. Generated HTML is ignored by Git; rebuild it after checkout.
 
 Native button colours, the approved Query Menu / IQA component and all banner CSS are included in this local theme.
@@ -33,20 +33,20 @@ ContentPanel, ContentWizardDisplay or EmptyMasterContentPanel, including native
 CCO pages. Form/component rows, card padding and vertical iPart spacing keep
 their existing values. No new author class is required. Deploy the updated
 foundation to each page's theme, including iframe content themes. See
-[the layout example and exact scope](Usage-Guide.html#page-layout-spacing).
+[the layout example and exact scope](../UnionSuite-Guides/Usage-Guide.html#page-layout-spacing).
 
 For a single embedded content page, put `EmbeddedCCO` in the CCO iPart's
 **CSS class** field. The shared stylesheet hides its outer header/tab strip
 and removes the surrounding panel surface and padding, including the empty
 vertical navigation rail. Nested panels and tabs retain their styling. See
-[the interactive example and placement notes](Usage-Guide.html#embedded-cco).
+[the interactive example and placement notes](../UnionSuite-Guides/Usage-Guide.html#embedded-cco).
 This modifier needs updated `zUnionSuite.css` only; no custom CCO package change.
 
-The [Membership Overview cards](Usage-Guide.html#membership-stats) are implemented
+The [Membership Overview cards](../UnionSuite-Guides/Usage-Guide.html#membership-stats) are implemented
 in the shared CSS/JS. Copy the six Content HTML templates into the embedded Stats
 page using RiSE rows 12 / 12 / 8+4 / 8+4. The cards execute `GET /api/query` only
 when visible and share cached results; the time-series card is a placeholder.
-See [the template installation notes](../../THeme/UnionSuite/guides/usage/templates/Home/Stats/README.md) for
+See [the template installation notes](../../THeme/UnionSuite-Guides/usage/templates/Home/Stats/README.md) for
 the six IQAs, named date filters, financial-status configuration and `(empty)`
 buckets. The offline home/guide examples embed a verified probe capture; production
 loads live data. Install both updated shared assets on the embedded page.
@@ -72,7 +72,7 @@ Dark mode is the exception: its palette, toggle styling and all mode-specific
 overrides live only in `zzDarkMode.css`, loaded **last**, after both client files.
 It is a separately deployed CSS file, not an import or build-time bundle.
 The existing shared JS owns document preferences; the taskbar generates the switch.
-See [dark mode installation and limits](Usage-Guide.html#taskbar-dark-mode).
+See [dark mode installation and limits](../UnionSuite-Guides/Usage-Guide.html#taskbar-dark-mode).
 
 Consolidate redundant overrides when touching a component, preserving and
 checking its native states and behaviour. Existing overrides have not all been
@@ -143,7 +143,7 @@ Deploy the updated `zUnionSuite.css` with the existing root `Tabler.css`,
 Keep `Tabler/LICENSE` with the package. After verifying the new theme, the old
 staff-icon rules can be removed from a separate live `UTStaff.css` include;
 the repository copy remains a legacy reference. Do not reload that whole legacy
-stylesheet just for icons. See the [navigation usage recipe](Usage-Guide.html#navigation-icons)
+stylesheet just for icons. See the [navigation usage recipe](../UnionSuite-Guides/Usage-Guide.html#navigation-icons)
 for class placement, the complete mapping and troubleshooting.
 
 ## Existing native buttons
@@ -266,7 +266,7 @@ methods and suffix-derived IDs are retired.
 Load `zUnionSuite.js`, `Scripts/ActionDefinitions.js`, then client
 `../UnionSuite-Client/Actions.js` once in order. Definitions separate presentation,
 context and action. Repeated controls have unique IDs; required missing context
-disables them. See [the complete API and execution route](Usage-Guide.html#unified-action-route).
+disables them. See [the complete API and execution route](../UnionSuite-Guides/Usage-Guide.html#unified-action-route).
 
 See [panel actions and report behavior](../../THEME-PANEL-ACTIONS.md),
 [the element inventory](../../THEME-INVENTORY.md),
@@ -286,7 +286,7 @@ supplies both components. Deploy the updated CSS and JS, remove the old
 separate banner embed/script include, then reload and verify scrolling,
 Actions and the native partial-refresh lifecycle. Keep the visible HTML and
 iPart/page classes. The old embed and standalone banner JS remain generated
-fallbacks for older deployments only. See the [banner guide](../../THeme/UnionSuite/guides/usage/examples/Banner-README.md).
+fallbacks for older deployments only. See the [banner guide](../../THeme/UnionSuite-Guides/usage/examples/Banner-README.md).
 
 These combinations go on the **banner iPart**, for either Query Template
 Display or Content HTML:
@@ -305,15 +305,15 @@ requires the shared theme JS; apply the classes to the content iPart, not the
 separate behaviour embed. Keep page-layout CSS and component CSS in their own
 sections during future updates. The zone tab switcher remains deferred.
 
-The [complete banner template](../../THeme/UnionSuite/guides/usage/templates/Banner-Template.html) includes
+The [complete banner template](../../THeme/UnionSuite-Guides/usage/templates/Banner-Template.html) includes
 removable Actions and tabs divs. The disclosure works; sample commands still
 need verified handlers or destinations, and tab switching remains planned.
 For lightweight dashboards, the preferred tab adapter will show/hide matching
 page zones without reloading the page; all zones still load initially. CCO is
 a separate option, not a dependency of the dashboard approach. See the
 [tab switcher plan](../../prototypes/wip/banner-tabs/Banner-Tabs-Plan.md).
-Simpler [dashboard](../../THeme/UnionSuite/guides/usage/templates/Banner-Dashboard-Template.html) and
-[Contact](../../THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html) templates are included
+Simpler [dashboard](../../THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html) and
+[Contact](../../THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html) templates are included
 in the standalone guide. Its [maintenance workflow](docs/README.md) imports
 these sources and the current tokens when rebuilding the portable HTML.
 
@@ -458,12 +458,12 @@ New markup uses `us-actions`; supported native, Quick Actions, custom Agreement
 and banner menus are adapted automatically. Original unregistered item handlers
 and links remain native. Other context/Telerik menus still need review.
 
-Use [the Actions guide](Usage-Guide.html#action-menus) for exact placement,
+Use [the Actions guide](../UnionSuite-Guides/Usage-Guide.html#action-menus) for exact placement,
 HTML, migration, keyboard/lifecycle behaviour and limits. Author template:
-[Action-Menu-Template.html](../../THeme/UnionSuite/guides/usage/templates/Action-Menu-Template.html).
+[Action-Menu-Template.html](../../THeme/UnionSuite-Guides/usage/templates/Action-Menu-Template.html).
 Register namespaced definitions via `UnionSuiteActions.define(key, definition)` in a
 client-owned JS file loaded once after the shared theme. The
-[client example](../../THeme/UnionSuite/guides/usage/examples/Client-Actions.example.js) uses the supplied
+[client example](../../THeme/UnionSuite-Guides/usage/examples/Client-Actions.example.js) uses the supplied
 case popup functions; review its editor destination for the intended page.
 There are no inline onclick handlers or dynamic function-name evaluation.
 The old banner-only compatibility embed does not include this shared registry.
@@ -473,7 +473,7 @@ The old banner-only compatibility embed does not include this shared registry.
 Classic RadWindow_Bootstrap title typography and reload/maximize/restore/close
 states are automatic with shared CSS. Popup footer dividers require shared
 CSS/JS inside the popup document (IsPopup=true), or the optional authored
-us-dialog-footer container. See [usage](Usage-Guide.html#dialog-chrome).
+us-dialog-footer container. See [usage](../UnionSuite-Guides/Usage-Guide.html#dialog-chrome).
 Window sizing, native actions and resize footer remain native. Verify the live
 iframe footer markup and Telerik states after upload.
 
@@ -499,7 +499,7 @@ enables Biscuit and `false` removes him and his reserved space. Remove the old
 taskbar injection and include `Scripts/UnionSuiteTaskbar.js` once with `defer`.
 Keep `zzDarkMode.css` last after client CSS. See
 [the taskbar installation notes](Scripts/README.md) and
-[the complete Biscuit guide](Usage-Guide.html#taskbar-pip).
+[the complete Biscuit guide](../UnionSuite-Guides/Usage-Guide.html#taskbar-pip).
 The legacy `pipGreeting`, `pipStoragePrefix`, `playPipIdle()` and CSS hooks now
 control Biscuit. Existing daily records are preserved. Deploy the script and
 both stylesheets together. Replay and idle-trigger buttons stay in the preview.

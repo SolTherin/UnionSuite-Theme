@@ -35,7 +35,7 @@ as a theme section that follows the conventions below.
 | Dark mode | `THeme/UnionSuite/zzDarkMode.css` | Only the cover surface, if `--bg-surface` does not already follow dark mode. |
 | Site-wide setting | `THeme/UnionSuite-Client/Config.js` | Add `window.UnionSuiteCcoSwitchConfig = { ...window.UnionSuiteCcoSwitchConfig, enabled: true };` with a comment in the file's existing style. |
 | Behaviour tests | `tools/test-cco-switch.cjs` | Follow the existing `tools/test-*.cjs`: Playwright from `../.tmp-iqa-integration/node_modules/playwright`, `channel: 'msedge'`, headless, requests intercepted. Port the trial's fixtures. |
-| Guide | `THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html` | A section near the native tabs and `EmbeddedCCO` sections, plus installation-table entries for `Config.js`. Rebuild and check (below). |
+| Guide | `THeme/UnionSuite-Guides/usage/source/Usage-Guide.source.html` | A section near the native tabs and `EmbeddedCCO` sections, plus installation-table entries for `Config.js`. Rebuild and check (below). |
 
 Public API: `window.UnionSuiteCcoSwitch` with `refresh()`, `report()`, `enable()`
 and `disable()`. Nothing else is global.

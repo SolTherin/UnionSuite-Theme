@@ -1,0 +1,48 @@
+<!-- Agreement field panels · Query Template Display, one record. Used four
+     times; only the IQA path and CSS class change (add us-panel-fill where
+     the panel shares a row):
+
+     Panel               iPart CSS class                                         data-us-fields-query
+     Summary             us-query-template                                       $/_i4u_/SandBox/CA/Agreement Summary
+                         (Overview, first, full width: status alert and key details)
+     Agreement details   us-query-template us-action-agreements-edit             $/_i4u_/SandBox/CA/Agreement Details
+     Key dates           us-query-template us-action-agreements-edit-key-dates   $/_i4u_/SandBox/CA/Agreement Key Dates
+                         (add us-field-groups--single to the div below)
+     Resolution          us-query-template us-action-agreements-record-resolution  $/_i4u_/SandBox/CA/Agreement Resolution
+                         (no status alert: it is Summary's)
+
+     iPart source: the panel's existing IQA (Data - Manage Agreement - Agreement
+     Details, Key Dates or Resolution; Banner Primary for Summary), unchanged:
+     its @url:AgreementID filter gives the iPart one row. Title as the panel
+     heading; Rows per page: 1.
+     The template renders no fields itself. US-FIELD-GROUPS runs the IQA named
+     in data-us-fields-query, filtered on AgreementNum from the page URL, and
+     builds the fields from its column names, so clients change a panel by
+     editing that IQA's columns only:
+
+     Column name          Shows
+     Label                a field, in column order, before any group
+     Group-Label          the field under the sub-heading "Group"; columns
+                          of one group are gathered together, groups in the
+                          order their first column appears. Splits at the
+                          first hyphen: Term-Re-negotiation → Term / Re-negotiation
+     1-Label, 2-Label …   a new line of fields with no sub-heading
+     Tone-Label           badge tone for the field named Label:
+                          success, warning, danger or info
+     Alert-Title          a status alert above the fields (the v1
+     Alert-Message        Resolution banner): bold title, message below,
+     Alert-Tone           coloured by the tone (success, warning, danger,
+                          info; anything else is neutral). Blank
+                          Alert-Title leaves the alert out.
+     Alert-Only           true: the alert and no fields (an agreement not
+                          yet resolved has no outcome to show)
+     Tone and Alert are reserved: they are never group names.
+
+     Values: blank shows —; ISO dates read "1 Jan 2026"; true/false Yes/No;
+     web addresses and emails become links. Links and values over 60
+     characters take the full row. Values are plain text (HTML is shown as text).
+     Example (Key dates): Bargaining-Start, Bargaining-Completed,
+     Bargaining-Approved, Term-Expiry, Term-Re-negotiation.
+     Column-by-column build notes for the three IQAs: Field-Groups-IQA-Build.md.
+     Confirm the filter name with GET /api/QueryParameterDefinition. -->
+<div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/CA/Agreement Details" data-us-fields-filter="AgreementNum"></div>

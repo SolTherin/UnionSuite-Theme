@@ -2,7 +2,7 @@
 
 Reconciled 8 September 2026. Implementation status is maintained in
 [THEME-INVENTORY.md](THEME-INVENTORY.md); author recipes and installation are in
-[Usage-Guide.html](THeme/UnionSuite/Usage-Guide.html).
+[Usage-Guide.html](THeme/UnionSuite-Guides/Usage-Guide.html).
 Local implementation is distinct from live deployment verification.
 
 ## Latest live checks
@@ -85,4 +85,4 @@ from their sources and run the usage-guide freshness check before delivery.
 
 - [ ] Verify opt-in `us-cco-sticky-tabs` in live iMIS with the member banner, long menus, partial refresh and site-specific overflow wrappers. Local fixture covers sticky positioning and CCO boundaries; grey-background navigation remains deferred.
 
-- [ ] Native CCO tab switching without page reloads: implemented in the shared theme (`US-CCO-SWITCH` in `zUnionSuite.js`/`.css`, `Config.js` setting, guide section `#cco-tab-switching`); 23 offline scenarios pass in `THeme/UnionSuite/guides/usage/tests/test-cco-switch.cjs`. **Next: live acceptance** against the deployed theme (see the [approved specification](prototypes/approved/cco-inline-loading/README.md) and its implementation guide), then archive the WIP trial per AGENTS. Background preloading and kept tabs are v2. The custom CCO iPart is retired and archived.
+- [ ] Native CCO tab switching without page reloads: implemented in the shared theme (`US-CCO-SWITCH` in `zUnionSuite.js`/`.css`, `Config.js` setting, guide section `#cco-tab-switching`); 23 offline scenarios pass in `THeme/UnionSuite-Guides/usage/tests/test-cco-switch.cjs`. **Next: live acceptance** against the deployed theme (see the [approved specification](prototypes/approved/cco-inline-loading/README.md) and its implementation guide), then archive the WIP trial per AGENTS. Background preloading and kept tabs are v2. The custom CCO iPart is retired and archived.

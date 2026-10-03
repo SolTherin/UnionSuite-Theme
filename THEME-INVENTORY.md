@@ -1,7 +1,7 @@
 # Element inventory — what the native CSS actually styles
 
 Extracted from `Native CSS/Orion-99.css` (1,030 rule blocks, 563 classes) and
-`THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css` (3,831 blocks, 2,678 classes) by
+`THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css` (3,831 blocks, 2,678 classes) by
 parsing selectors and weighting each class by how many declarations target it.
 Presence checked against the captured `Orion page.html`.
 
@@ -12,7 +12,7 @@ Current implementation: the approved Query Menu / IQA component is now in
 `THeme/UnionSuite/zUnionSuite.css` and `zUnionSuite.js`. Use `us-report` on the
 iPart; optional modifiers are `us-filters-collapsible`, `us-filters-collapsed`
 and `us-report-expandable`. `SearchContactsClass` remains a supported alias.
-Use the [standalone Theme Usage Guide](THeme/UnionSuite/Usage-Guide.html) for
+Use the [standalone Theme Usage Guide](THeme/UnionSuite-Guides/Usage-Guide.html) for
 author-facing classes, tokens, templates and feature status, and the
 [theme README](THeme/UnionSuite/README.md) for integration details.
 The [current condensed CSV](CRM-Member-Profile-Component-Types-Updated.csv) and
@@ -55,7 +55,7 @@ it does not imply every native screen or state has been verified live.
 
 Production truth: [shared CSS](THeme/UnionSuite/zUnionSuite.css),
 [shared JS](THeme/UnionSuite/zUnionSuite.js) and the
-[usage guide](THeme/UnionSuite/Usage-Guide.html).
+[usage guide](THeme/UnionSuite-Guides/Usage-Guide.html).
 Visual references: [native forms](references/Native-Form-Integration.html),
 [choices/dropdowns](references/Choice-Dropdown-Comparison.html),
 [calendar](references/Calendar-Comparison.html) and
@@ -418,9 +418,9 @@ gutters. All styling is now in `THeme/UnionSuite/zUnionSuite.css`, with page-lay
 and component rules kept separate. Interaction still uses the existing banner
 script; the legacy-named embed is now behaviour only. The native profile-banner
 selectors above are a different component family. See the
-[banner usage guide](THeme/UnionSuite/guides/usage/examples/Banner-README.md).
+[banner usage guide](THeme/UnionSuite-Guides/usage/examples/Banner-README.md).
 
-The [complete template](THeme/UnionSuite/guides/usage/templates/Banner-Template.html) includes an optional
+The [complete template](THeme/UnionSuite-Guides/usage/templates/Banner-Template.html) includes an optional
 Actions disclosure inside the summary and tabs after the details. Delete either
 whole div to omit it. Both remain visible when compact. Dropdown behaviour is
 implemented; sample commands are disabled until connected to verified handlers.
@@ -428,8 +428,8 @@ Tabs supply presentation only. Direct zone switching is the preferred planned
 adapter for lightweight dashboards, with multiple zones per tab and shared zones
 remaining visible. CCO integration remains a separate option. Zone titles and
 grid space must follow visibility; hiding a zone does not defer its initial IQA.
-Separate [dashboard](THeme/UnionSuite/guides/usage/templates/Banner-Dashboard-Template.html) and
-[Contact](THeme/UnionSuite/guides/usage/templates/Banner-Contact-Template.html) templates provide simpler
+Separate [dashboard](THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html) and
+[Contact](THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html) templates provide simpler
 starting points. The standalone guide embeds these maintained sources rather
 than carrying independently edited copies.
 
@@ -503,7 +503,7 @@ Headers, separators, disabled/danger states, one submenu level, keyboard focus,
 400ms opening/closing and the 1000ms inline line glint are implemented.
 Namespaced explicit function registration replaces inline onclick for new HTML.
 Other native context/Telerik menus remain unreviewed. See
-[usage and examples](THeme/UnionSuite/Usage-Guide.html#action-menus).
+[usage and examples](THeme/UnionSuite-Guides/Usage-Guide.html#action-menus).
 Live iMIS popup/postback/permission testing remains required.
 
 
@@ -518,7 +518,7 @@ now use shared typography, navy hover, inset pressed borders and red Close
 states. Popup-document dividers use the theme border; load shared CSS/JS inside
 the iframe as well as the parent. The captured HTML omits iframe footer markup,
 so verify that coverage live. Alert/confirm/prompt content remains unreviewed.
-See [usage and preview](THeme/UnionSuite/Usage-Guide.html#dialog-chrome).
+See [usage and preview](THeme/UnionSuite-Guides/Usage-Guide.html#dialog-chrome).
 
 
 ### Deferred: alert, confirm and prompt dialogs
