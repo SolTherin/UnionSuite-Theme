@@ -370,7 +370,7 @@
 }
 
 /* The value is only as wide as its text, so the copy flash fits it. */
-.us-contact-tile__reach > span > span {
+.us-contact-tile__reach .us-contact-tile__value {
   justify-self: start;
   max-width: 100%;
   margin: 0 -3px;
@@ -379,11 +379,11 @@
   overflow-wrap: anywhere;
 }
 
-.us-contact-tile__phone > span {
+.us-contact-tile__phone .us-contact-tile__value {
   white-space: nowrap;
 }
 
-.us-contact-tile__reach i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-contact-tile__reach .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--text-faint);
   font-size: 14px;
   line-height: 1;
@@ -409,7 +409,7 @@
   background: var(--bg-sunken);
 }
 
-.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled) i {
+.us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled) .ti {
   color: var(--text-strong);
 }
 
@@ -423,17 +423,17 @@
   cursor: default;
 }
 
-.us-contact-tile__copy:disabled i {
+.us-contact-tile__copy:disabled .ti {
   opacity: .55;
 }
 
 /* Copied: a green copy icon, and the line flashes once. */
-.us-contact-tile__copy[data-us-copied] i:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-contact-tile__copy[data-us-copied] .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--success);
   opacity: 1;
 }
 
-.us-contact-tile__reach > span[data-us-copied] > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-contact-tile__reach > span[data-us-copied] .us-contact-tile__value:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   animation: us-contact-copied 900ms ease-out;
 }
 
@@ -443,7 +443,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .us-contact-tile__reach > span[data-us-copied] > span {
+  .us-contact-tile__reach > span[data-us-copied] .us-contact-tile__value {
     animation: none;
     background: color-mix(in srgb, var(--success) 14%, transparent);
   }
@@ -789,7 +789,7 @@
 }
 
 /* A missing email or phone reads as deliberately empty. */
-.us-contacts-grouped .us-contact-tile__reach > span > span:empty::before {
+.us-contacts-grouped .us-contact-tile__reach .us-contact-tile__value:empty::before {
   content: "—" / "";
   color: var(--text-faint);
 }

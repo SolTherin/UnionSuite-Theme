@@ -4726,8 +4726,10 @@ SOFTWARE.
 /* US-INCREASES:END */
 
 /* US-CONTACT-COPY:START — copy a contact's email or phone from its icon.
-   The icon is a .us-contact-tile__copy button before the value. Pressing it
-   copies the value, swaps the icon for a green copy icon and flashes the
+   The icon is a .us-contact-tile__copy button on the same line as the
+   value, which is marked .us-contact-tile__value (a class, because the iMIS
+   editor can strip a bare span and turns <i> into <em>). Pressing it copies
+   the value, swaps the icon for a green copy icon and flashes the
    line, with no visible text; a hidden status line tells screen readers.
    A button whose value is blank is disabled, so it does nothing. */
 (function () {
@@ -4739,7 +4741,7 @@ SOFTWARE.
   let status = null;
 
   function valueOf(button) {
-    const value = button.nextElementSibling;
+    const value = button.parentElement.querySelector('.us-contact-tile__value');
     return value ? value.textContent.trim() : '';
   }
 
@@ -4782,7 +4784,8 @@ SOFTWARE.
 
   function flash(button) {
     const line = button.parentElement;
-    const icon = button.querySelector('i');
+    const icon = button.querySelector('.ti');
+    if (!icon) return;
     if (!icon.dataset.usIcon) icon.dataset.usIcon = icon.className;
     clearTimeout(timers.get(button));
     // Restart the flash even on a quick second press.
