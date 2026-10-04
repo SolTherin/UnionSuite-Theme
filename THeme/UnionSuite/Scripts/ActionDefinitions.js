@@ -280,7 +280,8 @@
   popup('agreements.add-term', 'Add term', 'plus',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum}),
     'Add term', refreshList('us-action-agreements-add-term'));
-  popup('agreements.remove-terms', 'Remove terms', 'trash',
+  // The page removes several terms at once (owner, 4 October 2026: "Bulk remove").
+  popup('agreements.remove-terms', 'Bulk remove', 'trash',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Delete_Terms.aspx', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
     'Remove terms', refreshList('us-action-agreements-add-term'));
   popup('agreements.edit-coverage', 'Update coverage', 'pencil',

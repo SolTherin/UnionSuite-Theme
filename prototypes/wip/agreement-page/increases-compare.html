@@ -1,0 +1,520 @@
+<!doctype html>
+<!--
+  Scheduled increases, five ways, filled from the same sample increases
+  (open decision 12 in README.md):
+  1. Current (v0.1): the live Terms & Schedule tab, rebuilt as static
+     markup in the theme: the summary Query Menu, the Create a new scheduled
+     increase form, and All Increases with its General and Class tables.
+  2. Summary + breakdown, two iParts: a summary IQA (one row per group,
+     totals by the IQA) through templates/Agreement-Increases-Summary-Query-Template.html,
+     then the rows IQA grouped (us-increases-c us-increases--grouped).
+  3 to 5. One IQA and one template, templates/Agreement-Increases-Rows-Query-Template.html,
+     the layout chosen by the iPart CSS class (increases-layouts.candidate.css,
+     groups, totals and views from increases-layouts.candidate.js):
+  3. One grouped list (us-increases--grouped us-increases--totals): headings
+     with each group's total, and a totals strip.
+  4. Expandable groups (us-increases--expand us-increases--totals): the
+     terms' expandable rows, one per group; opening slides in the steps.
+  5. Class matrix (us-increases--matrix): general increases as a dated
+     strip, classes by months in class.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Increases Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="increases-layouts.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.ic-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .ic-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .ic-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .ic-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .ic-toolbar select,
+    .ic-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .ic-toolbar .ic-mode {
+      margin-inline-start: auto;
+    }
+
+    .ic-stage {
+      display: grid;
+      gap: 32px;
+      max-width: var(--ic-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .ic-option {
+      display: grid;
+      gap: 12px;
+      scroll-margin-top: 56px;
+    }
+
+    .ic-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .ic-option > p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .ic-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    /* Option 1: v0.1's native pieces, as they render today. */
+    .ic-num {
+      text-align: end;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ic-v01-subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 16px 0 8px;
+      color: var(--text-strong);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .ic-v01-subhead:first-child {
+      margin-top: 0;
+    }
+
+    .ic-v01-filter {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px;
+    }
+
+    .ic-v01-filter .form-control {
+      width: auto;
+      min-width: 120px;
+    }
+
+    .ic-v01-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      align-items: end;
+      gap: 12px 16px;
+    }
+
+    .ic-v01-form .form-group {
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="ic-page">
+
+<div class="ic-toolbar" aria-label="Comparison controls">
+  <strong>Scheduled increases</strong>
+  <nav aria-label="Options">
+    <a href="#ic-current">1</a>
+    <a href="#ic-summary">2</a>
+    <a href="#ic-grouped">3</a>
+    <a href="#ic-expand">4</a>
+    <a href="#ic-matrix">5</a>
+  </nav>
+  <label>Panel width
+    <select id="ic-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Terms &amp; Schedule tab)</option>
+      <option value="1600px">Full (wide screen)</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="ic-measure" checked> Cap main column (400px)</label>
+  <label><input type="checkbox" id="ic-compound"> Compound percentages (3 to 5)</label>
+  <label>Sample
+    <select id="ic-sample">
+      <option value="full" selected>4 general, 3 classes</option>
+      <option value="small">Small: 2 general, 1 class</option>
+      <option value="v01">v0.1 test data (live page)</option>
+    </select>
+  </label>
+  <button type="button" class="ic-mode" id="ic-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="ic-stage">
+
+  <section class="ic-option" id="ic-current" aria-labelledby="ic-current-title">
+    <h2 id="ic-current-title">1. Current (v0.1)</h2>
+    <p>The live Terms &amp; Schedule tab, rebuilt as static markup in the theme, filled from the sample as v0.1's three IQAs would show it. A summary Query Menu (Class, Total Increase), a form, and All Increases: a General table and a Class table, each with Export, the Class table with a Class filter. The summary mixes units: General is a sum of percentages, Fixed a sum of dollars, both in one column. A CPI increase shows as a blank amount. A fixed-amount general increase appears only in the summary (the General list filters Type = General), and a class step in dollars cannot be entered (the form takes a percentage), so it shows blank here. The layout v2 page (<code>index-v2.html</code>) already keeps only the summary table, with the form moved to the Add increase heading button.</p>
+    <div class="ContentItemContainer"><div class="us-panel-fill"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled Increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div data-gridid="ic-v01-summary"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+        <thead><tr><th class="rgHeader" scope="col">Class</th><th class="rgHeader ic-num" scope="col">Total Increase</th></tr></thead>
+        <tbody id="ic-v01-summary-rows"></tbody>
+      </table></div></div></div></div>
+    </div></div></div>
+    <div class="ContentItemContainer"><div class="us-query-template us-form"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Create a new scheduled increase</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="rendered-form ic-v01-form">
+        <div class="form-group"><label for="ic-v01-type">Type</label><select id="ic-v01-type" class="form-control"><option>General</option><option selected>Class</option><option>Fixed Amount</option></select></div>
+        <div class="form-group"><label for="ic-v01-class">Class</label><input id="ic-v01-class" type="text" class="form-control"></div>
+        <div class="form-group"><label for="ic-v01-months">Months In Role</label><input id="ic-v01-months" type="number" class="form-control"></div>
+        <div class="form-group"><label for="ic-v01-amount">Increase Amount (%)</label><input id="ic-v01-amount" type="number" class="form-control"></div>
+        <div><button type="button" class="TextButton PrimaryButton">Add Scheduled Increase</button></div>
+      </div></div></div>
+    </div></div></div>
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">All Increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body">
+        <h3 class="ic-v01-subhead">General <button type="button" class="TextButton">Export</button></h3>
+        <div data-gridid="ic-v01-general"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+          <thead><tr><th class="rgHeader" scope="col">Effective Date</th><th class="rgHeader ic-num" scope="col">Increase Amount (%)</th><th class="rgHeader ic-num" scope="col">Increase Number</th></tr></thead>
+          <tbody id="ic-v01-general-rows"></tbody>
+        </table></div></div>
+        <h3 class="ic-v01-subhead">Class <button type="button" class="TextButton">Export</button></h3>
+        <div class="ic-v01-filter">
+          <label for="ic-v01-filter">Class</label>
+          <select class="form-control" aria-label="Class comparison"><option>Equals</option></select>
+          <input id="ic-v01-filter" type="text" class="form-control">
+          <button type="button" class="TextButton">Find</button>
+        </div>
+        <div data-gridid="ic-v01-class"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+          <thead><tr><th class="rgHeader" scope="col">Class</th><th class="rgHeader ic-num" scope="col">Months In Role</th><th class="rgHeader ic-num" scope="col">Increase Amount (%)</th></tr></thead>
+          <tbody id="ic-v01-class-rows"></tbody>
+        </table></div></div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <section class="ic-option" id="ic-summary" aria-labelledby="ic-summary-title">
+    <h2 id="ic-summary-title">2. Summary + breakdown (two iParts, two IQAs)</h2>
+    <p>A compact summary panel from a summary IQA: General first (what everyone gets), then one line per class with that class's own steps, each with its total; the IQA sums, so the totals need no script. The units and "+ CPI" are drawn by the CSS from which sums are blank. Under it, the breakdown: every increase on the rows IQA, grouped General then each class, the headings counting only (the totals are above). Two iParts to place and two IQAs to keep in step; the summary IQA cannot compound, and prints its sums as the IQA formats them (6.50, 4788.00). Add increase sits on the summary only.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-increases-summary us-action-agreements-add-increase"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-ic-template="Agreement-Increases-Summary-Query-Template.html" data-ic-rows="summary"></div></div></div>
+    </div></div></div>
+    <div class="ContentItemContainer"><div class="us-query-template us-increases-c us-increases--grouped"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[list-details]] All increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-ic-template="Agreement-Increases-Rows-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="ic-option" id="ic-grouped" aria-labelledby="ic-grouped-title">
+    <h2 id="ic-grouped-title">3. One grouped list (us-increases-c us-increases--grouped us-increases--totals)</h2>
+    <p>One IQA, one iPart. A strip at the top answers "what is the total": what everyone gets, how many classes and steps (and the largest class total), and when the general increases take effect. Then every increase, under a heading per group whose total sits in the amount column, so General's 6.5% + CPI + $40.00 lines up with each row's amount. Rows: the type icon in its column, when it applies with the type coloured under it, the amount right-aligned in a fixed column, the pencil at the right edge under Add increase. Everything is visible without a click; at about 50px a row it suits up to 15 or 20 increases.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-increases-c us-increases--grouped us-increases--totals us-action-agreements-add-increase"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-ic-template="Agreement-Increases-Rows-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="ic-option" id="ic-expand" aria-labelledby="ic-expand-title">
+    <h2 id="ic-expand-title">4. Expandable groups (us-agreement-increases) — decided, now in the theme</h2>
+    <p>The locked terms look, one row per group: the group icon in its own column, the group with a coloured line under it (Everyone · 4 increases, 1 Jul 2026 to 1 Jul 2028; Class · 2 steps, after 6 to 12 months), its total in a fixed column, a chevron. The closed panel is the summary; click a row (or Enter on it) and its increases slide in under the title, each amount under the group total and each pencil under the chevron. Click anywhere on an open group to close it. The same totals strip leads. Same IQA and template as option 3; the groups are built by script from the rows, so without it the rows show flat. General is opened here so the open state shows.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-increases"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-ic-template="Agreement-Increases-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="ic-option" id="ic-matrix" aria-labelledby="ic-matrix-title">
+    <h2 id="ic-matrix-title">5. Class matrix (us-increases-c us-increases--matrix)</h2>
+    <p>General increases as a dated strip with everyone's total; then a table with a row per class and a column per step (6, 12, 24 months in class), with a total column, so classes compare side by side. Same IQA and template; the table is pivoted by script from the rows, which is the catch: without the script there is no table, the month columns grow with every distinct step, and a cell has no room for the pencil, so editing needs another route. A narrow panel scrolls the table sideways with the class column fixed.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-increases-c us-increases--matrix us-action-agreements-add-increase"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-ic-template="Agreement-Increases-Rows-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // Sample increases, as the table holds them (i4u_UT_CA_Schedule; see
+  // Increases-IQA-Build.md). Kind and IncreaseType are the proposed
+  // aliases; v0.1 stores Type (General, Class, Fixed Amount) and Class
+  // ("General" and "Fixed" for its general rows).
+  const general = (Ordinal, IncreaseNum, EffectiveDate, IncreaseType, value, AmountPeriod = '', Comment = '') => ({
+    Ordinal, IncreaseNum, Kind: 'General', IncreaseType, Class: '', ClassOrder: '', EffectiveDate, MonthsInClass: '',
+    Percent: IncreaseType === 'Negotiated' ? value : '', Amount: IncreaseType === 'Fixed amount' ? value : '', AmountPeriod, Comment
+  });
+  const step = (Ordinal, Class, ClassOrder, MonthsInClass, IncreaseType, value, AmountPeriod = '', Comment = '') => ({
+    Ordinal, IncreaseNum: '', Kind: 'Class', IncreaseType, Class, ClassOrder, EffectiveDate: '', MonthsInClass,
+    Percent: IncreaseType === 'Percentage' ? value : '', Amount: IncreaseType === 'Fixed amount' ? value : '', AmountPeriod, Comment
+  });
+
+  const samples = {
+    // 4 general (two negotiated, one CPI, one fixed $) across 2026 to 2028,
+    // and three classes with one to two steps.
+    full: [
+      general('201', '1', '2026-07-01', 'Negotiated', '3.50'),
+      general('202', '2', '2027-01-01', 'Fixed amount', '40.00', 'per week', 'Flat amount for all classifications, paid on ordinary hours.'),
+      general('203', '3', '2027-07-01', 'CPI', '', '', 'CPI (all groups, Australia) for the March quarter, with a 2% floor.'),
+      general('204', '4', '2028-07-01', 'Negotiated', '3.00'),
+      step('211', 'C1', '1', '6', 'Percentage', '2.00'),
+      step('212', 'C1', '1', '12', 'Percentage', '3.00'),
+      step('213', 'C2', '2', '12', 'Percentage', '4.00'),
+      step('214', 'C3', '3', '6', 'Fixed amount', '25.00', 'per week'),
+      step('215', 'C3', '3', '24', 'Percentage', '2.50', '', 'On completion of the Certificate IV.')
+    ],
+    small: [
+      general('301', '1', '2026-07-01', 'Negotiated', '4.00'),
+      general('302', '2', '2027-07-01', 'CPI'),
+      step('311', 'C1', '1', '6', 'Percentage', '2.00')
+    ],
+    // The live v0.1 page (owner's screenshot, 4 October 2026). The blank
+    // amounts (#1, #3) are taken as CPI; the Fixed summary row ($4,788.00)
+    // as one fixed-amount general increase with no basis recorded.
+    v01: [
+      general('101', '1', '2026-07-10', 'CPI'),
+      general('102', '2', '2026-07-10', 'Negotiated', '2.00'),
+      general('103', '3', '2026-07-14', 'CPI'),
+      general('104', '4', '2026-07-14', 'Negotiated', '88.00'),
+      general('105', '5', '2026-07-15', 'Negotiated', '2.00'),
+      general('106', '6', '2027-01-01', 'Negotiated', '5.00'),
+      general('107', '', '2026-07-10', 'Fixed amount', '4788.00'),
+      step('111', 'C88', '', '7', 'Percentage', '12.00'),
+      step('112', 'Test', '', '6', 'Percentage', '2.00')
+    ]
+  };
+
+  let sample = 'full';
+
+  // ── The IQA's work, simulated ──────────────────────────────────
+
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const longDate = iso => { const [y, m, d] = iso.split('-').map(Number); return d + ' ' + MONTHS[m - 1] + ' ' + y; };
+  const shortDate = iso => { const [y, m, d] = iso.split('-'); return Number(d) + '/' + m + '/' + y; };
+  const trim = value => String(Number(value));
+  const money = value => '$' + Number(value).toLocaleString('en-AU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  // The display columns the IQA would build with expressions (When, AmountText).
+  function withDisplay(row) {
+    const When = row.Kind === 'General' ? longDate(row.EffectiveDate) : 'After ' + row.MonthsInClass + ' months';
+    const AmountText = row.IncreaseType === 'CPI' ? 'CPI'
+      : row.Amount ? money(row.Amount) + (row.AmountPeriod ? ' ' + row.AmountPeriod : '')
+      : trim(row.Percent) + '%';
+    return {...row, When, AmountText};
+  }
+
+  // IQA sort: GroupSort, ClassOrder, Class, EffectiveDate, MonthsInClass, IncreaseNum.
+  function sortRows(rows) {
+    const groupSort = row => row.Kind === 'General' ? 0 : 1;
+    return [...rows].sort((a, b) => groupSort(a) - groupSort(b) ||
+      (Number(a.ClassOrder) || 999) - (Number(b.ClassOrder) || 999) ||
+      a.Class.localeCompare(b.Class) ||
+      a.EffectiveDate.localeCompare(b.EffectiveDate) ||
+      (Number(a.MonthsInClass) || 0) - (Number(b.MonthsInClass) || 0) ||
+      (Number(a.IncreaseNum) || 999) - (Number(b.IncreaseNum) || 999));
+  }
+
+  const increases = () => sortRows(samples[sample]).map(withDisplay);
+
+  // The summary IQA: grouped on GroupName, SUM of Percent and Amount (blank
+  // when every value is blank), MAX of the CPI flag and AmountPeriod, COUNT.
+  function summaryRows() {
+    const groups = [];
+    increases().forEach(row => {
+      const name = row.Kind === 'General' ? 'General' : row.Class;
+      let group = groups.find(entry => entry.GroupName === name);
+      if (!group) groups.push(group = {GroupName: name, Kind: row.Kind, rows: []});
+      group.rows.push(row);
+    });
+    const sum = (rows, field) => {
+      const values = rows.map(row => row[field]).filter(Boolean).map(Number);
+      return values.length ? values.reduce((a, b) => a + b, 0).toFixed(2) : '';
+    };
+    return groups.map(group => ({
+      GroupName: group.GroupName,
+      Kind: group.Kind,
+      TotalPercent: sum(group.rows, 'Percent'),
+      CPI: group.rows.some(row => row.IncreaseType === 'CPI') ? 'CPI' : '',
+      TotalAmount: sum(group.rows, 'Amount'),
+      AmountPeriod: group.rows.map(row => row.AmountPeriod).sort().pop() || '',
+      StepCount: String(group.rows.length)
+    }));
+  }
+
+  // ── Template fill ──────────────────────────────────────────────
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // The Query Template Display's substitution; an unselected field fails loudly.
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  const templates = new Map();
+  async function template(name) {
+    if (!templates.has(name)) {
+      const response = await fetch('templates/' + name, {cache: 'no-cache'});
+      if (!response.ok) throw new Error('No template ' + name);
+      // Drop the leading comment, as iMIS stores only the markup.
+      templates.set(name, (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, ''));
+    }
+    return templates.get(name);
+  }
+
+  async function renderTheme() {
+    for (const set of document.querySelectorAll('[data-ic-template]')) {
+      const markup = await template(set.getAttribute('data-ic-template'));
+      const rows = set.getAttribute('data-ic-rows') === 'summary' ? summaryRows() : increases();
+      set.innerHTML = rows.map((row, index) =>
+        `<section data-item="increases-${index}"><div class="QueryTemplateItem">${fill(markup, row)}</div></section>`).join('');
+    }
+  }
+
+  // ── Option 1: v0.1's three IQAs ────────────────────────────────
+
+  function renderCurrent() {
+    const rows = sortRows(samples[sample]);
+    const generalRows = rows.filter(row => row.Kind === 'General' && row.IncreaseType !== 'Fixed amount')
+      .sort((a, b) => Number(a.IncreaseNum) - Number(b.IncreaseNum));
+    const fixedRows = rows.filter(row => row.Kind === 'General' && row.IncreaseType === 'Fixed amount');
+    const classRows = rows.filter(row => row.Kind === 'Class')
+      .sort((a, b) => a.Class.localeCompare(b.Class) || Number(a.MonthsInClass) - Number(b.MonthsInClass));
+    const sum = list => list.reduce((total, value) => total + Number(value || 0), 0);
+    const tr = (cells, index) => `<tr class="${index % 2 ? 'rgAltRow' : 'rgRow'}">${cells}</tr>`;
+
+    // Summary: Class, SUM(IncreaseAmount); sorted Type descending, then Class.
+    const summary = [];
+    if (generalRows.length) summary.push(['General', sum(generalRows.map(row => row.Percent)).toFixed(2) + '%']);
+    if (fixedRows.length) summary.push(['Fixed', money(sum(fixedRows.map(row => row.Amount)))]);
+    [...new Set(classRows.map(row => row.Class))].forEach(name => {
+      const percents = classRows.filter(row => row.Class === name).map(row => row.Percent).filter(Boolean);
+      summary.push([name, percents.length ? sum(percents).toFixed(2) + '%' : '']);
+    });
+    document.getElementById('ic-v01-summary-rows').innerHTML = summary
+      .map(([name, value], index) => tr(`<td>${escapeHtml(name)}</td><td class="ic-num">${escapeHtml(value)}</td>`, index)).join('');
+
+    document.getElementById('ic-v01-general-rows').innerHTML = generalRows
+      .map((row, index) => tr(`<td>${shortDate(row.EffectiveDate)}</td><td class="ic-num">${row.Percent ? Number(row.Percent).toFixed(2) : ''}</td><td class="ic-num">${escapeHtml(row.IncreaseNum)}</td>`, index)).join('');
+
+    // A dollar class step cannot be entered in v0.1; its % cell is blank.
+    document.getElementById('ic-v01-class-rows').innerHTML = classRows
+      .map((row, index) => tr(`<td>${escapeHtml(row.Class)}</td><td class="ic-num">${escapeHtml(row.MonthsInClass)}</td><td class="ic-num">${row.Percent ? Number(row.Percent).toFixed(2) : ''}</td>`, index)).join('');
+  }
+
+  // ── Toolbar ────────────────────────────────────────────────────
+
+  document.getElementById('ic-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--ic-width', event.target.value);
+  });
+
+  // Off: the main column takes all spare width, as without the cap.
+  document.getElementById('ic-measure').addEventListener('change', event => {
+    if (event.target.checked) document.documentElement.style.removeProperty('--us-increase-measure');
+    else document.documentElement.style.setProperty('--us-increase-measure', '100vw');
+  });
+
+  // The modifier class an author would add to the iPart CSS class.
+  document.getElementById('ic-compound').addEventListener('change', event => {
+    document.querySelectorAll('#ic-grouped .us-increases-c, #ic-expand .us-increases, #ic-matrix .us-increases-c')
+      .forEach(wrapper => wrapper.classList.toggle('us-increases--compound', event.target.checked));
+  });
+
+  document.getElementById('ic-sample').addEventListener('change', event => {
+    sample = event.target.value;
+    renderCurrent();
+    renderTheme().then(openFirstGroup).catch(showServeHint);
+  });
+
+  document.getElementById('ic-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  // Opened from disk, the browser blocks the template fetches; say so in
+  // place of empty panels.
+  function showServeHint() {
+    if (document.querySelector('.ic-hint')) return;
+    const url = 'http://localhost:8778/prototypes/wip/agreement-page/increases-compare.html';
+    const hint = document.createElement('p');
+    hint.className = 'ic-hint';
+    hint.innerHTML = 'Options 2 to 5 need this page served, not opened from disk. Serve the project root and open <a href="' + url + '">' + url + '</a>.';
+    document.querySelector('.ic-stage').prepend(hint);
+  }
+
+  // Option 4 shows General open, once the script has built the groups.
+  function openFirstGroup(tries = 60) {
+    const first = document.querySelector('#ic-expand .us-increase-group');
+    if (first) { first.open = true; return; }
+    if (tries > 0) requestAnimationFrame(() => openFirstGroup(tries - 1));
+  }
+
+  renderCurrent();
+  if (location.protocol === 'file:') showServeHint();
+  else renderTheme().then(openFirstGroup).catch(showServeHint);
+</script>
+<!-- The theme script gives each panel its heading buttons and title icon,
+     and paints Add increase (agreements.add-increase). Without AgreementID
+     and AgreementNum in the URL the actions stay disabled, which is fine
+     for a layout comparison. -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="increases-layouts.candidate.js"></script>
+</body>
+</html>

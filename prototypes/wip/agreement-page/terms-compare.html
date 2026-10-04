@@ -1,0 +1,423 @@
+<!doctype html>
+<!--
+  Agreement terms and clauses, six ways, filled from the same sample terms
+  (the three Terms rows in agreement-page.js, plus eight more):
+  1. Original: the v1 mock-up's terms card in its own styling, in an isolated
+     frame (always light), with its sample terms replaced by these.
+  2. Current theme: the us-list shell with Display in cards, through
+     templates/Agreement-Terms-Cards-Query-Template.html (the template before
+     option 7 was decided).
+  3 to 6. One new template, templates/Agreement-Terms-Rows-Query-Template.html,
+     with the layout chosen by the iPart CSS class (terms-layouts.candidate.css,
+     group headings from terms-layouts.candidate.js):
+  3. Rows (us-terms), preferred (owner, 4 October 2026): one row per term,
+     the status first, facts in aligned columns, status quick filters in the
+     funnel disclosure (US-TERM-FACETS). The term column stops at 640px so
+     the facts stay beside it on a wide tab, and the pencil keeps the right
+     edge under Add term; the toolbar can switch the cap off for comparison.
+  4. Checklist (us-terms--checklist), preferred (owner, 4 October 2026): a
+     status icon opens each row, the amount beside the status, the category
+     in a column.
+  5. Grouped by status (us-terms--by-status).
+  6. Grouped by category (us-terms--by-category).
+  7. Expandable rows (us-terms--expand, own template
+     templates/Agreement-Terms-Expand-Query-Template.html): option 4's look
+     closed (status icon column, term with status under it, category); description,
+     amount and View, Edit, Delete at the bottom right open; a click
+     anywhere on an open row closes it.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terms Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="terms-layouts.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.tc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .tc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .tc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .tc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .tc-toolbar select,
+    .tc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .tc-toolbar .tc-mode {
+      margin-inline-start: auto;
+    }
+
+    .tc-stage {
+      display: grid;
+      gap: 32px;
+      max-width: var(--tc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .tc-option {
+      scroll-margin-top: 56px;
+    }
+
+    .tc-option > h2 {
+      margin: 0 0 4px;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .tc-option > p {
+      margin: 0 0 10px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .tc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    .tc-frame {
+      display: block;
+      width: 100%;
+      height: 480px;
+      border: 0;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body class="tc-page">
+
+<div class="tc-toolbar" aria-label="Comparison controls">
+  <strong>Agreement terms</strong>
+  <nav aria-label="Options">
+    <a href="#tc-original">1</a>
+    <a href="#tc-current">2</a>
+    <a href="#tc-rows">3</a>
+    <a href="#tc-checklist">4</a>
+    <a href="#tc-by-status">5</a>
+    <a href="#tc-by-category">6</a>
+    <a href="#tc-expand">7</a>
+  </nav>
+  <label>Panel width
+    <select id="tc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Terms tab)</option>
+      <option value="1600px">Full (wide screen)</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="tc-measure" checked> Cap term column (640px)</label>
+  <label>Status save (7)
+    <select id="tc-save">
+      <option value="ok" selected>Succeeds</option>
+      <option value="fail">Fails</option>
+    </select>
+  </label>
+  <label>Sample
+    <select id="tc-sample">
+      <option value="full" selected>11 terms</option>
+      <option value="prototype">3 terms (agreement page)</option>
+    </select>
+  </label>
+  <button type="button" class="tc-mode" id="tc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="tc-stage">
+
+  <section class="tc-option" id="tc-original" aria-labelledby="tc-original-title">
+    <h2 id="tc-original-title">1. Original (v1 mock-up)</h2>
+    <p>The v1 terms card in its own styling, always light. One line per term: title, category tag and description on the left; amount, status and edit on the right.</p>
+    <iframe class="tc-frame" id="tc-original-frame" title="Original terms" src="../../Agreement%20Management/Agreement-Management-Prototype.html"></iframe>
+  </section>
+
+  <section class="tc-option" id="tc-current" aria-labelledby="tc-current-title">
+    <h2 id="tc-current-title">2. Current theme (us-list, Display in cards)</h2>
+    <p>The agreement page today: a card per term, the title, then category and status as matching badges with the amount and pencil after them, then the description.</p>
+    <!-- The preset us-agreement-terms now adds the decided layout (us-terms), so the old cards spell out the classes it stood for. -->
+    <div class="ContentItemContainer"><div class="us-query-template us-query-search us-list-scroll us-action-agreements-remove-terms us-action-agreements-add-term"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Cards-Query-Template.html" data-tc-cards></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="tc-option" id="tc-rows" aria-labelledby="tc-rows-title">
+    <h2 id="tc-rows-title">3. Rows (us-terms)</h2>
+    <p>No cards: one row per term under a rule. The term, then its status badge and amount on one line, then its description; the category and the pencil each in a fixed column, so they line up down the list. Status quick filters sit in the funnel disclosure, as the contacts panel's group chips do (a pressed chip puts a dot on the funnel and the count beside the title). The term column stops at 640px, so on a wide tab the category stays beside the term; the pencil keeps the right edge under Add term, and the spare width sits inside the row between them (options 4 to 6 too). The amount shows its unit. IQA sorted by term.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-terms us-terms"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Rows-Query-Template.html" data-tc-sort="term"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="tc-option" id="tc-checklist" aria-labelledby="tc-checklist-title">
+    <h2 id="tc-checklist-title">4. Checklist (us-terms us-terms--checklist) — preferred</h2>
+    <p>The same rows read as a checklist: a tick, half circle or dash opens each row, with the status as coloured text and the amount beside it under the term. The category in its own column, then the pencil. The status quick filters from option 3 apply here too (opened here so they show).</p>
+    <div class="ContentItemContainer"><div class="us-agreement-terms us-terms us-terms--checklist"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Rows-Query-Template.html" data-tc-sort="term"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="tc-option" id="tc-by-status" aria-labelledby="tc-by-status-title">
+    <h2 id="tc-by-status-title">5. Grouped by status (us-terms us-terms--by-status)</h2>
+    <p>Headings for Negotiating, Included and Not Included, each with a coloured dot and a count, so where the agreement stands reads at a glance; the rows drop their status badge. Needs a StatusSort column in the IQA.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-terms us-terms us-terms--by-status"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Rows-Query-Template.html" data-tc-sort="status"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="tc-option" id="tc-by-category" aria-labelledby="tc-by-category-title">
+    <h2 id="tc-by-category-title">6. Grouped by category (us-terms us-terms--by-category)</h2>
+    <p>Headings per category, as the agreement document is arranged; the rows keep their status badge and drop the category. IQA sorted by category, then term.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-terms us-terms us-terms--by-category"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Rows-Query-Template.html" data-tc-sort="category"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="tc-option" id="tc-expand" aria-labelledby="tc-expand-title">
+    <h2 id="tc-expand-title">7. Expandable rows (us-terms us-terms--expand) — decided, now in the theme</h2>
+    <p>Option 4's look, closed to three facts: the status icon in its own column, the term with its status and amount on the line under it ("Included · 17.5%", as option 4), and the category in its column, with a chevron. Click the icon to change the status from a menu; changing to Included plays the confetti. Terms have no status save yet, so this page stands in a pretend one (the toolbar's "Status save" makes it fail, to see the change revert). Click the row (or press Enter on it) and it opens, as the contact page's activity history cards do, to the description and the actions: View, Edit and Delete at the bottom right. Click anywhere on an open row to close it. View and Delete have no actions defined yet, so they do nothing here. Own template: Agreement-Terms-Expand-Query-Template.html. The first row is opened here so the open state shows.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-terms us-terms us-terms--expand"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-tc-template="Agreement-Terms-Expand-Query-Template.html" data-tc-sort="term"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // The three Terms rows from agreement-page.js (amounts as the live IQA
+  // gives them, a bare number), then eight more with the amount and its
+  // unit as the IQA should give it, a long description, a blank
+  // description and a blank category.
+  const prototypeTerms = [
+    {Ordinal: '59', Term: 'Paid meetings', Category: 'General', Amount: '', StatusClass: 'not-included', StatusLabel: 'Not Included', Comment: 'Meetings relevant to this agreement are paid for employees.'},
+    {Ordinal: '58', Term: 'Staff entitled to a half day off on Fridays', Category: 'General', Amount: '', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: 'A commitment from the employer to recognise the dangerous working bonus.'},
+    {Ordinal: '60', Term: 'Employer superannuation contribution', Category: 'Superannuation', Amount: '12.00', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Paid on all ordinary time earnings, including leave loading.'}
+  ];
+  const moreTerms = [
+    {Ordinal: '61', Term: 'Annual leave loading', Category: 'Leave', Amount: '17.5%', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Loading payable on all annual leave taken, in addition to the ordinary time rate.'},
+    {Ordinal: '62', Term: 'Overtime rate — weekdays', Category: 'Pay', Amount: '1.5× rate', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Time and a half for the first two hours, double time after that.'},
+    {Ordinal: '63', Term: 'Overtime rate — weekends', Category: 'Pay', Amount: '2× rate', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: 'Claim is double time for all weekend overtime. The employer has offered time and a half on Saturdays and double time on Sundays only, and wants the change phased in over the life of the agreement.'},
+    {Ordinal: '64', Term: 'Dangerous work allowance', Category: 'Allowances', Amount: '$4.20 per shift', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: 'Per shift worked in a designated hazardous area.'},
+    {Ordinal: '65', Term: 'Family and domestic violence leave', Category: 'Leave', Amount: '10 days', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Ten days of paid leave each year, not cumulative.'},
+    {Ordinal: '66', Term: 'Redundancy pay above the NES', Category: 'General', Amount: '', StatusClass: 'not-included', StatusLabel: 'Not Included', Comment: 'Withdrawn from the log of claims after the second meeting.'},
+    {Ordinal: '67', Term: 'Uniform laundry allowance', Category: 'Allowances', Amount: '', StatusClass: 'not-included', StatusLabel: 'Not Included', Comment: ''},
+    {Ordinal: '68', Term: 'Consultation before roster changes', Category: '', Amount: '4 weeks', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Four weeks’ notice before any change to rosters, with a delegate present.'}
+  ];
+
+  let sample = 'full';
+  const terms = () => sample === 'full' ? prototypeTerms.concat(moreTerms) : prototypeTerms;
+
+  // The IQA's sort for each option; headings gather runs, so order matters.
+  const statusOrder = {negotiating: 1, included: 2};
+  const byTerm = (a, b) => a.Term.localeCompare(b.Term);
+  const sorts = {
+    term: rows => [...rows].sort(byTerm),
+    status: rows => [...rows].sort((a, b) => (statusOrder[a.StatusClass] || 3) - (statusOrder[b.StatusClass] || 3) || byTerm(a, b)),
+    category: rows => [...rows].sort((a, b) => (a.Category === '') - (b.Category === '') || a.Category.localeCompare(b.Category) || byTerm(a, b))
+  };
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // The Query Template Display's substitution; an unselected field fails loudly.
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  const templates = new Map();
+  async function template(name) {
+    if (!templates.has(name)) {
+      const response = await fetch('templates/' + name, {cache: 'no-cache'});
+      if (!response.ok) throw new Error('No template ' + name);
+      // Drop the leading comment, as iMIS stores only the markup.
+      templates.set(name, (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, ''));
+    }
+    return templates.get(name);
+  }
+
+  // Each set renders as the iPart would: Display in cards wraps the item in a card.
+  async function renderTheme() {
+    for (const set of document.querySelectorAll('[data-tc-template]')) {
+      const markup = await template(set.getAttribute('data-tc-template'));
+      const sort = sorts[set.getAttribute('data-tc-sort')];
+      const rows = sort ? sort(terms()) : terms();
+      set.innerHTML = rows.map((row, index) => set.hasAttribute('data-tc-cards')
+        ? `<section data-item="terms-${index}" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body">${fill(markup, row)}</div></div></section>`
+        : `<section data-item="terms-${index}"><div class="QueryTemplateItem">${fill(markup, row)}</div></section>`).join('');
+    }
+  }
+
+  // The v1 term markup, filled from the same rows so only the layout differs.
+  function originalTerm(row) {
+    return `<div class="term-item">
+      <div class="term-info">
+        <div class="tr-title">${escapeHtml(row.Term)}</div>
+        <div class="tr-meta">
+          ${row.Category ? `<span class="tr-category">${escapeHtml(row.Category)}</span>` : ''}
+          <span class="tr-details">${escapeHtml(row.Comment)}</span>
+        </div>
+      </div>
+      <span class="tr-amount">${escapeHtml(row.Amount)}</span>
+      <span class="term-status ${escapeHtml(row.StatusClass)}">${escapeHtml(row.StatusLabel)}</span>
+      <button type="button" class="item-edit-btn" title="Edit term">✏️</button>
+    </div>`;
+  }
+
+  // Keep only the v1 terms card in its frame, with its own styles.
+  function trimOriginal() {
+    const frame = document.getElementById('tc-original-frame');
+    const doc = frame.contentDocument;
+    const list = doc && doc.querySelector('.terms-list');
+    if (!list) return;
+    list.innerHTML = terms().map(originalTerm).join('');
+    if (doc.body.hasAttribute('data-tc-trimmed')) return;
+    doc.body.setAttribute('data-tc-trimmed', '');
+    // v1 scrolls the list at 480px; show every term, as the other options do.
+    list.style.maxHeight = 'none';
+    const card = list.closest('.card');
+    const holder = doc.createElement('div');
+    holder.style.padding = '1px';
+    holder.append(card);
+    doc.body.replaceChildren(holder);
+    doc.body.style.margin = '0';
+    doc.body.style.background = 'transparent';
+    doc.documentElement.style.background = 'transparent';
+    // Measured from the card, not the document, so the frame can also shrink.
+    const fit = () => { frame.style.height = Math.ceil(holder.getBoundingClientRect().height) + 'px'; };
+    fit();
+    new ResizeObserver(fit).observe(holder);
+  }
+
+  // A cached frame can finish loading before this script runs.
+  const originalFrame = document.getElementById('tc-original-frame');
+  originalFrame.addEventListener('load', trimOriginal);
+  const originalDoc = originalFrame.contentDocument;
+  if (originalDoc && originalDoc.readyState === 'complete' && originalDoc.location.href !== 'about:blank') trimOriginal();
+
+  document.getElementById('tc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--tc-width', event.target.value);
+  });
+
+  // Off: the term column takes all spare width again, as before the cap.
+  document.getElementById('tc-measure').addEventListener('change', event => {
+    if (event.target.checked) document.documentElement.style.removeProperty('--us-term-measure');
+    else document.documentElement.style.setProperty('--us-term-measure', '100vw');
+  });
+
+  document.getElementById('tc-sample').addEventListener('change', event => {
+    sample = event.target.value;
+    trimOriginal();
+    renderTheme().catch(showServeHint);
+  });
+
+  document.getElementById('tc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  // Opened from disk, the browser blocks the template fetches and the v1
+  // frame; say so in place of empty panels.
+  function showServeHint() {
+    if (document.querySelector('.tc-hint')) return;
+    const url = 'http://localhost:8778/prototypes/wip/agreement-page/terms-compare.html';
+    const hint = document.createElement('p');
+    hint.className = 'tc-hint';
+    hint.innerHTML = 'Options 2 to 6 need this page served, not opened from disk. Serve the project root and open <a href="' + url + '">' + url + '</a>.';
+    document.querySelector('.tc-stage').prepend(hint);
+  }
+
+  // The preferred option opens its filter disclosure once the theme has
+  // built it, so the status chips are in view without a click.
+  function openRowsFilters(tries = 60) {
+    const toggle = document.querySelector('#tc-checklist .us-iqa-filter-toggle');
+    if (toggle) { if (toggle.getAttribute('aria-expanded') !== 'true') toggle.click(); return; }
+    if (tries > 0) requestAnimationFrame(() => openRowsFilters(tries - 1));
+  }
+
+  // Option 7's status icon needs a save. Terms have no status endpoint yet,
+  // so the comparison stands in a pretend one: half a second, then done.
+  // Pick "Fail" in the toolbar to see a failed save revert.
+  function definePretendSaver() {
+    window.UnionSuiteTermStatus?.defineSaver(() => new Promise((resolve, reject) => setTimeout(() =>
+      document.getElementById('tc-save').value === 'fail' ? reject(new Error('Pretend save failed.')) : resolve(), 500)));
+  }
+
+  // Option 7 shows one row open.
+  function openFirstExpandRow() {
+    const first = document.querySelector('#tc-expand .us-term--expand');
+    if (first) first.open = true;
+  }
+
+  if (location.protocol === 'file:') showServeHint();
+  else renderTheme().then(() => { openRowsFilters(); openFirstExpandRow(); definePretendSaver(); }).catch(showServeHint);
+</script>
+<!-- The theme script gives each panel its search toggle, heading buttons and
+     title icon, and paints the pencil (agreements.edit-term). Without
+     AgreementID and AgreementNum in the URL the actions stay disabled, which
+     is fine for a layout comparison. -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="terms-layouts.candidate.js"></script>
+</body>
+</html>

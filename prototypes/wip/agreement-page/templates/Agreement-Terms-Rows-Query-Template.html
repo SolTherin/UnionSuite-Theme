@@ -1,0 +1,49 @@
+<!-- Agreement terms as rows (options 3 to 6 in terms-compare.html; under
+     review). One template for all four; the iPart CSS class picks the layout:
+
+     Option                 iPart CSS class
+     3. Rows                us-agreement-terms us-terms
+     4. Checklist           us-agreement-terms us-terms us-terms--checklist
+                            (preferred, owner 4 October 2026: status icon,
+                            "Included · 17.5%" under the term, category column)
+     5. Grouped by status   us-agreement-terms us-terms us-terms--by-status
+     6. Grouped by category us-agreement-terms us-terms us-terms--by-category
+
+     us-agreement-terms is the existing section preset (us-query-template
+     us-query-search us-list-scroll us-action-agreements-add-term
+     us-action-agreements-remove-terms). Styles: terms-layouts.candidate.css;
+     group headings: US-TERM-GROUPS, and the status quick filters (chips in
+     the funnel disclosure, the count beside the title, as the contacts
+     panel): US-TERM-FACETS, both in terms-layouts.candidate.js.
+     Native title: Terms and clauses covered. Display in cards: unchecked.
+     Display in columns: unchecked. Header/Footer blank. Rows per page: 30.
+     No results: "No terms recorded."
+
+     IQA sort (headings gather each run of rows with the same value):
+     3 and 4  Term
+     5        a StatusSort custom column, then Term:
+              CASE StatusClass WHEN 'negotiating' THEN 1 WHEN 'included' THEN 2 ELSE 3 END
+     6        Category, then Term
+
+     Fields (the existing Terms IQA, unchanged apart from StatusSort for 5):
+     Ordinal (required)      term ordinal; the pencil opens the term popup
+     Term (required)         term title
+     Category                category; blank leaves it out (option 6: "Uncategorised")
+     StatusClass             included | negotiating | not-included; sets the tone
+     StatusLabel             Included | Negotiating | Not Included
+     Amount                  amount with its unit, as text (17.5%, $4.20 per shift,
+                             4 weeks), after the status under the term (owner,
+                             4 October 2026: text-sized columns did not line
+                             up, each row being its own grid); blank leaves it out.
+                             The live IQA gives a bare number (12.00); add the unit
+     Comment                 description under the title; blank collapses -->
+<div class="us-term" data-us-term-status="{#query.StatusClass}" data-us-term-category="{#query.Category}"
+  data-us-search="{#query.Term} {#query.Category} {#query.StatusLabel} {#query.Comment}">
+  <div class="us-term__main">
+    <h3 class="us-term__title">{#query.Term}</h3>
+    <p class="us-term__meta"><span class="us-badge us-term-status us-term__status" data-us-term-status="{#query.StatusClass}">{#query.StatusLabel}</span><span class="us-term__amount">{#query.Amount}</span></p>
+    <p class="us-term__comment">{#query.Comment}</p>
+  </div>
+  <span class="us-term__category">{#query.Category}</span>
+  <button type="button" class="us-term__edit us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
+</div>

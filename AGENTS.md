@@ -71,6 +71,23 @@
   files from their maintained sources rather than formatting generated output
   by hand.
 
+## Motion
+
+- **Transition every visible state change the theme makes** (owner,
+  4 October 2026): content that appears or disappears slides (height and
+  fade); turns, colour and pressed states transition. Reach for a
+  transition first and settle for an instant change only where the browser
+  cannot animate it.
+- For reveal and collapse, reuse `UnionSuiteRecordCards.fold(element, open)`
+  in `zUnionSuite.js`: it slides from the element's current size, reverses
+  mid-way, and keeps the final state in `hidden`. A native `<details>` needs
+  its summary click taken over to slide; `US-TERM-EXPAND` in
+  `prototypes/wip/agreement-page/terms-layouts.candidate.js` is the pattern.
+- Match the existing timing: 150–240ms on `cubic-bezier(.2, 0, 0, 1)`
+  (fold 220ms, filter disclosure 180ms).
+- Every animation honours `prefers-reduced-motion` by making the change
+  instantly; `fold` already does.
+
 ## iMIS iPart wrapper contract
 
 - Adding a value to an iPart's **CSS class** field makes iMIS insert a separate

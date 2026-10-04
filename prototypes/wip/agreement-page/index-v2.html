@@ -268,28 +268,22 @@
 
       <!-- ── TERMS & SCHEDULE: what it contains ────────────────── -->
       <div class="rmpView rmpHidden" id="view-terms">
-        <!-- Query Template Display (Terms IQA) · CSS class:
-             us-agreement-terms
-             · templates/Agreement-Terms-Query-Template.html -->
+        <!-- Query Template Display (Terms IQA) · CSS class: us-agreement-terms ·
+             Display in cards: unchecked · expandable rows (US-TERMS, decided
+             4 October 2026) · templates/Agreement-Terms-Query-Template.html -->
         <div class="ContentItemContainer" id="ste_container_ciTerms"><div class="us-agreement-terms"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[file-text]] Terms and clauses covered</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-terms"></div></div></div>
         </div></div></div>
 
-        <!-- Query Menu (Scheduled Increases) · CSS class: us-action-agreements-add-increase.
-             Replaces the Add scheduled increase BeyondForm panel: the form opens in a popup
-             (agreements.add-increase; its page URL is a placeholder). -->
-        <div class="ContentItemContainer"><div class="us-action-agreements-add-increase"><div class="panel">
+        <!-- Query Template Display (Agreement Increases IQA) · CSS class: us-agreement-increases ·
+             Display in cards: unchecked · Rows per page: 100 · expandable groups with a
+             totals strip (US-INCREASES, decided 4 October 2026) ·
+             templates/Agreement-Increases-Query-Template.html. Add increase opens the
+             form in a popup (agreements.add-increase; its page URL is a placeholder). -->
+        <div class="ContentItemContainer" id="ste_container_ciIncreases"><div class="us-agreement-increases"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
-          <div class="panel-body-container"><div class="panel-body"><div id="ap-increases_ContentPanel"><div id="ap-increases_ListerPanel"><div data-gridid="ap-increases"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
-            <thead><tr><th class="rgHeader" scope="col">Class</th><th class="rgHeader" scope="col">Total increase (%)</th></tr></thead>
-            <tbody>
-              <tr class="rgRow"><td>General</td><td class="ap-num">97.00</td></tr>
-              <tr class="rgAltRow"><td>Fixed</td><td class="ap-num"></td></tr>
-              <tr class="rgRow"><td>C88</td><td class="ap-num">12.00</td></tr>
-              <tr class="rgAltRow"><td>Test</td><td class="ap-num">2.00</td></tr>
-            </tbody>
-          </table></div></div></div></div></div></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-increases"></div></div></div>
         </div></div></div>
       </div>
 

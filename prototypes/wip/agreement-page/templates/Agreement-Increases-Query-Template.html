@@ -1,0 +1,79 @@
+<!-- Agreement scheduled increases · Query Template Display, one row per increase,
+     as expandable groups (decided 4 October 2026: option 4 of
+     increases-compare.html; theme block US-INCREASES in zUnionSuite.css and
+     .js). The theme groups the rows (General, then each class), works out
+     the totals, and shows: a totals strip (what everyone gets, the classes,
+     when it takes effect); one closed row per group with its total; and, on
+     opening, the group's increases in a bordered tray, sliding in and out.
+     The funnel holds the theme's search and type chips (Negotiated, CPI,
+     Fixed amount, Percentage); groups follow the filter.
+
+     iPart CSS class: us-agreement-increases
+       Section preset in zUnionSuite.js, standing in for
+       us-query-template us-increases us-query-search us-action-agreements-add-increase
+       Add us-increases--compound to compound percentages instead of adding
+       them (open decision: 2% then 3% is 5% added, 5.06% compounded).
+     Native title: [[chart-line]] Scheduled increases
+     Display in cards: unchecked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 100 (every increase on one page: the
+     groups and totals are worked out from the rows on the page).
+     No results: "No scheduled increases recorded."
+     IQA: $/_i4u_/SandBox/CA/Increases/Agreement Increases (new; see
+     Increases-IQA-Build.md). Filter AgreementOrdinal Equal @url:AgreementNum.
+     IQA sort, table fields only: Type (descending), Class, EffectiveDate,
+     MonthsInRole, IncreaseNum. The theme orders the groups and increases
+     itself (General first, then each class in natural order; each group's
+     increases by date or months in class), so this sort only matters if the
+     theme script is missing.
+
+     Edit: agreements.edit-increase, NOT YET DEFINED (TODO.md). v0.1 has no
+     edit or delete for an increase. The pencil is a plain icon button and does
+     nothing; it carries no us-action-* class yet, as an undefined one would
+     show as a text label. When the action exists, replace it with
+     <button class="us-action-agreements-edit-increase" data-ordinal="…">Edit increase</button>
+     as the terms' Edit is written.
+
+     Fields (every one selected by the IQA; Increases-IQA-Build.md has the
+     source of each):
+     Ordinal (required)     the increase's key; on the pencil and the row
+     Kind (required)        General | Class. Groups the rows; General first
+     IncreaseType (required) Negotiated | CPI | Fixed amount (general);
+                            Percentage | Fixed amount (class). The coloured
+                            type and the type chips
+     Class                  the class (C1); blank for a general increase. The
+                            group name
+     Percent                the percentage as a number (3.5); for a CPI increase
+                            the recorded figure, blank until it is known (the
+                            totals then add "+ CPI"); blank for a fixed amount.
+                            Read by the totals
+     Amount                 the dollar value as a number (40.00); blank unless a
+                            fixed amount. Read by the totals
+     AmountPeriod           the basis of a dollar amount (per week); blank when
+                            not a dollar amount. OPEN QUESTION: not recorded today
+     EffectiveDate          ISO date (2026-07-01) a general increase takes
+                            effect; blank for a class step
+     MonthsInClass          whole months in the class before a class step
+                            applies (6); blank for a general increase
+     When (required)        display text: "1 Jul 2026" (general) or
+                            "After 6 months" (class)
+     AmountText (required)  display text with its unit: "3.5%",
+                            "$40.00 per week", "CPI"
+     IncreaseNum            v0.1's running number; tie-break only, blank is fine
+     Comment                a note on the increase (CPI index, floor); blank
+                            collapses. NOT IN THE TABLE TODAY: select '' until a
+                            column exists -->
+<div class="us-increase" data-us-increase-ordinal="{#query.Ordinal}" data-us-increase-kind="{#query.Kind}"
+  data-us-increase-type="{#query.IncreaseType}" data-us-increase-class="{#query.Class}"
+  data-us-increase-percent="{#query.Percent}" data-us-increase-amount="{#query.Amount}"
+  data-us-increase-period="{#query.AmountPeriod}" data-us-increase-date="{#query.EffectiveDate}"
+  data-us-increase-months="{#query.MonthsInClass}" data-us-increase-number="{#query.IncreaseNum}"
+  data-us-search="{#query.Class} {#query.When} {#query.IncreaseType} {#query.AmountText} {#query.Comment}">
+  <span class="us-increase__icon" aria-hidden="true"></span>
+  <div class="us-increase__main">
+    <h3 class="us-increase__when">{#query.When}</h3>
+    <p class="us-increase__meta"><span class="us-increase__type">{#query.IncreaseType}</span><span class="us-increase__class">{#query.Class}</span></p>
+    <p class="us-increase__comment">{#query.Comment}</p>
+  </div>
+  <p class="us-increase__amount">{#query.AmountText}</p>
+  <button type="button" class="us-increase__edit TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Edit increase" title="Edit increase"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+</div>

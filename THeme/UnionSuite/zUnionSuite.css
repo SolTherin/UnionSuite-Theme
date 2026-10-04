@@ -1179,7 +1179,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
@@ -1229,7 +1229,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0 0 18px;
@@ -1252,7 +1252,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1280,7 +1280,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
 :is(
@@ -1290,7 +1290,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   display: none;
@@ -1303,7 +1303,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1324,7 +1324,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1348,7 +1348,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description > :is(div, p):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1362,7 +1362,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
@@ -1375,7 +1375,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)) + .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
@@ -1390,7 +1390,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
 :where(
@@ -1400,7 +1400,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -6880,9 +6880,8 @@ button.us-busy-hide-label > *:not(:where(.us-report-no-styling, .us-report-no-st
   inset: 0;
   z-index: 5;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: var(--space-6, 24px);
   border-radius: inherit;
   background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
   cursor: progress;
@@ -12172,6 +12171,34 @@ html.us-taskbar-mounted #hd .search-dropdown {
   column-gap: 13px;
 }
 
+/* Group headings from US-CONTACT-GROUPS: the group name, then its count. */
+.us-contact-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  padding: var(--space-3) 6px 6px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-contact-group:first-child {
+  padding-top: 2px;
+}
+
+.us-contact-group[hidden] {
+  display: none;
+}
+
+.us-contact-group__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+}
+
 /* Group headings across the tile grid, with the group's colour dot. */
 .us-contacts-grouped.us-contacts-tiles .us-contact-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   align-items: center;
@@ -12927,7 +12954,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    when iMIS omits QueryTemplateSet for no results; nested iParts are excluded. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding: var(--space-3) var(--iqa-inset,var(--space-4));
 }
@@ -12958,7 +12985,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 /* No-results HTML is author supplied; trim paragraph margins within its own body. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:has(> .QueryTemplateSet)):not(:where(.us-report-no-styling, .us-report-no-styling *)) > p {
   margin: 0;
   color: var(--iqa-muted);
@@ -12976,7 +13003,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   .us-list--no-shell,
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)):not(:where(.us-list *, .us-list--rows *, .us-list--timeline *, .us-list--compact *, .us-list--no-shell *))
 ) {
   --list-gap: var(--space-3);
@@ -13826,6 +13853,899 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 /* US-NOTES:END */
+
+/* US-TERMS:START — agreement terms and clauses as expandable rows
+   (us-terms; decided 4 October 2026, option 7 of the agreement terms
+   comparison). Display in cards off, one native <details> row per term
+   under a rule. Closed: the status icon in its own column, centred on the
+   row; the term with its status as coloured text and its amount under it
+   ("Included · 17.5%"; owner, 4 October 2026); the category in a fixed
+   column; a chevron. Open: the description, and View, Edit and Delete at
+   the bottom right, sliding in and out.
+   Each row is its own grid, so the columns beside the term have fixed
+   widths, and the term column stops at 640px (--us-term-measure) so the
+   facts stay beside the term on a wide tab; the chevron keeps the panel's
+   right edge. Below about 560px the category moves under the status.
+   Behaviour (zUnionSuite.js, US-TERMS): the slide and click-anywhere-to-
+   close, the status menu from the icon, and the status quick filters.
+   Selectors name details.us-term so other us-term markup is untouched. */
+
+.us-terms .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-terms / inline-size;
+  --list-gap: 0px;
+}
+
+.us-terms .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.us-terms .QueryTemplateSet > section:first-child .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-top: 0;
+}
+
+/* Rows the status chips exclude. The theme's search treats a hidden section
+   as off the page, so its counts follow. */
+.us-terms .QueryTemplateSet > section[hidden] {
+  display: none !important;
+}
+
+/* Status tone and icon: a tick, a half-filled circle or a dash. One
+   definition per status, shared by the row and the status menu. */
+:is(.us-terms details.us-term, .us-term-status-menu__item):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-term-tone: var(--text-muted);
+  --us-term-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><circle cx='12' cy='12' r='9'/><path d='M8.5 12h7'/></svg>");
+}
+
+:is(.us-terms details.us-term, .us-term-status-menu__item)[data-us-term-status="included" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-term-tone: var(--success);
+  --us-term-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='m8.5 12 2.5 2.5 4.5-5'/></svg>");
+}
+
+:is(.us-terms details.us-term, .us-term-status-menu__item)[data-us-term-status="negotiating" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-term-tone: var(--warning);
+  --us-term-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M12 3a9 9 0 0 1 0 18z' fill='black'/></svg>");
+}
+
+/* The whole row is the control, so all of it highlights, open or closed. */
+.us-terms details.us-term:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  cursor: pointer;
+}
+
+.us-terms details.us-term:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-terms details.us-term > .us-term__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-term-measure, 640px)) 120px minmax(0, 1fr) 24px;
+  grid-template-areas: "icon main category . chevron";
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: 10px 6px;
+  list-style: none;
+}
+
+.us-terms details.us-term > .us-term__row::-webkit-details-marker {
+  display: none;
+}
+
+.us-terms details.us-term > .us-term__row:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: inset var(--focus-ring);
+}
+
+/* The status icon: a button opening the status menu, centred on the closed
+   row. It changes the status and leaves the row open or closed. */
+.us-terms details.us-term .us-term__status-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .15s, transform .15s;
+}
+
+.us-terms details.us-term .us-term__status-button::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: var(--us-term-tone);
+  -webkit-mask: var(--us-term-icon) center / contain no-repeat;
+  mask: var(--us-term-icon) center / contain no-repeat;
+  transition: background-color .2s;
+}
+
+.us-terms details.us-term .us-term__status-button:is(:hover, [aria-expanded="true"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: color-mix(in srgb, var(--us-term-tone) 14%, transparent);
+}
+
+.us-terms details.us-term .us-term__status-button:active:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  transform: scale(.92);
+}
+
+.us-terms details.us-term .us-term__status-button:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.us-terms details.us-term[aria-busy="true"] .us-term__status-button {
+  cursor: progress;
+}
+
+.us-terms details.us-term .us-term__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: main;
+  min-width: 0;
+}
+
+.us-terms details.us-term .us-term__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+.us-terms details.us-term .us-term__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-1);
+  margin: 2px 0 0;
+  line-height: 18px;
+}
+
+/* The status reads as coloured text beside the icon, not a badge. */
+.us-terms details.us-term .us-term__status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--us-term-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+  white-space: nowrap;
+  transition: color .2s;
+}
+
+.us-terms details.us-term .us-term__status:empty {
+  display: none;
+}
+
+/* The amount follows the status on its line, with its unit from the IQA. */
+.us-terms details.us-term .us-term__amount:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.us-terms details.us-term .us-term__amount:empty {
+  display: none;
+}
+
+/* A dot between the status and the amount, when both show. */
+.us-terms details.us-term .us-term__status:not(:empty) + .us-term__amount:not(:empty)::before {
+  content: "·";
+  margin-inline-end: var(--space-1);
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+/* A status change that did not save. */
+.us-terms details.us-term .us-term__error:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline-start: var(--space-1);
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+.us-terms details.us-term .us-term__category:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: category;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 20px;
+}
+
+/* Tabler "chevron-down" outline (MIT). It turns back as soon as the row
+   starts closing (is-closing), before the slide ends. */
+.us-terms details.us-term .us-term__chevron {
+  grid-area: chevron;
+  justify-self: end;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6 -6'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6 -6'/></svg>") center / contain no-repeat;
+  transition: transform .15s;
+}
+
+.us-terms details.us-term[open]:not(.is-closing) .us-term__chevron {
+  transform: rotate(180deg);
+}
+
+/* The open part, under the term and clear of the icon column: the
+   description, and the actions at the bottom right, level with its last
+   line. */
+.us-terms details.us-term > .us-term__detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: minmax(0, var(--us-term-measure, 640px)) minmax(0, 1fr) auto;
+  grid-template-areas: "comment . actions";
+  align-items: end;
+  gap: 8px var(--space-3);
+  padding: 0 6px 10px calc(6px + 32px + var(--space-3));
+}
+
+/* The slide holds its end state in the hidden attribute, which the grid
+   display above would otherwise outrank. */
+.us-terms details.us-term > .us-term__detail[hidden] {
+  display: none;
+}
+
+.us-terms details.us-term .us-term__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: comment;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.us-terms details.us-term .us-term__comment:empty {
+  display: none;
+}
+
+.us-terms details.us-term .us-term__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  grid-area: actions;
+  gap: 2px;
+  margin: 0 0 -6px;
+  cursor: default;
+}
+
+.us-terms details.us-term .us-term__delete:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--danger);
+}
+
+/* A narrow panel: the category goes under the status line; the open part
+   keeps the actions at the right of the description. */
+@container us-terms (max-width: 559.98px) {
+  .us-terms details.us-term > .us-term__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 24px;
+    grid-template-areas:
+      "icon main chevron"
+      "icon category .";
+    row-gap: 2px;
+  }
+
+  .us-terms details.us-term .us-term__category:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    font-size: var(--fs-xs);
+    line-height: 18px;
+  }
+
+  .us-terms details.us-term > .us-term__detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "comment actions";
+  }
+}
+
+/* The status menu, opened from the icon: one item per status with its
+   icon, the current one ticked. Fixed to the page so a scrolling list
+   cannot clip it; it fades and drops in. */
+.us-term-status-menu:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  display: grid;
+  min-width: 168px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  box-shadow: 0 5px 14px rgb(0 0 0 / .10);
+  font-family: var(--font-ui);
+}
+
+.us-term-status-menu[hidden] {
+  display: none;
+}
+
+.us-term-status-menu__item:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-sm)/20px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .12s;
+}
+
+.us-term-status-menu__item::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-term-tone);
+  -webkit-mask: var(--us-term-icon) center / contain no-repeat;
+  mask: var(--us-term-icon) center / contain no-repeat;
+}
+
+/* Tabler "check" (MIT) beside the current status. */
+.us-term-status-menu__item[aria-checked="true"]::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  background: var(--text-link);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5l10 -10'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5l10 -10'/></svg>") center / contain no-repeat;
+}
+
+.us-term-status-menu__item[aria-checked="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+.us-term-status-menu__item:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  background: var(--bg-sunken);
+}
+
+.us-term-status-menu__item:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-shadow: inset 0 0 0 2px var(--border-focus);
+}
+
+/* Status quick filters: the contacts' chip classes in the funnel
+   disclosure. With room, the chips and the search field share one row:
+   chips left, field right, the hint under both. */
+.us-terms > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-terms-panel / inline-size;
+}
+
+@container us-terms-panel (min-width: 760px) {
+  .us-terms > .panel > .us-query-search-controls:has(> .us-contact-facets--filter):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr);
+    grid-template-areas:
+      "chips search"
+      "hint  hint";
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+
+  .us-terms .us-query-search-controls > .us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: chips;
+    padding: 0;
+  }
+
+  .us-terms .us-query-search-controls > .us-query-filter-fields {
+    grid-area: search;
+  }
+
+  .us-terms .us-query-search-controls > .us-query-search-hint {
+    grid-area: hint;
+  }
+}
+
+/* A pressed chip adds a dot to the funnel, so the filter shows while the
+   disclosure is closed. */
+.us-terms[data-us-term-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-terms[data-us-term-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-terms details.us-term .us-term__status-button,
+  .us-terms details.us-term .us-term__status-button::before,
+  .us-terms details.us-term .us-term__status,
+  .us-terms details.us-term .us-term__chevron,
+  .us-term-status-menu__item {
+    transition: none;
+  }
+}
+
+/* US-TERMS:END */
+
+/* US-INCREASES:START — agreement scheduled increases as expandable groups
+   (us-increases, the us-agreement-increases preset; decided 4 October 2026,
+   option 4 of the increases comparison). One Query Template row per increase
+   (prototypes/wip/agreement-page/templates/Agreement-Increases-Query-Template.html);
+   US-INCREASES in zUnionSuite.js groups them (General, then each class),
+   works out the totals, and builds the view over the rows:
+   - a totals strip: what everyone gets, the classes, when it takes effect;
+   - one closed row per group: its icon, name, a coloured line, its total in
+     a fixed column, a chevron. Opening slides in the group's increases in a
+     bordered tray, each amount lighter than the bold total it adds up to;
+   - the theme's search and type chips in the funnel disclosure; a group the
+     filter leaves empty hides, one with matches opens.
+   The rendered rows stay in the page, out of sight and inert: the theme's
+   search skips rows that are not displayed, and the view follows its marks.
+   Each row is its own grid, so the columns are fixed widths; the first
+   stops at --us-increase-measure (400px), so the totals stay beside the
+   names on a wide tab, and the chevron and pencils keep the right edge.
+   Below about 560px the measure goes and the total column narrows. */
+
+.us-increases > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-increases / inline-size;
+}
+
+.us-increases .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+}
+
+/* The rendered rows under the view: displayed, so the search reads them,
+   but out of sight. */
+.us-increases .QueryTemplateSet[data-us-increases-view]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+}
+
+.us-increases .QueryTemplateSet[data-us-increases-view] > section:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Rows the type chips exclude. */
+.us-increases .QueryTemplateSet > section[hidden] {
+  display: none !important;
+}
+
+/* Tones and icons. An increase by type: a percentage (negotiated or class),
+   CPI, or a fixed dollar amount (Tabler percentage, trending-up and
+   currency-dollar, MIT). A group by kind: everyone (users) or a class's
+   steps (stairs-up). */
+.us-increases .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--success);
+}
+
+.us-increases .us-increase[data-us-increase-type="cpi" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--warning);
+}
+
+.us-increases .us-increase[data-us-increase-type="fixed amount" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--info);
+}
+
+.us-increases .us-increase-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--text-link);
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0'/><path d='M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/><path d='M21 21v-2a4 4 0 0 0-3-3.85'/></svg>");
+}
+
+.us-increases .us-increase-group[data-us-increase-kind="class" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 6h-5v5h-5v5h-5v5h-5'/><path d='M6 10v-7'/><path d='M3 6l3-3l3 3'/></svg>");
+}
+
+/* A total as separate parts, "6.5%", "CPI", "$40.00 per week", joined by
+   "+"; a narrow column wraps between parts, the "+" leading the new line. */
+.us-increases .us-increase-sum:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: .3em;
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increases .us-increase-sum__part:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  white-space: nowrap;
+}
+
+.us-increases .us-increase-sum__part + .us-increase-sum__part::before {
+  content: "+ ";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+.us-increases .us-increase-sum__part--none:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+}
+
+/* The totals strip: what everyone gets, the classes, and when. Items keep a
+   readable width on a wide tab rather than spreading across it. */
+.us-increases .us-increases-totals:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(156px, 240px));
+  gap: var(--space-3) var(--space-6);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+}
+
+.us-increases .us-increases-totals dt:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-increases .us-increases-totals dd:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+}
+
+/* Everyone's total leads, larger. */
+.us-increases .us-increases-totals__item--everyone dd:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semi);
+}
+
+.us-increases .us-increases-totals .us-increase-sum:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  justify-content: flex-start;
+}
+
+/* A group: a native <details>, opened and closed by US-INCREASES with the
+   theme's fold(). The hover marks what a click acts on: the group's row
+   (a closed group is only that row), and in an open group each increase. */
+.us-increases .us-increase-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.us-increases .us-increase-group:first-child {
+  border-top: 0;
+}
+
+.us-increases .us-increase-group[hidden] {
+  display: none;
+}
+
+.us-increases .us-increase-group__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "icon main total . chevron";
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: 10px 6px;
+  list-style: none;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increases .us-increase-group__row::-webkit-details-marker {
+  display: none;
+}
+
+.us-increases .us-increase-group__row:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-increases .us-increase-group__row:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: inset var(--focus-ring);
+}
+
+/* The group icon on a soft disc in its tone, centred on the row. */
+.us-increases .us-increase-group__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-increase-tone) 12%, transparent);
+}
+
+.us-increases .us-increase-group__icon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-increase-tone);
+  -webkit-mask: var(--us-increase-icon) center / contain no-repeat;
+  mask: var(--us-increase-icon) center / contain no-repeat;
+}
+
+.us-increases .us-increase-group__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: main;
+  min-width: 0;
+}
+
+.us-increases .us-increase-group__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+.us-increases .us-increase-group__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+}
+
+/* How many of a group's increases a filter leaves showing. */
+.us-increases .us-increase-group__shown:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline-start: var(--space-1);
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.us-increases .us-increase-group__shown:empty {
+  display: none;
+}
+
+.us-increases .us-increase-group__total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: total;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+/* Tabler "chevron-down" outline (MIT). It turns back as soon as the group
+   starts closing (is-closing), before the slide ends. */
+.us-increases .us-increase-group__chevron:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: chevron;
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6-6'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6-6'/></svg>") center / contain no-repeat;
+  transition: transform .18s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increases .us-increase-group[open]:not(.is-closing) .us-increase-group__chevron {
+  transform: rotate(180deg);
+}
+
+/* The open part: the group's increases in a bordered tray inset under the
+   title. The detail's padding stops 13px short of the title, which the
+   tray's border and inner padding make up, so the steps' columns are the
+   header's: dates under the name, amounts under the total, pencils under
+   the chevron. The tray clips its rows' hover to its rounded corners; a
+   click inside it is the increase's and leaves the group open. */
+.us-increases .us-increase-group__detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0 0 10px calc(6px + 32px + var(--space-3) - 13px);
+}
+
+.us-increases .us-increase-group__detail[hidden] {
+  display: none;
+}
+
+.us-increases .us-increase-group__steps:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  list-style: none;
+  cursor: default;
+}
+
+.us-increases .us-increase-group__step:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0 5px 0 12px;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increases .us-increase-group__step:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-increases .us-increase-group__step + .us-increase-group__step {
+  border-top: 1px solid var(--border);
+}
+
+.us-increases .us-increase-group__step[hidden] {
+  display: none;
+}
+
+/* An increase in the tray: when, then its type in its tone, then any note;
+   the amount under the group total; the pencil centred on the row. */
+.us-increases .us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "main amount . edit";
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: 8px 0;
+}
+
+.us-increases .us-increase-group__step .us-increase__icon,
+.us-increases .us-increase-group__step .us-increase__class {
+  display: none;
+}
+
+.us-increases .us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: main;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  min-width: 0;
+}
+
+.us-increases .us-increase-group__step .us-increase__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-medium) var(--fs-sm)/20px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increases .us-increase-group__step .us-increase__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-1);
+  margin: 0;
+  line-height: 18px;
+}
+
+.us-increases .us-increase-group__step .us-increase__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  white-space: nowrap;
+}
+
+.us-increases .us-increase-group__step .us-increase__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.us-increases .us-increase-group__step .us-increase__comment:empty {
+  display: none;
+}
+
+/* An increase's amount is a part of the group total: smaller, regular
+   weight and the body colour, so the bold total reads as the sum. CPI has
+   no number, so the word is quieter still. */
+.us-increases .us-increase-group__step .us-increase__amount:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: amount;
+  margin: 0;
+  color: var(--text-base);
+  font: var(--fw-normal) var(--fs-sm)/20px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.us-increases .us-increase-group__step .us-increase[data-us-increase-type="cpi" i] .us-increase__amount {
+  color: var(--text-muted);
+}
+
+/* The theme's icon button sets its own margin, so this names the button
+   class as well. Centred on the row, it overhangs a one-line row rather
+   than lifting it. */
+.us-increases .us-increase-group__step .us-increase > .us-increase__edit.us-icon-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: edit;
+  align-self: center;
+  margin-block: -8px;
+  cursor: pointer;
+}
+
+/* A narrow panel: the group's coloured line runs under its total, and an
+   increase's type and note under its amount. */
+@container us-increases (max-width: 559.98px) {
+  .us-increases .us-increase-group__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
+    grid-template-areas:
+      "icon title total chevron"
+      "icon meta  meta  chevron";
+  }
+
+  .us-increases .us-increase-group__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+
+  .us-increases .us-increase-group__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: title;
+  }
+
+  .us-increases .us-increase-group__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: meta;
+  }
+
+  .us-increases .us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr) 112px 36px;
+    grid-template-areas:
+      "when    amount  edit"
+      "meta    meta    edit"
+      "comment comment edit";
+  }
+
+  .us-increases .us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+
+  .us-increases .us-increase-group__step .us-increase__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: when;
+  }
+
+  .us-increases .us-increase-group__step .us-increase__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: meta;
+  }
+
+  .us-increases .us-increase-group__step .us-increase__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: comment;
+  }
+}
+
+/* Type quick filters: the contacts' chip classes in the funnel disclosure.
+   With room, the chips and the search field share one row: chips left,
+   field right, the hint under both. A pressed chip puts a dot on the
+   funnel. */
+@container us-increases (min-width: 760px) {
+  .us-increases > .panel > .us-query-search-controls:has(> .us-contact-facets--filter):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr);
+    grid-template-areas:
+      "chips search"
+      "hint  hint";
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+
+  .us-increases .us-query-search-controls > .us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: chips;
+    padding: 0;
+  }
+
+  .us-increases .us-query-search-controls > .us-query-filter-fields {
+    grid-area: search;
+  }
+
+  .us-increases .us-query-search-controls > .us-query-search-hint {
+    grid-area: hint;
+  }
+}
+
+.us-increases[data-us-increase-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-increases[data-us-increase-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-increases .us-increase-group__row,
+  .us-increases .us-increase-group__chevron,
+  .us-increases .us-increase-group__step {
+    transition: none;
+  }
+}
+
+/* US-INCREASES:END */
 
 /* US-RECORD-CARDS:START — one card for every record list that reads as a
    history: the combined activity feed, notes, cases, meetings and

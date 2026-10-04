@@ -1,0 +1,91 @@
+<!-- Scheduled increases, one row per increase (increases-compare.html
+     options 2 to 5; under review, owner 4 October 2026). One IQA, one
+     template; the iPart CSS class picks the layout, as the terms rows do:
+
+     iPart CSS class (with us-action-agreements-add-increase for the
+     heading's Add increase in every case):
+       us-query-template us-increases us-increases--grouped
+           option 2's breakdown: headings General, C1, C2 … with a count
+       us-query-template us-increases us-increases--grouped us-increases--totals
+           option 3: the same headings with each group's total, and a
+           totals strip above the list
+       us-query-template us-increases us-increases--expand us-increases--totals us-query-search
+           option 4 (preferred, owner 4 October 2026): one closed row per
+           group, its total in a column; opening it slides in its increases,
+           in a bordered tray, each amount lighter than the group total.
+           us-query-search adds the funnel: the theme's search and type
+           chips (US-INCREASE-FACETS); groups follow the filter, hiding when
+           empty and opening when they have matches
+       us-query-template us-increases us-increases--matrix
+           option 5: general increases as a dated strip, then classes as
+           rows and months in class as columns, with a total column
+       add us-increases--compound to any of them to compound percentages
+       (open decision: 2% then 3% is 5% added, 5.06% compounded)
+     Styles: increases-layouts.candidate.css; headings, totals, groups and
+     the matrix: increases-layouts.candidate.js (US-INCREASE-*). Without the
+     script the rows show as one flat list, every class named on its row.
+
+     Native title: Scheduled increases. Display in cards: unchecked.
+     Display in columns: unchecked. Header/Footer blank.
+     Rows per page: 100. Every increase must be on one page: the groups and
+     their totals are worked out from the rows on the page.
+     No results: "No scheduled increases recorded."
+     IQA: $/_i4u_/SandBox/CA/Increases/Agreement Increases (new; see
+     Increases-IQA-Build.md). Filter AgreementOrdinal Equal @url:AgreementNum.
+     IQA sort: GroupSort, then ClassOrder, then Class, then EffectiveDate,
+     then MonthsInClass, then IncreaseNum (general first, then each class
+     in order, each group's increases in the order they take effect).
+     Groups are runs of rows, so the sort matters.
+
+     Edit: agreements.edit-increase, NOT YET DEFINED. v0.1 has no edit or
+     delete for an increase. The pencil is authored as a theme icon button
+     so the layout can be judged; it does nothing. When the action exists,
+     replace it with
+     <button class="us-action-agreements-edit-increase" data-ordinal="…">Edit increase</button>
+     as the terms' Edit is written.
+
+     Fields (every one is selected by the IQA; see Increases-IQA-Build.md
+     for the source of each):
+     Ordinal (required)     the increase's key; on the pencil and the row
+     Kind (required)        General | Class. Groups the rows; General first
+     IncreaseType (required) Negotiated | CPI | Fixed amount (general);
+                            Percentage | Fixed amount (class). The coloured
+                            second line and the row's icon
+     Class                  the class (C1); blank for a general increase.
+                            The group name; shown on the row only when the
+                            script has not grouped it
+     Percent                the percentage as a number (3.5); blank unless
+                            the increase is a percentage. Read by the totals
+     Amount                 the dollar value as a number (40.00); blank
+                            unless the increase is a fixed amount. Read by
+                            the totals
+     AmountPeriod           the basis of a dollar amount (per week); blank
+                            when not a dollar amount. OPEN QUESTION: the $
+                            basis is not recorded today
+     EffectiveDate          ISO date (2026-07-01) a general increase takes
+                            effect; blank for a class step
+     MonthsInClass          whole months in the class before a class step
+                            applies (6); blank for a general increase
+     When (required)        display text: "1 Jul 2026" (general) or
+                            "After 6 months" (class)
+     AmountText (required)  display text with its unit: "3.5%",
+                            "$40.00 per week", "CPI"
+     IncreaseNum            v0.1's running number; tie-break only, blank is fine
+     Comment                a note on the increase (CPI index, floor);
+                            blank collapses. NOT IN THE TABLE TODAY: select
+                            '' until a column exists -->
+<div class="us-increase" data-us-increase-ordinal="{#query.Ordinal}" data-us-increase-kind="{#query.Kind}"
+  data-us-increase-type="{#query.IncreaseType}" data-us-increase-class="{#query.Class}"
+  data-us-increase-percent="{#query.Percent}" data-us-increase-amount="{#query.Amount}"
+  data-us-increase-period="{#query.AmountPeriod}" data-us-increase-date="{#query.EffectiveDate}"
+  data-us-increase-months="{#query.MonthsInClass}" data-us-increase-number="{#query.IncreaseNum}"
+  data-us-search="{#query.Class} {#query.When} {#query.IncreaseType} {#query.AmountText} {#query.Comment}">
+  <span class="us-increase__icon" aria-hidden="true"></span>
+  <div class="us-increase__main">
+    <h3 class="us-increase__when">{#query.When}</h3>
+    <p class="us-increase__meta"><span class="us-increase__type">{#query.IncreaseType}</span><span class="us-increase__class">{#query.Class}</span></p>
+    <p class="us-increase__comment">{#query.Comment}</p>
+  </div>
+  <p class="us-increase__amount">{#query.AmountText}</p>
+  <button type="button" class="us-increase__edit TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Edit increase" title="Edit increase"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+</div>

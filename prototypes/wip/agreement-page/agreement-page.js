@@ -79,6 +79,19 @@
       {Ordinal: '59', Term: 'Paid meetings', Category: 'General', Amount: '', StatusClass: 'not-included', StatusLabel: 'Not Included', Comment: 'Meetings relevant to this agreement are paid for employees.'},
       {Ordinal: '58', Term: 'Staff entitled to a half day off on Fridays', Category: 'General', Amount: '', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: 'A commitment from the employer to recognise the dangerous working bonus.'},
       {Ordinal: '60', Term: 'Employer superannuation contribution', Category: 'Superannuation', Amount: '12.00', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Paid on all ordinary time earnings, including leave loading.'}
+    ],
+    // Scheduled increases, as the Agreement Increases IQA returns them: sorted
+    // general first, then each class; When and AmountText built by the IQA.
+    increases: [
+      {Ordinal: '201', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '3.50', Amount: '', AmountPeriod: '', EffectiveDate: '2026-07-01', MonthsInClass: '', When: '1 Jul 2026', AmountText: '3.5%', IncreaseNum: '1', Comment: ''},
+      {Ordinal: '202', Kind: 'General', IncreaseType: 'Fixed amount', Class: '', ClassOrder: '', Percent: '', Amount: '40.00', AmountPeriod: 'per week', EffectiveDate: '2027-01-01', MonthsInClass: '', When: '1 Jan 2027', AmountText: '$40.00 per week', IncreaseNum: '2', Comment: 'Flat amount for all classifications, paid on ordinary hours.'},
+      {Ordinal: '203', Kind: 'General', IncreaseType: 'CPI', Class: '', ClassOrder: '', Percent: '', Amount: '', AmountPeriod: '', EffectiveDate: '2027-07-01', MonthsInClass: '', When: '1 Jul 2027', AmountText: 'CPI', IncreaseNum: '3', Comment: 'CPI (all groups, Australia) for the March quarter, with a 2% floor.'},
+      {Ordinal: '204', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '3.00', Amount: '', AmountPeriod: '', EffectiveDate: '2028-07-01', MonthsInClass: '', When: '1 Jul 2028', AmountText: '3%', IncreaseNum: '4', Comment: ''},
+      {Ordinal: '211', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C1', ClassOrder: '1', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '6', When: 'After 6 months', AmountText: '2%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '212', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C1', ClassOrder: '1', Percent: '3.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '12', When: 'After 12 months', AmountText: '3%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '213', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C2', ClassOrder: '2', Percent: '4.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '12', When: 'After 12 months', AmountText: '4%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '214', Kind: 'Class', IncreaseType: 'Fixed amount', Class: 'C3', ClassOrder: '3', Percent: '', Amount: '25.00', AmountPeriod: 'per week', EffectiveDate: '', MonthsInClass: '6', When: 'After 6 months', AmountText: '$25.00 per week', IncreaseNum: '', Comment: ''},
+      {Ordinal: '215', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C3', ClassOrder: '3', Percent: '2.50', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '24', When: 'After 24 months', AmountText: '2.5%', IncreaseNum: '', Comment: 'On completion of the Certificate IV.'}
     ]
   };
 
@@ -114,7 +127,8 @@
     {set: 'ap-attachments', template: 'Agreement-Attachments-Query-Template.html', rows: rows.attachments},
     {set: 'ap-meetings', template: 'Agreement-Meetings-Query-Template.html', rows: pastMeetingsOnly ? rows.meetings.filter(row => row['Date-ISO'] < window.UnionSuiteQueryStatesConfig.today) : rows.meetings},
     {set: 'ap-notes', template: readingNotes ? 'Agreement-Notes-Reading-Query-Template.html' : 'Agreement-Notes-Ledger-Query-Template.html', rows: rows.notes},
-    {set: 'ap-terms', template: 'Agreement-Terms-Query-Template.html', rows: rows.terms, cards: true}
+    {set: 'ap-terms', template: 'Agreement-Terms-Query-Template.html', rows: rows.terms},
+    {set: 'ap-increases', template: 'Agreement-Increases-Query-Template.html', rows: rows.increases}
   ];
 
   const escapeHtml = value => String(value ?? '')

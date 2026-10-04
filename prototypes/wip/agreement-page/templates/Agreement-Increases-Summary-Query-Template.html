@@ -1,0 +1,42 @@
+<!-- Scheduled increases summary, one row per group (increases-compare.html
+     option 2, the first of its two iParts; under review, owner 4 October
+     2026). General first (the increases everyone gets), then one line per
+     class with that class's own steps. The totals come from the summary
+     IQA's aggregates, so this panel needs no script; the units, the "+"
+     between parts and CPI are drawn by the CSS from which values are blank.
+     Percentages are added (2% then 3% is 5%); the IQA cannot compound them.
+
+     iPart CSS class: us-query-template us-increases-summary
+       us-action-agreements-add-increase
+       Styles: increases-layouts.candidate.css. The breakdown below it is a
+       second Query Template Display on the rows IQA with
+       templates/Agreement-Increases-Rows-Query-Template.html and
+       us-query-template us-increases us-increases--grouped (no Add button
+       there: one per pair of panels).
+     Native title: Scheduled increases. Display in cards: unchecked.
+     Display in columns: unchecked. Header/Footer blank. Rows per page: 30.
+     No results: "No scheduled increases recorded."
+     IQA: $/_i4u_/SandBox/CA/Increases/Agreement Increases Summary (new; see
+     Increases-IQA-Build.md). Filter AgreementOrdinal Equal @url:AgreementNum.
+     IQA sort: GroupSort, then ClassOrder, then GroupName.
+
+     Fields (every one is selected by the IQA):
+     GroupName (required)   General, or the class (C1)
+     Kind (required)        General | Class; sets the icon and the scope line
+     TotalPercent           SUM of Percent as a number (6.50); blank when the
+                            group has no percentage increase. Shown with "%"
+     CPI                    "CPI" when any increase in the group is tied to
+                            CPI, otherwise blank. Shown as "+ CPI"
+     TotalAmount            SUM of Amount as a number (40.00); blank when the
+                            group has no dollar increase. Shown with "$"
+     AmountPeriod           MAX of AmountPeriod (per week); blank hides it.
+                            Assumes one $ basis per group (open question)
+     StepCount (required)   COUNT of increases in the group (4) -->
+<div class="us-increase-total" data-us-increase-kind="{#query.Kind}">
+  <span class="us-increase-total__icon" aria-hidden="true"></span>
+  <div class="us-increase-total__main">
+    <h3 class="us-increase-total__name">{#query.GroupName}</h3>
+    <p class="us-increase-total__meta"><span class="us-increase-total__count">{#query.StepCount}</span> scheduled</p>
+  </div>
+  <p class="us-increase-total__value"><span class="us-increase-total__percent">{#query.TotalPercent}</span><span class="us-increase-total__cpi">{#query.CPI}</span><span class="us-increase-total__money"><span class="us-increase-total__amount">{#query.TotalAmount}</span> <span class="us-increase-total__period">{#query.AmountPeriod}</span></span></p>
+</div>

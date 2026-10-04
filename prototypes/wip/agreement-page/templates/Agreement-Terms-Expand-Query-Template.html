@@ -1,0 +1,79 @@
+<!-- Agreement terms as expandable rows (option 7 in terms-compare.html;
+     under review, owner 4 October 2026). Option 4's look, closed: the status
+     icon in its own column (drawn by the CSS from StatusClass), the term with
+     its status under it, and the category in its column.
+     The row opens, as the contact page's activity history cards do, to the
+     description, the amount and the actions at the bottom right. Native
+     <details>: the first line opens and closes it without script, keyboard
+     included (Enter or Space); US-TERM-EXPAND in terms-layouts.candidate.js
+     lets a click anywhere on an open row close it.
+
+     iPart CSS class: us-agreement-terms us-terms us-terms--expand
+       us-agreement-terms is the existing section preset (us-query-template
+       us-query-search us-list-scroll us-action-agreements-add-term
+       us-action-agreements-remove-terms). Styles: terms-layouts.candidate.css;
+       status quick filters: US-TERM-FACETS, closing from anywhere on an open
+     row: US-TERM-EXPAND, both in terms-layouts.candidate.js.
+     Native title: Terms and clauses covered. Display in cards: unchecked.
+     Display in columns: unchecked. Header/Footer blank. Rows per page: 30.
+     No results: "No terms recorded."
+     IQA sort: Term.
+
+     Status, from the icon (owner, 4 October 2026): the icon is a button
+     that opens a menu of the three statuses (US-TERM-STATUS). The change
+     shows at once; changing to Included plays the theme's completion
+     confetti (UnionSuiteTaskRows.celebrate). The save is a hook:
+     UnionSuiteTermStatus.defineSaver(async ({ordinal, status, label}) => …).
+     NO SAVER EXISTS YET: terms have no status endpoint (tasks and milestones
+     use CloudToolz /ca/complete-task). Until one is registered, a change
+     reverts and the row says "Not saved".
+
+     Actions, in the open row (owner, 4 October 2026: view, edit and delete
+     wanted; kept off the closed row so it stays three facts and a chevron):
+     Edit    agreements.edit-term, the existing Add-or-Update-Term popup
+     View    agreements.view-term, NOT YET DEFINED: the terms have no read-only
+             page; until one exists the edit popup is the only page for a term
+     Delete  agreements.delete-term, TODO (owner, 4 October 2026: the owner will
+             define the endpoint): confirm in place, then call an endpoint that
+             deletes this one term by Ordinal, and refresh the list. The heading's
+             Bulk remove keeps Delete_Terms.aspx, the checkbox form for removing
+             several terms. See TODO.md.
+     View and Delete are authored as theme icon buttons here so the layout can
+     be judged; they do nothing until their actions exist. They carry no
+     us-action-* class yet: the theme paints any such class as a command, and
+     an undefined one falls back to a text label. When the actions are
+     defined, replace the eye and trash markup with
+     <button class="us-action-agreements-view-term" data-ordinal="…">View term</button>
+     and the same for agreements.delete-term, as the Edit button is written.
+
+     Fields (the existing Terms IQA, unchanged):
+     Ordinal (required)      term ordinal, on each action and for the status save
+     Term (required)         term title
+     Category                category, in its column; blank leaves it empty
+     StatusClass             included | negotiating | not-included; sets the badge tone
+     StatusLabel             Included | Negotiating | Not Included
+     Amount                  amount with its unit, as text (17.5%, $4.20 per shift,
+                             4 weeks), after the status on the row's second line
+                             (owner, 4 October 2026); blank leaves it out.
+                             The live IQA gives a bare number (12.00); add the unit
+     Comment                 description, in the open row; blank collapses -->
+<details class="us-term us-term--expand" data-us-term-status="{#query.StatusClass}" data-us-term-category="{#query.Category}"
+  data-us-term-ordinal="{#query.Ordinal}" data-us-search="{#query.Term} {#query.Category} {#query.StatusLabel} {#query.Comment}">
+  <summary class="us-term__row">
+    <button type="button" class="us-term__status-button" aria-haspopup="menu" aria-expanded="false" aria-label="Change status" title="Change status"></button>
+    <div class="us-term__main">
+      <h3 class="us-term__title">{#query.Term}</h3>
+      <p class="us-term__meta"><span class="us-badge us-term-status us-term__status" data-us-term-status="{#query.StatusClass}">{#query.StatusLabel}</span><span class="us-term__amount">{#query.Amount}</span></p>
+    </div>
+    <span class="us-term__category">{#query.Category}</span>
+    <span class="us-term__chevron" aria-hidden="true"></span>
+  </summary>
+  <div class="us-term__detail">
+    <p class="us-term__comment">{#query.Comment}</p>
+    <p class="us-term__actions">
+      <button type="button" class="us-term__view TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="View term" title="View term"><i class="ti ti-eye" aria-hidden="true"></i></button>
+      <button type="button" class="us-term__edit us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
+      <button type="button" class="us-term__delete TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Delete term" title="Delete term"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </p>
+  </div>
+</details>

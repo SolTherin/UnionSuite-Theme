@@ -1351,7 +1351,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -1371,7 +1371,11 @@ SOFTWARE.
     'us-agreement-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-meeting'],
     'us-agreement-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-list-scroll', 'us-action-agreements-upload-attachment'],
     'us-agreement-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-note'],
-    'us-agreement-terms': ['us-query-template', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-term', 'us-action-agreements-remove-terms'],
+    // Expandable rows (US-TERMS, decided 4 October 2026). Bulk remove before
+    // Add term, so the primary action ends the heading.
+    'us-agreement-terms': ['us-query-template', 'us-terms', 'us-query-search', 'us-list-scroll', 'us-action-agreements-remove-terms', 'us-action-agreements-add-term'],
+    // Expandable groups with a totals strip (US-INCREASES, decided 4 October 2026).
+    'us-agreement-increases': ['us-query-template', 'us-increases', 'us-query-search', 'us-action-agreements-add-increase'],
     // The contacts scripts also read this class for the agreement's search wording.
     'us-agreement-contacts': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-facets', 'us-contacts-group-filter', 'us-contacts-group-tone', 'us-query-search', 'us-action-agreements-add-contact', 'us-action-agreements-email-contacts']
   };
@@ -3462,6 +3466,1215 @@ SOFTWARE.
   window.UnionSuiteContactFacets = Object.freeze({refresh: schedule, version: '1.0'});
 })();
 /* US-CONTACT-FACETS:END */
+
+/* US-TERMS:START — agreement terms and clauses as expandable rows (us-terms,
+   the us-agreement-terms preset; decided 4 October 2026). Three parts, all
+   on the details.us-term rows of templates/Agreement-Terms-Query-Template.html
+   in prototypes/wip/agreement-page/:
+   - Expand: rows slide open and closed (fold() from US-RECORD-CARDS), and
+     an open row closes from a click anywhere on it, not only its first line.
+   - Status: the status icon opens a menu of the statuses; a change shows at
+     once, plays the completion confetti for Included, and saves through
+     UnionSuiteTermStatus.defineSaver(fn). No saver exists yet (TODO.md), so
+     until one is defined a change reverts and the row says "Not saved".
+   - Facets: status quick filters, as the agreement contacts' group chips, in
+     the funnel disclosure, with the count beside the panel title. */
+
+/* Expand. A native <details> shows and hides its content at once, so the
+   summary's click is taken over: opening sets the row open with the details
+   hidden, then slides them in; closing slides them out, then closes the row.
+   fold() reverses from where it is when clicked again mid-way and is instant
+   under reduced motion. Buttons, links and form fields keep their own
+   clicks; a click that ends a text selection leaves the row open, so the
+   description can be copied. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTermExpand) return;
+
+  const runs = new WeakMap();
+
+  // Open, and not on its way closed.
+  function isOpen(term) {
+    return term.open && !term.classList.contains('is-closing');
+  }
+
+  function setOpen(term, open) {
+    const detail = term.querySelector(':scope > .us-term__detail');
+    const fold = window.UnionSuiteRecordCards?.fold;
+    const run = (runs.get(term) || 0) + 1;
+    runs.set(term, run);
+    if (!detail || !fold) {
+      term.open = open;
+      return;
+    }
+    if (open) {
+      term.classList.remove('is-closing');
+      if (!term.open) {
+        detail.hidden = true;
+        term.open = true;
+      }
+      fold(detail, true);
+    } else {
+      // The chevron turns back now; the row closes when the slide ends,
+      // unless another click has come since.
+      term.classList.add('is-closing');
+      fold(detail, false).then(() => {
+        if (runs.get(term) !== run) return;
+        term.open = false;
+        detail.hidden = false;
+        term.classList.remove('is-closing');
+      });
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const term = event.target.closest('.us-terms details.us-term');
+    if (!term || term.closest('.us-report-no-styling')) return;
+    const summary = event.target.closest('summary');
+    if (summary && summary.parentElement === term) {
+      // A control on the first line, such as the status icon, has its own click.
+      if (event.target.closest('button, a, input, select, textarea')) return;
+      event.preventDefault();
+      setOpen(term, !isOpen(term));
+      return;
+    }
+    if (!isOpen(term) || event.target.closest('a, button, input, select, textarea, label')) return;
+    if (String(window.getSelection?.() || '').trim()) return;
+    setOpen(term, false);
+  });
+
+  window.UnionSuiteTermExpand = Object.freeze({open: term => setOpen(term, true), close: term => setOpen(term, false), version: '1.0'});
+})();
+
+/* Status. The icon button opens a small menu of the statuses, each with its
+   icon, the current one ticked; arrow keys, Home and End move, Enter or
+   Space picks, Escape and Tab close. A pick shows at once (icon, colour,
+   label, filter counts), optimistic as tasks and milestones are; Included
+   plays UnionSuiteTaskRows.celebrate from the icon. The saver receives
+   {ordinal, status, label, term} and returns a promise. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTermStatus) return;
+
+  const STATUSES = [
+    {status: 'negotiating', label: 'Negotiating'},
+    {status: 'included', label: 'Included'},
+    {status: 'not-included', label: 'Not Included'}
+  ];
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  let saver = null;
+  let menu = null;
+  let owner = null;
+
+  function statusOf(term) {
+    return (term.getAttribute('data-us-term-status') || '').trim().toLowerCase();
+  }
+
+  // The icon, the label and the filter all read the row's status.
+  function show(term, status, label) {
+    term.setAttribute('data-us-term-status', status);
+    const badge = term.querySelector('.us-term__status');
+    if (badge) {
+      badge.setAttribute('data-us-term-status', status);
+      badge.textContent = label;
+    }
+    const button = term.querySelector('.us-term__status-button');
+    if (button) button.setAttribute('aria-label', 'Status: ' + label + '. Change status');
+  }
+
+  function reportFailure(term) {
+    const meta = term.querySelector('.us-term__meta');
+    if (!meta) return;
+    meta.querySelectorAll('.us-term__error').forEach(node => node.remove());
+    const message = document.createElement('span');
+    message.className = 'us-term__error';
+    message.setAttribute('role', 'status');
+    message.textContent = 'Not saved. Try again.';
+    meta.append(message);
+    setTimeout(() => message.remove(), 6000);
+  }
+
+  async function change(term, next) {
+    const previous = statusOf(term);
+    const previousLabel = term.querySelector('.us-term__status')?.textContent.trim() || '';
+    const item = STATUSES.find(entry => entry.status === next);
+    if (!item || next === previous || term.getAttribute('aria-busy') === 'true') return;
+    const ordinal = (term.getAttribute('data-us-term-ordinal') || '').trim();
+    term.setAttribute('aria-busy', 'true');
+    show(term, next, item.label);
+    const button = term.querySelector('.us-term__status-button');
+    const celebration = next === 'included' && button ? window.UnionSuiteTaskRows?.celebrate?.(button) : null;
+    let saved = true;
+    try {
+      if (!saver) throw new Error('No term status saver is defined (UnionSuiteTermStatus.defineSaver).');
+      if (!/^\d+$/.test(ordinal)) throw new Error('The term has no ordinal.');
+      await saver({ordinal, status: next, label: item.label, term});
+    } catch (error) {
+      saved = false;
+      console.warn(error.message);
+    }
+    await celebration;
+    term.removeAttribute('aria-busy');
+    if (!saved) {
+      show(term, previous, previousLabel);
+      reportFailure(term);
+    }
+    // Counts and the status filter follow once the effect has played, so a
+    // filtered row does not vanish under its own confetti.
+    window.UnionSuiteTermFacets?.refresh();
+  }
+
+  function buildMenu() {
+    const node = document.createElement('div');
+    node.className = 'us-term-status-menu';
+    node.setAttribute('role', 'menu');
+    node.setAttribute('aria-label', 'Term status');
+    node.hidden = true;
+    STATUSES.forEach(entry => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'us-term-status-menu__item';
+      item.setAttribute('role', 'menuitemradio');
+      item.setAttribute('data-us-term-status', entry.status);
+      item.setAttribute('tabindex', '-1');
+      item.append(document.createTextNode(entry.label));
+      node.append(item);
+    });
+    node.addEventListener('click', event => {
+      const item = event.target.closest('.us-term-status-menu__item');
+      if (!item || !owner) return;
+      const term = owner.closest('.us-term');
+      close(true);
+      void change(term, item.getAttribute('data-us-term-status'));
+    });
+    node.addEventListener('keydown', onMenuKey);
+    document.body.append(node);
+    return node;
+  }
+
+  function items() {
+    return [...menu.querySelectorAll('.us-term-status-menu__item')];
+  }
+
+  // Under the icon, or above it when the window has no room below.
+  function place(button) {
+    const rect = button.getBoundingClientRect();
+    const height = menu.offsetHeight;
+    const below = rect.bottom + 4;
+    const top = below + height > window.innerHeight - 8 ? Math.max(8, rect.top - 4 - height) : below;
+    const left = Math.min(Math.max(8, rect.left), window.innerWidth - menu.offsetWidth - 8);
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+  }
+
+  function open(button) {
+    menu ||= buildMenu();
+    if (owner === button) {
+      close(true);
+      return;
+    }
+    if (owner) close(false);
+    owner = button;
+    const current = statusOf(button.closest('.us-term'));
+    items().forEach(item => item.setAttribute('aria-checked', String(item.getAttribute('data-us-term-status') === current)));
+    menu.hidden = false;
+    place(button);
+    button.setAttribute('aria-expanded', 'true');
+    if (!reducedMotion() && menu.animate) {
+      menu.animate([{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}], {duration: 140, easing: 'cubic-bezier(.2, 0, 0, 1)'});
+    }
+    (items().find(item => item.getAttribute('aria-checked') === 'true') || items()[0]).focus({preventScroll: true});
+  }
+
+  function close(returnFocus) {
+    if (!menu || !owner) return;
+    const button = owner;
+    owner = null;
+    button.setAttribute('aria-expanded', 'false');
+    if (returnFocus) button.focus({preventScroll: true});
+    if (reducedMotion() || !menu.animate) {
+      menu.hidden = true;
+      return;
+    }
+    menu.animate([{opacity: 1}, {opacity: 0}], {duration: 100, easing: 'ease-out'}).finished.then(() => {
+      if (!owner) menu.hidden = true;
+    }, () => {});
+  }
+
+  function onMenuKey(event) {
+    const list = items();
+    const index = list.indexOf(document.activeElement);
+    const moves = {ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: list.length - 1};
+    if (event.key in moves) {
+      event.preventDefault();
+      list[(moves[event.key] + list.length) % list.length].focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      close(true);
+    } else if (event.key === 'Tab') {
+      close(false);
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('.us-terms .us-term__status-button');
+    if (!button || button.closest('.us-report-no-styling')) return;
+    // The icon sits on the row's first line; it changes the status, and
+    // leaves the row open or closed as it was.
+    event.preventDefault();
+    if (button.closest('.us-term')?.getAttribute('aria-busy') === 'true') return;
+    open(button);
+  });
+
+  // A press anywhere else, a scroll or a resize closes the menu.
+  document.addEventListener('pointerdown', event => {
+    if (owner && !menu.contains(event.target) && event.target !== owner) close(false);
+  }, true);
+  addEventListener('scroll', event => {
+    if (owner && !menu.contains(event.target)) close(false);
+  }, true);
+  addEventListener('resize', () => close(false));
+
+  window.UnionSuiteTermStatus = Object.freeze({
+    defineSaver: fn => { saver = typeof fn === 'function' ? fn : null; },
+    version: '1.0'
+  });
+})();
+
+/* Facets. One chip per status in the list, in bargaining order, with a
+   count; the count beside the panel title, with a clear; a dot on the
+   funnel while a chip is pressed. Chips exist when the list has two or more
+   statuses. A row the chip excludes gets the hidden attribute, which the
+   theme's search treats as off the page. The chips reuse the contact facet
+   classes so the two panels match. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTermFacets) return;
+
+  const ORDER = ['negotiating', 'included', 'not-included'];
+  const states = new WeakMap();
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function wrapperOf(set) {
+    return set.closest('.us-terms');
+  }
+
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, row: section.querySelector('.us-term')}))
+      .filter(entry => entry.row)
+      .map(entry => ({
+        section: entry.section,
+        status: (entry.row.getAttribute('data-us-term-status') || '').trim().toLowerCase(),
+        label: (entry.row.querySelector('.us-term__status')?.textContent || '').trim() || 'No status'
+      }));
+  }
+
+  // The statuses present, in bargaining order, then anything else by name.
+  function statuses(rows) {
+    const labels = new Map();
+    rows.forEach(row => {
+      if (!labels.has(row.status)) labels.set(row.status, row.label);
+    });
+    const rank = status => {
+      const index = ORDER.indexOf(status);
+      return index < 0 ? ORDER.length : index;
+    };
+    return [...labels.keys()]
+      .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+      .map(status => ({status, label: labels.get(status)}));
+  }
+
+  function chip(item) {
+    const button = el('button', 'us-contact-chip');
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('data-us-contact-facet-value', item.status);
+    button.append(el('span', '', item.label), el('span', 'us-contact-chip__count', ''));
+    return button;
+  }
+
+  function buildStrip() {
+    const strip = el('div', 'us-contact-facets us-contact-facets--filter');
+    const row = el('div', 'us-contact-facets__row');
+    row.setAttribute('data-us-contact-facet', 'status');
+    row.append(el('span', 'us-contact-facets__label', 'Status'), el('div', 'us-contact-facets__chips'));
+    strip.append(row);
+    return strip;
+  }
+
+  // Beside the panel title: the count, the pressed status and a clear.
+  function buildHeadingCount() {
+    const node = el('span', 'us-contact-facets__heading-count');
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
+    node.setAttribute('aria-atomic', 'true');
+    const clear = el('button', 'us-contact-facets__clear us-contact-facets__clear--icon');
+    clear.type = 'button';
+    clear.hidden = true;
+    clear.setAttribute('aria-label', 'Clear the term filters');
+    clear.title = 'Clear the term filters';
+    const icon = el('i', 'ti ti-x');
+    icon.setAttribute('aria-hidden', 'true');
+    clear.append(icon);
+    node.append(el('span', 'us-contact-facets__count', ''), clear);
+    return node;
+  }
+
+  function onClick(set, event) {
+    const state = states.get(set);
+    const target = event.target.closest('button');
+    if (!state || !target) return;
+    if (target.classList.contains('us-contact-facets__clear')) {
+      state.filter = null;
+      // The clear also empties the text search, as on the contacts panel.
+      const input = wrapperOf(set)?.querySelector(':scope > .panel > .us-query-search-controls input');
+      if (input && input.value) {
+        input.value = '';
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+    } else if (target.classList.contains('us-contact-chip')) {
+      if (target.getAttribute('aria-disabled') === 'true') return;
+      const value = target.getAttribute('data-us-contact-facet-value');
+      state.filter = state.filter === value ? null : value;
+    } else {
+      return;
+    }
+    apply(set);
+  }
+
+  // Chips are rebuilt only when the statuses change; counts and pressed
+  // state update in place, so focus stays on the chip just pressed.
+  function syncChips(container, items) {
+    const current = [...container.querySelectorAll('.us-contact-chip')];
+    const same = current.length === items.length &&
+      current.every((node, index) => node.getAttribute('data-us-contact-facet-value') === items[index].status);
+    if (!same) container.replaceChildren(...items.map(chip));
+  }
+
+  // The chips live in the theme's filter disclosure; a panel without the
+  // search gets them above the results instead.
+  function mount(state, set) {
+    const wrapper = wrapperOf(set);
+    const controls = wrapper.querySelector(':scope > .panel > .us-query-search-controls');
+    if (controls) {
+      if (controls.firstElementChild !== state.strip) controls.prepend(state.strip);
+    } else if (!wrapper.classList.contains('us-query-search')) {
+      if (state.strip.nextElementSibling !== set || state.strip.parentElement !== set.parentElement) set.before(state.strip);
+    } else {
+      state.strip.remove();
+    }
+  }
+
+  function mountHeadingCount(state, set) {
+    const title = wrapperOf(set).querySelector(':scope > .panel > .panel-heading > .panel-title');
+    if (!title) {
+      state.headingCount.remove();
+      return;
+    }
+    if (title.nextElementSibling !== state.headingCount) title.after(state.headingCount);
+  }
+
+  function apply(set) {
+    const state = states.get(set);
+    const wrapper = wrapperOf(set);
+    if (!state || !wrapper) return;
+    const rows = rowsOf(set);
+    const total = rows.length;
+    const items = statuses(rows);
+    const noun = total === 1 ? 'term' : 'terms';
+    mountHeadingCount(state, set);
+    const count = state.headingCount.querySelector('.us-contact-facets__count');
+    const clear = state.headingCount.querySelector('.us-contact-facets__clear');
+
+    // One status, or none: nothing to filter by.
+    if (items.length < 2) {
+      rows.forEach(row => {
+        if (row.section.hidden) row.section.hidden = false;
+      });
+      state.filter = null;
+      state.strip.remove();
+      wrapper.removeAttribute('data-us-term-facet-active');
+      count.replaceChildren(total + ' ' + noun);
+      clear.hidden = true;
+      return;
+    }
+    mount(state, set);
+    if (state.filter && !items.some(item => item.status === state.filter)) state.filter = null;
+
+    const chips = state.strip.querySelector('.us-contact-facets__chips');
+    syncChips(chips, items);
+    chips.querySelectorAll('.us-contact-chip').forEach(node => {
+      const value = node.getAttribute('data-us-contact-facet-value');
+      const matching = rows.filter(row => row.status === value).length;
+      node.querySelector('.us-contact-chip__count').textContent = String(matching);
+      node.setAttribute('aria-pressed', String(state.filter === value));
+    });
+
+    // Rows, then the count, which follows the theme's text search too.
+    let shown = 0, searching = false;
+    rows.forEach(row => {
+      const match = !state.filter || row.status === state.filter;
+      const searchHidden = row.section.hasAttribute('data-us-query-search-hidden');
+      if (searchHidden) searching = true;
+      if (match && !searchHidden) shown++;
+      if (row.section.hidden !== !match) row.section.hidden = !match;
+    });
+    const filtered = !!state.filter || searching;
+    count.replaceChildren(filtered ? shown + ' of ' + total + ' ' + noun : total + ' ' + noun);
+    if (state.filter) count.append(' · ', el('span', 'us-contact-facets__token', items.find(item => item.status === state.filter).label));
+    clear.hidden = !filtered;
+    wrapper.toggleAttribute('data-us-term-facet-active', !!state.filter);
+  }
+
+  function stateFor(set) {
+    let state = states.get(set);
+    if (!state) {
+      state = {filter: null, strip: buildStrip(), headingCount: buildHeadingCount()};
+      state.strip.addEventListener('click', event => onClick(set, event));
+      state.headingCount.addEventListener('click', event => onClick(set, event));
+      states.set(set, state);
+    }
+    return state;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-terms .QueryTemplateSet').forEach(set => {
+        if (set.closest('.us-report-no-styling')) return;
+        stateFor(set);
+        apply(set);
+      });
+    });
+  }
+
+  // On a cached reload this can run before the section preset adds
+  // us-terms; us:panel-actions-ready follows that expansion.
+  document.addEventListener('us:panel-actions-ready', schedule);
+  document.addEventListener('us:query-template-refreshed', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section' || node.localName === 'div')) ||
+        (record.type === 'attributes' && record.target.closest?.('.us-terms')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-query-search-hidden']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  // A row refreshed in place (US-ROW-PATCH) may change only attributes.
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteTermFacets = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-TERMS:END */
+
+/* US-INCREASES:START — agreement scheduled increases as expandable groups
+   (us-increases, the us-agreement-increases preset; decided 4 October 2026).
+   One Query Template row per increase
+   (prototypes/wip/agreement-page/templates/Agreement-Increases-Query-Template.html).
+   A Query Template cannot aggregate, so the groups and totals are worked out
+   here from data attributes on the rows:
+     data-us-increase-kind      General | Class
+     data-us-increase-type      Negotiated | CPI | Fixed amount | Percentage
+     data-us-increase-class     the class (C1); blank for general
+     data-us-increase-percent   a number, blank unless a percentage
+     data-us-increase-amount    a number, blank unless a dollar amount
+     data-us-increase-period    the dollar basis (per week)
+     data-us-increase-date      ISO date (general)
+     data-us-increase-months    months in class (class)
+   Totals: percentages add (2% then 3% is 5%), or compound with
+   us-increases--compound (5.06%), an open decision. Dollar amounts add
+   separately, per basis. A CPI increase counts its recorded figure; one
+   with no figure yet shows as "+ CPI".
+   The script orders them (the IQA designer sorts only by table fields):
+   General first, then each class in natural order (C4 before C34); a
+   group's increases by date (general) or months in class (class), then by
+   IncreaseNum. Every increase must be on one page.
+   Three parts:
+   - View: a totals strip above the list, and one <details> per group built
+     as the set's first child from copies of the rows. The rendered rows stay
+     in the page, out of sight (CSS) and inert, so the theme's search can
+     read them; the view follows the search's and the chips' marks.
+   - Expand: groups slide open and closed (fold() from US-RECORD-CARDS); a
+     click on an open group outside its tray closes it.
+   - Facets: type quick filters, as the terms status chips, in the funnel
+     disclosure, with the count beside the panel title. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteIncreases) return;
+
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // ── Reading the rows ─────────────────────────────────────────
+
+  function number(value) {
+    const text = String(value ?? '').replace(/[$,%\s]/g, '');
+    if (!text) return null;
+    const parsed = Number(text);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function readRow(row, section, index) {
+    const attr = name => (row.getAttribute('data-us-increase-' + name) || '').trim();
+    const type = attr('type');
+    return {
+      row,
+      section,
+      index,
+      kind: attr('kind').toLowerCase() === 'class' ? 'class' : 'general',
+      type,
+      cpi: /cpi/i.test(type),
+      className: attr('class'),
+      percent: number(attr('percent')),
+      amount: number(attr('amount')),
+      period: attr('period'),
+      date: /^\d{4}-\d{2}-\d{2}/.test(attr('date')) ? attr('date').slice(0, 10) : '',
+      months: number(attr('months')),
+      sequence: number(attr('number'))
+    };
+  }
+
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, row: section.querySelector('.us-increase')}))
+      .filter(entry => entry.row)
+      .map((entry, index) => readRow(entry.row, entry.section, index));
+  }
+
+  // A blank sorts last.
+  const ascending = (a, b) => (a === null) - (b === null) || (a === null ? 0 : a - b);
+
+  // One group per kind and class, wherever their rows fall: General first,
+  // then the classes in natural order (C4 before C34). A group's increases
+  // by date (general) or months in class (class), then by IncreaseNum, then
+  // as the rows came.
+  function groupsOf(increases) {
+    const groups = new Map();
+    increases.forEach(increase => {
+      const name = increase.kind === 'general' ? 'General' : (increase.className || 'No class');
+      const key = increase.kind + '|' + name;
+      if (!groups.has(key)) groups.set(key, {name, kind: increase.kind, increases: []});
+      groups.get(key).increases.push(increase);
+    });
+    const list = [...groups.values()].sort((a, b) =>
+      (a.kind === 'general' ? 0 : 1) - (b.kind === 'general' ? 0 : 1) ||
+      a.name.localeCompare(b.name, 'en', {numeric: true, sensitivity: 'base'}));
+    list.forEach(group => group.increases.sort((a, b) =>
+      (a.date || '\uffff').localeCompare(b.date || '\uffff') ||
+      ascending(a.months, b.months) ||
+      ascending(a.sequence, b.sequence) ||
+      a.index - b.index));
+    return list;
+  }
+
+  // ── Totals ───────────────────────────────────────────────────
+
+  // Six places is enough to stop 0.1 + 0.2 showing as 0.30000000000000004.
+  const tidy = value => Math.round(value * 1e6) / 1e6;
+
+  function total(increases, compound) {
+    const percents = increases.map(increase => increase.percent).filter(value => value !== null);
+    let percent = null;
+    if (percents.length) {
+      percent = compound
+        ? tidy((percents.reduce((product, value) => product * (1 + value / 100), 1) - 1) * 100)
+        : tidy(percents.reduce((sum, value) => sum + value, 0));
+    }
+    const amounts = new Map();
+    increases.forEach(increase => {
+      if (increase.amount === null) return;
+      amounts.set(increase.period, tidy((amounts.get(increase.period) || 0) + increase.amount));
+    });
+    return {
+      percent,
+      // A CPI increase with a recorded figure counts as its percentage; only
+      // one without a figure adds "+ CPI".
+      cpi: increases.some(increase => increase.cpi && increase.percent === null),
+      amounts: [...amounts].map(([period, amount]) => ({period, amount})),
+      compound: Boolean(compound && percents.length > 1)
+    };
+  }
+
+  const formatPercent = value => value.toLocaleString('en-AU', {maximumFractionDigits: 2}) + '%';
+  const formatMoney = value => '$' + value.toLocaleString('en-AU', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  // The parts of a total, in reading order: "6.5%", "CPI", "$40.00 per week".
+  function parts(sum) {
+    const list = [];
+    if (sum.percent !== null) list.push(formatPercent(sum.percent));
+    if (sum.cpi) list.push('CPI');
+    sum.amounts.forEach(entry => list.push(formatMoney(entry.amount) + (entry.period ? ' ' + entry.period : '')));
+    return list;
+  }
+
+  function formatDate(iso) {
+    const [year, month, day] = iso.split('-').map(Number);
+    return day + ' ' + MONTHS[month - 1] + ' ' + year;
+  }
+
+  // "1 Jul 2026 to 1 Jul 2028", or one date.
+  function dateSpan(increases) {
+    const dates = increases.map(increase => increase.date).filter(Boolean).sort();
+    if (!dates.length) return '';
+    const first = formatDate(dates[0]);
+    const last = formatDate(dates[dates.length - 1]);
+    return first === last ? first : first + ' to ' + last;
+  }
+
+  // "after 6 to 12 months", or one number.
+  function monthSpan(increases) {
+    const months = increases.map(increase => increase.months).filter(value => value !== null).sort((a, b) => a - b);
+    if (!months.length) return '';
+    const first = months[0];
+    const last = months[months.length - 1];
+    return 'after ' + (first === last ? first : first + ' to ' + last) + (last === 1 ? ' month' : ' months');
+  }
+
+  function countLabel(count, kind) {
+    const noun = kind === 'class' ? 'step' : 'increase';
+    return count + ' ' + noun + (count === 1 ? '' : 's');
+  }
+
+  // "4 increases, 1 Jul 2026 to 1 Jul 2028" or "2 steps, after 6 to 12 months".
+  function groupMeta(group) {
+    const span = group.kind === 'class' ? monthSpan(group.increases) : dateSpan(group.increases);
+    return countLabel(group.increases.length, group.kind) + (span ? ', ' + span : '');
+  }
+
+  // ── Markup ───────────────────────────────────────────────────
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // A total as separate parts, so a narrow column wraps between them and
+  // never inside "$40.00 per week". The "+" comes from the CSS.
+  function totalNode(className, sum) {
+    const node = el('span', className);
+    const list = parts(sum);
+    if (!list.length) node.append(el('span', 'us-increase-sum__part us-increase-sum__part--none', '—'));
+    list.forEach(text => node.append(el('span', 'us-increase-sum__part', text)));
+    if (sum.compound) node.title = 'Percentages compounded';
+    return node;
+  }
+
+  function wrapperOf(set) {
+    return set.closest('.us-increases');
+  }
+
+  function isCompound(set) {
+    return Boolean(wrapperOf(set)?.classList.contains('us-increases--compound'));
+  }
+
+  // What the view was built from; a rebuild with the same key changes nothing.
+  function keyOf(set, increases) {
+    return [wrapperOf(set).classList.contains('us-increases--compound'), ...increases.map(increase => [
+      increase.row.getAttribute('data-us-increase-ordinal'), increase.kind, increase.type, increase.className,
+      increase.percent, increase.amount, increase.period, increase.date, increase.months,
+      increase.row.textContent.replace(/\s+/g, ' ').trim()
+    ].join('|'))].join('\n');
+  }
+
+  function buildStrip(groups, compound) {
+    const strip = el('dl', 'us-increases-totals');
+    const general = groups.filter(group => group.kind === 'general').flatMap(group => group.increases);
+    const classes = groups.filter(group => group.kind === 'class');
+
+    const everyone = el('div', 'us-increases-totals__item us-increases-totals__item--everyone');
+    const everyoneValue = el('dd');
+    everyoneValue.append(general.length ? totalNode('us-increase-sum', total(general, compound)) : 'No general increases');
+    everyone.append(el('dt', '', 'Everyone'), everyoneValue);
+    strip.append(everyone);
+
+    if (classes.length) {
+      const steps = classes.reduce((sum, group) => sum + group.increases.length, 0);
+      let text = classes.length + (classes.length === 1 ? ' class, ' : ' classes, ') + countLabel(steps, 'class');
+      const ranked = classes
+        .map(group => ({name: group.name, percent: total(group.increases, compound).percent}))
+        .filter(entry => entry.percent !== null)
+        .sort((a, b) => b.percent - a.percent);
+      if (ranked.length > 1) text += '; up to ' + formatPercent(ranked[0].percent) + ' (' + ranked[0].name + ')';
+      const item = el('div', 'us-increases-totals__item');
+      item.append(el('dt', '', 'By class'), el('dd', '', text));
+      strip.append(item);
+    }
+
+    const span = dateSpan(general);
+    if (span) {
+      const item = el('div', 'us-increases-totals__item');
+      item.append(el('dt', '', 'Takes effect'), el('dd', '', span));
+      strip.append(item);
+    }
+    return strip;
+  }
+
+  function buildGroups(groups, compound, openNames) {
+    const view = el('div', 'us-increase-groups');
+    groups.forEach(group => {
+      const details = el('details', 'us-increase-group');
+      details.setAttribute('data-us-increase-kind', group.kind);
+      details.setAttribute('data-us-increase-group', group.name);
+      if (openNames.has(group.name)) details.open = true;
+
+      const summary = el('summary', 'us-increase-group__row');
+      const icon = el('span', 'us-increase-group__icon');
+      icon.setAttribute('aria-hidden', 'true');
+      const meta = el('p', 'us-increase-group__meta', (group.kind === 'general' ? 'Everyone · ' : 'Class · ') + groupMeta(group));
+      // How many increases a filter leaves showing (syncFilter).
+      meta.append(el('span', 'us-increase-group__shown'));
+      const main = el('div', 'us-increase-group__main');
+      main.append(el('h3', 'us-increase-group__title', group.name), meta);
+      const chevron = el('span', 'us-increase-group__chevron');
+      chevron.setAttribute('aria-hidden', 'true');
+      summary.append(icon, main, totalNode('us-increase-group__total us-increase-sum', total(group.increases, compound)), chevron);
+
+      const steps = el('ol', 'us-increase-group__steps');
+      group.increases.forEach(increase => {
+        const item = el('li', 'us-increase-group__step');
+        // The rendered row this copies, for the filters (syncFilter).
+        item.setAttribute('data-us-increase-row', String(increase.index));
+        item.append(increase.row.cloneNode(true));
+        steps.append(item);
+      });
+      const detail = el('div', 'us-increase-group__detail');
+      detail.append(steps);
+      details.append(summary, detail);
+      view.append(details);
+    });
+    return view;
+  }
+
+  // ── Building ─────────────────────────────────────────────────
+
+  function syncStrip(set, groups, key) {
+    const existing = set.previousElementSibling?.classList.contains('us-increases-totals') ? set.previousElementSibling : null;
+    if (!groups.length) {
+      existing?.remove();
+      return;
+    }
+    if (existing && existing.getAttribute('data-us-increases-key') === key) return;
+    const strip = buildStrip(groups, isCompound(set));
+    strip.setAttribute('data-us-increases-key', key);
+    if (existing) existing.replaceWith(strip);
+    else set.before(strip);
+  }
+
+  function syncView(set, groups, key) {
+    const existing = set.querySelector(':scope > .us-increase-groups');
+    const active = groups.length > 0;
+    // The rendered rows stay for the theme's search and the filters, out of
+    // sight (CSS) and inert, so keyboard and screen reader users meet each
+    // increase once, in the view.
+    [...set.children].forEach(child => {
+      if (child.localName === 'section' && child.inert !== active) child.inert = active;
+    });
+    if (!active) {
+      existing?.remove();
+      set.removeAttribute('data-us-increases-view');
+      return;
+    }
+    set.setAttribute('data-us-increases-view', '');
+    if (existing && existing.getAttribute('data-us-increases-key') === key) return;
+    const openNames = new Set(existing ? [...existing.querySelectorAll('.us-increase-group[open]')].map(node => node.getAttribute('data-us-increase-group')) : []);
+    const view = buildGroups(groups, isCompound(set), openNames);
+    view.setAttribute('data-us-increases-key', key);
+    if (existing) existing.replaceWith(view);
+    else set.prepend(view);
+  }
+
+  // The theme's search and the type chips hide rendered rows; the view
+  // follows: a hidden row's increase hides, a group left with none hides, a
+  // group with matches opens while the filter is on (and closes again
+  // after, if the filter opened it), and each group says how many show.
+  function syncFilter(set) {
+    const view = set.querySelector(':scope > .us-increase-groups');
+    if (!view) return;
+    const sections = [...set.children].filter(child => child.localName === 'section');
+    const shown = section => !section.hidden && !section.hasAttribute('data-us-query-search-hidden');
+    const filtering = sections.some(section => !shown(section));
+    view.querySelectorAll(':scope > .us-increase-group').forEach(group => {
+      const steps = [...group.querySelectorAll('.us-increase-group__step')];
+      let visible = 0;
+      steps.forEach(step => {
+        const section = sections[Number(step.getAttribute('data-us-increase-row'))];
+        const show = !section || shown(section);
+        if (show) visible++;
+        if (step.hidden !== !show) step.hidden = !show;
+      });
+      const hide = filtering && visible === 0;
+      if (group.hidden !== hide) group.hidden = hide;
+      const note = group.querySelector('.us-increase-group__shown');
+      const text = filtering && visible ? '(' + visible + ' of ' + steps.length + ' shown)' : '';
+      if (note && note.textContent !== text) note.textContent = text;
+      if (filtering && visible && !group.open) {
+        group.open = true;
+        group.setAttribute('data-us-increase-filter-opened', '');
+      } else if (!filtering && group.hasAttribute('data-us-increase-filter-opened')) {
+        group.removeAttribute('data-us-increase-filter-opened');
+        group.open = false;
+      }
+    });
+  }
+
+  function build(set) {
+    const increases = rowsOf(set);
+    const groups = groupsOf(increases);
+    const key = keyOf(set, increases);
+    syncStrip(set, groups, key);
+    syncView(set, groups, key);
+    syncFilter(set);
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-increases .QueryTemplateSet').forEach(set => {
+        if (!set.closest('.us-report-no-styling')) build(set);
+      });
+    });
+  }
+
+  // Rows added or removed, the compound class changed, or a filter hid or
+  // showed a row. The view is not a section, so building it does not call
+  // back here.
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section')) ||
+        (record.attributeName === 'class' && record.target.classList?.contains('us-increases')) ||
+        (record.attributeName !== 'class' && record.target.localName === 'section' && record.target.closest?.('.us-increases')))) schedule();
+  }).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['class', 'hidden', 'data-us-query-search-hidden']
+  });
+  // On a cached reload this can run before the section preset adds
+  // us-increases; us:panel-actions-ready follows that expansion.
+  document.addEventListener('us:panel-actions-ready', schedule);
+  document.addEventListener('us:query-template-refreshed', schedule);
+  document.addEventListener('us:row-patched', schedule);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteIncreases = Object.freeze({
+    refresh: schedule,
+    // The groups and their totals as the panel shows them, for checks.
+    totals: set => groupsOf(rowsOf(set)).map(group => ({name: group.name, kind: group.kind, total: parts(total(group.increases, isCompound(set))).join(' + ') || '—'})),
+    version: '1.0'
+  });
+})();
+
+/* Expand. A native <details> shows and hides its content at once, so the
+   summary's click is taken over: opening sets the group open with its
+   detail hidden, then slides it in through fold(); closing slides it out,
+   then closes the group. fold() reverses from where it is when clicked
+   again mid-way and is instant under reduced motion. A click on an open
+   group outside its tray closes it; a click in the tray is the increase's.
+   Buttons and links keep their own clicks; a click that ends a text
+   selection leaves the group open. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteIncreaseExpand) return;
+
+  const runs = new WeakMap();
+
+  function isOpen(group) {
+    return group.open && !group.classList.contains('is-closing');
+  }
+
+  function setOpen(group, open) {
+    // Opened or closed by hand, the group is no longer the filter's to close.
+    group.removeAttribute('data-us-increase-filter-opened');
+    const detail = group.querySelector(':scope > .us-increase-group__detail');
+    const fold = window.UnionSuiteRecordCards?.fold;
+    const run = (runs.get(group) || 0) + 1;
+    runs.set(group, run);
+    if (!detail || !fold) {
+      group.open = open;
+      return;
+    }
+    if (open) {
+      group.classList.remove('is-closing');
+      if (!group.open) {
+        detail.hidden = true;
+        group.open = true;
+      }
+      fold(detail, true);
+    } else {
+      // The chevron turns back now; the group closes when the slide ends,
+      // unless another click has come since.
+      group.classList.add('is-closing');
+      fold(detail, false).then(() => {
+        if (runs.get(group) !== run) return;
+        group.open = false;
+        detail.hidden = false;
+        group.classList.remove('is-closing');
+      });
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const group = event.target.closest('.us-increases .us-increase-group');
+    if (!group || group.closest('.us-report-no-styling')) return;
+    const summary = event.target.closest('summary');
+    if (summary && summary.parentElement === group) {
+      if (event.target.closest('button, a, input, select, textarea')) return;
+      event.preventDefault();
+      setOpen(group, !isOpen(group));
+      return;
+    }
+    if (!isOpen(group) || event.target.closest('a, button, input, select, textarea, label')) return;
+    if (event.target.closest('.us-increase-group__steps')) return;
+    if (String(window.getSelection?.() || '').trim()) return;
+    setOpen(group, false);
+  });
+
+  window.UnionSuiteIncreaseExpand = Object.freeze({open: group => setOpen(group, true), close: group => setOpen(group, false), version: '1.0'});
+})();
+
+/* Facets. One chip per increase type in the list (Negotiated, CPI, Fixed
+   amount, Percentage), with a count, in the funnel disclosure beside the
+   search; the count beside the panel title, with a clear; a dot on the
+   funnel while a chip is pressed. Chips exist when the list has two or
+   more types. A row the chip excludes gets the hidden attribute. The chips
+   reuse the contact facet classes, so the agreement panels match. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteIncreaseFacets) return;
+
+  const ORDER = ['negotiated', 'cpi', 'fixed amount', 'percentage'];
+  const states = new WeakMap();
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function wrapperOf(set) {
+    return set.closest('.us-increases');
+  }
+
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, row: section.querySelector('.us-increase')}))
+      .filter(entry => entry.row)
+      .map(entry => {
+        const label = (entry.row.getAttribute('data-us-increase-type') || '').trim() || 'No type';
+        return {section: entry.section, type: label.toLowerCase(), label};
+      });
+  }
+
+  // The types present, in the order they are described, then any other.
+  function types(rows) {
+    const labels = new Map();
+    rows.forEach(row => {
+      if (!labels.has(row.type)) labels.set(row.type, row.label);
+    });
+    const rank = type => {
+      const index = ORDER.indexOf(type);
+      return index < 0 ? ORDER.length : index;
+    };
+    return [...labels.keys()]
+      .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+      .map(type => ({type, label: labels.get(type)}));
+  }
+
+  function chip(item) {
+    const button = el('button', 'us-contact-chip');
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('data-us-contact-facet-value', item.type);
+    button.append(el('span', '', item.label), el('span', 'us-contact-chip__count', ''));
+    return button;
+  }
+
+  function buildStrip() {
+    const strip = el('div', 'us-contact-facets us-contact-facets--filter');
+    const row = el('div', 'us-contact-facets__row');
+    row.setAttribute('data-us-contact-facet', 'type');
+    row.append(el('span', 'us-contact-facets__label', 'Type'), el('div', 'us-contact-facets__chips'));
+    strip.append(row);
+    return strip;
+  }
+
+  // Beside the panel title: the count, the pressed type and a clear.
+  function buildHeadingCount() {
+    const node = el('span', 'us-contact-facets__heading-count');
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
+    node.setAttribute('aria-atomic', 'true');
+    const clear = el('button', 'us-contact-facets__clear us-contact-facets__clear--icon');
+    clear.type = 'button';
+    clear.hidden = true;
+    clear.setAttribute('aria-label', 'Clear the increase filters');
+    clear.title = 'Clear the increase filters';
+    const icon = el('i', 'ti ti-x');
+    icon.setAttribute('aria-hidden', 'true');
+    clear.append(icon);
+    node.append(el('span', 'us-contact-facets__count', ''), clear);
+    return node;
+  }
+
+  function onClick(set, event) {
+    const state = states.get(set);
+    const target = event.target.closest('button');
+    if (!state || !target) return;
+    if (target.classList.contains('us-contact-facets__clear')) {
+      state.filter = null;
+      // The clear also empties the text search, as on the other panels.
+      const input = wrapperOf(set)?.querySelector(':scope > .panel > .us-query-search-controls input');
+      if (input && input.value) {
+        input.value = '';
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+    } else if (target.classList.contains('us-contact-chip')) {
+      const value = target.getAttribute('data-us-contact-facet-value');
+      state.filter = state.filter === value ? null : value;
+    } else {
+      return;
+    }
+    apply(set);
+  }
+
+  // Chips are rebuilt only when the types change; counts and pressed state
+  // update in place, so focus stays on the chip just pressed.
+  function syncChips(container, items) {
+    const current = [...container.querySelectorAll('.us-contact-chip')];
+    const same = current.length === items.length &&
+      current.every((node, index) => node.getAttribute('data-us-contact-facet-value') === items[index].type);
+    if (!same) container.replaceChildren(...items.map(chip));
+  }
+
+  // The chips live in the theme's filter disclosure (us-query-search).
+  function mount(state, set) {
+    const controls = wrapperOf(set).querySelector(':scope > .panel > .us-query-search-controls');
+    if (!controls) {
+      state.strip.remove();
+      return;
+    }
+    if (controls.firstElementChild !== state.strip) controls.prepend(state.strip);
+  }
+
+  function mountHeadingCount(state, set) {
+    const title = wrapperOf(set).querySelector(':scope > .panel > .panel-heading > .panel-title');
+    if (!title) {
+      state.headingCount.remove();
+      return;
+    }
+    if (title.nextElementSibling !== state.headingCount) title.after(state.headingCount);
+  }
+
+  function apply(set) {
+    const state = states.get(set);
+    const wrapper = wrapperOf(set);
+    if (!state || !wrapper) return;
+    const rows = rowsOf(set);
+    const total = rows.length;
+    const items = types(rows);
+    const noun = total === 1 ? 'increase' : 'increases';
+    mountHeadingCount(state, set);
+    const count = state.headingCount.querySelector('.us-contact-facets__count');
+    const clear = state.headingCount.querySelector('.us-contact-facets__clear');
+
+    // One type, or none: nothing to filter by.
+    if (items.length < 2) {
+      rows.forEach(row => {
+        if (row.section.hidden) row.section.hidden = false;
+      });
+      state.filter = null;
+      state.strip.remove();
+      wrapper.removeAttribute('data-us-increase-facet-active');
+      count.replaceChildren(total + ' ' + noun);
+      clear.hidden = true;
+      return;
+    }
+    mount(state, set);
+    if (state.filter && !items.some(item => item.type === state.filter)) state.filter = null;
+
+    const chips = state.strip.querySelector('.us-contact-facets__chips');
+    syncChips(chips, items);
+    chips.querySelectorAll('.us-contact-chip').forEach(node => {
+      const value = node.getAttribute('data-us-contact-facet-value');
+      node.querySelector('.us-contact-chip__count').textContent = String(rows.filter(row => row.type === value).length);
+      node.setAttribute('aria-pressed', String(state.filter === value));
+    });
+
+    // Rows, then the count, which follows the theme's text search too.
+    let shown = 0, searching = false;
+    rows.forEach(row => {
+      const match = !state.filter || row.type === state.filter;
+      const searchHidden = row.section.hasAttribute('data-us-query-search-hidden');
+      if (searchHidden) searching = true;
+      if (match && !searchHidden) shown++;
+      if (row.section.hidden !== !match) row.section.hidden = !match;
+    });
+    const filtered = !!state.filter || searching;
+    count.replaceChildren(filtered ? shown + ' of ' + total + ' ' + noun : total + ' ' + noun);
+    if (state.filter) count.append(' · ', el('span', 'us-contact-facets__token', items.find(item => item.type === state.filter).label));
+    clear.hidden = !filtered;
+    wrapper.toggleAttribute('data-us-increase-facet-active', !!state.filter);
+  }
+
+  function stateFor(set) {
+    let state = states.get(set);
+    if (!state) {
+      state = {filter: null, strip: buildStrip(), headingCount: buildHeadingCount()};
+      state.strip.addEventListener('click', event => onClick(set, event));
+      state.headingCount.addEventListener('click', event => onClick(set, event));
+      states.set(set, state);
+    }
+    return state;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-increases .QueryTemplateSet').forEach(set => {
+        if (set.closest('.us-report-no-styling')) return;
+        stateFor(set);
+        apply(set);
+      });
+    });
+  }
+
+  // The search controls arrive after the rows (US-QUERY-SEARCH builds them),
+  // so their arrival and the search's own marks reschedule this.
+  document.addEventListener('us:panel-actions-ready', schedule);
+  document.addEventListener('us:query-template-refreshed', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section' || node.localName === 'div')) ||
+        (record.type === 'attributes' && record.target.closest?.('.us-increases')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-query-search-hidden']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  document.addEventListener('us:row-patched', schedule);
+  window.UnionSuiteIncreaseFacets = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-INCREASES:END */
 
 /* US-CONTACT-COPY:START — copy a contact's email or phone from its icon.
    The icon is a .us-contact-tile__copy button before the value. Pressing it
@@ -10205,7 +11418,30 @@ SOFTWARE.
     const text = label(wrapper, done, rows.length);
     // Write only on change: a childList mutation reschedules this render.
     if (count.textContent !== text) count.textContent = text;
+    if (!fitted.has(header)) {
+      fitted.add(header);
+      headerSize.observe(header);
+    }
+    fitCount(header);
   }
+
+  // The heading stays on one row (owner, 3 October 2026): when the count would
+  // wrap it, the count is hidden. The footer still gives it to screen readers.
+  function fitCount(header) {
+    const count = header.querySelector('.us-task-progress__count');
+    if (!count) return;
+    count.hidden = true;
+    const height = header.offsetHeight;
+    count.hidden = false;
+    if (header.offsetHeight > height) count.hidden = true;
+  }
+
+  // Refit on the next frame: hiding the count changes the heading's height,
+  // which inside this callback would be reported as a ResizeObserver loop.
+  const fitted = new WeakSet();
+  const headerSize = new ResizeObserver(entries => {
+    requestAnimationFrame(() => entries.forEach(entry => fitCount(entry.target)));
+  });
 
   let scheduled = false;
   function schedule() {

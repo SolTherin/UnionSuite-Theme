@@ -1,0 +1,958 @@
+/* ── Scheduled increases (candidate; increases-compare.html options 2, 3 and 5) ──
+   Option 4 is decided and in the theme (US-INCREASES, class us-increases).
+   These candidate rules use their own root class, us-increases-c, so they
+   style only the options still under comparison.
+   us-increases-c: Display in cards off, one row per increase under a rule,
+   from templates/Agreement-Increases-Rows-Query-Template.html. As the terms
+   rows (terms-layouts.candidate.css): the type icon in its own column, then
+   when it applies with the type as coloured text under it, then the amount
+   in a fixed-width column, then the pencil at the panel's right edge.
+   Every row is its own grid (one QueryTemplateItem each), so the columns
+   beside the main cell are fixed widths. The main cell stops at
+   --us-increase-measure (400px: a date and a word, so shorter than the
+   terms' 640px), the amount follows it, and spare width sits between the
+   amount and the pencil. Modifiers on the same template:
+   us-increases--grouped   headings per group (US-INCREASES)
+   us-increases--totals    group totals in the headings, and a totals strip
+   us-increases--expand    one closed row per group, opening to its steps
+   us-increases--matrix    general strip, then classes by months in class
+   Below about 560px the measure goes and the amount column narrows. */
+
+.us-increases-c > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-increases-c / inline-size;
+}
+
+.us-increases-c .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+}
+
+.us-increases-c .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* The first row, and the first row under a heading, have no rule above. */
+.us-increases-c .QueryTemplateSet > section:first-of-type .QueryTemplateItem,
+.us-increases-c .us-increase-heading + section .QueryTemplateItem {
+  border-top: 0;
+}
+
+/* ── Type tone and icon ────────────────────────────────────────
+   One definition per increase type, for the row icon, the coloured type
+   line and the matrix: a percentage (negotiated or class), CPI, or a
+   fixed dollar amount. Icons are Tabler outlines (MIT): percentage,
+   trending-up and currency-dollar. */
+
+:is(.us-increase, .us-increase-matrix__event, .us-increase-matrix__cell):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--success);
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='17' cy='17' r='1'/><circle cx='7' cy='7' r='1'/><path d='M6 18L18 6'/></svg>");
+}
+
+:is(.us-increase, .us-increase-matrix__event, .us-increase-matrix__cell)[data-us-increase-type="cpi" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--warning);
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 17l6-6l4 4l8-8'/><path d='M14 7h7v7'/></svg>");
+}
+
+:is(.us-increase, .us-increase-matrix__event, .us-increase-matrix__cell)[data-us-increase-type="fixed amount" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--info);
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M16.7 8a3 3 0 0 0-2.7-2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1-2.7-2'/><path d='M12 3v3m0 12v3'/></svg>");
+}
+
+/* Group icons: Tabler users (general, everyone) and stairs-up (a class's
+   steps). */
+:is(.us-increase-group, .us-increase-total):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-tone: var(--text-link);
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 7a4 4 0 1 0 8 0a4 4 0 1 0-8 0'/><path d='M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/><path d='M21 21v-2a4 4 0 0 0-3-3.85'/></svg>");
+}
+
+:is(.us-increase-group, .us-increase-total)[data-us-increase-kind="class" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 6h-5v5h-5v5h-5v5h-5'/><path d='M6 10v-7'/><path d='M3 6l3-3l3 3'/></svg>");
+}
+
+/* ── Rows ────────────────────────────────────────────────────── */
+
+.us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "icon main amount . edit";
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: 10px 6px;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increase:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+/* The type icon on a soft disc in its tone, centred on the row. */
+.us-increase__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-increase-tone) 12%, transparent);
+}
+
+.us-increase__icon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-increase-tone);
+  -webkit-mask: var(--us-increase-icon) center / contain no-repeat;
+  mask: var(--us-increase-icon) center / contain no-repeat;
+}
+
+.us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: main;
+  min-width: 0;
+}
+
+.us-increase__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The type in its tone, then the class when the row is not under a
+   heading that already names it. */
+.us-increase__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-1);
+  margin: 2px 0 0;
+  line-height: 18px;
+}
+
+.us-increase__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  white-space: nowrap;
+}
+
+.us-increase__class:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+.us-increase__type:not(:empty) + .us-increase__class:not(:empty)::before {
+  content: "·";
+  margin-inline-end: var(--space-1);
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+.us-increase__class:empty,
+.us-increases-c .QueryTemplateSet[data-us-increases-grouped] .us-increase__class {
+  display: none;
+}
+
+.us-increase__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.us-increase__comment:empty {
+  display: none;
+}
+
+/* The amount with its unit, right-aligned so the figures line up. */
+.us-increase__amount:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: amount;
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* CPI has no number: the word, quieter. */
+.us-increase[data-us-increase-type="cpi" i] .us-increase__amount {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+/* The 36px icon button is centred on the row (owner, 4 October 2026: with a
+   description it sat on the first line), overhanging a one-line row rather
+   than lifting it. The theme's icon button sets its own margin, so this
+   names the button class as well. */
+.us-increases-c .us-increase > .us-increase__edit.us-icon-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: edit;
+  align-self: center;
+  margin-block: -8px;
+}
+
+/* A narrow panel drops the measure and narrows the amount column. The main
+   cell's lines become grid items, so the type line and the comment can run
+   under the amount instead of wrapping in the narrow first column. */
+@container us-increases-c (max-width: 559.98px) {
+  .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
+    grid-template-areas:
+      "icon when    amount  edit"
+      "icon meta    meta    edit"
+      "icon comment comment edit";
+  }
+
+  .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+
+  .us-increase__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: when;
+  }
+
+  .us-increase__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: meta;
+  }
+
+  .us-increase__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: comment;
+  }
+}
+
+/* ── Sums (US-INCREASES) ─────────────────────────────────────────
+   A total as separate parts, "6.5%", "CPI", "$40.00 per week", joined by
+   "+"; a narrow column wraps between parts, the "+" leading the new line. */
+
+.us-increase-sum:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: .3em;
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increase-sum__part:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  white-space: nowrap;
+}
+
+.us-increase-sum__part + .us-increase-sum__part::before {
+  content: "+ ";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+.us-increase-sum__part--none:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+}
+
+/* ── Group headings (us-increases--grouped) ──────────────────────
+   On the rows' grid, so a heading's total sits in the amount column. */
+
+.us-increase-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  align-items: end;
+  column-gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4) 6px 6px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+}
+
+.us-increases-c .QueryTemplateSet > .us-increase-heading:first-child {
+  padding-top: 2px;
+}
+
+.us-increase-heading__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  grid-column: 1 / 3;
+  align-items: baseline;
+  gap: 6px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-increase-heading__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+}
+
+.us-increase-heading__total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 3;
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+}
+
+@container us-increases-c (max-width: 559.98px) {
+  .us-increase-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
+  }
+}
+
+/* ── Totals strip (us-increases--totals) ─────────────────────────
+   Above the list: what everyone gets, the classes, and when. Items keep
+   a readable width on a wide tab rather than spreading across it. */
+
+.us-increases-totals:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(156px, 240px));
+  gap: var(--space-3) var(--space-6);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+}
+
+.us-increases-totals dt:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-increases-totals dd:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+}
+
+/* Everyone's total leads, larger. */
+.us-increases-totals__item--everyone dd:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semi);
+}
+
+.us-increases-totals .us-increase-sum:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  justify-content: flex-start;
+}
+
+/* ── Views built over the rows (expand and matrix) ──────────────
+   US-INCREASES builds the view as the set's first child from copies of
+   the rows, which stay in the page, out of sight and inert (the script).
+   They stay displayed, not display: none: the theme's search skips rows
+   that are not displayed, and the view follows the search's marks on these
+   rows. */
+
+.us-increases-c .QueryTemplateSet[data-us-increases-view] > section:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.us-increases-c .QueryTemplateSet[data-us-increases-view]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+}
+
+/* ── Expandable groups (option 4; us-increases--expand) ─────────
+   The terms' expandable rows (option 7 there), one per group: the group
+   icon in its own column, the group with a coloured line under it, its
+   total in a fixed column, a chevron. Opening slides in the group's
+   increases (US-INCREASE-EXPAND, the theme's fold()); a click anywhere on
+   an open group closes it. The steps line up under the title, their
+   amounts under the group total, their pencils under the chevron. */
+
+.us-increase-group:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increase-group:first-child {
+  border-top: 0;
+}
+
+/* The hover marks what a click acts on (owner, 4 October 2026): the group's
+   own row, which opens or closes it (a closed group is only that row), and
+   in an open group each increase, which carries the pencil. */
+.us-increase-group__row:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-increase-group__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "icon main total . chevron";
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: 10px 6px;
+  list-style: none;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increase-group__row::-webkit-details-marker {
+  display: none;
+}
+
+.us-increase-group__row:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: inset var(--focus-ring);
+}
+
+.us-increase-group__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-increase-tone) 12%, transparent);
+}
+
+.us-increase-group__icon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-increase-tone);
+  -webkit-mask: var(--us-increase-icon) center / contain no-repeat;
+  mask: var(--us-increase-icon) center / contain no-repeat;
+}
+
+.us-increase-group__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: main;
+  min-width: 0;
+}
+
+.us-increase-group__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+.us-increase-group__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+}
+
+.us-increase-group__total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: total;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+/* Tabler "chevron-down" outline (MIT), turning over when the group is open. */
+.us-increase-group__chevron:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: chevron;
+  justify-self: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6-6'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6l6-6'/></svg>") center / contain no-repeat;
+  transition: transform .18s cubic-bezier(.2, 0, 0, 1);
+}
+
+/* While the details slide shut (is-closing) the group is still open, but
+   the chevron has already turned back. */
+.us-increase-group[open]:not(.is-closing) .us-increase-group__chevron {
+  transform: rotate(180deg);
+}
+
+/* The open part: the group's increases in a tray inset under the title
+   (owner, 4 October 2026: the header and its increases need telling apart).
+   The tray is a bordered surface, so it stands off the group row whether
+   the row is plain or hovered. Its padding is offset against the detail's,
+   so the steps' columns still line up under the header: amounts under the
+   group total, pencils under the chevron. */
+.us-increase-group__detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0 0 10px calc(6px + 32px + var(--space-3) - 13px);
+}
+
+.us-increase-group__detail[hidden] {
+  display: none;
+}
+
+/* The tray clips its rows' hover to its rounded corners. A click inside it
+   is the increase's, so it does not close the group (US-INCREASE-EXPAND). */
+.us-increase-group__steps:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  list-style: none;
+  cursor: default;
+}
+
+/* Each increase carries the tray's inset itself, so its hover spans the
+   tray from edge to edge. */
+.us-increase-group__step:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0 5px 0 12px;
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increase-group__step:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-increase-group__step + .us-increase-group__step {
+  border-top: 1px solid var(--border);
+}
+
+/* A step: when and its type on one line, the amount under the group
+   total, the pencil under the chevron. No icon: the type line says it.
+   The tray's padding already starts the steps level with the title, so
+   the columns are the header's own. */
+.us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-columns: minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "main amount . edit";
+  padding: 8px 0;
+}
+
+.us-increase-group__step .us-increase:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: transparent;
+}
+
+.us-increase-group__step .us-increase__icon {
+  display: none;
+}
+
+.us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+}
+
+.us-increase-group__step .us-increase__when:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.us-increase-group__step .us-increase__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+}
+
+.us-increase-group__step .us-increase__comment:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex-basis: 100%;
+}
+
+/* A step's amount is a part of the group total above it: smaller, regular
+   weight and the body colour, so the bold total reads as the sum. */
+.us-increase-group__step .us-increase__amount:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-normal);
+}
+
+/* While a filter is on: the steps it hides, the groups left with none, and
+   how many of a group's steps show (US-INCREASE-FACETS). */
+.us-increase-group[hidden],
+.us-increase-group__step[hidden] {
+  display: none;
+}
+
+.us-increase-group__shown:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline-start: var(--space-1);
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.us-increase-group__shown:empty {
+  display: none;
+}
+
+.us-increase-group__step .us-increase__edit:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  cursor: pointer;
+}
+
+/* A narrow panel: the group's coloured line runs under its total, and a
+   step's type line and comment under its amount, as the rows do. */
+@container us-increases-c (max-width: 559.98px) {
+  .us-increase-group__row:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
+    grid-template-areas:
+      "icon title total chevron"
+      "icon meta  meta  chevron";
+  }
+
+  .us-increase-group__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+
+  .us-increase-group__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: title;
+  }
+
+  .us-increase-group__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: meta;
+  }
+
+  .us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr) 112px 36px;
+    padding: 8px 0;
+    grid-template-areas:
+      "when    amount  edit"
+      "meta    meta    edit"
+      "comment comment edit";
+  }
+
+  .us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: contents;
+  }
+}
+
+/* ── Type quick filters (US-INCREASE-FACETS) ─────────────────────
+   On a us-query-search panel: the contacts' chip classes in the funnel
+   disclosure, one chip per increase type. With room, the chips and the
+   search field share one row: chips left, field right, the hint under
+   both. A pressed chip puts a dot on the funnel. */
+
+.us-increases-c .QueryTemplateSet > section[hidden] {
+  display: none !important;
+}
+
+@container us-increases-c (min-width: 760px) {
+  .us-increases-c > .panel > .us-query-search-controls:has(> .us-contact-facets--filter):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr);
+    grid-template-areas:
+      "chips search"
+      "hint  hint";
+    align-items: center;
+    column-gap: var(--space-4);
+  }
+
+  .us-increases-c .us-query-search-controls > .us-contact-facets--filter:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-area: chips;
+    padding: 0;
+  }
+
+  .us-increases-c .us-query-search-controls > .us-query-filter-fields {
+    grid-area: search;
+  }
+
+  .us-increases-c .us-query-search-controls > .us-query-search-hint {
+    grid-area: hint;
+  }
+}
+
+.us-increases-c[data-us-increase-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-increases-c[data-us-increase-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+/* ── Matrix (option 5; us-increases--matrix) ─────────────────────
+   General increases as a dated strip with everyone's total; then a table,
+   one row per class, one column per months-in-class step, and a total. A
+   narrow panel scrolls the table sideways inside its own region. */
+
+.us-increase-matrix:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  gap: var(--space-4);
+  padding: 2px 0 4px;
+}
+
+.us-increase-matrix__head:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px var(--space-4);
+  margin: 0 0 var(--space-2);
+}
+
+.us-increase-matrix__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-increase-matrix__total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+}
+
+.us-increase-matrix__timeline:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One general increase: the date, the amount, the type in its tone, with
+   a bar in the tone along the top. The bar is an inset shadow clipped by
+   the box, so it follows the rounded corners instead of curving a thick
+   border. */
+.us-increase-matrix__event:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  padding: 10px 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  box-shadow: inset 0 3px 0 var(--us-increase-tone);
+}
+
+.us-increase-matrix__date:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increase-matrix__amount:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increase-matrix__type:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+}
+
+.us-increase-matrix__scroll:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.us-increase-matrix__scroll:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.us-increase-matrix__table:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-increase-matrix__table :is(th, td):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.us-increase-matrix__table thead th:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-top: 0;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+}
+
+/* The class column stays in view while the steps scroll. */
+.us-increase-matrix__table .us-increase-matrix__class:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: sticky;
+  left: 0;
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  text-align: left;
+}
+
+.us-increase-matrix__table thead .us-increase-matrix__class:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.us-increase-matrix__table tbody tr:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increase-matrix__table tbody tr:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+}
+
+.us-increase-matrix__cell:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  color: var(--text-strong);
+}
+
+/* A dollar step carries its tone, so it does not read as a percentage. */
+.us-increase-matrix__cell[data-us-increase-type="fixed amount" i]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--us-increase-tone);
+  font-weight: var(--fw-semi);
+}
+
+.us-increase-matrix__empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-faint);
+}
+
+.us-increase-matrix__table .us-increase-matrix__sum:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-left: 1px solid var(--border);
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+/* ── Summary (option 2; templates/Agreement-Increases-Summary-Query-Template.html)
+   One line per group from the summary IQA: General first, then each class.
+   The totals are the IQA's sums as bare numbers; the units, the "+"
+   between parts and CPI come from which values are blank, so the panel
+   needs no script. On the rows' grid, so the totals line up with the
+   breakdown's amounts below. */
+
+.us-increases-summary .QueryTemplateSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --list-gap: 0px;
+}
+
+.us-increases-summary .QueryTemplateItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.us-increases-summary .QueryTemplateSet > section:first-of-type .QueryTemplateItem {
+  border-top: 0;
+}
+
+.us-increases-summary > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  container: us-increases-summary / inline-size;
+}
+
+.us-increase-total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "icon main value . .";
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: 10px 6px;
+}
+
+.us-increase-total__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--us-increase-tone) 12%, transparent);
+}
+
+.us-increase-total__icon::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: var(--us-increase-tone);
+  -webkit-mask: var(--us-increase-icon) center / contain no-repeat;
+  mask: var(--us-increase-icon) center / contain no-repeat;
+}
+
+.us-increase-total__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: main;
+  min-width: 0;
+}
+
+.us-increase-total__name:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+}
+
+/* "Everyone · 4 scheduled" or "Class · 2 scheduled". */
+.us-increase-total__meta:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 2px 0 0;
+  color: var(--us-increase-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+}
+
+.us-increase-total__meta::before {
+  content: "Everyone · ";
+}
+
+.us-increase-total[data-us-increase-kind="class" i] .us-increase-total__meta::before {
+  content: "Class · ";
+}
+
+.us-increase-total__value:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  grid-area: value;
+  justify-content: flex-end;
+  column-gap: .3em;
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-semi) var(--fs-base)/20px var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Each part stays whole; the amount and its basis are one part, so
+   "$40.00 per week" never splits. */
+.us-increase-total__value > span {
+  white-space: nowrap;
+}
+
+.us-increase-total__value > span:empty,
+.us-increase-total__money:has(> .us-increase-total__amount:empty),
+.us-increase-total__period:empty {
+  display: none;
+}
+
+.us-increase-total__percent::after {
+  content: "%";
+}
+
+.us-increase-total__amount::before {
+  content: "$";
+}
+
+/* The "+" before a part that follows another. */
+.us-increase-total__percent:not(:empty) ~ .us-increase-total__cpi::before,
+.us-increase-total__percent:not(:empty) ~ .us-increase-total__money::before,
+.us-increase-total__cpi:not(:empty) ~ .us-increase-total__money::before {
+  content: "+ ";
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+.us-increase-total__period:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+@container us-increases-summary (max-width: 559.98px) {
+  .us-increase-total:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
+    grid-template-areas: "icon main value .";
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────
+   The fold already changes at once under reduced motion; these are the
+   hover and chevron transitions. */
+
+@media (prefers-reduced-motion: reduce) {
+  .us-increase,
+  .us-increase-group,
+  .us-increase-group__chevron,
+  .us-increase-matrix__table tbody tr {
+    transition: none;
+  }
+}
