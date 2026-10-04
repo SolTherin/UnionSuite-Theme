@@ -7784,7 +7784,7 @@ SOFTWARE.
  const candidates='.us-actions,.BigButtonLinkList:has(> .BigButtonList),#MemberQuickActions:has(> .dropdown-menu),.CaseActions.dropdown:has(> .dropdown-menu),.actions-wrap:has(> .actions-menu),.us-banner details.us-banner__action-menu';
  const excluded=el=>!!el.closest('.us-report-no-styling,[data-us-actions-ignore]');
  const disabled=el=>!!el.closest(':disabled,[disabled],.disabled,.aspNetDisabled,[aria-disabled="true"],.hidden,[hidden],[inert]');
- const narrow=()=>matchMedia('(max-width:950px)').matches||matchMedia('(pointer:coarse)').matches;
+ const narrow=()=>matchMedia('(max-width:950px)').matches;
  const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
  const zero={height:'0px',paddingTop:'0px',paddingBottom:'0px',marginTop:'0px',marginBottom:'0px',borderTopWidth:'0px',borderBottomWidth:'0px'};
  let uid=0,status;

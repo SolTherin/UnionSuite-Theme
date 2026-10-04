@@ -672,7 +672,13 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   text-decoration: none;
 }
 
-@media (pointer: coarse) {
+/* Touch sizes go by width, not pointer type (owner, 5 October 2026).
+   Browsers on touchscreen laptops can report the touchscreen as the only
+   pointer (Edge on Windows reports no mouse or trackpad at all), so a
+   pointer: coarse or hover: none test gave docked laptops 44px buttons on a
+   mouse-driven screen. Every former touch query in the theme is now
+   (max-width: 950px). */
+@media (max-width: 950px) {
   :root {
     --panel-header-min-height: 56px;
     --panel-header-action-height: 44px;
@@ -2855,7 +2861,7 @@ SOFTWARE.
   display: none !important;
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   [data-us-query-display] .us-iqa-report-utilities .us-iqa-icon-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     flex-basis: 44px;
     width: 44px;
@@ -2896,7 +2902,7 @@ SOFTWARE.
   text-decoration: line-through;
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   .us-task-completed-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     min-height: 44px;
   }
@@ -3740,7 +3746,7 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   justify-content: center;
 }
 
-@media (max-width:950px),(pointer:coarse) {
+@media (max-width:950px) {
   .us-banner .us-banner__surface--status .us-banner__badge--record-status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     min-height: 44px;
     padding-block: 10px;
@@ -4020,8 +4026,8 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
 }
 
 /* A copy button beside the record ID in the eyebrow is compact and pulled
-   into the line, so the eyebrow keeps its height. Touch pointers keep the
-   theme's 44px target. It centres on the capitals and digits (half the cap
+   into the line, so the eyebrow keeps its height. At 950px or narrower it
+   keeps the theme's 44px touch target. It centres on the capitals and digits (half the cap
    height above the baseline); `middle` centres on lowercase letters, which
    sits it low beside an ID. The button's baseline is the bottom of its 16px
    icon, 8px below its centre, at either button size. */
@@ -4033,8 +4039,8 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   vertical-align: calc(.5cap - 8px);
 }
 
-/* Touch only: a narrow window with a mouse keeps the compact button. */
-@media (pointer: coarse) {
+/* 950px or narrower: the 44px touch target. */
+@media (max-width: 950px) {
   .us-banner .us-banner__eyebrow:not(:where(.us-report-no-styling, .us-report-no-styling *)) > button.us-copy {
     width: 44px;
     height: 44px;
@@ -4259,7 +4265,7 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   display: none;
 }
 
-@media (max-width: 950px), (pointer: coarse) {
+@media (max-width: 950px) {
   .us-banner .us-banner__alerts-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     width: 44px;
     height: 44px;
@@ -4473,9 +4479,9 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   }
 }
 
-/* Touch: a 44px target around the 28px badge, without changing its size
+/* 950px or narrower: a 44px touch target around the 28px badge, without changing its size
    beside the status pill. */
-@media (pointer: coarse) {
+@media (max-width: 950px) {
   .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     position: relative;
   }
@@ -4654,7 +4660,7 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   background: currentColor;
 }
 
-@media (max-width: 950px), (pointer: coarse) {
+@media (max-width: 950px) {
   .us-banner .us-banner__surface--rows.us-banner__surface--status .us-banner__badge--record-status {
     min-height: 0;
     padding-block: 3px;
@@ -6301,7 +6307,7 @@ select[id*="_AddressEdit_"]:not([multiple]):not(:where(.us-report-no-styling, .u
   cursor: not-allowed;
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   .RadUploadPanel .ruFileWrap:not(:where(.us-report-no-styling, .us-report-no-styling *)),
   .RadUploadPanel .ruInputs > li :is(.ruFakeInput, .ruButton):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     min-height: 44px;
@@ -10667,7 +10673,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   display: none !important;
 }
 
-@media (max-width:950px),(pointer:coarse) {
+@media (max-width:950px) {
   :root .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) :is(.us-actions__item, .us-actions__subtoggle, .us-actions__toggle) {
     min-height: 44px;
   }
@@ -10760,7 +10766,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   outline-offset: 2px;
 }
 
-@media (max-width:950px),(pointer:coarse) {
+@media (max-width:950px) {
   :root .us-banner .us-banner__surface .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) > .us-actions__toggle {
     min-height: 44px;
     padding-block: 10px;
@@ -11740,7 +11746,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   }
 }
 
-@media (pointer: coarse) {
+@media (max-width: 950px) {
   .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     height: 30px;
     padding: 0 11px;
@@ -12674,7 +12680,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--border);
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   #injected-taskbar .us-taskbar__quick-link {
     width: 44px;
     height: 44px;
@@ -16074,8 +16080,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   cursor: pointer;
 }
 
-/* Touch pointers keep 44px targets. */
-@media (pointer: coarse) {
+/* 950px or narrower: 44px touch targets. */
+@media (max-width: 950px) {
   .us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:not(:where(.us-report-no-styling *)) {
     min-height: 44px;
   }
@@ -17785,7 +17791,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   .us-task__check:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     width: 44px;
     height: 44px;
@@ -19051,7 +19057,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   #hd .us-taskbar__pip {
     --biscuit-clip-height: 80.6px;
     height: 44px;
@@ -19252,7 +19258,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   border: 0;
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   :is(button.us-copy, button.us-banner__copy) {
     width: 44px;
     height: 44px;

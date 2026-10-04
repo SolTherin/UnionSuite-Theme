@@ -910,7 +910,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   background: currentColor;
 }
 
-@media (max-width: 950px), (pointer: coarse) {
+@media (max-width: 950px) {
   .us-banner .us-banner__surface--rows.us-banner__surface--status .us-banner__badge--record-status {
     min-height: 0;
     padding-block: 3px;

@@ -224,7 +224,7 @@
   }
 }
 
-@media (pointer: coarse) {
+@media (max-width: 950px) {
   .us-contact-chip:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     height: 30px;
     padding: 0 11px;

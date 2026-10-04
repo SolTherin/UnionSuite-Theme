@@ -4546,7 +4546,7 @@ body.loaded .js-nav-sticky .primary-nav-toggle:focus:after {
   margin-top: 3px;
 }
 
-@media (pointer:coarse) {
+@media (max-width:950px) {
   .navbar-right.navbar-right.navbar-right :is(.nav-aux-cart > a, .ste-toggle, .obo-toggle, .account-toggle) {
     min-width: 44px;
     height: 44px;
