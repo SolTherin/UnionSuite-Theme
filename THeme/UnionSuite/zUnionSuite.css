@@ -13658,8 +13658,10 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   cursor: pointer;
 }
 
+/* The tag input takes its own line under the chips (owner, 5 October 2026),
+   so a new tag always starts at the left, however many chips there are. */
 .us-attachment__chips input {
-  flex: 1 1 120px;
+  flex: 1 0 100%;
   min-width: 0;
   height: 26px;
   padding: 0 4px;
