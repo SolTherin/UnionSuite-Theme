@@ -843,15 +843,41 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   color: var(--text-strong);
   box-shadow: var(--shadow-lg);
   font: 13px/1.5 var(--font-ui);
+  animation: us-command-notice-in 180ms cubic-bezier(.2, 0, 0, 1);
+  transition:
+    opacity 180ms cubic-bezier(.2, 0, 0, 1),
+    translate 180ms cubic-bezier(.2, 0, 0, 1);
 }
 
 .us-command-notice:empty {
   display: none;
 }
 
+/* A plain message fades out after a few seconds (US-UNIFIED-ACTIONS
+   clears it); an error or a Retry offer stays until dismissed. */
+.us-command-notice[data-us-leaving] {
+  opacity: 0;
+  translate: 0 6px;
+}
+
+@keyframes us-command-notice-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-command-notice {
+    animation: none;
+    transition: none;
+  }
+}
+
 .us-command-notice > button {
-  display: block;
+  display: inline-block;
   margin-top: 8px;
+  margin-inline-end: 8px;
   padding: 4px 8px;
   background: var(--bg-subtle);
   color: var(--text-link);

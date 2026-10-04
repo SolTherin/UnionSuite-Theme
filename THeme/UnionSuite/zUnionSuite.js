@@ -883,14 +883,42 @@ SOFTWARE.
     if (value == null) { if (element.hasAttribute(name)) element.removeAttribute(name); }
     else if (element.getAttribute(name) !== String(value)) element.setAttribute(name, String(value));
   }
+  // A plain message (success, unavailable) fades after NOTICE_MS, paused
+  // while the pointer or focus is on it; an error or a Retry offer stays
+  // until it is dismissed or replaced.
+  const NOTICE_MS = 4000, NOTICE_FADE_MS = 180;
+  let noticeTimer = 0, noticeAuto = false;
+  function clearNotice() {
+    clearTimeout(noticeTimer); noticeAuto = false;
+    if (!notice?.isConnected || !notice.firstChild) return;
+    notice.setAttribute('data-us-leaving', '');
+    noticeTimer = setTimeout(() => { notice.replaceChildren(); notice.removeAttribute('data-us-leaving'); }, NOTICE_FADE_MS);
+  }
+  function scheduleNotice() {
+    clearTimeout(noticeTimer);
+    if (noticeAuto && !notice.matches(':hover, :focus-within')) noticeTimer = setTimeout(clearNotice, NOTICE_MS);
+  }
   function announce(message, env, phase, error, retry) {
-    if (!notice?.isConnected) { notice = document.createElement('div'); notice.className = 'us-command-notice'; notice.setAttribute('role','status'); document.body.append(notice); }
+    if (!notice?.isConnected) {
+      notice = document.createElement('div'); notice.className = 'us-command-notice'; notice.setAttribute('role','status'); document.body.append(notice);
+      notice.addEventListener('pointerenter', () => clearTimeout(noticeTimer));
+      notice.addEventListener('pointerleave', scheduleNotice);
+      notice.addEventListener('focusout', () => setTimeout(scheduleNotice));
+    }
+    clearTimeout(noticeTimer); notice.removeAttribute('data-us-leaving');
     notice.replaceChildren(document.createTextNode(message));
     if (retry) {
       const button = document.createElement('button'); button.type = 'button'; button.textContent = 'Retry refresh';
-      button.addEventListener('click', async () => { if (button.disabled) return; button.disabled = true; try { await retry(); notice.textContent = 'View refreshed.'; } catch (failure) { button.disabled = false; button.title = 'Refresh failed. You can retry the view refresh.'; console.error('[UnionSuiteActions] Refresh retry failed',failure); } });
+      button.addEventListener('click', async () => { if (button.disabled) return; button.disabled = true; try { await retry(); announce('View refreshed.', env, 'refresh'); } catch (failure) { button.disabled = false; button.title = 'Refresh failed. You can retry the view refresh.'; console.error('[UnionSuiteActions] Refresh retry failed',failure); } });
       notice.append(button);
     }
+    if (error || retry) {
+      const dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.textContent = 'Dismiss';
+      dismiss.addEventListener('click', clearNotice);
+      notice.append(dismiss);
+    }
+    noticeAuto = !error && !retry;
+    scheduleNotice();
     if (error) {
       console.error('[UnionSuiteActions]', env?.key, phase, error);
       (env?.trigger?.isConnected ? env.trigger : document).dispatchEvent(new CustomEvent('us:action-error',{bubbles:true,detail:{key:env?.key,actionId:env?.key,phase,error}}));
