@@ -13597,6 +13597,51 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   box-shadow: var(--field-focus-glow);
 }
 
+/* The file name is a theme text field (the .us-form field rules), full
+   width like the tags box under it; without this it kept the browser's
+   size and focus ring. */
+.us-attachment__editor .us-attachment__name-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+  box-shadow: none;
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__editor :is(.us-attachment__name-input, .us-attachment__chips):hover:not(:focus, :focus-within) {
+  border-color: var(--brand-600);
+}
+
+/* The tags box shows focus for its input (focus-within), so the input draws
+   no ring of its own. */
+.us-attachment__editor .us-attachment__chips input:focus {
+  outline: 2px solid transparent;
+  box-shadow: none;
+}
+
+.us-attachment__editor .us-attachment__name-input:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-attachment__editor .us-attachment__name-input {
+    transition: none;
+  }
+}
+
 .us-attachment__chip {
   display: inline-flex;
   align-items: center;
