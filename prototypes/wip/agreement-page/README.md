@@ -405,7 +405,12 @@ guide (templates, field definitions and component sections).
     template in `templates/Agreement-Increases-Query-Template.html`; layout
     v2's Scheduled increases panel uses it. The comparison stays: options 2,
     3 and 5 now run on the candidate root class `us-increases-c`, option 4 on
-    the theme. Still to do (TODO.md): the IQA, edit and delete, and the open
+    the theme. Status rail (owner, 5 October 2026): an open group's
+    increases sit on a rail under the group icon, as the activity feed's:
+    the terms' tick for a dated increase that has applied (its date is
+    today or earlier), a clock for one still to come, and a plain ring for
+    a class step, which has months in class rather than a date. Still to do
+    (TODO.md): the IQA, edit and delete, and the open
     questions below. Chosen with two changes: a filter
     like the other panels (`us-query-search`: the theme's search plus type
     chips, `US-INCREASE-FACETS`; groups hide when a filter leaves them

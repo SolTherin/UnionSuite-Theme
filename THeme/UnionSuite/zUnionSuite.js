@@ -4131,6 +4131,12 @@ SOFTWARE.
   // A blank sorts last.
   const ascending = (a, b) => (a === null) - (b === null) || (a === null ? 0 : a - b);
 
+  // Today as an ISO date in local time, to compare with data-us-increase-date.
+  function today() {
+    const now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  }
+
   // One group per kind and class, wherever their rows fall: General first,
   // then the classes in natural order (C4 before C34). A group's increases
   // by date (general) or months in class (class), then by IncreaseNum, then
@@ -4323,7 +4329,15 @@ SOFTWARE.
         const item = el('li', 'us-increase-group__step');
         // The rendered row this copies, for the filters (syncFilter).
         item.setAttribute('data-us-increase-row', String(increase.index));
-        item.append(increase.row.cloneNode(true));
+        const copy = increase.row.cloneNode(true);
+        // A dated increase is applied from its date on, upcoming before it;
+        // the rail shows which. A class step (months in class) has neither.
+        const status = increase.date ? (increase.date <= today() ? 'applied' : 'upcoming') : '';
+        if (status) {
+          item.setAttribute('data-us-increase-status', status);
+          copy.querySelector('.us-increase__when')?.append(el('span', 'us-increase__status', status === 'applied' ? ' (applied)' : ' (upcoming)'));
+        }
+        item.append(copy);
         steps.append(item);
       });
       const detail = el('div', 'us-increase-group__detail');

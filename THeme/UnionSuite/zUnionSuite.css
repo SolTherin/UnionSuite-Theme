@@ -14640,14 +14640,15 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   transform: rotate(180deg);
 }
 
-/* The open part: the group's increases in a bordered tray inset under the
-   title. The detail's padding stops 13px short of the title, which the
-   tray's border and inner padding make up, so the steps' columns are the
-   header's: dates under the name, amounts under the total, pencils under
-   the chevron. The tray clips its rows' hover to its rounded corners; a
-   click inside it is the increase's and leaves the group open. */
+/* The open part: the group's increases in a bordered tray under the title.
+   The tray starts under the group icon (the detail's 5px and the tray's
+   border make up the row's 6px), so the steps' status rail lines up with
+   the group icon and the other columns are the header's: dates under the
+   name, amounts under the total, pencils under the chevron. The tray clips
+   its rows' hover to its rounded corners; a click inside it is the
+   increase's and leaves the group open. */
 .us-increases .us-increase-group__detail:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  padding: 0 0 10px calc(6px + 32px + var(--space-3) - 13px);
+  padding: 0 0 10px 5px;
 }
 
 .us-increases .us-increase-group__detail[hidden] {
@@ -14666,16 +14667,34 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 .us-increases .us-increase-group__step:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  padding: 0 5px 0 12px;
+  --us-increase-step-bg: var(--bg-surface);
+  --us-increase-step-tone: var(--text-faint);
+  --us-increase-step-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/></svg>");
+  position: relative;
+  padding: 0 5px 0 0;
   transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
 }
 
 .us-increases .us-increase-group__step:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-step-bg: var(--bg-sunken);
   background: var(--bg-sunken);
 }
 
+/* The separator starts at the text column, clear of the status rail
+   (owner, 5 October 2026); the transparent border keeps the row spacing. */
 .us-increases .us-increase-group__step + .us-increase-group__step {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid transparent;
+}
+
+.us-increases .us-increase-group__step + .us-increase-group__step::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0;
+  left: calc(32px + var(--space-3));
+  height: 1px;
+  background: var(--border);
+  pointer-events: none;
 }
 
 .us-increases .us-increase-group__step[hidden] {
@@ -14686,16 +14705,89 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
    the amount under the group total; the pencil centred on the row. */
 .us-increases .us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: grid;
-  grid-template-columns: minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
-  grid-template-areas: "main amount . edit";
+  grid-template-columns: 32px minmax(0, var(--us-increase-measure, 400px)) 168px minmax(0, 1fr) 36px;
+  grid-template-areas: "icon main amount . edit";
   align-items: start;
   column-gap: var(--space-3);
   padding: 8px 0;
 }
 
-.us-increases .us-increase-group__step .us-increase__icon,
 .us-increases .us-increase-group__step .us-increase__class {
   display: none;
+}
+
+/* Status rail (owner, 5 October 2026): a dated increase that has applied
+   shows the terms' tick, one still to come a clock, and a class step
+   (months in class, no calendar date) a plain ring; a line joins them, as
+   the activity feed's rail does. US-INCREASES sets
+   data-us-increase-status and adds the status as hidden text. The icon
+   sits on the first line, so the line runs icon centre to icon centre
+   (8px row padding + half the 20px line) across the rows' borders. */
+.us-increases .us-increase-group__step[data-us-increase-status="applied"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-step-tone: var(--success);
+  --us-increase-step-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='m8.5 12 2.5 2.5 4.5-5'/></svg>");
+}
+
+.us-increases .us-increase-group__step[data-us-increase-status="upcoming"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-increase-step-tone: var(--info);
+  --us-increase-step-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M12 7.5V12l3 2'/></svg>");
+}
+
+.us-increases .us-increase-group__step::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  bottom: 0;
+  left: 15px;
+  width: 2px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+.us-increases .us-increase-group__step:not([hidden]):not(.us-increase-group__step:not([hidden]) ~ .us-increase-group__step)::before {
+  top: 18px;
+}
+
+.us-increases .us-increase-group__step:not([hidden]):not(:has(~ .us-increase-group__step:not([hidden])))::before {
+  bottom: auto;
+  height: 19px;
+}
+
+.us-increases .us-increase-group__step:not([hidden]):not(.us-increase-group__step:not([hidden]) ~ .us-increase-group__step):not(:has(~ .us-increase-group__step:not([hidden])))::before {
+  display: none;
+}
+
+.us-increases .us-increase-group__step .us-increase__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-area: icon;
+  place-items: center;
+  place-self: start center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--us-increase-step-bg);
+  transition: background-color .16s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-increases .us-increase-group__step .us-increase__icon::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: var(--us-increase-step-tone);
+  -webkit-mask: var(--us-increase-step-icon) center / contain no-repeat;
+  mask: var(--us-increase-step-icon) center / contain no-repeat;
+}
+
+.us-increases .us-increase-group__step .us-increase__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .us-increases .us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -14791,11 +14883,11 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 
   .us-increases .us-increase-group__step .us-increase:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    grid-template-columns: minmax(0, 1fr) 112px 36px;
+    grid-template-columns: 32px minmax(0, 1fr) 112px 36px;
     grid-template-areas:
-      "when    amount  edit"
-      "meta    meta    edit"
-      "comment comment edit";
+      "icon when    amount  edit"
+      "icon meta    meta    edit"
+      "icon comment comment edit";
   }
 
   .us-increases .us-increase-group__step .us-increase__main:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -14862,7 +14954,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 @media (prefers-reduced-motion: reduce) {
   .us-increases .us-increase-group__row,
   .us-increases .us-increase-group__chevron,
-  .us-increases .us-increase-group__step {
+  .us-increases .us-increase-group__step,
+  .us-increases .us-increase-group__step .us-increase__icon {
     transition: none;
   }
 }
