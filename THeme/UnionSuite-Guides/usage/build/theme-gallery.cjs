@@ -38,7 +38,7 @@ function classCopies(html) {
   }
   actions.forEach(a=>names.add('ti-'+a.icon));
   buttons.forEach(b=>b.classes.split(' ').forEach(n=>names.add(n)));
-  ['ti-home','ti-users-group','ti-briefcase','ti-heart-handshake','ti-phone-outgoing','ti-plane','ti-settings','btn-group-vertical','btn-group-justified','btn-toolbar'].forEach(n=>names.add(n));
+  ['ti-home','ti-users-group','ti-briefcase','ti-contract','ti-phone-outgoing','ti-plane','ti-settings','btn-group-vertical','btn-group-justified','btn-toolbar'].forEach(n=>names.add(n));
   // Explicit copy controls are already interactive; never nest another button
   // around the code label inside them.
   return html.split(/(<pre\b[\s\S]*?<\/pre>|<button\b[\s\S]*?<\/button>)/g).map(part=>/^<(?:pre|button)\b/.test(part)?part:part.replace(/<code>([\w -]+)<\/code>/g,(all,text)=>text.split(' ').every(n=>names.has(n))?chip(text,'See the adjacent placement instruction'):all)).join('');

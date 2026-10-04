@@ -143,7 +143,7 @@ in `UTStaff.css`. Existing navigation settings remain usable: `Nav-Icon` plus
 No new icon element or `ti` class is needed for those rows.
 
 Home uses `ti-home`; Organising/Committees use `ti-users-group`; Cases uses
-`ti-briefcase`; Agreements uses `ti-heart-handshake`; Calls uses
+`ti-briefcase`; Agreements uses `ti-contract`; Calls uses
 `ti-phone-outgoing`; Travel uses `ti-plane`; Integrations uses `ti-settings`.
 Normal icons use `--brand-100`; hover, keyboard focus, selected and selected-child
 states use `--accent`. The font stays at weight 400 and occupies a 32px slot.

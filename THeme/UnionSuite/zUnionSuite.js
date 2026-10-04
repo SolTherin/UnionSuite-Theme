@@ -1328,9 +1328,11 @@ SOFTWARE.
      us-report us-filters-collapsible us-report-expandable
    SearchContactsClass is a supported legacy alias for us-report.
    us-filters-collapsed overrides saved choices on initialization/reconciliation.
-   Without that class, user choices survive refreshes
-   in this browser tab. A different query or initial-state class resets that
-   preference. No filter values are stored, cleared, cloned or disabled.
+   Without that class, whether the filters are open is kept per page, report
+   and query in browser storage shared by every tab (owner, 4 October 2026),
+   so a refresh, a CCO tab switch or a record opened in a new tab keeps it. A
+   different query or initial-state class resets that preference. No filter
+   values are stored, cleared, cloned or disabled.
    Export is moved as one native dropdown, not copied. Its original slot is
    restored before an AJAX replacement so iMIS can dispose/update it normally. */
 (function () {
@@ -1347,6 +1349,45 @@ SOFTWARE.
   var queryDisplayEntries = new Map();
   var querySearchStates = new WeakMap();
   var querySearchId = 0;
+
+  // Filter disclosure memory (owner, 4 October 2026). Whether a Query
+  // Template panel's filters are open is a working preference, so it is kept
+  // per page and panel in browser storage shared by every tab: a record
+  // opened in a new tab from a search, a CCO tab switch (which replaces the
+  // panels) and a reload all keep it. Only the open or closed state is kept;
+  // search text, Show completed and quick-filter chips start fresh. The key
+  // is the panel's iMIS content ID, which a tab switch and a reload keep; a
+  // panel without one falls back to its title.
+  var panelMemoryPrefix = 'UnionSuite.panelFilters.v1:';
+  function panelMemoryKey(wrapper) {
+    if (!wrapper) return null;
+    var container = wrapper.closest('.ContentItemContainer');
+    var id = (container && container.id) || wrapper.id;
+    if (!id) {
+      var title = wrapper.querySelector(':scope > .panel > .panel-heading .panel-title');
+      id = title && title.textContent.trim() ? 'title:' + title.textContent.trim() : '';
+    }
+    return id ? panelMemoryPrefix + window.location.pathname + ':' + id : null;
+  }
+  function readPanelMemory(wrapper) {
+    var key = panelMemoryKey(wrapper);
+    if (!key) return null;
+    try {
+      var value = JSON.parse(window.localStorage.getItem(key));
+      return value && typeof value === 'object' ? value : null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function writePanelMemory(wrapper, patch) {
+    var key = panelMemoryKey(wrapper);
+    if (!key) return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(Object.assign({}, readPanelMemory(wrapper), patch)));
+    } catch (_) {
+      // Without storage the filters still work; they start closed each time.
+    }
+  }
   // iMIS adds one div inside ContentItemContainer for the iPart CSS class.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
@@ -1763,7 +1804,14 @@ SOFTWARE.
       status.setAttribute('aria-live', 'polite');
       status.setAttribute('aria-atomic', 'true');
       set.after(status);
-      var state = querySearchStates.get(entry.wrapper) || {query:'', collapsed:true, showCompleted:false};
+      // The panel opens or stays closed as it was last left (filter
+      // disclosure memory).
+      var remembered = readPanelMemory(entry.wrapper);
+      var state = querySearchStates.get(entry.wrapper) || {
+        query: '',
+        collapsed: remembered && typeof remembered.collapsed === 'boolean' ? remembered.collapsed : true,
+        showCompleted: false
+      };
       if (!withSearch) state.query = '';
       if (!withCompleted) state.showCompleted = false;
       querySearchStates.set(entry.wrapper, state);
@@ -1785,6 +1833,7 @@ SOFTWARE.
       };
       button.addEventListener('click', function () {
         search.state.collapsed = !search.state.collapsed;
+        writePanelMemory(search.wrapper, {collapsed: search.state.collapsed});
         if (search.state.collapsed && search.input) {
           search.input.value = '';
           stopTaskReveals(search);
@@ -1909,7 +1958,7 @@ SOFTWARE.
     if (entry.wrapper.classList.contains("us-filters-collapsed")) return;
     states.set(entry.key, entry.state);
     try {
-      window.sessionStorage.setItem(entry.key, JSON.stringify(entry.state));
+      window.localStorage.setItem(entry.key, JSON.stringify(entry.state));
     } catch (_) {
       // The in-memory preference still works if browser storage is unavailable.
     }
@@ -1924,7 +1973,7 @@ SOFTWARE.
     var key = storageKey(filter);
     var previous = states.get(key);
     if (!previous) {
-      try { previous = JSON.parse(window.sessionStorage.getItem(key)); } catch (_) {}
+      try { previous = JSON.parse(window.localStorage.getItem(key)); } catch (_) {}
     }
     if (previous && previous.query === query &&
         previous.initialCollapsed === initialCollapsed &&

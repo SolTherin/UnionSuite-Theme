@@ -892,10 +892,10 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 
 /* ti-briefcase */
 .sub-nav-body .RadTreeView_Orion > .rtUL > .rtLI > div.Nav-Icon-wrapper.Agreements-wrapper:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
-  content: "\f0f3";
+  content: "\fefb";
 }
 
-/* ti-heart-handshake */
+/* ti-contract (owner, 4 October 2026; was ti-heart-handshake) */
 .sub-nav-body .RadTreeView_Orion > .rtUL > .rtLI > div.Nav-Icon-wrapper.Calls-wrapper:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
   content: "\eb07";
 }
