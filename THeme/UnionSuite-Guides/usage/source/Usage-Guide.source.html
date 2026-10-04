@@ -1443,7 +1443,7 @@ UnionSuiteCcoSwitch.enable();  // switch in place again</code></pre></div>
   <table><thead><tr><th>Class / attribute</th><th>Apply to</th></tr></thead><tbody>
   <tr><td><button type="button" data-copy-text="us-actions"><code>us-actions</code></button></td><td>Outer div containing the trigger and root list as direct children.</td></tr>
   <tr><td><button type="button" data-copy-text="us-actions__toggle"><code>us-actions__toggle</code></button></td><td>Root button, always type="button".</td></tr>
-  <tr><td><button type="button" data-copy-text="us-actions__list"><code>us-actions__list</code></button></td><td>Root ul and submenu ul.</td></tr>
+  <tr><td><button type="button" data-copy-text="us-actions__list"><code>us-actions__list</code></button></td><td>Root ul and submenu ul. The root list stays hidden until the controller takes the menu over, as Bootstrap hides <code>.dropdown-menu</code>, so the menu never shows open while the theme script loads. No <code>hidden</code> attribute is needed in the template.</td></tr>
   <tr><td><button type="button" data-copy-text="us-actions__item"><code>us-actions__item</code></button></td><td>Action button or destination anchor inside an li.</td></tr>
   <tr><td><button type="button" data-copy-text="us-actions__heading"><code>us-actions__heading</code></button></td><td>Heading inside its own li, or on the li itself. Both use 7px top, 10px horizontal and 5px bottom padding. Existing dropdown-header items in Member Quick Actions are adapted automatically. Optional; omit the whole li when unnecessary.</td></tr>
   <tr><td><button type="button" data-copy-text="us-actions__separator"><code>us-actions__separator</code></button></td><td>Empty li with role="separator", between groups. Optional.</td></tr>

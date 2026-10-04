@@ -10461,6 +10461,14 @@ html.us-taskbar-mounted #hd .search-dropdown {
   display: none !important;
 }
 
+/* Until US-ACTION-MENUS takes a menu over (data-us-actions-ready), its list
+   is hidden, as Bootstrap hides .dropdown-menu, so the page never shows the
+   whole menu open, stretching the banner, while the theme script loads.
+   Only a root with a toggle: a list with nothing to open it stays visible. */
+:root .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)):not([data-us-actions-ready]):has(> :is(.us-actions__toggle, summary, button)) > .us-actions__list {
+  display: none;
+}
+
 /* Keep the list-item reset below heading styles in the cascade, including headings on li itself. */
 :root .us-actions:not(:where(.us-report-no-styling, .us-report-no-styling *, [data-us-actions-ignore], [data-us-actions-ignore] *)) .us-actions__list>:where(li) {
   list-style: none;
