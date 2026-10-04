@@ -795,6 +795,41 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   cursor: progress;
 }
 
+/* An icon action that is running (data-us-command-state="busy", such as a
+   download or a preview loading) swaps its icon for the theme's button
+   spinner, in the link colour rather than the greyed disabled colour, so it
+   reads as working rather than unavailable (owner, 5 October 2026). The
+   spinner fades in; reduced motion shows it still. */
+.us-command.us-icon-button[data-us-command-state="busy"] > :is(.ti, svg:not(.us-action-conflict-icon)) {
+  display: none;
+}
+
+.us-command.us-icon-button[data-us-command-state="busy"]::before {
+  content: "";
+  box-sizing: border-box;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-link);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation:
+    us-button-spin .8s linear infinite,
+    us-command-busy-in 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@keyframes us-command-busy-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-command.us-icon-button[data-us-command-state="busy"]::before {
+    animation: none;
+  }
+}
+
 .us-command-notice {
   position: fixed;
   bottom: 20px;

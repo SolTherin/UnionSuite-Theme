@@ -483,6 +483,7 @@ window.UnionSuiteLoader.ready.then(function () {
       <li><strong>Refresh:</strong> await the target plan or custom callback after the configured event. Keep a successful operation distinct from a failed refresh.</li>
       <li><strong>Finish:</strong> clear busy/record guards, preserve native focus behaviour and announce errors or configured success. A refresh-only retry never repeats the operation.</li>
     </ol>
+    <p>While an action runs, its control has <code>data-us-command-state="busy"</code> and <code>aria-busy</code>, and is disabled with “Action in progress” in its label. An icon-only action (<code>us-icon-button</code>) also swaps its icon for the theme's button spinner in the link colour until the action finishes, so a download or a loading preview shows that it is working.</p>
     <p>Navigation anchors receive a prepared, validated href and retain native new-tab/modifier behaviour. Prepared resolver values remain cached until refresh/context change; for a workflow requiring asynchronous checks at every activation, use a function or popup action. Full native popup lifecycle guarantees apply to action.type=popup. A legacy function that opens a popup and immediately returns does not expose its later close/save result to the registry.</p>
 
     <h4>Native origin refresh and your custom callbacks</h4>
