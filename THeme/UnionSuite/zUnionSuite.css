@@ -19300,6 +19300,75 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   display: none;
 }
 
+/* The copy button sits inside the ID chip (owner, 5 October 2026), so the
+   ID and its button read as one token before the title. The button is
+   stretched over the whole chip, so clicking the ID copies it; the icon sits
+   at the chip's end, in space reserved by the chip's end padding. It stays
+   one button with its own label, so keyboard and screen reader behaviour is
+   unchanged. At 950px or narrower the hit area grows to 44px tall around the
+   chip, so
+   hover, focus and error are drawn on the chip, never on the button: the
+   larger hit area stays invisible. */
+.us-banner .us-banner__record-copy {
+  position: relative;
+}
+
+.us-banner .us-banner__record-copy > .us-banner__record-id {
+  padding-inline-end: 28px;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__record-copy:has(> :is(button.us-copy, button.us-banner__copy):hover:not(:disabled)) > .us-banner__record-id {
+  background-color: rgb(255 255 255 / 25%);
+  border-color: rgb(255 255 255 / 60%);
+}
+
+.us-banner .us-banner__record-copy:has(> :is(button.us-copy, button.us-banner__copy):focus-visible) > .us-banner__record-id {
+  outline: 2px solid var(--banner-text);
+  outline-offset: 2px;
+}
+
+.us-banner .us-banner__record-copy:has(> :is(button.us-copy, button.us-banner__copy)[data-us-copy-state=error]) > .us-banner__record-id {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {
+  --copy-hover: transparent;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  place-items: center end;
+  padding-inline-end: 8px;
+  transition: opacity 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy):is(:focus-visible, [data-us-copy-state=error]) {
+  outline: none;
+}
+
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy)::before,
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy)::after {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 950px) {
+  .us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {
+    inset-block: calc((100% - 44px) / 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-banner .us-banner__record-copy > .us-banner__record-id,
+  .us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {
+    transition: none;
+  }
+}
+
 /* US-COPY:END */
 
 /* Inline banner disclosure and optional empty-field handling. */
