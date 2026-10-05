@@ -135,7 +135,7 @@
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum}),
     'Add term', refreshList('us-action-agreements-add-term'));
   popup('agreements.remove-terms', 'Remove terms', 'trash',
-    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Delete_Terms.aspx', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
+    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Delete_Terms.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
     'Remove terms', refreshList('us-action-agreements-add-term'));
   popup('agreements.edit-coverage', 'Update coverage', 'pencil',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Coverage.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
