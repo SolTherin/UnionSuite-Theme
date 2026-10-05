@@ -323,9 +323,23 @@ guide (templates, field definitions and component sections).
       sits beside the panel title and shows "4 of 15 · Employer · ROLE
       Consultant" with a clear while filters are on. A send icon button in
       the heading (`us-action-agreements-email-contacts`, owner 3 October
-      2026) is the placeholder for an email contacts action through iMIS;
-      it opens the Email negotiating team page until the destination is
-      decided. The
+      2026) emails the contacts on screen through iMIS's Create
+      communication page (owner, 5 October 2026), as a Query Menu report's
+      Email button does: the Reports tab's Contacts IQA
+      (`$/_i4u_/Core/CA/v2/Reports/Contacts`), with the shown rows'
+      ordinals in its `Ordinal` prompt (`"177","183"`; blank when nothing
+      is filtered, so the whole agreement) and `@url:AgreementNum`. It
+      navigates there and comes back through `ReturnUrl`. It passes
+      `AgreementID` too, for the dedicated send page's fixed subject tag
+      (`us-agreement-comms`, usage guide 06h). The query from the address
+      is a mail merge (owner, 5 October 2026): one copy of the email per
+      row, and each row's columns are `{#recipient.<column>}` fields in the
+      subject and body (Name, Email, Role, Group, Type, Ordinal…). So a
+      column added to the Reports Contacts IQA becomes a merge field
+      (AgreementNum is the candidate, for template bodies), a template
+      that uses a field the query lacks fails to send, and a contact on two
+      rows gets two copies. The subject tag stays text from the URL, not a
+      merge field (owner, 5 October 2026). The
       avatar tint follows the group (owner decision: tint by group, not
       type), taking the theme hues in IQA group order with a blank group
       neutral. The blank-value email and phone buttons in the option 4

@@ -260,28 +260,84 @@
     ({context}) => page('/Agreements_EmailContacts', {AgreementID: context.agreementId}), 'Email negotiating team');
   popup('agreements.email-members', 'Email members', 'ti-mail',
     ({context}) => page('/Agreements_SMSContacts', {AgreementID: context.agreementId}), 'Email members');
-  // Placeholder (owner, 3 October 2026): the send button in the Contacts
-  // heading. It will start an "email contacts" action through
-  // iMIS so the emails are tracked; the destination is not decided, so for
-  // now it opens the same page as Email negotiating team. Icon only in the
-  // heading, a labelled item in menus.
+  // The send button in the Contacts heading (owner, 5 October 2026). It hands
+  // the contacts on screen to a copy of iMIS's Create communication page (the
+  // Communication Creator iPart), as the Email button under a Query Menu
+  // report does with the original, so the send is tracked:
+  //   <website>/<send page>?query=<IQA path>
+  //     &queryparams=[{"Item1":"<filter>","Item2":"<value>"}, …]
+  //     &ReturnUrl=<this page>
+  // The IQA is the Reports tab's Contacts report: prompts ContactType,
+  // ContactGroup, ContactRole and Ordinal, and AgreementNum read from the
+  // page address (hence "@url:"). The parameters copy that report's own
+  // Email button, unused prompts sent blank. Several ordinals go in one
+  // value, each in double quotes: "177","183","214" (iMIS's form for a list
+  // in an Equals prompt). With a group, role or search filter on, Ordinal
+  // carries the rows still shown; with nothing filtered it is blank, so the
+  // whole agreement is emailed, including rows past the first page.
+  // AgreementID goes too: the send page (us-agreement-comms on its
+  // Communication Creator iPart) puts "Agreement A107 –" at the start
+  // of the subject, where staff cannot remove it (US-SUBJECT-TAG). So do
+  // AgreementNum, Audience=Staff and CommunicationType=Email: after the send
+  // the page links the log row to the agreement with them (US-COMMS-LOG).
+  // It navigates rather than opening a popup, although the page sits in the
+  // Popups folder: the Communication Creator returns to ReturnUrl when it
+  // finishes, which would load this page inside a popup.
+  // Icon only in the heading, a labelled item in menus.
+  const emailContacts = {
+    // The send page, under the current website (owner, 5 October 2026).
+    page: '/_i4u_/Core/Collective_Agreements/v2/Popups/Send-Email-Contacts.aspx',
+    query: '$/_i4u_/Core/CA/v2/Reports/Contacts',
+    blankFilters: ['ContactType', 'ContactGroup', 'ContactRole'],
+    ordinalFilter: 'Ordinal',
+    agreementFilter: '@url:AgreementNum'
+  };
+  // The tiles' ordinals, all of them and those the filters leave shown.
+  // A tile without its ordinal (a template from before data-us-contact-
+  // ordinal) cannot be sent on its own, and a blank Ordinal means the whole
+  // agreement, so a list missing any ordinal stops the send instead.
+  function contactOrdinals(wrapper) {
+    const rows = wrapper ? [...wrapper.querySelectorAll('.QueryTemplateSet > section')]
+      .map(section => ({section, ordinal: section.querySelector('[data-us-contact-ordinal]')?.getAttribute('data-us-contact-ordinal')?.trim()})) : [];
+    if (rows.some(row => !row.ordinal)) {
+      throw new Error('The contacts list does not mark each contact\'s ordinal (data-us-contact-ordinal in its Query Template), so the email cannot be limited to the contacts shown.');
+    }
+    const shown = rows.filter(row => !row.section.hidden && !row.section.hasAttribute('data-us-query-search-hidden'));
+    return {total: rows.length, shown: shown.map(row => row.ordinal)};
+  }
+  // The current website's path (/UTNewTheme), as the native Email button
+  // uses. gWebRoot is the virtual directory (usually blank), not the website.
+  function websitePath(path) {
+    const site = window.gWebSiteRoot || clientContext().websiteRoot || '';
+    const root = site ? new URL(String(site), location.origin).pathname.replace(/\/+$/, '') : '';
+    return new URL(root + path, location.origin);
+  }
   define('agreements.email-contacts', {
     presentation: {label: 'Email contacts', icon: 'ti-send', default: 'button', header: 'icon', menu: 'menu-item'},
     context: {agreementId, agreementNum},
-    action: {type: 'popup', recordKey: ['agreementId'],
-      href: ({context, wrapper}) => {
-        // With a filter on, email the contacts on screen. Rows carry
-        // data-us-contact-id; hidden rows are the filtered-out ones. Without
-        // ids or with nothing filtered, the whole list.
-        const values = {AgreementID: context.agreementId};
-        const rows = wrapper ? [...wrapper.querySelectorAll('.QueryTemplateSet > section')]
-          .map(section => ({section, id: section.querySelector('[data-us-contact-id]')?.getAttribute('data-us-contact-id')?.trim()}))
-          .filter(row => row.id) : [];
-        const shown = rows.filter(row => !row.section.hidden && !row.section.hasAttribute('data-us-query-search-hidden'));
-        if (shown.length && shown.length < rows.length) values.ContactIDs = shown.map(row => row.id).join(',');
-        return page('/Agreements_EmailContacts', values);
-      },
-      popup: {title: 'Email contacts', width: '90%', height: '90%'}}
+    action: {type: 'function', recordKey: ['agreementId'],
+      // Read the rows when the button is pressed, not when it is drawn: the
+      // filters change without the action being checked again.
+      run: ({context, wrapper}) => {
+        const {total, shown} = contactOrdinals(wrapper);
+        // Every row filtered out: nothing on screen to email, and a blank
+        // Ordinal would mean the whole agreement.
+        if (total && !shown.length) throw new Error('No contacts are shown to email. Clear the filter and try again.');
+        const ordinals = shown.length < total ? shown : [];
+        const url = websitePath(emailContacts.page);
+        url.searchParams.set('AgreementID', context.agreementId);
+        url.searchParams.set('AgreementNum', context.agreementNum);
+        url.searchParams.set('Audience', 'Staff');
+        url.searchParams.set('CommunicationType', 'Email');
+        url.searchParams.set('query', emailContacts.query);
+        url.searchParams.set('queryparams', JSON.stringify([
+          ...emailContacts.blankFilters.map(name => ({Item1: name, Item2: ''})),
+          {Item1: emailContacts.ordinalFilter, Item2: ordinals.map(ordinal => '"' + ordinal + '"').join(',')},
+          {Item1: emailContacts.agreementFilter, Item2: String(context.agreementNum)}
+        ]));
+        url.searchParams.set('ReturnUrl', location.pathname + location.search);
+        location.assign(url.href);
+      }}
   });
 
   // ── Terms and coverage ──────────────────────────────────────

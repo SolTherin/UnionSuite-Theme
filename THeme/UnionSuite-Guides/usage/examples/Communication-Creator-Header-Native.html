@@ -1,0 +1,56 @@
+<!-- Native iMIS Create Communication page (Communication Creator iPart, CSS
+     class us-agreement-comms): the panel heading and the Header tab only,
+     captured 5 October 2026 from the dev tenant. Inline postback handlers (other than the heading buttons' own, which the CSS matches),
+     the Cc/Bcc panels and the other tabs are removed. The subject arrives
+     already tagged, as it does after a postback, so the preview shows the
+     tag is not doubled.
+     Guide example only: authors configure the iPart, they do not paste this. -->
+<div class="ContentItemContainer"><div class="us-agreement-comms"><div class="panel ">
+  <div id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon__Head" class="panel-heading Distinguish">
+    <h2 class="panel-title" translate="no">New communication – Compose communication</h2><div class="panel-heading-options">
+      <input type="button" value="Preview" title="Preview" class="jsButtonPreview TextButton" translate="yes"><input type="button" value="Open" title="Open" onclick="window['ctl01_TemplateBody_WebPartManager1_gwpciSendEmail_ciSendEmail_CommunicationCreatorComposer_jsmanager'].LoadCommunication(null,null,null,&#39;Document Browser&#39;);return false;" class=" TextButton" translate="yes"><input type="button" value="Save As" title="Save As" onclick="window.asiCommCreatorIsSaveAs=true;window['ctl01_TemplateBody_WebPartManager1_gwpciSendEmail_ciSendEmail_CommunicationCreatorComposer_jsmanager'].SaveAsCommunication(null,null,null,&#39;Document Browser&#39;);return false;" class=" TextButton" translate="yes"><input type="button" value="Save" title="Save" onclick="window['ctl01_TemplateBody_WebPartManager1_gwpciSendEmail_ciSendEmail_CommunicationCreatorComposer_jsmanager'].SaveCommunication(null,null,null,&#39;Document Browser&#39;);return false;" class="PrimaryButton TextButton" translate="yes">
+    </div>
+  </div>
+  <div class="panel-body-container"><div class="panel-body">
+    <fieldset>
+      <div id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_DivEmailHeader" class="ClearFix">
+        <div class="PanelField Left">
+          <div class="PanelFieldLabel">
+            <label for="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtFrom">From</label>
+          </div>
+          <div class="PanelFieldValue">
+            <input name="ctl01$TemplateBody$WebPartManager1$gwpciNewCommunicationCreatorCommon$ciNewCommunicationCreatorCommon$CommunicationCreatorHeader$TxtFrom" type="text" value="Bargaining Team &lt;bargaining@example.org&gt;" id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtFrom" class="InputXLarge">
+          </div>
+        </div>
+        <div class="PanelField Left">
+          <div class="PanelFieldLabel">
+            <label for="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtTo">To</label>
+          </div>
+          <div class="PanelFieldValue">
+            <input name="ctl01$TemplateBody$WebPartManager1$gwpciNewCommunicationCreatorCommon$ciNewCommunicationCreatorCommon$CommunicationCreatorHeader$TxtTo" type="text" value="{#party.Email};" id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtTo" class="InputXLarge">
+          </div>
+        </div>
+        <div class="PanelField Left">
+          <div class="PanelFieldLabel">
+            <label for="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtSubject" id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_LabelSubject">Subject</label>
+          </div>
+          <div class="PanelFieldValue">
+            <input name="ctl01$TemplateBody$WebPartManager1$gwpciNewCommunicationCreatorCommon$ciNewCommunicationCreatorCommon$CommunicationCreatorHeader$TxtSubject" type="text" value="Agreement A107 – Bargaining update" id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_TxtSubject" class="InputXLarge">
+            <span id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_SubjectRegularExpressionValidatorPreviewSend" class="ValidationError" style="display:none;">May not contain the characters '&lt;&gt;'</span>
+          </div>
+        </div>
+        <div class="PanelField Left">
+          <div class="PanelFieldLabel">
+            <label for="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_CommunicationTypeList">Type</label>
+          </div>
+          <div class="PanelFieldValue">
+            <select name="ctl01$TemplateBody$WebPartManager1$gwpciNewCommunicationCreatorCommon$ciNewCommunicationCreatorCommon$CommunicationCreatorHeader$CommunicationTypeList" id="ctl01_TemplateBody_WebPartManager1_gwpciNewCommunicationCreatorCommon_ciNewCommunicationCreatorCommon_CommunicationCreatorHeader_CommunicationTypeList">
+              <option selected="selected" value="">(None)</option>
+              <option value="industrial-news">Industrial News</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div></div>
+</div></div></div>

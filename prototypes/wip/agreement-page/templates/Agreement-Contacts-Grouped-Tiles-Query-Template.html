@@ -12,8 +12,11 @@
        ContactIsLead) and marked with a star on the avatar.
      - The name opens the contact's record (ContactUrl, as the theme's
        MemberUrl does; blank leaves plain text).
-     - The send button emails the contacts on screen: with a filter on, it
-       passes their ContactId values to the email page (placeholder).
+     - The send button emails the contacts on screen through iMIS's Create
+       communication page (owner, 5 October 2026): with a filter on, it
+       passes their row ordinals (data-us-contact-ordinal) to the Reports
+       tab's Contacts IQA, as its own Email button does; with none, the
+       whole agreement.
      - Search suggestions offer names, roles and groups, not the system
        type, and the field says so.
      - No us-list-scroll: the Overview tab scrolls as a page, so the tiles
@@ -42,8 +45,8 @@
      The title count follows the search as well as the group filter.
 
      Fields:
-     Ordinal (required)      contact row ordinal; the pencil opens the edit popup
-     ContactId (required)    the contact's iMIS ID; sent by the email action when filtered
+     Ordinal (required)      contact row ordinal; the pencil opens the edit popup, and the email action sends it when filtered
+     ContactId (required)    the contact's iMIS ID
      ContactName (required)  name; also the avatar initials
      ContactUrl              the contact's record; blank leaves the name as plain text
      ContactIsLead           true or 1 for the agreement's Lead; blank or false otherwise
@@ -62,7 +65,7 @@
      that one query and updates the tile (US-ROW-PATCH). The IQA must return
      the same column names as the list's IQA; a contact it no longer returns
      is removed from the list. -->
-<article class="us-contact-tile us-contact-tile--card" data-us-contact-id="{#query.ContactId}" data-us-contact-name="{#query.ContactName}"
+<article class="us-contact-tile us-contact-tile--card" data-us-contact-id="{#query.ContactId}" data-us-contact-ordinal="{#query.Ordinal}" data-us-contact-name="{#query.ContactName}"
   data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-group="{#query.ContactGroup}" data-us-contact-group-tone="{#query.ContactGroupTone}"
   data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
   data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}"

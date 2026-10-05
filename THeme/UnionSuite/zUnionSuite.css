@@ -10452,6 +10452,92 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* US-CREDENTIALS:END */
+
+/* US-SUBJECT-TAG:START — us-agreement-comms on the Communication Creator
+   iPart. zUnionSuite.js (US-SUBJECT-TAG) hides the native subject field and
+   puts a wrapper with a proxy field in its place. The wrapper draws the
+   field (the theme's field look from US-NATIVE-FORMS: height, border,
+   corners, hover and focus), and its ::before shows the prefix,
+   "Agreement A107 –", read-only before the cursor: an input cannot carry
+   ::before. The proxy inside has no border or background of its own. The
+   wrapper keeps the native field's classes, so InputXLarge sets its width.
+   Every rule sits inside .us-agreement-comms, the iPart class. */
+.us-agreement-comms .PanelFieldValue > input[data-us-subject-tag] {
+  display: none;
+}
+
+.us-agreement-comms .PanelFieldValue > .us-subject-tag {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/20px var(--font-ui);
+  vertical-align: middle;
+  cursor: text;
+  transition: border-color 150ms cubic-bezier(.2, 0, 0, 1), box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-agreement-comms .PanelFieldValue > .us-subject-tag::before {
+  content: attr(data-us-subject-prefix);
+  flex: none;
+  padding-left: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.us-agreement-comms .PanelFieldValue > .us-subject-tag:hover {
+  border-color: var(--brand-600);
+}
+
+.us-agreement-comms .PanelFieldValue > .us-subject-tag:focus-within {
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+/* Native rules style every text input (99-Orion, the dark palette); the
+   wrapper owns the surface, so the proxy drops them. */
+.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input,
+.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:hover,
+.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:focus {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 10px 0 6px;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  box-shadow: none;
+  outline: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-agreement-comms .PanelFieldValue > .us-subject-tag {
+    transition: none;
+  }
+}
+
+/* Save and Save As leave the heading: either would store this agreement's
+   tag in a template. Open stays (the script re-tags a template's subject).
+   Matched on the native handler, as the labels can be translated. */
+.us-agreement-comms .panel-heading > .panel-heading-options > input:is(
+  [onclick*=".SaveCommunication("],
+  [onclick*=".SaveAsCommunication("]
+) {
+  display: none;
+}
+
+/* US-SUBJECT-TAG:END */
 [data-us-panel-action="edit"] {
   --us-panel-glyph: "\eb04";
 }

@@ -99,8 +99,38 @@ Checked in the browser at 1280–1366px, light and dark, no console errors:
 5. Contacts layout is settled: option 7, grouped tiles (owner, 3 October
    2026; README decision 10), and is on the prototype page. The Contacts
    IQA needs five new columns (ContactId, ContactUrl, ContactIsLead,
-   ContactGroupOrder, ContactGroupTone) and a new sort; the email contacts
-   action destination is still a placeholder.
+   ContactGroupOrder, ContactGroupTone) and a new sort. The email contacts
+   action opens iMIS's Create communication page with the Reports tab's
+   Contacts IQA and the shown rows' ordinals (5 October 2026); still to
+   check on the live page: the send, the return through `ReturnUrl`, and
+   which CCO tab it lands on. It opens the owner's send page,
+   `/_i4u_/Core/Collective_Agreements/v2/Popups/Send-Email-Contacts.aspx`
+   (`emailContacts.page`), with `AgreementID` too: its Communication
+   Creator iPart carries `us-agreement-comms` (US-SUBJECT-TAG), which fixes
+   "Agreement A107 – " at the start of the subject (owner's format; no
+   brackets: Advanced Email will not send a subject with square brackets), also on a subject
+   loaded with Open (probed 5 October 2026: Open reloads the page with the
+   same address plus CommunicationId, so AgreementID survives); Save and
+   Save As are hidden. Verified live by the owner (5 October 2026): the
+   prefix shows in the subject field, the send succeeds ("Emails have been
+   queued for processing"), and the communication log stores the subject
+   as "Agreement A107 – test agreement email". The owner's
+   `$/_i4u_/Core/CA/v2/API - Agreement Email Logs` IQA lists those log rows
+   (CommunicationLogKey, sent date, sender, status, subject). After a send,
+   US-COMMS-LOG links the log row to the agreement in
+   `i4u_UT_CA_Communications` (AgreementOrdinal, CommunicationLogKey,
+   Audience, CommunicationType; owner's probe of the same steps worked,
+   5 October 2026). The owner is adding the Audience and CommunicationType
+   properties; until then the insert fails and the page shows a warning.
+   Member sends get their own page with `us-agreement-comms--members`.
+   Still to check: that a template opened from the
+   Email button keeps the Contacts query on its Recipients tab. The query is
+   a mail merge, one copy per row with each row's columns as
+   `{#recipient.<column>}` fields (owner, 5 October 2026); still to
+   decide: duplicate rows for one person, and contacts with no iMIS ID
+   (To is `{#party.Email}`, which needs one). Still to check live:
+   that the copied page honours `query`, `queryparams` and `ReturnUrl` as
+   CreateCommunication does.
 5. Notes layout is settled: option 4, ledger rows (owner, 3 October 2026;
    README decision 9). The Notes IQA needs a new `CreatedTime` column.
 6. The remaining README open decisions (attachment View, Upload vs Add note,

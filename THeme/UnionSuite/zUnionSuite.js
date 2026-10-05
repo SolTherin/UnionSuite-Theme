@@ -8067,6 +8067,407 @@ SOFTWARE.
     const root = document.createElement('div');
     root.className = 'us-actions us-heading-menu';
     root.setAttribute('data-us-heading-menu', menu.key);
+/* US-SUBJECT-TAG:START — a fixed tag at the start of a Communication Creator
+   subject (us-agreement-comms, owner 5 October 2026). The class goes in the
+   Communication Creator iPart's CSS class field on the agreement send page
+   the Contacts panel's Email button opens. The page address names the
+   record (AgreementID=A107), and every email from the page goes out as
+   "Agreement A107 – <subject>" (owner's choice of format, 5 October 2026),
+   or "Agreement A107" alone with a blank subject. Staff see "Agreement
+   A107 –" inside the field, before the cursor, read-only (owner, 5 October
+   2026), so they know every email is sent with it; they cannot edit or
+   remove it. No square or angle brackets: with
+   Advanced Email tracking on, iMIS will not send a subject containing
+   [ ] < >.
+
+   The native subject field stays in the form, hidden, and is the one
+   posted; its validators still check it and show their messages under the
+   visible field. Staff type in a proxy field with no name (never posted),
+   and each change writes the tag and their text to the native field.
+
+   Anything else that fills the native field is taken in too: a postback
+   (Type, Preview, Send) that brings it back tagged, or a template from Open
+   with its own subject. The proxy shows that subject without any agreement
+   tag at its start (this agreement's or another's, in this format or the
+   earlier "(Agreement ID: A107)" and "[Agreement ID: A107]" ones) and the
+   field gets this agreement's tag again. The check runs on every
+   page load and partial postback, when the proxy takes focus, and before
+   any click on the page reaches its button, so Send and Preview always
+   post a tagged subject. With no parameter, or one that is not an ID, the
+   page stays native. The CSS hides Save and Save As: a saved template would
+   carry this agreement's tag into other sends. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteSubjectTag) {
+    window.UnionSuiteSubjectTag.refresh();
+    return;
+  }
+
+  // One entry per page class: the address parameter that names the record,
+  // the word before its value in the tag, and the label the earlier
+  // bracketed tags used (still recognised on a template's subject).
+  const TAGS = {
+    'us-agreement-comms': { parameter: 'AgreementID', label: 'Agreement', bracketLabel: 'Agreement ID' }
+  };
+  const SEPARATOR = ' – ';
+  const SUBJECT = 'input[id$="_CommunicationCreatorHeader_TxtSubject"]';
+  const RECORD_ID = /^[A-Za-z0-9_-]+$/;
+  const tagged = new Set();
+  let queued = false;
+
+  const eligible = owner => owner.isConnected &&
+    !owner.closest('.us-report-no-styling') &&
+    !document.body.classList.contains('TemplateAreaEasyEditOn');
+
+  const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  function attach(subject, config, value) {
+    const tag = config.label + ' ' + value;
+    // Every agreement tag at the start, for any record, so a subject from a
+    // postback or a template shows without it and never carries a second or
+    // a stale tag: "Agreement A107 –" (any dash, or nothing after it) and
+    // the earlier "(Agreement ID: A107)" / "[Agreement ID: A107]". The code
+    // after "Agreement" must contain a digit, so a subject such as
+    // "Agreement update – details" keeps its words.
+    const current = escapeRegExp(config.label) + '\\s+(?=[A-Za-z0-9_-]*\\d)[A-Za-z0-9_-]+\\s*(?:[\\u2013\\u2014-]\\s*|$)';
+    const bracketed = '[\\[(]\\s*' + escapeRegExp(config.bracketLabel) + ':[^\\])]*[\\])]\\s*';
+    const leading = new RegExp('^(?:\\s*(?:' + current + '|' + bracketed + '))+');
+
+    // The field: a wrapper drawing the border, whose ::before shows the
+    // prefix read-only inside it (an input cannot carry ::before), then the
+    // proxy. It keeps the native field's classes, so InputXLarge sets the
+    // same width as the fields around it.
+    const field = document.createElement('span');
+    field.className = subject.className + ' us-subject-tag';
+    field.setAttribute('data-us-subject-prefix', tag + SEPARATOR.trimEnd());
+    field.title = 'Every email from this page is sent with this prefix';
+
+    // The prefix is generated content, which screen readers may skip, so
+    // the proxy is also described in words.
+    const note = document.createElement('span');
+    note.id = subject.id + '_UsSubjectPrefix';
+    note.hidden = true;
+    note.textContent = 'Sent with the prefix ' + tag + SEPARATOR.trimEnd() + ' before this subject.';
+
+    const proxy = document.createElement('input');
+    proxy.type = 'text';
+    proxy.id = subject.id + '_UsSubjectText';
+    proxy.className = 'us-subject-tag__input';
+    proxy.autocomplete = 'off';
+    proxy.setAttribute('aria-describedby', note.id);
+    field.append(proxy);
+    // A click on the prefix puts the cursor in the field.
+    field.addEventListener('mousedown', event => {
+      if (event.target !== field) return;
+      event.preventDefault();
+      proxy.focus();
+    });
+
+    const pair = { subject, proxy, written: null };
+
+    function write() {
+      const text = proxy.value.trim();
+      pair.written = subject.value = text ? tag + SEPARATOR + text : tag;
+    }
+
+    // Takes in a subject something else put in the native field.
+    pair.sync = () => {
+      if (subject.value === pair.written) return;
+      proxy.value = subject.value.replace(leading, '');
+      write();
+    };
+
+    proxy.addEventListener('input', write);
+    proxy.addEventListener('change', write);
+    proxy.addEventListener('focus', pair.sync);
+    // Enter would submit the form; the native field blocks it too.
+    proxy.addEventListener('keydown', event => {
+      if (event.key === 'Enter') event.preventDefault();
+    });
+
+    subject.setAttribute('data-us-subject-tag', '');
+    subject.before(field, note);
+    const forLabel = document.querySelector('label[for="' + subject.id + '"]');
+    if (forLabel) forLabel.htmlFor = proxy.id;
+    tagged.add(pair);
+    pair.sync();
+  }
+
+  function syncAll() {
+    tagged.forEach(pair => {
+      if (pair.subject.isConnected) pair.sync();
+      else tagged.delete(pair);
+    });
+  }
+
+  function update() {
+    queued = false;
+    syncAll();
+    Object.entries(TAGS).forEach(([ownerClass, config]) => {
+      document.querySelectorAll('.' + ownerClass).forEach(owner => {
+        if (!eligible(owner)) return;
+        const subject = owner.querySelector(SUBJECT);
+        if (!subject || subject.hasAttribute('data-us-subject-tag')) return;
+        const value = (new URLSearchParams(location.search).get(config.parameter) || '').trim();
+        if (!RECORD_ID.test(value)) return;
+        attach(subject, config, value);
+      });
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+
+  function start() {
+    // Only pages that carry a configured class (the iPart class is rendered
+    // with the page) get the tag or any listener.
+    if (!Object.keys(TAGS).some(ownerClass => document.querySelector('.' + ownerClass))) return;
+    update();
+    // A partial postback can render the header again or refill the subject.
+    if (window.Sys?.Application) window.Sys.Application.add_load(schedule);
+    // Capture runs before a button's own click handler, so Send, Preview and
+    // Schedule post the tag even if a template filled the field moments ago.
+    document.addEventListener('click', syncAll, true);
+  }
+
+  window.UnionSuiteSubjectTag = { refresh: schedule };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+/* US-SUBJECT-TAG:END */
+
+/* US-COMMS-LOG:START — link an email sent from the agreement send page to
+   its agreement (us-agreement-comms, owner 5 October 2026). iMIS sends on
+   the server and never gives the browser the new CommunicationLogKey
+   (probed 5 October 2026), but the send page reloads with iMIS's "Emails
+   have been queued for processing" message. On that reload the script:
+   1. reads the sent subject from the native subject field (tagged
+      "Agreement A107 – …" by US-SUBJECT-TAG), the agreement's ordinal
+      (AgreementNum, or @url:AgreementNum in queryparams), and the audience
+      and channel (Audience=Staff|Members and CommunicationType=Email|SMS in
+      the address; without them us-agreement-comms--members means Members,
+      otherwise Staff, and the channel is Email);
+   2. runs the Agreement Email Logs IQA for that exact subject and takes the
+      newest row sent by the signed-in user (retrying briefly while the log
+      row is written);
+   3. skips it if i4u_UT_CA_Communications already holds that key (a reload
+      of the same page), otherwise inserts AgreementOrdinal,
+      CommunicationLogKey, Audience and CommunicationType.
+   Everything it reads or changes is inside .us-agreement-comms except
+   iMIS's message, which iMIS renders in the page template, outside the
+   iPart; the script only reads its text. Success is silent. A failure adds
+   a warning at the top of the iPart, under iMIS's message, so
+   staff know the email went but is not on the agreement. A scheduled send
+   shows a different message and is left to the send hook (TODO.md). */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCommsLog) return;
+
+  // One entry per page class. Values are core UnionSuite names.
+  const PAGES = {
+    'us-agreement-comms': {
+      query: '$/_i4u_/Core/CA/v2/API - Agreement Email Logs',
+      subjectFilter: 'Subject',
+      entity: 'i4u_UT_CA_Communications',
+      recordField: 'AgreementOrdinal',
+      recordParameter: 'AgreementNum',
+      audiences: ['Staff', 'Members'],
+      membersClass: 'us-agreement-comms--members',
+      types: ['Email', 'SMS'],
+      defaultType: 'Email'
+    }
+  };
+  const SUBJECT = 'input[id$="_CommunicationCreatorHeader_TxtSubject"]';
+  const SENT = /queued for processing/i;
+  const RETRIES = [0, 3000, 8000];
+  const DONE_KEY = 'usCommsLogDone';
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const squash = text => String(text).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  function clientContext() {
+    try { return JSON.parse(document.getElementById('__ClientContext')?.value || '{}'); }
+    catch (_) { return {}; }
+  }
+
+  // /api/query rows are keyed by column alias ("Communication Log Key");
+  // generic entities use Name/Value lists. Match either, ignoring case and
+  // spaces.
+  function field(row, ...names) {
+    const wanted = names.map(squash);
+    const list = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(list)) {
+      const hit = list.find(entry => wanted.includes(squash(entry.Name)));
+      return hit ? unwrap(hit.Value) : undefined;
+    }
+    const key = Object.keys(row || {}).find(name => wanted.includes(squash(name)));
+    return key ? unwrap(row[key]) : undefined;
+  }
+
+  async function api(path, init = {}) {
+    const response = await fetch(path, {
+      credentials: 'same-origin',
+      ...init,
+      headers: {Accept: 'application/json', RequestVerificationToken: token(), ...(init.body ? {'Content-Type': 'application/json'} : {}), ...init.headers}
+    });
+    if (!response.ok) throw new Error(path.split('?')[0] + ' failed (HTTP ' + response.status + ').');
+    return response.json();
+  }
+
+  function sendDetails(owner, config) {
+    const page = new URLSearchParams(location.search);
+    let record = page.get(config.recordParameter);
+    if (!record) {
+      try {
+        const params = JSON.parse(page.get('queryparams') || '[]');
+        record = params.find(item => squash(item.Item1).endsWith(squash(config.recordParameter)))?.Item2;
+      } catch (_) { /* no queryparams */ }
+    }
+    const pick = (value, allowed) => allowed.find(option => option.toLowerCase() === String(value || '').trim().toLowerCase());
+    const members = owner.classList.contains(config.membersClass) || !!owner.closest('.' + config.membersClass);
+    return {
+      record: String(record || '').trim(),
+      subject: String(owner.querySelector(SUBJECT)?.value || '').trim(),
+      sender: String(clientContext().loggedInPartyId || ''),
+      audience: page.has('Audience') ? pick(page.get('Audience'), config.audiences) : (members ? 'Members' : 'Staff'),
+      type: page.has('CommunicationType') ? pick(page.get('CommunicationType'), config.types) : config.defaultType
+    };
+  }
+
+  // The newest log row with this subject from this sender.
+  async function findLogKey(config, details) {
+    const params = new URLSearchParams({QueryName: config.query, limit: '50'});
+    params.set(config.subjectFilter, details.subject);
+    for (const delay of RETRIES) {
+      if (delay) await wait(delay);
+      const data = await api('/api/query?' + params);
+      const rows = (data?.Items?.$values || [])
+        .map(row => ({
+          key: field(row, 'CommunicationLogKey', 'Communication Log Key'),
+          sent: field(row, 'SentDate', 'Sent date', 'CreatedOn'),
+          sender: field(row, 'SentByID', 'SentById')
+        }))
+        .filter(row => row.key && String(row.sender) === details.sender)
+        .sort((a, b) => new Date(b.sent) - new Date(a.sent));
+      if (rows.length) return String(rows[0].key);
+    }
+    return '';
+  }
+
+  async function alreadyLinked(config, key) {
+    const data = await api('/api/' + config.entity + '?CommunicationLogKey=' + encodeURIComponent(key));
+    return (data?.Items?.$values || []).some(row => String(field(row, 'CommunicationLogKey')).toLowerCase() === key.toLowerCase());
+  }
+
+  function insert(config, details, key) {
+    const property = (name, value) => ({$type: 'Asi.Soa.Core.DataContracts.GenericPropertyData, Asi.Contracts', Name: name, Value: value});
+    return api('/api/' + config.entity, {
+      method: 'POST',
+      body: JSON.stringify({
+        $type: 'Asi.Soa.Core.DataContracts.GenericEntityData, Asi.Contracts',
+        EntityTypeName: config.entity,
+        PrimaryParentEntityTypeName: 'Standalone',
+        Properties: {$type: 'Asi.Soa.Core.DataContracts.GenericPropertyDataCollection, Asi.Contracts', $values: [
+          property(config.recordField, {$type: 'System.Int32', $value: Number(details.record)}),
+          property('CommunicationLogKey', key),
+          property('Audience', details.audience),
+          property('CommunicationType', details.type)
+        ]}
+      })
+    });
+  }
+
+  // At the top of the iPart, directly under iMIS's message.
+  function warn(owner, message) {
+    if (owner.querySelector(':scope > .us-comms-log__warning')) return;
+    const note = document.createElement('p');
+    note.className = 'AsiWarning us-comms-log__warning';
+    note.setAttribute('role', 'alert');
+    note.textContent = message;
+    owner.prepend(note);
+  }
+
+  function sentMessage() {
+    const area = document.querySelector('.user-message-area');
+    return !!area && SENT.test(area.textContent || '');
+  }
+
+  // Keys linked from this tab, so a repeat run on the same page does nothing.
+  // Marked only once the row is in the table, so a failed insert retries.
+  function linkedHere() {
+    try { return JSON.parse(sessionStorage.getItem(DONE_KEY) || '[]'); }
+    catch (_) { return []; }
+  }
+
+  function markLinked(key) {
+    try { sessionStorage.setItem(DONE_KEY, JSON.stringify(linkedHere().concat(key).slice(-50))); }
+    catch (_) { /* storage unavailable: the table check still guards */ }
+  }
+
+  let running = false;
+
+  function ownerEntry() {
+    return Object.entries(PAGES)
+      .map(([ownerClass, config]) => ({owner: document.querySelector('.' + ownerClass), config}))
+      .find(item => item.owner);
+  }
+
+  async function run() {
+    if (running) return;
+    // The class first: without it the page is never read or logged.
+    const entry = ownerEntry();
+    if (!entry || entry.owner.closest('.us-report-no-styling') || !sentMessage()) return;
+    running = true;
+    const {owner, config} = entry;
+    const details = sendDetails(owner, config);
+    try {
+      if (!/^\d+$/.test(details.record)) throw new Error('No agreement number (' + config.recordParameter + ') in the page address.');
+      if (!details.subject) throw new Error('No subject on the page.');
+      if (!details.audience || !details.type) throw new Error('Audience or CommunicationType in the address is not one of ' + config.audiences.concat(config.types).join(', ') + '.');
+      const key = await findLogKey(config, details);
+      if (!key) throw new Error('The communication log has no row for "' + details.subject + '" from you yet.');
+      if (linkedHere().includes(key)) return;
+      if (await alreadyLinked(config, key)) {
+        markLinked(key);
+        return;
+      }
+      await insert(config, details, key);
+      markLinked(key);
+      console.info('[UnionSuiteCommsLog] Linked ' + key + ' to ' + config.recordField + ' ' + details.record + ' (' + details.audience + ', ' + details.type + ').');
+    } catch (error) {
+      console.error('[UnionSuiteCommsLog]', error);
+      warn(owner, 'The email was sent, but it could not be added to the agreement. ' + error.message);
+    } finally {
+      running = false;
+    }
+  }
+
+  function start() {
+    // Only pages that carry a configured class get any listener.
+    if (!ownerEntry()) return;
+    run();
+    // The message area is an update panel; a partial postback can fill it.
+    if (window.Sys?.Application) window.Sys.Application.add_load(() => run());
+  }
+
+  window.UnionSuiteCommsLog = {run};
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+/* US-COMMS-LOG:END */
+
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'us-actions__toggle';
