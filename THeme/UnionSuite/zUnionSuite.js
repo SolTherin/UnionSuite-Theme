@@ -600,6 +600,10 @@ SOFTWARE.
       blockContent();
       const updated = templateParts(container);
       if (settings) window.jQuery(updated.set).simplePaginate(settings);
+      // Theme the new rows before anything awaits, so the browser never
+      // paints them unthemed (completed tasks flashed before the completed
+      // filter hid them); again after initialize, for what it changes.
+      refreshTemplateTheme();
       if (initialize) await initialize(container);
       refreshTemplateTheme();
       container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container}}));
