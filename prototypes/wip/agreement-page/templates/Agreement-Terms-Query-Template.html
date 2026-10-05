@@ -3,8 +3,8 @@
      terms-compare.html; theme block US-TERMS in zUnionSuite.css and .js).
      Closed: the status icon in its own column, the term with its status and
      amount under it ("Included · 17.5%"), the category in its column, a
-     chevron. Open (click the row, or Enter on it): the description, and View,
-     Edit and Delete at the bottom right. The row slides open and closed; a click anywhere on an open
+     chevron. Open (click the row, or Enter on it): the description, and Edit
+     and Delete at the bottom right. The row slides open and closed; a click anywhere on an open
      row closes it. Clicking the status icon opens a status menu instead.
 
      iPart CSS class: us-agreement-terms
@@ -26,20 +26,19 @@
      "Not saved". Status quick filters (chips in the funnel disclosure, the
      count beside the title) appear when the list has two or more statuses.
 
-     Actions in the open row:
+     Actions in the open row (no View: it opened the same popup as Edit,
+     owner 5 October 2026):
      Edit    agreements.edit-term, the existing Add-or-Update-Term popup
-     View    no action yet: the terms have no read-only page; until one exists
-             the edit popup is the only page for a term
      Delete  TODO (owner, 4 October 2026: the owner will define the endpoint):
              confirm in place, then call an endpoint that deletes this one term
              by Ordinal, and refresh the list. The heading's Bulk remove keeps
              Delete_Terms.aspx, the checkbox form for several terms. TODO.md.
-     View and Delete are plain icon buttons until their actions exist, and do
-     nothing. They carry no us-action-* class yet: the theme paints any such
-     class as a command, and an undefined one falls back to a text label.
-     When the actions are defined, replace the eye and trash markup with
-     <button class="us-action-agreements-view-term" data-ordinal="…">View term</button>
-     and the same for agreements.delete-term, as the Edit button is written.
+     Delete is a plain icon button until its action exists, and does nothing.
+     It carries no us-action-* class yet: the theme paints any such class as
+     a command, and an undefined one falls back to a text label. When the
+     action is defined, replace the trash markup with
+     <button class="us-action-agreements-delete-term" data-ordinal="…">Delete term</button>
+     as the Edit button is written.
 
      Fields (the existing Terms IQA, unchanged):
      Ordinal (required)      term ordinal: each action and the status save
@@ -66,7 +65,6 @@
   <div class="us-term__detail">
     <p class="us-term__comment">{#query.Comment}</p>
     <p class="us-term__actions">
-      <button type="button" class="us-term__view TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="View term" title="View term"><i class="ti ti-eye" aria-hidden="true"></i></button>
       <button type="button" class="us-term__edit us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
       <button type="button" class="us-term__delete TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Delete term" title="Delete term"><i class="ti ti-trash" aria-hidden="true"></i></button>
     </p>

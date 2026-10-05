@@ -384,10 +384,10 @@ guide (templates, field definitions and component sections).
     menu (`US-TERM-STATUS`); a change to Included plays the theme's
     completion confetti. Terms have no status endpoint yet: the save is a
     hook (`UnionSuiteTermStatus.defineSaver`), and without one a change
-    reverts with "Not saved". The comparison registers a pretend save. View
-    (`agreements.view-term`) and Delete (`agreements.delete-term`) have no
-    action definitions yet: the terms have no read-only page, and Delete
-    is a to-do (owner, 4 October 2026): it will confirm, then call an
+    reverts with "Not saved". The comparison registers a pretend save. The
+    layout's View button is gone (owner, 5 October 2026): it opened the same
+    popup as Edit, since terms have no read-only page. Delete
+    (`agreements.delete-term`) has no action definition yet; it is a to-do (owner, 4 October 2026): it will confirm, then call an
     endpoint the owner will define that deletes one term by ordinal
     (TODO.md). The heading's Bulk remove (relabelled from Remove terms, now
     before Add term) keeps `Delete_Terms.aspx`, the checkbox form for
