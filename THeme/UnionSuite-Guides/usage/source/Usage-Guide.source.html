@@ -552,6 +552,7 @@ console.log(UnionSuiteActions.getActionStatus('jobs.edit'));
     <table><thead><tr><th>action.popup option</th><th>Default / behaviour</th></tr></thead><tbody>
       <tr><td>title</td><td>presentation.label; optional native dialog header string.</td></tr>
       <tr><td>width / height</td><td>90% each. Positive pixel number, px string, or whole 1%–100%.</td></tr>
+      <tr><td>maxWidth / maxHeight</td><td>Off. Positive pixel number or px string. When width (height) would open larger than this on the current window, the popup opens at this many pixels instead; smaller windows keep the percentage. For example width '90%' with maxWidth 960 is 960px on a 1920px screen and 90% on a 1000px one.</td></tr>
       <tr><td>fullscreenBelow</td><td>Off; positive pixel breakpoint adds Mode=Maximized below it. Zero disables.</td></tr>
       <tr><td>args / iconUrl / templateType</td><td>null / null / E. Forwarded native arguments; visible native iconUrl support depends on Asi.js.</td></tr>
       <tr><td>windowName</td><td>Generated unique name. A configured name cannot be reused while that editor is still open.</td></tr>

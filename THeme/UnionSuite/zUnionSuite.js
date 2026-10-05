@@ -935,6 +935,16 @@ SOFTWARE.
     if (typeof value === 'string' && /^(?:[1-9]\d?|100)%$/.test(value)) return value;
     throw new TypeError('Popup dimensions require positive pixels or whole percentages from 1% to 100%.');
   }
+  // A percentage that would open the popup wider (or taller) than its
+  // maxWidth (maxHeight) opens it at that many pixels instead, so a form
+  // keeps a sensible size on a large screen and its percentage on a small one.
+  function capped(value, max, viewport) {
+    const requested = size(value, '90%');
+    if (max == null) return requested;
+    const limit = size(max);
+    const pixels = typeof requested === 'number' ? requested : viewport * parseFloat(requested) / 100;
+    return pixels > limit ? limit : requested;
+  }
   function url(value, popup=false) {
     if (typeof value !== 'string' || !/^(https?:\/\/|\/(?!\/)|#|\.\.?\/)/i.test(value) || /[\u0000-\u001f\\]/.test(value)) throw new TypeError('Use an HTTP(S) or relative action URL.');
     const parsed = new URL(value, document.baseURI);
@@ -990,6 +1000,7 @@ SOFTWARE.
       for (const name of ['title','iconUrl','templateType','windowName']) if (a.popup[name] != null && typeof a.popup[name] !== 'string') throw new TypeError('popup.' + name + ' must be a string.');
       for (const name of ['closeWindowOnCommit','preserveStatefulBusinessContainer']) if (a.popup[name] != null && typeof a.popup[name] !== 'boolean') throw new TypeError('popup.' + name + ' must be boolean.');
       if (a.popup.fullscreenBelow != null && (!Number.isFinite(a.popup.fullscreenBelow) || a.popup.fullscreenBelow < 0)) throw new TypeError('fullscreenBelow must be nonnegative pixels.');
+      for (const name of ['maxWidth','maxHeight']) if (a.popup[name] != null && typeof size(a.popup[name]) !== 'number') throw new TypeError('popup.' + name + ' must be positive pixels.');
     }
     if (a.refresh != null) {
       const r = a.refresh; object(r,'refresh');
@@ -1272,7 +1283,7 @@ SOFTWARE.
         catch(error){closeEvent?.set_cancel?.(true);announce('The editor could not close.',env,'beforeClose',error);popupError(definition,env,error,'beforeClose');}
       }
       function close(dialog,closeEvent){if(closed)return;closed=true;windows.delete(name);queueMicrotask(async()=>{try{const result={...env,dialog,closeEvent};if(options.onClose)await options.onClose(result);resolve(result);}catch(error){reject(error);}});}
-      try{window.ShowDialog_NoReturnValue(target.href,options.args??null,size(options.width,'90%'),size(options.height,'90%'),options.title||definition.presentation.label,
+      try{window.ShowDialog_NoReturnValue(target.href,options.args??null,capped(options.width,options.maxWidth,innerWidth),capped(options.height,options.maxHeight,innerHeight),options.title||definition.presentation.label,
         options.iconUrl||null,options.templateType||'E',options.onBeforeClose?before:null,name,options.closeWindowOnCommit===true,options.preserveStatefulBusinessContainer===true,close,options.sourceObject??env.trigger);}
       catch(error){windows.delete(name);reject(error);}
     });
