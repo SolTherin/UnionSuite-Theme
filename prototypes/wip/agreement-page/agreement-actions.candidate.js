@@ -137,7 +137,7 @@
     ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Delete_Terms.aspx', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
     'Remove terms', refreshList('us-action-agreements-add-term'));
   popup('agreements.edit-coverage', 'Update coverage', 'pencil',
-    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Coverage.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
+    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Coverage.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
     'Edit coverage rules', {when: 'close', targets: [{type: 'origin-report'}]});
   // Layout v2 (index-v2.html): the Add scheduled increase BeyondForm moves to a
   // popup page. PLACEHOLDER URL: the form needs its own page first.
