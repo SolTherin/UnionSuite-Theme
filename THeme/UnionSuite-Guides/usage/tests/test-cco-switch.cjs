@@ -74,6 +74,13 @@ function viewContent(name, options, inner) {
       <script>window.casesScriptRuns = (window.casesScriptRuns || 0) + 1;${options.badViewScript ? 'undefinedHelper();' : ''}</script>
       <script type="application/json">{"not": "executed"}</script></div></div>`;
   }
+  if (name === 'Participation') {
+    // A report that hides its results until Find: filters only, so no grid
+    // and no refresh button, with two Chosen multi-selects.
+    const list = field => `<select size="4" multiple="multiple" id="${base}Participation_${field}_ListBox" class="chosen-select"><option value="A">A</option></select>`;
+    return `<div id="${base}Participation_ListerPanel"><div class="FilterPanel">${list('Category')}${list('Status')}</div>
+      <div class="ListSearchPrompt">Please enter your search criteria to view results</div></div>`;
+  }
   return '<span class="Info">Loading...</span>';
 }
 
@@ -95,7 +102,9 @@ function startupScript(selected) {
   const gridCreate = `Sys.Application.add_init(function() {\n    $create(Telerik.Web.UI.RadGrid, {"ClientID":"${grid}"}, {"gridCreated":window['${grid}_jsmanager'].OnGridCreated}, null, $get("${grid}"));\n});`;
   const listers = { 8: ['Cases'], 1: ['ContactDetailsList', 'Jobs'] }[selected] || [];
   const panels = listers.map(name => `,'t${uniqueBase}${name}$ListerPanel',''`).join('');
-  return `Sys.WebForms.PageRequestManager._initialize('ctl01$ScriptManager1', 'aspnetForm', ['tctl01$UserMessagesUpdatePanel',''${panels}], ['ctl01$ScriptManager1','','${uniqueBase}radTab_Top',''], ['btnExportWord',''], 3600, 'ctl01');\n${manager}${creates}\n${gridCreate}`;
+  // iMIS enhances multi-select filters from one page-level line.
+  const chosen = selected === 7 ? "jQuery('.chosen-select').chosen({placeholder_text_multiple: '(Any)'});" : '';
+  return `Sys.WebForms.PageRequestManager._initialize('ctl01$ScriptManager1', 'aspnetForm', ['tctl01$UserMessagesUpdatePanel',''${panels}], ['ctl01$ScriptManager1','','${uniqueBase}radTab_Top',''], ['btnExportWord',''], 3600, 'ctl01');\n${manager}${chosen}${creates}\n${gridCreate}`;
 }
 
 // PageRequestManager, Sys.Application and $create doubles, installed before
@@ -209,6 +218,27 @@ function installDoubles() {
   });
 }
 
+// A jQuery with only the Chosen plugin: it adds the container after each
+// select it has not enhanced yet, as the real plugin does.
+function installChosen() {
+  window.chosenCalls = [];
+  window.jQuery = selector => ({
+    chosen(settings) {
+      window.chosenCalls.push(settings);
+      for (const select of document.querySelectorAll(selector)) {
+        if (document.getElementById(select.id + '_chosen')) continue;
+        const container = document.createElement('div');
+        container.id = select.id + '_chosen';
+        container.className = 'chosen-container chosen-container-multi';
+        container.dataset.placeholder = settings.placeholder_text_multiple;
+        select.style.display = 'none';
+        select.after(container);
+      }
+    }
+  });
+  window.jQuery.fn = { chosen() {} };
+}
+
 function page(selected, state, options) {
   const views = captions.map((name, index) => {
     const shown = index === selected;
@@ -219,7 +249,7 @@ function page(selected, state, options) {
   const validation = state.validation ? `<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="${state.validation}">` : '';
   // Native startup statements are not executed by the fixture's live page.
   const startup = state.live ? '' : `<script type="text/x-fixture-startup">${startupScript(selected)}</script>`;
-  const doubles = state.live ? `<script>(${installDoubles})();${options.easyEdit ? 'window.gIsEasyEditEnabled = true;' : ''}</script>` : '';
+  const doubles = state.live ? `<script>(${installDoubles})();${options.easyEdit ? 'window.gIsEasyEditEnabled = true;' : ''}${options.chosen ? `(${installChosen})();` : ''}</script>` : '';
   const created = state.live ? `<script>if ($get('${base}About_EditButton')) $create(Telerik.Web.UI.RadButton, {}, null, null, $get('${base}About_EditButton'));</script>` : '';
   const signIn = options.signIn && !state.live ? '<input type="submit" class="SignInButton" value="Sign In">' : '';
   // Telerik's embedded multipage rule is not part of the theme files.
@@ -451,6 +481,26 @@ function page(selected, state, options) {
       assert.match(entry.scripts.errors[0].message, /undefinedHelper/);
       assert.equal(entry.listers[0].gridRegistered, true);
     }, { badViewScript: true, expectedError: /undefinedHelper/ });
+
+    await scenario('a report that hides results until Find gets its Chosen multi-selects from the native startup line', async tab => {
+      await click(tab, 'Participation');
+      await idle(tab, 1);
+      const entry = await lastSwitch(tab);
+      assert.equal(entry.status, 'shown');
+      assert.deepEqual(entry.listers, []);
+      assert.equal(entry.chosen.bare, 2);
+      assert.equal(entry.chosen.remaining, 0);
+      assert.deepEqual(entry.chosen.errors, []);
+      const placeholders = await tab.evaluate(() => [...document.querySelectorAll('.chosen-container')].map(node => node.dataset.placeholder));
+      assert.deepEqual(placeholders, ['(Any)', '(Any)']);
+      // Back and forth: the re-inserted lists are enhanced again, once each.
+      await click(tab, 'About');
+      await idle(tab, 2);
+      await click(tab, 'Participation');
+      await idle(tab, 3);
+      assert.equal(await tab.evaluate(() => document.querySelectorAll('.chosen-container').length), 2);
+      assert.equal((await lastSwitch(tab)).chosen.remaining, 0);
+    }, { chosen: true });
 
     await scenario('loading states: tab and section spinners after the delay, one tab spinner, suppressed native indicators, full cleanup', async tab => {
       await click(tab, 'Cases');

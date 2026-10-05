@@ -1022,12 +1022,40 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 
 /* US-STAFF-NAV-ICONS:END */
 
+/* US-ICONS:START — the theme's own icons (.us-icon, inline SVG from
+   UnionSuiteIcons in zUnionSuite.js). Like a Tabler glyph: a 1em square in
+   the current text colour, so the font size and colour around it set it.
+   --us-icon-stroke sets the line weight; 2 matches Tabler. An unknown name
+   leaves the element empty, and an empty one takes no space. */
+.us-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  vertical-align: -0.125em;
+}
+
+.us-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke-width: var(--us-icon-stroke, 2);
+}
+
+.us-icon:empty {
+  display: none;
+}
+
+/* US-ICONS:END */
+
 /* US-PANEL-TITLE-ICONS:START — optional icon before a panel title.
    zUnionSuite.js turns a leading "[[icon-name]]" in the iPart title into a
-   decorative Tabler icon (.us-panel-title__icon). Muted, so the title text
-   stays the strongest thing in the heading; 16px beside the 14px title,
-   centred on its capitals. The gap belongs to the glyph (::before), so an
-   unknown icon name, which draws no glyph, leaves no space either. */
+   decorative icon (.us-panel-title__icon): a Tabler glyph, or one of the
+   theme's own us- icons (.us-icon). Muted, so the title text stays the
+   strongest thing in the heading; 16px beside the 14px title, centred on
+   its capitals. A glyph's gap belongs to the glyph (::before), so an
+   unknown Tabler name, which draws no glyph, leaves no space either; an
+   unknown us- icon is empty and hidden. */
 .panel-heading .panel-title .us-panel-title__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--iqa-muted, var(--text-muted));
   font-size: 16px;
@@ -1037,6 +1065,10 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 
 .panel-heading .panel-title .us-panel-title__icon:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
   display: inline-block;
+  margin-inline-end: 8px;
+}
+
+.panel-heading .panel-title .us-panel-title__icon.us-icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin-inline-end: 8px;
 }
 
@@ -7972,10 +8004,12 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--brand-600);
 }
 
-.us-taskbar__result-kind svg {
+/* The icon is a theme icon (us-building, us-person; US-ICONS), drawn a
+   little lighter than Tabler's default at this size. */
+.us-taskbar__result-kind .us-icon {
   display: block;
-  width: 18px;
-  height: 18px;
+  font-size: 18px;
+  --us-icon-stroke: 1.7;
 }
 
 /* US-TASKBAR-COMPONENT:END */
@@ -10615,6 +10649,18 @@ html.us-taskbar-mounted #hd .search-dropdown {
   text-decoration: underline;
 }
 
+/* data-us-recipients-link: back to the record the list comes from. */
+.us-send-recipients .us-send-recipients__link {
+  color: var(--text-link);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.us-send-recipients .us-send-recipients__link:hover {
+  text-decoration: underline;
+}
+
+.us-send-recipients .us-send-recipients__link:focus-visible,
 .us-send-recipients .us-send-recipients__toggle:focus-visible,
 .us-send-recipients .us-send-recipients__scroll:focus-visible {
   outline: 2px solid var(--border-focus);
@@ -15688,7 +15734,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   white-space: nowrap;
 }
 
-.us-rule__entity > .ti {
+.us-rule__entity > .ti,
+.us-rule__entity > .us-icon {
   color: var(--text-muted);
   font-size: 15px;
 }

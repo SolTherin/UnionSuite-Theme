@@ -332,7 +332,7 @@ guide (templates, field definitions and component sections).
       2026) emails the contacts on screen through iMIS's Create
       communication page (owner, 5 October 2026), as a Query Menu report's
       Email button does: the Communication Recipient List IQA
-      (`$/_i4u_/Core/CA/v2/API - Communication Recipient List`, owner
+      (`$/_i4u_/Core/CA/v2/API - Communication Recipient List - Contacts`, owner
       5 October 2026; an Ordinal prompt and a hidden AgreementOrdinal =
       @url:AgreementNum filter), with the shown rows'
       ordinals in its `Ordinal` prompt (`"177","183"`; blank when nothing

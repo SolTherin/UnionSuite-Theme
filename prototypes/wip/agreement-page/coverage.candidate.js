@@ -43,15 +43,15 @@
   // Rule1's table part, lower case: the CloudToolz table, or the flow's
   // short name for it.
   const RECORDS = {
-    'zencrm.organisations': {label: 'Workplace', icon: 'ti-building'},
-    workplace: {label: 'Workplace', icon: 'ti-building'},
-    'zencrm.individuals': {label: 'Member', icon: 'ti-user'},
-    individuals: {label: 'Member', icon: 'ti-user'},
-    'uniontemplate.jobs': {label: 'Job', icon: 'ti-briefcase'},
-    'uniontemplate.profile': {label: 'Member profile', icon: 'ti-id-badge-2'},
-    profile: {label: 'Member profile', icon: 'ti-id-badge-2'},
-    'uniontemplate.orgdetails': {label: 'Employer', icon: 'ti-building-factory-2'},
-    employer: {label: 'Employer', icon: 'ti-building-factory-2'}
+    'zencrm.organisations': {label: 'Workplace', icon: 'us-building'},
+    workplace: {label: 'Workplace', icon: 'us-building'},
+    'zencrm.individuals': {label: 'Member', icon: 'user'},
+    individuals: {label: 'Member', icon: 'user'},
+    'uniontemplate.jobs': {label: 'Job', icon: 'briefcase'},
+    'uniontemplate.profile': {label: 'Member profile', icon: 'id-badge-2'},
+    profile: {label: 'Member profile', icon: 'id-badge-2'},
+    'uniontemplate.orgdetails': {label: 'Employer', icon: 'building-factory-2'},
+    employer: {label: 'Employer', icon: 'building-factory-2'}
   };
   const FIELDS = {
     imisid: 'iMIS ID', id: 'iMIS ID', companyid: 'Parent organisation', name: 'Name',
@@ -69,11 +69,8 @@
     return node;
   }
 
-  function icon(name) {
-    const node = el('i', 'ti ' + name);
-    node.setAttribute('aria-hidden', 'true');
-    return node;
-  }
+  // A Tabler name, or one of the theme's own (us-) icons: US-ICONS.
+  const icon = name => window.UnionSuiteIcons.create(name);
 
   const wrapperOf = set => set.closest('.us-coverage-rules');
   const yes = value => !/^(false|0|no|n)$/i.test(String(value || '').trim());
@@ -108,7 +105,7 @@
       row.setAttribute('data-us-rule-target', target);
       const cut = target.lastIndexOf('.');
       const table = cut > 0 ? target.slice(0, cut) : '';
-      const record = RECORDS[table.toLowerCase()] || {label: table.split('.').pop() || 'Record', icon: 'ti-filter'};
+      const record = RECORDS[table.toLowerCase()] || {label: table.split('.').pop() || 'Record', icon: 'filter'};
       field.textContent = fieldLabel(cut > 0 ? target.slice(cut + 1) : target);
       const entity = el('span', 'us-rule__entity');
       entity.append(icon(record.icon), record.label);
@@ -128,7 +125,7 @@
   function status(enabled) {
     const sign = el('span', 'us-rule__status');
     sign.setAttribute('data-us-rule-status', enabled ? 'enabled' : 'disabled');
-    sign.append(icon(enabled ? 'ti-circle-check' : 'ti-circle-x'), enabled ? 'Enabled' : 'Disabled');
+    sign.append(icon(enabled ? 'circle-check' : 'circle-x'), enabled ? 'Enabled' : 'Disabled');
     return sign;
   }
 

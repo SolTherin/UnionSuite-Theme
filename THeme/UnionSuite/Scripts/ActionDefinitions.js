@@ -199,7 +199,8 @@
   }
 
   // ── Add entry ───────────────────────────────────────────────
-  // Single-record forms (notes, tasks, milestones, meetings, terms) stop at 800px:
+  // Single-record forms (notes, tasks, milestones, meetings, terms, contacts)
+  // stop at 800px:
   // 90% of a large screen stretched their narrow fields (owner, 5 October
   // 2026). A smaller window keeps the 90%.
   const formWidth = {maxWidth: 800};
@@ -258,8 +259,6 @@
   // ── Communication ───────────────────────────────────────────
   popup('agreements.email-team', 'Email negotiating team', 'ti-mail',
     ({context}) => page('/Agreements_EmailContacts', {AgreementID: context.agreementId}), 'Email negotiating team');
-  popup('agreements.email-members', 'Email members', 'ti-mail',
-    ({context}) => page('/Agreements_SMSContacts', {AgreementID: context.agreementId}), 'Email members');
   // The send button in the Contacts heading (owner, 5 October 2026). It hands
   // the contacts on screen to a copy of iMIS's Create communication page (the
   // Communication Creator iPart), as the Email button under a Query Menu
@@ -267,7 +266,8 @@
   //   <website>/<send page>?query=<IQA path>
   //     &queryparams=[{"Item1":"<filter>","Item2":"<value>"}, …]
   //     &ReturnUrl=<this page>
-  // The IQA is API - Communication Recipient List (owner, 5 October 2026):
+  // The IQA is API - Communication Recipient List - Contacts (owner, 6 October
+  // 2026; before it, API - Communication Recipient List):
   // one prompt, Ordinal (the agreement contact rows to email), and a hidden
   // AgreementOrdinal = @url:AgreementNum filter. Several ordinals go in one
   // value, each in double quotes: "177","183","214" (iMIS's form for a list
@@ -289,7 +289,7 @@
   const emailContacts = {
     // The send page, under the current website (owner, 5 October 2026).
     page: '/_i4u_/Core/Collective_Agreements/v2/Popups/Send-Email-Contacts.aspx',
-    query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List',
+    query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List - Contacts',
     ordinalFilter: 'Ordinal',
     agreementFilter: '@url:AgreementNum'
   };
@@ -312,6 +312,20 @@
     const root = site ? new URL(String(site), location.origin).pathname.replace(/\/+$/, '') : '';
     return new URL(root + path, location.origin);
   }
+  // The send page's address: the record (AgreementID for the subject tag,
+  // AgreementNum for the log row), audience and channel (US-COMMS-LOG), the
+  // recipients query and its filters, and where to come back to.
+  function sendPage(target, context, audience, filters) {
+    const url = websitePath(target.page);
+    url.searchParams.set('AgreementID', context.agreementId);
+    url.searchParams.set('AgreementNum', context.agreementNum);
+    url.searchParams.set('Audience', audience);
+    url.searchParams.set('CommunicationType', 'Email');
+    url.searchParams.set('query', target.query);
+    url.searchParams.set('queryparams', JSON.stringify(filters));
+    url.searchParams.set('ReturnUrl', location.pathname + location.search);
+    return url.href;
+  }
   define('agreements.email-contacts', {
     presentation: {label: 'Email contacts', icon: 'ti-send', default: 'button', header: 'icon', menu: 'menu-item'},
     context: {agreementId, agreementNum},
@@ -325,19 +339,37 @@
         // Ordinal would mean the whole agreement.
         if (!shown.length) throw new Error('No contacts are shown to email. Clear the filter and try again.');
         const ordinals = shown.length < total ? shown : [];
-        const url = websitePath(emailContacts.page);
-        url.searchParams.set('AgreementID', context.agreementId);
-        url.searchParams.set('AgreementNum', context.agreementNum);
-        url.searchParams.set('Audience', 'Staff');
-        url.searchParams.set('CommunicationType', 'Email');
-        url.searchParams.set('query', emailContacts.query);
-        url.searchParams.set('queryparams', JSON.stringify([
+        location.assign(sendPage(emailContacts, context, 'Staff', [
           {Item1: emailContacts.ordinalFilter, Item2: ordinals.map(ordinal => '"' + ordinal + '"').join(',')},
           {Item1: emailContacts.agreementFilter, Item2: String(context.agreementNum)}
         ]));
-        url.searchParams.set('ReturnUrl', location.pathname + location.search);
-        location.assign(url.href);
       }}
+  });
+
+  // Email members (owner, 6 October 2026): every member the agreement
+  // covers, through the member send page, as Email contacts does for the
+  // contacts. The page's Communication Creator iPart carries
+  // us-agreement-comms us-agreement-comms--members (the subject tag, and the
+  // log row's Audience=Members), and a Content HTML iPart above it shows the
+  // count only (us-send-recipients--summary) with a link back to the
+  // agreement's Coverage tab. The IQA, API - Communication Recipient List -
+  // Members, has a hidden AgreementOrdinal = @url:AgreementNum filter.
+  // The send icon in the Covered Members report's heading (owner, 6 October
+  // 2026), as Email contacts in the Contacts heading; a labelled item in the
+  // banner's Actions menu. It emails every covered member, whatever the
+  // report's own filters show.
+  const emailMembers = {
+    page: '/_i4u_/Core/Collective_Agreements/v2/Popups/SendEmail-Members.aspx',
+    query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List - Members',
+    agreementFilter: '@url:AgreementNum'
+  };
+  define('agreements.email-members', {
+    presentation: {label: 'Email members', icon: 'ti-send', default: 'button', header: 'icon', menu: 'menu-item'},
+    context: {agreementId, agreementNum},
+    action: {type: 'function', recordKey: ['agreementId'],
+      run: ({context}) => location.assign(sendPage(emailMembers, context, 'Members', [
+        {Item1: emailMembers.agreementFilter, Item2: String(context.agreementNum)}
+      ]))}
   });
 
   // ── Terms and coverage ──────────────────────────────────────
@@ -395,7 +427,7 @@
     'Edit meeting', formWidth);
   rowPopup('agreements.edit-contact', 'Edit contact', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Contact/Edit-Contact-Information.aspx', {ID: context.ordinal}),
-    'Edit contact');
+    'Edit contact', formWidth);
   rowPopup('agreements.edit-term', 'Edit term', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum, TermOrdinal: context.ordinal}),
     'Update term', formWidth);

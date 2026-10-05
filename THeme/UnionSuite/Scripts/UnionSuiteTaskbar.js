@@ -121,9 +121,10 @@
       const icon = createElement('span', 'us-taskbar__result-kind');
       icon.setAttribute('role', 'img');
       icon.setAttribute('aria-label', companyRecord ? 'Company' : 'Person');
-      // Static SVG only: API values are never interpolated into markup.
-      icon.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
-        (companyRecord ? '<path d="M4 21V4h11v17M15 10h5v11M2 21h20M8 21v-4h3v4M7 8h1m3 0h1M7 12h1m3 0h1m6 2h1m-1 3h1"/>' : '<circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>') + '</svg>';
+      // The theme's own icons (US-ICONS in zUnionSuite.js, which loads first).
+      if (window.UnionSuiteIcons) {
+        icon.appendChild(window.UnionSuiteIcons.create(companyRecord ? 'us-building' : 'us-person'));
+      }
       a.appendChild(icon);
     }
     const info = createElement('div');

@@ -1,5 +1,6 @@
 // Guide-only fixture: panel titles typed with a leading [[icon-name]] token,
-// converted by the shared US-PANEL-TITLE-ICONS block in zUnionSuite.js.
+// converted by the shared US-PANEL-TITLE-ICONS block in zUnionSuite.js,
+// which draws the theme's own us- icons from US-ICONS.
 // Each caption shows exactly what was typed in the iPart Title field.
 exports.sources = ['THeme/UnionSuite-Guides/usage/build/panel-title-icons-example.cjs'];
 
@@ -8,12 +9,14 @@ const esc = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').
 const panels = [
   ['[[user]] Contact summary', 'Typed with a known icon name: the token becomes the icon.'],
   ['[[receipt]] Recent payments', 'Any Tabler icon name works, without the ti- prefix.'],
+  ['[[us-building]] Covered workplaces', 'One of the theme\'s own icons, by its us- name.'],
   ['[[recieve]] Documents', 'A misspelt name: the token is still removed, and no icon or gap is left.'],
   ['Pinned notes', 'No token: the title is unchanged.']
 ];
 
 exports.documentHtml = ({nativePreviewCss, theme, themeJs, iconCss, branding}) => {
-  const runtime = themeJs.match(/\/\* US-PANEL-TITLE-ICONS:START[\s\S]*?\/\* US-PANEL-TITLE-ICONS:END \*\//)[0];
+  const block = name => themeJs.match(new RegExp('/\\* ' + name + ':START[\\s\\S]*?/\\* ' + name + ':END \\*/'))[0];
+  const runtime = block('US-ICONS') + '\n' + block('US-PANEL-TITLE-ICONS');
   const markup = panels.map(([title, note]) => `<figure class="title-icon-demo">
     <div class="ContentItemContainer"><div class="panel">
       <div class="panel-heading Distinguish"><h2 class="panel-title">${esc(title)}</h2></div>

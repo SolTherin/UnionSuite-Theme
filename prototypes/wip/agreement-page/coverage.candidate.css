@@ -65,7 +65,8 @@
   white-space: nowrap;
 }
 
-.us-rule__entity > .ti {
+.us-rule__entity > .ti,
+.us-rule__entity > .us-icon {
   color: var(--text-muted);
   font-size: 15px;
 }
@@ -312,7 +313,8 @@
   display: inline;
 }
 
-.us-coverage-rules--sentences .us-rule__entity > .ti {
+.us-coverage-rules--sentences .us-rule__entity > .ti,
+.us-coverage-rules--sentences .us-rule__entity > .us-icon {
   margin-right: 4px;
   vertical-align: -2px;
 }

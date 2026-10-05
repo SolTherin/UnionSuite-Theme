@@ -2,6 +2,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const read = name => fs.readFileSync(path.join(__dirname,'../../../..',name),'utf8').replace(/\r\n/g,'\n');
 function frameDocument() {
+  // The taskbar's record icons come from the shared US-ICONS block.
+  const themeIcons = read('THeme/UnionSuite/zUnionSuite.js').match(/\/\* US-ICONS:START[\s\S]*?\/\* US-ICONS:END \*\//)[0];
   const actionIcons = read('THeme/UnionSuite/zUnionSuite.js').match(/\/\* US-ACTION-ICONS:START \*\/[\s\S]*?\/\* US-ACTION-ICONS:END \*\//)[0];
   const nativeButtons = read('THeme/UnionSuite/99-Orion.css').split('/* set up button base styles */')[1].split('/* ==========================================================================\n   ORION THEME STYLES')[0];
   return `<!doctype html><html lang="en" data-us-color-scheme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Biscuit's daily taskbar greeting — UnionSuite</title><style>
@@ -25,7 +27,7 @@ body{padding:24px;margin:0;font:14px var(--font-ui);background:var(--bg-page);co
 <p>The idle buttons leave his click sequence and five-minute timer unchanged. Use Replay greeting to bring him back after he leaves.</p>
 <p>Replay resets only this example's daily greeting. Reload preserves it, just like navigating to another page. These review controls are not added to the live taskbar.</p></main>
 <p id="demo-taskbar-status" role="status">Fictional records only. Search Morgan or example.com; try empty or error. Result and Full Search navigation are inactive.</p>
-<script>${read('THeme/UnionSuite-Guides/usage/source/taskbar-example.js')}</script><script>${read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js').replace('setTimeout(resetFullSearch, 10000)', 'setTimeout(resetFullSearch, 1200)')}</script><script>${actionIcons}</script></body></html>`;
+<script>${read('THeme/UnionSuite-Guides/usage/source/taskbar-example.js')}</script><script>${themeIcons}</script><script>${read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js').replace('setTimeout(resetFullSearch, 10000)', 'setTimeout(resetFullSearch, 1200)')}</script><script>${actionIcons}</script></body></html>`;
 }
 module.exports = {frameDocument};
 if (require.main === module) {

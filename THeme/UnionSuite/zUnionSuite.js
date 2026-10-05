@@ -119,10 +119,68 @@ SOFTWARE.
 })();
 /* US-APPEARANCE:END */
 
+/* US-ICONS:START — the theme's own icons, beside the Tabler icon font.
+   Every icon name the theme accepts goes through UnionSuiteIcons.create:
+   a name starting "us-" is one of the icons below, drawn as inline SVG;
+   any other name is a Tabler glyph (<i class="ti ti-<name>">). So a panel
+   title token ([[us-building]]) and theme code take either kind the same
+   way. To add an icon, add an entry to ICONS: an "us-" name and the SVG's
+   inner markup, drawn on Tabler's 24px grid with strokes only (the SVG
+   supplies the stroke, round caps and joins), so it sits with Tabler
+   glyphs. The markup is static; never build it from data.
+   The icon is a 1em square, sized and coloured by the text around it like
+   a glyph; --us-icon-stroke sets its line weight (default 2, as Tabler).
+   An unknown "us-" name gives an empty element, as an unknown Tabler name
+   draws nothing. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteIcons) return;
+
+  const ICONS = Object.freeze({
+    // An organisation record: a block with a lower wing, a door and windows.
+    // Taskbar search results, coverage rule workplaces.
+    'us-building': '<path d="M4 21V4h11v17M15 10h5v11M2 21h20M8 21v-4h3v4M7 8h1m3 0h1M7 12h1m3 0h1m6 2h1m-1 3h1"/>',
+    // A person record: head and shoulders. Taskbar search results.
+    'us-person': '<circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>'
+  });
+
+  const own = name => /^us-/.test(name);
+  const has = name => Object.prototype.hasOwnProperty.call(ICONS, name);
+
+  // A decorative icon element; className is added to it either way.
+  function create(name, className) {
+    let node;
+    if (own(name)) {
+      node = document.createElement('span');
+      node.className = 'us-icon';
+      if (has(name)) {
+        node.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+          'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">' +
+          ICONS[name] + '</svg>';
+      }
+    } else {
+      node = document.createElement('i');
+      node.className = 'ti ti-' + name;
+    }
+    if (className) node.classList.add(...className.split(/\s+/).filter(Boolean));
+    node.setAttribute('aria-hidden', 'true');
+    return node;
+  }
+
+  window.UnionSuiteIcons = Object.freeze({
+    create,
+    has,
+    names: () => Object.keys(ICONS)
+  });
+})();
+/* US-ICONS:END */
+
 /* US-PANEL-TITLE-ICONS:START — an optional icon before a panel title.
    Authors start the iPart title with a Tabler icon name in double square
    brackets, e.g. "[[user]] Contact summary" (the name is the ti-<name>
-   class without its prefix). The token is removed and a decorative icon
+   class without its prefix), or one of the theme's own icons by its "us-"
+   name (US-ICONS), e.g. "[[us-building]] Covered workplaces". The token
+   is removed and a decorative icon
    (aria-hidden) is inserted before the text, so everything that reads the
    title afterwards, including later theme blocks that build labels from it,
    sees only "Contact summary". An unknown name draws no glyph and takes no
@@ -160,10 +218,7 @@ SOFTWARE.
     if (!match) return;
     const name = match[1];
     text.data = text.data.slice(match[0].length);
-    const icon = document.createElement('i');
-    icon.className = 'ti ti-' + name + ' us-panel-title__icon';
-    icon.setAttribute('aria-hidden', 'true');
-    text.before(icon);
+    text.before(window.UnionSuiteIcons.create(name, 'us-panel-title__icon'));
     title.setAttribute('data-us-title-icon', name);
   }
 
@@ -4844,15 +4899,15 @@ SOFTWARE.
   // Rule1's table part, lower case: the CloudToolz table, or the flow's
   // short name for it.
   const RECORDS = {
-    'zencrm.organisations': {label: 'Workplace', icon: 'ti-building'},
-    workplace: {label: 'Workplace', icon: 'ti-building'},
-    'zencrm.individuals': {label: 'Member', icon: 'ti-user'},
-    individuals: {label: 'Member', icon: 'ti-user'},
-    'uniontemplate.jobs': {label: 'Job', icon: 'ti-briefcase'},
-    'uniontemplate.profile': {label: 'Member profile', icon: 'ti-id-badge-2'},
-    profile: {label: 'Member profile', icon: 'ti-id-badge-2'},
-    'uniontemplate.orgdetails': {label: 'Employer', icon: 'ti-building-factory-2'},
-    employer: {label: 'Employer', icon: 'ti-building-factory-2'}
+    'zencrm.organisations': {label: 'Workplace', icon: 'us-building'},
+    workplace: {label: 'Workplace', icon: 'us-building'},
+    'zencrm.individuals': {label: 'Member', icon: 'user'},
+    individuals: {label: 'Member', icon: 'user'},
+    'uniontemplate.jobs': {label: 'Job', icon: 'briefcase'},
+    'uniontemplate.profile': {label: 'Member profile', icon: 'id-badge-2'},
+    profile: {label: 'Member profile', icon: 'id-badge-2'},
+    'uniontemplate.orgdetails': {label: 'Employer', icon: 'building-factory-2'},
+    employer: {label: 'Employer', icon: 'building-factory-2'}
   };
   const FIELDS = {
     imisid: 'iMIS ID', id: 'iMIS ID', companyid: 'Parent organisation', name: 'Name',
@@ -4870,11 +4925,8 @@ SOFTWARE.
     return node;
   }
 
-  function icon(name) {
-    const node = el('i', 'ti ' + name);
-    node.setAttribute('aria-hidden', 'true');
-    return node;
-  }
+  // A Tabler name, or one of the theme's own (us-) icons: US-ICONS.
+  const icon = name => window.UnionSuiteIcons.create(name);
 
   const wrapperOf = set => set.closest('.us-coverage-rules');
   const yes = value => !/^(false|0|no|n)$/i.test(String(value || '').trim());
@@ -4909,7 +4961,7 @@ SOFTWARE.
       row.setAttribute('data-us-rule-target', target);
       const cut = target.lastIndexOf('.');
       const table = cut > 0 ? target.slice(0, cut) : '';
-      const record = RECORDS[table.toLowerCase()] || {label: table.split('.').pop() || 'Record', icon: 'ti-filter'};
+      const record = RECORDS[table.toLowerCase()] || {label: table.split('.').pop() || 'Record', icon: 'filter'};
       field.textContent = fieldLabel(cut > 0 ? target.slice(cut + 1) : target);
       const entity = el('span', 'us-rule__entity');
       entity.append(icon(record.icon), record.label);
@@ -4929,7 +4981,7 @@ SOFTWARE.
   function status(enabled) {
     const sign = el('span', 'us-rule__status');
     sign.setAttribute('data-us-rule-status', enabled ? 'enabled' : 'disabled');
-    sign.append(icon(enabled ? 'ti-circle-check' : 'ti-circle-x'), enabled ? 'Enabled' : 'Disabled');
+    sign.append(icon(enabled ? 'circle-check' : 'circle-x'), enabled ? 'Enabled' : 'Disabled');
     return sign;
   }
 
@@ -8526,7 +8578,21 @@ SOFTWARE.
    a failed load turns the line into a warning. With no query in the
    address, or after a send (iMIS's "Emails have been queued" message), the
    div stays empty and hidden. Columns are read by alias, ignoring case:
-   Name, Email, ID, Role, Group. */
+   Name, Email, ID, Role, Group.
+
+   Every row is read, a page of 500 at a time (up to 10,000), so a list of
+   thousands of members is counted in full; past that the count is the
+   query's TotalCount and the problems are of the rows read.
+   Options on the div:
+   - us-send-recipients--summary: the line only, with no Show recipients
+     and no table (member sends, owner 6 October 2026: thousands of names
+     are no use here).
+   - data-us-recipients-link="<address>" with data-us-recipients-link-label:
+     a link at the end of the line, e.g. back to the record the list comes
+     from. {Name} in the address is the page address's Name parameter,
+     e.g. /Agreements_ManageAgreement?AgreementID={AgreementID}&…; a
+     parameter the page lacks, or an address on another site, leaves the
+     link out. */
 (function () {
   'use strict';
 
@@ -8536,8 +8602,10 @@ SOFTWARE.
   }
 
   const HOST = '.us-send-recipients';
+  const SUMMARY = 'us-send-recipients--summary';
   const SENT = /queued for processing/i;
-  const LIMIT = '500';
+  const LIMIT = 500;
+  const MAX_ROWS = 10000;
 
   const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
 
@@ -8571,13 +8639,54 @@ SOFTWARE.
     const page = new URLSearchParams(location.search);
     const query = page.get('query');
     if (!query) return null;
-    const params = new URLSearchParams({QueryName: query, limit: LIMIT});
+    const params = new URLSearchParams({QueryName: query, limit: String(LIMIT)});
     JSON.parse(page.get('queryparams') || '[]').forEach(filter => {
       const name = String(filter.Item1 || '').replace(/^@url:/i, '');
       const value = String(filter.Item2 ?? '');
       if (name && value !== '') params.set(name, value);
     });
     return params;
+  }
+
+  // Every row, a page at a time, up to MAX_ROWS. total is the query's own
+  // count when it gives one.
+  async function loadRows(params) {
+    const rows = [];
+    let total = null;
+    let offset = 0;
+    while (rows.length < MAX_ROWS) {
+      params.set('offset', String(offset));
+      const response = await fetch('/api/query?' + params, {credentials: 'same-origin', headers: {Accept: 'application/json', RequestVerificationToken: token()}});
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const data = await response.json();
+      const page = data?.Items?.$values || [];
+      rows.push(...page);
+      if (Number.isFinite(Number(data?.TotalCount))) total = Number(data.TotalCount);
+      if (!data?.HasNext || !page.length) break;
+      offset = Number(data.NextOffset) || offset + page.length;
+    }
+    return {rows, total: Math.max(total ?? 0, rows.length)};
+  }
+
+  // The optional link: {Name} filled from the page address. Null when a
+  // parameter is missing or the address leaves this site.
+  function recordLink(host) {
+    const template = host.getAttribute('data-us-recipients-link');
+    if (!template) return null;
+    const page = new URLSearchParams(location.search);
+    let missing = false;
+    const address = template.replace(/\{(\w+)\}/g, (_, name) => {
+      const value = page.get(name);
+      if (!value) missing = true;
+      return encodeURIComponent(value || '');
+    });
+    if (missing) return null;
+    let url;
+    try { url = new URL(address, location.origin); } catch (_) { return null; }
+    if (url.origin !== location.origin) return null;
+    const link = el('a', 'us-send-recipients__link', host.getAttribute('data-us-recipients-link-label') || 'Open the record');
+    link.href = url.href;
+    return link;
   }
 
   function build(host) {
@@ -8606,17 +8715,17 @@ SOFTWARE.
       return;
     }
 
-    fetch('/api/query?' + params, {credentials: 'same-origin', headers: {Accept: 'application/json', RequestVerificationToken: token()}})
-      .then(response => {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-      })
-      .then(data => render(data?.Items?.$values || []))
+    const summary = host.classList.contains(SUMMARY);
+    const link = recordLink(host);
+
+    loadRows(params)
+      .then(render)
       .catch(error => warn('The recipient list could not be loaded (' + error.message + '). Check the Recipients tab before sending.'));
 
-    function render(rows) {
+    function render({rows, total}) {
       if (!rows.length) {
         warn('No contacts match. This email would go to nobody.');
+        if (link) line.append(link);
         return;
       }
       // Optional columns: only what the query returns is shown or checked.
@@ -8636,7 +8745,7 @@ SOFTWARE.
         return contact;
       });
 
-      count.textContent = contacts.length + ' recipient' + (contacts.length === 1 ? '' : 's');
+      count.textContent = total.toLocaleString() + ' recipient' + (total === 1 ? '' : 's');
       if (columns.group) {
         const groups = new Map();
         contacts.forEach(contact => {
@@ -8646,7 +8755,12 @@ SOFTWARE.
         line.append(el('span', 'us-send-recipients__groups', [...groups].map(([name, total]) => name + ' ' + total).join(' · ')));
       }
       const unreachable = contacts.filter(contact => contact.problems.length).length;
-      if (unreachable) line.append(el('span', 'us-send-recipients__problems', unreachable + ' will not receive it'));
+      if (unreachable) {
+        const checked = total > contacts.length ? ' (of the first ' + contacts.length.toLocaleString() + ')' : '';
+        line.append(el('span', 'us-send-recipients__problems', unreachable.toLocaleString() + ' will not receive it' + checked));
+      }
+      if (link) line.append(link);
+      if (summary) return;
 
       const headings = ['Name'].concat(columns.role ? 'Role' : [], columns.group ? 'Group' : [], columns.email ? 'Email' : [], 'Status');
       const table = el('table', 'us-send-recipients__table');
@@ -10706,7 +10820,8 @@ SOFTWARE.
  * page is fetched, only that CCO's view is replaced, and page-level form
  * state is switched to the fetched page so iMIS's own partial postbacks keep
  * working. The view is then initialized in native order: its scripts, grid
- * managers, $create blocks and one native refresh per report lister.
+ * managers, $create blocks, one native refresh per report lister, then
+ * iMIS's Chosen line for multi-select filters the refreshes did not reach.
  *
  * Opt-outs, checked at click time: UnionSuiteCcoSwitch.disable() for this
  * browser tab, UnionSuiteCcoSwitchConfig.enabled === false, Easy Edit,
@@ -11309,6 +11424,41 @@ SOFTWARE.
     return blocks;
   }
 
+  // iMIS enhances multi-select filters with Chosen from a page-level startup
+  // line, e.g. jQuery('.chosen-select').chosen({placeholder_text_multiple: '(Any)'});
+  // A lister refresh sends it again, but a report that hides its results
+  // until Find has no refresh button, so its lists stayed bare until Find
+  // (owner, 6 October 2026). Chosen skips selects it already enhanced.
+  const chosenPattern = /(?:jQuery|\$)\(\s*(['"])\.chosen-select\1\s*\)\s*\.chosen\(/g;
+
+  function chosenStatements(doc, fetchedView) {
+    const statements = new Set();
+    for (const script of doc.scripts) {
+      if (fetchedView.contains(script)) continue;
+      const text = script.textContent;
+      for (const match of text.matchAll(chosenPattern)) {
+        const open = match.index + match[0].length - 1;
+        const end = callEnd(text, open);
+        if (end >= 0) statements.add(text.slice(match.index, end + 1) + ';');
+      }
+    }
+    return [...statements];
+  }
+
+  const bareChosen = view => [...view.querySelectorAll('select.chosen-select[id]')]
+    .filter(select => !document.getElementById(select.id + '_chosen'));
+
+  function replayChosen(statements, view) {
+    const result = { bare: bareChosen(view).length, run: 0, errors: [] };
+    if (!result.bare || typeof window.jQuery?.fn?.chosen !== 'function') return result;
+    for (const code of statements) {
+      result.run++;
+      for (const message of execute(code)) result.errors.push({ type: 'Chosen', message });
+    }
+    result.remaining = bareChosen(view).length;
+    return result;
+  }
+
   const inLister = (element, listers) => listers.some(lister => lister.contains(element));
   const registered = id => typeof window.$find === 'function' && !!window.$find(id);
 
@@ -11545,6 +11695,8 @@ SOFTWARE.
       viewHandlers.set(targetView, added);
       entry.trackedHandlers = added.length;
       entry.listers = await refreshListers(prm, listers);
+      // After the refreshes, which send it for their own listers.
+      entry.chosen = replayChosen(chosenStatements(doc, fetchedView), targetView);
       entry.initMs = Math.round(performance.now() - initializing);
       entry.uninitialized = uninitialized(targetView);
       entry.orphans = orphans();

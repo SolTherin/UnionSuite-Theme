@@ -8,6 +8,9 @@ const attribute = text => text.replaceAll('&', '&amp;').replaceAll('"', '&quot;'
 const source = read('THeme/UnionSuite/zUnionSuite.js');
 const appearance = source.match(/\/\* US-APPEARANCE:START \*\/[\s\S]*?\/\* US-APPEARANCE:END \*\//)?.[0];
 if (!appearance) throw new Error('Appearance section is missing.');
+// The taskbar's record icons come from the shared US-ICONS block.
+const themeIcons = source.match(/\/\* US-ICONS:START[\s\S]*?\/\* US-ICONS:END \*\//)?.[0];
+if (!themeIcons) throw new Error('Icons section is missing.');
 const nativeButtons = read('THeme/UnionSuite/99-Orion.css').split('/* set up button base styles */')[1].split('/* ==========================================================================\n   ORION THEME STYLES')[0];
 const font = fs.readFileSync(path.join(root, 'THeme/UnionSuite/Tabler/fonts/tabler-icons.woff2')).toString('base64');
 const iconSource = read('THeme/UnionSuite/Tabler/tabler-icons.min.css');
@@ -26,7 +29,7 @@ function frame(variant) {
     'FRAME_VARIANT': variant,
     '/* SHARED_STYLES */': styles,
     '/* FRAME_STYLES */': read('prototypes/approved/taskbar/Taskbar-Workshop.frame.css') + '\n' + read('prototypes/approved/taskbar/Popup-Shell.css'),
-    '/* APPEARANCE_SCRIPT */': script(appearance),
+    '/* APPEARANCE_SCRIPT */': script(appearance + '\n' + themeIcons),
     '/* FIXTURE_SCRIPT */': script(read('THeme/UnionSuite-Guides/usage/source/taskbar-example.js').replaceAll('union-suite:preview:', 'union-suite:workshop:' + variant + ':')),
     '/* TASKBAR_SCRIPT */': script(read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js')),
     '/* FUSE_SCRIPT */': variant === 'proposal' ? script(read(fusePath)) : '',

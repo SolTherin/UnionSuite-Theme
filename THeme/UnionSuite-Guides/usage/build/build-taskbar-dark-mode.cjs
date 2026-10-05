@@ -69,6 +69,7 @@ ${read('THeme/UnionSuite/zzDarkMode.css')}</style>
   </details>
 </main>
 <script>${read('THeme/UnionSuite-Guides/usage/source/taskbar-example.js')}</script>
+<script>${read('THeme/UnionSuite/zUnionSuite.js').match(/\/\* US-ICONS:START[\s\S]*?\/\* US-ICONS:END \*\//)[0]}</script>
 <script>${read('THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js').replace('setTimeout(resetFullSearch, 10000)','setTimeout(resetFullSearch, 1200)')}</script>
 <script>${read('THeme/UnionSuite-Guides/usage/examples/Taskbar-Dark-Mode.js')}</script>
 </body></html>`;
