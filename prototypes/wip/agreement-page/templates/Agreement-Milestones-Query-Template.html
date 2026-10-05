@@ -4,7 +4,9 @@
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone
      Native title: Milestones. Display in cards / columns: unchecked. Header blank.
-     Footer: <div class="us-query-footer"><span data-us-task-summary></span></div>
+     Footer: blank. The theme adds the card footer with the results line
+     (us-task-progress); an existing <div class="us-query-footer"><span
+     data-us-task-summary></span></div> is harmless and stays hidden.
      (as on Tasks: us-task-progress shows "x of y complete" in the heading and
      keeps the footer summary for screen readers only).
      Rows per page: 30 (the progress rail shows the rows on the page).

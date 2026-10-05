@@ -4,7 +4,9 @@
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task
      Native title: Tasks. Display in cards / columns: unchecked. Header blank.
-     Footer: <div class="us-query-footer"><span data-us-task-summary></span></div>
+     Footer: blank. The theme adds the card footer with the results line
+     (us-task-progress); an existing <div class="us-query-footer"><span
+     data-us-task-summary></span></div> is harmless and stays hidden.
      (the theme writes "n outstanding" into it, as on the Home tasks list;
      us-task-progress keeps it for screen readers and shows "x of y complete"
      in the heading instead).

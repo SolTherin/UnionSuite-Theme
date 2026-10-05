@@ -1521,6 +1521,7 @@ SOFTWARE.
     search.filter.remove();
     search.utilities.remove();
     search.status.remove();
+    if (search.footer) search.footer.remove();
     if (search.generatedSetId && search.set.id === search.generatedSetId) search.set.removeAttribute('id');
     entry.search = null;
   }
@@ -1664,7 +1665,20 @@ SOFTWARE.
     });
     var message = !query && !search.completedToggle ? '' : matches ? matches + ' of ' + total + ' results on this page.' : 'No matching results on this page.';
     var summarySlot = search.set.parentElement.querySelector(':scope > .us-query-footer > [data-us-task-summary], :scope > .template-footer > .us-query-footer > [data-us-task-summary]');
-    if (summarySlot) {
+    // With us-task-progress the heading has the count, so the results line
+    // goes in a card footer: the panel's last child, outside the body, so it
+    // stays put under a scrolling list (owner, 5 October 2026). A template's
+    // own footer is then left empty and hides.
+    var card = search.wrapper.querySelector(':scope > .panel');
+    if (search.wrapper.classList.contains('us-task-progress') && card) {
+      if (!search.footer) {
+        search.footer = document.createElement('div');
+        search.footer.className = 'us-query-footer';
+        search.footer.setAttribute('data-us-query-footer-generated', '');
+      }
+      if (search.footer.parentElement !== card || search.footer.nextElementSibling) card.appendChild(search.footer);
+      if (search.status.parentElement !== search.footer) search.footer.appendChild(search.status);
+    } else if (summarySlot) {
       if (search.status.parentElement !== summarySlot) summarySlot.appendChild(search.status);
       message = outstanding + ' outstanding';
     } else if (search.status.parentElement !== search.set.parentElement) search.set.after(search.status);

@@ -5,7 +5,9 @@
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-meeting
      Native title: Meetings. Display in cards / columns: unchecked. Header blank.
-     Footer: <div class="us-query-footer"><span data-us-task-summary></span></div>
+     Footer: blank. The theme adds the card footer with the results line
+     (us-task-progress); an existing <div class="us-query-footer"><span
+     data-us-task-summary></span></div> is harmless and stays hidden.
      (as on Tasks: us-task-progress shows "x upcoming" in the heading and
      keeps the footer summary for screen readers only).
      Rows per page: 30. No results: "No meetings scheduled."

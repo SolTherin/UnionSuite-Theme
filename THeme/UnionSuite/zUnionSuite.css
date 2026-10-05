@@ -2747,6 +2747,17 @@ SOFTWARE.
   flex-direction: column;
 }
 
+/* A stretched panel with a card footer (US-TASK-PROGRESS) keeps the footer
+   at the card's bottom edge rather than under the last row. */
+.us-panel-fill > .panel:has(> .us-query-footer) {
+  display: flex;
+  flex-direction: column;
+}
+
+.us-panel-fill > .panel > .us-query-footer:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: auto;
+}
+
 /* US-PANEL-FILL:END */
 
 /* US-HOME-WELCOME:START — authored Content HTML, independent of the iPart shell. */
@@ -2976,8 +2987,11 @@ SOFTWARE.
    every row on the page (completed ones the filter hides included); for
    us-meetings "x upcoming". No progress bar (owner, 2 October 2026). Used on
    Tasks, Milestones and Meetings (owner, 3 October 2026: counts in the
-   heading). The footer's "n outstanding" says the same thing, so it is kept
-   for screen readers only. */
+   heading). The card shows the results line in a footer instead ("4 of 4
+   results on this page"; owner, 5 October 2026): US-QUERY-SEARCH adds it as
+   the panel's last child, outside the body, so it stays under a scrolling
+   list (us-list-scroll scrolls the body). A template's own footer is left
+   empty, and an empty footer hides. */
 
 .us-task-progress__count:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   align-self: center;
@@ -2988,13 +3002,23 @@ SOFTWARE.
   white-space: nowrap;
 }
 
-.us-task-progress .us-query-footer:has(> [data-us-task-summary]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.us-task-progress .us-query-footer:not(:has(.us-query-search-status:not(:empty), .us-query-footer__link)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* The card footer is the panel's own child, so it needs none of the
+   body's negative margins, and rounds its bottom corners to the card's
+   (the card keeps overflow visible for native menus). The card's bottom
+   padding reserves those corners for lists; the shared card rule's
+   selector outranks any plain one, hence !important. */
+.us-task-progress > .panel > .us-query-footer[data-us-query-footer-generated]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline: 0;
+  margin-bottom: 0;
+  border-radius: 0 0 max(0px, calc(var(--iqa-radius) - 1px)) max(0px, calc(var(--iqa-radius) - 1px));
+}
+
+.us-task-progress > .panel:has(> .us-query-footer .us-query-search-status:not(:empty)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-bottom: 0 !important;
 }
 
 /* US-TASK-PROGRESS:END */
