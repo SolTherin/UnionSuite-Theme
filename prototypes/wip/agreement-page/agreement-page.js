@@ -126,7 +126,7 @@
     {set: 'ap-contacts', template: 'Agreement-Contacts-Grouped-Tiles-Query-Template.html', rows: rows.contacts},
     {set: 'ap-attachments', template: 'Agreement-Attachments-Query-Template.html', rows: rows.attachments},
     {set: 'ap-meetings', template: 'Agreement-Meetings-Query-Template.html', rows: pastMeetingsOnly ? rows.meetings.filter(row => row['Date-ISO'] < window.UnionSuiteQueryStatesConfig.today) : rows.meetings},
-    {set: 'ap-notes', template: readingNotes ? 'Agreement-Notes-Reading-Query-Template.html' : 'Agreement-Notes-Ledger-Query-Template.html', rows: rows.notes},
+    {set: 'ap-notes', template: readingNotes ? 'Agreement-Notes-Reading-Query-Template.html' : 'Agreement-Notes-Ledger-Query-Template.html', rows: readingNotes ? rows.notes : rows.notes.map(ledgerNote)},
     {set: 'ap-terms', template: 'Agreement-Terms-Query-Template.html', rows: rows.terms},
     {set: 'ap-increases', template: 'Agreement-Increases-Query-Template.html', rows: rows.increases}
   ];
@@ -135,12 +135,21 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+  // The ledger's Notes IQA fields: a restricted note's text is the word
+  // "Restricted", with NoteClass us-restricted-note (owner, 5 October 2026).
+  function ledgerNote(row) {
+    return row.AccessClass === 'restricted'
+      ? {...row, Note: 'Restricted', NoteClass: 'us-restricted-note'}
+      : {...row, NoteClass: ''};
+  }
+
   // Same substitution the Query Template Display performs: each token is
-  // replaced by the row's value; an unselected field fails loudly here.
+  // replaced by the row's value, HTML-encoded unless the token says noencode
+  // ({#query.Note noencode}); an unselected field fails loudly here.
   function fill(template, row) {
-    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)( noencode)?\}/g, (_, field, raw) => {
       if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
-      return escapeHtml(row[field]);
+      return raw ? String(row[field] ?? '') : escapeHtml(row[field]);
     });
   }
 

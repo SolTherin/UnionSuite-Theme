@@ -223,6 +223,25 @@ guide (templates, field definitions and component sections).
    The note card was not chosen for agreement notes, so activity-cards
    decision 4 (the contact page) stays open.
 
+   **Restricted notes** (5 October 2026, in the theme: `US-NOTES-RESTRICTED`
+   in zUnionSuite.js and the restricted-note rules in `US-NOTES` CSS; shown
+   in `notes-compare.html` option 4): for a restricted note the Notes IQA
+   returns "Restricted" as the Note and `us-restricted-note` as a new
+   NoteClass field, the class of the span around the note in the template
+   (`<span class="{#query.NoteClass}">{#query.Note}</span>`), so its text
+   never reaches the page and every field stays HTML-encoded. The theme
+   shows a quiet notice with a lock and,
+   once a loader is defined, adds Show note: the loader hook
+   (`UnionSuiteRestrictedNotes.defineLoader(async ({ordinal, row}) => text)`)
+   checks whether this user may read the note. Allowed, the notice stays
+   (so the row still says the note was restricted), its padlock unlocks and
+   turns green, and the note appears on its own line under it; denied (the loader throws with `denied: true`), the button
+   shakes and turns red and the row says "You don't have permission to view
+   this note." for a few seconds. Without a loader there is no button. The
+   comparison registers a pretend loader (10 May allowed, 14 April denied).
+   Open (TODO): the access-check endpoint, which must check the restriction
+   and return the text, registered as the loader in ActionDefinitions.js.
+
    **Option 5 — reading list** (3 October 2026, under review):
    `notes-reading.candidate.css` and `notes-reading.candidate.js`, with
    `templates/Agreement-Notes-Reading-Query-Template.html`, add

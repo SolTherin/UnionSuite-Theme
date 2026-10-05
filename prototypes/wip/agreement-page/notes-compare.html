@@ -164,7 +164,7 @@
 
   <section class="nc-option" aria-labelledby="nc-ledger-title">
     <h2 id="nc-ledger-title">4. Ledger rows (us-notes--ledger)</h2>
-    <p>Proposed for long lists: no cards, one row per note under a rule. The date in its own column so dates line up, the author first, badges and a view icon at the right, the note underneath, capped at three lines with More to read the rest. The magnifier in the heading is the theme’s search filter (us-query-search). Needs one new IQA column, CreatedTime.</p>
+    <p>Proposed for long lists: no cards, one row per note under a rule. The date in its own column so dates line up, the author first, badges and a view icon at the right, the note underneath, capped at three lines with More to read the rest. The magnifier in the heading is the theme’s search filter (us-query-search). Needs one new IQA column, CreatedTime. Restricted notes (in the theme, 5 October 2026: US-NOTES-RESTRICTED): the IQA returns “Restricted” as the note and us-restricted-note as NoteClass, the class of the span around it, shown as a quiet notice with a lock, with Show note: it checks access (here a pretend check: 10 May is allowed, 14 April is not), and when allowed the padlock unlocks and the note appears under “Restricted”, which stays; when not, the button shakes with a message. The eye opens the full note, where the note page applies the restriction.</p>
     <div class="ContentItemContainer"><div class="us-query-template us-notes us-notes--ledger us-query-search"><div class="panel">
       <div class="panel-heading Distinguish"><h2 class="panel-title">Notes</h2></div>
       <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="nc-ledger"></div></div></div>
@@ -201,11 +201,12 @@
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-  // The Query Template Display's substitution; an unselected field fails loudly.
+  // The Query Template Display's substitution: HTML-encoded unless the token
+  // says noencode ({#query.Note noencode}); an unselected field fails loudly.
   function fill(template, row) {
-    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)( noencode)?\}/g, (_, field, raw) => {
       if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
-      return escapeHtml(row[field]);
+      return raw ? String(row[field] ?? '') : escapeHtml(row[field]);
     });
   }
 
@@ -223,8 +224,15 @@
     document.getElementById('nc-card').innerHTML = notes.map((row, index) =>
       `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(card, row)}</div></section>`).join('');
     const ledger = await template('Agreement-Notes-Ledger-Query-Template.html');
+    // Option 4 only: for a restricted note the IQA returns the word
+    // "Restricted" as the Note and us-restricted-note as NoteClass, so its
+    // text never reaches the page (owner, 5 October 2026; US-NOTES-RESTRICTED
+    // in the theme).
+    const ledgerNote = row => row.AccessClass === 'restricted'
+      ? {...row, Note: 'Restricted', NoteClass: 'us-restricted-note'}
+      : {...row, NoteClass: ''};
     document.getElementById('nc-ledger').innerHTML = notes.map((row, index) =>
-      `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(ledger, row)}</div></section>`).join('');
+      `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(ledger, ledgerNote(row))}</div></section>`).join('');
     const reading = await template('Agreement-Notes-Reading-Query-Template.html');
     document.getElementById('nc-reading').innerHTML = notes.map((row, index) =>
       `<section data-item="notes-${index}"><div class="QueryTemplateItem">${fill(reading, row)}</div></section>`).join('');
@@ -325,5 +333,16 @@
 <script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
 <script src="theme-candidate.js"></script>
 <script src="notes-reading.candidate.js"></script>
+<script>
+  // Option 4: a pretend access check standing in for the API, after a short
+  // wait. This user may read note 634 (10 May) and not note 588 (14 April).
+  window.ncCheckNote = ({ordinal}) => new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (ordinal === '634') resolve(notes.find(note => note.Ordinal === ordinal).Note);
+      else reject(Object.assign(new Error('No access to note ' + ordinal + '.'), {denied: true}));
+    }, 700);
+  });
+  window.UnionSuiteRestrictedNotes?.defineLoader(window.ncCheckNote);
+</script>
 </body>
 </html>

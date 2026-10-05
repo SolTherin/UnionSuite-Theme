@@ -12279,6 +12279,180 @@ SOFTWARE.
   window.UnionSuiteNotesLedger = Object.freeze({refresh: schedule, version: '1.0'});
 })();
 /* US-NOTES-LEDGER:END */
+
+/* US-NOTES-RESTRICTED:START — restricted notes (owner, 5 October 2026).
+   For a restricted note the Notes IQA returns the word "Restricted" as the
+   note and us-restricted-note as the class of the span around it, so its
+   text never reaches the page and every field stays HTML-encoded:
+     <p class="us-note__body"><span class="{#query.NoteClass}">{#query.Note}</span></p>
+   CSS shows it as a quiet notice with a lock; once a loader is defined this
+   adds a Show note button. (Any markup in the row's search text, from a
+   template that outputs HTML in the note, is stripped.) Pressing it asks
+   the loader whether this user may read the note. Allowed: the notice
+   stays, so the row still says the note was restricted; its padlock
+   unlocks (the shackle swings open about its left leg and the lock turns
+   green) and the note slides in on its own line under it. Denied: the
+   button shakes and the row says so for a few seconds. The view button
+   still opens the full note, where the note page applies the restriction.
+   The loader is a hook, as the term status and task savers are:
+     UnionSuiteRestrictedNotes.defineLoader(async ({ordinal, row}) => text)
+   It returns the note text, or throws an error with denied: true when the
+   user lacks the permission; any other error reads as a failed check. The
+   ordinal is the row's first data-ordinal (its view button's). */
+(function () {
+  'use strict';
+  if (window.UnionSuiteRestrictedNotes) return;
+
+  const PLACEHOLDERS = '.us-note .us-restricted-note';
+  const SVG = 'http://www.w3.org/2000/svg';
+  const MESSAGE_MS = 4000;
+  const FADE_MS = 180;
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const timers = new WeakMap();
+  let loader = null;
+
+  function reducedMotion() {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function enhance(placeholder) {
+    const row = placeholder.closest('.us-note');
+    if (!row || row.hasAttribute('data-us-note-unlocked') || row.closest('.us-report-no-styling')) return;
+    // The placeholder's markup is not something to search for.
+    const search = row.getAttribute('data-us-search');
+    if (search && search.includes('<')) row.setAttribute('data-us-search', search.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim());
+    const button = row.querySelector('.us-note__reveal');
+    if (!loader) {
+      button?.remove();
+      return;
+    }
+    if (button) return;
+    const reveal = document.createElement('button');
+    reveal.type = 'button';
+    reveal.className = 'us-note__reveal';
+    reveal.textContent = 'Show note';
+    placeholder.after(reveal);
+  }
+
+  function clearMessage(row) {
+    clearTimeout(timers.get(row));
+    row.querySelector('.us-note__reveal-message')?.remove();
+    row.querySelector('.us-note__reveal')?.classList.remove('is-denied');
+  }
+
+  // The button shakes (restarted on a repeat press) and the row says why;
+  // the message fades out after MESSAGE_MS.
+  function deny(row, button, text) {
+    clearMessage(row);
+    void button.offsetWidth;
+    button.classList.add('is-denied');
+    const message = document.createElement('span');
+    message.className = 'us-note__reveal-message';
+    message.setAttribute('role', 'status');
+    message.textContent = text;
+    button.after(message);
+    timers.set(row, setTimeout(() => {
+      message.setAttribute('data-us-leaving', '');
+      timers.set(row, setTimeout(() => clearMessage(row), reducedMotion() ? 0 : FADE_MS));
+    }, MESSAGE_MS));
+  }
+
+  // The padlock as inline SVG, so its shackle can move on its own (the
+  // notice's CSS lock is a mask, which cannot).
+  function padlock() {
+    const svg = document.createElementNS(SVG, 'svg');
+    svg.setAttribute('class', 'us-restricted-note__lock');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const shackle = document.createElementNS(SVG, 'path');
+    shackle.setAttribute('class', 'us-restricted-note__shackle');
+    shackle.setAttribute('d', 'M8 11V7a4 4 0 0 1 8 0v4');
+    const body = document.createElementNS(SVG, 'rect');
+    Object.entries({x: 5, y: 11, width: 14, height: 10, rx: 2}).forEach(([name, value]) => body.setAttribute(name, value));
+    svg.append(shackle, body);
+    return svg;
+  }
+
+  // Allowed: the notice stays and its padlock unlocks; the note slides in on
+  // its own line under it.
+  function unlock(row, notice, button, text) {
+    clearMessage(row);
+    button.remove();
+    row.setAttribute('data-us-note-unlocked', '');
+    notice.prepend(padlock());
+    notice.classList.add('has-lock');
+    // One frame locked, then the shackle swings open (CSS transition).
+    requestAnimationFrame(() => requestAnimationFrame(() => notice.classList.add('is-unlocked')));
+    const note = document.createElement('span');
+    note.className = 'us-note__unlocked-text';
+    note.textContent = text;
+    notice.parentElement.append(note);
+    if (!reducedMotion() && note.animate) {
+      const height = note.getBoundingClientRect().height;
+      note.animate(
+        [{height: '0px', opacity: 0, overflow: 'hidden'}, {height: height + 'px', opacity: 1, overflow: 'hidden'}],
+        {duration: 220, delay: 120, easing: EASE, fill: 'backwards'}
+      );
+    }
+    // The ledger's More control measures the note against its three lines.
+    window.UnionSuiteNotesLedger?.refresh();
+  }
+
+  async function reveal(button) {
+    const row = button.closest('.us-note');
+    const notice = row?.querySelector('.us-restricted-note');
+    if (!row || !notice || button.getAttribute('aria-busy') === 'true') return;
+    const ordinal = (row.querySelector('[data-ordinal]')?.getAttribute('data-ordinal') || '').trim();
+    clearMessage(row);
+    button.setAttribute('aria-busy', 'true');
+    const spinner = document.createElement('span');
+    spinner.className = 'us-button-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    button.prepend(spinner);
+    try {
+      if (!loader) throw new Error('No restricted note loader is defined (UnionSuiteRestrictedNotes.defineLoader).');
+      if (!/^\d+$/.test(ordinal)) throw new Error('The note has no ordinal.');
+      const text = await loader({ordinal, row});
+      unlock(row, notice, button, String(text ?? ''));
+    } catch (error) {
+      spinner.remove();
+      button.removeAttribute('aria-busy');
+      if (!error?.denied) console.warn(error?.message);
+      deny(row, button, error?.denied
+        ? 'You don’t have permission to view this note.'
+        : 'The note could not be checked. Try again.');
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('.us-note .us-note__reveal');
+    if (button && !button.closest('.us-report-no-styling')) void reveal(button);
+  });
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll(PLACEHOLDERS).forEach(enhance);
+    });
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList')) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteRestrictedNotes = Object.freeze({
+    defineLoader: fn => { loader = typeof fn === 'function' ? fn : null; schedule(); },
+    refresh: schedule,
+    version: '1.0'
+  });
+})();
+/* US-NOTES-RESTRICTED:END */
 /* US-ACTIVITY-FEED:START — one recent-activity list built from several IQAs.
    Author markup, usually the template of a one-row Query Template Display so
    iMIS fills in the record (item 32):

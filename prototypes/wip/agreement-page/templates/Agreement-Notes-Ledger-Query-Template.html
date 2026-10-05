@@ -17,7 +17,23 @@
      Fields (the same aliases as Agreement-Notes-Query-Template.html):
      Ordinal (required)      note ordinal; the eye icon (agreements.preview-note, an
                              icon-only row action in agreement-actions.candidate.js) opens it
-     Note (required)         note text; three lines, all of it after More
+     Note (required)         note text; three lines, all of it after More. For a
+                             restricted note the IQA returns the word
+                             "Restricted" instead, so the text never reaches
+                             the page (owner, 5 October 2026):
+                               CASE WHEN [vbo_I4u_UT_CA_Notes].[Access] <> 'Open'
+                               THEN 'Restricted'
+                               ELSE [vbo_I4u_UT_CA_Notes].[Note] END
+     NoteClass (required)    us-restricted-note for a restricted note, blank
+                             otherwise, on the span around the note:
+                               CASE WHEN [vbo_I4u_UT_CA_Notes].[Access] <> 'Open'
+                               THEN 'us-restricted-note' ELSE '' END
+                             The theme shows a restricted note as a notice
+                             with a lock and, once a loader is defined, Show
+                             note (US-NOTES-RESTRICTED): allowed, the lock
+                             opens and the note appears under the notice. Use the same test in
+                             both fields; wrap Access in ISNULL(…, '') if a
+                             blank Access means restricted.
      CreatedBy               author name
      CreatedOn               date text, in the date column
      CreatedTime             time text (e.g. "10:42 am"), under the date; a new IQA
@@ -40,6 +56,6 @@
       <button type="button" class="us-note__open us-action-agreements-preview-note" data-ordinal="{#query.Ordinal}"></button>
     </span>
   </p>
-  <p class="us-note__body">{#query.Note}</p>
+  <p class="us-note__body"><span class="{#query.NoteClass}">{#query.Note}</span></p>
   <button type="button" class="us-note__more" aria-expanded="false" hidden>More</button>
 </div>
