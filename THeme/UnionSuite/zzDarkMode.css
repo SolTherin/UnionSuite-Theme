@@ -38,6 +38,9 @@
     --danger-bg: #472d31;
     --info: #83d7f5;
     --info-bg: #203d4b;
+    /* Icon hover: the lighter accent reads on the dark surfaces. */
+    --icon-hover-colour: var(--accent);
+    --icon-hover-bg: color-mix(in srgb, var(--accent) 18%, transparent);
     /* Activity types: the same hue families as the light pairs, each icon
        above 7:1 on its tint. */
     --activity-interaction: #8ccfe0;

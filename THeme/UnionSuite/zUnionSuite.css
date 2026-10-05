@@ -29,6 +29,13 @@
   --panel-header-font-weight: 700;
   --panel-header-line-height: 1.4;
 
+  /* Icon-only controls on hover and keyboard focus (owner, 5 October 2026):
+     the icon turns the accent's darker shade (about 3:1 on white) on a soft
+     accent tint, the same for every icon control. zzDarkMode.css re-points
+     the colour; danger and success icons keep their own hover. */
+  --icon-hover-colour: var(--accent-700);
+  --icon-hover-bg: color-mix(in srgb, var(--accent) 14%, transparent);
+
   /* ── LAYER 1 — SEEDS. The five values a client changes. ───────────────── */
 
   /* Client setting: use var(--brand-600) for primary-colour checkboxes. */
@@ -632,10 +639,16 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 
 :where(a, button):is(.TextButton, .btn).us-icon-button:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --button-bg: transparent;
-  --button-hover-bg: var(--brand-50);
+  --button-hover-bg: var(--icon-hover-bg);
   --button-text: var(--text-link);
-  --button-hover-text: var(--text-link-hover);
+  --button-hover-text: var(--icon-hover-colour);
   --button-decoration: none;
+}
+
+/* Keyboard focus shows the hover tint as well as the focus ring. */
+:where(a, button):is(.TextButton, .btn).us-icon-button:focus-visible:not(:where(:disabled, [disabled], .disabled, .aspNetDisabled, [aria-disabled="true"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --button-current-bg: var(--button-hover-bg);
+  --button-current-text: var(--button-hover-text);
 }
 
 :where(a, button):is(.TextButton, .btn).us-icon-button.DangerButton:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -2047,10 +2060,10 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   box-shadow: none;
 }
 
-:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel], [data-us-query-display]) .us-iqa-report-utilities .us-iqa-icon-button:hover:where(:not(:disabled)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  background: var(--iqa-table-head);
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel], [data-us-query-display]) .us-iqa-report-utilities .us-iqa-icon-button:is(:hover, :focus-visible):where(:not(:disabled)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--icon-hover-bg);
   border-color: transparent;
-  color: var(--iqa-title);
+  color: var(--icon-hover-colour);
   text-decoration: none;
 }
 
@@ -12016,11 +12029,11 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 .us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  background: var(--bg-sunken);
+  background: var(--icon-hover-bg);
 }
 
 .us-contact-tile__copy:is(:hover, :focus-visible):not(:disabled) .ti {
-  color: var(--text-strong);
+  color: var(--icon-hover-colour);
 }
 
 .us-contact-tile__copy:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -18051,8 +18064,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   color: var(--text-faint);
 }
 
-.us-task__aside .us-icon-button:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  color: var(--accent);
+.us-task__aside .us-icon-button:is(:hover, :focus-visible):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--icon-hover-colour);
 }
 
 /* A completed row keeps its badges but drops their colour, like its title. */
@@ -19499,7 +19512,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 /* US-COPY:START — clipboard icon, success tick and target feedback. */
 :is(button.us-copy, button.us-banner__copy):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --copy-colour: var(--text-muted);
-  --copy-hover: var(--bg-sunken);
+  --copy-hover: var(--icon-hover-bg);
+  --copy-hover-colour: var(--icon-hover-colour);
   --copy-success: var(--success);
   position: relative;
   display: inline-grid;
@@ -19545,6 +19559,11 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   background: var(--copy-hover);
 }
 
+/* The tick keeps its success colour while hovered. */
+:is(button.us-copy, button.us-banner__copy):is(:hover, :focus-visible):not(:disabled):not([data-us-copy-state]) {
+  color: var(--copy-hover-colour);
+}
+
 :is(button.us-copy, button.us-banner__copy):focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
@@ -19577,6 +19596,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 .us-banner :is(button.us-copy, button.us-banner__copy) {
   --copy-colour: var(--banner-text);
   --copy-hover: rgb(255 255 255 / 15%);
+  --copy-hover-colour: var(--banner-text);
   --copy-success: var(--banner-text);
 }
 
