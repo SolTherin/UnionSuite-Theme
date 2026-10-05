@@ -19389,42 +19389,37 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 /* Copy flash: the copied text is highlighted. A rectangle exactly the size
    of the text (3px radius) fills the target, its edges softened by a 3px
-   blur of the same colour, holds briefly, then fades over 1.6s. US-COPY
-   removes the class after this animation's own length, so CSS alone sets the
-   timing. The accent at 60% everywhere, including the banner. The colour is
-   a registered property so the fill and shadow animate. */
-@property --us-copy-glow {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: transparent;
-}
-
+   blur of the same colour; it holds for the first third of 1.6s, then eases
+   out (owner, 5 October 2026: it read as vanishing, gone well before the
+   tick). The fill and shadow animate directly, with no 100% keyframe, so
+   they fade into the element's own background and shadow (the banner ID
+   chip keeps its colour) and need no registered property. An animation
+   outranks the element's own background, so this also shows on the chip.
+   US-COPY removes the class after this animation's length and turns the
+   tick back with it, so CSS alone sets the timing. The accent at 60%
+   everywhere, including the banner. */
 .us-copy-flash {
   --us-copy-glow-colour: color-mix(in srgb, var(--accent) 60%, transparent);
   border-radius: 3px;
-  background-color: var(--us-copy-glow);
-  box-shadow: 0 0 3px var(--us-copy-glow);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  animation: us-copy-glow 1600ms ease-out;
+  animation: us-copy-glow 1600ms;
 }
 
 @keyframes us-copy-glow {
   0%,
-  10% {
-    --us-copy-glow: var(--us-copy-glow-colour);
-  }
-
-  100% {
-    --us-copy-glow: transparent;
+  35% {
+    background-color: var(--us-copy-glow-colour);
+    box-shadow: 0 0 3px var(--us-copy-glow-colour);
+    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
   }
 }
 
 /* "Copied" beside the button while the success tick shows (added by
    US-COPY): past the button's edge, so nothing moves; in the success colour,
    softened; placed from the icon's centre so the gap stays the same on a
-   44px touch button; fades in during the flash's hold, then fades out with
-   it (same 1.6s, keyframe 10% and ease-out). Hidden from assistive
+   44px touch button; fades in at the start of the flash's hold, then fades
+   out with it (same 1.6s, hold to 35%, same easing). Hidden from assistive
    technology: the live region already announces "Copied". */
 :is(button.us-copy, button.us-banner__copy) > .us-copy-label {
   position: absolute;
@@ -19435,7 +19430,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font: 500 11px/1 var(--font-ui);
   white-space: nowrap;
   pointer-events: none;
-  animation: us-copy-label 1600ms ease-out forwards;
+  animation: us-copy-label 1600ms forwards;
 }
 
 @keyframes us-copy-label {
@@ -19444,9 +19439,11 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
     translate: -4px 0;
   }
 
-  10% {
+  10%,
+  35% {
     opacity: .75;
     translate: 0 0;
+    animation-timing-function: cubic-bezier(.4, 0, .6, 1);
   }
 
   100% {
@@ -19485,25 +19482,22 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
     opacity: .75;
   }
 
-  .us-copy-flash {
-    --us-copy-glow: var(--us-copy-glow-colour);
+  .us-copy-flash,
+  .us-banner .us-banner__record-id.us-copy-flash {
+    background-color: var(--us-copy-glow-colour);
+    box-shadow: 0 0 3px var(--us-copy-glow-colour);
     animation: none;
     outline: 0;
   }
 }
 
 /* Banner record ID copy feedback. Theme-wide: every banner with the
-   record ID chip (the agreement and case templates). - The flash never showed
-   on the chip: the chip's background shorthand (.us-banner
-   .us-banner__record-id, 0,2,0) outranks .us-copy-flash (0,1,0). The glow is
-   laid over the chip as a background image, so the chip colour shows through
-   as it fades. - No "Copied" label beside the chip's copy button (owner, 3
-   October 2026): it ran over the title. The tick, the flash and the live
-   region's "Copied" still confirm the copy. */
-
-.us-banner .us-banner__record-id.us-copy-flash {
-  background-image: linear-gradient(var(--us-copy-glow), var(--us-copy-glow));
-}
+   record ID chip (the agreement and case templates). The flash animates the
+   chip's own background (above); with reduced motion the still flash
+   names the chip, whose background would otherwise outrank it. No "Copied"
+   label beside the chip's copy button (owner, 3 October 2026): it ran over
+   the title. The tick, the flash and the live region's "Copied" still
+   confirm the copy. */
 
 .us-banner .us-banner__record-copy :is(button.us-copy, button.us-banner__copy) > .us-copy-label {
   display: none;

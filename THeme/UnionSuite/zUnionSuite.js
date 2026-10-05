@@ -14091,6 +14091,9 @@ SOFTWARE.
   if (window.UnionSuiteCopy) return;
   window.UnionSuiteCopy = {version:'1.1'};
   var pending = new WeakSet(), resets = new WeakMap(), flashes = new WeakMap();
+  // The tick's own turn back to the copy icon (the button's 180ms icon
+  // transition) starts this much early, so both end together.
+  var TICK_TURN_MS = 180;
   var live;
   function announce(text) {
     if (!live || !live.isConnected) {
@@ -14162,6 +14165,9 @@ SOFTWARE.
     announce('');
     pending.add(button);
     var oldBusy = button.getAttribute('aria-busy');
+    // How long the tick shows: the flash's own length when there is one, so
+    // the tick turns back as the flash finishes fading.
+    var tickLength = 1600;
     button.setAttribute('aria-busy','true');
     try {
       if (!target || target.contains(button)) throw new Error('Missing, duplicate or recursive target');
@@ -14179,7 +14185,8 @@ SOFTWARE.
         target.classList.remove('us-copy-flash');
         void target.offsetWidth;
         target.classList.add('us-copy-flash');
-        flashes.set(target,setTimeout(function () { target.classList.remove('us-copy-flash'); flashes.delete(target); },flashLength(target)));
+        tickLength = flashLength(target);
+        flashes.set(target,setTimeout(function () { target.classList.remove('us-copy-flash'); flashes.delete(target); },tickLength));
       }
     } catch (_) {
       button.setAttribute('data-us-copy-state','error');
@@ -14193,7 +14200,7 @@ SOFTWARE.
         copiedLabel(button, false);
         if (oldTitle === null) button.removeAttribute('title'); else button.setAttribute('title',oldTitle);
         resets.delete(button);
-      },1600)});
+      },Math.max(0, tickLength - TICK_TURN_MS))});
     }
   });
 })();
