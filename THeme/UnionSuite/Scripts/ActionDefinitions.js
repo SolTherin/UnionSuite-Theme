@@ -199,7 +199,7 @@
   }
 
   // ── Add entry ───────────────────────────────────────────────
-  // Single-record forms (notes, tasks, milestones, meetings) stop at 800px:
+  // Single-record forms (notes, tasks, milestones, meetings, terms) stop at 800px:
   // 90% of a large screen stretched their narrow fields (owner, 5 October
   // 2026). A smaller window keeps the 90%.
   const formWidth = {maxWidth: 800};
@@ -287,7 +287,7 @@
   // ── Terms and coverage ──────────────────────────────────────
   popup('agreements.add-term', 'Add term', 'plus',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum}),
-    'Add term', refreshList('us-action-agreements-add-term'));
+    'Add term', refreshList('us-action-agreements-add-term'), formWidth);
   // The page removes several terms at once (owner, 4 October 2026: "Bulk remove").
   popup('agreements.remove-terms', 'Bulk remove', 'trash',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Delete_Terms.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
@@ -342,7 +342,7 @@
     'Edit contact');
   rowPopup('agreements.edit-term', 'Edit term', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum, TermOrdinal: context.ordinal}),
-    'Update term');
+    'Update term', formWidth);
 
   // ── CloudToolz ──────────────────────────────────────────────
   // Every CloudToolz call stores a short-lived ZenToken in iMIS first; CloudToolz
