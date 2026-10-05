@@ -11854,6 +11854,9 @@ SOFTWARE.
     const saveButton = editor.querySelector('.us-attachment__save');
     saveButton.disabled = true;
     editor.setAttribute('aria-busy', 'true');
+    // The theme's button spinner while the save is in flight (owner,
+    // 5 October 2026); cleared on either outcome.
+    const busy = window.UnionSuiteBusy?.show(saveButton);
     try {
       await window.UnionSuiteAgreements.cloudToolz('/ca/update-attachment', {
         method: 'POST',
@@ -11866,6 +11869,7 @@ SOFTWARE.
       });
     } catch (error) {
       console.warn(error.message);
+      busy?.clear();
       saveButton.disabled = false;
       editor.removeAttribute('aria-busy');
       let message = editor.querySelector('.us-attachment__error');
@@ -11879,6 +11883,7 @@ SOFTWARE.
       Object.assign(row.dataset, {usFileName: previous.name, usFileTags: previous.tags, usFileTagOrdinals: previous.ordinals});
       return;
     }
+    busy?.clear();
     row.dataset.usFileName = name;
     row.dataset.usFileTags = tagNames.join(',');
     row.dataset.usFileTagOrdinals = tagOrdinals.join(',');
