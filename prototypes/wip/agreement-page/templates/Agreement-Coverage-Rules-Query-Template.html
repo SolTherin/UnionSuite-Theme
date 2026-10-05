@@ -1,0 +1,52 @@
+<!-- Agreement coverage rules (candidate, decision 15: option 2 decided,
+     4 October 2026; coverage-compare.html option 2).
+     iPart: Query Template Display, on the Details tab above the covered
+     records panel.
+       Title              [[filter]] Coverage rules
+       CSS class          us-query-template us-coverage-rules us-action-agreements-edit-coverage
+       Query              $/_i4u_/Core/CA/v2/API - Manage Agreement - Coverage Rules (proposed)
+       Display in cards   off
+       Rows per page      100
+       Template           the markup below (this comment is not part of it)
+       No results         No coverage rules yet. Use Update coverage to add them.
+     Update coverage, in the panel heading, opens the existing Coverage.aspx
+     popup (agreements.edit-coverage) and refreshes this panel on close.
+     IQA over the iMIS copy of the rules table, i4u_UT_CA_Coverage_SubRules
+     (Ordinal, CreatedOn, UpdatedOn, Rank, Enabled, MatchCondition, Rule1,
+     Rule2, AgreementID, AgreementOrdinal; synced from CloudToolz, owner
+     4 October 2026). The tables Rule1 names are CloudToolz tables: the
+     CA: Update Covered Contacts flow runs the rules there and syncs the
+     covered contacts back to iMIS (i4u_UT_CA_Coverage_Members).
+     Filter: AgreementOrdinal Equal, prompt Required, search label
+     AgreementNum (the agreement's Ordinal, from the page URL).
+     Sort: Rank, then Ordinal. Columns, as the table names them:
+       Rank            the rule's group: the flow ANDs every enabled rule in
+                       a rank, and covers a record matching any rank
+       Enabled         1 | 0 (the flow skips 0; true | false also read)
+       Rule1           the table and field tested, as stored
+                       (ZenCrm.Organisations.ImisId, or the flow's short
+                       form Workplace.ImisId); the script shows the record
+                       and field in readers' words (Workplace · iMIS ID)
+       MatchCondition  Equals | Not Equals (the only two the flow runs)
+       Rule2           the value tested
+       ValueLabel      optional: a name for the value. An .ImisId rule's
+                       value is an iMIS ID, so the IQA can left join the
+                       iMIS contact on its ID = Rule2 for its name (the
+                       workplace for ZenCrm.Organisations.ImisId); select
+                       '' for other rules, or for every rule if not joined
+     The covered counts are not here: they are a Needs Attention tracker
+     (us-attention with data-us-iqa-filter="AgreementNum"; owner,
+     4 October 2026).
+     US-COVERAGE-RULES (coverage.candidate.js) groups the rows by Rank,
+     writes and / or between them, words Rule1 and MatchCondition, and ends
+     each rule with an Enabled or Disabled sign; without it each rule
+     reads as one line. -->
+<div class="us-rule" data-us-rule-rank="{#query.Rank}" data-us-rule-enabled="{#query.Enabled}">
+  <span class="us-rule__rank">{#query.Rank}</span>
+  <span class="us-rule__test">
+    <span class="us-rule__field">{#query.Rule1}</span>
+    <span class="us-rule__condition">{#query.MatchCondition}</span>
+    <span class="us-rule__value">{#query.Rule2}</span>
+    <span class="us-rule__label">{#query.ValueLabel}</span>
+  </span>
+</div>

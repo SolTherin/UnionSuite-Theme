@@ -119,6 +119,25 @@
     });
   }
 
+  // Coverage rules, as the Agreement Coverage Rules IQA returns the iMIS
+  // copy of the rules table (owner's export, 4 October 2026): sorted Rank,
+  // then Ordinal; no names for the values.
+  const coverageRules = [
+    {Ordinal: '99', Rank: '1', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103841', ValueLabel: ''},
+    {Ordinal: '112', Rank: '2', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103997', ValueLabel: ''},
+    {Ordinal: '117', Rank: '2', Enabled: '1', Rule1: 'ZenCrm.Individuals.Category', MatchCondition: 'Equals', Rule2: 'RN', ValueLabel: ''},
+    {Ordinal: '113', Rank: '3', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '101', ValueLabel: ''},
+    {Ordinal: '114', Rank: '3', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '23101', ValueLabel: ''},
+    {Ordinal: '115', Rank: '4', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '23309', ValueLabel: ''}
+  ];
+
+  // Coverage trackers: the folder's IQAs by name, each one summary row.
+  const trackerFolder = '$/_i4u_/Core/CA/v2/Coverage Trackers';
+  const coverageTrackers = {
+    '01 Covered Workplaces': {Count: 6, Header: 'Workplaces', Label: 'covered by this agreement', Link: ''},
+    '02 Covered Members': {Count: 5431, Header: 'Members', Label: 'covered by this agreement', Link: ''}
+  };
+
   // Which template fills which list, and whether "Display in cards" is on.
   const lists = [
     {set: 'ap-tasks', template: 'Agreement-Tasks-Query-Template.html', rows: allTasksDone ? rows.tasks.map(row => ({...row, TAskCheckCSS: 'done', TaskStatusCSS: 'actioned', OverdueText: ''})) : rows.tasks},
@@ -128,7 +147,8 @@
     {set: 'ap-meetings', template: 'Agreement-Meetings-Query-Template.html', rows: pastMeetingsOnly ? rows.meetings.filter(row => row['Date-ISO'] < window.UnionSuiteQueryStatesConfig.today) : rows.meetings},
     {set: 'ap-notes', template: readingNotes ? 'Agreement-Notes-Reading-Query-Template.html' : 'Agreement-Notes-Ledger-Query-Template.html', rows: readingNotes ? rows.notes : rows.notes.map(ledgerNote)},
     {set: 'ap-terms', template: 'Agreement-Terms-Query-Template.html', rows: rows.terms},
-    {set: 'ap-increases', template: 'Agreement-Increases-Query-Template.html', rows: rows.increases}
+    {set: 'ap-increases', template: 'Agreement-Increases-Query-Template.html', rows: rows.increases},
+    {set: 'ap-coverage-rules', template: 'Agreement-Coverage-Rules-Query-Template.html', rows: coverageRules}
   ];
 
   const escapeHtml = value => String(value ?? '')
@@ -203,6 +223,16 @@
 
   window.fetch = async (input, init = {}) => {
     const target = new URL(typeof input === 'string' ? input : input.url, location.href);
+    // The tracker folder's listing (DocumentSummary FindByPath, then
+    // FindDocumentsInFolder), as the Needs Attention loader asks for it.
+    if (target.pathname === '/api/DocumentSummary/_execute') {
+      const request = JSON.parse(init.body || '{}');
+      if (request.OperationName === 'FindByPath') return reply({Result: {DocumentId: '00000000-0000-4000-8000-0000000000c0'}});
+      if (request.OperationName === 'FindDocumentsInFolder') {
+        return reply({Result: {$values: Object.keys(coverageTrackers).map((Name, index) =>
+          ({Name, DocumentTypeId: 'IQD', DocumentVersionId: '00000000-0000-4000-8000-0000000000c' + (index + 1)}))}});
+      }
+    }
     if (target.pathname === '/api/query') {
       const name = target.searchParams.get('QueryName') || '';
       if (name.endsWith('/CloudToolzUrl')) return reply(items([{Description: cloudToolz + '/'}]));
@@ -213,6 +243,12 @@
       if (name.endsWith('/API - Manage Agreement - Contacts Single')) {
         const contact = rows.contacts.find(row => row.Ordinal === target.searchParams.get('Ordinal'));
         return reply(items(contact ? [contact] : []), 200, 600);
+      }
+      // Coverage trackers (US-ATTENTION with data-us-iqa-filter): one summary
+      // row each, for the agreement in the AgreementNum filter.
+      const tracker = coverageTrackers[name.slice(name.lastIndexOf('/') + 1)];
+      if (name.startsWith(trackerFolder + '/') && tracker) {
+        return reply(items(target.searchParams.get('AgreementNum') === '123' ? [tracker] : []), 200, 300);
       }
       if (name.endsWith('/API - Manage Agreement - Banner Details')) return reply(items([{
         Description: 'New collective bargaining agreement for Stark Industries.',

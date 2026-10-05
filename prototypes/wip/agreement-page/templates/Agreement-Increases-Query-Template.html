@@ -26,12 +26,11 @@
      increases by date or months in class), so this sort only matters if the
      theme script is missing.
 
-     Edit: agreements.edit-increase, NOT YET DEFINED (TODO.md). v0.1 has no
-     edit or delete for an increase. The pencil is a plain icon button and does
-     nothing; it carries no us-action-* class yet, as an undefined one would
-     show as a text label. When the action exists, replace it with
-     <button class="us-action-agreements-edit-increase" data-ordinal="…">Edit increase</button>
-     as the terms' Edit is written.
+     Edit: agreements.edit-increase (owner, 5 October 2026), the pencil:
+     /_i4u_/Core/Collective_Agreements/v2/Popups/Edit-Scheduled-Increase.aspx
+     with AgreementNum and IncreaseOrdinal (the row's Ordinal), at most 800px
+     wide like Add increase; closing it refreshes the whole list, since an
+     edit can change the group totals. Delete is not defined yet (TODO.md).
 
      Fields (every one selected by the IQA; Increases-IQA-Build.md has the
      source of each):
@@ -75,5 +74,5 @@
     <p class="us-increase__comment">{#query.Comment}</p>
   </div>
   <p class="us-increase__amount">{#query.AmountText}</p>
-  <button type="button" class="us-increase__edit TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Edit increase" title="Edit increase"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+  <button type="button" class="us-increase__edit us-action-agreements-edit-increase" data-ordinal="{#query.Ordinal}">Edit increase</button>
 </div>

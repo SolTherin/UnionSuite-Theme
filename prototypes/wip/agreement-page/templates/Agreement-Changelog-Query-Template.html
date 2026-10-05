@@ -1,0 +1,35 @@
+<!-- Agreement changelog (candidate, decision 14; changelog-compare.html
+     options 2 and 4). Query Template Display · Display in cards: off ·
+     iPart CSS class: us-query-template us-changelog us-query-search
+     (option 4, the day-and-save ledger) or add us-changelog--timeline
+     (option 2, the v1 mock-up's timeline). Rows per page: 100.
+     IQA: Agreement Changes (proposed), one row per field change, filtered
+     on AgreementNum (the agreement's Ordinal), sorted ChangeDate
+     descending, then ChangeSet, then FieldOrder.
+       ChangeKey   the log row's key
+       ChangeDate  ISO date and time (2026-09-30T14:05:00)
+       ChangeText  the same, for reading without the script ("30 Sep 2026, 2:05 pm")
+       ChangeSet   one save: every row a save wrote shares it
+       ChangedBy   the person, or System
+       Area        Agreement, Terms, Increases, Contacts, Tasks, Milestones,
+                   Attachments, Meetings, Notes or Coverage
+       Action      Created, Added, Updated, Status or Removed
+       Item        the record changed (a term, a task); blank for the agreement itself
+       Field       the field changed; blank for Created, Added and Removed
+       OldValue, NewValue  as text, blank when there was none
+     US-CHANGELOG (changelog.candidate.js) groups the rows by day and save,
+     writes each save's sentence and adds the area chips; without it each
+     row reads as one line. -->
+<div class="us-change" data-us-change-set="{#query.ChangeSet}" data-us-change-area="{#query.Area}" data-us-change-action="{#query.Action}" data-us-search="{#query.ChangedBy} {#query.Area} {#query.Item} {#query.Field} {#query.OldValue} {#query.NewValue}">
+  <time class="us-change__when" datetime="{#query.ChangeDate}">{#query.ChangeText}</time>
+  <span class="us-change__by">{#query.ChangedBy}</span>
+  <span class="us-change__action">{#query.Action}</span>
+  <span class="us-change__area">{#query.Area}</span>
+  <span class="us-change__item">{#query.Item}</span>
+  <span class="us-change__line">
+    <span class="us-change__field">{#query.Field}</span>
+    <span class="us-change__old">{#query.OldValue}</span>
+    <span class="us-change__arrow" aria-hidden="true">&rarr;</span>
+    <span class="us-change__new">{#query.NewValue}</span>
+  </span>
+</div>

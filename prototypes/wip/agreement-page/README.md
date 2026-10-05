@@ -60,6 +60,9 @@ it would open; its close callback runs, so the in-place refresh is exercised.
 | `terms-compare.html` | Terms layout comparison (decision 11, decided: option 7, now in the theme as `US-TERMS`): seven options on one sample, with panel width, sample size and dark mode controls. Options 3 to 6 use `terms-layouts.candidate.css` / `.js` and `templates/Agreement-Terms-Rows-Query-Template.html`; option 2 uses the superseded `Agreement-Terms-Cards-Query-Template.html`. Kept for reference until the owner retires it. |
 | `increases-compare.html` | Scheduled increases layout comparison (decision 12, decided: option 4, now in the theme as `US-INCREASES`): v0.1 rebuilt, then four options on one sample (or a small one, or the live v0.1 test data), with panel width, measure cap, compounding and dark mode controls. Options 2 to 5 use `increases-layouts.candidate.css` / `.js`, `templates/Agreement-Increases-Rows-Query-Template.html` and, for option 2's summary, `templates/Agreement-Increases-Summary-Query-Template.html`. |
 | `Increases-IQA-Build.md` | Build notes for the scheduled increases IQAs (decision 12): what v0.1's three IQAs and `i4u_UT_CA_Schedule` hold, and the proposed rows and summary IQAs. |
+| `communications-compare.html` | Communications panel for the Activity tab (decision 13, decided 4 October 2026): the contact page's activity feed and card, one card per send, group sends with a summary bar and recipient list, member sends with the bar only, email and SMS; the contact's email IQAs as they are below for reference, which loads `US-ACTIVITY-EVENTS` from `../contact-page-v3/theme-candidate.js` / `.css` (read between its markers). Uses `communications.candidate.css` / `.js`. |
+| `coverage-compare.html` | Coverage rules comparison for the Details tab (decision 15, decided 4 October 2026: option 2, now in the theme; the page loads the theme alone and keeps option 1, the current grid, beside it; options 3 and 4 retired): the current grid, then rule groups, sentences and a grouped table on one template, `templates/Agreement-Coverage-Rules-Query-Template.html`, with `coverage.candidate.css` / `.js`; the covered records (the existing IQA) once at the end. |
+| `changelog-compare.html` | Change history panel comparison for the Activity tab (decision 14, decided 4 October 2026: option 8): eight views from one sample. Options 2, 4, 5 and 8 use `changelog.candidate.css` / `.js` and `templates/Agreement-Changelog-Query-Template.html`. Options 6 (change-first timeline) and 7 (browse and inspect) use the comparison-only `changelog-explorations.css` / `.js`; these are research views, not installable components or author templates. |
 
 Run `node prototypes/wip/agreement-page/build-task-rows-candidate.cjs --check`
 to confirm the task-rows candidate still matches the theme block.
@@ -81,7 +84,7 @@ to confirm the task-rows candidate still matches the theme block.
 | Meetings (date box, show past) | `us-meetings` (candidate A2): date tile; past meetings worked out from `Date-ISO` and hidden by the completed filter, labelled "Show past meetings" with a history icon. With no upcoming meetings, a placeholder says so and offers a Show past meetings button (US-PAST-EMPTY; preview with `?meetings=past`). |
 | Notes (`note-card`, `filterNotes`) | Ledger rows (`us-notes--ledger`, candidate N1, Display in cards off) with `us-query-search`: date and time column, author, badges, view icon, note capped at three lines with an animated More. Needs the new `CreatedTime` IQA column. |
 | Terms (`term-item`, `filterTerms`, suggestions, inline term edit) | Theme list shell (`us-list`, Display in cards) with status badges. Edit opens the existing term popup; the old inline edit never saved. |
-| Coverage, Scheduled Increases, Reports Query Menus | Unchanged native reports; the theme styles them. Coverage gets the Update coverage heading button. |
+| Coverage, Scheduled Increases, Reports Query Menus | Scheduled Increases and Reports: unchanged native reports; the theme styles them. Coverage (decision 15): a Coverage rules panel (`us-agreement-coverage`, with the Update coverage heading button) above the existing covered records report; the covered counts are a Needs Attention tracker (`us-attention` with `data-us-iqa-filter="AgreementNum"`; folder `$/_i4u_/Core/CA/v2/Coverage Trackers`, IQAs `01 Covered Workplaces` and `02 Covered Members`) above the rules. |
 | Add Scheduled Increase BeyondForm | Unchanged form; iPart class `us-query-template us-form` for the card shell and field styling. |
 | Per-card search boxes and suggestion dropdowns | The theme's `us-query-search` filter on each list. Prefixed suggestions ("Assignee: …") are not carried over. |
 | Toast, scroll-to-top, section flash | Dropped. The theme's action notices replace the toast. |
@@ -141,6 +144,8 @@ guide (templates, field definitions and component sections).
 | B2 | `US-FIELD-GROUPS` (owner, 3 October 2026): fills `.us-field-groups[data-us-fields-query]` from a one-row IQA, one `us-fields` field per column in column order. `Group-Label` puts the field under a sub-heading (split at the first hyphen; a group's columns are gathered, groups in first-appearance order, ungrouped first); a number group (`1-Label`) starts a new line with no sub-heading; `Tone-Label` makes that field a badge; `Alert-Title`, `Alert-Message` and `Alert-Tone` show a status alert above the fields in the native message colours (the v1 Resolution banner, owner 3 October 2026); `Alert-Only` true shows the alert alone. The alert belongs to the Summary panel (layout v2; owner, 3 October 2026), not Resolution; preview an unresolved agreement with `?resolution=open`. Blank shows —; ISO dates, Yes/No, web and email links; links and values over 60 characters take the full row. `us-field-groups--single` for one column. `UnionSuiteFieldGroups.reload(root)` reloads one panel. | Opt-in by markup | New block after `US-BANNER-FACTS`; CSS beside A4 |
 | B1 | `US-BANNER-FACTS`: fills `.us-banner__details[data-us-facts-query]` from a client-editable IQA: `Description`, then one fact per `Additional-*` column in column order, with optional `Tone-*` badges. Same convention as the activity feed details IQAs. | Opt-in by markup | New block after `US-BANNER-POSITIONS` |
 | AC | Agreement actions, CloudToolz helper and task saver. | Core actions | `Scripts/ActionDefinitions.js` |
+| CR | `US-COVERAGE-RULES` (decided and promoted 4 October 2026; decision 15): the coverage rules as rule groups, from one row per rule (`templates/Agreement-Coverage-Rules-Query-Template.html`). A box per rank, "Rank 2 · all must match" ("all active rules must match" when one is disabled), "and" between its rules and an "or" between ranks, as the CA: Update Covered Contacts flow applies them. Rule1's CloudToolz table shown as the record it means (Workplace, Member, Job, Member profile, Employer), the field labelled (ImisId → iMIS ID), Equals → is, Not Equals → is not. A disabled rule stays in its rank, lightly struck through (its "and" too), with a plain red Disabled sign; enabled rules a green Enabled; rows light up on hover. Preset `us-agreement-coverage` = `us-query-template us-coverage-rules us-action-agreements-edit-coverage`. | Opt-in (preset) | Block after `US-INCREASES` in `zUnionSuite.js` and `zUnionSuite.css` |
+| AF | `US-ATTENTION` record filter (owner, 4 October 2026): `data-us-iqa-filter="AgreementNum"` on a Needs Attention section counts for the record in the page URL. Each IQA in the folder runs through `GET /api/query` by folder path and name, with that named filter set to the URL parameter of the same name; without it the status says so and nothing runs. Used for the coverage counts (6 workplaces, 5,431 members). Replaced `US-COVERAGE-TOTALS` (a totals line beside the covered records title, removed the same day). | Opt-in by markup | `US-ATTENTION` in `zUnionSuite.js`; guide: Needs Attention, "Counts for one record" |
 
 ## Building it in iMIS
 
@@ -501,6 +506,204 @@ guide (templates, field definitions and component sections).
       option 2 needs two IQAs and no script for its totals.
     - **Edit and delete.** v0.1 has neither for an increase; the pencils
       are placeholders for an `agreements.edit-increase` action.
+13. **Communications on the Activity tab** — decided (owner,
+    4 October 2026): the contact page's activity feed and record card,
+    one card per send, shown by the kind of send. Two scenarios: a member
+    send (every covered member, possibly thousands) and a group send (a
+    contact group such as SBU or the working group, 10 to 15 people).
+    `communications-compare.html` shows the direction on a sample of 10
+    sends (email and SMS) and 4 received emails, with the contact's email
+    IQAs as they are below it for reference (one row per recipient, so a
+    member send becomes thousands of cards). Each kind of send is its own
+    feed source filtered on the send's tag, so the card's type line names
+    the group (or Members) and opening it shows how the send went
+    (`US-ACTIVITY-RECIPIENTS` in `communications.candidate.js` / `.css`):
+    - **Group send** (`data-recipients`): a summary bar and a count per
+      state (Opened, Delivered, Pending, Failed), then every recipient
+      with their status, failures first; past 15, Show all slides in the
+      rest, scrolling inside the card. The group column shows only when
+      a send spans groups.
+    - **Member send** (`data-delivery`): the summary bar and counts from
+      one row of totals; no recipient list.
+    - **SMS** the same on the SMS card (no Opened). **Received** email
+      comes from the Outlook integration.
+    The owner chose the bar and list of the earlier options 3 and 4; the
+    compact card and the tally-in-details option are dropped.
+    Open questions:
+    - **The send hook** (TODO.md). Nothing marks a send as belonging to an
+      agreement, or as a member or group send: `CommunicationLog` has no
+      such fields and the business object designer cannot use its tables
+      (contact page v3 `Outbound-Emails-Build.md`). The tag (channel,
+      direction, kind, group, agreement) goes in a link table keyed on
+      `CommunicationLogKey`, written when the send is made.
+    - **The IQAs.** One core IQA per channel and kind (Emails to Groups,
+      Emails to Members, SMS to Groups, SMS to Members), returning
+      `Category` (the group, or Members) and `Direction`; a recipients
+      IQA (`Recipient`, `RecipientGroup`, `Status`, failures first) and
+      a delivery IQA (one row: `Recipients`, `Opened`, `Delivered`,
+      `Pending`, `Failed`, by `SUM(CASE …)`, to be checked in the IQA
+      designer). Received email from the Outlook integration's data.
+    - **SMS in the log.** Confirm SMS sends land in the communications
+      log, and their status words.
+    - **Folder and names.** `$/_i4u_/Core/CA/v2/Communications` and the
+      IQA names are placeholders.
+    The contact page's Recent activity gets the same treatment (TODO.md).
+14. **Change history on the Activity tab** — decided: option 8, the
+    rail led by what happened (owner, 4 October 2026; `us-changelog
+    us-changelog--rail us-changelog--events` on
+    `templates/Agreement-Changelog-Query-Template.html`). Still to do
+    (TODO.md): the change log and how it is written, then the IQA and
+    promotion. The comparison stays for now. The history of the choice
+    follows (owner asked for the panel,
+    4 October 2026). `changelog-compare.html` shows 33 field changes in
+    25 saves (January to October 2026) eight ways: 1 the contact page v3
+    Admin tab's Change history grid (native Query Menu: Date and time,
+    Field or action, Old value, New value, Changed by); 2 the v1
+    mock-up's History tab timeline rebuilt on theme tokens
+    (`us-changelog us-changelog--timeline`: initials on a rail, a
+    coloured action badge, old and new values side by side, type chips);
+    3 activity feed record cards with a "change" type (one card per
+    field); 4 a ledger by day and save (`us-changelog`: a day heading,
+    one sentence per save with the area's icon and time, the fields
+    under it; area chips and the search in the funnel); 5 option 4 on a
+    rail (owner asked for it, 4 October 2026: `us-changelog
+    us-changelog--rail`): no day headings, each save's date and time
+    stacked on the right as on the record cards, a line joining one
+    day's icons and broken between days, with a thin rule above a new
+    day; 8 option 5 made more like option 6, led by what happened
+    (owner, 4 October 2026: "what happened should be primary";
+    `us-changelog us-changelog--rail
+    us-changelog--events`): the event as the only strong text ("Task
+    Added", "Milestone Updated", "Term Status Changed", "Agreement
+    Details Updated" for the agreement's own fields, "Contact Deleted"
+    for a removal), with who beside it ("Task Added · by Mary
+    O'Conner"; owner, 4 October 2026) and the date and time on the
+    right (secondary: small, base colour), then the record's name and
+    its field lines (tertiary: muted, the new value unemphasised).
+    Over the 25 saves: timeline about 2,550px, ledger 2,250px, rail
+    1,770px, events 2,100px (two lines a save before its fields).
+    Options 2, 4, 5 and 8 share
+    `templates/Agreement-Changelog-Query-Template.html` and
+    `US-CHANGELOG` (`changelog.candidate.js`), which groups the rows by
+    day and by `ChangeSet` and moves the heads (and the rail's line) when
+    a filter hides a row. The theme's Query Template list gap
+    (`--list-gap`) is zeroed on `us-changelog`, so a save's field lines
+    sit together. Recommended before option 5: 4. Chosen: 8.
+    Two further explorations (owner, 4 October 2026, preference for the
+    connected icons in option 5), kept in `changelog-explorations.css`
+    and `.js`, share the same fixture:
+    - **6, change first:** the record and first value change lead, with
+      author/time below, a continuous icon rail and one date label per day.
+      Further fields slide open; Expand details opens all visible saves.
+      This tests a reading/catch-up flow with less repeated wording.
+    - **7, browse and inspect:** a scrollable icon rail selects a save;
+      its full before/after table sits beside it. Below 720px panel width,
+      the same detail moves beneath the selected entry. Arrow Up/Down and
+      Home/End select saves from a focused row. This tests investigation
+      of individual saves while keeping long values readable.
+    Both have search, area filtering, counts and a clear/empty state;
+    search retains the complete save when any of its fields match, and
+    option 6 opens matching extra fields. Sample and width controls apply
+    to both. They inherit light/dark theme tokens and reuse
+    `UnionSuiteRecordCards.fold` for reduced-motion-aware disclosure.
+    Preview: start `static-node` as above, then open
+    `http://localhost:8778/prototypes/wip/agreement-page/changelog-compare.html#lc-summary`
+    (option 7: `#lc-inspector`). Neither exploration is installed, approved,
+    added to the live embed, or represented as supported in the usage guide.
+    Still to decide: reading timeline versus inspector; continuous rail
+    versus day breaks; which fields should be visible before expansion.
+    Open questions:
+    - **The log itself.** Nothing records agreement changes today. It
+      needs a table (proposed `i4u_UT_CA_ChangeLog`: agreement ordinal,
+      date, user, area, action, item, field, old and new value, a save
+      key), written on every save: by each form's Flowz or a database
+      trigger. A trigger catches every path but sits outside iMIS; Flowz
+      misses edits made elsewhere (the native panel editors, imports).
+    - **Which changes.** Every field, or a chosen set (status, dates,
+      amounts, people)? Notes and attachments already show their own
+      creator and date.
+    - **System changes.** Overdue flags and other scheduled updates as
+      "System", or left out?
+    - **Retention.** Keep everything, or trim after the agreement ends?
+15. **Coverage rules on the Details tab** — decided: option 2, rule groups
+    (owner, 4 October 2026), promoted to the theme the same day as
+    `US-COVERAGE-RULES` (preset `us-agreement-coverage`); layout v2's
+    Details tab uses it, under a Needs Attention tracker for the covered
+    counts. Options 3 and 4 are
+    retired from the comparison; their code stays in
+    `coverage.candidate.css` / `.js`. Still to do (TODO.md): the two IQAs,
+    and the open questions below. The history follows (owner asked for
+    it, 4 October 2026). The rules decide which records the agreement covers.
+    Owner, 4 October 2026: rules sharing a rank must all match (and); a
+    record matching any rank's group is covered (or). Rules stay edited
+    in the `v2/Popups/Coverage.aspx` page (`agreements.edit-coverage`,
+    Update coverage; owner, 5 October 2026); the page shows them. The covered records stay the
+    existing simple IQA, under the rules. `coverage-compare.html` shows
+    the rules four ways on the live rules table (six rules, the owner's
+    export) or a named sample with a rule off: 1 the current
+    Existing coverage rules grid (count strip; Enabled, Rank, Entity,
+    Rule 1, Match Condition, Rule 2); 2 rule groups (`us-coverage-rules`:
+    a tinted box per rank, "Group 2 · all must match", "and" between its
+    rules, an "or" pill between boxes); 3 sentences
+    (`us-coverage-rules--sentences`: one line per group, the next
+    starting "or"); 4 a grouped table (`us-coverage-rules--table`:
+    today's columns with the group in the first column). Options 2 to 4
+    share `templates/Agreement-Coverage-Rules-Query-Template.html` and
+    `US-COVERAGE-RULES` (`coverage.candidate.js` / `.css`): groups by
+    Rank, words the condition (Equals → is) and field (ImisId → iMIS
+    ID), and marks rules that are off. Source: the iMIS
+    copy of the rules table, `i4u_UT_CA_Coverage_SubRules`, synced from
+    CloudToolz (owner, 4 October 2026). The tables Rule1 names
+    (`ZenCrm.Organisations`) are CloudToolz tables: the flow builds and
+    runs the rules there and syncs the covered contacts back to iMIS
+    (`i4u_UT_CA_Coverage_Members`: AgreementOrdinal, ContactID). The
+    table's columns (owner's export, 4 October 2026): Ordinal, CreatedOn,
+    UpdatedOn, Rank, Enabled, MatchCondition, Rule1, Rule2, AgreementID,
+    AgreementOrdinal. The IQA filters AgreementOrdinal on AgreementNum,
+    sorts Rank then Ordinal, and returns Rank, Enabled, Rule1,
+    MatchCondition and Rule2 as the table names them; the table has no
+    name for a value and no totals (below).
+    Checked against the CA: Update Covered Contacts flow (v78, owner's
+    export, 4 October 2026): it reads the enabled rules, turns each into
+    one SQL condition (Rule1's table becomes an alias, Equals = and Not
+    Equals <>, Rule2 quoted unless a number), ANDs every condition in a
+    rank, runs each rank on its own and adds the results together, so
+    ranks are OR. Option 2 now follows it (owner, 4 October 2026):
+    - the label is the real rank ("Rank 2 · all must match"; "all active
+      rules must match" when one is disabled), so a gap in the ranks
+      matches the popup;
+    - Rule1 is shown in readers' words for every table the flow knows,
+      in both of its spellings: ZenCrm.Organisations or Workplace →
+      Workplace, ZenCrm.Individuals or Individuals → Member,
+      UnionTemplate.Jobs → Job, UnionTemplate.Profile or Profile → Member
+      profile, UnionTemplate.OrgDetails or Employer → Employer; the field
+      gets a label (ImisId → iMIS ID); Equals → is, Not Equals → is not;
+    - a disabled rule stays in its rank, lightly struck through; every
+      rule ends with a plain green Enabled or red Disabled sign (no
+      badge), and each row lights up on hover so its sign is easy to
+      match to it.
+    Open questions:
+    - **Rank 3 in the live data** ANDs two workplace iMIS IDs (101 and
+      23101; rows 113 and 114): the flow confirms AND, so rank 3 covers
+      nothing. Two workplaces need two ranks.
+    - **The counts** are a Needs Attention tracker above the rules
+      (owner, 4 October 2026; it replaced a totals line beside the covered
+      records title): `us-attention` with `data-us-iqa-filter="AgreementNum"`
+      on folder `$/_i4u_/Core/CA/v2/Coverage Trackers`, two IQAs,
+      `01 Covered Workplaces` and `02 Covered Members`. Each counts the
+      agreement's rows in `i4u_UT_CA_Coverage_Members` of one contact
+      type (the flow stores only ContactID) and returns one summary row:
+      `Count`, `Header` (Workplaces, Members), `Label` (covered by this
+      agreement), `Link` ''. Filter `AgreementOrdinal`, search label
+      `AgreementNum`; available via REST. One row even at zero is to be
+      checked in the IQA designer.
+    - **Names for values.** An `.ImisId` rule's value is an iMIS ID, so
+      `ValueLabel` can join the iMIS contact for its name. Other rules
+      (Category RN) show their value only.
+    - **Fields.** The full list of Rule1 fields, for their labels
+      (the flow runs only Equals and Not Equals).
+    - **Refresh.** Update coverage refreshes the rules panel on close;
+      the covered records panel needs refreshing too.
 
 ## Later (after MVP)
 

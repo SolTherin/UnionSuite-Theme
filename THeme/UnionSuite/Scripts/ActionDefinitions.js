@@ -399,6 +399,17 @@
   rowPopup('agreements.edit-term', 'Edit term', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Layouts/Popups/Add-or-Update-Term.aspx', {AgreementOrdinal: context.agreementNum, TermOrdinal: context.ordinal}),
     'Update term', formWidth);
+  // The increase row's pencil (owner, 5 October 2026). An edit can change
+  // the group totals, so closing it refreshes the whole list, as Add
+  // increase does, rather than the one row.
+  define('agreements.edit-increase', {
+    presentation: {label: 'Edit increase', ...editIcon},
+    context: {agreementId, agreementNum, ordinal: rowOrdinal},
+    action: {type: 'popup', recordKey: ['agreementId', 'ordinal'],
+      href: ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Edit-Scheduled-Increase.aspx', {AgreementNum: context.agreementNum, IncreaseOrdinal: context.ordinal}),
+      popup: {title: 'Edit scheduled increase', width: '90%', height: '90%', ...formWidth},
+      refresh: {when: 'close', targets: [{type: 'origin-report'}]}}
+  });
 
   // ── CloudToolz ──────────────────────────────────────────────
   // Every CloudToolz call stores a short-lived ZenToken in iMIS first; CloudToolz

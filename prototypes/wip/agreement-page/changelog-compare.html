@@ -1,0 +1,456 @@
+<!doctype html>
+<!--
+  Agreement changelog, eight ways, on the Activity tab (decision 14 in
+  README.md: option 8 chosen, 4 October 2026), all filled from the same sample changes (one row per field
+  change, as a proposed Agreement Changes IQA would return them):
+  1. The contact page v3 Change history: a native Query Menu grid (Date and
+     time, Field or action, Old value, New value, Changed by).
+  2. The v1 agreement mock-up's Change History timeline
+     (prototypes/Agreement Management/Agreement-Management-Prototype.html),
+     rebuilt on theme tokens (us-changelog us-changelog--timeline).
+  3. Activity feed record cards: US-ACTIVITY-FEED with one "change" source.
+  4. A ledger by day and save (us-changelog).
+  5. Option 4 on a rail (us-changelog us-changelog--rail): no day
+     headings; the date and time on the right, as option 3; a line joins
+     one day's saves and breaks between days.
+  6. Change-first rail: the record and first value change lead; further
+     fields slide open within the save.
+  7. Browse and inspect: a connected list selects one save for a full
+     before/after comparison. Details move inline in a narrow panel.
+  8. Option 5 made more like option 6, led by what happened
+     (us-changelog us-changelog--rail us-changelog--events): the event as
+     the title with who beside it (Task Added · by Mary O'Conner), the
+     date and time on the right, the record and its fields as details.
+  Options 6 and 7 are comparison-only explorations in changelog-explorations
+  .css / .js, reading the same sample. They are not installable templates.
+  Options 2, 4, 5 and 8 share templates/Agreement-Changelog-Query-Template.html;
+  the layout is the iPart CSS class (changelog.candidate.css, saves, days
+  and chips from changelog.candidate.js). Serve the project root
+  (static-node) and open this page. No change log exists in iMIS yet: the
+  table, the IQA and its folder are proposals.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Changelog Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="changelog.candidate.css">
+  <link rel="stylesheet" href="changelog-explorations.css">
+  <style>
+    /* Comparison page layout only. */
+    body.lc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .lc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .lc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .lc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .lc-toolbar select,
+    .lc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .lc-toolbar .lc-mode {
+      margin-inline-start: auto;
+    }
+
+    .lc-stage {
+      display: grid;
+      gap: 32px;
+      max-width: var(--lc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .lc-option {
+      display: grid;
+      gap: 12px;
+      scroll-margin-top: 56px;
+    }
+
+    .lc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .lc-option > p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .lc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    .lc-nowrap {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="lc-page">
+
+<!-- Native iMIS page state the feed reads (API root and request token). -->
+<object hidden type="application/json"><param name="__ClientContext" id="__ClientContext" value='{"baseUrl":"/","isAnonymous":false,"loggedInPartyId":"104203","selectedPartyId":"104203","websiteRoot":"/"}'></object>
+<input type="hidden" name="__RequestVerificationToken" id="__RequestVerificationToken" value="prototype-token">
+
+<div class="lc-toolbar" aria-label="Comparison controls">
+  <strong>Changelog</strong>
+  <nav aria-label="Options">
+    <a href="#lc-grid">1</a>
+    <a href="#lc-timeline">2</a>
+    <a href="#lc-feed">3</a>
+    <a href="#lc-ledger">4</a>
+    <a href="#lc-rail">5</a>
+    <a href="#lc-summary">6 · Change first</a>
+    <a href="#lc-inspector">7 · Browse &amp; inspect</a>
+    <a href="#lc-events">8 · Decided</a>
+  </nav>
+  <label>Panel width
+    <select id="lc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Activity tab)</option>
+      <option value="1600px">Full (wide screen)</option>
+    </select>
+  </label>
+  <label>Sample
+    <select id="lc-sample">
+      <option value="full" selected>33 changes in 25 saves, Jan to Oct 2026</option>
+      <option value="recent">Recent: the last 2 weeks</option>
+    </select>
+  </label>
+  <a href="communications-compare.html">Communications comparison</a>
+  <a href="index-v2.html?AgreementID=A107&amp;AgreementNum=123#activity">Layout v2</a>
+  <button type="button" class="lc-mode" id="lc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="lc-stage" id="lc-stage">
+
+  <section class="lc-option" id="lc-grid" aria-labelledby="lc-grid-title">
+    <h2 id="lc-grid-title">1. Contact page v3: Change history grid</h2>
+    <p>The contact page's Admin tab audit log: a native Query Menu, one row per field change, styled by the theme. Nothing to build but the IQA, and it sorts, pages and exports like every report. Every change stands alone: a save that changed three fields is three unrelated rows, the record changed and the field share one column, and long values (a term's comment) stretch the row. No filter by area without the IQA's own filter fields.</p>
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div id="lc-grid_ContentPanel"><div id="lc-grid_ListerPanel"><div data-gridid="lc-grid"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+        <thead><tr><th class="rgHeader" scope="col">Date and time</th><th class="rgHeader" scope="col">Field or action</th><th class="rgHeader" scope="col">Old value</th><th class="rgHeader" scope="col">New value</th><th class="rgHeader" scope="col">Changed by</th></tr></thead>
+        <tbody id="lc-grid-rows"></tbody>
+      </table></div></div></div></div></div></div>
+    </div></div>
+  </section>
+
+  <section class="lc-option" id="lc-timeline" aria-labelledby="lc-timeline-title">
+    <h2 id="lc-timeline-title">2. v1 mock-up: Change History timeline (us-changelog us-changelog--timeline)</h2>
+    <p>The agreement mock-up's History tab on theme tokens: each save is one entry on a rail, with the person's initials, their name, a coloured badge for the kind of change (Created, Added, Updated, Status change, Removed) and the full time, a sentence saying what changed, then each field as its old and new value side by side. The v1 search and type filter become the theme's search and type chips. Saves read as one event, but every entry repeats the full date, and the 25 saves take about 2,550px.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-changelog us-changelog--timeline us-query-search" data-us-changelog-today="2026-10-02"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-lc-template="Agreement-Changelog-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-feed" aria-labelledby="lc-feed-title">
+    <h2 id="lc-feed-title">3. Activity feed record cards (US-ACTIVITY-FEED, a "change" type)</h2>
+    <p>The record card used for communications, one card per field change: the area as the card's category, who as its sender, a headline for the record and the change itself as the preview line; the field, old and new value again in its details. Months, the date range, search across loaded changes and Show more come from the feed. One design for every history on the page, but a card is about 78px for one field, a three-field save is three cards, and a chevron that opens to what the closed card already says.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-changes"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet"><section data-item="changes-0"><div class="QueryTemplateItem">
+        <div class="us-activity-feed"
+             data-us-activity-folder="$/_i4u_/Core/CA/v2/Changes"
+             data-us-activity-filter="AgreementNum" data-us-activity-value="123"
+             data-us-activity-start="StartDate" data-us-activity-days="0"
+             data-us-activity-today="2026-10-02">
+          <ul class="us-activity__sources" hidden>
+            <li data-source="changes" data-query="Agreement Changes Feed" data-details="Agreement Changes Feed Details" data-type="change" data-label="Change" data-plural="Changes"></li>
+          </ul>
+        </div>
+      </div></section></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-ledger" aria-labelledby="lc-ledger-title">
+    <h2 id="lc-ledger-title">4. Ledger by day and save (us-changelog)</h2>
+    <p>One heading per day; under it each save is one line in plain words ("Mary O'Conner updated the term Staff entitled to a half day off on Fridays") with the area's icon and the time, and its fields under the sentence: the field, the old value struck through, the new one. The record names the save; the fields line up. Area chips (Terms, Increases, Tasks…) and the search sit in the funnel, with the count beside the title, as the terms panel. The 25 saves take about 2,250px (2,550px on the timeline); each further field adds a 20px line, and a day with several saves reads as a short paragraph. Same template and IQA as option 2.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-changelog us-query-search" data-us-changelog-today="2026-10-02"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-lc-template="Agreement-Changelog-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-rail" aria-labelledby="lc-rail-title">
+    <h2 id="lc-rail-title">5. Ledger on a rail (us-changelog us-changelog--rail)</h2>
+    <p>Option 4 without the day headings. Each save keeps its sentence, area icon and field lines, and its date and time stack on the right as on the record cards in option 3 (1 Oct over 4:38 pm), beside the sentence and first field line rather than above them. A line joins the icons of one day's saves, the cards' rail, and stops at the day's last save; the next day starts a new line after a gap and a thin rule. The dates line up down the right edge, and with no day headings and no rule between one day's saves the 25 saves take about 1,770px, the shortest here. Same template and IQA as options 2 and 4.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-changelog us-changelog--rail us-query-search" data-us-changelog-today="2026-10-02"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-lc-template="Agreement-Changelog-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-summary" aria-labelledby="lc-summary-title">
+    <h2 id="lc-summary-title">6. Change first — a reading timeline</h2>
+    <p>The record leads, with its first value change immediately below it; the person and time sit quietly underneath. A continuous icon rail connects the saves across days, with a date label only when the day changes. Further fields slide open inside the same entry. Try the half-day term or “Agreement details”. Best for catching up on what changed, with less repeated wording; comparing every field takes an extra click.</p>
+    <div class="ContentItemContainer"><div class="us-query-template lc-explore" data-lc-explore="summary"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2><span class="lc-explore__count" role="status"></span></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="lc-explore__mount"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-inspector" aria-labelledby="lc-inspector-title">
+    <h2 id="lc-inspector-title">7. Browse &amp; inspect — a focused comparison</h2>
+    <p>A compact, connected feed on the left is the index; select a save to read every field side by side on the right. The selection stays visible while you browse, and long values have room to wrap. At narrow widths, the comparison slides open beneath the selected entry. Best for investigating a particular edit; less useful for reading every change in one pass. The half-day term is selected initially to demonstrate a save with two fields.</p>
+    <div class="ContentItemContainer"><div class="us-query-template lc-explore" data-lc-explore="inspector"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2><span class="lc-explore__count" role="status"></span></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="lc-explore__mount"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="lc-option" id="lc-events" aria-labelledby="lc-events-title">
+    <h2 id="lc-events-title">8. Decided (owner, 4 October 2026): rail led by what happened (us-changelog us-changelog--rail us-changelog--events)</h2>
+    <p>Option 5 made more like option 6, with the owner's hierarchy (4 October 2026). Where option 6 leads with the record, this leads with the event. First, what happened, as the only strong text: Task Added, Milestone Updated, Term Status Changed, Agreement Details Updated, Contact Deleted. Second, who and when: "· by Mary O'Conner" beside the title (owner, 4 October 2026), the date and time on the right, both smaller and in the base colour. Third, the details, muted: the record's name (the task, the term), then each field's old and new value. The area icon, the day line and the chips are option 5's. Same template and IQA.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-changelog us-changelog--rail us-changelog--events us-query-search" data-us-changelog-today="2026-10-02"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Change history</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-lc-template="Agreement-Changelog-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // OFFLINE FIXTURE. Sample change history for agreement A107 (AgreementNum
+  // 123), newest first, as the proposed Agreement Changes IQA would return
+  // it: one row per field change; rows written by one save share ChangeSet.
+  // People and records match index-v2.html. "Today" is 2 October 2026.
+  let setNumber = 0;
+  function save(date, by, area, action, item, fields = [['', '', '']]) {
+    const ChangeSet = 'S-' + String(++setNumber).padStart(3, '0');
+    return fields.map(([Field, OldValue, NewValue], index) => ({
+      ChangeKey: ChangeSet + '-' + (index + 1), ChangeDate: date, ChangeSet, ChangedBy: by,
+      Area: area, Action: action, Item: item, Field, OldValue, NewValue
+    }));
+  }
+
+  const CHANGES = [
+    save('2026-10-01T16:38:00', "Mary O'Conner", 'Attachments', 'Added', 'Draft agreement v3', [['', '', 'Tagged Logged Document']]),
+    save('2026-10-01T09:14:00', 'Hub TestLastName', 'Tasks', 'Added', 'Task goes here', [['Assigned to', '', 'Unassigned']]),
+    save('2026-09-30T14:05:00', "Mary O'Conner", 'Terms', 'Updated', 'Staff entitled to a half day off on Fridays', [
+      ['Status', 'Not included', 'Negotiating'],
+      ['Comment', '', 'Employer asks to defer to the next agreement.']
+    ]),
+    save('2026-09-28T06:00:00', 'System', 'Tasks', 'Status', 'Send draft agreement to the bargaining committee', [['Status', 'Outstanding', 'Overdue']]),
+    save('2026-09-24T09:40:00', 'Dani Sundara', 'Increases', 'Updated', 'C3, after 6 months', [
+      ['Type', 'Percentage', 'Fixed amount'],
+      ['Amount', '2%', '$25.00 per week']
+    ]),
+    save('2026-09-24T09:31:00', 'Dani Sundara', 'Increases', 'Added', 'General #4, 1 Jul 2028', [['', '', '3%']]),
+    save('2026-09-18T10:20:00', "Mary O'Conner", 'Agreement', 'Updated', '', [
+      ['Priority', 'Medium', 'High'],
+      ['Expiry date', '30 Jun 2029', '30 Jun 2030'],
+      ['Description', 'Collective bargaining agreement for Stark Industries.', 'New collective bargaining agreement for Stark Industries.']
+    ]),
+    save('2026-08-20T15:49:00', 'Christina Zerk', 'Milestones', 'Updated', 'Second round of negotiations', [['Deadline', '', '30 Oct 2026']]),
+    save('2026-08-20T15:47:00', 'Christina Zerk', 'Milestones', 'Added', 'Second round of negotiations'),
+    save('2026-07-31T12:40:00', 'Alex Keaton', 'Tasks', 'Status', 'Email members about agreement', [['Status', 'Outstanding', 'Done']]),
+    save('2026-07-16T17:10:00', "Mary O'Conner", 'Terms', 'Status', 'Employer superannuation contribution', [
+      ['Status', 'Negotiating', 'Included'],
+      ['Amount', '11.50', '12.00']
+    ]),
+    save('2026-07-16T17:02:00', "Mary O'Conner", 'Terms', 'Removed', 'Rostered days off', [['', 'General · Not included', '']]),
+    save('2026-07-16T16:55:00', "Mary O'Conner", 'Meetings', 'Updated', 'General meeting, 16 Jul', [['Outcome', '', 'Classification structure tabled']]),
+    save('2026-06-04T11:05:00', 'Andrew O Newnham', 'Attachments', 'Updated', 'Screenshot 2026-06-03 122317', [['Tags', '', 'ID, new tag']]),
+    save('2026-06-04T11:02:00', 'Andrew O Newnham', 'Attachments', 'Added', 'Screenshot 2026-06-03 122317'),
+    save('2026-05-21T17:20:00', "Mary O'Conner", 'Milestones', 'Status', 'First round of negotiations', [['Status', 'In progress', 'Completed']]),
+    save('2026-05-11T09:11:00', 'Hub TestLastName', 'Attachments', 'Added', 'Contract File 27-05-2026'),
+    save('2026-05-11T09:11:00', 'Hub TestLastName', 'Attachments', 'Added', 'Initial Proposal v2'),
+    save('2026-05-11T09:11:00', 'Hub TestLastName', 'Attachments', 'Added', 'Survey Responses v2'),
+    save('2026-04-02T10:00:00', "Mary O'Conner", 'Contacts', 'Added', 'Frank Grimes', [['', '', 'External · Consultant']]),
+    save('2026-03-16T14:30:00', "Mary O'Conner", 'Coverage', 'Updated', 'Stark Enterprise', [['Covered members', '35', '38']]),
+    save('2026-02-10T11:45:00', "Mary O'Conner", 'Agreement', 'Status', '', [['Status', 'Draft', 'Pending']]),
+    save('2026-01-12T09:30:00', "Mary O'Conner", 'Contacts', 'Updated', 'Dani Sundara', [
+      ['Group', 'All', 'SBU'],
+      ['Role', 'Consultant', 'General']
+    ]),
+    save('2026-01-01T09:05:00', "Mary O'Conner", 'Contacts', 'Added', "Mary O'Conner", [['', '', 'Staff · Lead']]),
+    save('2026-01-01T09:00:00', "Mary O'Conner", 'Agreement', 'Created', 'A107 Collective Bargaining – Stark Industries', [
+      ['Type', '', 'EBA_SupportedBargaining'],
+      ['Status', '', 'Draft'],
+      ['Lead', '', "Mary O'Conner"]
+    ])
+  ].flat();
+
+  let sample = 'full';
+  const changes = () => sample === 'recent' ? CHANGES.filter(row => row.ChangeDate >= '2026-09-18') : CHANGES;
+
+  // ── Words, as the IQA would build them ───────────────────────────
+
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function changeText(iso) {
+    const [date, time] = iso.split('T');
+    const [y, m, d] = date.split('-').map(Number);
+    const [h, min] = time.split(':').map(Number);
+    return d + ' ' + MONTHS[m - 1] + ' ' + y + ', ' + (h % 12 || 12) + ':' + String(min).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm');
+  }
+  const SINGULAR = {Terms: 'Term', Increases: 'Increase', Contacts: 'Contact', Tasks: 'Task', Milestones: 'Milestone', Attachments: 'Attachment', Meetings: 'Meeting', Notes: 'Note', Coverage: 'Coverage', Agreement: 'Agreement'};
+  const ACTION_WORDS = {Created: 'created', Added: 'added', Updated: 'updated', Status: 'status changed', Removed: 'removed'};
+  // "Status changed: Paid meetings", "Term added: Rostered days off".
+  const headline = row => row.Action === 'Status' || row.Action === 'Updated'
+    ? (row.Field ? row.Field + ' changed' : 'Updated') + (row.Item ? ': ' + row.Item : '')
+    : SINGULAR[row.Area] + ' ' + ACTION_WORDS[row.Action] + (row.Item ? ': ' + row.Item : '');
+  const change = row => row.Field
+    ? (row.OldValue || '—') + ' → ' + (row.NewValue || '—')
+    : row.NewValue || row.OldValue || '';
+
+  // ── Option 1: the native grid ────────────────────────────────────
+
+  function renderGrid() {
+    const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    document.getElementById('lc-grid-rows').innerHTML = changes().map((row, index) => {
+      const what = row.Field ? (row.Item ? row.Item + ' – ' : '') + row.Field : SINGULAR[row.Area] + ' ' + ACTION_WORDS[row.Action] + (row.Item ? ': ' + row.Item : '');
+      return `<tr class="${index % 2 ? 'rgAltRow' : 'rgRow'}"><td class="lc-nowrap">${esc(changeText(row.ChangeDate))}</td><td>${esc(what)}</td><td>${esc(row.OldValue || '—')}</td><td>${esc(row.NewValue || '—')}</td><td>${esc(row.ChangedBy)}</td></tr>`;
+    }).join('');
+  }
+
+  // ── Options 2 and 4: the Query Template ──────────────────────────
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  let templateMarkup = '';
+  async function renderTemplates() {
+    if (!templateMarkup) {
+      const response = await fetch('templates/Agreement-Changelog-Query-Template.html', {cache: 'no-cache'});
+      if (!response.ok) throw new Error('No template');
+      templateMarkup = (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+    }
+    const rows = changes().map(row => ({...row, ChangeText: changeText(row.ChangeDate)}));
+    document.querySelectorAll('[data-lc-template]').forEach(set => {
+      set.innerHTML = rows.map((row, index) =>
+        `<section data-item="changes-${index}"><div class="QueryTemplateItem">${fill(templateMarkup, row)}</div></section>`).join('');
+    });
+  }
+
+  // ── Option 3: the feed's IQAs, through a stand-in for /api/query ─
+
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async (input, options = {}) => {
+    const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+    if (!url.pathname.endsWith('/api/query')) return realFetch(input, options);
+    const name = (url.searchParams.get('QueryName') || '').replace('$/_i4u_/Core/CA/v2/Changes/', '');
+    const ours = url.searchParams.get('AgreementNum') === '123';
+    const limit = Number(url.searchParams.get('limit')) || 100;
+    const offset = Number(url.searchParams.get('offset')) || 0;
+    await new Promise(resolve => setTimeout(resolve, 120 + Math.random() * 200));
+    let rows = [];
+    if (name === 'Agreement Changes Feed') {
+      const start = url.searchParams.get('StartDate') || '';
+      rows = (ours ? changes() : []).filter(row => row.ChangeDate.slice(0, 10) >= start).map(row => ({
+        ActivityKey: row.ChangeKey, ActivityDate: row.ChangeDate, CreatedBy: row.ChangedBy,
+        Category: row.Area, Subject: headline(row), Summary: change(row)
+      }));
+    } else if (name === 'Agreement Changes Feed Details') {
+      const row = ours && CHANGES.find(item => item.ChangeKey === url.searchParams.get('ActivityKey'));
+      if (row) rows = [{'Additional-Record': row.Item, 'Additional-Field': row.Field, 'Additional-Old value': row.OldValue, 'Additional-New value': row.NewValue, 'Additional-Save': row.ChangeSet}];
+    } else {
+      return {ok: false, status: 404, json: async () => ({})};
+    }
+    const slice = rows.slice(offset, offset + limit);
+    const data = {TotalCount: rows.length, Offset: offset, Limit: limit, Count: slice.length, HasNext: offset + slice.length < rows.length, Items: {$values: slice}};
+    return {ok: true, status: 200, json: async () => data};
+  };
+
+  // ── Toolbar ──────────────────────────────────────────────────────
+
+  document.getElementById('lc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--lc-width', event.target.value);
+  });
+
+  const feedOriginal = document.querySelector('.us-activity-feed').outerHTML;
+  document.getElementById('lc-sample').addEventListener('change', event => {
+    sample = event.target.value;
+    renderGrid();
+    renderTemplates().catch(showServeHint);
+    window.UnionSuiteChangelogExplorations?.render(changes());
+    const feed = document.querySelector('.us-activity-feed');
+    feed.replaceWith(document.createRange().createContextualFragment(feedOriginal).firstElementChild);
+    window.UnionSuiteActivityFeed?.refresh();
+  });
+
+  document.getElementById('lc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  function showServeHint() {
+    if (document.querySelector('.lc-hint')) return;
+    const hint = document.createElement('p');
+    hint.className = 'lc-hint';
+    hint.textContent = 'Options 2 to 4 need this page served, not opened from disk: serve the project root and open http://localhost:8778/prototypes/wip/agreement-page/changelog-compare.html.';
+    document.getElementById('lc-stage').prepend(hint);
+  }
+
+  renderGrid();
+  if (location.protocol === 'file:') showServeHint();
+  else renderTemplates().catch(showServeHint);
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="changelog.candidate.js"></script>
+<script src="changelog-explorations.js"></script>
+<script>window.UnionSuiteChangelogExplorations.render(changes());</script>
+</body>
+</html>

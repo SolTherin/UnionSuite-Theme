@@ -1,0 +1,356 @@
+<!doctype html>
+<!--
+  Agreement coverage rules (decision 15 in README.md). The rules
+  decide which records the agreement covers: rules sharing a rank must all
+  match (and); a record matching any rank's group is covered (or) (owner,
+  4 October 2026). Rules are edited in the v2/Popups/Coverage.aspx page;
+  the page shows them. The covered records stay the existing simple IQA
+  (shown once, at the end).
+  1. Current: the Existing coverage rules grid, as on the Coverage page.
+  2. Rule groups, decided 4 October 2026 and in the theme
+     (US-COVERAGE-RULES; preset us-agreement-coverage), on
+     templates/Agreement-Coverage-Rules-Query-Template.html.
+  The covered counts are a Needs Attention tracker (index-v2.html). Options
+  3 (sentences) and 4 (grouped table) are retired: README decision 15 keeps
+  their description, and coverage.candidate.css / .js their code. Serve the
+  project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coverage Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <style>
+    /* Comparison page layout only. */
+    body.vc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .vc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .vc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .vc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .vc-toolbar select,
+    .vc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .vc-toolbar .vc-mode {
+      margin-inline-start: auto;
+    }
+
+    .vc-stage {
+      display: grid;
+      gap: 32px;
+      max-width: var(--vc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .vc-option {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+      scroll-margin-top: 56px;
+    }
+
+    .vc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .vc-option > p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .vc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    /* Option 1: the current page's pieces. */
+    .vc-tick {
+      color: var(--success);
+    }
+
+    .vc-num {
+      text-align: end;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="vc-page">
+
+<div class="vc-toolbar" aria-label="Comparison controls">
+  <strong>Coverage rules</strong>
+  <nav aria-label="Options">
+    <a href="#vc-current">1</a>
+    <a href="#vc-groups">2 · Decided</a>
+    <a href="#vc-covered">Covered records</a>
+  </nav>
+  <label>Panel width
+    <select id="vc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Details tab)</option>
+      <option value="1600px">Full (wide screen)</option>
+    </select>
+  </label>
+  <label>Sample
+    <select id="vc-sample">
+      <option value="live" selected>Live rules table (6 rules)</option>
+      <option value="named">Named workplaces, one rule off</option>
+    </select>
+  </label>
+  <a href="index-v2.html?AgreementID=A107&amp;AgreementNum=123#details">Layout v2</a>
+  <button type="button" class="vc-mode" id="vc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="vc-stage" id="vc-stage">
+
+  <section class="vc-option" id="vc-current" aria-labelledby="vc-current-title">
+    <h2 id="vc-current-title">1. Current: Existing coverage rules</h2>
+    <p>The Coverage page's grid as it is: a count strip, then one row per rule with the rank as a number. The and / or logic is not on the screen: rules 2 and 2 must both match, but they read as two separate rows like the rest. Rule 1 and Rule 2 are the field and the value; a workplace shows as its iMIS ID only.</p>
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Existing coverage rules</h2></div>
+      <div class="panel-body-container"><div class="panel-body">
+        <div class="AsiInformation" role="note"><p id="vc-current-counts"></p></div>
+        <div data-gridid="vc-current-grid"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+          <thead><tr><th class="rgHeader" scope="col"><span class="sr-only">Select</span></th><th class="rgHeader" scope="col">Enabled</th><th class="rgHeader" scope="col">Rank</th><th class="rgHeader" scope="col">Entity</th><th class="rgHeader" scope="col">Rule 1</th><th class="rgHeader" scope="col">Match Condition</th><th class="rgHeader" scope="col">Rule 2</th></tr></thead>
+          <tbody id="vc-current-rows"></tbody>
+        </table></div></div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <section class="vc-option" id="vc-groups" aria-labelledby="vc-groups-title">
+    <h2 id="vc-groups-title">2. Decided (owner, 4 October 2026), in the theme: rule groups (us-agreement-coverage)</h2>
+    <p>Each rank becomes a tinted box labelled with its real rank, "Rank 2 · all must match" ("all active rules must match" when one is disabled), with its rules inside joined by "and"; an "or" sits between the boxes. This is how the CA: Update Covered Contacts flow applies them: every enabled rule in a rank must match, and any rank covers. Each rule reads left to right: the record in everyday words (Workplace, Member, Job, Member profile, Employer, for the CloudToolz tables in Rule1), then the field, the condition (is, is not) and the value, with the workplace's name when the IQA returns one. Every rule ends with a plain sign, a green Enabled or a red Disabled (no badge); a disabled rule stays in its rank, lightly struck through. Hover a rule to see which sign is its own. Update coverage opens the existing popup. The covered counts are a Needs Attention tracker above the rules on the agreement page (index-v2.html; owner, 4 October 2026).</p>
+    <div class="ContentItemContainer"><div class="us-agreement-coverage"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[filter]] Coverage rules</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template="Agreement-Coverage-Rules-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="vc-option" id="vc-covered" aria-labelledby="vc-covered-title">
+    <h2 id="vc-covered-title">Covered records: the existing IQA, unchanged</h2>
+    <p>The records the rules cover, from the existing simple IQA (owner, 4 October 2026), under the rules on the Details tab. Not part of the comparison. The covered counts are a Needs Attention tracker (us-attention with data-us-iqa-filter="AgreementNum"); see the Details tab of index-v2.html.</p>
+    <div class="ContentItemContainer"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[user-shield]] Covered records</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div data-gridid="vc-covered-grid"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+        <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">Record type</th><th class="rgHeader" scope="col">Employer</th><th class="rgHeader vc-num" scope="col">Members covered</th></tr></thead>
+        <tbody id="vc-covered-rows"></tbody>
+      </table></div></div></div></div>
+    </div></div>
+  </section>
+
+</main>
+
+<script>
+  // OFFLINE FIXTURE. Coverage rules for agreement A107 (AgreementNum 123),
+  // as the proposed Agreement Coverage Rules IQA returns them: the rules
+  // table's own columns (Rule1, MatchCondition, Rule2), sorted Rank, then
+  // Ordinal; ValueLabel is the optional name for the value.
+  const rule = (Ordinal, Rank, Rule1, MatchCondition, Rule2, ValueLabel = '', Enabled = '1') =>
+    ({Ordinal, Rank, Enabled, Rule1, MatchCondition, Rule2, ValueLabel});
+
+  // The coverage rules table as the owner exported it (4 October 2026).
+  // It has no name for a value, so ValueLabel is blank.
+  const TABLE = [
+    {Ordinal: '99', Rank: '1', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Organisations.ImisId', Rule2: '103841', AgreementOrdinal: '123'},
+    {Ordinal: '112', Rank: '2', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Organisations.ImisId', Rule2: '103997', AgreementOrdinal: '123'},
+    {Ordinal: '113', Rank: '3', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Organisations.ImisId', Rule2: '101', AgreementOrdinal: '123'},
+    {Ordinal: '114', Rank: '3', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Organisations.ImisId', Rule2: '23101', AgreementOrdinal: '123'},
+    {Ordinal: '115', Rank: '4', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Organisations.ImisId', Rule2: '23309', AgreementOrdinal: '123'},
+    {Ordinal: '117', Rank: '2', Enabled: '1', MatchCondition: 'Equals', Rule1: 'ZenCrm.Individuals.Category', Rule2: 'RN', AgreementOrdinal: '123'}
+  ];
+  const fromTable = rows => rows
+    .filter(row => row.AgreementOrdinal === '123')
+    .sort((a, b) => Number(a.Rank) - Number(b.Rank) || Number(a.Ordinal) - Number(b.Ordinal))
+    .map(row => rule(row.Ordinal, row.Rank, row.Rule1, row.MatchCondition, row.Rule2, '', row.Enabled));
+
+  const SAMPLES = {
+    // The live table above; the totals are the Coverage page's (they are
+    // not in the table).
+    live: {
+      totals: {WorkplaceCount: '6', MemberCount: '5431'},
+      rules: fromTable(TABLE),
+      covered: [
+        ['Stark Enterprise', 'Workplace', 'Stark Industries', 1840],
+        ['Stark Industries – Malibu Works', 'Workplace', 'Stark Industries', 212],
+        ['Stark Industries – Long Beach', 'Workplace', 'Stark Industries', 1190],
+        ['Stark Industries – Queens', 'Workplace', 'Stark Industries', 964],
+        ['Stark Industries – Gulf Coast', 'Workplace', 'Stark Industries', 841],
+        ['Stark Industries – Head Office', 'Workplace', 'Stark Industries', 384]
+      ]
+    },
+    // Every table the flow knows, in both of its spellings, with the
+    // workplaces' names, a disabled rule in an active rank, a rank with
+    // every rule disabled, and a gap in the ranks (no rank 4).
+    named: {
+      totals: {WorkplaceCount: '3', MemberCount: '890'},
+      rules: [
+        rule('11', '1', 'ZenCrm.Organisations.ImisId', 'Equals', '103841', 'Stark Enterprise'),
+        rule('12', '2', 'Workplace.ImisId', 'Equals', '103997', 'Stark Industries – Malibu Works'),
+        rule('13', '2', 'ZenCrm.Individuals.Category', 'Equals', 'RN'),
+        rule('14', '2', 'UnionTemplate.Profile.MemberType', 'Not Equals', 'Associate', '', '0'),
+        rule('15', '3', 'UnionTemplate.OrgDetails.Sector', 'Equals', 'Aged Care'),
+        rule('16', '3', 'UnionTemplate.Jobs.EmploymentType', 'Not Equals', 'Casual'),
+        rule('17', '5', 'Individuals.Category', 'Equals', 'Delegate', '', '0'),
+        rule('18', '5', 'Employer.ImisId', 'Equals', '100512', 'Stark Industries', '0')
+      ],
+      covered: [
+        ['Stark Enterprise', 'Workplace', 'Stark Industries', 640],
+        ['Stark Industries – Malibu Works', 'Workplace', 'Stark Industries', 212],
+        ['Stark Industries', 'Employer', 'Stark Industries', 38]
+      ]
+    }
+  };
+
+  let sample = 'live';
+  const rows = () => SAMPLES[sample].rules;
+
+  // The agreement's page URL: Update coverage reads AgreementID and
+  // AgreementNum from it.
+  {
+    const url = new URL(location.href);
+    if (!url.searchParams.get('AgreementNum')) {
+      url.searchParams.set('AgreementID', 'A107');
+      url.searchParams.set('AgreementNum', '123');
+      try { history.replaceState(null, '', url); } catch (error) { /* optional */ }
+    }
+  }
+
+  const escapeHtml = value => String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  // ── Option 1 and the covered records: native grids ───────────────
+
+  // The Coverage page's Entity column: Organisations show as Workplace.
+  const pageEntity = rule1 => {
+    const table = rule1.split('.').slice(-2, -1)[0] || '';
+    return {Organisations: 'Workplace'}[table] || table;
+  };
+
+  function renderGrids() {
+    const {totals, covered} = SAMPLES[sample];
+    document.getElementById('vc-current-counts').textContent = 'Workplace Count: ' + totals.WorkplaceCount + ' | Member Count: ' + totals.MemberCount;
+    document.getElementById('vc-current-rows').innerHTML = SAMPLES[sample].rules.map((row, index) =>
+      `<tr class="${index % 2 ? 'rgAltRow' : 'rgRow'}"><td><input type="checkbox" aria-label="Select rule ${index + 1}"></td>` +
+      `<td>${row.Enabled === '1' ? '<i class="ti ti-check vc-tick" aria-label="Enabled"></i>' : '<span class="sr-only">Disabled</span>'}</td>` +
+      `<td>${escapeHtml(row.Rank)}</td><td>${escapeHtml(pageEntity(row.Rule1))}</td><td>${escapeHtml(row.Rule1.split('.').pop())}</td>` +
+      `<td>${escapeHtml(row.MatchCondition)}</td><td>${escapeHtml(row.Rule2)}</td></tr>`).join('');
+    document.getElementById('vc-covered-rows').innerHTML = covered.map(([name, type, employer, members], index) =>
+      `<tr class="${index % 2 ? 'rgAltRow' : 'rgRow'}"><td>${escapeHtml(name)}</td><td>${escapeHtml(type)}</td><td>${escapeHtml(employer)}</td><td class="vc-num">${members.toLocaleString('en-AU')}</td></tr>`).join('');
+  }
+
+  // ── Options 2 to 4: the Query Template ───────────────────────────
+
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  let markup = '';
+  async function renderTemplates() {
+    if (!markup) {
+      const response = await fetch('templates/Agreement-Coverage-Rules-Query-Template.html', {cache: 'no-cache'});
+      if (!response.ok) throw new Error('No template');
+      markup = (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+    }
+    document.querySelectorAll('[data-vc-template]').forEach(set => {
+      set.innerHTML = rows().map((row, index) =>
+        `<section data-item="rules-${index}"><div class="QueryTemplateItem">${fill(markup, row)}</div></section>`).join('');
+    });
+  }
+
+  // ── Toolbar ──────────────────────────────────────────────────────
+
+  document.getElementById('vc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--vc-width', event.target.value);
+  });
+
+  document.getElementById('vc-sample').addEventListener('change', event => {
+    sample = event.target.value;
+    renderGrids();
+    renderTemplates().catch(showServeHint);
+  });
+
+  document.getElementById('vc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  function showServeHint() {
+    if (document.querySelector('.vc-hint')) return;
+    const hint = document.createElement('p');
+    hint.className = 'vc-hint';
+    hint.textContent = 'Options 2 to 4 need this page served, not opened from disk: serve the project root and open http://localhost:8778/prototypes/wip/agreement-page/coverage-compare.html.';
+    document.getElementById('vc-stage').prepend(hint);
+  }
+
+  renderGrids();
+  if (location.protocol === 'file:') showServeHint();
+  else renderTemplates().catch(showServeHint);
+</script>
+<!-- The theme gives each panel its title icon and heading buttons, and
+     paints Update coverage (agreements.edit-coverage). Without AgreementID
+     and AgreementNum in the URL the action stays disabled. -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+</body>
+</html>

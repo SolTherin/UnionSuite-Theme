@@ -15262,6 +15262,276 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 /* US-INCREASES:END */
 
+/* US-COVERAGE-RULES:START — agreement coverage rules as rule groups (the
+   us-agreement-coverage preset; decided 4 October 2026).
+   Behaviour: US-COVERAGE-RULES in zUnionSuite.js.
+   Author template: prototypes/wip/agreement-page/templates/
+   Agreement-Coverage-Rules-Query-Template.html. */
+/* --------------------------------------------------------------------------
+   Rows from the coverage rules Query Template (one row per rule).
+   Without the script each rule reads as one line (rank · Rule1 · condition
+   · value). With it (data-us-coverage-ready) each row reads as a record, a
+   test and a status, and each section knows its rank's group.
+   -------------------------------------------------------------------------- */
+.us-coverage-rules {
+  --list-gap: 0px;
+  --list-divider-display: none;
+  --list-rail-display: none;
+}
+
+/* The list is the container the narrow-panel rules below measure. */
+.us-coverage-rules .QueryTemplateSet {
+  display: block;
+  container-type: inline-size;
+}
+
+.us-coverage-rules .QueryTemplateSet > section {
+  margin: 0;
+}
+
+.us-coverage-rules .QueryTemplateItem:not(.card) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.us-rule {
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.us-coverage-rules:not([data-us-coverage-ready]) .us-rule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-coverage-rules[data-us-coverage-ready] .us-rule__rank {
+  display: none;
+}
+
+.us-rule span:empty {
+  display: none;
+}
+
+/* The record the rule tests (Workplace, Member), with its icon. */
+.us-rule__entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-base);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.us-rule__entity > .ti {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.us-rule__test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+}
+
+.us-rule :is(.us-rule__field, .us-rule__condition) {
+  color: var(--text-muted);
+}
+
+.us-rule__value {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  overflow-wrap: anywhere;
+}
+
+/* A name for the value (the workplace for an iMIS ID), after a dot. */
+.us-rule__label {
+  color: var(--text-base);
+  overflow-wrap: anywhere;
+}
+
+.us-rule__label::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+/* The words the script adds: and, or, and the rank's label. */
+.us-rule__and,
+.us-rule__or,
+.us-rule__group {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.us-rule__group {
+  margin: 0;
+}
+
+.us-rule__group-rule {
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.us-rule__or {
+  padding: 1px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+}
+
+/* Each rule's status at the end of its row, as a plain sign (no badge):
+   green Enabled, red Disabled. */
+.us-rule__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: end;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.us-rule__status[data-us-rule-status="enabled"] {
+  color: var(--success);
+}
+
+.us-rule__status[data-us-rule-status="disabled"] {
+  color: var(--danger);
+}
+
+.us-rule__status > .ti {
+  font-size: 15px;
+}
+
+/* A disabled rule stays in its group, struck through lightly so it still
+   reads. The flow skips it. */
+.us-rule--off :is(.us-rule__and, .us-rule__entity, .us-rule__field, .us-rule__condition, .us-rule__value, .us-rule__label) {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.us-rule--off :is(.us-rule__entity, .us-rule__value, .us-rule__label) {
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Rule groups (decided 4 October 2026): each rank is a tinted box, its label at the top ("Rank 2 · all must match"),
+   its rules inside joined by "and"; an "or" pill sits in the gap between
+   boxes. Each rule row lights up on hover, so its status is easy to match
+   to it.
+   -------------------------------------------------------------------------- */
+.us-coverage-rules[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section {
+  position: relative;
+  padding: 1px 6px;
+  border: solid var(--border);
+  border-width: 0 1px;
+  background: var(--bg-subtle);
+}
+
+.us-coverage-rules[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-first {
+  padding-top: 8px;
+  border-top-width: 1px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.us-coverage-rules[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-last {
+  padding-bottom: 6px;
+  border-bottom-width: 1px;
+  border-end-start-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+}
+
+.us-coverage-rules[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-first:has(> .us-rule__or) {
+  margin-top: 34px;
+}
+
+/* A rank whose rules are all disabled: no tint, a dashed edge. */
+.us-coverage-rules[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-off {
+  border-style: dashed;
+  background: var(--bg-surface);
+}
+
+.us-coverage-rules .us-rule__or {
+  position: absolute;
+  top: -27px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.us-coverage-rules .us-rule__group {
+  padding: 0 8px 2px;
+}
+
+.us-coverage-rules[data-us-coverage-ready] .us-rule {
+  display: grid;
+  grid-template-columns: 44px 150px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-coverage-rules[data-us-coverage-ready] .us-rule:hover {
+  background: var(--bg-sunken);
+}
+
+.us-coverage-rules .us-rule__and {
+  grid-column: 1;
+}
+
+.us-coverage-rules .us-rule__entity {
+  grid-column: 2;
+}
+
+.us-coverage-rules .us-rule__test {
+  grid-column: 3;
+}
+
+.us-coverage-rules .us-rule__status {
+  grid-column: 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-coverage-rules .us-rule {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Narrow panels: the boxes stack each rule's test under its record.
+   -------------------------------------------------------------------------- */
+@container (max-width: 520px) {
+  .us-coverage-rules[data-us-coverage-ready] .us-rule {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .us-coverage-rules .us-rule__test {
+    grid-column: 2 / -1;
+  }
+
+  .us-coverage-rules .us-rule__status {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+/* US-COVERAGE-RULES:END */
+
 /* US-RECORD-CARDS:START — one card for every record list that reads as a
    history: the combined activity feed, notes, cases, meetings and
    communications. A quiet type line, one bold headline and one muted
@@ -15474,6 +15744,20 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font-weight: var(--fw-semi);
   letter-spacing: .06em;
   text-transform: uppercase;
+}
+
+/* The direction: Incoming or Outgoing after a small arrow (down for
+   incoming, up for outgoing), in the type line's muted colour. */
+.us-record__direction {
+  display: inline-flex;
+  align-items: center;
+}
+
+.us-record__direction > svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-right: 2px;
 }
 
 /* Flags sit in the type line at its 18px height (the badge's 1px borders

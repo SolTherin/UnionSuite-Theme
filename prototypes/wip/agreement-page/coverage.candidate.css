@@ -1,0 +1,419 @@
+/* PROMOTED 4 October 2026: option 2 is in zUnionSuite.css (US-COVERAGE-RULES).
+   Kept for the retired options 3 and 4 (sentences, grouped table). */
+/* Agreement coverage rules candidate (decision 15, option 2 chosen 4 October
+   2026; coverage-compare.html). Nothing here is in the theme. Target when
+   chosen: zUnionSuite.css, a new US-COVERAGE-RULES block after
+   US-INCREASES; dark values, if any are needed, in zzDarkMode.css. */
+
+/* --------------------------------------------------------------------------
+   Shared: rows from templates/Agreement-Coverage-Rules-Query-Template.html.
+   Without the script each rule reads as one line (rank · Rule1 · condition
+   · value). With it (data-us-coverage-ready) each row reads as a record, a
+   test and a status, and each section knows its rank's group.
+   -------------------------------------------------------------------------- */
+.us-coverage-rules {
+  --list-gap: 0px;
+  --list-divider-display: none;
+  --list-rail-display: none;
+}
+
+/* The list is the container the narrow-panel rules below measure. */
+.us-coverage-rules .QueryTemplateSet {
+  display: block;
+  container-type: inline-size;
+}
+
+.us-coverage-rules .QueryTemplateSet > section {
+  margin: 0;
+}
+
+.us-coverage-rules .QueryTemplateItem:not(.card) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.us-rule {
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.us-coverage-rules:not([data-us-coverage-ready]) .us-rule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-coverage-rules[data-us-coverage-ready] .us-rule__rank {
+  display: none;
+}
+
+.us-rule span:empty {
+  display: none;
+}
+
+/* The record the rule tests (Workplace, Member), with its icon. */
+.us-rule__entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-base);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.us-rule__entity > .ti {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.us-rule__test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+}
+
+.us-rule :is(.us-rule__field, .us-rule__condition) {
+  color: var(--text-muted);
+}
+
+.us-rule__value {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  overflow-wrap: anywhere;
+}
+
+/* A name for the value (the workplace for an iMIS ID), after a dot. */
+.us-rule__label {
+  color: var(--text-base);
+  overflow-wrap: anywhere;
+}
+
+.us-rule__label::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+
+/* The words the script adds: and, or, and the rank's label. */
+.us-rule__and,
+.us-rule__or,
+.us-rule__group {
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.us-rule__group {
+  margin: 0;
+}
+
+.us-rule__group-rule {
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.us-rule__or {
+  padding: 1px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+}
+
+/* Each rule's status at the end of its row, as a plain sign (no badge):
+   green Enabled, red Disabled. */
+.us-rule__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: end;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+
+.us-rule__status[data-us-rule-status="enabled"] {
+  color: var(--success);
+}
+
+.us-rule__status[data-us-rule-status="disabled"] {
+  color: var(--danger);
+}
+
+.us-rule__status > .ti {
+  font-size: 15px;
+}
+
+/* A disabled rule stays in its group, struck through lightly so it still
+   reads. The flow skips it. */
+.us-rule--off :is(.us-rule__and, .us-rule__entity, .us-rule__field, .us-rule__condition, .us-rule__value, .us-rule__label) {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.us-rule--off :is(.us-rule__entity, .us-rule__value, .us-rule__label) {
+  color: var(--text-muted);
+}
+
+/* The covered totals beside the panel title; they wrap rather than widen
+   a narrow panel. */
+.us-coverage-count {
+  min-width: 0;
+  margin-inline: auto var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  text-align: end;
+}
+
+/* --------------------------------------------------------------------------
+   Rule groups (option 2, us-coverage-rules; chosen 4 October 2026): each
+   rank is a tinted box, its label at the top ("Rank 2 · all must match"),
+   its rules inside joined by "and"; an "or" pill sits in the gap between
+   boxes. Each rule row lights up on hover, so its status is easy to match
+   to it.
+   -------------------------------------------------------------------------- */
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section {
+  position: relative;
+  padding: 1px 6px;
+  border: solid var(--border);
+  border-width: 0 1px;
+  background: var(--bg-subtle);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-first {
+  padding-top: 8px;
+  border-top-width: 1px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-last {
+  padding-bottom: 6px;
+  border-bottom-width: 1px;
+  border-end-start-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-first:has(> .us-rule__or) {
+  margin-top: 34px;
+}
+
+/* A rank whose rules are all disabled: no tint, a dashed edge. */
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-off {
+  border-style: dashed;
+  background: var(--bg-surface);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__or {
+  position: absolute;
+  top: -27px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__group {
+  padding: 0 8px 2px;
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .us-rule {
+  display: grid;
+  grid-template-columns: 44px 150px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .us-rule:hover {
+  background: var(--bg-sunken);
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__and {
+  grid-column: 1;
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__entity {
+  grid-column: 2;
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__test {
+  grid-column: 3;
+}
+
+.us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__status {
+  grid-column: 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-coverage-rules .us-rule {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Sentences (option 3, us-coverage-rules--sentences): each rank is one line
+   in words, the next starting with "or".
+   -------------------------------------------------------------------------- */
+.us-coverage-rules--sentences[data-us-coverage-ready] :is(.QueryTemplateSet > section, .QueryTemplateItem, .us-rule, .us-rule__test) {
+  display: inline;
+}
+
+.us-coverage-rules--sentences .us-rule-section--group-first::before {
+  content: "";
+  display: block;
+  margin-top: 10px;
+}
+
+.us-coverage-rules--sentences section:first-of-type.us-rule-section--group-first::before {
+  margin-top: 0;
+}
+
+.us-coverage-rules--sentences .us-rule__group {
+  display: none;
+}
+
+.us-coverage-rules--sentences .us-rule :is(.us-rule__and, .us-rule__entity, .us-rule__field, .us-rule__condition, .us-rule__value, .us-rule__label, .us-rule__status) {
+  margin-right: 5px;
+}
+
+.us-coverage-rules--sentences .us-rule__or {
+  display: inline-block;
+  min-width: 32px;
+  margin-right: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.us-coverage-rules--sentences section:first-of-type .us-rule__entity {
+  margin-left: 40px;
+}
+
+.us-coverage-rules--sentences .us-rule__and {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-normal);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.us-coverage-rules--sentences .us-rule__entity {
+  display: inline;
+}
+
+.us-coverage-rules--sentences .us-rule__entity > .ti {
+  margin-right: 4px;
+  vertical-align: -2px;
+}
+
+.us-coverage-rules--sentences .us-rule__status {
+  display: inline-flex;
+  vertical-align: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   Grouped table (option 4, us-coverage-rules--table): the rank's label above
+   its rules, the record, field, condition and value in columns, "and" in
+   the first column, and a heavier rule with "or" where a new rank starts.
+   -------------------------------------------------------------------------- */
+.us-coverage-rules--table[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section {
+  position: relative;
+}
+
+.us-coverage-rules--table[data-us-coverage-ready] .QueryTemplateSet > section.us-rule-section--group-first:has(> .us-rule__or) {
+  margin-top: 14px;
+  border-top: 2px solid var(--border-strong);
+}
+
+.us-coverage-rules--table .us-rule__group {
+  padding: 8px 4px 0;
+  color: var(--text-base);
+}
+
+.us-coverage-rules--table .us-rule__or {
+  position: absolute;
+  top: -11px;
+  left: 4px;
+}
+
+.us-coverage-rules--table[data-us-coverage-ready] .us-rule {
+  display: grid;
+  grid-template-columns: 44px 150px minmax(90px, 140px) minmax(56px, 72px) minmax(0, 1fr) max-content;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: 7px 4px;
+  border-radius: var(--radius-sm);
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-coverage-rules--table[data-us-coverage-ready] .us-rule:hover {
+  background: var(--bg-sunken);
+}
+
+.us-coverage-rules--table .us-rule__test {
+  display: contents;
+}
+
+.us-coverage-rules--table .us-rule__and {
+  grid-column: 1;
+}
+
+.us-coverage-rules--table .us-rule__entity {
+  grid-column: 2;
+}
+
+.us-coverage-rules--table .us-rule__field {
+  grid-column: 3;
+}
+
+.us-coverage-rules--table .us-rule__condition {
+  grid-column: 4;
+}
+
+.us-coverage-rules--table .us-rule__value {
+  grid-column: 5;
+}
+
+.us-coverage-rules--table .us-rule__label {
+  grid-column: 5;
+  grid-row: 2;
+  font-size: var(--fs-xs);
+}
+
+.us-coverage-rules--table .us-rule__label::before {
+  content: none;
+}
+
+.us-coverage-rules--table .us-rule__status {
+  grid-column: 6;
+  grid-row: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Narrow panels: the boxes stack each rule's test under its record.
+   -------------------------------------------------------------------------- */
+@container (max-width: 520px) {
+  .us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table)[data-us-coverage-ready] .us-rule {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__test {
+    grid-column: 2 / -1;
+  }
+
+  .us-coverage-rules:not(.us-coverage-rules--sentences, .us-coverage-rules--table) .us-rule__status {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}

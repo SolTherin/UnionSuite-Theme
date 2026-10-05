@@ -1,0 +1,506 @@
+/* Agreement changelog candidates (decision 14, proposed 4 October 2026;
+   changelog-compare.html). Nothing here is in the theme. Target when
+   chosen: zUnionSuite.css, a new US-CHANGELOG block after US-INCREASES;
+   dark values, if any are needed, in zzDarkMode.css. */
+
+/* --------------------------------------------------------------------------
+   Shared: rows from templates/Agreement-Changelog-Query-Template.html.
+   Without the script each row reads as one line (when · who · action ·
+   area · item · field: old → new). With it (data-us-changelog-ready) the
+   head carries who, what and when, and the row keeps its field line.
+   -------------------------------------------------------------------------- */
+/* Rows sit flush: the theme's list gap (a margin under every Query
+   Template row) and divider would split one save's field lines apart. */
+.us-changelog {
+  --list-gap: 0px;
+  --list-divider-display: none;
+  --list-rail-display: none;
+}
+
+.us-changelog .QueryTemplateSet {
+  display: block;
+}
+
+.us-changelog .QueryTemplateSet > section {
+  margin: 0;
+}
+
+.us-changelog .QueryTemplateItem:not(.card) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.us-change {
+  color: var(--text-base);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-base);
+}
+
+.us-changelog:not([data-us-changelog-ready]) .us-change {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-changelog:not([data-us-changelog-ready]) .us-change__when {
+  color: var(--text-muted);
+}
+
+.us-changelog[data-us-changelog-ready] :is(.us-change__when, .us-change__by, .us-change__action, .us-change__area, .us-change__item) {
+  display: none;
+}
+
+.us-change > span:empty {
+  display: none;
+}
+
+/* The field line: Field  old → new. A blank old value on a changed field
+   reads as a dash; an added or removed record shows only its value. */
+.us-change__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+  font-size: var(--fs-xs);
+}
+
+.us-change__line:not(:has(> span:not(:empty, .us-change__arrow))) {
+  display: none;
+}
+
+.us-change__line > span:empty {
+  display: none;
+}
+
+.us-change__field {
+  min-width: 7.5rem;
+  color: var(--text-muted);
+}
+
+.us-change__old {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.us-change__field:not(:empty) ~ .us-change__old:empty {
+  display: inline;
+  text-decoration: none;
+}
+
+.us-change__field:not(:empty) ~ .us-change__old:empty::before {
+  content: "\2014";
+}
+
+.us-change__new {
+  color: var(--text-strong);
+  font-weight: var(--fw-medium);
+  overflow-wrap: anywhere;
+}
+
+/* The arrow shows only on a changed field. */
+.us-change__arrow {
+  color: var(--text-faint);
+}
+
+.us-change__field:empty ~ .us-change__arrow {
+  display: none;
+}
+
+.us-change[data-us-change-action="Removed"] .us-change__old {
+  color: var(--text-base);
+}
+
+.us-change__sentence {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-base);
+  overflow-wrap: anywhere;
+}
+
+.us-change__who,
+.us-change__what {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+.us-change__time {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Ledger (option 4, us-changelog): days, then saves. Each save is the area
+   icon, one sentence and the time, with its field lines under the
+   sentence; saves are separated by space, days by a quiet heading in the
+   record list's group-title voice.
+   -------------------------------------------------------------------------- */
+.us-changelog:not(.us-changelog--timeline) .us-change {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  column-gap: var(--space-3);
+}
+
+.us-changelog:not(.us-changelog--timeline) .us-change__line {
+  grid-column: 2 / -1;
+  padding: 1px 0;
+}
+
+.us-changelog:not(.us-changelog--timeline) .us-change--first {
+  padding-top: 10px;
+}
+
+.us-changelog:not(.us-changelog--timeline) .us-change--last {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-changelog:not(.us-changelog--timeline) section:last-of-type .us-change--last {
+  border-bottom: 0;
+}
+
+.us-change__day {
+  grid-column: 1 / -1;
+  margin: 14px 0 0;
+  padding: 0 0 2px;
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-2xs)/1.4 var(--font-ui);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.us-changelog section:first-of-type .us-change__day {
+  margin-top: 0;
+}
+
+.us-changelog:not(.us-changelog--timeline) .us-change__head {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: start;
+  padding-bottom: 3px;
+}
+
+.us-changelog:not(.us-changelog--timeline) .us-change__time {
+  padding-top: 1px;
+}
+
+.us-change__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Timeline (option 2, us-changelog--timeline): the v1 mock-up's change
+   history on theme tokens. Initials on a rail, the person, a coloured
+   action badge and the full time on top, the sentence under it, and each
+   field as old and new values side by side.
+   -------------------------------------------------------------------------- */
+.us-changelog--timeline .us-change {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: var(--space-3);
+}
+
+/* The rail: one line down the initials column, under each mark. */
+.us-changelog--timeline .us-change::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15px;
+  width: 2px;
+  background: var(--border);
+}
+
+.us-changelog--timeline .us-change--first::before {
+  top: 14px;
+}
+
+.us-changelog--timeline section:last-of-type .us-change--last::before {
+  display: none;
+}
+
+.us-changelog--timeline .us-change--first {
+  padding-top: 12px;
+}
+
+.us-changelog--timeline section:first-of-type .us-change--first {
+  padding-top: 2px;
+}
+
+.us-changelog--timeline .us-change--last {
+  padding-bottom: 12px;
+}
+
+.us-changelog--timeline .us-change__head {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  row-gap: 2px;
+  padding-bottom: 6px;
+}
+
+.us-changelog--timeline .us-change__mark {
+  position: relative;
+  z-index: 1;
+  grid-row: span 2;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border: 2px solid var(--bg-surface);
+  background: var(--info-bg);
+  color: var(--info);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .02em;
+}
+
+.us-changelog--timeline .us-change__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+}
+
+.us-changelog--timeline .us-change__top .us-change__time {
+  margin-inline-start: auto;
+}
+
+.us-changelog--timeline .us-change__sentence {
+  grid-column: 2;
+  color: var(--text-muted);
+}
+
+.us-changelog--timeline .us-change__line {
+  grid-column: 2;
+  padding: 2px 0;
+}
+
+.us-changelog--timeline :is(.us-change__old, .us-change__new):not(:empty) {
+  padding: 1px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.us-changelog--timeline .us-change__old:not(:empty) {
+  background: var(--bg-sunken);
+}
+
+.us-changelog--timeline .us-change__new:not(:empty) {
+  background: var(--success-bg);
+}
+
+.us-changelog--timeline .us-change[data-us-change-action="Removed"] .us-change__old:not(:empty) {
+  background: var(--danger-bg);
+}
+
+/* --------------------------------------------------------------------------
+   Rail (option 5, us-changelog us-changelog--rail): the ledger without day
+   headings. Each save's date and time stack on the right, as on the record
+   cards; a line joins the icons of one day's saves (the record cards'
+   rail: 2px, the border colour, each icon ringed in the surface colour),
+   and stops at the day's last icon, so a gap and a thin rule mark a new
+   day. Saves within a day are separated by space only.
+   --us-change-pad is a row's top padding; the line meets an icon's centre
+   at that plus 11px (the icon's 13px half-height, less its -2px offset).
+   -------------------------------------------------------------------------- */
+.us-changelog.us-changelog--rail .us-change {
+  --us-change-pad: 8px;
+  position: relative;
+}
+
+.us-changelog.us-changelog--rail .us-change--first {
+  padding-top: var(--us-change-pad);
+}
+
+.us-changelog.us-changelog--rail .us-change--day-start {
+  --us-change-pad: 14px;
+}
+
+.us-changelog.us-changelog--rail section:first-of-type .us-change--day-start {
+  --us-change-pad: 2px;
+}
+
+.us-changelog.us-changelog--rail .us-change--last {
+  padding-bottom: 8px;
+  border-bottom: 0;
+}
+
+/* The line, in the icon column. */
+.us-changelog.us-changelog--rail .us-change::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 2px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+.us-changelog.us-changelog--rail .us-change--day-start::before {
+  top: calc(var(--us-change-pad) + 11px);
+}
+
+.us-changelog.us-changelog--rail .us-change--day-end::before {
+  bottom: calc(100% - var(--us-change-pad) - 11px);
+}
+
+.us-changelog.us-changelog--rail :is(.us-change--day-start.us-change--day-end, .us-change--day-tail)::before {
+  display: none;
+}
+
+/* A new day: a rule across the content columns, above its first save. */
+.us-changelog.us-changelog--rail section:not(:first-of-type) .us-change--day-start::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 0;
+  left: calc(26px + var(--space-3));
+  height: 1px;
+  background: var(--border);
+}
+
+/* The head's parts join the row's grid, so the date and time (two lines)
+   sit beside the sentence and the first field line instead of pushing the
+   field line down. */
+.us-changelog.us-changelog--rail .us-change {
+  row-gap: 3px;
+}
+
+.us-changelog.us-changelog--rail .us-change__head {
+  display: contents;
+}
+
+.us-changelog.us-changelog--rail .us-change__line {
+  grid-column: 2;
+}
+
+.us-changelog.us-changelog--rail .us-change__stamp {
+  grid-column: 3;
+  grid-row: span 2;
+}
+
+.us-changelog.us-changelog--rail .us-change__mark {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3px var(--bg-surface);
+}
+
+/* The date over the time, right-aligned, as the record cards' side. */
+.us-change__stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+}
+
+.us-change__date {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.us-changelog.us-changelog--rail .us-change__time {
+  padding-top: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Events (option 8, us-changelog us-changelog--rail us-changelog--events;
+   owner, 4 October 2026): the rail with a three-level hierarchy.
+   1. What happened: "Task Added", "Agreement Details Updated" — the only
+      strong text.
+   2. Who and when: "· by Mary O'Conner" after the title, the date and
+      time on the right, both in the base colour at the small size.
+   3. The details: the record's name, then the field lines, muted.
+   -------------------------------------------------------------------------- */
+.us-changelog.us-changelog--events .us-change {
+  row-gap: 1px;
+}
+
+.us-changelog.us-changelog--events .us-change__title {
+  min-width: 0;
+  margin: 0;
+  font: var(--fs-sm)/1.45 var(--font-ui);
+}
+
+.us-changelog.us-changelog--events .us-change__event {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+/* Who, after the title: a dot (the record cards' separator), then "by".
+   A real space precedes it, so the text reads "Task Added by …". */
+.us-changelog.us-changelog--events .us-change__meta {
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+}
+
+.us-changelog.us-changelog--events .us-change__meta::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--text-faint);
+}
+
+.us-changelog.us-changelog--events .us-change__subject {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.us-changelog.us-changelog--events .us-change__date {
+  color: var(--text-base);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+/* Tertiary: the new value loses its emphasis, so it reads as detail. */
+.us-changelog.us-changelog--events .us-change__line {
+  color: var(--text-muted);
+}
+
+.us-changelog.us-changelog--events .us-change__new {
+  color: var(--text-base);
+  font-weight: var(--fw-normal);
+}
+
+/* --------------------------------------------------------------------------
+   Option 3: a change as an activity feed record card. The feed takes any
+   type through data-label and data-plural; this gives the "change" type
+   its rail icon (Tabler "history", MIT) in the card's quiet neutral.
+   -------------------------------------------------------------------------- */
+.us-record[data-us-record-type="change"] {
+  --us-record-hue: var(--text-muted);
+  --us-record-tint: var(--bg-sunken);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8l0 4l2 2'/%3E%3Cpath d='M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 560px) {
+  .us-change__field {
+    min-width: 0;
+  }
+}

@@ -213,10 +213,36 @@
           </div>
         </div>
 
-        <!-- Query Menu (Covered Entities / Covered Members) · CSS class: us-action-agreements-edit-coverage.
-             Replaces the separate Coverage anchor iPart: the title and button now belong to the report's own panel. -->
-        <div class="ContentItemContainer" id="ste_container_ciCoverage"><div class="us-action-agreements-edit-coverage"><div class="panel">
-          <div class="panel-heading Distinguish"><h2 class="panel-title">[[user-shield]] Coverage</h2></div>
+        <!-- Content HTML (title and CSS class blank, panel styling off) · Needs Attention tracker
+             (US-ATTENTION) scoped to this agreement: data-us-iqa-filter="AgreementNum" runs each IQA
+             in the folder with the AgreementNum from the page URL (owner, 4 October 2026). -->
+        <div class="ContentItemContainer" id="ste_container_ciCoverageTrackers">
+          <section class="us-attention"
+            data-us-iqa-folder="$/_i4u_/Core/CA/v2/Coverage Trackers"
+            data-us-iqa-filter="AgreementNum"
+            aria-label="Coverage">
+            <header class="us-attention__heading">
+              <h2>Coverage</h2>
+              <span>Covered by this agreement</span>
+            </header>
+            <ul class="us-attention__items" aria-label="Coverage counts"></ul>
+            <p class="us-attention__status" role="status" aria-live="polite">Loading counts…</p>
+            <button type="button" class="TextButton us-attention__retry" hidden>Retry</button>
+          </section>
+        </div>
+
+        <!-- Query Template Display (Agreement Coverage Rules IQA) · CSS class: us-agreement-coverage ·
+             Display in cards: off · Rows per page: 100 · rule groups (US-COVERAGE-RULES, decided
+             4 October 2026) · templates/Agreement-Coverage-Rules-Query-Template.html. Update coverage
+             opens v2/Popups/Coverage.aspx (agreements.edit-coverage). -->
+        <div class="ContentItemContainer" id="ste_container_ciCoverageRules"><div class="us-agreement-coverage"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[filter]] Coverage rules</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-coverage-rules"></div></div></div>
+        </div></div></div>
+
+        <!-- Query Menu (the existing covered records IQA) · CSS class: none. -->
+        <div class="ContentItemContainer" id="ste_container_ciCoverage"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[user-shield]] Covered records</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div id="ap-coverage_ContentPanel"><div id="ap-coverage_ListerPanel"><div data-gridid="ap-coverage"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
             <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">Record type</th><th class="rgHeader" scope="col">Employer</th><th class="rgHeader" scope="col">Members covered</th></tr></thead>
             <tbody>
@@ -225,7 +251,7 @@
               <tr class="rgRow"><td>Stark Enterprise</td><td>Non Member Company</td><td>Stark Industries</td><td class="ap-num">38</td></tr>
             </tbody>
           </table></div></div></div></div></div></div>
-        </div></div></div>
+        </div></div>
       </div>
 
       <!-- ── ACTIVITY: what has been recorded ──────────────────── -->

@@ -1435,7 +1435,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -1460,6 +1460,8 @@ SOFTWARE.
     'us-agreement-terms': ['us-query-template', 'us-terms', 'us-query-search', 'us-list-scroll', 'us-action-agreements-remove-terms', 'us-action-agreements-add-term'],
     // Expandable groups with a totals strip (US-INCREASES, decided 4 October 2026).
     'us-agreement-increases': ['us-query-template', 'us-increases', 'us-query-search', 'us-action-agreements-add-increase'],
+    // Coverage rules as rule groups (US-COVERAGE-RULES, decided 4 October 2026).
+    'us-agreement-coverage': ['us-query-template', 'us-coverage-rules', 'us-action-agreements-edit-coverage'],
     // The contacts scripts also read this class for the agreement's search wording.
     'us-agreement-contacts': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-facets', 'us-contacts-group-filter', 'us-contacts-group-tone', 'us-query-search', 'us-action-agreements-add-contact', 'us-action-agreements-email-contacts']
   };
@@ -4803,6 +4805,214 @@ SOFTWARE.
 })();
 /* US-INCREASES:END */
 
+/* US-COVERAGE-RULES:START — an agreement's coverage rules from one row per
+   rule (templates/Agreement-Coverage-Rules-Query-Template.html), on a Query
+   Template Display with us-coverage-rules in its CSS class. The rows carry
+   the rules table's own values (Rule1, MatchCondition, Rule2), and this
+   block shows them the way the CA: Update Covered Contacts flow applies
+   them (checked against the flow, 4 October 2026):
+   - Groups: consecutive rows with the same data-us-rule-rank are one group.
+     The flow ANDs every active rule in a rank and covers a record that
+     matches any rank (or). Each group's section gets the rank's label
+     ("Rank 2 · all must match"; "all active rules must match" when one is
+     inactive) and, after the first group, an "or"; the group's other rows
+     get an "and". Sections are marked us-rule-section, --group-first and
+     --group-last, and data-us-rule-group holds the rank, so the layout
+     class can draw a box per rank around its rules.
+   - Words: Rule1 is a CloudToolz table and field (ZenCrm.Organisations.ImisId)
+     or the flow's short form (Workplace.ImisId). The table becomes the
+     record it means to a reader (Workplace, Member, Job, Member profile,
+     Employer, with an icon) and the field a label (ImisId → iMIS ID);
+     MatchCondition becomes a phrase (Equals → is, Not Equals → is not).
+     The table's values stay on the row (data-us-rule-target,
+     data-us-rule-condition).
+   - Status: every rule ends with an Enabled (green) or Disabled (red)
+     badge; a disabled rule (data-us-rule-enabled 0) gets us-rule--off and
+     is struck through lightly. The flow skips disabled rules. A group
+     whose rules are all disabled gets us-rule-section--group-off.
+   The covered counts are not here: they are a Needs Attention tracker
+   (us-attention with data-us-iqa-filter="AgreementNum"; owner, 4 October
+   2026).
+   The rows stay where iMIS put them; the added words and classes are
+   redrawn when the rows change. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCoverageRules) return;
+
+  // The flow's alias map (Create Filters), in readers' words. Keys are
+  // Rule1's table part, lower case: the CloudToolz table, or the flow's
+  // short name for it.
+  const RECORDS = {
+    'zencrm.organisations': {label: 'Workplace', icon: 'ti-building'},
+    workplace: {label: 'Workplace', icon: 'ti-building'},
+    'zencrm.individuals': {label: 'Member', icon: 'ti-user'},
+    individuals: {label: 'Member', icon: 'ti-user'},
+    'uniontemplate.jobs': {label: 'Job', icon: 'ti-briefcase'},
+    'uniontemplate.profile': {label: 'Member profile', icon: 'ti-id-badge-2'},
+    profile: {label: 'Member profile', icon: 'ti-id-badge-2'},
+    'uniontemplate.orgdetails': {label: 'Employer', icon: 'ti-building-factory-2'},
+    employer: {label: 'Employer', icon: 'ti-building-factory-2'}
+  };
+  const FIELDS = {
+    imisid: 'iMIS ID', id: 'iMIS ID', companyid: 'Parent organisation', name: 'Name',
+    category: 'Category', status: 'Status', membertype: 'Member type',
+    startdate: 'Start date', enddate: 'End date', state: 'State', postcode: 'Postcode'
+  };
+  // The flow turns Equals into = and Not Equals into <>; nothing else runs.
+  const CONDITIONS = {equals: 'is', 'not equals': 'is not', notequals: 'is not'};
+  const states = new WeakMap();
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function icon(name) {
+    const node = el('i', 'ti ' + name);
+    node.setAttribute('aria-hidden', 'true');
+    return node;
+  }
+
+  const wrapperOf = set => set.closest('.us-coverage-rules');
+  const yes = value => !/^(false|0|no|n)$/i.test(String(value || '').trim());
+
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, row: section.querySelector('.us-rule')}))
+      .filter(entry => entry.row)
+      .map(entry => ({
+        ...entry,
+        rank: (entry.row.getAttribute('data-us-rule-rank') || '').trim(),
+        enabled: yes(entry.row.getAttribute('data-us-rule-enabled'))
+      }));
+  }
+
+  // "UnionTemplate.Jobs.StartDate" → the record (Job) and the field (Start date).
+  function fieldLabel(name) {
+    const known = FIELDS[name.toLowerCase().replace(/[\s_-]/g, '')];
+    if (known) return known;
+    const words = name.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1)
+      : /^(ID|[A-Z0-9]{2,})$/.test(word) ? word : word.toLowerCase()).join(' ');
+  }
+
+  // Words for one row, once: the record before the test, the field and the
+  // condition in readers' words. The table's own values stay as attributes.
+  function word(row) {
+    const field = row.querySelector('.us-rule__field');
+    if (field && !row.hasAttribute('data-us-rule-target')) {
+      const target = field.textContent.trim();
+      row.setAttribute('data-us-rule-target', target);
+      const cut = target.lastIndexOf('.');
+      const table = cut > 0 ? target.slice(0, cut) : '';
+      const record = RECORDS[table.toLowerCase()] || {label: table.split('.').pop() || 'Record', icon: 'ti-filter'};
+      field.textContent = fieldLabel(cut > 0 ? target.slice(cut + 1) : target);
+      const entity = el('span', 'us-rule__entity');
+      entity.append(icon(record.icon), record.label);
+      const test = row.querySelector('.us-rule__test');
+      row.insertBefore(entity, test || field);
+    }
+    const condition = row.querySelector('.us-rule__condition');
+    if (condition && !row.hasAttribute('data-us-rule-condition')) {
+      const raw = condition.textContent.trim();
+      row.setAttribute('data-us-rule-condition', raw);
+      condition.textContent = CONDITIONS[raw.toLowerCase()] || raw.toLowerCase();
+    }
+  }
+
+  // A plain sign, not a badge (owner, 4 October 2026): the colour and icon
+  // carry it, the word says it.
+  function status(enabled) {
+    const sign = el('span', 'us-rule__status');
+    sign.setAttribute('data-us-rule-status', enabled ? 'enabled' : 'disabled');
+    sign.append(icon(enabled ? 'ti-circle-check' : 'ti-circle-x'), enabled ? 'Enabled' : 'Disabled');
+    return sign;
+  }
+
+  function apply(set) {
+    const state = states.get(set) || {};
+    states.set(set, state);
+    const rows = rowsOf(set);
+    rows.forEach(entry => word(entry.row));
+
+    const shown = rows.filter(entry => !entry.section.hidden && !entry.section.hasAttribute('data-us-query-search-hidden'));
+    const signature = shown.map(entry => rows.indexOf(entry) + ':' + entry.rank + ':' + entry.enabled).join(',');
+    if (signature === state.signature) return;
+    state.signature = signature;
+
+    set.querySelectorAll('.us-rule__or, .us-rule__and, .us-rule__group, .us-rule__status').forEach(node => node.remove());
+    rows.forEach(entry => {
+      entry.row.classList.remove('us-rule--off');
+      entry.section.classList.remove('us-rule-section', 'us-rule-section--group-first', 'us-rule-section--group-last', 'us-rule-section--group-off');
+      entry.section.removeAttribute('data-us-rule-group');
+    });
+
+    // Consecutive rows with one rank are a group (the IQA sorts by Rank).
+    const groups = [];
+    shown.forEach(entry => {
+      const last = groups[groups.length - 1];
+      if (last && last.rank === entry.rank) last.rows.push(entry);
+      else groups.push({rank: entry.rank, rows: [entry]});
+    });
+
+    groups.forEach((group, index) => {
+      const allOff = group.rows.every(entry => !entry.enabled);
+      const someOff = !allOff && group.rows.some(entry => !entry.enabled);
+      group.rows.forEach((entry, position) => {
+        const {row, section} = entry;
+        section.classList.add('us-rule-section');
+        section.setAttribute('data-us-rule-group', group.rank || String(index + 1));
+        if (allOff) section.classList.add('us-rule-section--group-off');
+        if (!entry.enabled) row.classList.add('us-rule--off');
+        row.append(status(entry.enabled));
+        if (position === 0) {
+          section.classList.add('us-rule-section--group-first');
+          const label = el('p', 'us-rule__group', 'Rank ' + (group.rank || index + 1));
+          if (group.rows.length > 1) {
+            label.append(el('span', 'us-rule__group-rule', someOff ? ' · all active rules must match' : ' · all must match'));
+          }
+          section.prepend(label);
+          if (index > 0) section.prepend(el('span', 'us-rule__or', 'or'));
+        } else {
+          row.prepend(el('span', 'us-rule__and', 'and'));
+        }
+        if (position === group.rows.length - 1) section.classList.add('us-rule-section--group-last');
+      });
+    });
+    wrapperOf(set).setAttribute('data-us-coverage-ready', '');
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-coverage-rules .QueryTemplateSet').forEach(set => {
+        if (set.closest('.us-report-no-styling')) return;
+        apply(set);
+      });
+    });
+  }
+
+  document.addEventListener('us:panel-actions-ready', schedule);
+  document.addEventListener('us:query-template-refreshed', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section')) ||
+        (record.type === 'attributes' && record.target.localName === 'section' && record.target.closest?.('.us-coverage-rules')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-query-search-hidden', 'hidden']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteCoverageRules = Object.freeze({refresh: schedule, version: '0.3'});
+})();
+/* US-COVERAGE-RULES:END */
+
 /* US-CONTACT-COPY:START — copy a contact's email or phone from its icon.
    The icon is a .us-contact-tile__copy button on the same line as the
    value, which is marked .us-contact-tile__value (a class, because the iMIS
@@ -7857,216 +8067,6 @@ SOFTWARE.
 })();
 /* US-CREDENTIALS:END */
 
-/* US-ACTION-MENUS:START — approved option 5; explicit actions, no evaluated HTML. */
-(function(){
- 'use strict';
- if(window.UnionSuiteActionMenus)return;
- const roots=new Map(),toggles=new WeakMap();
- const candidates='.us-actions,.BigButtonLinkList:has(> .BigButtonList),#MemberQuickActions:has(> .dropdown-menu),.CaseActions.dropdown:has(> .dropdown-menu),.actions-wrap:has(> .actions-menu),.us-banner details.us-banner__action-menu';
- const excluded=el=>!!el.closest('.us-report-no-styling,[data-us-actions-ignore]');
- const disabled=el=>!!el.closest(':disabled,[disabled],.disabled,.aspNetDisabled,[aria-disabled="true"],.hidden,[hidden],[inert]');
- const narrow=()=>matchMedia('(max-width:950px)').matches;
- const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
- const zero={height:'0px',paddingTop:'0px',paddingBottom:'0px',marginTop:'0px',marginBottom:'0px',borderTopWidth:'0px',borderBottomWidth:'0px'};
- let uid=0,status;
- function dimensions(el){const s=getComputedStyle(el);return {height:el.getBoundingClientRect().height+'px',paddingTop:s.paddingTop,paddingBottom:s.paddingBottom,marginTop:s.marginTop,marginBottom:s.marginBottom,borderTopWidth:s.borderTopWidth,borderBottomWidth:s.borderBottomWidth}}
- function duration(root){const value=parseFloat(getComputedStyle(root).getPropertyValue('--us-actions-duration'));return Number.isFinite(value)?Math.max(0,value):400}
- function place(state){
-  const {panel,trigger,child,owner}=state;
-  panel.classList.toggle('us-actions__inline',child&&narrow());
-  if(child&&narrow()){['left','top','width','max-height'].forEach(p=>panel.style.removeProperty(p));return}
-  const r=trigger.getBoundingClientRect(),w=Math.min(288,window.innerWidth-24);
-  panel.style.width=w+'px';panel.style.maxHeight=Math.max(60,window.innerHeight-24)+'px';
-  let x=child?r.right-2:r.right-w,y=r.bottom+8;
-  if(child){if(x+w>window.innerWidth-12)x=r.left-w+2;y=r.top}
-  else if(y+Math.min(panel.scrollHeight,180)>window.innerHeight-12&&r.top>window.innerHeight-r.bottom){y=Math.max(12,r.top-8-Math.min(panel.scrollHeight,window.innerHeight-24));}
-  panel.style.left=Math.max(12,Math.min(x,window.innerWidth-w-12))+'px';
-  panel.style.top=Math.max(12,Math.min(y,window.innerHeight-72))+'px';
-  panel.style.maxHeight=Math.max(48,window.innerHeight-parseFloat(panel.style.top)-12)+'px';
- }
- function setOpen(state,open,{instant=false,focus=false}={}){
-  const {panel,trigger,owner,child}=state;
-  if(!owner.root.isConnected)return;
-  if(state.open===open&&!state.animation)return;
-  const from=panel.hidden?zero:dimensions(panel);
-  state.animation?.cancel();state.animation=null;state.open=open;
-  trigger.setAttribute('aria-expanded',String(open));panel.inert=!open;
-  if(!open&&(focus||panel.contains(document.activeElement)))trigger.focus({preventScroll:true});
-  if(open){
-   if(!child){for(const item of roots.values())if(item!==owner)setOpen(item.main,false,{instant:true});}
-   else for(const other of owner.children)if(other!==state&&other.parent===state.parent)setOpen(other,false,{instant:true});
-   if(owner.details)owner.root.open=true;
-   panel.classList.remove('us-actions__drawing','us-actions__closing');panel.hidden=false;place(state);
-  }else{
-   panel.classList.add('us-actions__closing');
-   if(!child)for(const item of owner.children)setOpen(item,false,{instant:true});
-   else for(const item of owner.children)if(item!==state&&panel.contains(item.trigger))setOpen(item,false,{instant:true});
-  }
-  const to=open?dimensions(panel):zero;
-  const animate=!instant&&!reduced()&&typeof panel.animate==='function';
-  if(open&&child&&narrow()&&animate){
-   panel.style.setProperty('--us-actions-line-height',Math.max(0,panel.getBoundingClientRect().height-8)+'px');
-   void panel.offsetHeight;panel.classList.add('us-actions__drawing');
-  }
-  function finish(){
-   state.animation=null;panel.classList.remove('us-actions__moving');
-   if(!state.open){panel.hidden=true;panel.classList.remove('us-actions__closing','us-actions__drawing');if(!child&&owner.details)owner.root.open=false;}
-   else if(focus)panel.querySelector('a[href]:not([aria-disabled="true"]),button:not(:disabled)')?.focus({preventScroll:true});
-  }
-  if(!animate){finish();return}
-  panel.classList.add('us-actions__moving');
-  const frames=child&&!narrow()?[{opacity:open?0:1},{opacity:open?1:0}]:[from,to];
-  state.animation=panel.animate(frames,{duration:duration(owner.root),easing:'cubic-bezier(.22,1,.36,1)'});
-  state.animation.onfinish=finish;
- }
- function stateFor(owner,trigger,panel,child=false,parent=null){
-  if(!panel.id)panel.id='us-actions-list-'+(++uid);
-  trigger.setAttribute('aria-controls',panel.id);trigger.setAttribute('aria-expanded','false');
-  trigger.classList.add(child?'us-actions__subtoggle':'us-actions__toggle');
-  panel.classList.add('us-actions__list');if(child){panel.classList.add('us-actions__sublist');const glint=document.createElement('span');glint.className='us-actions__glint';glint.setAttribute('aria-hidden','true');panel.append(glint)}
-  panel.hidden=true;panel.inert=true;
-  const state={owner,trigger,panel,child,parent,open:false,animation:null};toggles.set(trigger,state);return state;
- }
- function decorate(owner){
-  const {root}=owner;
-  owner.children=owner.children.filter(state=>{if(root.contains(state.trigger)&&root.contains(state.panel))return true;state.animation?.cancel();toggles.delete(state.trigger);return false});
-  root.querySelectorAll('.dropdown-header,.actions-menu-label,.us-banner__menu-label').forEach(el=>el.classList.add('us-actions__heading'));
-  root.querySelectorAll('.divider,.dropdown-divider').forEach(el=>el.classList.add('us-actions__separator'));
-  root.querySelectorAll('.actions-menu-section,.us-banner__menu-group').forEach(el=>el.classList.add('us-actions__group'));
-  root.querySelectorAll('.us-actions__branch').forEach(branch=>{
-   const trigger=branch.querySelector(':scope > button'),panel=branch.querySelector(':scope > .us-actions__list');
-   if(trigger&&panel&&!toggles.has(trigger)){const parent=owner.children.find(s=>s.panel.contains(branch))||owner.main;owner.children.push(stateFor(owner,trigger,panel,true,parent))}
-  });
-  owner.main.panel.querySelectorAll('a,button').forEach(el=>{
-   if(!toggles.has(el))el.classList.add('us-actions__item');
-
-  });
- }
- function refresh(){
-  for(const [root,owner] of roots){
-   if(!root.isConnected||!root.contains(owner.main.panel)||excluded(root)){
-
-    for(const s of [owner.main,...owner.children]){s.animation?.cancel();toggles.delete(s.trigger);s.panel.inert=false;if(s.child)s.panel.hidden=true;else s.panel.hidden=false;s.panel.classList.remove('us-actions__moving')}
-    root.removeAttribute('data-us-actions-ready');roots.delete(root);
-   }
-  }
-  document.querySelectorAll(candidates).forEach(root=>{
-   if(excluded(root))return;
-   if(roots.has(root)){decorate(roots.get(root));return}
-   const trigger=root.querySelector(':scope > .us-actions__toggle,:scope > summary,:scope > button');
-   const panel=root.querySelector(':scope > .us-actions__list,:scope > .dropdown-menu,:scope > .actions-menu,:scope > .us-banner__menu-panel');
-   if(!trigger||!panel)return;
-   const owner={root,details:root.tagName==='DETAILS',main:null,children:[]};
-   root.classList.add('us-actions');root.setAttribute('data-us-actions-ready','');
-   // The adapter now owns only disclosure. Original item links and commands remain intact.
-   root.classList.remove('open');panel.classList.remove('open');trigger.classList.remove('open');if(owner.details)root.open=false;
-   owner.main=stateFor(owner,trigger,panel);roots.set(root,owner);decorate(owner);
-  });
- }
- function ownerFor(el){const root=el.closest('[data-us-actions-ready]');return roots.get(root)}
- document.addEventListener('click',event=>{
-  const el=event.target.closest?.('button,summary,a');if(!el)return;
-  const owner=ownerFor(el);if(!owner)return;
-  const state=toggles.get(el);
-  if(state){event.preventDefault();event.stopImmediatePropagation();if(!disabled(el))setOpen(state,!state.open);return}
-  if(disabled(el)){event.preventDefault();event.stopImmediatePropagation();return}
-  // Let native item handlers/postbacks/navigation run; never synthesize their click.
-  queueMicrotask(()=>{if(!event.defaultPrevented)setOpen(owner.main,false,{instant:true,focus:false})});
- },true);
- document.addEventListener('keydown',event=>{
-  const el=event.target,owner=ownerFor(el);if(!owner)return;
-  const state=toggles.get(el);
-  if(event.key==='ArrowRight'&&state?.child&&!disabled(el)){event.preventDefault();setOpen(state,true,{focus:true});return}
-  if(event.key==='Escape'||event.key==='ArrowLeft'){
-   const branch=[...owner.children].reverse().find(s=>s.open&&(s.panel.contains(el)||s.trigger===el));
-   if(branch){event.preventDefault();event.stopPropagation();setOpen(branch,false,{focus:true});}
-   else if(event.key==='Escape'&&owner.main.open){event.preventDefault();event.stopPropagation();setOpen(owner.main,false,{focus:true});}
-  }
- });
- document.addEventListener('pointerdown',event=>{for(const owner of roots.values())if(!owner.root.contains(event.target))setOpen(owner.main,false)},true);
- document.addEventListener('focusin',event=>{for(const owner of roots.values())if(!owner.root.contains(event.target))setOpen(owner.main,false,{instant:true})});
- document.addEventListener('toggle',event=>{const owner=roots.get(event.target);if(owner?.details&&!owner.root.open&&owner.main.open)setOpen(owner.main,false,{instant:true})},true);
- function reset(){for(const owner of roots.values())setOpen(owner.main,false,{instant:true})}
- window.addEventListener('resize',reset);window.addEventListener('pagehide',reset);
- window.addEventListener('scroll',event=>{
-  for(const owner of roots.values()){
-   if(!owner.main.open)continue;
-   if(event.target===document||event.target===window||!owner.root.contains(event.target))setOpen(owner.main,false,{instant:true});
-   else if(!narrow())for(const child of owner.children)if(!child.panel.contains(event.target))setOpen(child,false,{instant:true});
-  }
- },true);
- let scheduled=false;
- function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh()})}
- function start(){refresh();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true})}
- window.UnionSuiteActionMenus={version:'2.0',refresh,closeFor(element){const owner=ownerFor(element);if(owner)setOpen(owner.main,false,{instant:true,focus:true})}};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-/* US-ACTION-MENUS:END */
-/* US-ACTION-HEADING-MENUS:START — dropdown menus in panel headings.
-   Defined here, before ActionDefinitions.js and the client Actions.js, so
-   client files can register menus. Planned to move inside
-   US-UNIFIED-ACTIONS (contact page v3 THEME-CHANGES.md, item 31).
-
-   US-ACTION-HEADING-MENUS 1.0 — a menu is configured exactly like
-   a heading button: one definition, placed by its us-action-* class in the
-   iPart CSS class field. The definition has the button's shape with
-   action {type: 'menu', items: [action keys]}:
-
-     UnionSuiteHeadingMenus.define('finance.add-adjustment', {
-       className: 'us-action-finance-add-adjustment',
-       owner: 'Client', source: 'Actions.js:finance.add-adjustment',
-       presentation: {label: 'Add adjustment', icon: 'plus', order: 1},
-       action: {type: 'menu', items: ['finance.add-waiver',
-         'membership.suspend', 'membership.change']}
-     });
-
-   The menu is the theme's .us-actions dropdown (Quick Actions' look, motion
-   and keyboard handling from US-ACTION-MENUS). Each item is an ordinary
-   control carrying the item action's class, so US-UNIFIED-ACTIONS labels,
-   checks access and runs it in menu placement, as for a Quick Actions item.
-   US-UNIFIED-ACTIONS does not know type 'menu' yet: it draws an
-   unconfigured button for the menu's class, which this block hides, and
-   this block keeps its own registry. Once UnionSuiteActions.define accepts
-   type 'menu', the heading slot reconciler renders this markup. */
-(function () {
-  'use strict';
-
-  if (window.UnionSuiteHeadingMenus) {
-    window.UnionSuiteHeadingMenus.refresh();
-    return;
-  }
-
-  const menus = new Map();
-  const PLACEHOLDER = 'data-us-heading-menu-placeholder';
-  let scheduled = false;
-
-  function define(key, value) {
-    if (!/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/.test(key)) throw new TypeError('Use a namespaced menu key.');
-    if (!value || typeof value.className !== 'string' || !/^us-action-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.className)) throw new TypeError('Supply one us-action-AREA-COMMAND class.');
-    if (typeof value.owner !== 'string' || !value.owner.trim() || typeof value.source !== 'string' || !value.source.trim()) throw new TypeError('Menu registration requires nonempty owner and source strings.');
-    const presentation = value.presentation || {};
-    if (typeof presentation.label !== 'string' || !presentation.label.trim()) throw new TypeError('presentation.label is required.');
-    if (presentation.icon != null && presentation.icon !== 'plus') throw new TypeError('Heading menus support the plus icon only.');
-    const action = value.action || {};
-    if (action.type !== 'menu' || !Array.isArray(action.items) || !action.items.length || action.items.some(item => typeof item !== 'string')) {
-      throw new TypeError('Menus need action {type: "menu", items: [action keys]}.');
-    }
-    if ([...menus.values()].some(menu => menu.className === value.className && menu.key !== key)) throw new TypeError('That class belongs to another menu.');
-    menus.set(key, Object.freeze({ key, className: value.className, label: presentation.label.trim(), icon: presentation.icon || null, order: presentation.order || 0, items: Object.freeze([...action.items]) }));
-    schedule();
-    return key;
-  }
-
-  // Item classes come from the action registry, so an item follows its
-  // action's own className; the key convention is the fallback.
-  function itemClass(key) {
-    return window.UnionSuiteActions?.getActionStatus?.(key)?.className || 'us-action-' + key.replace(/\./g, '-');
-  }
-
-  function build(menu) {
-    const root = document.createElement('div');
-    root.className = 'us-actions us-heading-menu';
-    root.setAttribute('data-us-heading-menu', menu.key);
 /* US-SUBJECT-TAG:START — a fixed tag at the start of a Communication Creator
    subject (us-agreement-comms, owner 5 October 2026). The class goes in the
    Communication Creator iPart's CSS class field on the agreement send page
@@ -8468,6 +8468,216 @@ SOFTWARE.
 })();
 /* US-COMMS-LOG:END */
 
+/* US-ACTION-MENUS:START — approved option 5; explicit actions, no evaluated HTML. */
+(function(){
+ 'use strict';
+ if(window.UnionSuiteActionMenus)return;
+ const roots=new Map(),toggles=new WeakMap();
+ const candidates='.us-actions,.BigButtonLinkList:has(> .BigButtonList),#MemberQuickActions:has(> .dropdown-menu),.CaseActions.dropdown:has(> .dropdown-menu),.actions-wrap:has(> .actions-menu),.us-banner details.us-banner__action-menu';
+ const excluded=el=>!!el.closest('.us-report-no-styling,[data-us-actions-ignore]');
+ const disabled=el=>!!el.closest(':disabled,[disabled],.disabled,.aspNetDisabled,[aria-disabled="true"],.hidden,[hidden],[inert]');
+ const narrow=()=>matchMedia('(max-width:950px)').matches;
+ const reduced=()=>matchMedia('(prefers-reduced-motion:reduce)').matches;
+ const zero={height:'0px',paddingTop:'0px',paddingBottom:'0px',marginTop:'0px',marginBottom:'0px',borderTopWidth:'0px',borderBottomWidth:'0px'};
+ let uid=0,status;
+ function dimensions(el){const s=getComputedStyle(el);return {height:el.getBoundingClientRect().height+'px',paddingTop:s.paddingTop,paddingBottom:s.paddingBottom,marginTop:s.marginTop,marginBottom:s.marginBottom,borderTopWidth:s.borderTopWidth,borderBottomWidth:s.borderBottomWidth}}
+ function duration(root){const value=parseFloat(getComputedStyle(root).getPropertyValue('--us-actions-duration'));return Number.isFinite(value)?Math.max(0,value):400}
+ function place(state){
+  const {panel,trigger,child,owner}=state;
+  panel.classList.toggle('us-actions__inline',child&&narrow());
+  if(child&&narrow()){['left','top','width','max-height'].forEach(p=>panel.style.removeProperty(p));return}
+  const r=trigger.getBoundingClientRect(),w=Math.min(288,window.innerWidth-24);
+  panel.style.width=w+'px';panel.style.maxHeight=Math.max(60,window.innerHeight-24)+'px';
+  let x=child?r.right-2:r.right-w,y=r.bottom+8;
+  if(child){if(x+w>window.innerWidth-12)x=r.left-w+2;y=r.top}
+  else if(y+Math.min(panel.scrollHeight,180)>window.innerHeight-12&&r.top>window.innerHeight-r.bottom){y=Math.max(12,r.top-8-Math.min(panel.scrollHeight,window.innerHeight-24));}
+  panel.style.left=Math.max(12,Math.min(x,window.innerWidth-w-12))+'px';
+  panel.style.top=Math.max(12,Math.min(y,window.innerHeight-72))+'px';
+  panel.style.maxHeight=Math.max(48,window.innerHeight-parseFloat(panel.style.top)-12)+'px';
+ }
+ function setOpen(state,open,{instant=false,focus=false}={}){
+  const {panel,trigger,owner,child}=state;
+  if(!owner.root.isConnected)return;
+  if(state.open===open&&!state.animation)return;
+  const from=panel.hidden?zero:dimensions(panel);
+  state.animation?.cancel();state.animation=null;state.open=open;
+  trigger.setAttribute('aria-expanded',String(open));panel.inert=!open;
+  if(!open&&(focus||panel.contains(document.activeElement)))trigger.focus({preventScroll:true});
+  if(open){
+   if(!child){for(const item of roots.values())if(item!==owner)setOpen(item.main,false,{instant:true});}
+   else for(const other of owner.children)if(other!==state&&other.parent===state.parent)setOpen(other,false,{instant:true});
+   if(owner.details)owner.root.open=true;
+   panel.classList.remove('us-actions__drawing','us-actions__closing');panel.hidden=false;place(state);
+  }else{
+   panel.classList.add('us-actions__closing');
+   if(!child)for(const item of owner.children)setOpen(item,false,{instant:true});
+   else for(const item of owner.children)if(item!==state&&panel.contains(item.trigger))setOpen(item,false,{instant:true});
+  }
+  const to=open?dimensions(panel):zero;
+  const animate=!instant&&!reduced()&&typeof panel.animate==='function';
+  if(open&&child&&narrow()&&animate){
+   panel.style.setProperty('--us-actions-line-height',Math.max(0,panel.getBoundingClientRect().height-8)+'px');
+   void panel.offsetHeight;panel.classList.add('us-actions__drawing');
+  }
+  function finish(){
+   state.animation=null;panel.classList.remove('us-actions__moving');
+   if(!state.open){panel.hidden=true;panel.classList.remove('us-actions__closing','us-actions__drawing');if(!child&&owner.details)owner.root.open=false;}
+   else if(focus)panel.querySelector('a[href]:not([aria-disabled="true"]),button:not(:disabled)')?.focus({preventScroll:true});
+  }
+  if(!animate){finish();return}
+  panel.classList.add('us-actions__moving');
+  const frames=child&&!narrow()?[{opacity:open?0:1},{opacity:open?1:0}]:[from,to];
+  state.animation=panel.animate(frames,{duration:duration(owner.root),easing:'cubic-bezier(.22,1,.36,1)'});
+  state.animation.onfinish=finish;
+ }
+ function stateFor(owner,trigger,panel,child=false,parent=null){
+  if(!panel.id)panel.id='us-actions-list-'+(++uid);
+  trigger.setAttribute('aria-controls',panel.id);trigger.setAttribute('aria-expanded','false');
+  trigger.classList.add(child?'us-actions__subtoggle':'us-actions__toggle');
+  panel.classList.add('us-actions__list');if(child){panel.classList.add('us-actions__sublist');const glint=document.createElement('span');glint.className='us-actions__glint';glint.setAttribute('aria-hidden','true');panel.append(glint)}
+  panel.hidden=true;panel.inert=true;
+  const state={owner,trigger,panel,child,parent,open:false,animation:null};toggles.set(trigger,state);return state;
+ }
+ function decorate(owner){
+  const {root}=owner;
+  owner.children=owner.children.filter(state=>{if(root.contains(state.trigger)&&root.contains(state.panel))return true;state.animation?.cancel();toggles.delete(state.trigger);return false});
+  root.querySelectorAll('.dropdown-header,.actions-menu-label,.us-banner__menu-label').forEach(el=>el.classList.add('us-actions__heading'));
+  root.querySelectorAll('.divider,.dropdown-divider').forEach(el=>el.classList.add('us-actions__separator'));
+  root.querySelectorAll('.actions-menu-section,.us-banner__menu-group').forEach(el=>el.classList.add('us-actions__group'));
+  root.querySelectorAll('.us-actions__branch').forEach(branch=>{
+   const trigger=branch.querySelector(':scope > button'),panel=branch.querySelector(':scope > .us-actions__list');
+   if(trigger&&panel&&!toggles.has(trigger)){const parent=owner.children.find(s=>s.panel.contains(branch))||owner.main;owner.children.push(stateFor(owner,trigger,panel,true,parent))}
+  });
+  owner.main.panel.querySelectorAll('a,button').forEach(el=>{
+   if(!toggles.has(el))el.classList.add('us-actions__item');
+
+  });
+ }
+ function refresh(){
+  for(const [root,owner] of roots){
+   if(!root.isConnected||!root.contains(owner.main.panel)||excluded(root)){
+
+    for(const s of [owner.main,...owner.children]){s.animation?.cancel();toggles.delete(s.trigger);s.panel.inert=false;if(s.child)s.panel.hidden=true;else s.panel.hidden=false;s.panel.classList.remove('us-actions__moving')}
+    root.removeAttribute('data-us-actions-ready');roots.delete(root);
+   }
+  }
+  document.querySelectorAll(candidates).forEach(root=>{
+   if(excluded(root))return;
+   if(roots.has(root)){decorate(roots.get(root));return}
+   const trigger=root.querySelector(':scope > .us-actions__toggle,:scope > summary,:scope > button');
+   const panel=root.querySelector(':scope > .us-actions__list,:scope > .dropdown-menu,:scope > .actions-menu,:scope > .us-banner__menu-panel');
+   if(!trigger||!panel)return;
+   const owner={root,details:root.tagName==='DETAILS',main:null,children:[]};
+   root.classList.add('us-actions');root.setAttribute('data-us-actions-ready','');
+   // The adapter now owns only disclosure. Original item links and commands remain intact.
+   root.classList.remove('open');panel.classList.remove('open');trigger.classList.remove('open');if(owner.details)root.open=false;
+   owner.main=stateFor(owner,trigger,panel);roots.set(root,owner);decorate(owner);
+  });
+ }
+ function ownerFor(el){const root=el.closest('[data-us-actions-ready]');return roots.get(root)}
+ document.addEventListener('click',event=>{
+  const el=event.target.closest?.('button,summary,a');if(!el)return;
+  const owner=ownerFor(el);if(!owner)return;
+  const state=toggles.get(el);
+  if(state){event.preventDefault();event.stopImmediatePropagation();if(!disabled(el))setOpen(state,!state.open);return}
+  if(disabled(el)){event.preventDefault();event.stopImmediatePropagation();return}
+  // Let native item handlers/postbacks/navigation run; never synthesize their click.
+  queueMicrotask(()=>{if(!event.defaultPrevented)setOpen(owner.main,false,{instant:true,focus:false})});
+ },true);
+ document.addEventListener('keydown',event=>{
+  const el=event.target,owner=ownerFor(el);if(!owner)return;
+  const state=toggles.get(el);
+  if(event.key==='ArrowRight'&&state?.child&&!disabled(el)){event.preventDefault();setOpen(state,true,{focus:true});return}
+  if(event.key==='Escape'||event.key==='ArrowLeft'){
+   const branch=[...owner.children].reverse().find(s=>s.open&&(s.panel.contains(el)||s.trigger===el));
+   if(branch){event.preventDefault();event.stopPropagation();setOpen(branch,false,{focus:true});}
+   else if(event.key==='Escape'&&owner.main.open){event.preventDefault();event.stopPropagation();setOpen(owner.main,false,{focus:true});}
+  }
+ });
+ document.addEventListener('pointerdown',event=>{for(const owner of roots.values())if(!owner.root.contains(event.target))setOpen(owner.main,false)},true);
+ document.addEventListener('focusin',event=>{for(const owner of roots.values())if(!owner.root.contains(event.target))setOpen(owner.main,false,{instant:true})});
+ document.addEventListener('toggle',event=>{const owner=roots.get(event.target);if(owner?.details&&!owner.root.open&&owner.main.open)setOpen(owner.main,false,{instant:true})},true);
+ function reset(){for(const owner of roots.values())setOpen(owner.main,false,{instant:true})}
+ window.addEventListener('resize',reset);window.addEventListener('pagehide',reset);
+ window.addEventListener('scroll',event=>{
+  for(const owner of roots.values()){
+   if(!owner.main.open)continue;
+   if(event.target===document||event.target===window||!owner.root.contains(event.target))setOpen(owner.main,false,{instant:true});
+   else if(!narrow())for(const child of owner.children)if(!child.panel.contains(event.target))setOpen(child,false,{instant:true});
+  }
+ },true);
+ let scheduled=false;
+ function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh()})}
+ function start(){refresh();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true})}
+ window.UnionSuiteActionMenus={version:'2.0',refresh,closeFor(element){const owner=ownerFor(element);if(owner)setOpen(owner.main,false,{instant:true,focus:true})}};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+/* US-ACTION-MENUS:END */
+/* US-ACTION-HEADING-MENUS:START — dropdown menus in panel headings.
+   Defined here, before ActionDefinitions.js and the client Actions.js, so
+   client files can register menus. Planned to move inside
+   US-UNIFIED-ACTIONS (contact page v3 THEME-CHANGES.md, item 31).
+
+   US-ACTION-HEADING-MENUS 1.0 — a menu is configured exactly like
+   a heading button: one definition, placed by its us-action-* class in the
+   iPart CSS class field. The definition has the button's shape with
+   action {type: 'menu', items: [action keys]}:
+
+     UnionSuiteHeadingMenus.define('finance.add-adjustment', {
+       className: 'us-action-finance-add-adjustment',
+       owner: 'Client', source: 'Actions.js:finance.add-adjustment',
+       presentation: {label: 'Add adjustment', icon: 'plus', order: 1},
+       action: {type: 'menu', items: ['finance.add-waiver',
+         'membership.suspend', 'membership.change']}
+     });
+
+   The menu is the theme's .us-actions dropdown (Quick Actions' look, motion
+   and keyboard handling from US-ACTION-MENUS). Each item is an ordinary
+   control carrying the item action's class, so US-UNIFIED-ACTIONS labels,
+   checks access and runs it in menu placement, as for a Quick Actions item.
+   US-UNIFIED-ACTIONS does not know type 'menu' yet: it draws an
+   unconfigured button for the menu's class, which this block hides, and
+   this block keeps its own registry. Once UnionSuiteActions.define accepts
+   type 'menu', the heading slot reconciler renders this markup. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteHeadingMenus) {
+    window.UnionSuiteHeadingMenus.refresh();
+    return;
+  }
+
+  const menus = new Map();
+  const PLACEHOLDER = 'data-us-heading-menu-placeholder';
+  let scheduled = false;
+
+  function define(key, value) {
+    if (!/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/.test(key)) throw new TypeError('Use a namespaced menu key.');
+    if (!value || typeof value.className !== 'string' || !/^us-action-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value.className)) throw new TypeError('Supply one us-action-AREA-COMMAND class.');
+    if (typeof value.owner !== 'string' || !value.owner.trim() || typeof value.source !== 'string' || !value.source.trim()) throw new TypeError('Menu registration requires nonempty owner and source strings.');
+    const presentation = value.presentation || {};
+    if (typeof presentation.label !== 'string' || !presentation.label.trim()) throw new TypeError('presentation.label is required.');
+    if (presentation.icon != null && presentation.icon !== 'plus') throw new TypeError('Heading menus support the plus icon only.');
+    const action = value.action || {};
+    if (action.type !== 'menu' || !Array.isArray(action.items) || !action.items.length || action.items.some(item => typeof item !== 'string')) {
+      throw new TypeError('Menus need action {type: "menu", items: [action keys]}.');
+    }
+    if ([...menus.values()].some(menu => menu.className === value.className && menu.key !== key)) throw new TypeError('That class belongs to another menu.');
+    menus.set(key, Object.freeze({ key, className: value.className, label: presentation.label.trim(), icon: presentation.icon || null, order: presentation.order || 0, items: Object.freeze([...action.items]) }));
+    schedule();
+    return key;
+  }
+
+  // Item classes come from the action registry, so an item follows its
+  // action's own className; the key convention is the fallback.
+  function itemClass(key) {
+    return window.UnionSuiteActions?.getActionStatus?.(key)?.className || 'us-action-' + key.replace(/\./g, '-');
+  }
+
+  function build(menu) {
+    const root = document.createElement('div');
+    root.className = 'us-actions us-heading-menu';
+    root.setAttribute('data-us-heading-menu', menu.key);
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'us-actions__toggle';
@@ -11098,7 +11308,11 @@ SOFTWARE.
 })();
 /* US-SECTION-SWITCHER:END */
 
-/* US-ATTENTION:START — read-only IQA folder counts for Content HTML. */
+/* US-ATTENTION:START — read-only IQA folder counts for Content HTML.
+   Optional data-us-iqa-filter="AgreementNum" (4 October 2026): counts for
+   one record. Each query runs through GET /api/query by its folder path and
+   name, with that named filter set to the page URL's parameter of the same
+   name; with no such parameter the status says so and nothing is queried. */
 (function () {
   'use strict';
   if (window.UnionSuiteAttention) { window.UnionSuiteAttention.refresh(); return; }
@@ -11189,8 +11403,15 @@ SOFTWARE.
       return /^(https?:)$/.test(url.protocol) && !url.username && !url.password ? url.href : null;
     } catch { return null; }
   }
-  async function queryCount(query, signal) {
-    const data = await request('iqa?' + new URLSearchParams({QueryDocumentVersionKey:query.id,Limit:'2'}), null, signal);
+  // scope (data-us-iqa-filter): run the query by its folder path and name
+  // through GET /api/query with the record's named filter, so its count is
+  // for this record (the agreement in the page URL). Without it, the query
+  // runs unfiltered by its version key, as before.
+  async function queryCount(query, signal, scope) {
+    const path = scope
+      ? 'query?' + new URLSearchParams({QueryName:scope.folder + '/' + query.name,limit:'2',offset:'0',[scope.filter]:scope.value})
+      : 'iqa?' + new URLSearchParams({QueryDocumentVersionKey:query.id,Limit:'2'});
+    const data = await request(path, null, signal);
     const rows = values(data.Items);
     if (rows.length !== 1 || Number(unwrap(data.TotalCount)) > 1 || unwrap(data.HasNext) === true) throw Error('Each tracker IQA must return exactly one summary row.');
     const rawCount = property(rows[0],'Count'), header = property(rows[0],'Header'), label = property(rows[0],'Label');
@@ -11278,8 +11499,22 @@ SOFTWARE.
     try {
       const path = state.path.trim().replace(/\/+$/,'');
       if (!/^\$\/.+/.test(path)) throw Error('Configure an IQA folder path beginning $/.');
+      // A record filter takes its value from the page URL's parameter of the
+      // same name; without a value there is no record, so nothing is queried.
+      const filter = (state.filter || '').trim();
+      let scope = null;
+      if (filter) {
+        if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(filter)) throw Error('Invalid filter name.');
+        const value = new URLSearchParams(location.search).get(filter);
+        if (!value || !value.trim()) {
+          if (!current()) return;
+          state.status.textContent = 'Counts need ' + filter + ' in the page address.';
+          return;
+        }
+        scope = {folder:path,filter,value:value.trim()};
+      }
       const queries = await queriesInFolder(path, controller.signal);
-      const results = await Promise.allSettled(queries.map(query => queryCount(query, controller.signal)));
+      const results = await Promise.allSettled(queries.map(query => queryCount(query, controller.signal, scope)));
       if (!current()) return;
       let failed = 0;
       const cards = results.map((result,i) => {
@@ -11305,7 +11540,7 @@ SOFTWARE.
   function refresh() {
     for (const [link,entry] of opening) if (!availableCard(link) || link.href !== entry.href) clearOpening(link);
     states.forEach((state,root) => {
-      if (!root.isConnected || !root.matches(selector) || root.closest('.us-report-no-styling') || root.dataset.usIqaFolder !== state.path ||
+      if (!root.isConnected || !root.matches(selector) || root.closest('.us-report-no-styling') || root.dataset.usIqaFolder !== state.path || (root.dataset.usIqaFilter || '') !== state.filter ||
           root.querySelector(':scope > .us-attention__items') !== state.list || root.querySelector(':scope > .us-attention__status') !== state.status || root.querySelector(':scope > .us-attention__retry') !== state.retry) {
         state.controller?.abort(); state.list.removeAttribute('aria-busy'); states.delete(root);
       }
@@ -11314,7 +11549,7 @@ SOFTWARE.
       if (states.has(root) || root.closest('.us-report-no-styling')) return;
       const list=root.querySelector(':scope > .us-attention__items'), status=root.querySelector(':scope > .us-attention__status'), retry=root.querySelector(':scope > .us-attention__retry');
       if (!list || !status || !retry) return;
-      const state = {root,list,status,retry,path:root.dataset.usIqaFolder};
+      const state = {root,list,status,retry,path:root.dataset.usIqaFolder,filter:root.dataset.usIqaFilter || ''};
       states.set(root,state); void load(state);
     });
   }
@@ -11328,7 +11563,7 @@ SOFTWARE.
     refresh();
     new MutationObserver(records => {
       if (opening.size || records.some(record => record.type === 'attributes' || [...record.addedNodes,...record.removedNodes].some(node => node.nodeType === 1 && (node.matches(selector) || node.querySelector(selector) || node.matches('.us-attention__items,.us-attention__status,.us-attention__retry'))))) schedule();
-    }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-us-iqa-folder','class','hidden','aria-disabled','href']});
+    }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-us-iqa-folder','data-us-iqa-filter','class','hidden','aria-disabled','href']});
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
@@ -12937,11 +13172,13 @@ SOFTWARE.
   }
 
   const SELECTOR = '.us-activity-feed';
+  // A direction reads Incoming or Outgoing, with an arrow, on every type
+  // (owner, 4 October 2026: one word pair for calls, email and SMS).
   const TYPES = {
-    call: { label: 'Call', plural: 'Calls', inward: 'Inbound', outward: 'Outbound' },
-    email: { label: 'Email', plural: 'Emails', inward: 'Received', outward: 'Sent' },
+    call: { label: 'Call', plural: 'Calls' },
+    email: { label: 'Email', plural: 'Emails' },
     meeting: { label: 'Meeting', plural: 'Meetings' },
-    sms: { label: 'SMS', plural: 'SMS', inward: 'Received', outward: 'Sent' },
+    sms: { label: 'SMS', plural: 'SMS' },
     note: { label: 'Note', plural: 'Notes' },
     // pins: records of this type can be pinned, so the search field offers a
     // pinned-only toggle while it is chosen.
@@ -12960,6 +13197,14 @@ SOFTWARE.
   // The theme's report filter icon (US-QUERY-SEARCH icon('filter')).
   const FILTER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
     '<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"></path></svg>';
+  // Tabler "arrow-down" and "arrow-up" outlines (MIT) before the direction
+  // word: incoming points down, outgoing up.
+  const DIRECTION_ICONS = {
+    in: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+      '<path d="M12 5l0 14"></path><path d="M18 13l-6 6"></path><path d="M6 13l6 6"></path></svg>',
+    out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+      '<path d="M12 5l0 14"></path><path d="M18 11l-6 -6"></path><path d="M6 11l6 -6"></path></svg>'
+  };
   const MAX_FETCHES_PER_FILL = 25;
 
   const states = new Map();
@@ -13033,8 +13278,8 @@ SOFTWARE.
     return {
       label: source.label || known.label,
       plural: source.plural || known.plural,
-      inward: known.inward || 'Inbound',
-      outward: known.outward || 'Outbound'
+      inward: known.inward || 'Incoming',
+      outward: known.outward || 'Outgoing'
     };
   }
 
@@ -13716,13 +13961,19 @@ SOFTWARE.
     record.dataset.usRecordType = row.source.type;
     record.dataset.usRecordPriority = row.priority;
     record.dataset.usActivityId = row.id;
+    if (row.direction) record.dataset.usRecordDirection = row.direction;
     const node = el('span', 'us-record__node');
     node.setAttribute('aria-hidden', 'true');
 
     const tags = el('p', 'us-record__tags');
     tags.append(el('span', 'us-record__type', info.label));
     if (row.category) tags.append(el('span', 'us-record__category', row.category));
-    if (row.direction) tags.append(el('span', 'us-record__direction', row.direction === 'in' ? info.inward : info.outward));
+    if (row.direction) {
+      const direction = el('span', 'us-record__direction');
+      direction.innerHTML = DIRECTION_ICONS[row.direction];
+      direction.append(row.direction === 'in' ? info.inward : info.outward);
+      tags.append(direction);
+    }
     if (row.caseRef) {
       const link = el(row.caseUrl ? 'a' : 'span', 'us-record__link', row.caseRef);
       if (row.caseUrl) link.href = row.caseUrl;

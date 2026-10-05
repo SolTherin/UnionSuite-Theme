@@ -159,6 +159,27 @@ Checked in the browser at 1280–1366px, light and dark, no console errors:
    `node tools/build-theme-usage.cjs`, its `--check`, and
    `node tools/check-usage-sources.cjs`.
 6. After MVP: rail sub-section links.
+7. Activity tab additions (owner, 4 October 2026): Communications and
+   Change history, each with a comparison page
+   (`communications-compare.html`, `changelog-compare.html`; README
+   decisions 13 and 14). Communications decided the same day: one
+   card per send, group sends with a summary bar and recipient list,
+   member sends with the bar only, email and SMS; it waits on the send
+   hook (TODO.md). Change history decided the same day: option 8, the
+   rail led by what happened ("Task Added · by Mary O'Conner", date and
+   time on the right, the record and its fields as details); it waits on
+   the change log (TODO.md). Neither panel is on `index-v2.html` yet.
+8. Coverage rules (owner, 4 October 2026): `coverage-compare.html`
+   (README decision 15). Ranks are and-groups, any group covers (or);
+   editing stays in the Coverage.aspx popup; the covered records stay the
+   existing IQA. Decided the same day: option 2, rule groups (a box per
+   rank, "Rank 2 · all must match", and / or in words, everyday names for
+   the CloudToolz tables, a light strikethrough and a red Disabled sign
+   on an inactive rule), and promoted to the theme: US-COVERAGE-RULES
+   (preset us-agreement-coverage), under a Needs Attention tracker for
+   the covered counts (data-us-iqa-filter="AgreementNum", a new
+   US-ATTENTION option). Layout v2's Details tab uses both. It waits on
+   the rules IQA and the two tracker IQAs (TODO.md).
 
 ## Preview
 

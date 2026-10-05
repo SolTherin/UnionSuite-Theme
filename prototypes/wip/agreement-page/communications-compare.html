@@ -1,0 +1,475 @@
+<!doctype html>
+<!--
+  Agreement communications on the Activity tab (decision 13 in README.md).
+  Both panels are the contact page's activity feed (US-ACTIVITY-FEED in
+  zUnionSuite.js) with its record card, fed from one sample:
+  1. The contact's email IQAs as they are: one row per recipient, with the
+     delivery history (US-ACTIVITY-EVENTS, contact page v3 item 37, loaded
+     from prototypes/wip/contact-page-v3/ below). Kept for reference.
+  2. The direction (owner, 4 October 2026): one card per send, the kind of
+     send from the tag the send hook will give it (TODO.md). A group send
+     (a contact group such as SBU, 10 to 15 people) shows the send results
+     and every recipient; a member send (every covered member, thousands)
+     shows the summary bar and counts only. Email and SMS, sent and
+     received (received email through the Outlook integration).
+     US-ACTIVITY-RECIPIENTS in communications.candidate.js / .css.
+  Serve the project root (static-node) and open this page. The IQA names
+  and folder are proposals; nothing is built in iMIS.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Communications Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="communications.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.cc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .cc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .cc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .cc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .cc-toolbar select,
+    .cc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .cc-toolbar .cc-mode {
+      margin-inline-start: auto;
+    }
+
+    .cc-stage {
+      display: grid;
+      gap: 32px;
+      max-width: var(--cc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .cc-option {
+      display: grid;
+      gap: 12px;
+      scroll-margin-top: 56px;
+    }
+
+    .cc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .cc-option > p,
+    .cc-option > ul {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .cc-option > ul {
+      padding-inline-start: 20px;
+    }
+
+    .cc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+  </style>
+</head>
+<body class="cc-page">
+
+<!-- Native iMIS page state the feed reads (API root and request token). -->
+<object hidden type="application/json"><param name="__ClientContext" id="__ClientContext" value='{"baseUrl":"/","isAnonymous":false,"loggedInPartyId":"104203","selectedPartyId":"104203","websiteRoot":"/"}'></object>
+<input type="hidden" name="__RequestVerificationToken" id="__RequestVerificationToken" value="prototype-token">
+
+<div class="cc-toolbar" aria-label="Comparison controls">
+  <strong>Communications</strong>
+  <nav aria-label="Options">
+    <a href="#cc-direction">Decided</a>
+    <a href="#cc-contact">Contact as is</a>
+  </nav>
+  <label>Panel width
+    <select id="cc-width">
+      <option value="380px">380px</option>
+      <option value="620px">620px</option>
+      <option value="1100px" selected>Full (Activity tab)</option>
+      <option value="1600px">Full (wide screen)</option>
+    </select>
+  </label>
+  <label>Sample
+    <select id="cc-sample">
+      <option value="full" selected>14 sends and replies</option>
+      <option value="quiet">Quiet: group sends only</option>
+    </select>
+  </label>
+  <a href="changelog-compare.html">Changelog comparison</a>
+  <a href="index-v2.html?AgreementID=A107&amp;AgreementNum=123#activity">Layout v2</a>
+  <button type="button" class="cc-mode" id="cc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="cc-stage" id="cc-stage">
+
+  <section class="cc-option" id="cc-direction" aria-labelledby="cc-direction-title">
+    <h2 id="cc-direction-title">Decided (owner, 4 October 2026): one card per send, shown by the kind of send</h2>
+    <p>The contact page's activity feed and record card, unchanged. Each kind of send is its own source, filtered on the tag the send hook gives it, so the card's type line says who it went to (the group, or Members) and opening it shows how it went:</p>
+    <ul>
+      <li><strong>Group send</strong> (a contact group such as SBU, 10 to 15 people): the summary bar and counts, then every recipient with their status, failures first. Past 15, "Show all" slides in the rest. Open the SBU or Bargaining Team cards.</li>
+      <li><strong>Member send</strong> (every covered member, possibly thousands): the summary bar and counts only, from one row of totals; the send's own record lists the people. Open "Bargaining update #5".</li>
+      <li><strong>SMS</strong> works the same way on the SMS card (no Opened state). <strong>Incoming</strong> email comes from the Outlook integration, on the same card. Every card marks its direction as Incoming (down arrow) or Outgoing (up arrow).</li>
+    </ul>
+    <div class="ContentItemContainer"><div class="us-agreement-communications"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[mail]] Communications</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet"><section data-item="communications-0"><div class="QueryTemplateItem">
+        <div class="us-activity-feed"
+             data-us-activity-folder="$/_i4u_/Core/CA/v2/Communications"
+             data-us-activity-details-folder="$/_i4u_/Core/CA/v2/Client Communications"
+             data-us-activity-filter="AgreementNum" data-us-activity-value="123"
+             data-us-activity-start="StartDate" data-us-activity-days="0"
+             data-us-activity-today="2026-10-02">
+          <ul class="us-activity__sources" hidden>
+            <li data-source="email-groups" data-query="Agreement Emails to Groups" data-details="Agreement Sends Details" data-recipients="Agreement Send Recipients" data-type="email" data-direction="out" data-record-popup="true"></li>
+            <li data-source="email-members" data-query="Agreement Emails to Members" data-details="Agreement Sends Details" data-delivery="Agreement Send Delivery" data-type="email" data-direction="out" data-record-popup="true"></li>
+            <li data-source="sms-groups" data-query="Agreement SMS to Groups" data-recipients="Agreement Send Recipients" data-type="sms" data-direction="out"></li>
+            <li data-source="sms-members" data-query="Agreement SMS to Members" data-delivery="Agreement Send Delivery" data-type="sms" data-direction="out"></li>
+            <li data-source="email-in" data-query="Agreement Emails Received" data-details="Agreement Emails Received Details" data-type="email" data-direction="in"></li>
+          </ul>
+        </div>
+      </div></section></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="cc-option" id="cc-contact" aria-labelledby="cc-contact-title">
+    <h2 id="cc-contact-title">For reference: the contact's email IQAs, as they are</h2>
+    <p>The contact page's sent and received email IQAs, pointed at the agreement and otherwise unchanged. They return one row per recipient (iMIS logs a send once per recipient), which on a contact is one email. Here a group send shows once per person, and a member send once per member: thousands of identical cards. Each card's delivery history is right, but for one person.</p>
+    <div class="ContentItemContainer"><div class="us-agreement-communications"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[mail]] Communications</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet"><section data-item="communications-0"><div class="QueryTemplateItem">
+        <div class="us-activity-feed"
+             data-us-activity-folder="$/_i4u_/Core/CA/v2/Communications"
+             data-us-activity-filter="AgreementNum" data-us-activity-value="123"
+             data-us-activity-start="StartDate" data-us-activity-days="0"
+             data-us-activity-today="2026-10-02">
+          <ul class="us-activity__sources" hidden>
+            <li data-source="emails-out" data-query="Contact Style Emails Sent" data-details="Contact Style Emails Sent Details" data-events="Contact Style Emails History" data-events-label="Delivery history" data-type="email" data-direction="out" data-record-popup="true"></li>
+            <li data-source="emails-in" data-query="Agreement Emails Received" data-details="Agreement Emails Received Details" data-type="email" data-direction="in"></li>
+          </ul>
+        </div>
+      </div></section></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<script>
+  // OFFLINE FIXTURE. Sends and replies for agreement A107 (AgreementNum
+  // 123), answered through a stand-in for GET /api/query. "Today" is 2
+  // October 2026, as on index-v2.html. Each send carries the tag the send
+  // hook will write: channel, direction, kind (Group or Members) and group.
+  const AGREEMENT = '123';
+  const CORE = '$/_i4u_/Core/CA/v2/Communications/';
+  const CLIENT = '$/_i4u_/Core/CA/v2/Client Communications/';
+
+  // Made-up names, stable from run to run.
+  const FIRST = ['Aisha', 'Ben', 'Chloe', 'Daniel', 'Ella', 'Farid', 'Grace', 'Hamish', 'Isla', 'Jack', 'Kiri', 'Liam', 'Mei', 'Noah', 'Olivia', 'Priya', 'Quinn', 'Ruby', 'Sam', 'Tara'];
+  const LAST = ['Anderson', 'Brown', 'Chen', 'Dimitriou', 'Evans', 'Fraser', 'Gupta', 'Huang', 'Ivanov', 'Jones', 'Kelly', 'Lee', 'Martin', 'Nguyen', 'O\'Brien', 'Patel', 'Rossi', 'Singh', 'Taylor', 'Walsh'];
+  const nameAt = index => FIRST[(index * 7) % FIRST.length] + ' ' + LAST[(index * 3 + Math.floor(index / 20)) % LAST.length];
+
+  // Agreement contact groups (index-v2.html's Contacts panel).
+  const GROUPS = {
+    'Bargaining Team': ["Dani Sundara", 'Tony Fin Stark', 'Tony Williams', 'Al Soria', 'Alicia Miller', 'Christina Zerk', 'Andrew O Newnham', 'Alex Keaton'],
+    SBU: Array.from({length: 12}, (_, index) => nameAt(index + 40)),
+    External: ['Frank Grimes', 'Pepper Potts', 'Happy Hogan'],
+    Delegates: Array.from({length: 18}, (_, index) => nameAt(index + 70))
+  };
+
+  // One text per send: an email's subject, or an SMS's message. Outgoing
+  // email has no preview line: the communications log stores only the HTML
+  // body, so the full email opens in the native preview instead.
+  const words = (channel, text) => channel === 'sms' ? {subject: '', summary: text} : {subject: text, summary: ''};
+
+  // A group send: statuses by position (the rest Opened, or Delivered for SMS).
+  function groupSend(key, channel, date, by, group, text, statuses = {}, attachments = 0) {
+    const fallback = channel === 'sms' ? 'Delivered' : 'Opened';
+    const recipients = GROUPS[group].map((name, index) => ({name, group, status: statuses[index] || fallback}));
+    return {key, channel, kind: 'Group', group, date, by, ...words(channel, text), recipients, total: recipients.length, attachments};
+  }
+
+  // A member send: counts only, as the delivery IQA returns them.
+  function memberSend(key, channel, date, by, text, counts, attachments = 0) {
+    const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
+    return {key, channel, kind: 'Members', group: 'Members', date, by, ...words(channel, text), counts, total, attachments};
+  }
+
+  const SENDS = [
+    groupSend('E-3120', 'email', '2026-10-01T16:40:00', "Mary O'Conner", 'Bargaining Team', 'Draft agreement for review',
+      {2: 'Delivered', 5: 'Delivered', 7: 'Queued'}, 1),
+    groupSend('S-0412', 'sms', '2026-09-29T08:05:00', 'Dani Sundara', 'SBU',
+      'Site meeting moved to 3pm today, Building C lunchroom. Reply STOP to opt out.', {4: 'Failed', 9: 'Pending'}),
+    memberSend('E-3104', 'email', '2026-09-24T07:30:00', 'Dani Sundara', "Bargaining update #5: the employer's revised offer",
+      {Opened: 1912, Delivered: 846, Pending: 31, Failed: 57}),
+    memberSend('S-0398', 'sms', '2026-09-24T07:35:00', 'Dani Sundara',
+      'Bargaining update #5 is in your inbox: the employer has revised its offer. Reply STOP to opt out.', {Delivered: 2704, Pending: 22, Failed: 120}),
+    groupSend('E-3090', 'email', '2026-09-18T10:05:00', "Mary O'Conner", 'External', 'Response to the revised classification structure',
+      {1: 'Delivered'}, 2),
+    groupSend('E-3071', 'email', '2026-09-10T14:15:00', 'Dani Sundara', 'Delegates', 'Site visit roster for September',
+      {3: 'Bounced', 8: 'Delivered', 11: 'Delivered', 15: 'Deferred'}, 1),
+    memberSend('E-3044', 'email', '2026-07-28T09:00:00', 'Alex Keaton', 'Your agreement: what is changing',
+      {Opened: 1650, Delivered: 1094, Pending: 0, Failed: 67}),
+    groupSend('E-3012', 'email', '2026-07-14T11:20:00', "Mary O'Conner", 'External', 'Agenda for 16 July',
+      {2: 'Bounced'}),
+    memberSend('E-2980', 'email', '2026-06-02T08:15:00', 'Dani Sundara', 'Member survey: your priorities',
+      {Opened: 1388, Delivered: 1340, Pending: 0, Failed: 62}),
+    groupSend('E-2961', 'email', '2026-05-21T17:05:00', "Mary O'Conner", 'SBU', 'First round outcomes',
+      {6: 'Delivered'})
+  ];
+
+  // Received email, from the Outlook integration. The preview line stands in
+  // for the message's bodyPreview (Microsoft Graph: the first 255
+  // characters, plain text), if the integration stores it.
+  const RECEIVED = [
+    {key: 'R-610', date: '2026-09-30T11:22:00', from: 'Frank Grimes', group: 'External', subject: 'Re: Response to the revised classification structure', summary: 'The employer will keep level 4; asks to defer the Friday half day to the next agreement.', attachments: 0},
+    {key: 'R-598', date: '2026-09-19T08:47:00', from: 'Tony Williams', group: 'Bargaining Team', subject: 'Members\' questions on the offer', summary: 'Twelve questions from the night shift, mostly about the C3 step.', attachments: 1},
+    {key: 'R-560', date: '2026-07-15T16:02:00', from: 'Pepper Potts', group: 'External', subject: 'Re: Agenda for 16 July', summary: 'Confirms the agenda and adds an item on site allowances.', attachments: 0},
+    {key: 'R-541', date: '2026-06-30T09:12:00', from: 'Frank Grimes', group: 'External', subject: 'Venue for the July meetings', summary: 'Meeting room 3 at the Stark Industries head office, 2 pm.', attachments: 0}
+  ];
+
+  let sample = 'full';
+  const sends = () => sample === 'quiet' ? SENDS.filter(send => send.kind === 'Group') : SENDS;
+  const received = () => sample === 'quiet' ? RECEIVED.slice(0, 1) : RECEIVED;
+  const findSend = key => SENDS.find(send => send.key === key);
+  const address = name => name.toLowerCase().replace(/[^a-z]+/g, '.') + '@example.org.au';
+
+  // ── The IQAs, simulated ───────────────────────────────────────────
+
+  // Core sends: one row per send, filtered on the tag. Category is the
+  // group (or Members); Direction comes from the tag too.
+  const sendRows = (channel, kind) => () => sends()
+    .filter(send => send.channel === channel && send.kind === kind)
+    .map(send => ({
+      ActivityKey: send.key, ActivityDate: send.date, Subject: send.subject, Summary: send.summary,
+      CreatedBy: send.by, Category: send.group, Direction: 'Out', RecordUrl: '#send-record'
+    }));
+
+  const receivedRows = () => received().map(email => ({
+    ActivityKey: email.key, ActivityDate: email.date, Subject: email.subject, Summary: email.summary,
+    CreatedBy: email.from, Category: email.group, Direction: 'In', RecordUrl: '#email-record'
+  }));
+
+  // Recipients of a group send, failures first.
+  const ORDER = {Bounced: 0, Failed: 0, Deferred: 1, Pending: 2, Queued: 2, Delivered: 3, Opened: 4};
+  function recipients(key) {
+    const send = findSend(key);
+    if (!send || send.kind !== 'Group') return [];
+    return send.recipients
+      .map(person => ({Recipient: person.name, RecipientGroup: person.group, Status: person.status}))
+      .sort((a, b) => ORDER[a.Status] - ORDER[b.Status] || a.Recipient.localeCompare(b.Recipient));
+  }
+
+  // Totals of a member send: one row.
+  function delivery(key) {
+    const send = findSend(key);
+    if (!send || send.kind !== 'Members') return [];
+    return [{Recipients: send.total, Opened: send.counts.Opened || 0, Delivered: send.counts.Delivered || 0, Pending: send.counts.Pending || 0, Failed: send.counts.Failed || 0}];
+  }
+
+  const details = {
+    'Agreement Sends Details': key => {
+      const send = findSend(key);
+      return send && {'Additional-Attachments': send.attachments ? String(send.attachments) : ''};
+    },
+    'Agreement Emails Received Details': key => {
+      const email = RECEIVED.find(item => item.key === key);
+      return email && {'Additional-From': address(email.from), 'Additional-Mailbox': 'bargaining@example.org.au', 'Additional-Attachments': email.attachments ? String(email.attachments) : ''};
+    },
+    // Reference panel: the contact's per-recipient details.
+    'Contact Style Emails Sent Details': key => {
+      const match = contactRecipient(key);
+      return match && {'Additional-Outcome': match.status, 'Additional-With': address(match.name), 'Additional-Attachments': match.send.attachments ? String(match.send.attachments) : ''};
+    }
+  };
+
+  // ── Reference panel: one row per recipient ───────────────────────
+
+  // Every recipient of an email send, members included (made up from the counts).
+  function everyone(send) {
+    if (send.kind === 'Group') return send.recipients;
+    const people = [];
+    Object.entries(send.counts).forEach(([status, count]) => {
+      for (let n = 0; n < count; n++) people.push({name: nameAt(people.length), status: status === 'Failed' ? 'Bounced' : status});
+    });
+    return people;
+  }
+
+  const contactRows = () => sends().filter(send => send.channel === 'email').flatMap(send =>
+    everyone(send).map((person, index) => ({
+      ActivityKey: send.key + '-' + (index + 1), ActivityDate: send.date, Subject: send.subject,
+      CreatedBy: send.by, RecordUrl: '#email-record'
+    })));
+
+  function contactRecipient(key) {
+    const cut = key.lastIndexOf('-');
+    const send = findSend(key.slice(0, cut));
+    const person = send && everyone(send)[Number(key.slice(cut + 1)) - 1];
+    return person ? {send, name: person.name, status: person.status} : null;
+  }
+
+  function contactHistory(key) {
+    const match = contactRecipient(key);
+    if (!match) return [];
+    const at = minutes => new Date(new Date(match.send.date).getTime() + minutes * 60000).toISOString().slice(0, 16);
+    const events = [{EventDate: at(0), Event: 'Queued'}];
+    if (match.status === 'Bounced') events.push({EventDate: at(1), Event: 'Bounced', EventTone: 'danger', EventDetail: 'Mailbox does not exist'});
+    else if (match.status === 'Deferred') events.push({EventDate: at(2), Event: 'Deferred', EventTone: 'warning', EventDetail: 'Mailbox full; retrying'});
+    else if (!/Queued|Pending/.test(match.status)) events.push({EventDate: at(1), Event: 'Delivered', EventTone: 'success'});
+    if (match.status === 'Opened') events.push({EventDate: at(95), Event: 'Opened', EventTone: 'success'});
+    return events;
+  }
+
+  const lists = {
+    'Agreement Emails to Groups': sendRows('email', 'Group'),
+    'Agreement Emails to Members': sendRows('email', 'Members'),
+    'Agreement SMS to Groups': sendRows('sms', 'Group'),
+    'Agreement SMS to Members': sendRows('sms', 'Members'),
+    'Agreement Emails Received': receivedRows,
+    'Contact Style Emails Sent': contactRows
+  };
+
+  const page = (rows, limit, offset) => {
+    const slice = rows.slice(offset, offset + limit);
+    return {TotalCount: rows.length, Offset: offset, Limit: limit, Count: slice.length, HasNext: offset + slice.length < rows.length, Items: {$values: slice}};
+  };
+  const reply = data => ({ok: true, status: 200, json: async () => data});
+
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async (input, options = {}) => {
+    const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+    if (!url.pathname.endsWith('/api/query')) return realFetch(input, options);
+    const name = (url.searchParams.get('QueryName') || '').replace(CORE, '').replace(CLIENT, '');
+    const key = url.searchParams.get('ActivityKey');
+    const limit = Number(url.searchParams.get('limit')) || 100;
+    const offset = Number(url.searchParams.get('offset')) || 0;
+    const ours = url.searchParams.get('AgreementNum') === AGREEMENT;
+    await new Promise(resolve => setTimeout(resolve, 120 + Math.random() * 240));
+
+    if (name === 'Contact Style Emails History') return reply(page(ours ? contactHistory(key) : [], 50, 0));
+    if (name === 'Agreement Send Recipients') return reply(page(ours ? recipients(key) : [], limit, offset));
+    if (name === 'Agreement Send Delivery') return reply(page(ours ? delivery(key) : [], 1, 0));
+    if (details[name]) {
+      const row = ours ? details[name](key) : null;
+      return reply(page(row ? [{ActivityKey: key, ...row}] : [], 1, 0));
+    }
+    if (lists[name]) {
+      const start = url.searchParams.get('StartDate') || '';
+      const rows = (ours ? lists[name]() : [])
+        .filter(row => row.ActivityDate.slice(0, 10) >= start)
+        .sort((a, b) => b.ActivityDate.localeCompare(a.ActivityDate));
+      return reply(page(rows, limit, offset));
+    }
+    return {ok: false, status: 404, json: async () => ({})};
+  };
+
+  // ── Delivery history from contact page v3 ─────────────────────────
+  // The reference panel needs US-ACTIVITY-EVENTS (contact page v3 item 37,
+  // not in the theme). Its blocks are read from that prototype's candidate
+  // files, so the reference shows the contact card exactly as it is there.
+  async function loadContactEvents() {
+    const base = '../contact-page-v3/';
+    const [script, styles] = await Promise.all([
+      realFetch(base + 'theme-candidate.js', {cache: 'no-cache'}).then(response => response.text()),
+      realFetch(base + 'theme-candidate.css', {cache: 'no-cache'}).then(response => response.text())
+    ]);
+    const js = script.slice(script.indexOf('/* US-ACTIVITY-EVENTS:START'), script.indexOf('/* US-ACTIVITY-EVENTS:END */'));
+    const cssStart = styles.indexOf('/* --------------------------------------------------------------------------\n   37. Activity history');
+    const cssEnd = styles.indexOf('/* -----', cssStart + 10);
+    const style = document.createElement('style');
+    style.textContent = styles.slice(cssStart, cssEnd < 0 ? undefined : cssEnd);
+    document.head.append(style);
+    const tag = document.createElement('script');
+    tag.textContent = js;
+    document.body.append(tag);
+  }
+
+  // ── Toolbar ──────────────────────────────────────────────────────
+
+  document.getElementById('cc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--cc-width', event.target.value);
+  });
+
+  // The feed reloads when its host is replaced, so each panel is redrawn
+  // from a copy of its original markup.
+  const originals = [...document.querySelectorAll('.us-activity-feed')].map(feed => feed.outerHTML);
+  document.getElementById('cc-sample').addEventListener('change', event => {
+    sample = event.target.value;
+    document.querySelectorAll('.us-activity-feed').forEach((feed, index) => {
+      feed.replaceWith(document.createRange().createContextualFragment(originals[index]).firstElementChild);
+    });
+    window.UnionSuiteActivityFeed?.refresh();
+  });
+
+  document.getElementById('cc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  if (location.protocol === 'file:') {
+    const hint = document.createElement('p');
+    hint.className = 'cc-hint';
+    hint.textContent = 'This page needs to be served, not opened from disk: serve the project root and open http://localhost:8778/prototypes/wip/agreement-page/communications-compare.html.';
+    document.getElementById('cc-stage').prepend(hint);
+  } else {
+    loadContactEvents().catch(error => console.warn('Delivery history candidate did not load:', error));
+  }
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="communications.candidate.js"></script>
+</body>
+</html>
