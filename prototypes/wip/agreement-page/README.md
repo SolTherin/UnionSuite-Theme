@@ -192,7 +192,9 @@ guide (templates, field definitions and component sections).
    `us-field-groups--single`.
 5. **Attachment View.** The old view modal was a placeholder; View now
    downloads the file through CloudToolz until a view endpoint exists.
-6. **Upload.** The Attachments heading button opens `/Agreements_AddAttachment`
+6. **Upload.** The Attachments heading button opens
+   `/_i4u_/Core/Collective_Agreements/v2/Popups/Add-Attachment.aspx` (owner,
+   5 October 2026; was `/Agreements_AddAttachment`), at most 960px wide
    (the old `CA_AddAttachmentPopupFn`, previously unused; the banner used Add
    Note / Attachment). Keep both, or one?
 7. **Toggle labels.** T2 relabels the completed toggle in script, and

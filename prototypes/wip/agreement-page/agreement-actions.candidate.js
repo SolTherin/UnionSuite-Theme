@@ -51,11 +51,12 @@
     };
   }
 
-  function popup(key, label, icon, href, title, refresh) {
+  // sizing: optional popup size options (maxWidth, maxHeight) over the 90%.
+  function popup(key, label, icon, href, title, refresh, sizing) {
     define(key, {
       presentation: {label, ...(icon ? {icon} : {}), default: 'button', menu: 'menu-item'},
       context: {agreementId, agreementNum},
-      action: {type: 'popup', recordKey: ['agreementId'], href, popup: {title, width: '90%', height: '90%'}, ...(refresh ? {refresh} : {})}
+      action: {type: 'popup', recordKey: ['agreementId'], href, popup: {title, width: '90%', height: '90%', ...sizing}, ...(refresh ? {refresh} : {})}
     });
   }
 
@@ -64,8 +65,8 @@
     ({context}) => page('/Agreements_CreateNote', {AgreementID: context.agreementId}),
     'Add note', refreshList('us-action-agreements-add-note'));
   popup('agreements.upload-attachment', 'Upload', 'ti-upload',
-    ({context}) => page('/Agreements_AddAttachment', {AgreementID: context.agreementId}),
-    'Add attachment', refreshList('us-action-agreements-upload-attachment'));
+    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Add-Attachment.aspx', {AgreementID: context.agreementId}),
+    'Add attachment', refreshList('us-action-agreements-upload-attachment'), {maxWidth: 960});
   popup('agreements.add-contact', 'Add contact', 'plus',
     ({context}) => page('/Agreements_ManageContacts', {AgreementID: context.agreementId}),
     'Manage contacts', refreshList('us-action-agreements-add-contact'));
