@@ -140,11 +140,11 @@
   popup('agreements.edit-coverage', 'Update coverage', 'pencil',
     ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Coverage.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
     'Edit coverage rules', {when: 'close', targets: [{type: 'origin-report'}]});
-  // Layout v2 (index-v2.html): the Add scheduled increase BeyondForm moves to a
-  // popup page. PLACEHOLDER URL: the form needs its own page first.
+  // Layout v2 (index-v2.html): the Add scheduled increase BeyondForm, on its
+  // own popup page (owner, 5 October 2026).
   popup('agreements.add-increase', 'Add increase', 'plus',
-    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Add_Scheduled_Increase.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
-    'Add scheduled increase', {when: 'close', targets: [{type: 'origin-report'}]});
+    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Add-Scheduled-Increase.aspx', {AgreementID: context.agreementId, AgreementNum: context.agreementNum}),
+    'Add scheduled increase', {when: 'close', targets: [{type: 'origin-report'}]}, {maxWidth: 800});
 
   // ── Row actions (read the record from the row's data-ordinal) ─
   // Open actions sit on the row's own title, which keeps its text as a link
