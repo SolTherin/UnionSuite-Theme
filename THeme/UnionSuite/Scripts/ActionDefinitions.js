@@ -267,14 +267,16 @@
   //   <website>/<send page>?query=<IQA path>
   //     &queryparams=[{"Item1":"<filter>","Item2":"<value>"}, …]
   //     &ReturnUrl=<this page>
-  // The IQA is the Reports tab's Contacts report: prompts ContactType,
-  // ContactGroup, ContactRole and Ordinal, and AgreementNum read from the
-  // page address (hence "@url:"). The parameters copy that report's own
-  // Email button, unused prompts sent blank. Several ordinals go in one
+  // The IQA is API - Communication Recipient List (owner, 5 October 2026):
+  // one prompt, Ordinal (the agreement contact rows to email), and a hidden
+  // AgreementOrdinal = @url:AgreementNum filter. Several ordinals go in one
   // value, each in double quotes: "177","183","214" (iMIS's form for a list
   // in an Equals prompt). With a group, role or search filter on, Ordinal
   // carries the rows still shown; with nothing filtered it is blank, so the
-  // whole agreement is emailed, including rows past the first page.
+  // whole agreement is emailed, including rows past the first page. The
+  // hidden filter's value goes in queryparams as "@url:AgreementNum", as a
+  // Query Menu's own Email button sends it: the Communication Creator runs
+  // the query on the server, not from this page's address.
   // AgreementID goes too: the send page (us-agreement-comms on its
   // Communication Creator iPart) puts "Agreement A107 –" at the start
   // of the subject, where staff cannot remove it (US-SUBJECT-TAG). So do
@@ -287,15 +289,13 @@
   const emailContacts = {
     // The send page, under the current website (owner, 5 October 2026).
     page: '/_i4u_/Core/Collective_Agreements/v2/Popups/Send-Email-Contacts.aspx',
-    query: '$/_i4u_/Core/CA/v2/Reports/Contacts',
-    blankFilters: ['ContactType', 'ContactGroup', 'ContactRole'],
+    query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List',
     ordinalFilter: 'Ordinal',
     agreementFilter: '@url:AgreementNum'
   };
   // The tiles' ordinals, all of them and those the filters leave shown.
   // A tile without its ordinal (a template from before data-us-contact-
-  // ordinal) cannot be sent on its own, and a blank Ordinal means the whole
-  // agreement, so a list missing any ordinal stops the send instead.
+  // ordinal) cannot be sent, so a list missing any ordinal stops the send.
   function contactOrdinals(wrapper) {
     const rows = wrapper ? [...wrapper.querySelectorAll('.QueryTemplateSet > section')]
       .map(section => ({section, ordinal: section.querySelector('[data-us-contact-ordinal]')?.getAttribute('data-us-contact-ordinal')?.trim()})) : [];
@@ -320,9 +320,10 @@
       // filters change without the action being checked again.
       run: ({context, wrapper}) => {
         const {total, shown} = contactOrdinals(wrapper);
+        if (!total) throw new Error('This agreement has no contacts to email.');
         // Every row filtered out: nothing on screen to email, and a blank
         // Ordinal would mean the whole agreement.
-        if (total && !shown.length) throw new Error('No contacts are shown to email. Clear the filter and try again.');
+        if (!shown.length) throw new Error('No contacts are shown to email. Clear the filter and try again.');
         const ordinals = shown.length < total ? shown : [];
         const url = websitePath(emailContacts.page);
         url.searchParams.set('AgreementID', context.agreementId);
@@ -331,7 +332,6 @@
         url.searchParams.set('CommunicationType', 'Email');
         url.searchParams.set('query', emailContacts.query);
         url.searchParams.set('queryparams', JSON.stringify([
-          ...emailContacts.blankFilters.map(name => ({Item1: name, Item2: ''})),
           {Item1: emailContacts.ordinalFilter, Item2: ordinals.map(ordinal => '"' + ordinal + '"').join(',')},
           {Item1: emailContacts.agreementFilter, Item2: String(context.agreementNum)}
         ]));

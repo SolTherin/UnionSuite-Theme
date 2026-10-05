@@ -8260,9 +8260,12 @@ SOFTWARE.
       CommunicationLogKey, Audience and CommunicationType.
    Everything it reads or changes is inside .us-agreement-comms except
    iMIS's message, which iMIS renders in the page template, outside the
-   iPart; the script only reads its text. Success is silent. A failure adds
-   a warning at the top of the iPart, under iMIS's message, so
-   staff know the email went but is not on the agreement. A scheduled send
+   iPart; the script only reads its text. A status line at the top of the
+   iPart, directly under iMIS's message, follows the work (owner, 5 October
+   2026): "Adding this email to agreement A107…" with a spinner, then
+   "Added to agreement A107's communications.", or a warning that the email
+   went but is not on the agreement. It slides in and its colours ease from
+   one state to the next. A scheduled send
    shows a different message and is left to the send hook (TODO.md). */
 (function () {
   'use strict';
@@ -8388,15 +8391,37 @@ SOFTWARE.
     });
   }
 
-  // At the top of the iPart, directly under iMIS's message.
-  function warn(owner, message) {
-    if (owner.querySelector(':scope > .us-comms-log__warning')) return;
-    const note = document.createElement('p');
-    note.className = 'AsiWarning us-comms-log__warning';
-    note.setAttribute('role', 'alert');
-    note.textContent = message;
-    owner.prepend(note);
+  // The status line at the top of the iPart, directly under iMIS's message:
+  // tone is the native message class, busy adds the theme's spinner.
+  function showStatus(owner, tone, message, busy) {
+    let note = owner.querySelector(':scope > .us-comms-log__status');
+    const appearing = !note;
+    if (!note) {
+      note = document.createElement('div');
+      note.hidden = true;
+      owner.prepend(note);
+    }
+    note.className = tone + ' us-comms-log__status';
+    note.setAttribute('role', tone === 'AsiWarning' ? 'alert' : 'status');
+    note.setAttribute('aria-busy', String(!!busy));
+    const parts = [];
+    if (busy) {
+      const spinner = document.createElement('span');
+      spinner.className = 'us-button-spinner';
+      spinner.setAttribute('aria-hidden', 'true');
+      parts.push(spinner);
+    }
+    const text = document.createElement('span');
+    text.textContent = message;
+    parts.push(text);
+    note.replaceChildren(...parts);
+    if (!appearing) return;
+    if (window.UnionSuiteRecordCards?.fold) window.UnionSuiteRecordCards.fold(note, true);
+    else note.hidden = false;
   }
+
+  // The spinner stays long enough to be read, however quick the work.
+  const MIN_BUSY = 700;
 
   function sentMessage() {
     const area = document.querySelector('.user-message-area');
@@ -8431,23 +8456,33 @@ SOFTWARE.
     running = true;
     const {owner, config} = entry;
     const details = sendDetails(owner, config);
+    const agreement = 'agreement ' + (new URLSearchParams(location.search).get('AgreementID') || details.record);
+    // Set when the spinner shows; only then does the next state wait for it.
+    let busySince = 0;
+    const settle = () => wait(busySince ? Math.max(0, MIN_BUSY - (Date.now() - busySince)) : 0);
     try {
       if (!/^\d+$/.test(details.record)) throw new Error('No agreement number (' + config.recordParameter + ') in the page address.');
       if (!details.subject) throw new Error('No subject on the page.');
       if (!details.audience || !details.type) throw new Error('Audience or CommunicationType in the address is not one of ' + config.audiences.concat(config.types).join(', ') + '.');
+      showStatus(owner, 'AsiInformation', 'Adding this email to ' + agreement + '…', true);
+      busySince = Date.now();
       const key = await findLogKey(config, details);
       if (!key) throw new Error('The communication log has no row for "' + details.subject + '" from you yet.');
-      if (linkedHere().includes(key)) return;
-      if (await alreadyLinked(config, key)) {
-        markLinked(key);
-        return;
+      if (!linkedHere().includes(key)) {
+        if (await alreadyLinked(config, key)) {
+          markLinked(key);
+        } else {
+          await insert(config, details, key);
+          markLinked(key);
+        }
       }
-      await insert(config, details, key);
-      markLinked(key);
+      await settle();
+      showStatus(owner, 'AsiSuccess', 'Added to ' + agreement + '\'s communications.');
       console.info('[UnionSuiteCommsLog] Linked ' + key + ' to ' + config.recordField + ' ' + details.record + ' (' + details.audience + ', ' + details.type + ').');
     } catch (error) {
       console.error('[UnionSuiteCommsLog]', error);
-      warn(owner, 'The email was sent, but it could not be added to the agreement. ' + error.message);
+      await settle();
+      showStatus(owner, 'AsiWarning', 'The email was sent, but it could not be added to ' + agreement + '. ' + error.message);
     } finally {
       running = false;
     }
@@ -8467,6 +8502,538 @@ SOFTWARE.
   else start();
 })();
 /* US-COMMS-LOG:END */
+
+/* US-SEND-RECIPIENTS:START — who an email will go to, above a Communication
+   Creator (owner, 5 October 2026; option 4 of
+   prototypes/wip/agreement-page/recipients-compare.html). Authors place
+   <div class="us-send-recipients"></div> in a Content HTML iPart above the
+   Communication Creator; nothing else goes on the page.
+
+   The page address carries the recipients the Communication Creator will
+   use: query (an IQA path) and queryparams ([{"Item1": filter, "Item2":
+   value}, …], as a Query Menu's Email button or the agreement Contacts
+   panel sends them). The script runs that IQA through /api/query with the
+   same filters (blank ones skipped, as the Communication Creator does;
+   "@url:AgreementNum" passed as AgreementNum) and fills the div with:
+   - one information line: the number of recipients, the count per group
+     (when the query has a Group column), and how many will not receive it;
+   - "Show recipients", which slides open a table (Name, and Role, Group and
+     Email when the query has them, and Status) capped in height with its
+     own scroll.
+   A row with no email (when the query has an Email column) or no iMIS ID
+   (when it has an ID column; To is {#party.Email}, which needs one) gets a
+   red badge and is counted; everyone else reads "Will receive". No match or
+   a failed load turns the line into a warning. With no query in the
+   address, or after a send (iMIS's "Emails have been queued" message), the
+   div stays empty and hidden. Columns are read by alias, ignoring case:
+   Name, Email, ID, Role, Group. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteSendRecipients) {
+    window.UnionSuiteSendRecipients.refresh();
+    return;
+  }
+
+  const HOST = '.us-send-recipients';
+  const SENT = /queued for processing/i;
+  const LIMIT = '500';
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  // /api/query rows are keyed by column alias; older shapes use Name/Value
+  // lists. Read either, ignoring case. Undefined when the column is absent.
+  function field(row, name) {
+    const wanted = name.toLowerCase();
+    const list = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(list)) {
+      const hit = list.find(entry => String(entry.Name).toLowerCase() === wanted);
+      return hit ? String(unwrap(hit.Value) ?? '').trim() : undefined;
+    }
+    const key = Object.keys(row || {}).find(entry => entry.toLowerCase() === wanted);
+    return key ? String(unwrap(row[key]) ?? '').trim() : undefined;
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // The address's recipients query and filters, as the Communication
+  // Creator applies them; null when the page has none.
+  function requestFromAddress() {
+    const page = new URLSearchParams(location.search);
+    const query = page.get('query');
+    if (!query) return null;
+    const params = new URLSearchParams({QueryName: query, limit: LIMIT});
+    JSON.parse(page.get('queryparams') || '[]').forEach(filter => {
+      const name = String(filter.Item1 || '').replace(/^@url:/i, '');
+      const value = String(filter.Item2 ?? '');
+      if (name && value !== '') params.set(name, value);
+    });
+    return params;
+  }
+
+  function build(host) {
+    const alert = el('div', 'AsiInformation us-send-recipients__alert');
+    alert.setAttribute('role', 'status');
+    const line = el('p', 'us-send-recipients__line');
+    const count = el('span', 'us-send-recipients__count', 'Loading recipients…');
+    line.append(count);
+    alert.append(line);
+    host.replaceChildren(alert);
+
+    function warn(message) {
+      alert.className = 'AsiWarning us-send-recipients__alert';
+      count.textContent = message;
+    }
+
+    let params;
+    try {
+      params = requestFromAddress();
+    } catch (_) {
+      warn('The recipient filters in the page address could not be read. Check the Recipients tab before sending.');
+      return;
+    }
+    if (!params) {
+      host.replaceChildren();
+      return;
+    }
+
+    fetch('/api/query?' + params, {credentials: 'same-origin', headers: {Accept: 'application/json', RequestVerificationToken: token()}})
+      .then(response => {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(data => render(data?.Items?.$values || []))
+      .catch(error => warn('The recipient list could not be loaded (' + error.message + '). Check the Recipients tab before sending.'));
+
+    function render(rows) {
+      if (!rows.length) {
+        warn('No contacts match. This email would go to nobody.');
+        return;
+      }
+      // Optional columns: only what the query returns is shown or checked.
+      const has = name => field(rows[0], name) !== undefined;
+      const columns = {role: has('Role'), group: has('Group'), email: has('Email'), id: has('ID')};
+      const contacts = rows.map(row => {
+        const contact = {
+          name: field(row, 'Name') || '(no name)',
+          role: field(row, 'Role') || '',
+          group: field(row, 'Group') || '',
+          email: field(row, 'Email') || ''
+        };
+        contact.problems = [
+          columns.email && !contact.email && 'no email',
+          columns.id && !field(row, 'ID') && 'no iMIS ID'
+        ].filter(Boolean);
+        return contact;
+      });
+
+      count.textContent = contacts.length + ' recipient' + (contacts.length === 1 ? '' : 's');
+      if (columns.group) {
+        const groups = new Map();
+        contacts.forEach(contact => {
+          const name = contact.group || 'No group';
+          groups.set(name, (groups.get(name) || 0) + 1);
+        });
+        line.append(el('span', 'us-send-recipients__groups', [...groups].map(([name, total]) => name + ' ' + total).join(' · ')));
+      }
+      const unreachable = contacts.filter(contact => contact.problems.length).length;
+      if (unreachable) line.append(el('span', 'us-send-recipients__problems', unreachable + ' will not receive it'));
+
+      const headings = ['Name'].concat(columns.role ? 'Role' : [], columns.group ? 'Group' : [], columns.email ? 'Email' : [], 'Status');
+      const table = el('table', 'us-send-recipients__table');
+      const headRow = el('tr');
+      headings.forEach(title => {
+        const th = el('th', '', title);
+        th.scope = 'col';
+        headRow.append(th);
+      });
+      const thead = el('thead');
+      thead.append(headRow);
+      const tbody = el('tbody');
+      contacts.forEach(contact => {
+        const row = el('tr');
+        row.append(el('td', '', contact.name));
+        if (columns.role) row.append(el('td', '', contact.role));
+        if (columns.group) row.append(el('td', '', contact.group || 'No group'));
+        if (columns.email) row.append(el('td', '', contact.email || '—'));
+        const status = el('td');
+        if (contact.problems.length) {
+          status.append(el('span', 'us-badge us-badge--danger', contact.problems.join(', ')));
+        } else {
+          const ok = el('span', 'us-send-recipients__ok');
+          const icon = el('i', 'ti ti-check');
+          icon.setAttribute('aria-hidden', 'true');
+          ok.append(icon, 'Will receive');
+          status.append(ok);
+        }
+        row.append(status);
+        tbody.append(row);
+      });
+      table.append(thead, tbody);
+
+      const scroll = el('div', 'us-send-recipients__scroll');
+      scroll.id = 'us-send-recipients-' + Math.random().toString(36).slice(2, 8);
+      scroll.tabIndex = 0;
+      scroll.hidden = true;
+      scroll.setAttribute('role', 'region');
+      scroll.setAttribute('aria-label', 'Recipients');
+      scroll.append(table);
+
+      const toggle = el('button', 'us-send-recipients__toggle', 'Show recipients');
+      toggle.type = 'button';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-controls', scroll.id);
+      toggle.addEventListener('click', () => {
+        const open = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.textContent = open ? 'Hide recipients' : 'Show recipients';
+        // The theme's slide (US-RECORD-CARDS); instant without it.
+        if (window.UnionSuiteRecordCards?.fold) window.UnionSuiteRecordCards.fold(scroll, open);
+        else scroll.hidden = !open;
+      });
+      line.append(toggle);
+      alert.append(scroll);
+    }
+  }
+
+  function refresh() {
+    const hosts = [...document.querySelectorAll(HOST)].filter(host => !host.hasAttribute('data-us-send-recipients') && !host.closest('.us-report-no-styling'));
+    if (!hosts.length) return;
+    // After a send, iMIS's success message takes this block's place.
+    const messages = document.querySelector('.user-message-area');
+    const sent = !!messages && SENT.test(messages.textContent || '');
+    hosts.forEach(host => {
+      host.setAttribute('data-us-send-recipients', '');
+      if (!sent) build(host);
+    });
+  }
+
+  window.UnionSuiteSendRecipients = {refresh};
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh);
+  else refresh();
+})();
+/* US-SEND-RECIPIENTS:END */
+
+/* US-COMMS-RECIPIENTS:START — how a send went, inside an opened record card
+   from a Query Template (README decision 13; owner, 5 October 2026;
+   templates/Agreement-Communications-Query-Template.html). The card's
+   details hold
+     <div class="us-comms-recipients" data-us-comms-query="<details IQA>"
+       data-us-comms-key="{#query.CommunicationLogKey}"
+       data-us-comms-audience="{#query.Audience}"
+       data-us-comms-recipients="{#query.Recipients}"
+       data-us-comms-delivered="{#query.Delivered}"
+       data-us-comms-not-sent="{#query.NotSent}"></div>
+   and the card's first opening fills it, as US-ACTIVITY-RECIPIENTS does on
+   the activity feed (the same markup and US-RECORD-RECIPIENTS styles):
+   - a staff send (Audience Staff) runs the details IQA through /api/query
+     with CommunicationLogKey, one row per recipient (Recipient, Status,
+     optional Address and RecipientGroup), and shows the send results (a summary bar and
+     a count per state) and every recipient with their address and status,
+     problems first; past data-us-comms-shown (default 15) the rest slide in under
+     "Show all". Recipients iMIS did not send to (no email, or no contact
+     record) have no row: their number comes from data-us-comms-not-sent and
+     a line says why;
+   - a member send shows the bar and counts from the summary row's own
+     numbers (Delivered and NotSent), with no request and no list.
+   Status is the latest event's name or its code (CommunicationLogEventTypeRef:
+   0 Queued, 1 Dropped, 2 Delivered, 3 Deferred, 4 Bounce, 5 Open, 6 Click,
+   7 Spam Report, 8 Unsubscribe, 9 Generated, 10 Resent); a code is shown as
+   its name. States: Opened (Open, Click), Delivered (Delivered,
+   Unsubscribe), Pending (Queued, Deferred, Processed, Sent, Generated,
+   Resent, blank), Failed (Dropped, Bounce, Spam Report), and Not sent: on a
+   staff send, the recipients with no row at all (the summary's Recipients
+   less the rows returned), so a dropped recipient counts once, as Failed;
+   on a member send, the summary's NotSent. Loading and Retry work as
+   the activity feed's details do; when the list replaces "Loading", the
+   block grows to its new height rather than jumping. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCommsRecipients) return;
+
+  const STATES = [
+    {key: 'failed', label: 'Failed', statuses: ['dropped', 'bounce', 'bounced', 'spam report', 'failed', 'undelivered']},
+    {key: 'not-sent', label: 'Not sent', statuses: []},
+    {key: 'pending', label: 'Pending', statuses: ['queued', 'deferred', 'processed', 'sent', 'generated', 'resent', 'pending', '']},
+    {key: 'delivered', label: 'Delivered', statuses: ['delivered', 'unsubscribe', 'unsubscribed']},
+    {key: 'opened', label: 'Opened', statuses: ['open', 'opened', 'click', 'clicked']}
+  ];
+  // CommunicationLogEventTypeRef, for a Status column that returns the code.
+  const EVENT_NAMES = ['Queued', 'Dropped', 'Delivered', 'Deferred', 'Bounce', 'Open', 'Click', 'Spam Report', 'Unsubscribe', 'Generated', 'Resent'];
+  // The bar and legend read left to right from best to worst.
+  const BAR_ORDER = ['opened', 'delivered', 'pending', 'not-sent', 'failed'];
+  const DEFAULT_SHOWN = 15;
+  const LIMIT = 200;
+  const DURATION = 220;
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const entries = new WeakMap();
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(unwrap(value)).trim();
+  const number = value => Math.max(0, Number(text(value).replace(/,/g, '')) || 0);
+  const format = value => value.toLocaleString('en-AU');
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
+  function el(tag, className, content) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (content !== undefined) node.textContent = content;
+    return node;
+  }
+
+  function field(row, ...names) {
+    const wanted = names.map(name => name.toLowerCase());
+    const key = Object.keys(row || {}).find(item => wanted.includes(item.toLowerCase()));
+    return key ? unwrap(row[key]) : undefined;
+  }
+
+  function stateOf(status) {
+    const value = status.toLowerCase();
+    return (STATES.find(state => state.statuses.includes(value)) || STATES[2]).key;
+  }
+
+  const labelOf = key => STATES.find(state => state.key === key).label;
+  const rank = key => STATES.findIndex(state => state.key === key);
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  function settings(block) {
+    return {
+      query: text(block.dataset.usCommsQuery),
+      key: text(block.dataset.usCommsKey),
+      members: text(block.dataset.usCommsAudience).toLowerCase() === 'members',
+      recipients: number(block.dataset.usCommsRecipients),
+      delivered: number(block.dataset.usCommsDelivered),
+      notSent: number(block.dataset.usCommsNotSent),
+      shown: number(block.dataset.usCommsShown) || DEFAULT_SHOWN
+    };
+  }
+
+  async function loadRows(cfg) {
+    const params = new URLSearchParams({QueryName: cfg.query, limit: String(LIMIT), offset: '0'});
+    params.set('CommunicationLogKey', cfg.key);
+    const response = await fetch('/api/query?' + params, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {Accept: 'application/json', RequestVerificationToken: token()}
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+    if (!Array.isArray(rows)) throw new Error('Unexpected response');
+    return rows.map(row => {
+      const raw = text(field(row, 'Status'));
+      const status = /^\d+$/.test(raw) ? (EVENT_NAMES[Number(raw)] || 'Event ' + raw) : (raw || 'Queued');
+      return {
+        name: text(field(row, 'Recipient')) || text(field(row, 'Address')),
+        group: text(field(row, 'RecipientGroup', 'Group')),
+        address: text(field(row, 'Address')),
+        status,
+        state: stateOf(status)
+      };
+    }).filter(row => row.name)
+      .sort((a, b) => rank(a.state) - rank(b.state) || a.name.localeCompare(b.name));
+  }
+
+  // Recipients iMIS did not send to. A staff send's rows cover everyone it
+  // tried; whoever is missing had no email or no contact record.
+  function notSent(entry, cfg) {
+    if (cfg.members || !cfg.recipients) return cfg.notSent;
+    return Math.max(0, cfg.recipients - entry.rows.length);
+  }
+
+  function countsFor(entry, cfg) {
+    const counts = Object.fromEntries(STATES.map(state => [state.key, 0]));
+    if (cfg.members) {
+      counts.delivered = cfg.delivered;
+    } else {
+      entry.rows.forEach(row => { counts[row.state] += 1; });
+    }
+    counts['not-sent'] = notSent(entry, cfg);
+    return counts;
+  }
+
+  function bar(counts) {
+    const node = el('div', 'us-record__delivery-bar');
+    node.setAttribute('aria-hidden', 'true');
+    BAR_ORDER.forEach(key => {
+      if (!counts[key]) return;
+      const segment = el('span', 'us-record__delivery-segment');
+      segment.dataset.usRecipientState = key;
+      segment.style.flexGrow = String(counts[key]);
+      node.append(segment);
+    });
+    return node;
+  }
+
+  function legend(counts) {
+    const list = el('ul', 'us-record__delivery-legend');
+    BAR_ORDER.forEach(key => {
+      if (!counts[key]) return;
+      const item = el('li');
+      item.dataset.usRecipientState = key;
+      item.append(el('span', 'us-record__delivery-count', format(counts[key])), ' ' + labelOf(key));
+      list.append(item);
+    });
+    return list;
+  }
+
+  function recipientList(rows, withGroup, withAddress, className) {
+    const list = el('ul', 'us-record__recipient-list' + (withGroup ? '' : ' us-record__recipient-list--one-group') +
+      (withAddress ? ' us-record__recipient-list--address' : '') + (className ? ' ' + className : ''));
+    rows.forEach(row => {
+      const item = el('li', 'us-record__recipient');
+      item.dataset.usRecipientState = row.state;
+      item.append(el('span', 'us-record__recipient-name', row.name));
+      if (withGroup) item.append(el('span', 'us-record__recipient-group', row.group));
+      if (withAddress) {
+        const address = el('span', 'us-record__recipient-address', row.address);
+        if (row.address) address.title = row.address;
+        item.append(address);
+      }
+      item.append(el('span', 'us-record__recipient-status', row.status));
+      list.append(item);
+    });
+    return list;
+  }
+
+  const moreLabel = entry => entry.expanded ? 'Show fewer' : 'Show all ' + format(entry.rows.length) + ' recipients';
+
+  function render(block) {
+    const entry = entries.get(block);
+    const cfg = settings(block);
+    block.classList.add('us-record__recipients');
+    const parts = [];
+    if (entry.status === 'loading') {
+      const status = el('p', 'us-record__extra-status', 'Loading recipients…');
+      status.setAttribute('role', 'status');
+      parts.push(status);
+    } else if (entry.status === 'failed') {
+      const status = el('p', 'us-record__extra-status', 'Recipients could not be loaded. ');
+      status.setAttribute('role', 'status');
+      const again = el('button', 'TextButton SmallButton us-record__recipients-retry', 'Retry');
+      again.type = 'button';
+      status.append(again);
+      parts.push(status);
+    } else {
+      const counts = countsFor(entry, cfg);
+      const total = cfg.recipients || Object.values(counts).reduce((sum, value) => sum + value, 0);
+      if (total) {
+        const label = el('p', 'us-record__note-label', cfg.members ? 'Delivery to ' : 'Recipients ');
+        label.append(el('span', 'us-record__recipients-total', format(total) + (cfg.members ? ' members' : '')));
+        const results = el('div', 'us-record__delivery');
+        results.append(bar(counts), legend(counts));
+        parts.push(label, results);
+      }
+      if (!cfg.members && entry.rows.length) {
+        const withGroup = new Set(entry.rows.map(row => row.group)).size > 1;
+        // The address column only when the details IQA returns addresses.
+        const withAddress = entry.rows.some(row => row.address);
+        parts.push(recipientList(entry.rows.slice(0, cfg.shown), withGroup, withAddress));
+        if (entry.rows.length > cfg.shown) {
+          const rest = recipientList(entry.rows.slice(cfg.shown), withGroup, withAddress, 'us-record__recipient-list--rest');
+          rest.hidden = !entry.expanded;
+          const more = el('button', 'TextButton SmallButton us-outline-button us-record__recipients-more', moreLabel(entry));
+          more.type = 'button';
+          more.setAttribute('aria-expanded', String(Boolean(entry.expanded)));
+          parts.push(rest, more);
+        }
+      }
+      const missing = notSent(entry, cfg);
+      if (!cfg.members && missing) {
+        parts.push(el('p', 'us-record__recipients-note',
+          format(missing) + ' not sent: no email address or no contact record.'));
+      }
+    }
+    resize(block, () => block.replaceChildren(...parts));
+    block.hidden = !block.childElementCount;
+  }
+
+  // Swaps the block's content and eases its height from old to new, so the
+  // opened card grows rather than jumps.
+  function resize(block, change) {
+    const before = block.getBoundingClientRect().height;
+    change();
+    if (block.hidden || reducedMotion() || !block.animate || !before) return;
+    const after = block.getBoundingClientRect().height;
+    if (Math.abs(after - before) < 1) return;
+    block.style.overflow = 'hidden';
+    const animation = block.animate([{height: before + 'px'}, {height: after + 'px'}], {duration: DURATION, easing: EASE});
+    animation.finished.then(() => { block.style.overflow = ''; }, () => { block.style.overflow = ''; });
+  }
+
+  function load(block) {
+    const current = entries.get(block);
+    if (current && current.status !== 'failed') return;
+    const cfg = settings(block);
+    const entry = {status: 'loading', rows: [], expanded: false};
+    entries.set(block, entry);
+    if (cfg.members || !cfg.query || !cfg.key) {
+      entry.status = 'ready';
+      render(block);
+      return;
+    }
+    render(block);
+    loadRows(cfg).then(rows => {
+      entry.status = 'ready';
+      entry.rows = rows;
+    }, error => {
+      entry.status = 'failed';
+      console.warn('[US-COMMS-RECIPIENTS] Did not load:', cfg.query, cfg.key, error);
+    }).then(() => {
+      if (entries.get(block) === entry) render(block);
+    });
+  }
+
+  function toggleRest(block, button) {
+    const entry = entries.get(block);
+    const rest = block.querySelector('.us-record__recipient-list--rest');
+    if (!entry || !rest) return;
+    entry.expanded = !entry.expanded;
+    button.setAttribute('aria-expanded', String(entry.expanded));
+    button.textContent = moreLabel(entry);
+    const fold = window.UnionSuiteRecordCards?.fold;
+    if (fold) fold(rest, entry.expanded);
+    else rest.hidden = !entry.expanded;
+  }
+
+  // Capture phase: before US-RECORD-CARDS opens the card, so the loading
+  // line is part of the height it folds open to.
+  document.addEventListener('click', event => {
+    const record = event.target.closest('.us-records .us-record');
+    const block = record?.querySelector('.us-comms-recipients[data-us-comms-key]');
+    if (!block || block.closest('.us-report-no-styling')) return;
+    if (event.target.closest('.us-record__recipients-retry')) {
+      load(block);
+      return;
+    }
+    const more = event.target.closest('.us-record__recipients-more');
+    if (more) {
+      toggleRest(block, more);
+      return;
+    }
+    const onToggle = event.target.closest('.us-record__toggle') ||
+      (event.target.closest('.us-record__head') && !event.target.closest('a, button, input, select, textarea'));
+    if (!onToggle || record.querySelector('.us-record__toggle')?.getAttribute('aria-expanded') === 'true') return;
+    load(block);
+  }, true);
+
+  window.UnionSuiteCommsRecipients = {load};
+})();
+/* US-COMMS-RECIPIENTS:END */
 
 /* US-ACTION-MENUS:START — approved option 5; explicit actions, no evaluated HTML. */
 (function(){

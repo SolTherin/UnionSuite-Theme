@@ -1,0 +1,65 @@
+<!-- Agreement communications: one record card per send (README decision 13;
+     owner, 5 October 2026). Query Template Display on
+     $/_i4u_/Core/CA/v2/Query Template - Manage Agreement - Communications - Summary
+     (field list and expressions in Communications-IQA-Build.md). The card is
+     the record card (US-RECORD-CARDS), as the activity feed renders an email.
+     Opening a staff send's card loads its recipients from
+     $/_i4u_/Core/CA/v2/API - Manage Agreement - Communications - Details
+     into .us-comms-recipients, filtered on the send's CommunicationLogKey;
+     a member send shows the summary only.
+
+     iPart CSS class (the Activity tab's Communications panel; owner,
+     5 October 2026): keep the tab classes and add us-records, which gives
+     the record cards, and optionally us-query-search (98 of the field's
+     100 characters):
+       us-query-template us-tab-panel us-tabset-activity us-tab-communications us-records us-query-search
+     Native title: Communications. Display in cards: unchecked. Display in columns: unchecked.
+     Header/Footer blank. Rows per page: 30. No results: "No emails sent from this agreement yet."
+
+     Fields:
+     CommunicationLogKey (required)  the send; loads its recipients
+     RecordType (required)           email | sms; the rail icon
+     Channel                         Email | SMS; the type label
+     Audience                        Staff | Members; on the type line; Staff loads recipients
+     SentBy                          sender's name; blank collapses
+     Title (required)                the subject without the "Agreement A107 – " prefix; the headline
+     Summary                         "7 recipients · 4 sent · 3 not sent"; the preview line
+     SentDate                        "5 Oct 2026"; at the right
+     SentTime                        "10:04 pm"; under the date
+     Subject                         the subject as sent, in the details
+     Category                        the Type chosen on the send page; blank collapses
+     Recipients, Delivered, NotSent  the counts; the recipients panel's summary bar -->
+<article class="us-record" data-us-record-type="{#query.RecordType}" data-us-record-direction="out"
+  data-us-search="{#query.Title} {#query.SentBy} {#query.Audience} {#query.Category}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__type">{#query.Channel}</span>
+        <span class="us-record__category">{#query.Audience}</span>
+        <span class="us-record__direction"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5l0 14"></path><path d="M18 11l-6 -6"></path><path d="M6 11l6 -6"></path></svg>Outgoing</span>
+        <span class="us-record__by">{#query.SentBy}</span>
+      </p>
+      <h3 class="us-record__title">{#query.Title}</h3>
+      <p class="us-record__text">{#query.Summary}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.SentDate}</span>
+        <span class="us-record__time">{#query.SentTime}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show details"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <dl class="us-record__facts">
+        <div><dt>Subject</dt><dd>{#query.Subject}</dd></div>
+        <div><dt>Type</dt><dd>{#query.Category}</dd></div>
+      </dl>
+      <div class="us-comms-recipients"
+        data-us-comms-query="$/_i4u_/Core/CA/v2/API - Manage Agreement - Communications - Details"
+        data-us-comms-key="{#query.CommunicationLogKey}" data-us-comms-audience="{#query.Audience}"
+        data-us-comms-recipients="{#query.Recipients}" data-us-comms-delivered="{#query.Delivered}"
+        data-us-comms-not-sent="{#query.NotSent}"></div>
+    </div>
+  </div>
+</article>

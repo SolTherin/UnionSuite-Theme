@@ -1,0 +1,758 @@
+<!doctype html>
+<!--
+  Who the email goes to: options for the alert at the top of the agreement
+  send page (Send-Email-Contacts.aspx; owner, 5 October 2026). Each option
+  reads the same list, the Communication Recipient List IQA run with the page address's
+  query and filters (templates/Send-Email-Recipients-Content-HTML.html is
+  option 1 as built), and is replaced by iMIS's "Emails have been queued"
+  message after the send.
+  1. Sentence and list (as built): a summary sentence, "Show all" opens a
+     grid of contacts.
+  2. Recipient chips: the contacts as chips, like an email To field; the
+     first few show, "+5 more" opens the rest.
+  3. Avatars and groups: an avatar stack, the count and a badge per group;
+     the list opens as rows with avatars.
+  4. Counts and table: the count, groups and problems on one line; the
+     list opens as a compact table with a status per contact.
+  5. Problems first: a short summary; contacts who will not receive the
+     email get their own warning, named, before the send.
+  The toolbar switches the sample (the SBU filter, the whole agreement, one
+  contact, no match, a failed load, after the send), the width and the mode.
+  Serve the project root (static-node) and open this page. Sample data only.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recipients Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <style>
+    /* Comparison page layout only. */
+    body.rc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .rc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .rc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .rc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .rc-toolbar select,
+    .rc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .rc-toolbar .rc-mode {
+      margin-inline-start: auto;
+    }
+
+    .rc-stage {
+      max-width: var(--rc-width, 1100px);
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .rc-option {
+      margin: 0 0 40px;
+    }
+
+    .rc-option > h2 {
+      margin: 0 0 4px;
+      color: var(--text-strong);
+      font: 600 16px/1.4 var(--font-ui);
+    }
+
+    .rc-option > p,
+    .rc-option > ul {
+      max-width: 820px;
+      margin: 0 0 12px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .rc-option > ul {
+      padding-inline-start: 18px;
+    }
+
+    /* A slice of the native send page under each alert, for placement. */
+    .rc-native {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+      opacity: .7;
+    }
+
+    .rc-native .panel-heading {
+      margin: 0;
+    }
+
+    .rc-native .rc-native__fields {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 360px);
+      gap: 8px 16px;
+      padding: 14px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .rc-native .rc-native__value {
+      height: 30px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: var(--text-base);
+    }
+
+    /* ── Shared by the options ──────────────────────────────────────── */
+    .rc-alert {
+      margin: 0 0 12px;
+    }
+
+    .rc-alert[hidden],
+    .rc-collapse[hidden] {
+      display: none;
+    }
+
+    .rc-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      margin: 0;
+    }
+
+    .rc-link {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--text-link);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .rc-link:hover {
+      text-decoration: underline;
+    }
+
+    .rc-link:focus-visible,
+    .rc-chip:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    .rc-muted {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .rc-flag {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    /* "Will receive": quiet text, so only problems carry a coloured badge. */
+    .rc-ok {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .rc-strong {
+      color: var(--text-strong);
+      font-weight: 600;
+    }
+
+    /* 1. Sentence and list */
+    .rc1-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 6px 24px;
+      margin: 10px 0 0;
+      padding: 10px 0 0;
+      border-top: 1px solid var(--border);
+      list-style: none;
+    }
+
+    .rc1-list .rc-muted {
+      display: block;
+    }
+
+    /* 2. Recipient chips */
+    .rc2-to {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .rc-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 500 12px/20px var(--font-ui);
+      white-space: nowrap;
+    }
+
+    .rc-chip[hidden] {
+      display: none;
+    }
+
+    .rc-chip--problem {
+      border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .rc-chip--more {
+      border-style: dashed;
+      color: var(--text-link);
+      cursor: pointer;
+    }
+
+    .rc2-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .rc2-legend {
+      margin: 8px 0 0;
+    }
+
+    /* 3. Avatars and groups */
+    .rc3-stack {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .rc3-stack .us-avatar {
+      margin-inline-start: -8px;
+      box-shadow: 0 0 0 2px var(--bg-surface);
+    }
+
+    .rc3-stack .us-avatar:first-child {
+      margin-inline-start: 0;
+    }
+
+    .rc3-rows {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 12px 0 0;
+      border-top: 1px solid var(--border);
+      list-style: none;
+    }
+
+    .rc3-rows li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rc3-rows .rc-muted {
+      display: block;
+    }
+
+    /* 4. Counts and table */
+    /* On the page surface, not the alert's tint, so the rows and badges
+       keep their contrast. */
+    .rc4-scroll {
+      max-height: 260px;
+      margin: 12px 0 0;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-surface);
+    }
+
+    .rc4-scroll:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    .rc4-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+    }
+
+    .rc4-table th,
+    .rc4-table td {
+      padding: 6px 10px;
+      border-top: 1px solid var(--border);
+      text-align: start;
+      vertical-align: middle;
+    }
+
+    /* The header stays in view while the rows scroll. */
+    .rc4-table thead th {
+      position: sticky;
+      z-index: 1;
+      top: 0;
+      border-top: 0;
+      background: var(--bg-surface);
+      box-shadow: inset 0 -1px 0 var(--border);
+    }
+
+    .rc4-table th {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* 5. Problems first */
+    .rc5-names {
+      margin: 6px 0 0;
+      padding-inline-start: 18px;
+    }
+
+    .rc5-group + .rc5-group {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body class="rc-page">
+  <div class="rc-toolbar">
+    <nav aria-label="Options">
+      <a href="#rc-1">1 Sentence</a>
+      <a href="#rc-2">2 Chips</a>
+      <a href="#rc-3">3 Avatars</a>
+      <a href="#rc-4">4 Table</a>
+      <a href="#rc-5">5 Problems first</a>
+    </nav>
+    <label>Sample
+      <select id="rc-sample">
+        <option value="sbu" selected>SBU filter: 3 contacts</option>
+        <option value="all">Whole agreement: 8, two cannot receive</option>
+        <option value="one">One contact</option>
+        <option value="none">No contacts match</option>
+        <option value="error">List did not load</option>
+        <option value="sent">After the send</option>
+      </select>
+    </label>
+    <label>Width
+      <select id="rc-width">
+        <option value="620px">620px</option>
+        <option value="1100px" selected>Full</option>
+        <option value="1600px">Wide screen</option>
+      </select>
+    </label>
+    <button type="button" class="rc-mode" id="rc-mode" aria-pressed="false">Mode: light</button>
+  </div>
+
+  <main class="rc-stage">
+    <section class="rc-option" id="rc-1" aria-labelledby="rc-1-title">
+      <h2 id="rc-1-title">1. Sentence and list (as built)</h2>
+      <p>The template as it stands: one information alert with a sentence naming the first three, a count of who will not receive it, and "Show all" opening a grid of every contact.</p>
+      <ul>
+        <li>Reads well at a glance; one line until opened.</li>
+        <li>Problems are a clause in the sentence, easy to read past.</li>
+      </ul>
+      <div class="rc-host" data-option="1"></div>
+    </section>
+
+    <section class="rc-option" id="rc-2" aria-labelledby="rc-2-title">
+      <h2 id="rc-2-title">2. Recipient chips</h2>
+      <p>The contacts as chips after "To", like an email client. The first five show; a "+3 more" chip opens the rest. A contact who will not receive it is a red chip with the reason on hover.</p>
+      <ul>
+        <li>Familiar from email; every name visible without opening a list.</li>
+        <li>No role or group; the reason for a red chip is only on hover.</li>
+      </ul>
+      <div class="rc-host" data-option="2"></div>
+    </section>
+
+    <section class="rc-option" id="rc-3" aria-labelledby="rc-3-title">
+      <h2 id="rc-3-title">3. Avatars and groups</h2>
+      <p>An avatar stack (as on the Contacts panel), the count and a badge per group, so the send reads as "SBU 3". The list opens as rows: avatar, name, role · group · email, and a status badge.</p>
+      <ul>
+        <li>Matches the Contacts panel the send came from; groups make the audience obvious.</li>
+        <li>Taller when opened; avatars add little when the names are listed anyway.</li>
+      </ul>
+      <div class="rc-host" data-option="3"></div>
+    </section>
+
+    <section class="rc-option" id="rc-4" aria-labelledby="rc-4-title">
+      <h2 id="rc-4-title">4. Counts and table</h2>
+      <p>One line: the count, the groups, and how many will not receive it. The list opens as a compact table (Name, Role, Group, Email, Status), like the native Recipients report, capped at 260px with its own scroll and the header kept in view.</p>
+      <ul>
+        <li>Densest; scans like a report and handles a long list.</li>
+        <li>Plainer; no names until opened.</li>
+      </ul>
+      <div class="rc-host" data-option="4"></div>
+    </section>
+
+    <section class="rc-option" id="rc-5" aria-labelledby="rc-5-title">
+      <h2 id="rc-5-title">5. Problems first</h2>
+      <p>A short information line with the count and groups. Anyone who will not receive the email gets a separate warning naming them and why, so it is fixed (or accepted) before sending. With no problems there is only the information line.</p>
+      <ul>
+        <li>Puts the thing staff must act on in front; quiet when all is well.</li>
+        <li>Two alerts when there are problems; the full list is still one click away.</li>
+      </ul>
+      <div class="rc-host" data-option="5"></div>
+    </section>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Sample data: the agreement's 8 contacts (Communication Recipient List IQA) ──
+  const CONTACTS = [
+    {id: '23151', name: 'Dani Sundara', email: 'danisundara@mailinator.com', role: 'General', group: 'SBU'},
+    {id: '20514', name: 'Tony Williams', email: 'tonywilliams@mailinator.com', role: 'Consultant', group: 'SBU'},
+    {id: '103885', name: 'Tony Fin Stark', email: 'work@email.com', role: 'Consultant', group: 'SBU'},
+    {id: '245', name: "Mary O'Conner", email: '', role: 'Lead', group: 'Bargaining Team'},
+    {id: '18033', name: 'Barbara Bourgeois', email: 'barbara@mailinator.com', role: 'Consultant', group: 'Bargaining Team'},
+    {id: '23285', name: 'Hub User', email: 'info@uhub.org.au', role: 'Negotiator', group: ''},
+    {id: '23151', name: 'Al Soria', email: 'asoria@mailinator.com', role: 'Consultant', group: 'All'},
+    {id: '', name: 'Frank Grimes', email: 'frank@grimes.com.au', role: 'Consultant', group: 'External'}
+  ];
+  const SAMPLES = {
+    sbu: {kind: 'list', contacts: CONTACTS.slice(0, 3)},
+    all: {kind: 'list', contacts: CONTACTS},
+    one: {kind: 'list', contacts: CONTACTS.slice(0, 1)},
+    none: {kind: 'list', contacts: []},
+    error: {kind: 'error', message: 'HTTP 500'},
+    sent: {kind: 'sent'}
+  };
+
+  // ── Helpers ─────────────────────────────────────────────────────
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  const problem = contact => [!contact.email && 'no email', !contact.id && 'no iMIS ID'].filter(Boolean).join(', ');
+  const plural = (count, word) => count + ' ' + word + (count === 1 ? '' : 's');
+
+  function nameList(contacts, max) {
+    const names = contacts.slice(0, max).map(contact => contact.name);
+    const rest = contacts.length - names.length;
+    if (rest > 0) return names.join(', ') + ' and ' + rest + ' more';
+    return names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+  }
+
+  function groups(contacts) {
+    const counts = new Map();
+    contacts.forEach(contact => {
+      const name = contact.group || 'No group';
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return [...counts];
+  }
+
+  function initials(name) {
+    const words = name.trim().split(/\s+/);
+    return ((words[0] || '')[0] + (words.length > 1 ? words[words.length - 1][0] : '')).toUpperCase();
+  }
+
+  function avatar(contact) {
+    const node = el('span', 'us-avatar', initials(contact.name));
+    node.setAttribute('data-us-avatar-name', contact.name);
+    node.setAttribute('aria-hidden', 'true');
+    return node;
+  }
+
+  function willReceive() {
+    const node = el('span', 'rc-ok', 'Will receive');
+    const icon = el('i', 'ti ti-check');
+    icon.setAttribute('aria-hidden', 'true');
+    node.prepend(icon);
+    return node;
+  }
+
+  function badge(text, tone) {
+    return el('span', 'us-badge' + (tone ? ' us-badge--' + tone : ''), text);
+  }
+
+  // A link-style button that opens and closes a panel, with the theme's slide.
+  function disclosure(label, openLabel, panel) {
+    const button = el('button', 'rc-link', label);
+    button.type = 'button';
+    panel.id = panel.id || 'rc-panel-' + Math.random().toString(36).slice(2, 8);
+    panel.hidden = true;
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', panel.id);
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(open));
+      button.textContent = open ? openLabel : label;
+      if (window.UnionSuiteRecordCards?.fold) window.UnionSuiteRecordCards.fold(panel, open);
+      else panel.hidden = !open;
+    });
+    return button;
+  }
+
+  function alertBox(tone) {
+    const box = el('div', 'rc-alert ' + (tone === 'warning' ? 'AsiWarning' : 'AsiInformation'));
+    box.setAttribute('role', 'status');
+    return box;
+  }
+
+  // States every option shares: nobody, a failed load, after the send.
+  function sharedState(sample) {
+    if (sample.kind === 'sent') {
+      const area = el('div', 'user-message-area');
+      const message = el('div', 'AsiSuccess', 'Emails have been queued for processing. Check the communication log for results. Return to previous page.');
+      area.append(message);
+      return area;
+    }
+    if (sample.kind === 'error') {
+      const box = alertBox('warning');
+      box.append(el('p', 'rc-line', 'The recipient list could not be loaded (' + sample.message + '). Check the Recipients tab before sending.'));
+      return box;
+    }
+    if (!sample.contacts.length) {
+      const box = alertBox('warning');
+      box.append(el('p', 'rc-line', 'No contacts match. This email would go to nobody.'));
+      return box;
+    }
+    return null;
+  }
+
+  // ── The options ─────────────────────────────────────────────────
+  const OPTIONS = {
+    // 1. Sentence and list (as built).
+    1(contacts) {
+      const box = alertBox();
+      const unreachable = contacts.filter(problem).length;
+      const line = el('p', 'rc-line');
+      line.append(el('span', '', 'This email goes to ' + plural(contacts.length, 'contact') + ': ' + nameList(contacts, 3) + '.' +
+        (unreachable ? ' ' + unreachable + ' will not receive it (no email or no iMIS ID).' : '')));
+      const list = el('ul', 'rc1-list rc-collapse');
+      contacts.forEach(contact => {
+        const item = el('li');
+        const meta = el('span', 'rc-muted', [contact.role, contact.group].filter(Boolean).concat(contact.email || []).join(' · '));
+        if (problem(contact)) meta.append(el('span', 'rc-flag', (contact.email ? ' · ' : '') + problem(contact) + ': will not receive it'));
+        item.append(el('span', 'rc-strong', contact.name), meta);
+        list.append(item);
+      });
+      line.append(disclosure('Show all ' + contacts.length, 'Hide list', list));
+      box.append(line, list);
+      return box;
+    },
+
+    // 2. Recipient chips.
+    2(contacts) {
+      const box = alertBox();
+      const shown = 5;
+      const chips = el('div', 'rc2-chips');
+      chips.append(el('span', 'rc2-to', 'To'));
+      const chip = contact => {
+        const node = el('span', 'rc-chip' + (problem(contact) ? ' rc-chip--problem' : ''), contact.name);
+        if (problem(contact)) {
+          node.prepend(el('i', 'ti ti-alert-triangle'));
+          node.title = problem(contact) + ': will not receive this email';
+          node.setAttribute('aria-label', contact.name + ', ' + node.title);
+        } else if (contact.email) {
+          node.title = contact.email;
+        }
+        return node;
+      };
+      contacts.slice(0, shown).forEach(contact => chips.append(chip(contact)));
+      // The rest wait behind "+N more"; one click shows them all.
+      const rest = contacts.slice(shown).map(chip);
+      if (rest.length) {
+        rest.forEach(node => { node.hidden = true; });
+        const toggle = el('button', 'rc-chip rc-chip--more', '+' + rest.length + ' more');
+        toggle.type = 'button';
+        toggle.addEventListener('click', () => {
+          rest.forEach(node => { node.hidden = false; });
+          toggle.remove();
+          rest[0].setAttribute('tabindex', '-1');
+          rest[0].focus({preventScroll: true});
+        });
+        chips.append(...rest, toggle);
+      }
+      box.append(chips);
+      const unreachable = contacts.filter(problem).length;
+      if (unreachable) box.append(el('p', 'rc2-legend rc-muted', unreachable + ' in red will not receive it (no email or no iMIS ID). Hover a red name for the reason.'));
+      return box;
+    },
+
+    // 3. Avatars and groups.
+    3(contacts) {
+      const box = alertBox();
+      const line = el('p', 'rc-line');
+      const stack = el('span', 'rc3-stack');
+      contacts.slice(0, 5).forEach(contact => stack.append(avatar(contact)));
+      line.append(stack, el('span', 'rc-strong', plural(contacts.length, 'contact')));
+      groups(contacts).forEach(([name, count]) => line.append(badge(name + ' ' + count)));
+      const unreachable = contacts.filter(problem).length;
+      if (unreachable) line.append(badge(unreachable + ' will not receive it', 'danger'));
+      const rows = el('ul', 'rc3-rows rc-collapse');
+      contacts.forEach(contact => {
+        const item = el('li');
+        const text = el('span');
+        text.append(el('span', 'rc-strong', contact.name), el('span', 'rc-muted', [contact.role, contact.group, contact.email].filter(Boolean).join(' · ')));
+        item.append(avatar(contact), text, problem(contact) ? badge(problem(contact), 'danger') : willReceive());
+        rows.append(item);
+      });
+      line.append(disclosure('Show list', 'Hide list', rows));
+      box.append(line, rows);
+      return box;
+    },
+
+    // 4. Counts and table.
+    4(contacts) {
+      const box = alertBox();
+      const line = el('p', 'rc-line');
+      line.append(el('span', 'rc-strong', plural(contacts.length, 'recipient')));
+      line.append(el('span', 'rc-muted', groups(contacts).map(([name, count]) => name + ' ' + count).join(' · ')));
+      const unreachable = contacts.filter(problem).length;
+      if (unreachable) line.append(el('span', 'rc-flag', unreachable + ' will not receive it'));
+      const table = el('table', 'rc4-table');
+      const head = el('tr');
+      ['Name', 'Role', 'Group', 'Email', 'Status'].forEach(title => {
+        const th = el('th', '', title);
+        th.scope = 'col';
+        head.append(th);
+      });
+      const thead = el('thead');
+      thead.append(head);
+      const tbody = el('tbody');
+      contacts.forEach(contact => {
+        const row = el('tr');
+        [contact.name, contact.role, contact.group || 'No group', contact.email || '—'].forEach(value => row.append(el('td', '', value)));
+        const status = el('td');
+        status.append(problem(contact) ? badge(problem(contact), 'danger') : willReceive());
+        row.append(status);
+        tbody.append(row);
+      });
+      table.append(thead, tbody);
+      // Capped and scrolled, so a long list stays a box, not a page.
+      const scroll = el('div', 'rc4-scroll rc-collapse');
+      scroll.tabIndex = 0;
+      scroll.setAttribute('role', 'region');
+      scroll.setAttribute('aria-label', 'Recipients');
+      scroll.append(table);
+      line.append(disclosure('Show recipients', 'Hide recipients', scroll));
+      box.append(line, scroll);
+      return box;
+    },
+
+    // 5. Problems first.
+    5(contacts) {
+      const wrap = el('div');
+      const info = alertBox();
+      const line = el('p', 'rc-line');
+      line.append(el('span', '', 'This email goes to ' + plural(contacts.length, 'contact') + ' · ' + groups(contacts).map(([name, count]) => name + ' ' + count).join(' · ')));
+      const list = el('ul', 'rc1-list rc-collapse');
+      contacts.forEach(contact => {
+        const item = el('li');
+        item.append(el('span', 'rc-strong', contact.name), el('span', 'rc-muted', [contact.role, contact.group, contact.email].filter(Boolean).join(' · ')));
+        list.append(item);
+      });
+      line.append(disclosure('Show all', 'Hide list', list));
+      info.append(line, list);
+      wrap.append(info);
+      const unreachable = contacts.filter(problem);
+      if (unreachable.length) {
+        const warning = alertBox('warning');
+        warning.append(el('p', 'rc-line rc-strong', plural(unreachable.length, 'contact') + ' will not receive this email'));
+        const reasons = new Map();
+        unreachable.forEach(contact => {
+          const reason = problem(contact);
+          reasons.set(reason, (reasons.get(reason) || []).concat(contact.name));
+        });
+        reasons.forEach((names, reason) => {
+          const group = el('div', 'rc5-group');
+          group.append(el('span', 'rc-muted', reason === 'no email' ? 'No email address' : reason === 'no iMIS ID' ? 'Not an iMIS contact (no ID)' : reason));
+          const ul = el('ul', 'rc5-names');
+          names.forEach(name => ul.append(el('li', '', name)));
+          group.append(ul);
+          warning.append(group);
+        });
+        wrap.append(warning);
+      }
+      return wrap;
+    }
+  };
+
+  // A faint slice of the native send page under each alert.
+  function nativeSlice() {
+    const slice = el('div', 'rc-native');
+    slice.innerHTML = '<div class="panel-heading Distinguish"><h2 class="panel-title">New communication – Compose communication</h2></div>' +
+      '<div class="rc-native__fields"><span>From</span><span class="rc-native__value">info@uhub.org.au;</span>' +
+      '<span>To</span><span class="rc-native__value">{#party.Email};</span>' +
+      '<span>Subject</span><span class="rc-native__value"><strong>Agreement A107 –</strong> Bargaining update</span></div>';
+    return slice;
+  }
+
+  function render(sampleName) {
+    const sample = SAMPLES[sampleName];
+    document.querySelectorAll('.rc-host').forEach(host => {
+      const shared = sharedState(sample);
+      host.replaceChildren(shared || OPTIONS[host.dataset.option](sample.contacts), nativeSlice());
+    });
+  }
+
+  // ── Toolbar ─────────────────────────────────────────────────────
+  document.getElementById('rc-sample').addEventListener('change', event => render(event.target.value));
+  document.getElementById('rc-width').addEventListener('change', event => {
+    document.documentElement.style.setProperty('--rc-width', event.target.value);
+  });
+  document.getElementById('rc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  render('sbu');
+})();
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+</body>
+</html>

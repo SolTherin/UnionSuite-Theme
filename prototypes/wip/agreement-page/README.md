@@ -61,6 +61,7 @@ it would open; its close callback runs, so the in-place refresh is exercised.
 | `increases-compare.html` | Scheduled increases layout comparison (decision 12, decided: option 4, now in the theme as `US-INCREASES`): v0.1 rebuilt, then four options on one sample (or a small one, or the live v0.1 test data), with panel width, measure cap, compounding and dark mode controls. Options 2 to 5 use `increases-layouts.candidate.css` / `.js`, `templates/Agreement-Increases-Rows-Query-Template.html` and, for option 2's summary, `templates/Agreement-Increases-Summary-Query-Template.html`. |
 | `Increases-IQA-Build.md` | Build notes for the scheduled increases IQAs (decision 12): what v0.1's three IQAs and `i4u_UT_CA_Schedule` hold, and the proposed rows and summary IQAs. |
 | `communications-compare.html` | Communications panel for the Activity tab (decision 13, decided 4 October 2026): the contact page's activity feed and card, one card per send, group sends with a summary bar and recipient list, member sends with the bar only, email and SMS; the contact's email IQAs as they are below for reference, which loads `US-ACTIVITY-EVENTS` from `../contact-page-v3/theme-candidate.js` / `.css` (read between its markers). Uses `communications.candidate.css` / `.js`. |
+| `recipients-compare.html` | Who the email goes to: five options for the alert at the top of the send page (owner, 5 October 2026). Samples for the SBU filter, the whole agreement, one contact, no match, a failed load and after the send. Decided (owner, 5 October 2026): option 4, counts and table, with the table capped at 260px and scrolling under a fixed header, and "Will receive" as quiet text so only problems carry a red badge; built into the theme as `US-SEND-RECIPIENTS` (zUnionSuite.css / .js, usage guide 06h); the page holds only `<div class="us-send-recipients"></div>` (`templates/Send-Email-Recipients-Content-HTML.html`). |
 | `coverage-compare.html` | Coverage rules comparison for the Details tab (decision 15, decided 4 October 2026: option 2, now in the theme; the page loads the theme alone and keeps option 1, the current grid, beside it; options 3 and 4 retired): the current grid, then rule groups, sentences and a grouped table on one template, `templates/Agreement-Coverage-Rules-Query-Template.html`, with `coverage.candidate.css` / `.js`; the covered records (the existing IQA) once at the end. |
 | `changelog-compare.html` | Change history panel comparison for the Activity tab (decision 14, decided 4 October 2026: option 8): eight views from one sample. Options 2, 4, 5 and 8 use `changelog.candidate.css` / `.js` and `templates/Agreement-Changelog-Query-Template.html`. Options 6 (change-first timeline) and 7 (browse and inspect) use the comparison-only `changelog-explorations.css` / `.js`; these are research views, not installable components or author templates. |
 
@@ -330,8 +331,10 @@ guide (templates, field definitions and component sections).
       the heading (`us-action-agreements-email-contacts`, owner 3 October
       2026) emails the contacts on screen through iMIS's Create
       communication page (owner, 5 October 2026), as a Query Menu report's
-      Email button does: the Reports tab's Contacts IQA
-      (`$/_i4u_/Core/CA/v2/Reports/Contacts`), with the shown rows'
+      Email button does: the Communication Recipient List IQA
+      (`$/_i4u_/Core/CA/v2/API - Communication Recipient List`, owner
+      5 October 2026; an Ordinal prompt and a hidden AgreementOrdinal =
+      @url:AgreementNum filter), with the shown rows'
       ordinals in its `Ordinal` prompt (`"177","183"`; blank when nothing
       is filtered, so the whole agreement) and `@url:AgreementNum`. It
       navigates there and comes back through `ReturnUrl`. It passes
@@ -340,7 +343,7 @@ guide (templates, field definitions and component sections).
       is a mail merge (owner, 5 October 2026): one copy of the email per
       row, and each row's columns are `{#recipient.<column>}` fields in the
       subject and body (Name, Email, Role, Group, Type, Ordinal…). So a
-      column added to the Reports Contacts IQA becomes a merge field
+      column added to the Communication Recipient List IQA becomes a merge field
       (AgreementNum is the candidate, for template bodies), a template
       that uses a field the query lacks fails to send, and a contact on two
       rows gets two copies. The subject tag stays text from the URL, not a

@@ -10538,6 +10538,367 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 /* US-SUBJECT-TAG:END */
+
+/* US-COMMS-LOG:START — the status line zUnionSuite.js (US-COMMS-LOG) puts at
+   the top of the us-agreement-comms iPart after a send, directly under
+   iMIS's message: logging (a spinner), done, or a warning. Its colours ease
+   between the states; reduced motion changes them at once. */
+.us-agreement-comms > .us-comms-log__status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  transition: background-color 200ms cubic-bezier(.2, 0, 0, 1), border-color 200ms cubic-bezier(.2, 0, 0, 1), color 200ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-agreement-comms > .us-comms-log__status[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-agreement-comms > .us-comms-log__status {
+    transition: none;
+  }
+}
+
+/* US-COMMS-LOG:END */
+
+/* US-SEND-RECIPIENTS:START — who an email will go to, above a Communication
+   Creator: an empty <div class="us-send-recipients"></div> in a Content HTML
+   iPart, filled by zUnionSuite.js (US-SEND-RECIPIENTS). One information
+   line (count, groups, problems) and a table that opens on the page surface,
+   capped in height with its own scroll and a fixed header. Every rule sits
+   inside .us-send-recipients. */
+.us-send-recipients:empty,
+.us-send-recipients [hidden] {
+  display: none;
+}
+
+.us-send-recipients {
+  margin: 0 0 16px;
+}
+
+.us-send-recipients .us-send-recipients__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.us-send-recipients .us-send-recipients__count {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.us-send-recipients .us-send-recipients__groups {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-send-recipients .us-send-recipients__problems {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.us-send-recipients .us-send-recipients__toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.us-send-recipients .us-send-recipients__toggle:hover {
+  text-decoration: underline;
+}
+
+.us-send-recipients .us-send-recipients__toggle:focus-visible,
+.us-send-recipients .us-send-recipients__scroll:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* On the page surface, not the alert's tint, so the rows and badges keep
+   their contrast; capped so a long list stays a box, not a page. */
+.us-send-recipients .us-send-recipients__scroll {
+  max-height: 260px;
+  margin: 12px 0 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+}
+
+.us-send-recipients .us-send-recipients__table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.us-send-recipients .us-send-recipients__table th,
+.us-send-recipients .us-send-recipients__table td {
+  padding: 6px 10px;
+  border-top: 1px solid var(--border);
+  text-align: start;
+  vertical-align: middle;
+}
+
+/* The header stays in view while the rows scroll. */
+.us-send-recipients .us-send-recipients__table thead th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  border-top: 0;
+  background: var(--bg-surface);
+  box-shadow: inset 0 -1px 0 var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* "Will receive" is quiet, so only problems carry a coloured badge. */
+.us-send-recipients .us-send-recipients__ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* US-SEND-RECIPIENTS:END */
+
+/* US-RECORD-RECIPIENTS:START — how a sent email went, inside an opened record
+   card (README decision 13). Filled by US-COMMS-RECIPIENTS (a Query Template
+   card's .us-comms-recipients) or US-ACTIVITY-RECIPIENTS (the activity
+   feed). A label with the count, a thin summary bar and a count per state,
+   then for a staff (group) send a line per recipient: name, group when the
+   send spans groups, address when the details IQA returns one, status, only a failed status in colour. Not sent (no
+   email or no contact record) is amber, apart from Failed (a bounce). */
+.us-record__recipients {
+  --us-recipient-opened: var(--success);
+  --us-recipient-delivered: var(--success-fill);
+  --us-recipient-pending: var(--border-strong);
+  --us-recipient-not-sent: var(--warning);
+  --us-recipient-failed: var(--danger);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.us-record__recipients[hidden] {
+  display: none;
+}
+
+.us-record__recipients-total {
+  margin-inline-start: 4px;
+  color: var(--text-base);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-record__delivery {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.us-record__delivery-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+
+.us-record__delivery-segment {
+  min-width: 4px;
+  flex-basis: 0;
+  background: var(--us-recipient-pending);
+}
+
+.us-record__delivery-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-4);
+  margin: 0;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  list-style: none;
+}
+
+.us-record__delivery-legend > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The legend's swatch, matching its bar segment. */
+.us-record__delivery-legend > li::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--us-recipient-pending);
+}
+
+.us-record__delivery-count {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  font-variant-numeric: tabular-nums;
+}
+
+.us-record__recipients [data-us-recipient-state="opened"] {
+  --us-recipient-swatch: var(--us-recipient-opened);
+}
+
+.us-record__recipients [data-us-recipient-state="delivered"] {
+  --us-recipient-swatch: var(--us-recipient-delivered);
+}
+
+.us-record__recipients [data-us-recipient-state="not-sent"] {
+  --us-recipient-swatch: var(--us-recipient-not-sent);
+}
+
+.us-record__recipients [data-us-recipient-state="failed"] {
+  --us-recipient-swatch: var(--us-recipient-failed);
+}
+
+.us-record__delivery-segment[data-us-recipient-state],
+.us-record__delivery-legend > li[data-us-recipient-state]::before {
+  background: var(--us-recipient-swatch, var(--us-recipient-pending));
+}
+
+/* Fixed columns, so the first rows and the rest (two lists) line up. */
+.us-record__recipient-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 6rem;
+  column-gap: var(--space-5);
+  row-gap: 2px;
+  /* Widened by the rows' 6px inset on each side, so a hovered row's tint
+     fits inside the list (and the scrolling rest) and names stay in line
+     with the label above. */
+  width: calc(100% + 12px);
+  max-width: 572px;
+  margin: 0 -6px;
+  padding: 0;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  list-style: none;
+}
+
+/* Every recipient in one group: the group column goes. */
+.us-record__recipient-list--one-group {
+  grid-template-columns: minmax(0, 1fr) 6rem;
+  max-width: 412px;
+}
+
+/* With addresses (US-COMMS-RECIPIENTS): name, group, address, status. */
+.us-record__recipient-list.us-record__recipient-list--address {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 6rem;
+  max-width: 772px;
+}
+
+.us-record__recipient-list.us-record__recipient-list--address.us-record__recipient-list--one-group {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 6rem;
+  max-width: 632px;
+}
+
+.us-record__recipient-list[hidden] {
+  display: none;
+}
+
+/* A long send scrolls inside the card rather than lengthening the list. */
+.us-record__recipient-list--rest {
+  max-height: 16rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Rows share the list's columns, so names, groups and statuses line up.
+   A row tints on hover, so a name can be followed across to its status in
+   a long list. The list's negative margin takes the 6px inset back. */
+.us-record__recipient {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-record__recipient:hover {
+  background: var(--bg-sunken);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-record__recipient {
+    transition: none;
+  }
+}
+
+.us-record__recipient-name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-weight: var(--fw-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-record__recipient-group,
+.us-record__recipient-status {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.us-record__recipient-address {
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-record__recipient[data-us-recipient-state="failed"] .us-record__recipient-status {
+  color: var(--danger);
+  font-weight: var(--fw-medium);
+}
+
+.us-record__recipients-more {
+  margin-top: 2px;
+}
+
+/* Recipients iMIS did not send to have no row; this line says how many. */
+.us-record__recipients-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* Narrow cards keep the name and status. */
+@container us-records (max-width: 420px) {
+  .us-record__recipient-list,
+  .us-record__recipient-list.us-record__recipient-list--address,
+  .us-record__recipient-list.us-record__recipient-list--address.us-record__recipient-list--one-group {
+    grid-template-columns: minmax(0, 1fr) 6rem;
+  }
+
+  .us-record__recipient-group,
+  .us-record__recipient-address {
+    display: none;
+  }
+}
+
+/* US-RECORD-RECIPIENTS:END */
 [data-us-panel-action="edit"] {
   --us-panel-glyph: "\eb04";
 }
