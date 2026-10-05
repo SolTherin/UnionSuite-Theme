@@ -231,6 +231,9 @@
   // refetched, because one edit can change several. Panels on other CCO tabs
   // are skipped: they are not on the page (or are hidden), and a tab loads
   // its panels fresh when it opens.
+  // The agreement editor's sections stop at 1060px wide (owner, 5 October
+  // 2026); a smaller window keeps the 90%.
+  const editorWidth = {maxWidth: 1060};
   const reload = {when: 'close', run: () => {
     document.querySelectorAll('.us-field-groups[data-us-fields-query]').forEach(root => {
       if (root.getClientRects().length) window.UnionSuiteFieldGroups?.reload(root);
@@ -239,10 +242,10 @@
   }};
   popup('agreements.edit', 'Update details', 'pencil',
     ({context}) => page('/Agreements_EditAgreement', {AgreementID: context.agreementId, Section: 'Details'}),
-    'Edit agreement details', reload);
+    'Edit agreement details', reload, editorWidth);
   popup('agreements.edit-key-dates', 'Update key dates', 'pencil',
     ({context}) => page('/Agreements_EditAgreement', {AgreementID: context.agreementId, Section: 'KeyDates'}),
-    'Edit key dates', reload);
+    'Edit key dates', reload, editorWidth);
   popup('agreements.record-resolution', 'Record resolution', 'pencil',
     ({context}) => page('/Agreements_EditAgreement', {AgreementID: context.agreementId, Section: 'Resolution'}),
     'Record resolution', reload);
