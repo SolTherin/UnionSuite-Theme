@@ -1862,6 +1862,13 @@ SOFTWARE.
       button.addEventListener('click', function () {
         search.state.collapsed = !search.state.collapsed;
         writePanelMemory(search.wrapper, {collapsed: search.state.collapsed});
+        // Closing the filter resets every selection in it (owner, 5 October
+        // 2026): the quick-filter chips through their own clear, which the
+        // chip scripts show only while a chip is pressed, then the text.
+        if (search.state.collapsed) {
+          var chipsClear = search.wrapper.querySelector('.us-contact-facets__clear:not([hidden])');
+          if (chipsClear) chipsClear.click();
+        }
         if (search.state.collapsed && search.input) {
           search.input.value = '';
           stopTaskReveals(search);
