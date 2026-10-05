@@ -95,7 +95,7 @@
         url.searchParams.set('ID',context.partyId);
         return url.href;
       },
-      popup:{title:'Add task',width:'70%',height:'70%'},
+      popup:{title:'Add task',width:'70%',height:'70%',maxWidth:800},
       // Refresh the iPart the button belongs to, whichever report that is.
       refresh:{when:'close',targets:[{type:'origin-report'}]}
     }
@@ -109,7 +109,7 @@
       type: 'popup',
       recordKey: ['taskUrl'],
       href: ({context}) => context.taskUrl,
-      popup: {title: 'Open task', width: '70%', height: '70%'},
+      popup: {title: 'Open task', width: '70%', height: '70%', maxWidth: 800},
       refresh: {when: 'close', targets: [{type: 'origin-report'}]}
     }
   });
@@ -189,18 +189,23 @@
     };
   }
 
-  function popup(key, label, icon, href, title, refresh) {
+  // sizing: optional popup size options (maxWidth, maxHeight) over the 90%.
+  function popup(key, label, icon, href, title, refresh, sizing) {
     define(key, {
       presentation: {label, ...(icon ? {icon} : {}), default: 'button', menu: 'menu-item'},
       context: {agreementId, agreementNum},
-      action: {type: 'popup', recordKey: ['agreementId'], href, popup: {title, width: '90%', height: '90%'}, ...(refresh ? {refresh} : {})}
+      action: {type: 'popup', recordKey: ['agreementId'], href, popup: {title, width: '90%', height: '90%', ...sizing}, ...(refresh ? {refresh} : {})}
     });
   }
 
   // ── Add entry ───────────────────────────────────────────────
+  // Single-record forms (notes, tasks, milestones, meetings) stop at 800px:
+  // 90% of a large screen stretched their narrow fields (owner, 5 October
+  // 2026). A smaller window keeps the 90%.
+  const formWidth = {maxWidth: 800};
   popup('agreements.add-note', 'Add note', 'plus',
     ({context}) => page('/Agreements_CreateNote', {AgreementID: context.agreementId}),
-    'Add note', refreshList('us-action-agreements-add-note'));
+    'Add note', refreshList('us-action-agreements-add-note'), formWidth);
   popup('agreements.upload-attachment', 'Upload', 'ti-upload',
     ({context}) => page('/Agreements_AddAttachment', {AgreementID: context.agreementId}),
     'Add attachment', refreshList('us-action-agreements-upload-attachment'));
@@ -209,13 +214,13 @@
     'Manage contacts', refreshList('us-action-agreements-add-contact'));
   popup('agreements.add-meeting', 'Add meeting', 'plus',
     ({context}) => page('/Agreements_CreateMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
-    'Schedule meeting', refreshList('us-action-agreements-add-meeting'));
+    'Schedule meeting', refreshList('us-action-agreements-add-meeting'), formWidth);
   popup('agreements.add-task', 'Add task', 'plus',
     ({context}) => page('/Agreements_CreateTask', {Task: 'true', AgreementID: context.agreementId}),
-    'Add task', refreshList('us-action-agreements-add-task'));
+    'Add task', refreshList('us-action-agreements-add-task'), formWidth);
   popup('agreements.add-milestone', 'Add milestone', 'plus',
     ({context}) => page('/Agreements_CreateTask', {Milestones: 'true', AgreementID: context.agreementId}),
-    'Add milestone', refreshList('us-action-agreements-add-milestone'));
+    'Add milestone', refreshList('us-action-agreements-add-milestone'), formWidth);
 
   // ── Agreement details ───────────────────────────────────────
   // One editor with a Section parameter; a heading button cannot carry data
@@ -307,27 +312,28 @@
     if (row && window.UnionSuiteRowPatch) return window.UnionSuiteRowPatch.refresh(row);
     return env.refresh.originReport({row: '[data-ordinal="' + env.context.ordinal + '"]'});
   }
-  function rowPopup(key, label, presentation, href, title) {
+  // sizing: optional popup size options (maxWidth, maxHeight) over the 90%.
+  function rowPopup(key, label, presentation, href, title, sizing) {
     define(key, {
       presentation: {label, ...presentation},
       context: {agreementId, agreementNum, ordinal: rowOrdinal},
-      action: {type: 'popup', recordKey: ['agreementId', 'ordinal'], href, popup: {title, width: '90%', height: '90%'},
+      action: {type: 'popup', recordKey: ['agreementId', 'ordinal'], href, popup: {title, width: '90%', height: '90%', ...sizing},
         refresh: {when: 'close', run: refreshRow}}
     });
   }
   const noteDetails = mode => ({context}) => page('/_i4u_/Core/Zidebar/NoteDetails.aspx', {
     NoteOrdinal: context.ordinal, AgreementID: context.agreementId, ...(mode ? {[mode]: 'true'} : {})
   });
-  rowPopup('agreements.view-note', 'Open note', openLink, noteDetails(''), 'Note');
+  rowPopup('agreements.view-note', 'Open note', openLink, noteDetails(''), 'Note', formWidth);
   // The eye button on a ledger note row (us-notes--ledger); same popup as Open note.
-  rowPopup('agreements.preview-note', 'View note', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails(''), 'Note');
-  rowPopup('agreements.view-task', 'Open task', openLink, noteDetails('Task'), 'Task');
+  rowPopup('agreements.preview-note', 'View note', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails(''), 'Note', formWidth);
+  rowPopup('agreements.view-task', 'Open task', openLink, noteDetails('Task'), 'Task', formWidth);
   // The eye button at the end of a task row; same popup as the title link.
-  rowPopup('agreements.preview-task', 'View task', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails('Task'), 'Task');
-  rowPopup('agreements.view-milestone', 'Open milestone', openLink, noteDetails('Milestones'), 'Milestone');
+  rowPopup('agreements.preview-task', 'View task', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails('Task'), 'Task', formWidth);
+  rowPopup('agreements.view-milestone', 'Open milestone', openLink, noteDetails('Milestones'), 'Milestone', formWidth);
   rowPopup('agreements.view-meeting', 'Open meeting', openLink,
     ({context}) => page('/Agreements_EditMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum, MeetingOrdinal: context.ordinal}),
-    'Edit meeting');
+    'Edit meeting', formWidth);
   rowPopup('agreements.edit-contact', 'Edit contact', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Contact/Edit-Contact-Information.aspx', {ID: context.ordinal}),
     'Edit contact');
