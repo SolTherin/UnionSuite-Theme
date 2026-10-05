@@ -13720,11 +13720,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   box-shadow: none;
 }
 
+/* Fixed, so a scrolling list or panel cannot clip it: US-ATTACHMENTS sets
+   its left, width, top or bottom and max-height from the tags box. */
 .us-attachment__suggestions {
-  position: absolute;
+  position: fixed;
   z-index: var(--z-tooltip);
-  inset-inline: 0;
-  top: calc(100% + 4px);
+  box-sizing: border-box;
   max-height: 200px;
   margin: 0;
   padding: 4px 0;

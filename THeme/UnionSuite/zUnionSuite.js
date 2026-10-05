@@ -11896,8 +11896,34 @@ SOFTWARE.
     let options = [];
     let active = -1;
 
+    // The list floats over the page (position: fixed), placed from the tags
+    // box, so a scrolling list or panel never clips it (owner, 5 October
+    // 2026). Below the box when it fits, otherwise above when there is more
+    // room there; it follows the box while anything scrolls.
+    const GAP = 4, EDGE = 8, MAX_HEIGHT = 200;
+    function place() {
+      if (!list.isConnected) { follow(false); return; }
+      if (list.hidden) return;
+      const rect = box.getBoundingClientRect();
+      const below = innerHeight - rect.bottom - GAP - EDGE;
+      const above = rect.top - GAP - EDGE;
+      const wanted = Math.min(list.scrollHeight, MAX_HEIGHT);
+      const up = below < wanted && above > below;
+      list.style.left = rect.left + 'px';
+      list.style.width = rect.width + 'px';
+      list.style.maxHeight = Math.max(80, Math.min(MAX_HEIGHT, up ? above : below)) + 'px';
+      list.style.top = up ? 'auto' : (rect.bottom + GAP) + 'px';
+      list.style.bottom = up ? (innerHeight - rect.top + GAP) + 'px' : 'auto';
+    }
+    function follow(on) {
+      const method = on ? 'addEventListener' : 'removeEventListener';
+      window[method]('scroll', place, true);
+      window[method]('resize', place);
+    }
+
     function hide() {
       list.hidden = true;
+      follow(false);
       input.setAttribute('aria-expanded', 'false');
       input.removeAttribute('aria-activedescendant');
       active = -1;
@@ -11928,6 +11954,8 @@ SOFTWARE.
         return option;
       }));
       list.hidden = !options.length;
+      follow(!list.hidden);
+      place();
       input.setAttribute('aria-expanded', String(!!options.length));
       active = -1;
     }
