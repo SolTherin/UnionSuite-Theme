@@ -74,6 +74,51 @@
         ],
         "createdAt": "2026-10-03T23:46:03.228Z",
         "reason": "Claude: comparison workbench chrome (toolbar, option captions) copied from notes-compare.html and contacts-compare.html; kept quiet on purpose so the six options under review carry the hierarchy"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/changelog-compare.html"
+        ],
+        "createdAt": "2026-10-04T07:27:25.932Z",
+        "reason": "Claude: L37 is the comparison-page toolbar/caption chrome (12-15px), copied from the existing increases-compare.html and terms-compare.html harnesses; the panels under review use the theme's own type scale"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/communications-compare.html"
+        ],
+        "createdAt": "2026-10-04T07:27:26.108Z",
+        "reason": "Claude: L37 is the comparison-page toolbar/caption chrome (12-15px), copied from the existing increases-compare.html and terms-compare.html harnesses; the panels under review use the theme's own type scale"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/notes-compare.html"
+        ],
+        "createdAt": "2026-10-05T02:56:55.370Z",
+        "reason": "Claude: the flagged sizes (12-15px) are the WIP comparison page's own harness chrome (toolbar, option labels), pre-existing and untouched; not theme or design under review"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/recipients-compare.html"
+        ],
+        "createdAt": "2026-10-05T10:31:38.637Z",
+        "reason": "Claude: comparison fixture; its sizes copy the other agreement compare pages and the theme's own alert/list text (12-14px) that the options preview, so they must not be re-scaled"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/milestones-compare.html"
+        ],
+        "createdAt": "2026-10-06T21:29:07.424Z",
+        "reason": "Claude: comparison-page chrome (toolbar, option headings, notes) shared by every *-compare.html research page; the panels under review use the theme's own type scale"
       }
     ]
   }

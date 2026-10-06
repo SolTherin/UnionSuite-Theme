@@ -31,6 +31,8 @@ THeme/**/*.zip
 !/references/Task List Animations.html
 # Single-file prototype exports; rebuild with node build-standalone.cjs
 /prototypes/wip/contact-page-v3/Contact-Page-v3-Standalone.html
+# Live-page candidate embed; rebuild with node prototypes/wip/agreement-page/build-embed.cjs
+/prototypes/wip/agreement-page/agreement-page-embed.html
 
 # Local preview output and captures; retain existing maintained helper scripts
 /.preview/*
