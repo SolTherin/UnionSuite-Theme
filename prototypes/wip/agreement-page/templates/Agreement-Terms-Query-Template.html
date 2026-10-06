@@ -21,24 +21,22 @@
      Status, from the icon: a menu of Negotiating, Included and Not Included.
      The change shows at once; Included plays the completion confetti. The
      save is a hook, UnionSuiteTermStatus.defineSaver(async ({ordinal, status,
-     label}) => …). NO SAVER EXISTS YET (TODO.md): terms have no status
-     endpoint, so until one is defined a change reverts and the row says
-     "Not saved". Status quick filters (chips in the funnel disclosure, the
+     label}) => …). The saver (owner, 6 October 2026, in
+     Scripts/ActionDefinitions.js) posts {"TermID": Ordinal, "Action":
+     "Negotiating" | "Included" | "Not Included"} to CloudToolz
+     /ca/quick-edit-term, as complete-task is called; a failed save reverts
+     the change and the row says "Not saved". Status quick filters (chips in the funnel disclosure, the
      count beside the title) appear when the list has two or more statuses.
 
      Actions in the open row (no View: it opened the same popup as Edit,
      owner 5 October 2026):
      Edit    agreements.edit-term, the existing Add-or-Update-Term popup
-     Delete  TODO (owner, 4 October 2026: the owner will define the endpoint):
-             confirm in place, then call an endpoint that deletes this one term
-             by Ordinal, and refresh the list. The heading's Bulk remove keeps
-             Delete_Terms.aspx, the checkbox form for several terms. TODO.md.
-     Delete is a plain icon button until its action exists, and does nothing.
-     It carries no us-action-* class yet: the theme paints any such class as
-     a command, and an undefined one falls back to a text label. When the
-     action is defined, replace the trash markup with
-     <button class="us-action-agreements-delete-term" data-ordinal="…">Delete term</button>
-     as the Edit button is written.
+     Delete  agreements.delete-term (owner, 6 October 2026), the bin: asks
+             "Delete this term?", posts {"TermID": Ordinal} to CloudToolz
+             /ca/quick-delete-term (as the status quick edit is saved), then
+             the row's words fly into the bin (US-TERM-DELETE, the word
+             vacuum; skipped with reduced motion) and the list refreshes. The heading's Bulk remove keeps
+             Delete_Terms.aspx, the checkbox form for several terms.
 
      Fields (the existing Terms IQA, unchanged):
      Ordinal (required)      term ordinal: each action and the status save
@@ -66,7 +64,7 @@
     <p class="us-term__comment">{#query.Comment}</p>
     <p class="us-term__actions">
       <button type="button" class="us-term__edit us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
-      <button type="button" class="us-term__delete TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Delete term" title="Delete term"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      <button type="button" class="us-term__delete us-action-agreements-delete-term" data-ordinal="{#query.Ordinal}">Delete term</button>
     </p>
   </div>
 </details>

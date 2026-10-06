@@ -28,23 +28,16 @@
      use CloudToolz /ca/complete-task). Until one is registered, a change
      reverts and the row says "Not saved".
 
-     Actions, in the open row (owner, 4 October 2026: view, edit and delete
-     wanted; kept off the closed row so it stays three facts and a chevron):
+     Actions, in the open row (owner, 4 October 2026: edit and delete; kept
+     off the closed row so it stays three facts and a chevron). No View
+     (removed, owner 6 October 2026, as in Agreement-Terms-Query-Template.html:
+     the terms have no read-only page, so it would open the Edit popup):
      Edit    agreements.edit-term, the existing Add-or-Update-Term popup
-     View    agreements.view-term, NOT YET DEFINED: the terms have no read-only
-             page; until one exists the edit popup is the only page for a term
-     Delete  agreements.delete-term, TODO (owner, 4 October 2026: the owner will
-             define the endpoint): confirm in place, then call an endpoint that
-             deletes this one term by Ordinal, and refresh the list. The heading's
-             Bulk remove keeps Delete_Terms.aspx, the checkbox form for removing
-             several terms. See TODO.md.
-     View and Delete are authored as theme icon buttons here so the layout can
-     be judged; they do nothing until their actions exist. They carry no
-     us-action-* class yet: the theme paints any such class as a command, and
-     an undefined one falls back to a text label. When the actions are
-     defined, replace the eye and trash markup with
-     <button class="us-action-agreements-view-term" data-ordinal="…">View term</button>
-     and the same for agreements.delete-term, as the Edit button is written.
+     Delete  agreements.delete-term (owner, 6 October 2026), the bin: asks
+             "Delete this term?", posts {"TermID": Ordinal} to CloudToolz
+             /ca/quick-delete-term (as the status quick edit is saved), then
+             refreshes the list. The heading's Bulk remove keeps
+             Delete_Terms.aspx, the checkbox form for several terms.
 
      Fields (the existing Terms IQA, unchanged):
      Ordinal (required)      term ordinal, on each action and for the status save
@@ -71,9 +64,8 @@
   <div class="us-term__detail">
     <p class="us-term__comment">{#query.Comment}</p>
     <p class="us-term__actions">
-      <button type="button" class="us-term__view TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="View term" title="View term"><i class="ti ti-eye" aria-hidden="true"></i></button>
       <button type="button" class="us-term__edit us-action-agreements-edit-term" data-ordinal="{#query.Ordinal}">Edit term</button>
-      <button type="button" class="us-term__delete TextButton us-icon-button" data-ordinal="{#query.Ordinal}" aria-label="Delete term" title="Delete term"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      <button type="button" class="us-term__delete us-action-agreements-delete-term" data-ordinal="{#query.Ordinal}">Delete term</button>
     </p>
   </div>
 </details>

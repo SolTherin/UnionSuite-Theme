@@ -15160,6 +15160,61 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 /* US-TERMS:END */
 
+/* US-TERM-DELETE:START — the pieces the word vacuum draws over the terms
+   list while a deleted row leaves (zUnionSuite.js, US-TERM-DELETE; owner,
+   6 October 2026). Reduced motion skips the animation, so none is drawn. */
+
+/* The list holds the copies. The sides clip, so flying words never widen
+   the page; the top and bottom stay open. */
+.us-term-deleting:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  overflow-x: clip;
+}
+
+/* The row's copy: the row as it looked, on the panel surface. */
+.us-term-ghost {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  margin: 0;
+  background: var(--bg-surface);
+  pointer-events: none;
+}
+
+.us-term-ghost__word {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* The bin's copy, over the row's own bin, with a lid that hinges at its
+   right end. */
+.us-term-bin {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  pointer-events: none;
+}
+
+.us-term-bin svg {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.us-term-bin__lid {
+  transform-box: fill-box;
+  transform-origin: 90% 100%;
+}
+
+/* US-TERM-DELETE:END */
+
 /* US-INCREASES:START — agreement scheduled increases as expandable groups
    (us-increases, the us-agreement-increases preset; decided 4 October 2026,
    option 4 of the increases comparison). One Query Template row per increase
@@ -19139,8 +19194,10 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 /* US-MILESTONES:START — us-milestones. A progress rail above the list (built
    by US-MILESTONES JS from the rows), then one row per milestone: status dot,
-   title, date and status select. Completed rows carry data-us-task-completed,
-   so us-task-completed-filter hides them until "Show completed" is pressed. */
+   title, date and status select. data-us-milestone-status holds the
+   TaskStatus (Not Complete, In Progress, Complete; matched ignoring case).
+   Completed rows carry data-us-task-completed, so us-task-completed-filter
+   hides them until "Show completed" is pressed. */
 
 .us-milestones__rail {
   --milestone-node: 28px;
@@ -19207,14 +19264,14 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font-weight: var(--fw-semi);
 }
 
-.us-milestones__node[data-us-milestone-status="current"] .us-milestones__circle {
+.us-milestones__node[data-us-milestone-status="In Progress" i] .us-milestones__circle {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--text-on-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.us-milestones__node[data-us-milestone-status="done"] .us-milestones__circle {
+.us-milestones__node[data-us-milestone-status="Complete" i] .us-milestones__circle {
   border-color: var(--success-fill);
   background: var(--success-fill);
   color: var(--text-on-accent);
@@ -19254,12 +19311,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   background: var(--border-strong);
 }
 
-.us-milestone[data-us-milestone-status="current"] .us-milestone__dot {
+.us-milestone[data-us-milestone-status="In Progress" i] .us-milestone__dot {
   background: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.us-milestone[data-us-milestone-status="done"] .us-milestone__dot {
+.us-milestone[data-us-milestone-status="Complete" i] .us-milestone__dot {
   background: var(--success-fill);
 }
 
@@ -19286,7 +19343,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   text-decoration: underline;
 }
 
-.us-milestone[data-us-milestone-status="done"] .us-milestone__title {
+.us-milestone[data-us-milestone-status="Complete" i] .us-milestone__title {
   color: var(--text-muted);
   text-decoration: line-through;
 }
@@ -19309,12 +19366,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font-weight: var(--fw-semi);
 }
 
-.us-milestone[data-us-milestone-status="current"] .us-milestone__status {
+.us-milestone[data-us-milestone-status="In Progress" i] .us-milestone__status {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.us-milestone[data-us-milestone-status="done"] .us-milestone__status {
+.us-milestone[data-us-milestone-status="Complete" i] .us-milestone__status {
   border-color: var(--success-fill);
   color: var(--success);
 }

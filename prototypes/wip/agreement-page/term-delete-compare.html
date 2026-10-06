@@ -1,0 +1,325 @@
+<!doctype html>
+<!--
+  Deleting a term: what the row does on its way out (owner, 6 October 2026;
+  "the row content getting sucked into the bin, but have some fun with it").
+  Each option is the agreement terms panel (US-TERMS, the current
+  templates/Agreement-Terms-Query-Template.html) with its own animation from
+  term-delete-motion.candidate.js / .css. Press a bin to play it; "Bring the
+  rows back" resets the panel. The real delete (agreements.delete-term, its
+  confirm and /ca/quick-delete-term) is not called here: the bins are demo
+  buttons. In the theme the chosen animation would play once the delete
+  succeeds, before the list refreshes; a failed delete leaves the row.
+  Decided (owner, 6 October 2026): option 5, the word vacuum, now in the
+  theme (US-TERM-DELETE in zUnionSuite.js / .css). This page still loads the
+  candidate files first, so all five options keep playing here.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Term Delete Motion</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="term-delete-motion.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.vc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .vc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .vc-toolbar nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    .vc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .vc-toolbar select,
+    .vc-toolbar button,
+    .vc-reset {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .vc-toolbar .vc-mode {
+      margin-inline-start: auto;
+    }
+
+    .vc-stage {
+      display: grid;
+      gap: 36px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 64px;
+    }
+
+    .vc-option {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+      scroll-margin-top: 56px;
+    }
+
+    .vc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .vc-option > p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .vc-reset {
+      justify-self: start;
+    }
+
+    .vc-hint {
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    /* The demo bin and pencil: the theme's icon buttons with inline icons. */
+    .vc-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body class="vc-page">
+
+<div class="vc-toolbar" aria-label="Comparison controls">
+  <strong>Deleting a term</strong>
+  <nav aria-label="Options">
+    <a href="#vc-fold">1 · Fold away</a>
+    <a href="#vc-black-hole">2 · Black hole</a>
+    <a href="#vc-crumple">3 · Crumple and toss</a>
+    <a href="#vc-shredder">4 · Shredder</a>
+    <a href="#vc-vacuum">5 · Word vacuum</a>
+  </nav>
+  <label>Speed
+    <select id="vc-speed">
+      <option value="1" selected>Normal</option>
+      <option value="3">Slow (×3)</option>
+      <option value="6">Slower (×6)</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="vc-force"> Play with reduced motion</label>
+  <button type="button" id="vc-reset-all">Bring them all back</button>
+  <button type="button" class="vc-mode" id="vc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="vc-stage" id="vc-stage">
+
+  <section class="vc-option" id="vc-fold" aria-labelledby="vc-fold-title">
+    <h2 id="vc-fold-title">1. Fold away (baseline)</h2>
+    <p>The theme's usual motion and nothing more: the row slides aside as it fades, then the gap closes. About 0.4 seconds.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-terms" data-vc-style="fold"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template></div></div></div>
+    </div></div></div>
+    <button type="button" class="vc-reset">Bring the rows back</button>
+  </section>
+
+  <section class="vc-option" id="vc-black-hole" aria-labelledby="vc-black-hole-title">
+    <h2 id="vc-black-hole-title">2. Black hole</h2>
+    <p>The bin's lid lifts and a swirl opens behind it. The row leans away for a moment, then spirals in, shrinking and blurring, and the bin swallows. About 1.5 seconds.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-terms" data-vc-style="black-hole"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template></div></div></div>
+    </div></div></div>
+    <button type="button" class="vc-reset">Bring the rows back</button>
+  </section>
+
+  <section class="vc-option" id="vc-crumple" aria-labelledby="vc-crumple-title">
+    <h2 id="vc-crumple-title">3. Crumple and toss</h2>
+    <p>The row scrunches into a paper ball, which arcs up and drops into the bin; the lid snaps shut and the bin rocks. About 1.7 seconds.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-terms" data-vc-style="crumple"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template></div></div></div>
+    </div></div></div>
+    <button type="button" class="vc-reset">Bring the rows back</button>
+  </section>
+
+  <section class="vc-option" id="vc-shredder" aria-labelledby="vc-shredder-title">
+    <h2 id="vc-shredder-title">4. Shredder</h2>
+    <p>The bin rattles, the row is fed in and cut into ten strips, and the strips tumble into the bin one after another. About 1.6 seconds.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-terms" data-vc-style="shredder"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template></div></div></div>
+    </div></div></div>
+    <button type="button" class="vc-reset">Bring the rows back</button>
+  </section>
+
+  <section class="vc-option" id="vc-vacuum" aria-labelledby="vc-vacuum-title">
+    <h2 id="vc-vacuum-title">5. Word vacuum</h2>
+    <p>The bin breathes in and the row's words lift off and fly into it one at a time, nearest first, as the row fades behind them. Longer rows take a little longer, up to about 1.5 seconds.</p>
+    <div class="ContentItemContainer"><div class="us-query-template us-terms" data-vc-style="vacuum"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">Terms and clauses covered</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-vc-template></div></div></div>
+    </div></div></div>
+    <button type="button" class="vc-reset">Bring the rows back</button>
+  </section>
+
+</main>
+
+<script>
+  'use strict';
+
+  // Sample terms (fields as the Terms IQA selects them). The first row of
+  // each panel starts open, so its bin is ready to press.
+  const TERMS = [
+    {Ordinal: '41', Term: 'Annual leave loading', StatusClass: 'included', StatusLabel: 'Included', Category: 'Leave', Amount: '17.5%', Comment: 'Paid on four weeks of annual leave at the start of each leave period.'},
+    {Ordinal: '42', Term: 'Shift penalty', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Category: 'Allowances', Amount: '$4.20 per shift', Comment: 'Evening and night shifts; the employer has offered $3.80.'},
+    {Ordinal: '43', Term: 'Paid parental leave', StatusClass: 'not-included', StatusLabel: 'Not Included', Category: 'Leave', Amount: '16 weeks', Comment: 'Dropped in round three in exchange for the wage offer.'},
+    {Ordinal: '44', Term: 'Wage increase', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Category: 'Wages', Amount: '3.5% a year', Comment: 'Three years, first increase on approval.'}
+  ];
+
+  const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+  const BIN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M9 6V3.5h6V6"/><path d="M5 6l1 15h12l1-15"/><path d="M10 11v6M14 11v6"/></svg>';
+
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
+    ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char]);
+
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => escapeHtml(row[field]));
+  }
+
+  // The template's Edit and Delete are theme actions (agreements.edit-term,
+  // agreements.delete-term); here they become demo buttons with the theme's
+  // icon button look, so nothing is called.
+  function demoButtons(html) {
+    return html
+      .replace(/<button type="button" class="us-term__edit [^"]*"([^>]*)>[^<]*<\/button>/,
+        '<button type="button" class="us-term__edit TextButton us-icon-button vc-icon"$1 aria-label="Edit term" title="Edit term (not part of this demo)">' + PENCIL + '</button>')
+      .replace(/<button type="button" class="us-term__delete [^"]*"([^>]*)>[^<]*<\/button>/,
+        '<button type="button" class="us-term__delete TextButton us-icon-button DangerButton vc-icon" data-vc-delete$1 aria-label="Delete term" title="Delete term">' + BIN + '</button>');
+  }
+
+  let template = '';
+  async function loadTemplate() {
+    if (template) return template;
+    const response = await fetch('templates/Agreement-Terms-Query-Template.html', {cache: 'no-cache'});
+    if (!response.ok) throw new Error('No template');
+    template = (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+    return template;
+  }
+
+  async function render(set) {
+    const markup = await loadTemplate();
+    set.innerHTML = TERMS.map((row, index) => {
+      let html = demoButtons(fill(markup, row));
+      if (index === 0) html = html.replace('<details class="us-term"', '<details class="us-term" open');
+      return `<section data-item="term-${row.Ordinal}"><div class="QueryTemplateItem">${html}</div></section>`;
+    }).join('');
+    window.UnionSuiteTermFacets?.refresh?.();
+  }
+
+  const renderAll = () => Promise.all([...document.querySelectorAll('[data-vc-template]')].map(render));
+
+  // ── The demo delete ──────────────────────────────────────────────
+
+  const busy = new WeakSet();
+  document.addEventListener('click', async event => {
+    const bin = event.target.closest('[data-vc-delete]');
+    if (!bin) return;
+    event.preventDefault();
+    const section = bin.closest('.QueryTemplateSet > section');
+    const style = bin.closest('[data-vc-style]')?.getAttribute('data-vc-style');
+    if (!section || busy.has(section)) return;
+    busy.add(section);
+    await window.UnionSuiteTermDelete.play(section, bin, style, {force: document.getElementById('vc-force').checked});
+    section.remove();
+    window.UnionSuiteTermFacets?.refresh?.();
+  });
+
+  document.querySelectorAll('.vc-reset').forEach(button => button.addEventListener('click', () => {
+    render(button.closest('.vc-option').querySelector('[data-vc-template]')).catch(showServeHint);
+  }));
+  document.getElementById('vc-reset-all').addEventListener('click', () => renderAll().catch(showServeHint));
+
+  // ── Toolbar ──────────────────────────────────────────────────────
+
+  document.getElementById('vc-speed').addEventListener('change', event => {
+    window.UnionSuiteTermDelete.setSpeed(event.target.value);
+  });
+
+  document.getElementById('vc-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  });
+
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    const hint = document.createElement('p');
+    hint.className = 'vc-hint';
+    hint.textContent = 'This computer asks for reduced motion, so a deleted row goes at once. Tick "Play with reduced motion" to see the animations.';
+    document.getElementById('vc-stage').prepend(hint);
+  }
+
+  function showServeHint() {
+    if (document.querySelector('.vc-hint[data-vc-serve]')) return;
+    const hint = document.createElement('p');
+    hint.className = 'vc-hint';
+    hint.setAttribute('data-vc-serve', '');
+    hint.textContent = 'This page reads the terms template, so it needs serving, not opening from disk: serve the project root and open http://localhost:8778/prototypes/wip/agreement-page/term-delete-compare.html.';
+    document.getElementById('vc-stage').prepend(hint);
+  }
+
+  if (location.protocol === 'file:') showServeHint();
+  else renderAll().catch(showServeHint);
+</script>
+<script src="term-delete-motion.candidate.js"></script>
+<!-- The theme gives the rows their slide open and closed, the status menu
+     and the status chips (US-TERMS). -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+</body>
+</html>

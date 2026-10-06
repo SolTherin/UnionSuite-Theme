@@ -3645,8 +3645,10 @@ SOFTWARE.
      an open row closes from a click anywhere on it, not only its first line.
    - Status: the status icon opens a menu of the statuses; a change shows at
      once, plays the completion confetti for Included, and saves through
-     UnionSuiteTermStatus.defineSaver(fn). No saver exists yet (TODO.md), so
-     until one is defined a change reverts and the row says "Not saved".
+     UnionSuiteTermStatus.defineSaver(fn); the agreement saver posts to
+     CloudToolz /ca/quick-edit-term (Scripts/ActionDefinitions.js). Without a
+     saver, or when the save fails, a change reverts and the row says
+     "Not saved".
    - Facets: status quick filters, as the agreement contacts' group chips, in
      the funnel disclosure, with the count beside the panel title. */
 
@@ -4146,6 +4148,174 @@ SOFTWARE.
   window.UnionSuiteTermFacets = Object.freeze({refresh: schedule, version: '1.0'});
 })();
 /* US-TERMS:END */
+
+/* US-TERM-DELETE:START — a deleted term row leaves by the word vacuum (owner,
+   6 October 2026; option 5 of prototypes/wip/agreement-page/
+   term-delete-compare.html). agreements.delete-term (ActionDefinitions.js)
+   plays it once /ca/quick-delete-term succeeds, before the list refreshes:
+
+     UnionSuiteTermDelete.play(section, bin) → Promise
+
+   section is the row's result section and bin its delete button. The row is
+   hidden in place; a copy of it (the ghost) sits over the list beside a copy
+   of the bin, whose lid lifts. The bin breathes in, and the ghost's words
+   fly into it one at a time, nearest first, as the row's surface fades;
+   the lid shuts with a gulp and the real row slides closed. About 1.5
+   seconds at most. Reduced motion skips it, and the list's refresh removes
+   the row at once. The copies sit inside the row's .QueryTemplateSet (a
+   container in the terms CSS, so it holds absolutely placed children) and
+   keep the .us-terms styles. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTermDelete) return;
+
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+
+  function el(tag, className) {
+    const node = document.createElement(tag);
+    node.className = className;
+    node.setAttribute('aria-hidden', 'true');
+    return node;
+  }
+
+  // A box relative to the list (frame), with its centre.
+  function box(node, frame) {
+    const rect = node.getBoundingClientRect();
+    const outer = frame.getBoundingClientRect();
+    const x = rect.left - outer.left - frame.clientLeft + frame.scrollLeft;
+    const y = rect.top - outer.top - frame.clientTop + frame.scrollTop;
+    return {x, y, w: rect.width, h: rect.height, cx: x + rect.width / 2, cy: y + rect.height / 2};
+  }
+
+  function place(node, b) {
+    Object.assign(node.style, {left: b.x + 'px', top: b.y + 'px', width: b.w + 'px', height: b.h + 'px'});
+  }
+
+  // The row's copy. Its own bin stays hidden: the bin copy plays instead.
+  function ghostOf(section, frame) {
+    const item = section.querySelector('.QueryTemplateItem') || section.firstElementChild || section;
+    const ghost = el('div', 'us-term-ghost');
+    ghost.append(item.cloneNode(true));
+    ghost.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+    ghost.querySelectorAll('.us-term__delete').forEach(node => { node.style.visibility = 'hidden'; });
+    place(ghost, box(item, frame));
+    frame.append(ghost);
+    return ghost;
+  }
+
+  // The bin, drawn with its lid apart so the lid can lift.
+  const BIN_SVG = '<svg viewBox="0 0 24 24" focusable="false">' +
+    '<g class="us-term-bin__lid"><path d="M3 6h18"/><path d="M9 6V3.5h6V6"/></g>' +
+    '<path d="M5 6l1 15h12l1-15"/><path d="M10 11v6M14 11v6"/></svg>';
+
+  function binOf(bin, frame) {
+    const b = box(bin, frame);
+    const node = el('span', 'us-term-bin');
+    node.innerHTML = BIN_SVG;
+    place(node, b);
+    frame.append(node);
+    return {node, lid: node.querySelector('.us-term-bin__lid'), b};
+  }
+
+  // Each word in its own inline box, so it can fly on its own.
+  function splitWords(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: node => node.data.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+    });
+    const texts = [];
+    while (walker.nextNode()) texts.push(walker.currentNode);
+    texts.forEach(text => {
+      const fragment = document.createDocumentFragment();
+      text.data.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) {
+          fragment.append(part);
+          return;
+        }
+        const word = document.createElement('span');
+        word.className = 'us-term-ghost__word';
+        word.textContent = part;
+        fragment.append(word);
+      });
+      text.replaceWith(fragment);
+    });
+    return [...root.querySelectorAll('.us-term-ghost__word')];
+  }
+
+  async function vacuum(ghost, can, frame) {
+    const words = splitWords(ghost)
+      .filter(word => word.getClientRects().length)
+      .map(word => {
+        const b = box(word, frame);
+        return {word, dx: can.b.cx - b.cx, dy: can.b.cy - b.cy};
+      })
+      .sort((a, b) => Math.hypot(a.dx, a.dy) - Math.hypot(b.dx, b.dy));
+    // Long rows send their words closer together, so the whole stays short.
+    const gap = Math.min(30, 560 / Math.max(1, words.length));
+    await can.lid.animate(
+      [{transform: 'none'}, {transform: 'translate(1px, -1.5px) rotate(-32deg)'}],
+      {duration: 180, easing: EASE, fill: 'forwards'}).finished;
+    const inhale = can.node.animate(
+      [{transform: 'none'}, {transform: 'scale(1.14)'}, {transform: 'none'}],
+      {duration: 260, iterations: Infinity, easing: 'ease-in-out'});
+    // The row's surface, borders and icons fade as its words leave.
+    ghost.animate([{backgroundColor: getComputedStyle(ghost).backgroundColor}, {backgroundColor: 'transparent'}],
+      {duration: gap * words.length + 440, easing: 'ease-in', fill: 'forwards'});
+    ghost.querySelectorAll('.us-term__status-button, .us-term__chevron, .us-term__edit, .us-badge, .QueryTemplateItem').forEach(part => {
+      const style = getComputedStyle(part);
+      part.animate([
+        {borderColor: style.borderColor, backgroundColor: style.backgroundColor, opacity: 1},
+        {borderColor: 'transparent', backgroundColor: 'transparent', opacity: part.matches('.us-badge, .QueryTemplateItem') ? 1 : 0}
+      ], {duration: 360, fill: 'forwards'});
+    });
+    await Promise.all(words.map(({word, dx, dy}, i) => {
+      const turn = (i % 3 - 1) * 25;
+      return word.animate([
+        {transform: 'none', opacity: 1},
+        {transform: `translate(${dx * .18}px, ${dy * .18 - 8}px) rotate(${turn * .4}deg) scale(1.08)`, offset: .3},
+        {transform: `translate(${dx}px, ${dy}px) rotate(${turn * 3}deg) scale(.1)`, opacity: 0}
+      ], {duration: 440, delay: i * gap, easing: 'cubic-bezier(.55, 0, .85, .3)', fill: 'forwards'}).finished;
+    }));
+    inhale.cancel();
+    // The lid shuts with a bounce and the bin swallows.
+    await Promise.all([
+      can.lid.animate(
+        [{transform: 'translate(1px, -1.5px) rotate(-32deg)'}, {transform: 'rotate(6deg)', offset: .55},
+          {transform: 'rotate(-3deg)', offset: .8}, {transform: 'none'}],
+        {duration: 320, easing: 'ease-out', fill: 'forwards'}).finished,
+      can.node.animate(
+        [{transform: 'none'}, {transform: 'scale(1.3, .78)', offset: .3}, {transform: 'scale(.9, 1.12)', offset: .65}, {transform: 'none'}],
+        {duration: 360, easing: 'ease-out'}).finished
+    ]);
+  }
+
+  async function play(section, bin) {
+    const frame = section?.parentElement;
+    if (!frame || !bin || !section.isConnected || !section.animate || reducedMotion()) return;
+    frame.classList.add('us-term-deleting');
+    const ghost = ghostOf(section, frame);
+    const can = binOf(bin, frame);
+    section.style.visibility = 'hidden';
+    try {
+      await vacuum(ghost, can, frame);
+      // The real row slides closed as the bin fades.
+      const height = section.getBoundingClientRect().height;
+      section.style.overflow = 'hidden';
+      await Promise.all([
+        section.animate([{height: height + 'px'}, {height: '0px'}], {duration: 220, easing: EASE, fill: 'forwards'}).finished,
+        can.node.animate([{opacity: 1}, {opacity: 0, transform: 'scale(.6)'}], {duration: 200, fill: 'forwards'}).finished
+      ]);
+    } finally {
+      ghost.remove();
+      can.node.remove();
+      if (!frame.querySelector(':scope > .us-term-ghost')) frame.classList.remove('us-term-deleting');
+    }
+  }
+
+  window.UnionSuiteTermDelete = Object.freeze({play, version: '1.0'});
+})();
+/* US-TERM-DELETE:END */
 
 /* US-INCREASES:START — agreement scheduled increases as expandable groups
    (us-increases, the us-agreement-increases preset; decided 4 October 2026).
@@ -12993,7 +13163,8 @@ SOFTWARE.
       task.removeAttribute('data-us-task-state');
     });
     scope.querySelectorAll('.us-milestone[data-us-milestone-status]').forEach(milestone => {
-      set(milestone, milestone.getAttribute('data-us-milestone-status').trim().toLowerCase() === 'done');
+      // TaskStatus Complete, or done from an earlier template.
+      set(milestone, /^(complete|done)$/i.test(milestone.getAttribute('data-us-milestone-status').trim()));
     });
     const now = today();
     scope.querySelectorAll('.us-meeting[data-us-meeting-date]').forEach(meeting => {
@@ -13260,14 +13431,22 @@ SOFTWARE.
   if (window.UnionSuiteMilestones) return;
 
   const wrapperSelector = '.us-milestones';
-  const labels = {future: 'Not started', current: 'In progress', done: 'Complete'};
-  const saveActions = {future: 'Not Complete', current: 'In Progress', done: 'Complete'};
+  // A milestone's status is its TaskStatus (owner, 6 October 2026): the
+  // row's data-us-milestone-status, the select's option values and labels,
+  // and the Action CloudToolz /ca/complete-task saves are the same words.
+  // Earlier templates' StatusCSS values (future, overdue, current, done) are
+  // still read, and the row is rewritten in TaskStatus words.
+  const STATUSES = ['Not Complete', 'In Progress', 'Complete'];
+  const LEGACY = {future: 'Not Complete', overdue: 'Not Complete', current: 'In Progress', done: 'Complete'};
+  const COMPLETE = 'Complete';
   const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>';
 
-  function status(milestone) {
-    const value = (milestone.getAttribute('data-us-milestone-status') || '').trim().toLowerCase();
-    return labels[value] ? value : 'future';
+  function normalise(value) {
+    const text = String(value || '').trim().toLowerCase();
+    return STATUSES.find(name => name.toLowerCase() === text) || LEGACY[text] || STATUSES[0];
   }
+
+  const status = milestone => normalise(milestone.getAttribute('data-us-milestone-status'));
 
   function setOf(wrapper) {
     return wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
@@ -13293,7 +13472,7 @@ SOFTWARE.
     }
     const states = milestones.map(status);
     // Progress reaches the last completed node, as the old rail did.
-    const lastDone = states.lastIndexOf('done');
+    const lastDone = states.lastIndexOf(COMPLETE);
     rail.style.setProperty('--milestones-progress', milestones.length > 1 && lastDone > 0 ? String(lastDone / (milestones.length - 1)) : '0');
     rail.replaceChildren(...milestones.map((milestone, index) => {
       const state = states[index];
@@ -13301,28 +13480,40 @@ SOFTWARE.
       const node = document.createElement('li');
       node.className = 'us-milestones__node';
       node.setAttribute('data-us-milestone-status', state);
-      node.title = title + ' — ' + labels[state];
+      node.title = title + ' — ' + state;
       const circle = document.createElement('span');
       circle.className = 'us-milestones__circle';
       circle.setAttribute('aria-hidden', 'true');
-      if (state === 'done') circle.innerHTML = tick;
+      if (state === COMPLETE) circle.innerHTML = tick;
       else circle.textContent = String(index + 1);
       const label = document.createElement('span');
       label.className = 'us-milestones__label';
       label.textContent = title;
       const hidden = document.createElement('span');
       hidden.className = 'sr-only';
-      hidden.textContent = ', ' + labels[state];
+      hidden.textContent = ', ' + state;
       label.append(hidden);
       node.append(circle, label);
       return node;
     }));
   }
 
+  // The option for a status, whether the template's options carry the
+  // TaskStatus words or the earlier StatusCSS values.
+  function setSelect(select, state) {
+    const option = [...select.options].find(item => normalise(item.value) === state);
+    if (option && !option.selected) option.selected = true;
+  }
+
+  // Rows from an earlier template are rewritten in TaskStatus words, so the
+  // stylesheet and the completed filter read one set of values.
   function syncSelects(wrapper) {
     wrapper.querySelectorAll('.us-milestone').forEach(milestone => {
+      if (milestone.hasAttribute('aria-busy')) return;
+      const state = status(milestone);
+      if (milestone.getAttribute('data-us-milestone-status') !== state) milestone.setAttribute('data-us-milestone-status', state);
       const select = milestone.querySelector('.us-milestone__status');
-      if (select && !milestone.hasAttribute('aria-busy') && select.value !== status(milestone)) select.value = status(milestone);
+      if (select) setSelect(select, state);
     });
   }
 
@@ -13355,10 +13546,10 @@ SOFTWARE.
     const milestone = select.closest('.us-milestone');
     const ordinal = (milestone?.getAttribute('data-us-milestone-ordinal') || '').trim();
     const previous = status(milestone);
-    const next = labels[select.value] ? select.value : 'future';
+    const next = normalise(select.value);
     if (!milestone || next === previous) return;
     if (!/^\d+$/.test(ordinal)) {
-      select.value = previous;
+      setSelect(select, previous);
       reportFailure(milestone);
       return;
     }
@@ -13366,13 +13557,13 @@ SOFTWARE.
     // Optimistic, as tasks are: the effect plays while the save is in flight.
     // A completed milestone stays in place until the save settles, then the
     // completed filter hides it unless completed milestones are shown.
-    const celebration = next === 'done' ? window.UnionSuiteTaskRows?.celebrate?.(select) : null;
+    const celebration = next === COMPLETE ? window.UnionSuiteTaskRows?.celebrate?.(select) : null;
     milestone.setAttribute('data-us-milestone-status', next);
     const wrapper = milestone.closest(wrapperSelector);
     if (wrapper) renderRail(wrapper);
     let saved = true;
     try {
-      await window.UnionSuiteAgreements.saveItemStatus(ordinal, saveActions[next], 'Milestone');
+      await window.UnionSuiteAgreements.saveItemStatus(ordinal, next, 'Milestone');
     } catch (error) {
       saved = false;
       console.warn(error.message);
@@ -13381,7 +13572,7 @@ SOFTWARE.
     milestone.removeAttribute('aria-busy');
     if (saved) apply(milestone, next);
     else {
-      select.value = previous;
+      setSelect(select, previous);
       apply(milestone, previous);
       reportFailure(milestone);
     }

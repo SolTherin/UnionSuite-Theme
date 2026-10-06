@@ -532,7 +532,73 @@
     return cloudToolz('/ca/complete-task', {method: 'POST', body: JSON.stringify({TaskID: ordinal, Action: action, NoteType: noteType})});
   }
 
-  window.UnionSuiteAgreements = Object.freeze({cloudToolz, saveItemStatus, version: '1.0'});
+  // Whether the signed-in user may read a restricted note (owner, 6 October
+  // 2026). CloudToolz knows the user from the call, as for complete-task,
+  // checks the note's access (Open, Individual, Team) and answers
+  // {Access: 'Granted' | 'Restricted', Note}; the text comes only when granted.
+  async function noteAccess(ordinal) {
+    const response = await cloudToolz('/ca/note-access', {method: 'POST', body: JSON.stringify({NoteOrdinal: ordinal})});
+    return response.json();
+  }
+
+  // A term's status from the row's quick edit (us-term__status-button;
+  // owner, 6 October 2026), as complete-task saves a task's. Action is the
+  // status as shown: Negotiating | Included | Not Included.
+  function saveTermStatus(ordinal, action) {
+    return cloudToolz('/ca/quick-edit-term', {method: 'POST', body: JSON.stringify({TermID: ordinal, Action: action})});
+  }
+
+  // One term deleted from its row's bin (owner, 6 October 2026), as the
+  // status quick edit saves. The heading's Bulk remove keeps the
+  // Delete_Terms.aspx popup for several terms.
+  function deleteTerm(ordinal) {
+    return cloudToolz('/ca/quick-delete-term', {method: 'POST', body: JSON.stringify({TermID: ordinal})});
+  }
+
+  window.UnionSuiteAgreements = Object.freeze({cloudToolz, saveItemStatus, saveTermStatus, deleteTerm, noteAccess, version: '1.0'});
+
+  // The bin in an open term row: asks first, deletes, then refreshes the
+  // terms list it sits in. A failed delete leaves the row and says so.
+  // Once deleted, the row's words fly into the bin (US-TERM-DELETE, the word
+  // vacuum; owner, 6 October 2026) before the list refreshes.
+  define('agreements.delete-term', {
+    presentation: {label: 'Delete term', icon: 'trash', tone: 'danger', default: 'button', row: 'icon', menu: 'menu-item'},
+    context: {agreementId, agreementNum, ordinal: rowOrdinal},
+    action: {type: 'function', recordKey: ['agreementId', 'ordinal'],
+      confirm: {message: 'Delete this term? This cannot be undone.'},
+      run: async ({context, trigger}) => {
+        await deleteTerm(context.ordinal);
+        // The term is gone by now, so a failed animation only logs.
+        const section = trigger?.closest('.QueryTemplateSet > section');
+        try {
+          if (section) await window.UnionSuiteTermDelete?.play(section, trigger);
+        } catch (error) {
+          console.warn('[agreements.delete-term] The delete animation failed:', error);
+        }
+        return {deleted: true};
+      },
+      refresh: {when: 'success', targets: [{type: 'origin-report'}]},
+      successMessage: 'Term deleted.'}
+  });
+
+  // US-TERMS in zUnionSuite.js: a status change shows at once and reverts
+  // with "Not saved" if this throws (an HTTP error from CloudToolz does).
+  window.UnionSuiteTermStatus?.defineSaver?.(({ordinal, label}) => saveTermStatus(ordinal, label));
+
+  // Show note on a restricted note (US-NOTES-RESTRICTED in zUnionSuite.js).
+  // Granted shows the text; Restricted reads as denied ("You don't have
+  // permission…"); any other answer reads as a failed check.
+  window.UnionSuiteRestrictedNotes?.defineLoader?.(async ({ordinal}) => {
+    const data = await noteAccess(ordinal);
+    const access = String(propertyValue(data, 'Access') ?? '').trim().toLowerCase();
+    if (access === 'granted') return String(propertyValue(data, 'Note') ?? '');
+    if (access === 'restricted') {
+      const denied = new Error('Access to this note is restricted.');
+      denied.denied = true;
+      throw denied;
+    }
+    throw new Error('The note access check gave no answer (Access was "' + access + '").');
+  });
 
   // Agreement task rows carry data-us-task-save="agreements.item-status".
   window.UnionSuiteTaskRows?.defineSaver?.('agreements.item-status', async ({root, done}) => {

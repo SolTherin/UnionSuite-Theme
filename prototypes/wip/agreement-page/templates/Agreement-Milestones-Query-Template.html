@@ -1,5 +1,6 @@
 <!-- Agreement milestones · Query Template Display on the existing Milestones IQA
-     ("Query Template - Manage Agreement - Milestones"). The IQA is unchanged.
+     ("Query Template - Manage Agreement - Milestones"), which also returns
+     TaskStatus (6 October 2026).
      iPart CSS class: us-agreement-milestones (add us-panel-fill when it shares a row)
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone
@@ -16,13 +17,15 @@
      shown because the status select carries it):
      Ordinal (required)      note ordinal; saves the status and opens the milestone
      Note (required)         milestone title
-     StatusCSS (required)    future | current | done
+     TaskStatus (required)   Not Complete | In Progress | Complete (owner, 6 October
+                             2026; replaces StatusCSS, whose future | current | done
+                             the theme still reads); the select shows and saves it
      Deadline                date text; blank hides it
 
      The theme builds the progress rail from these rows. Choosing Complete plays
      the task completion effect and saves through CloudToolz /ca/complete-task.
      Replaces the old milestone-nodes rail, Milestone Log and status select CSS. -->
-<div class="us-milestone" data-us-milestone-status="{#query.StatusCSS}" data-us-milestone-ordinal="{#query.Ordinal}"
+<div class="us-milestone" data-us-milestone-status="{#query.TaskStatus}" data-us-milestone-ordinal="{#query.Ordinal}"
   data-us-search="{#query.Note}">
   <span class="us-milestone__dot" aria-hidden="true"></span>
   <span class="us-milestone__copy">
@@ -30,8 +33,8 @@
     <span class="us-milestone__date">{#query.Deadline}</span>
   </span>
   <select class="us-milestone__status" aria-label="Status: {#query.Note}">
-    <option value="future">Not started</option>
-    <option value="current">In progress</option>
-    <option value="done">Complete</option>
+    <option value="Not Complete">Not Complete</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Complete">Complete</option>
   </select>
 </div>

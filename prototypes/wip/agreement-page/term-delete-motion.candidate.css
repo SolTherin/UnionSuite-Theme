@@ -1,0 +1,89 @@
+/* US-TERM-DELETE (candidate; owner, 6 October 2026): the pieces a deleted
+   term row's animation draws over the list (term-delete-motion.candidate.js).
+   Nothing here is in the theme yet; term-delete-compare.html loads it. */
+
+/* The list holds the copies while a row leaves. A spinning copy or the
+   swirl must not widen the page (a sideways scrollbar), so the sides clip;
+   the top and bottom stay open for the paper ball's arc. */
+.us-term-deleting {
+  position: relative;
+  overflow-x: clip;
+}
+
+/* The row's copy: the row as it looked, on the panel surface. */
+.us-term-ghost {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  margin: 0;
+  background: var(--bg-surface);
+  pointer-events: none;
+}
+
+.us-term-ghost__word {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* The bin's copy, with a lid that hinges at its right end. */
+.us-term-bin {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  pointer-events: none;
+}
+
+.us-term-bin svg {
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.us-term-bin__lid {
+  transform-box: fill-box;
+  transform-origin: 90% 100%;
+}
+
+/* Black hole: a swirl that opens behind the bin. */
+.us-term-hole {
+  position: absolute;
+  z-index: 1;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #0b0b1a 0 18%, transparent 19%),
+    conic-gradient(from 0deg,
+      color-mix(in srgb, var(--accent) 70%, transparent),
+      transparent 25%,
+      color-mix(in srgb, var(--brand-600) 70%, transparent) 50%,
+      transparent 75%,
+      color-mix(in srgb, var(--accent) 70%, transparent));
+  -webkit-mask: radial-gradient(circle, #000 35%, transparent 70%);
+  mask: radial-gradient(circle, #000 35%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Crumple: the paper ball, creased and lit from the top left. */
+.us-term-ball {
+  position: absolute;
+  z-index: 3;
+  border-radius: 46% 54% 50% 50% / 52% 46% 54% 48%;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 90%) 0 14%, transparent 30%),
+    conic-gradient(from 30deg, #ecebe6, #d9d7cf, #f4f3ef, #cfccc2, #e8e6df, #d4d1c8, #ecebe6);
+  box-shadow:
+    inset -3px -4px 6px rgb(0 0 0 / 14%),
+    0 2px 4px rgb(0 0 0 / 18%);
+  pointer-events: none;
+}
+
+/* Reduced motion: the script skips the show and the row goes at once, so
+   none of these pieces is drawn. */
