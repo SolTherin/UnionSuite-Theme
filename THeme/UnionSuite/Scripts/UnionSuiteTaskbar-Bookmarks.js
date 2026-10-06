@@ -493,6 +493,11 @@
   --iqa-link: var(--text-link, #006f94);
 }
 
+/* The appearance switch is ordered last in the row; the toggle follows it. */
+#injected-taskbar > .us-bookmarks-toggle {
+  order: 2;
+}
+
 .us-bookmarks-toggle[aria-expanded="true"],
 .us-bookmarks-toggle[aria-expanded="true"]:hover {
   background: var(--iqa-selected);
@@ -2295,7 +2300,7 @@
     if (!anchor) return false;
 
     // Clear anything left behind by a previous mount we no longer own.
-    bar.querySelectorAll('.us-taskbar-tools').forEach(node => node.remove());
+    bar.querySelectorAll('.us-taskbar-tools, .us-bookmarks-toggle').forEach(node => node.remove());
     document.querySelectorAll('.us-bookmarks-bar').forEach(node => node.remove());
 
     injectStyles();
@@ -2354,8 +2359,11 @@
     recentsButton.setAttribute('aria-expanded', 'false');
     recentsButton.setAttribute('aria-controls', 'us-tb-recents');
 
-    tools.append(paletteButton, toggle);
+    tools.append(paletteButton);
     strip.after(tools);
+    // Like a browser's bookmarks control, the toggle closes the row at its far
+    // right, after the appearance switch.
+    bar.append(toggle);
 
     // The labelled bar sits directly under the taskbar row.
     // The labelled bar spans the header, so it belongs beside the auxiliary row
@@ -2368,7 +2376,7 @@
     if (auxiliary) auxiliary.after(barHost);
     else bar.after(barHost);
 
-    mounted = { bar, strip, tools, barHost, recentsButton };
+    mounted = { bar, strip, tools, toggle, barHost, recentsButton };
     renderBookmarks();
     renderBookmarkLoadState();
     return true;
@@ -2386,6 +2394,7 @@
       mounted.strip.replaceWith(slot);
     }
     if (mounted.tools.isConnected) mounted.tools.remove();
+    if (mounted.toggle.isConnected) mounted.toggle.remove();
     if (mounted.barHost.isConnected) mounted.barHost.remove();
     mounted = null;
   }
@@ -2396,7 +2405,7 @@
     // old nodes connected inside a subtree that is no longer the live taskbar.
     const bar = document.querySelector('#injected-taskbar');
     const current = mounted && mounted.bar === bar &&
-      mounted.strip.isConnected && mounted.barHost.isConnected;
+      mounted.strip.isConnected && mounted.toggle.isConnected && mounted.barHost.isConnected;
     if (current) return;
     unmount();
     mount();
@@ -2405,7 +2414,7 @@
   function onDocumentClick(event) {
     const inside = event.composedPath().some(node =>
       node instanceof Element &&
-      node.matches('.us-popover, .us-palette, .us-feature-button, .us-bookmarks, .us-taskbar-tools, .us-bookmarks-bar'));
+      node.matches('.us-popover, .us-palette, .us-feature-button, .us-bookmarks, .us-taskbar-tools, .us-bookmarks-toggle, .us-bookmarks-bar'));
     if (!inside) closePanels();
   }
 
