@@ -425,7 +425,10 @@
   rowPopup('agreements.view-task', 'Open task', openLink, noteDetails('Task'), 'Task', formWidth);
   // The eye button at the end of a task row; same popup as the title link.
   rowPopup('agreements.preview-task', 'View task', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails('Task'), 'Task', formWidth);
+  // The earlier milestone template's title link; the current template has
+  // a plain title and the pencil below (owner, 7 October 2026).
   rowPopup('agreements.view-milestone', 'Open milestone', openLink, noteDetails('Milestones'), 'Milestone', formWidth);
+  rowPopup('agreements.edit-milestone', 'Edit milestone', editIcon, noteDetails('Milestones'), 'Milestone', formWidth);
   rowPopup('agreements.view-meeting', 'Open meeting', openLink,
     ({context}) => page('/Agreements_EditMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum, MeetingOrdinal: context.ordinal}),
     'Edit meeting', formWidth);
@@ -555,7 +558,18 @@
     return cloudToolz('/ca/quick-delete-term', {method: 'POST', body: JSON.stringify({TermID: ordinal})});
   }
 
-  window.UnionSuiteAgreements = Object.freeze({cloudToolz, saveItemStatus, saveTermStatus, deleteTerm, noteAccess, version: '1.0'});
+  // The agreement's milestones in their new order (US-MILESTONE-ORDER;
+  // owner, 7 October 2026), each with its Sequence, 1 for the first. The
+  // Milestones IQA sorts on Sequence. Proposed endpoint: not built yet.
+  function saveMilestoneOrder(ordinals) {
+    const agreementId = new URLSearchParams(location.search).get('AgreementID') || '';
+    return cloudToolz('/ca/reorder-milestones', {
+      method: 'POST',
+      body: JSON.stringify({AgreementID: agreementId, Milestones: ordinals.map((Ordinal, index) => ({Ordinal, Sequence: index + 1}))})
+    });
+  }
+
+  window.UnionSuiteAgreements = Object.freeze({cloudToolz, saveItemStatus, saveTermStatus, deleteTerm, saveMilestoneOrder, noteAccess, version: '1.0'});
 
   // The bin in an open term row: asks first, deletes, then refreshes the
   // terms list it sits in. A failed delete leaves the row and says so.
@@ -584,6 +598,10 @@
   // US-TERMS in zUnionSuite.js: a status change shows at once and reverts
   // with "Not saved" if this throws (an HTTP error from CloudToolz does).
   window.UnionSuiteTermStatus?.defineSaver?.(({ordinal, label}) => saveTermStatus(ordinal, label));
+
+  // US-MILESTONE-ORDER in zUnionSuite.js: Save order keeps the new order
+  // and says "Order not saved" if this throws.
+  window.UnionSuiteMilestoneOrder?.defineSaver?.(({ordinals}) => saveMilestoneOrder(ordinals));
 
   // Show note on a restricted note (US-NOTES-RESTRICTED in zUnionSuite.js).
   // Granted shows the text; Restricted reads as denied ("You don't have

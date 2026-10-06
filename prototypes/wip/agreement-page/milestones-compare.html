@@ -1,0 +1,365 @@
+<!doctype html>
+<!--
+  Milestones (agreement page, README decision 16). Options 1 to 5 were
+  tried on 6 October 2026 and retired once option 6 was chosen; the README
+  records them, and their candidate files are archived.
+  6. In the theme (7 October 2026): US-MILESTONES and US-MILESTONE-ORDER in
+     zUnionSuite.js / .css, through templates/Agreement-Milestones-Query-Template.html
+     and the us-agreement-milestones preset (us-milestones--bar,
+     us-milestones--reorder).
+  7. Option 6 with tasks linked to each stage, planned until tasks can be
+     linked to milestones in iMIS: the theme plus milestone-tasks.candidate.css
+     / .js, through templates/Agreement-Milestones-Tasks-Query-Template.html
+     with us-milestones--tasks.
+  Both panels show the same six milestones and change separately. Saves go
+  to an offline stand-in for CloudToolz; "Saves: fail" shows a failed save.
+  Popups (the pencils, Add milestone) show a note instead of opening.
+  Serve the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Milestones Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="milestone-tasks.candidate.css">
+  <style>
+    /* Comparison page layout only. */
+    body.mc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .mc-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .mc-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .mc-toolbar select,
+    .mc-toolbar button {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      cursor: pointer;
+    }
+
+    .mc-toolbar .mc-mode {
+      margin-inline-start: auto;
+    }
+
+    /* Two panels side by side at the page's half width (col-md-6 in a
+       1280px window), or one under the other when the window is narrow. */
+    .mc-stage {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), var(--mc-panel, 560px)));
+      justify-content: center;
+      gap: 32px;
+      padding: 20px 16px 64px;
+    }
+
+    .mc-option {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .mc-option > ul {
+      margin: 0;
+      padding-inline-start: 18px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .mc-hint {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding: 10px 14px;
+      border: 1px solid var(--warning-fill);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    .mc-toast {
+      position: fixed;
+      z-index: 20;
+      inset-inline: 0;
+      bottom: 20px;
+      width: max-content;
+      max-width: calc(100% - 32px);
+      margin: 0 auto;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      background: var(--text-strong);
+      color: var(--bg-surface);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .18s, transform .18s cubic-bezier(.2, 0, 0, 1);
+      pointer-events: none;
+    }
+
+    .mc-toast.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body class="mc-page">
+<!-- Stand-ins for what every iMIS page carries; the CloudToolz save reads both. -->
+<object hidden type="application/json"><param name="__ClientContext" id="__ClientContext" value='{"baseUrl":"/","isAnonymous":false,"loggedInPartyId":"104203","selectedPartyId":"104203","websiteRoot":"/"}'></object>
+<input type="hidden" name="__RequestVerificationToken" id="__RequestVerificationToken" value="prototype-token">
+
+<div class="mc-toolbar" aria-label="Comparison controls">
+  <strong>Milestones</strong>
+  <label>Panel width
+    <select id="mc-width">
+      <option value="560px" selected>Half (as on the page)</option>
+      <option value="420px">Narrow</option>
+      <option value="760px">Wide</option>
+    </select>
+  </label>
+  <button type="button" id="mc-saves" aria-pressed="false">Saves: succeed</button>
+  <button type="button" id="mc-reset">Reset all</button>
+  <button type="button" class="mc-mode" id="mc-mode" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="mc-stage" id="mc-stage">
+
+  <section class="mc-option" aria-labelledby="mc-theme-title">
+    <h2 id="mc-theme-title">6. In the theme</h2>
+    <ul>
+      <li>Milestones are undated lifecycle stages; the bar shows progress, the line under it the next stage.</li>
+      <li>The status icon opens the status menu; a completed stage slides out. The pencil opens the stage.</li>
+      <li>The <i class="ti ti-arrows-sort" aria-hidden="true"></i> toggle in the heading reorders them: drag a handle, or focus one and use the arrow keys.</li>
+    </ul>
+    <div class="ContentItemContainer"><div class="us-agreement-milestones"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[flag]] Milestones</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-mc-template="Agreement-Milestones-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+  <section class="mc-option" aria-labelledby="mc-tasks-title">
+    <h2 id="mc-tasks-title">7. With tasks linked to each stage (planned)</h2>
+    <ul>
+      <li>Each stage says how far its tasks have got, and how many are overdue; the in-progress segment of the bar fills with them.</li>
+      <li>Click a stage to open its tasks; tick them there. Done tasks group after the open ones.</li>
+      <li>Tick the last open task and the stage offers to complete itself; the status menu warns when tasks are still open.</li>
+      <li>Add a task at the foot of the list: type and press Enter. Each task’s pencil opens it in full.</li>
+    </ul>
+    <div class="ContentItemContainer"><div class="us-agreement-milestones us-milestones--tasks"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[flag]] Milestones</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" data-mc-template="Agreement-Milestones-Tasks-Query-Template.html"></div></div></div>
+    </div></div></div>
+  </section>
+
+</main>
+
+<div class="mc-toast" id="mc-toast" role="status" aria-live="polite"></div>
+
+<script>
+  'use strict';
+
+  // ── Page context, as the agreement page's URL gives it ─────────
+  const pageUrl = new URL(location.href);
+  if (!pageUrl.searchParams.get('AgreementID')) {
+    pageUrl.searchParams.set('AgreementID', 'A107');
+    pageUrl.searchParams.set('AgreementNum', '123');
+    try { history.replaceState(null, '', pageUrl); } catch (error) { /* optional */ }
+  }
+  window.gWebsiteKey = '44d4896b-1260-4b32-904e-9f9b4778fd68';
+
+  // Sample milestones (fields as the Milestones IQA selects them; option 7
+  // also reads the task counts).
+  const MILESTONES = [
+    {Ordinal: '637', Note: 'Form bargaining committee', TaskStatus: 'Complete', Deadline: '', TasksTotal: '2', TasksDone: '2', TasksOverdue: '0'},
+    {Ordinal: '636', Note: 'Initial member survey', TaskStatus: 'Complete', Deadline: '02/04/2026', TasksTotal: '1', TasksDone: '1', TasksOverdue: '0'},
+    {Ordinal: '617', Note: 'First round of negotiations', TaskStatus: 'Complete', Deadline: '21/05/2026', TasksTotal: '3', TasksDone: '3', TasksOverdue: '0'},
+    {Ordinal: '773', Note: 'Second round of negotiations', TaskStatus: 'In Progress', Deadline: '30/10/2026', TasksTotal: '5', TasksDone: '2', TasksOverdue: '1'},
+    {Ordinal: '774', Note: 'Members\' ballot', TaskStatus: 'Not Complete', Deadline: '20/11/2026', TasksTotal: '3', TasksDone: '0', TasksOverdue: '0'},
+    {Ordinal: '775', Note: 'Lodge with Fair Work', TaskStatus: 'Not Complete', Deadline: '', TasksTotal: '0', TasksDone: '0', TasksOverdue: '0'}
+  ];
+
+  // Option 7: each stage's tasks, as the Milestone Tasks IQA would return
+  // them for its MilestoneOrdinal filter.
+  const STAGE_TASKS = {
+    637: [
+      {Ordinal: '601', Note: 'Call for committee nominations', Done: '1', AssignedTo: 'Mary O\'Conner', Deadline: '03/02/2026'},
+      {Ordinal: '602', Note: 'Confirm committee members', Done: '1', AssignedTo: 'Mary O\'Conner', Deadline: '17/02/2026'}
+    ],
+    636: [
+      {Ordinal: '620', Note: 'Send survey to members', Done: '1', AssignedTo: '', Deadline: '22/05/2026'}
+    ],
+    617: [
+      {Ordinal: '611', Note: 'Log the union\'s claim', Done: '1', AssignedTo: 'Alicia Miller', Deadline: ''},
+      {Ordinal: '612', Note: 'Set the bargaining dates', Done: '1', AssignedTo: 'Dani Sundara', Deadline: ''},
+      {Ordinal: '613', Note: 'Record the first-round outcomes', Done: '1', AssignedTo: 'Mary O\'Conner', Deadline: '21/05/2026'}
+    ],
+    773: [
+      {Ordinal: '801', Note: 'Circulate the employer\'s revised offer', Done: '1', AssignedTo: 'Mary O\'Conner', Deadline: '02/10/2026'},
+      {Ordinal: '802', Note: 'Brief the bargaining committee', Done: '1', AssignedTo: 'Dani Sundara', Deadline: '05/10/2026'},
+      {Ordinal: '811', Note: 'Send draft agreement to the bargaining committee', Done: '0', AssignedTo: 'Mary O\'Conner', Deadline: '28/09/2026'},
+      {Ordinal: '803', Note: 'Cost the shift penalty claim', Done: '0', AssignedTo: 'Alicia Miller', Deadline: '14/10/2026'},
+      {Ordinal: '804', Note: 'Update members on round two', Done: '0', AssignedTo: 'Dani Sundara', Deadline: '20/10/2026'}
+    ],
+    774: [
+      {Ordinal: '812', Note: 'Book venue for the members\' ballot meeting', Done: '0', AssignedTo: 'Dani Sundara', Deadline: '14/10/2026'},
+      {Ordinal: '813', Note: 'Confirm Fair Work lodgement requirements', Done: '0', AssignedTo: '', Deadline: ''},
+      {Ordinal: '814', Note: 'Draft the ballot notice', Done: '0', AssignedTo: 'Alicia Miller', Deadline: ''}
+    ],
+    775: []
+  };
+  let nextTask = 900;
+
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
+    ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char]);
+
+  function fill(template, row) {
+    return template.replace(/\{#query\.([A-Za-z0-9_-]+)\}/g, (_, field) => {
+      if (!(field in row)) throw new Error('Sample row has no ' + field + ' — the IQA must select it.');
+      return escapeHtml(row[field]);
+    });
+  }
+
+  const nativeFetch = window.fetch.bind(window);
+  const templates = new Map();
+
+  async function render(set) {
+    const name = set.getAttribute('data-mc-template');
+    if (!templates.has(name)) {
+      const response = await nativeFetch('templates/' + name, {cache: 'no-cache'});
+      if (!response.ok) throw new Error('No template ' + name);
+      templates.set(name, (await response.text()).replace(/^\s*<!--[\s\S]*?-->\s*/, ''));
+    }
+    set.innerHTML = MILESTONES.map(row =>
+      `<section data-item="milestone-${row.Ordinal}"><div class="QueryTemplateItem">${fill(templates.get(name), row)}</div></section>`).join('');
+  }
+
+  const renderAll = () => Promise.all([...document.querySelectorAll('[data-mc-template]')].map(render));
+
+  // ── Offline answers: the CloudToolz base URL, the ZenToken and the save ──
+  const cloudToolz = 'https://cloudtoolz.example';
+  let savesFail = false;
+  const reply = (data, status = 200, delay = 150) => new Promise(resolve => setTimeout(() => resolve({
+    ok: status < 400, status, json: async () => data, text: async () => JSON.stringify(data)
+  }), delay));
+
+  window.fetch = async (input, init = {}) => {
+    const target = new URL(typeof input === 'string' ? input : input.url, location.href);
+    if (target.pathname === '/api/query' && (target.searchParams.get('QueryName') || '').endsWith('/CloudToolzUrl')) {
+      return reply({Count: 1, TotalCount: 1, Items: {$values: [{Description: cloudToolz + '/'}]}});
+    }
+    if (target.pathname === '/api/query' && (target.searchParams.get('QueryName') || '').endsWith('/Milestone Tasks')) {
+      const tasks = STAGE_TASKS[target.searchParams.get('MilestoneOrdinal')] || [];
+      return reply({Count: tasks.length, TotalCount: tasks.length, Items: {$values: tasks}}, 200, 450);
+    }
+    if (target.pathname === '/api/ZenTokens') return reply({});
+    if (target.origin === cloudToolz) {
+      if (savesFail) return reply({}, 500, 700);
+      const body = JSON.parse(init.body || '{}');
+      if (target.pathname === '/ca/quick-add-task') {
+        toast('Added “' + body.Note + '” to stage ' + body.MilestoneOrdinal + ' through CloudToolz (offline sample).');
+        return reply({Ordinal: String(++nextTask)}, 200, 700);
+      }
+      const what = body.Milestones ? 'the order (' + body.Milestones.map(item => item.Ordinal).join(', ') + ')' : body.Action;
+      toast('Saved ' + what + ' through CloudToolz ' + target.pathname + ' (offline sample).');
+      return reply({}, 200, 700);
+    }
+    return nativeFetch(input, init);
+  };
+
+  // The native popup: arguments as the theme's popup actions pass them.
+  // The close callback is not run, so the panels keep their sample rows.
+  window.ShowDialog_NoReturnValue = (href, args, width, height, title) => {
+    const path = new URL(href, location.href);
+    toast(`Would open “${title}”: ${path.pathname}${path.search}`);
+  };
+
+  function toast(message) {
+    const node = document.getElementById('mc-toast');
+    node.textContent = message;
+    node.classList.add('is-visible');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => node.classList.remove('is-visible'), 3200);
+  }
+
+  // ── Toolbar ──────────────────────────────────────────────────────
+
+  document.getElementById('mc-width').addEventListener('change', event => {
+    document.getElementById('mc-stage').style.setProperty('--mc-panel', event.target.value);
+  });
+
+  document.getElementById('mc-saves').addEventListener('click', event => {
+    savesFail = !savesFail;
+    event.currentTarget.setAttribute('aria-pressed', String(savesFail));
+    event.currentTarget.textContent = savesFail ? 'Saves: fail' : 'Saves: succeed';
+  });
+
+  document.getElementById('mc-reset').addEventListener('click', () => renderAll().catch(showServeHint));
+
+  // The theme's own light/dark switch (US-APPEARANCE), as the taskbar uses.
+  function showColorScheme() {
+    const button = document.getElementById('mc-mode');
+    const dark = window.UnionSuiteAppearance?.getState().scheme === 'dark';
+    button.setAttribute('aria-pressed', String(dark));
+    button.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+  }
+
+  document.getElementById('mc-mode').addEventListener('click', () => {
+    window.UnionSuiteAppearance?.toggle();
+    showColorScheme();
+  });
+  addEventListener('load', showColorScheme);
+
+  function showServeHint() {
+    if (document.querySelector('.mc-hint')) return;
+    const hint = document.createElement('p');
+    hint.className = 'mc-hint';
+    hint.textContent = 'This page reads the milestone templates, so it needs serving, not opening from disk: serve the project root and open http://localhost:8778/prototypes/wip/agreement-page/milestones-compare.html.';
+    document.getElementById('mc-stage').prepend(hint);
+  }
+
+  if (location.protocol === 'file:') showServeHint();
+  else renderAll().catch(showServeHint);
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="milestone-tasks.candidate.js"></script>
+</body>
+</html>

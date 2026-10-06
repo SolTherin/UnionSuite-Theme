@@ -32,12 +32,12 @@
       {Ordinal: '762', Note: 'Email members about agreement', TAskCheckCSS: 'done', TaskStatusCSS: 'actioned', Deadline: '31/07/2026', OverdueText: '', AssignedTo: 'Alex Keaton', PriorityBadge: ''}
     ],
     milestones: [
-      {Ordinal: '637', Note: 'Form bargaining committee', StatusCSS: 'done', Deadline: '', Status: 'Completed'},
-      {Ordinal: '636', Note: 'Initial member survey', StatusCSS: 'done', Deadline: '', Status: 'Completed'},
-      {Ordinal: '617', Note: 'First round of negotiations', StatusCSS: 'done', Deadline: '21/05/2026', Status: 'Completed'},
-      {Ordinal: '773', Note: 'Second round of negotiations', StatusCSS: 'current', Deadline: '30/10/2026', Status: 'In progress'},
-      {Ordinal: '774', Note: 'Members\' ballot', StatusCSS: 'future', Deadline: '20/11/2026', Status: 'Outstanding'},
-      {Ordinal: '775', Note: 'Lodge with Fair Work', StatusCSS: 'future', Deadline: '', Status: 'Outstanding'}
+      {Ordinal: '637', Note: 'Form bargaining committee', TaskStatus: 'Complete', StatusCSS: 'done', Deadline: '', Status: 'Completed'},
+      {Ordinal: '636', Note: 'Initial member survey', TaskStatus: 'Complete', StatusCSS: 'done', Deadline: '', Status: 'Completed'},
+      {Ordinal: '617', Note: 'First round of negotiations', TaskStatus: 'Complete', StatusCSS: 'done', Deadline: '21/05/2026', Status: 'Completed'},
+      {Ordinal: '773', Note: 'Second round of negotiations', TaskStatus: 'In Progress', StatusCSS: 'current', Deadline: '30/10/2026', Status: 'In progress'},
+      {Ordinal: '774', Note: 'Members\' ballot', TaskStatus: 'Not Complete', StatusCSS: 'future', Deadline: '20/11/2026', Status: 'Outstanding'},
+      {Ordinal: '775', Note: 'Lodge with Fair Work', TaskStatus: 'Not Complete', StatusCSS: 'future', Deadline: '', Status: 'Outstanding'}
     ],
     // Contacts IQA (option 7, settled 3 October 2026): sorted by group
     // order, the Lead first, then name. Group order and tone come from the

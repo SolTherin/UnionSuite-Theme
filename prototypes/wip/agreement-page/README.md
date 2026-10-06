@@ -65,6 +65,7 @@ it would open; its close callback runs, so the in-place refresh is exercised.
 | `recipients-compare.html` | Who the email goes to: five options for the alert at the top of the send page (owner, 5 October 2026). Samples for the SBU filter, the whole agreement, one contact, no match, a failed load and after the send. Decided (owner, 5 October 2026): option 4, counts and table, with the table capped at 260px and scrolling under a fixed header, and "Will receive" as quiet text so only problems carry a red badge; built into the theme as `US-SEND-RECIPIENTS` (zUnionSuite.css / .js, usage guide 06h); the page holds only `<div class="us-send-recipients"></div>` (`templates/Send-Email-Recipients-Content-HTML.html`). |
 | `coverage-compare.html` | Coverage rules comparison for the Details tab (decision 15, decided 4 October 2026: option 2, now in the theme; the page loads the theme alone and keeps option 1, the current grid, beside it; options 3 and 4 retired): the current grid, then rule groups, sentences and a grouped table on one template, `templates/Agreement-Coverage-Rules-Query-Template.html`, with `coverage.candidate.css` / `.js`; the covered records (the existing IQA) once at the end. |
 | `changelog-compare.html` | Change history panel comparison for the Activity tab (decision 14, decided 4 October 2026: option 8): eight views from one sample. Options 2, 4, 5 and 8 use `changelog.candidate.css` / `.js` and `templates/Agreement-Changelog-Query-Template.html`. Options 6 (change-first timeline) and 7 (browse and inspect) use the comparison-only `changelog-explorations.css` / `.js`; these are research views, not installable components or author templates. |
+| `milestones-compare.html` | Milestones (decision 16, decided 7 October 2026: option 6, now in the theme as `US-MILESTONES` 2.0 and `US-MILESTONE-ORDER`; option 7 planned). Shows option 6 from the theme alone, through `templates/Agreement-Milestones-Query-Template.html`, and option 7, tasks linked to each stage, from the theme plus `milestone-tasks.candidate.css` / `.js` through `templates/Agreement-Milestones-Tasks-Query-Template.html` (`us-milestones--tasks`). Options 1 to 5 were retired from the page; decision 16 records them, and their candidate files and templates are archived in `archive/agreement-page-milestones/`. Panel width, failing saves and dark mode controls. Serve the project root. |
 
 Run `node prototypes/wip/agreement-page/build-task-rows-candidate.cjs --check`
 to confirm the task-rows candidate still matches the theme block.
@@ -119,6 +120,13 @@ the theme alone:
   and contact group colours).
 - Not promoted: the contacts roster (C3), which was not chosen, and the
   notes reading option (`notes-reading.candidate.*`).
+- Milestones, 7 October 2026 (decision 16, option 6): US-MILESTONES 2.0
+  and the new US-MILESTONE-ORDER in `zUnionSuite.js` / `.css`, the
+  `us-agreement-milestones` preset (adds `us-milestones--bar` and
+  `us-milestones--reorder`), and `agreements.edit-milestone` with the order
+  saver in `Scripts/ActionDefinitions.js`. Option 7 (tasks linked to
+  stages) is not promoted: `milestone-tasks.candidate.*` until tasks can be
+  linked in iMIS.
 
 Checked against the pre-promotion version in headless Edge: every tab of
 both layouts, light and dark, is pixel-identical, and the task tick,
@@ -165,6 +173,13 @@ guide (templates, field definitions and component sections).
    other agreements, so check that filter on Tasks especially.
 6. Remove the anchor Content iParts, `ciIQACSS`, `ciIQAJS`, the `RawData` and
    `RawTemplate` iParts and the `#data-div` zone.
+7. Milestones (7 October 2026): paste the new
+   `templates/Agreement-Milestones-Query-Template.html` (status icon, plain
+   title, pencil; no date). The theme still handles the earlier template, so
+   the theme can go live first. Add a Sequence number to each milestone and
+   sort the Milestones IQA by Sequence then Ordinal; build CloudToolz
+   `/ca/reorder-milestones` (AgreementID and each milestone's Ordinal with
+   its Sequence) for Save order.
 
 ## Open decisions
 
@@ -708,6 +723,134 @@ guide (templates, field definitions and component sections).
       (the flow runs only Equals and Not Equals).
     - **Refresh.** Update coverage refreshes the rules panel on close;
       the covered records panel needs refreshing too.
+16. **Milestone row** — decided (owner, 7 October 2026): option 6, in the
+    theme the same day; option 7 (tasks linked to stages) is planned until
+    tasks can be linked to milestones in iMIS (TODO.md). In the theme:
+    `US-MILESTONES` 2.0 (zUnionSuite.js / .css): the status icon and menu
+    (in the term status menu's look), the status as text in its tone with
+    the In Progress glow, a plain title, the segmented bar
+    (`us-milestones--bar`) with "Next: …" and rows and segments lighting
+    each other, the completed row's exit, and `UnionSuiteMilestones.setStatus`
+    for other controls; rows from the earlier template (dot, title link,
+    select) and lists without the bar (the rail) still work.
+    `US-MILESTONE-ORDER` (`us-milestones--reorder`): the Reorder toggle,
+    drag and keyboard moves, Save order and Cancel; ActionDefinitions.js
+    saves through the proposed `/ca/reorder-milestones`
+    (`UnionSuiteAgreements.saveMilestoneOrder`) and adds
+    `agreements.edit-milestone`. The `us-agreement-milestones` preset adds
+    both modifiers. Option 7's task fill on the bar and "n tasks still
+    open" note stay in `milestone-tasks.candidate.js`, not the theme.
+    History: edits across the
+    page become a pencil at the end of the row, and task, milestone and
+    meeting titles lose their links. For milestones the owner proposed
+    moving the status select to the icon at the start of the row, as a
+    term's status is. `milestones-compare.html` shows the current row
+    and two proposals. Option 2: a 24px status icon (empty circle Not
+    Complete, half-filled In Progress, tick Complete, in the rail's
+    colours) opening a menu of the three TaskStatus values in the term
+    status menu's look; the status in words as a badge beside the date,
+    so it is not shown by shape and colour alone. Owner, 6 October 2026:
+    the icons and the rail's circles now say the same thing twice.
+    Option 3 (owner's suggestion): keep the small dot and make the rail's
+    nodes the control; the menu names the milestone, pointing at a node
+    lights its row and the reverse, completed milestones can be reopened
+    from the rail, and only In Progress and Complete get a badge. The
+    owner prefers option 2's control beside its details, so two other
+    ways to show progress keep option 2's rows. Option 4
+    (`us-milestones--bar`): a 6px bar, one segment per milestone coloured
+    by status, with "Next: <milestone> · <date>" under it; pointing at a
+    segment names that milestone and lights its row; "Show completed"
+    stays in the heading. Owner, 6 October 2026, focusing on option 4:
+    the status is plain text in its tone, then "·" and the date, as a
+    term's is (no badge); the In Progress icon keeps the rail's glow (a
+    3px accent ring); and a completed milestone leaves as a completed
+    task does, sliding out and then closing its space, before the
+    completed filter hides it (focus moves to the next row's icon; a
+    failed save leaves the row). The theme's milestones had no exit, so
+    the current select also drops a completed row at once. The bar is
+    8px ("a bit thicker", same day).
+    Option 6 (owner, 6 October 2026: milestones are broad lifecycle
+    stages, set up without a date; tasks will be linked to them later):
+    option 4 without dates, and a Reorder toggle (`ti-arrows-sort`)
+    beside "Show completed". Reordering shows every stage, completed or
+    not, swaps each pencil for a drag handle and opens a bar with Cancel
+    and Save order; drag a handle (mouse or touch) or focus one and use
+    the arrow keys (Home, End), each move announced; the progress bar
+    follows the order. As the IQA reorder lists do (owner, same day), the
+    held row is a touch see-through (80%) with a focus-coloured edge, and
+    its place in the list is a dashed placeholder; completed stages lose
+    their strike-through while reordering. Each row's tile reaches 4px
+    past it, leaving a 4px gap between rows, and each bar segment belongs
+    to its milestone, so it slides along the bar as the rows move. The toggle will not discard a changed order (it
+    asks for Save or Cancel); statuses, edits, "Show completed" and Add
+    milestone wait while reordering; a failed save keeps the new order
+    and says so. Needed in iMIS: a Sequence on each milestone note, the
+    IQA sorted by Sequence then Ordinal (no sequence sorts last), and a
+    CloudToolz endpoint for the order (proposed `/ca/reorder-milestones`:
+    AgreementID and each Ordinal with its Sequence;
+    `UnionSuiteMilestoneOrder.defineSaver` stands in). Open: new
+    milestones' Sequence (proposed: last), and the line under the bar
+    ("Next: …") now that stages have no date.
+    Option 7 (owner, 6 October 2026: "explore linking tasks and
+    milestones"): option 6, and each stage says how far its tasks have
+    got ("In Progress · 2 of 5 tasks"); the in-progress bar segment
+    fills that far (solid, then a paler accent; the fill animates).
+    Clicking a stage (anywhere but its status icon and pencil; a
+    chevron turns) opens its tasks under it, hanging from a thin line:
+    a tick box, the task, its assignee and due date. Ticking saves
+    through `/ca/complete-task` as the Tasks panel does, and the counts
+    and bar follow. The foot of the list adds a task to the stage: type,
+    Enter (Add shows once there is text; Escape clears); the task shows
+    at once and saves, and a failed add takes it away and puts the text
+    back. Reordering closes the stages. Needed in iMIS (proposed): a
+    MilestoneOrdinal on each task note; TasksTotal and TasksDone in the
+    Milestones IQA; a Milestone Tasks IQA with named filter
+    MilestoneOrdinal returning Ordinal, Note, Done, AssignedTo and
+    Deadline (default path `$/_i4u_/Core/CA/v2/Milestone Tasks`,
+    overridable with `data-us-milestone-tasks-query`); and CloudToolz
+    `/ca/quick-add-task` (AgreementID, MilestoneOrdinal, Note; answers
+    the new Ordinal).
+    Added to option 7 (owner, 6 October 2026):
+    - When the last open task is ticked, the list offers "All tasks
+      done. Complete stage"; it sets the stage Complete as the status
+      menu does (`UnionSuiteMilestones.setStatus`, in the theme). Never automatic.
+    - The status menu says "n tasks still open" under Complete for a
+      stage with open tasks: a nudge, not a block.
+    - No stage opens by itself (owner, same day: an auto-opened In
+      Progress stage was tried and dropped, since the full Tasks panel
+      sits beside Milestones on the page).
+    - A task past its due date says "Overdue" in red after its date, and
+      the stage adds "· 1 overdue" (Milestones IQA: `TasksOverdue`).
+    - Each task has a pencil, shown on hover or focus (always on touch
+      screens): `agreements.edit-task`, the task in NoteDetails
+      (`Task=true`); closing it reloads the stage's tasks. This is the
+      `agreements.preview-task` eye becoming a pencil, as agreed for the
+      Tasks panel.
+    - Open tasks come first; done ones are grouped after them behind
+      "n done" (Show / Hide; folded from three). A ticked task slides
+      into the done group, or folds into it when the group is shut.
+    - Opening a stage with no tasks puts the cursor in the quick add.
+    Planned, not built (owner, 6 October 2026: wait until tasks are
+    linked to milestones in iMIS):
+    - Keep the Milestones and Tasks panels in step: a task ticked in one
+      refreshes the other.
+    - Show each task's stage on the Tasks panel, with a stage filter.
+    - Give existing tasks a way into a stage: a Stage field on the task
+      form (NoteDetails), and later a "Move to stage" action.
+    Option 5 (`us-milestones--stepper`, iPart
+    classes listed without the section preset so the completed filter
+    is left out): the status icons joined by a line, green through
+    completed steps; completed milestones fold into a "n completed"
+    summary step at the top whose Show opens them in place; a milestone
+    being completed stays until its save settles, then folds in.
+    Options 2 to 5 have a plain title and `agreements.edit-milestone`
+    (the `NoteDetails.aspx?Milestones=true` popup the title link opens
+    today) as the pencil. Saving and the completion effect are
+    unchanged. Promoting any of them would share one status menu between
+    terms and milestones. Found while building it: a
+    completed milestone was hidden under its own effect before the save
+    settled; the completed filter now skips a milestone while it saves
+    (`UnionSuiteQueryStates` in zUnionSuite.js), for the select as well.
 
 ## Later (after MVP)
 

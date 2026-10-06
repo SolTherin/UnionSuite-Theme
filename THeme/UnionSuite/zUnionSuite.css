@@ -19192,12 +19192,20 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 /* US-TASK-ROWS:END */
 
-/* US-MILESTONES:START — us-milestones. A progress rail above the list (built
-   by US-MILESTONES JS from the rows), then one row per milestone: status dot,
-   title, date and status select. data-us-milestone-status holds the
-   TaskStatus (Not Complete, In Progress, Complete; matched ignoring case).
-   Completed rows carry data-us-task-completed, so us-task-completed-filter
-   hides them until "Show completed" is pressed. */
+/* US-MILESTONES:START — us-milestones. Progress above the list (built by
+   US-MILESTONES JS from the rows), then one row per milestone (stage).
+   With us-milestones--bar (in the us-agreement-milestones preset) progress
+   is a segmented bar with the next milestone named under it; without it,
+   the numbered rail. A row is a status icon (us-milestone__status-button)
+   that opens the status menu, the title, the status in words and the
+   pencil; rows from the earlier template have a dot, a title link, a date
+   and a status select. data-us-milestone-status holds the TaskStatus (Not
+   Complete, In Progress, Complete; matched ignoring case). Completed rows
+   carry data-us-task-completed, so us-task-completed-filter hides them
+   until "Show completed" is pressed. Reordering (us-milestones--reorder)
+   follows, as US-MILESTONE-ORDER. */
+
+/* ── The rail (without us-milestones--bar) ─────────────────────── */
 
 .us-milestones__rail {
   --milestone-node: 28px;
@@ -19293,6 +19301,69 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   -webkit-line-clamp: 2;
 }
 
+/* ── The bar (us-milestones--bar) ──────────────────────────────── */
+
+.us-milestones__bar {
+  margin: 0 0 var(--space-3);
+  padding: 2px 0 var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.us-milestones__segments {
+  display: flex;
+  gap: 3px;
+}
+
+/* An 8px segment per milestone, with an invisible 4px margin above and
+   below so the pointer finds it easily. */
+.us-milestones__segment {
+  flex: 1 1 0;
+  box-sizing: content-box;
+  height: 8px;
+  border-block: 4px solid transparent;
+  background: var(--border-strong);
+  background-clip: content-box;
+  transition: background-color .2s, transform .15s;
+}
+
+.us-milestones__segment:first-child {
+  border-start-start-radius: var(--radius-pill);
+  border-end-start-radius: var(--radius-pill);
+}
+
+.us-milestones__segment:last-child {
+  border-start-end-radius: var(--radius-pill);
+  border-end-end-radius: var(--radius-pill);
+}
+
+.us-milestones__segment[data-us-milestone-status="In Progress" i] {
+  background-color: var(--accent);
+}
+
+.us-milestones__segment[data-us-milestone-status="Complete" i] {
+  background-color: var(--success-fill);
+}
+
+.us-milestones__segment[data-us-milestone-linked] {
+  transform: scaleY(1.4);
+}
+
+.us-milestones__next {
+  overflow: hidden;
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-milestones__next strong {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+/* ── The rows ──────────────────────────────────────────────────── */
+
 .us-milestone {
   display: flex;
   align-items: center;
@@ -19303,6 +19374,106 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   --task-confetti-3: var(--success);
 }
 
+/* A segment and its row light each other. */
+.us-milestones--bar .us-milestone {
+  border-radius: var(--radius-sm);
+  transition: background-color .15s, box-shadow .15s;
+}
+
+.us-milestones--bar .us-milestone[data-us-milestone-linked] {
+  background: var(--bg-sunken);
+  box-shadow: 0 0 0 4px var(--bg-sunken);
+}
+
+/* Status tone and icon: an empty circle, a half-filled circle or a tick,
+   in the bar's colours. One definition per status, shared by the row's
+   icon and words and the status menu. The menu takes the term status
+   menu's look (us-term-status-menu), so its items hand the tone and icon
+   to that menu's variables. */
+.us-milestone,
+.us-milestone-status-menu .us-term-status-menu__item {
+  --us-milestone-tone: var(--text-muted);
+  --us-milestone-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/></svg>");
+}
+
+.us-milestone[data-us-milestone-status="In Progress" i],
+.us-milestone-status-menu .us-term-status-menu__item[data-us-milestone-status="In Progress" i] {
+  --us-milestone-tone: var(--accent);
+  --us-milestone-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M12 3a9 9 0 0 1 0 18z' fill='black'/></svg>");
+}
+
+.us-milestone[data-us-milestone-status="Complete" i],
+.us-milestone-status-menu .us-term-status-menu__item[data-us-milestone-status="Complete" i] {
+  --us-milestone-tone: var(--success);
+  --us-milestone-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='m8.5 12 2.5 2.5 4.5-5'/></svg>");
+}
+
+/* Two classes on the menu outrank the term status defaults. */
+.us-milestone-status-menu.us-term-status-menu .us-term-status-menu__item {
+  --us-term-tone: var(--us-milestone-tone);
+  --us-term-icon: var(--us-milestone-icon);
+}
+
+/* The status icon: a button opening the status menu, sized as a term's. */
+.us-milestones .us-milestone__status-button {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .15s, transform .15s;
+}
+
+.us-milestones .us-milestone__status-button::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  background: var(--us-milestone-tone);
+  -webkit-mask: var(--us-milestone-icon) center / contain no-repeat;
+  mask: var(--us-milestone-icon) center / contain no-repeat;
+  transition: background-color .2s;
+}
+
+/* In Progress keeps the rail's glow: a soft ring around the icon. */
+.us-milestones .us-milestone__status-button::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px transparent;
+  pointer-events: none;
+  transition: box-shadow .2s;
+}
+
+.us-milestone[data-us-milestone-status="In Progress" i] .us-milestone__status-button::after {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.us-milestones .us-milestone__status-button:is(:hover, [aria-expanded="true"]) {
+  background: color-mix(in srgb, var(--us-milestone-tone) 14%, transparent);
+}
+
+.us-milestones .us-milestone__status-button:active {
+  transform: scale(.92);
+}
+
+.us-milestones .us-milestone__status-button:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.us-milestone[aria-busy="true"] .us-milestone__status-button {
+  cursor: progress;
+}
+
+/* The earlier template's dot (it only shows the status). */
 .us-milestone__dot {
   flex: none;
   width: 10px;
@@ -19327,8 +19498,9 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   min-width: 0;
 }
 
-/* The title is the open action, drawn by the action runtime in link mode
-   (us-command); keep it a left-aligned title, as task titles are. */
+/* The title. In the earlier template it is the open action, drawn by the
+   action runtime in link mode (us-command); now it is plain text and the
+   pencil opens the milestone. */
 .us-milestone .us-milestone__title {
   justify-content: flex-start;
   overflow-wrap: anywhere;
@@ -19339,13 +19511,43 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   text-decoration: none;
 }
 
-.us-milestone .us-milestone__title:hover {
+.us-milestone a.us-milestone__title:hover {
   text-decoration: underline;
 }
 
 .us-milestone[data-us-milestone-status="Complete" i] .us-milestone__title {
   color: var(--text-muted);
   text-decoration: line-through;
+}
+
+/* The status in words as a term's is (US-TERMS): plain text in the status
+   tone, then a dot before the date when there is one. */
+.us-milestone__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-1);
+  margin-top: 2px;
+}
+
+.us-milestone__state {
+  color: var(--us-milestone-tone);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 18px;
+  white-space: nowrap;
+  transition: color .2s;
+}
+
+.us-milestone__state:empty {
+  display: none;
+}
+
+.us-milestone__state:not(:empty) + .us-milestone__date:not(:empty)::before {
+  content: "·";
+  margin-inline-end: var(--space-1);
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
 }
 
 .us-milestone__date {
@@ -19357,6 +19559,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   display: none;
 }
 
+/* The pencil stays at the end of the row. */
+.us-milestone > .us-action-agreements-edit-milestone {
+  flex: none;
+}
+
+/* The earlier template's status select. */
 .us-milestones .us-milestone__status {
   flex: none;
   width: auto;
@@ -19391,12 +19599,198 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .us-milestones__rail::after {
+  .us-milestones__rail::after,
+  .us-milestones__segment,
+  .us-milestones--bar .us-milestone,
+  .us-milestones .us-milestone__status-button,
+  .us-milestones .us-milestone__status-button::before,
+  .us-milestones .us-milestone__status-button::after,
+  .us-milestone__state {
     transition: none;
   }
 }
 
 /* US-MILESTONES:END */
+
+/* US-MILESTONE-ORDER:START — reordering milestones on a us-milestones--reorder
+   list (US-MILESTONE-ORDER JS). While data-us-milestones-reordering is on
+   the iPart wrapper, a bar above the list holds the hint, the
+   announcements and Cancel / Save order; each row sits on a tile with a
+   drag handle where its pencil was, and its status control steps back. */
+
+/* The heading toggle is a shared heading icon button, which sizes its
+   text to nothing; its icon is sized as the completed toggle's is. */
+.us-milestones__reorder-toggle > .ti {
+  font-size: 20px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* While reordering, "Show completed" and Add milestone wait (inert), and
+   look it. */
+.us-milestones--reorder[data-us-milestones-reordering] > .panel > .panel-heading [inert] {
+  opacity: .45;
+  transition: opacity .15s;
+}
+
+/* The bar above the list. */
+.us-milestones--reorder .us-milestones__reorder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+}
+
+.us-milestones--reorder .us-milestones__reorder-hint {
+  flex: 1 1 220px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* Announcements: read to screen readers, and shown for an error. */
+.us-milestones--reorder .us-milestones__reorder-status {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.us-milestones--reorder .us-milestones__reorder[data-us-error] .us-milestones__reorder-status {
+  position: static;
+  flex-basis: 100%;
+  order: 3;
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip: auto;
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  white-space: normal;
+}
+
+.us-milestones--reorder .us-milestones__reorder-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+/* Rows while reordering: each sits on a tile reaching 4px past it; rows
+   are 12px apart, so a 4px gap keeps the tiles apart. The pencil gives
+   way to the handle, the status control shows the status without taking
+   clicks, and completed stages lose their strike-through: here they are
+   just stages in a sequence. */
+.us-milestones--reorder {
+  --us-reorder-tile: 4px;
+}
+
+.us-milestones--reorder[data-us-milestones-reordering] .us-milestone {
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  box-shadow: 0 0 0 var(--us-reorder-tile) var(--bg-sunken);
+}
+
+.us-milestones--reorder[data-us-milestones-reordering] .us-milestone > .us-action-agreements-edit-milestone {
+  display: none;
+}
+
+.us-milestones--reorder[data-us-milestones-reordering] .us-milestone :is(.us-milestone__status-button, .us-milestone__status) {
+  opacity: .7;
+}
+
+.us-milestones--reorder[data-us-milestones-reordering] .us-milestone[data-us-milestone-status="Complete" i] .us-milestone__title {
+  text-decoration: none;
+}
+
+.us-milestones--reorder .us-milestone__handle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: grab;
+  touch-action: none;
+  animation: us-milestone-handle-in .18s cubic-bezier(.2, 0, 0, 1);
+  transition: background-color .15s, color .15s;
+}
+
+.us-milestones--reorder .us-milestone__handle:hover {
+  background: var(--bg-surface);
+  color: var(--text-strong);
+}
+
+.us-milestones--reorder .us-milestone__handle:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+  color: var(--text-strong);
+}
+
+@keyframes us-milestone-handle-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The row being dragged, as the IQA reorder lists draw it: its place in
+   the list is a dashed placeholder, and its content, a touch see-through
+   with a focus-coloured edge, follows the pointer above the others. */
+.us-milestones--reorder .QueryTemplateSet > [data-us-dragging] {
+  position: relative;
+  z-index: 2;
+}
+
+.us-milestones--reorder .QueryTemplateSet > [data-us-dragging]::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--us-reorder-tile) * -1);
+  box-sizing: border-box;
+  border: 2px dashed var(--border-focus);
+  border-radius: calc(var(--radius-sm) + var(--us-reorder-tile));
+  pointer-events: none;
+}
+
+.us-milestones--reorder .QueryTemplateSet > [data-us-dragging] > .QueryTemplateItem {
+  position: relative;
+  opacity: .8;
+}
+
+.us-milestones--reorder .QueryTemplateSet > [data-us-dragging] .us-milestone {
+  background: var(--bg-surface);
+  box-shadow:
+    0 0 0 var(--us-reorder-tile) var(--bg-surface),
+    0 0 0 calc(var(--us-reorder-tile) + 1px) var(--border-focus),
+    var(--shadow-lg);
+}
+
+[data-us-milestones-dragging],
+[data-us-milestones-dragging] * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-milestones--reorder .us-milestone__handle {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* US-MILESTONE-ORDER:END */
 
 /* US-TASKBAR-PIP:START */
 

@@ -1,0 +1,54 @@
+<!-- Agreement milestones, option 7 (owner, 6 October 2026): option 6 with
+     tasks linked to each milestone (stage). Clicking a stage opens its tasks
+     under it; a task is ticked there, and a new one is added at the foot of
+     the list, already linked to the stage.
+     Planned (owner, 7 October 2026): build once tasks can be linked to
+     milestones in iMIS. Option 6 is in the theme; this adds the tasks.
+     Query Template Display on the Milestones IQA.
+     iPart CSS class: us-agreement-milestones us-milestones--tasks
+       (add us-panel-fill when it shares a row)
+
+     Fields:
+     Ordinal (required)      note ordinal; saves the status and the order, edits
+                             the milestone and links its tasks
+     Note (required)         milestone (stage) name
+     TaskStatus (required)   Not Complete | In Progress | Complete
+     TasksTotal (required)   number of tasks linked to the stage; 0 when none
+     TasksDone (required)    how many of them are complete; 0 when none
+     TasksOverdue (required) how many open tasks are past their due date; 0 when
+                             none ("1 overdue" on the stage, in red)
+
+     Needed in iMIS (proposed):
+     - each task note records its stage: a MilestoneOrdinal on the note;
+     - the Milestones IQA counts them (TasksTotal, TasksDone, TasksOverdue)
+       and sorts on the stage Sequence (option 6);
+     - a Milestone Tasks IQA, named filter MilestoneOrdinal, returning
+       Ordinal, Note, Done (1 or 0), AssignedTo and Deadline; the stage's
+       tasks load from it through /api/query when the stage first opens.
+       Its path goes on the iPart wrapper or the page as
+       data-us-milestone-tasks-query when it differs from the default;
+     - a CloudToolz endpoint that adds a task to a stage (proposed
+       /ca/quick-add-task: AgreementID, MilestoneOrdinal, Note; answers the
+       new task's Ordinal). Ticking a task saves through /ca/complete-task,
+       as the Tasks panel does.
+
+     The theme's US-MILESTONES and US-MILESTONE-ORDER do the rest (status,
+     bar, reorder) and know nothing of tasks; the candidate adds the task
+     fill on the bar's in-progress segment and the open-task note in the
+     status menu. Candidate: milestone-tasks.candidate.css / .js; preview in
+     milestones-compare.html option 7. -->
+<div class="us-milestone" data-us-milestone-status="{#query.TaskStatus}" data-us-milestone-ordinal="{#query.Ordinal}"
+  data-us-milestone-tasks="{#query.TasksTotal}" data-us-milestone-tasks-done="{#query.TasksDone}"
+  data-us-milestone-tasks-overdue="{#query.TasksOverdue}" data-us-search="{#query.Note}">
+  <button type="button" class="us-milestone__status-button" aria-haspopup="menu" aria-expanded="false"
+    aria-label="Status: {#query.TaskStatus}. Change status" title="Change status"></button>
+  <button type="button" class="us-milestone__copy us-milestone__expand" aria-expanded="false">
+    <span class="us-milestone__title">{#query.Note}</span>
+    <span class="us-milestone__meta">
+      <span class="us-milestone__state" data-us-milestone-status="{#query.TaskStatus}">{#query.TaskStatus}</span>
+      <span class="us-milestone__tasks"></span>
+    </span>
+  </button>
+  <button type="button" class="us-action-agreements-edit-milestone" data-ordinal="{#query.Ordinal}"></button>
+  <span class="us-milestone__chevron" aria-hidden="true"></span>
+</div>

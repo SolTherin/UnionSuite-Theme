@@ -1,40 +1,50 @@
 <!-- Agreement milestones · Query Template Display on the existing Milestones IQA
-     ("Query Template - Manage Agreement - Milestones"), which also returns
-     TaskStatus (6 October 2026).
+     ("Query Template - Manage Agreement - Milestones").
+     Milestones are the broad stages of the agreement's lifecycle, set up
+     without a date (owner, 6 October 2026; milestones-compare.html option 6,
+     in the theme 7 October 2026).
      iPart CSS class: us-agreement-milestones (add us-panel-fill when it shares a row)
        Section preset in zUnionSuite.js, standing in for
-       us-query-template us-milestones us-task-completed-filter us-task-progress us-action-agreements-add-milestone
+       us-query-template us-milestones us-milestones--bar us-milestones--reorder
+       us-task-completed-filter us-task-progress us-action-agreements-add-milestone
      Native title: Milestones. Display in cards / columns: unchecked. Header blank.
      Footer: blank. The theme adds the card footer with the results line
      (us-task-progress); an existing <div class="us-query-footer"><span
      data-us-task-summary></span></div> is harmless and stays hidden.
      (as on Tasks: us-task-progress shows "x of y complete" in the heading and
      keeps the footer summary for screen readers only).
-     Rows per page: 30 (the progress rail shows the rows on the page).
+     Rows per page: 30 (the progress bar shows the rows on the page).
      No results: "No milestones yet."
 
-     Fields (aliases from the current template; Status is no longer
-     shown because the status select carries it):
-     Ordinal (required)      note ordinal; saves the status and opens the milestone
-     Note (required)         milestone title
-     TaskStatus (required)   Not Complete | In Progress | Complete (owner, 6 October
-                             2026; replaces StatusCSS, whose future | current | done
-                             the theme still reads); the select shows and saves it
-     Deadline                date text; blank hides it
+     Fields:
+     Ordinal (required)      note ordinal; saves the status and the order, and
+                             edits the milestone
+     Note (required)         milestone (stage) name
+     TaskStatus (required)   Not Complete | In Progress | Complete; the icon shows
+                             it, the words say it and the status menu saves it
 
-     The theme builds the progress rail from these rows. Choosing Complete plays
-     the task completion effect and saves through CloudToolz /ca/complete-task.
-     Replaces the old milestone-nodes rail, Milestone Log and status select CSS. -->
+     IQA change needed: a Sequence number on each milestone, the IQA sorted by
+     Sequence then Ordinal, so the list comes back in the saved order (a
+     milestone without one sorts last). The template does not show it: the
+     order of the rows is the order. Deadline is no longer used and can be
+     dropped from the IQA.
+
+     The theme builds the progress bar from these rows (US-MILESTONES). The
+     status icon opens the status menu; choosing Complete plays the task
+     completion effect, saves through CloudToolz /ca/complete-task, and the
+     row slides out. The pencil (agreements.edit-milestone) opens the
+     milestone in NoteDetails. The heading's Reorder toggle
+     (US-MILESTONE-ORDER) saves the order through the proposed CloudToolz
+     /ca/reorder-milestones (not built yet). -->
 <div class="us-milestone" data-us-milestone-status="{#query.TaskStatus}" data-us-milestone-ordinal="{#query.Ordinal}"
   data-us-search="{#query.Note}">
-  <span class="us-milestone__dot" aria-hidden="true"></span>
+  <button type="button" class="us-milestone__status-button" aria-haspopup="menu" aria-expanded="false"
+    aria-label="Status: {#query.TaskStatus}. Change status" title="Change status"></button>
   <span class="us-milestone__copy">
-    <a class="us-milestone__title us-action-agreements-view-milestone" href="#" data-ordinal="{#query.Ordinal}">{#query.Note}</a>
-    <span class="us-milestone__date">{#query.Deadline}</span>
+    <span class="us-milestone__title">{#query.Note}</span>
+    <span class="us-milestone__meta">
+      <span class="us-milestone__state" data-us-milestone-status="{#query.TaskStatus}">{#query.TaskStatus}</span>
+    </span>
   </span>
-  <select class="us-milestone__status" aria-label="Status: {#query.Note}">
-    <option value="Not Complete">Not Complete</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Complete">Complete</option>
-  </select>
+  <button type="button" class="us-action-agreements-edit-milestone" data-ordinal="{#query.Ordinal}"></button>
 </div>

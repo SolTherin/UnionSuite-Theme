@@ -1506,7 +1506,8 @@ SOFTWARE.
     'us-contact-methods': ['ContactDetailsIQA', 'us-action-member-add-contact-method'],
     // Agreement page panels (3 October 2026): each needs more than the field holds.
     'us-agreement-tasks': ['us-query-template', 'us-query-search', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-task'],
-    'us-agreement-milestones': ['us-query-template', 'us-milestones', 'us-task-completed-filter', 'us-task-progress', 'us-action-agreements-add-milestone'],
+    // Milestones show progress as a bar and can be reordered (owner, 7 October 2026).
+    'us-agreement-milestones': ['us-query-template', 'us-milestones', 'us-milestones--bar', 'us-milestones--reorder', 'us-task-completed-filter', 'us-task-progress', 'us-action-agreements-add-milestone'],
     'us-agreement-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-meeting'],
     'us-agreement-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-list-scroll', 'us-action-agreements-upload-attachment'],
     'us-agreement-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-note'],
@@ -13163,6 +13164,9 @@ SOFTWARE.
       task.removeAttribute('data-us-task-state');
     });
     scope.querySelectorAll('.us-milestone[data-us-milestone-status]').forEach(milestone => {
+      // A row whose status is saving keeps its place until the save settles
+      // (US-MILESTONES), so the completed filter does not hide it mid-effect.
+      if (milestone.hasAttribute('aria-busy')) return;
       // TaskStatus Complete, or done from an earlier template.
       set(milestone, /^(complete|done)$/i.test(milestone.getAttribute('data-us-milestone-status').trim()));
     });
@@ -13425,21 +13429,33 @@ SOFTWARE.
 })();
 /* US-TASK-PROGRESS:END */
 
-/* US-MILESTONES:START — progress rail and status select for us-milestones lists. */
+/* US-MILESTONES:START — progress, status and exit for us-milestones lists.
+   Milestones are the broad stages of an agreement's lifecycle (owner,
+   6 October 2026). Above the list, progress shows as a segmented bar
+   (us-milestones--bar, in the us-agreement-milestones preset) or, without
+   it, as the numbered rail. Each row's status icon (us-milestone__status-
+   button) opens a menu of the three statuses; rows from the earlier
+   template change it with their select. A completed row leaves as a
+   completed task does, then the completed filter hides it. Reordering is
+   US-MILESTONE-ORDER, below. */
 (function () {
   'use strict';
   if (window.UnionSuiteMilestones) return;
 
   const wrapperSelector = '.us-milestones';
   // A milestone's status is its TaskStatus (owner, 6 October 2026): the
-  // row's data-us-milestone-status, the select's option values and labels,
-  // and the Action CloudToolz /ca/complete-task saves are the same words.
-  // Earlier templates' StatusCSS values (future, overdue, current, done) are
-  // still read, and the row is rewritten in TaskStatus words.
+  // row's data-us-milestone-status, the menu's and select's values and the
+  // Action CloudToolz /ca/complete-task saves are the same words. Earlier
+  // templates' StatusCSS values (future, overdue, current, done) are still
+  // read, and the row is rewritten in TaskStatus words.
   const STATUSES = ['Not Complete', 'In Progress', 'Complete'];
   const LEGACY = {future: 'Not Complete', overdue: 'Not Complete', current: 'In Progress', done: 'Complete'};
   const COMPLETE = 'Complete';
+  const easing = 'cubic-bezier(.2, 0, 0, 1)';
   const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>';
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  let menu = null;
+  let owner = null;
 
   function normalise(value) {
     const text = String(value || '').trim().toLowerCase();
@@ -13447,18 +13463,23 @@ SOFTWARE.
   }
 
   const status = milestone => normalise(milestone.getAttribute('data-us-milestone-status'));
+  const barMode = wrapper => Boolean(wrapper?.classList.contains('us-milestones--bar'));
+  const titleOf = milestone => milestone.querySelector('.us-milestone__title')?.textContent.trim() || 'Milestone';
 
   function setOf(wrapper) {
     return wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
   }
 
+  const rowsOf = wrapper => [...(setOf(wrapper)?.querySelectorAll('.us-milestone') || [])];
+
+  // ── The rail (lists without us-milestones--bar) ──────────────────
   // The rail is a summary of every milestone, including completed ones the
   // filter hides, so it is built from all rows in result order.
   function renderRail(wrapper) {
     const set = setOf(wrapper);
     const body = set?.parentElement;
     if (!body) return;
-    const milestones = [...set.querySelectorAll('.us-milestone')];
+    const milestones = rowsOf(wrapper);
     let rail = body.querySelector(':scope > .us-milestones__rail');
     if (!milestones.length) {
       rail?.remove();
@@ -13476,7 +13497,7 @@ SOFTWARE.
     rail.style.setProperty('--milestones-progress', milestones.length > 1 && lastDone > 0 ? String(lastDone / (milestones.length - 1)) : '0');
     rail.replaceChildren(...milestones.map((milestone, index) => {
       const state = states[index];
-      const title = milestone.querySelector('.us-milestone__title')?.textContent.trim() || 'Milestone';
+      const title = titleOf(milestone);
       const node = document.createElement('li');
       node.className = 'us-milestones__node';
       node.setAttribute('data-us-milestone-status', state);
@@ -13498,6 +13519,106 @@ SOFTWARE.
     }));
   }
 
+  // ── The bar (us-milestones--bar) ─────────────────────────────────
+  // One segment per milestone, coloured by status, and a line under it
+  // naming the next milestone. Pointing at a segment names that milestone
+  // and lights its row (and a row lights its segment). Each segment
+  // belongs to its milestone, so a reorder slides it along the bar and a
+  // status change fades its colour.
+
+  const dateOf = milestone => milestone.querySelector('.us-milestone__date')?.textContent.trim() || '';
+
+  function nextOf(rows) {
+    return rows.find(row => status(row) === 'In Progress') || rows.find(row => status(row) !== COMPLETE) || null;
+  }
+
+  function writeLine(bar, milestone, pointed) {
+    const line = bar.querySelector('.us-milestones__next');
+    line.replaceChildren();
+    if (!milestone) {
+      line.textContent = 'All milestones complete';
+      return;
+    }
+    if (!pointed) line.append('Next: ');
+    const title = document.createElement('strong');
+    title.textContent = titleOf(milestone);
+    line.append(title);
+    if (pointed) line.append(' · ' + status(milestone));
+    if (dateOf(milestone)) line.append(' · ' + dateOf(milestone));
+  }
+
+  function renderBar(wrapper) {
+    const set = setOf(wrapper);
+    const body = set?.parentElement;
+    if (!body) return;
+    const rows = rowsOf(wrapper);
+    let bar = body.querySelector(':scope > .us-milestones__bar');
+    if (!rows.length) {
+      bar?.remove();
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'us-milestones__bar';
+      const segments = document.createElement('div');
+      segments.className = 'us-milestones__segments';
+      segments.setAttribute('role', 'img');
+      const line = document.createElement('p');
+      line.className = 'us-milestones__next';
+      bar.append(segments, line);
+      body.prepend(bar);
+    }
+    const segments = bar.querySelector('.us-milestones__segments');
+    const keyOf = (row, index) => row.getAttribute('data-us-milestone-ordinal') || 'row-' + index;
+    const existing = new Map([...segments.children].map(segment => [segment.getAttribute('data-us-milestone-key'), segment]));
+    const before = new Map([...existing.values()].map(segment => [segment, segment.getBoundingClientRect().left]));
+    const ordered = rows.map((row, index) => {
+      const key = keyOf(row, index);
+      let segment = existing.get(key);
+      existing.delete(key);
+      if (!segment) {
+        segment = document.createElement('span');
+        segment.className = 'us-milestones__segment';
+        segment.setAttribute('data-us-milestone-key', key);
+      }
+      segment.setAttribute('data-us-milestone-status', status(row));
+      segment.setAttribute('data-us-milestone-index', String(index));
+      return segment;
+    });
+    existing.forEach(segment => segment.remove());
+    if (ordered.some((segment, index) => segments.children[index] !== segment)) {
+      segments.append(...ordered);
+      if (!reducedMotion()) {
+        ordered.forEach(segment => {
+          if (!before.has(segment) || !segment.animate) return;
+          const delta = before.get(segment) - segment.getBoundingClientRect().left;
+          if (Math.abs(delta) >= 1) segment.animate([{transform: `translateX(${delta}px)`}, {transform: 'none'}], {duration: 200, easing});
+        });
+      }
+    }
+    const done = rows.filter(row => status(row) === COMPLETE).length;
+    const next = nextOf(rows);
+    segments.setAttribute('aria-label', 'Milestone progress: ' + done + ' of ' + rows.length + ' complete' + (next ? '. Next: ' + titleOf(next) : ''));
+    // Only a segment under the pointer renames the line; pointing at a row
+    // lights its segment but leaves the line on the next milestone.
+    const pointed = segments.matches(':hover') ? segments.querySelector('[data-us-milestone-linked]') : null;
+    writeLine(bar, pointed ? rows[Number(pointed.getAttribute('data-us-milestone-index'))] : next, Boolean(pointed));
+  }
+
+  function render(wrapper) {
+    const body = setOf(wrapper)?.parentElement;
+    if (!body) return;
+    if (barMode(wrapper)) {
+      body.querySelector(':scope > .us-milestones__rail')?.remove();
+      renderBar(wrapper);
+    } else {
+      body.querySelector(':scope > .us-milestones__bar')?.remove();
+      renderRail(wrapper);
+    }
+  }
+
+  // ── Showing a status ─────────────────────────────────────────────
+
   // The option for a status, whether the template's options carry the
   // TaskStatus words or the earlier StatusCSS values.
   function setSelect(select, state) {
@@ -13505,9 +13626,23 @@ SOFTWARE.
     if (option && !option.selected) option.selected = true;
   }
 
+  // The row's attribute drives the icon, the rail or bar and the completed
+  // filter; the status words, the icon's name and any select follow it.
+  function show(milestone, state) {
+    milestone.setAttribute('data-us-milestone-status', state);
+    const words = milestone.querySelector('.us-milestone__state');
+    if (words) {
+      words.setAttribute('data-us-milestone-status', state);
+      words.textContent = state;
+    }
+    milestone.querySelector('.us-milestone__status-button')?.setAttribute('aria-label', 'Status: ' + state + '. Change status');
+    const select = milestone.querySelector('.us-milestone__status');
+    if (select) setSelect(select, state);
+  }
+
   // Rows from an earlier template are rewritten in TaskStatus words, so the
   // stylesheet and the completed filter read one set of values.
-  function syncSelects(wrapper) {
+  function syncRows(wrapper) {
     wrapper.querySelectorAll('.us-milestone').forEach(milestone => {
       if (milestone.hasAttribute('aria-busy')) return;
       const state = status(milestone);
@@ -13520,16 +13655,9 @@ SOFTWARE.
   function syncAll() {
     document.querySelectorAll(wrapperSelector).forEach(wrapper => {
       if (wrapper.closest('.us-report-no-styling')) return;
-      syncSelects(wrapper);
-      renderRail(wrapper);
+      syncRows(wrapper);
+      render(wrapper);
     });
-  }
-
-  function apply(milestone, state) {
-    milestone.setAttribute('data-us-milestone-status', state);
-    window.UnionSuiteQueryStates?.refresh();
-    const wrapper = milestone.closest(wrapperSelector);
-    if (wrapper) renderRail(wrapper);
   }
 
   function reportFailure(milestone) {
@@ -13542,25 +13670,76 @@ SOFTWARE.
     setTimeout(() => message.remove(), 6000);
   }
 
-  async function change(select) {
-    const milestone = select.closest('.us-milestone');
-    const ordinal = (milestone?.getAttribute('data-us-milestone-ordinal') || '').trim();
+  // ── Leaving the list ─────────────────────────────────────────────
+  // A completed milestone the completed filter is about to hide leaves as a
+  // completed task does (US-TASK-ROWS): it slides out, then its space
+  // closes. The animations hold their end state until the filter has
+  // hidden the row, so it cannot flash back. Focus moves to the next row's
+  // status control first.
+
+  function leaving(milestone) {
+    const wrapper = milestone.closest(wrapperSelector);
+    const row = milestone.closest('.QueryTemplateSet > *');
+    if (!row || !wrapper?.classList.contains('us-task-completed-filter') || reducedMotion() || !milestone.animate) return false;
+    return !wrapper.querySelector('.us-task-completed-toggle[aria-pressed="true"]');
+  }
+
+  function moveFocus(row) {
+    if (!row.contains(document.activeElement)) return;
+    const rows = [...row.parentElement.children];
+    const index = rows.indexOf(row);
+    const next = [...rows.slice(index + 1), ...rows.slice(0, index).reverse()]
+      .find(node => node.getClientRects().length && !node.hasAttribute('data-us-query-search-hidden') &&
+        node.querySelector('.us-milestone__status-button, .us-milestone__status'));
+    next?.querySelector('.us-milestone__status-button, .us-milestone__status').focus({preventScroll: true});
+  }
+
+  async function leave(milestone) {
+    const row = milestone.closest('.QueryTemplateSet > *');
+    moveFocus(row);
+    row.setAttribute('data-us-task-exiting', '');
+    row.inert = true;
+    const slide = milestone.animate([{transform: 'translateX(0)', opacity: 1}, {transform: 'translateX(-105%)', opacity: 0}],
+      {duration: 450, easing: 'cubic-bezier(.4, 0, .2, 1)', fill: 'forwards'});
+    await slide.finished.catch(() => {});
+    const style = getComputedStyle(row);
+    const collapse = row.animate([
+      {height: row.getBoundingClientRect().height + 'px', marginBottom: style.marginBottom},
+      {height: '0px', marginBottom: '0px'}
+    ], {duration: 300, easing: 'ease-in-out', fill: 'forwards'});
+    await collapse.finished.catch(() => {});
+    return () => {
+      slide.cancel();
+      collapse.cancel();
+      row.removeAttribute('data-us-task-exiting');
+      row.inert = false;
+    };
+  }
+
+  async function whenHidden(row) {
+    for (let frame = 0; frame < 30 && row.getClientRects().length; frame++) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+  }
+
+  // ── Changing a status ────────────────────────────────────────────
+  // Optimistic, as tasks are: the icon, rail or bar and the effect change
+  // while the save is in flight, and a failed save puts the old status
+  // back. A completed row the filter will hide leaves once its effect has
+  // played and the save has settled.
+  async function change(milestone, next, trigger) {
     const previous = status(milestone);
-    const next = normalise(select.value);
-    if (!milestone || next === previous) return;
+    const ordinal = (milestone.getAttribute('data-us-milestone-ordinal') || '').trim();
+    if (!milestone || next === previous || milestone.getAttribute('aria-busy') === 'true') return;
     if (!/^\d+$/.test(ordinal)) {
-      setSelect(select, previous);
+      show(milestone, previous);
       reportFailure(milestone);
       return;
     }
     milestone.setAttribute('aria-busy', 'true');
-    // Optimistic, as tasks are: the effect plays while the save is in flight.
-    // A completed milestone stays in place until the save settles, then the
-    // completed filter hides it unless completed milestones are shown.
-    const celebration = next === COMPLETE ? window.UnionSuiteTaskRows?.celebrate?.(select) : null;
-    milestone.setAttribute('data-us-milestone-status', next);
-    const wrapper = milestone.closest(wrapperSelector);
-    if (wrapper) renderRail(wrapper);
+    show(milestone, next);
+    const celebration = next === COMPLETE && trigger ? window.UnionSuiteTaskRows?.celebrate?.(trigger) : null;
+    schedule();
     let saved = true;
     try {
       await window.UnionSuiteAgreements.saveItemStatus(ordinal, next, 'Milestone');
@@ -13569,20 +13748,175 @@ SOFTWARE.
       console.warn(error.message);
     }
     await celebration;
+    const release = saved && next === COMPLETE && leaving(milestone) ? await leave(milestone) : null;
     milestone.removeAttribute('aria-busy');
-    if (saved) apply(milestone, next);
-    else {
-      setSelect(select, previous);
-      apply(milestone, previous);
+    if (!saved) {
+      show(milestone, previous);
       reportFailure(milestone);
+    }
+    window.UnionSuiteQueryStates?.refresh();
+    schedule();
+    if (release) {
+      await whenHidden(milestone.closest('.QueryTemplateSet > *'));
+      release();
     }
   }
 
+  // Rows from the earlier template keep their status select.
   document.addEventListener('change', event => {
     const select = event.target.closest(wrapperSelector + ' .us-milestone__status');
-    if (select && !select.closest('.us-report-no-styling')) void change(select);
+    if (!select || select.closest('.us-report-no-styling')) return;
+    const milestone = select.closest('.us-milestone');
+    if (milestone) void change(milestone, normalise(select.value), select);
   });
 
+  // ── The status menu ──────────────────────────────────────────────
+  // The status icon opens it, as a term's does (US-TERM-STATUS), in the
+  // term status menu's look (us-term-status-menu), with the milestone tones.
+
+  function buildMenu() {
+    const node = document.createElement('div');
+    node.className = 'us-term-status-menu us-milestone-status-menu';
+    node.setAttribute('role', 'menu');
+    node.hidden = true;
+    STATUSES.forEach(state => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'us-term-status-menu__item';
+      item.setAttribute('role', 'menuitemradio');
+      item.setAttribute('data-us-milestone-status', state);
+      item.setAttribute('tabindex', '-1');
+      item.append(document.createTextNode(state));
+      node.append(item);
+    });
+    node.addEventListener('click', event => {
+      const item = event.target.closest('.us-term-status-menu__item');
+      if (!item || !owner) return;
+      const trigger = owner;
+      const milestone = trigger.closest('.us-milestone');
+      close(true);
+      if (milestone) void change(milestone, item.getAttribute('data-us-milestone-status'), trigger);
+    });
+    node.addEventListener('keydown', onMenuKey);
+    document.body.append(node);
+    return node;
+  }
+
+  function items() {
+    return [...menu.querySelectorAll('.us-term-status-menu__item')];
+  }
+
+  // Under the icon, or above it when the window has no room below.
+  function place(button) {
+    const rect = button.getBoundingClientRect();
+    const height = menu.offsetHeight;
+    const below = rect.bottom + 4;
+    const top = below + height > window.innerHeight - 8 ? Math.max(8, rect.top - 4 - height) : below;
+    const left = Math.min(Math.max(8, rect.left), window.innerWidth - menu.offsetWidth - 8);
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+  }
+
+  function open(button) {
+    menu ||= buildMenu();
+    if (owner === button) {
+      close(true);
+      return;
+    }
+    if (owner) close(false);
+    const milestone = button.closest('.us-milestone');
+    if (!milestone) return;
+    owner = button;
+    const current = status(milestone);
+    menu.setAttribute('aria-label', 'Status: ' + titleOf(milestone));
+    items().forEach(item => item.setAttribute('aria-checked', String(item.getAttribute('data-us-milestone-status') === current)));
+    menu.hidden = false;
+    place(button);
+    button.setAttribute('aria-expanded', 'true');
+    if (!reducedMotion() && menu.animate) {
+      menu.animate([{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}], {duration: 140, easing});
+    }
+    (items().find(item => item.getAttribute('aria-checked') === 'true') || items()[0]).focus({preventScroll: true});
+  }
+
+  function close(returnFocus) {
+    if (!menu || !owner) return;
+    const button = owner;
+    owner = null;
+    button.setAttribute('aria-expanded', 'false');
+    if (returnFocus && button.isConnected) button.focus({preventScroll: true});
+    if (reducedMotion() || !menu.animate) {
+      menu.hidden = true;
+      return;
+    }
+    menu.animate([{opacity: 1}, {opacity: 0}], {duration: 100, easing: 'ease-out'}).finished.then(() => {
+      if (!owner) menu.hidden = true;
+    }, () => {});
+  }
+
+  function onMenuKey(event) {
+    const list = items();
+    const index = list.indexOf(document.activeElement);
+    const moves = {ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: list.length - 1};
+    if (event.key in moves) {
+      event.preventDefault();
+      list[(moves[event.key] + list.length) % list.length].focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      close(true);
+    } else if (event.key === 'Tab') {
+      close(false);
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest(wrapperSelector + ' .us-milestone__status-button');
+    if (!button || button.closest('.us-report-no-styling')) return;
+    event.preventDefault();
+    if (button.closest('.us-milestone')?.getAttribute('aria-busy') === 'true') return;
+    open(button);
+  });
+
+  // A press anywhere else, a scroll or a resize closes the menu.
+  document.addEventListener('pointerdown', event => {
+    if (owner && !menu.contains(event.target) && !owner.contains(event.target)) close(false);
+  }, true);
+  addEventListener('scroll', event => {
+    if (owner && !menu.contains(event.target)) close(false);
+  }, true);
+  addEventListener('resize', () => close(false));
+
+  // ── Rows and segments light each other ───────────────────────────
+  let linked = [];
+
+  function pairFor(target) {
+    const wrapper = target.closest?.(wrapperSelector);
+    if (!barMode(wrapper)) return [];
+    const rows = rowsOf(wrapper);
+    const segments = [...wrapper.querySelectorAll('.us-milestones__segment')];
+    const segment = target.closest('.us-milestones__segment');
+    if (segment) {
+      const index = Number(segment.getAttribute('data-us-milestone-index'));
+      return [rows[index], segments[index]];
+    }
+    const row = target.closest('.us-milestone');
+    return row ? [row, segments[rows.indexOf(row)]] : [];
+  }
+
+  function link(pair) {
+    const next = pair.filter(Boolean);
+    if (next.length === linked.length && next.every((element, index) => element === linked[index])) return;
+    const bars = new Set([...linked, ...next].map(element => element.closest(wrapperSelector)).filter(barMode));
+    linked.forEach(element => element.removeAttribute('data-us-milestone-linked'));
+    linked = next;
+    linked.forEach(element => element.setAttribute('data-us-milestone-linked', ''));
+    bars.forEach(renderBar);
+  }
+
+  document.addEventListener('mouseover', event => link(pairFor(event.target)));
+  document.addEventListener('focusin', event => link(pairFor(event.target)));
+
+  // ── Keeping up with the page ─────────────────────────────────────
   let scheduled = false;
   function schedule() {
     if (scheduled) return;
@@ -13597,8 +13931,8 @@ SOFTWARE.
   // On a cached reload this runs before the panel's section preset
   // (us-agreement-milestones) adds us-milestones, so the first pass finds no
   // list. us:panel-actions-ready follows that expansion. The observer catches
-  // rows that arrive later (a CCO tab opening, an in-place refresh), and
-  // ignores the rail's own rebuilds.
+  // rows that arrive or move later (a CCO tab opening, an in-place refresh,
+  // a reorder), and ignores the rail's and bar's own rebuilds.
   document.addEventListener('us:panel-actions-ready', schedule);
   new MutationObserver(records => {
     if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 &&
@@ -13607,9 +13941,369 @@ SOFTWARE.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
   else schedule();
 
-  window.UnionSuiteMilestones = Object.freeze({refresh: schedule, version: '1.0'});
+  // setStatus changes a milestone's status as the menu does (save, effect,
+  // exit), for other controls such as a "Complete stage" prompt.
+  window.UnionSuiteMilestones = Object.freeze({
+    refresh: schedule,
+    setStatus: (milestone, state, trigger) => change(milestone, normalise(state), trigger),
+    version: '2.0'
+  });
 })();
 /* US-MILESTONES:END */
+
+/* US-MILESTONE-ORDER:START — reordering milestones on a us-milestones--reorder
+   list (in the us-agreement-milestones preset; owner, 6 October 2026:
+   milestones are undated lifecycle stages, so their order is their own).
+   The heading gets a Reorder toggle beside "Show completed". Reordering
+   shows every milestone, completed or not, swaps each row's pencil for a
+   drag handle and opens a bar above the list with Cancel and Save order:
+   - drag a handle with the mouse or a finger; the other rows make way, the
+     held row floats a touch see-through over a dashed placeholder, as the
+     IQA reorder lists do;
+   - or focus a handle and use the arrow keys (Home and End for the top and
+     bottom); each move is announced;
+   - the progress bar follows the new order.
+   Save order hands the milestones' ordinals, in their new order, to the
+   saver (UnionSuiteMilestoneOrder.defineSaver; ActionDefinitions.js saves
+   through CloudToolz). The toggle never discards a changed order: it asks
+   for Save or Cancel. While reordering, statuses, edits, "Show completed"
+   and Add milestone wait; a failed save keeps the new order and says so. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteMilestoneOrder) return;
+
+  const wrapperSelector = '.us-milestones.us-milestones--reorder';
+  const easing = 'cubic-bezier(.2, 0, 0, 1)';
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  const states = new WeakMap();
+  let saver = null;
+  let drag = null;
+
+  const setOf = wrapper => wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
+  const sectionsOf = wrapper => [...(setOf(wrapper)?.children || [])].filter(section => section.querySelector('.us-milestone'));
+  const titleOf = section => section.querySelector('.us-milestone__title')?.textContent.trim() || 'Milestone';
+  const ordinalOf = section => section.querySelector('.us-milestone')?.getAttribute('data-us-milestone-ordinal') || '';
+  const orderOf = sections => sections.map(ordinalOf).join(',');
+  const headingActions = wrapper => [...wrapper.querySelectorAll(':scope > .panel > .panel-heading :is(.us-task-completed-toggle, .us-command)')];
+  const heldOf = section => section.firstElementChild || section;
+
+  // ── The heading toggle ───────────────────────────────────────────
+
+  function addToggle(wrapper) {
+    const slot = wrapper.querySelector(':scope > .panel > .panel-heading [data-us-panel-actions-slot]');
+    if (!slot || slot.querySelector('.us-milestones__reorder-toggle')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'us-milestones__reorder-toggle us-iqa-icon-button';
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('aria-label', 'Reorder milestones');
+    button.title = 'Reorder milestones';
+    button.innerHTML = '<i class="ti ti-arrows-sort" aria-hidden="true"></i>';
+    const utilities = slot.querySelector('.us-iqa-report-utilities');
+    if (utilities) utilities.append(button);
+    else slot.prepend(button);
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll(wrapperSelector).forEach(wrapper => {
+        if (!wrapper.closest('.us-report-no-styling')) addToggle(wrapper);
+      });
+    });
+  }
+
+  document.addEventListener('us:panel-actions-ready', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 &&
+      (node.matches('[data-us-panel-actions-slot], .us-milestone') || node.querySelector('[data-us-panel-actions-slot]'))))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  // ── Moving rows ──────────────────────────────────────────────────
+
+  // Slides each row from where it was to where it now is, except the row
+  // being dragged, which follows the pointer.
+  function measure(wrapper) {
+    return new Map(sectionsOf(wrapper).map(section => [section, section.getBoundingClientRect().top]));
+  }
+
+  function slide(before, except) {
+    if (reducedMotion()) return;
+    before.forEach((top, section) => {
+      if (section === except || !section.animate) return;
+      const delta = top - section.getBoundingClientRect().top;
+      if (Math.abs(delta) >= 1) section.animate([{transform: `translateY(${delta}px)`}, {transform: 'none'}], {duration: 200, easing});
+    });
+  }
+
+  // Announcements are read out; an error is also shown, until the next one.
+  function say(wrapper, message, {error = false} = {}) {
+    const toolbar = states.get(wrapper)?.toolbar;
+    const status = toolbar?.querySelector('.us-milestones__reorder-status');
+    if (!status) return;
+    toolbar.toggleAttribute('data-us-error', error);
+    status.textContent = message;
+  }
+
+  function label(wrapper) {
+    const sections = sectionsOf(wrapper);
+    sections.forEach((section, index) => {
+      section.querySelector('.us-milestone__handle')?.setAttribute('aria-label',
+        'Move ' + titleOf(section) + '. Position ' + (index + 1) + ' of ' + sections.length);
+    });
+    const state = states.get(wrapper);
+    if (state) state.save.disabled = orderOf(sections) === state.order;
+  }
+
+  // Moves a row to an index. The rows around it move instead of the row
+  // itself, so a focused handle keeps its focus; each neighbour goes
+  // directly after (or before) the row, nearest last, to keep their order.
+  function moveTo(wrapper, section, index, {except} = {}) {
+    const sections = sectionsOf(wrapper);
+    const from = sections.indexOf(section);
+    const to = Math.max(0, Math.min(sections.length - 1, index));
+    if (from < 0 || to === from) return false;
+    const before = measure(wrapper);
+    if (to < from) sections.slice(to, from).reverse().forEach(other => section.after(other));
+    else sections.slice(from + 1, to + 1).forEach(other => section.before(other));
+    slide(before, except);
+    label(wrapper);
+    window.UnionSuiteMilestones?.refresh();
+    return true;
+  }
+
+  function announceMove(wrapper, section) {
+    const sections = sectionsOf(wrapper);
+    say(wrapper, titleOf(section) + ' moved to position ' + (sections.indexOf(section) + 1) + ' of ' + sections.length + '.');
+  }
+
+  // ── Starting and ending ──────────────────────────────────────────
+
+  function buildToolbar(wrapper) {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'us-milestones__reorder';
+    toolbar.setAttribute('role', 'group');
+    toolbar.setAttribute('aria-label', 'Reorder milestones');
+    const hint = document.createElement('p');
+    hint.className = 'us-milestones__reorder-hint';
+    hint.id = 'us-milestones-reorder-hint-' + Math.random().toString(36).slice(2, 8);
+    hint.textContent = 'Drag a handle to move a milestone, or focus one and use the arrow keys.';
+    const status = document.createElement('p');
+    status.className = 'us-milestones__reorder-status';
+    status.setAttribute('role', 'status');
+    const actions = document.createElement('div');
+    actions.className = 'us-milestones__reorder-actions';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'TextButton us-outline-button';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', () => void stop(wrapper, {restore: true}));
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'TextButton';
+    save.textContent = 'Save order';
+    save.disabled = true;
+    save.addEventListener('click', () => void commit(wrapper));
+    actions.append(cancel, save);
+    toolbar.append(hint, status, actions);
+    return {toolbar, hint, save};
+  }
+
+  function start(wrapper) {
+    if (states.has(wrapper)) return;
+    const completed = wrapper.querySelector('.us-task-completed-toggle');
+    const completedShown = completed?.getAttribute('aria-pressed') === 'true';
+    // Every milestone takes part in the order, including completed ones.
+    if (completed && !completedShown) completed.click();
+    const {toolbar, hint, save} = buildToolbar(wrapper);
+    const sections = sectionsOf(wrapper);
+    states.set(wrapper, {original: sections, order: orderOf(sections), completedShown, toolbar, save});
+    wrapper.setAttribute('data-us-milestones-reordering', '');
+    wrapper.querySelector('.us-milestones__reorder-toggle')?.setAttribute('aria-pressed', 'true');
+    headingActions(wrapper).forEach(action => { action.inert = true; });
+
+    toolbar.hidden = true;
+    setOf(wrapper).before(toolbar);
+    if (window.UnionSuiteRecordCards?.fold) void window.UnionSuiteRecordCards.fold(toolbar, true);
+    else toolbar.hidden = false;
+
+    sections.forEach(section => {
+      const milestone = section.querySelector('.us-milestone');
+      milestone.querySelector(':scope > .us-milestone__status-button, :scope > .us-milestone__status')?.setAttribute('inert', '');
+      const handle = document.createElement('button');
+      handle.type = 'button';
+      handle.className = 'us-milestone__handle';
+      handle.title = 'Drag to reorder';
+      handle.setAttribute('aria-describedby', hint.id);
+      handle.innerHTML = '<i class="ti ti-grip-vertical" aria-hidden="true"></i>';
+      milestone.append(handle);
+    });
+    label(wrapper);
+    sections[0]?.querySelector('.us-milestone__handle')?.focus({preventScroll: true});
+  }
+
+  async function stop(wrapper, {restore}) {
+    const state = states.get(wrapper);
+    if (!state) return;
+    if (drag?.wrapper === wrapper) endDrag(false);
+    if (restore && orderOf(sectionsOf(wrapper)) !== state.order) {
+      const before = measure(wrapper);
+      const set = setOf(wrapper);
+      state.original.forEach(section => set.append(section));
+      slide(before);
+      window.UnionSuiteMilestones?.refresh();
+    }
+    states.delete(wrapper);
+    wrapper.removeAttribute('data-us-milestones-reordering');
+    sectionsOf(wrapper).forEach(section => {
+      section.querySelector('.us-milestone__handle')?.remove();
+      section.querySelector('.us-milestone [inert]:is(.us-milestone__status-button, .us-milestone__status)')?.removeAttribute('inert');
+    });
+    headingActions(wrapper).forEach(action => { action.inert = false; });
+    const toggle = wrapper.querySelector('.us-milestones__reorder-toggle');
+    toggle?.setAttribute('aria-pressed', 'false');
+    toggle?.focus({preventScroll: true});
+    const completed = wrapper.querySelector('.us-task-completed-toggle');
+    if (completed && !state.completedShown && completed.getAttribute('aria-pressed') === 'true') completed.click();
+    if (window.UnionSuiteRecordCards?.fold) await window.UnionSuiteRecordCards.fold(state.toolbar, false);
+    state.toolbar.remove();
+  }
+
+  async function commit(wrapper) {
+    const state = states.get(wrapper);
+    if (!state || state.toolbar.getAttribute('aria-busy') === 'true') return;
+    const sections = sectionsOf(wrapper);
+    const buttons = [...state.toolbar.querySelectorAll('button')];
+    state.toolbar.setAttribute('aria-busy', 'true');
+    buttons.forEach(button => { button.disabled = true; });
+    say(wrapper, 'Saving the order…');
+    try {
+      if (!saver) throw new Error('No milestone order saver is defined (UnionSuiteMilestoneOrder.defineSaver).');
+      await saver({ordinals: sections.map(ordinalOf), wrapper});
+    } catch (error) {
+      console.warn(error.message);
+      state.toolbar.removeAttribute('aria-busy');
+      buttons.forEach(button => { button.disabled = false; });
+      say(wrapper, 'Order not saved. Try again.', {error: true});
+      return;
+    }
+    await stop(wrapper, {restore: false});
+  }
+
+  document.addEventListener('click', event => {
+    const toggle = event.target.closest(wrapperSelector + ' .us-milestones__reorder-toggle');
+    if (!toggle) return;
+    const wrapper = toggle.closest(wrapperSelector);
+    const state = states.get(wrapper);
+    if (!state) return start(wrapper);
+    if (orderOf(sectionsOf(wrapper)) === state.order) return void stop(wrapper, {restore: false});
+    say(wrapper, 'Save or cancel the new order first.');
+    state.save.focus({preventScroll: true});
+  });
+
+  // ── Keyboard ─────────────────────────────────────────────────────
+
+  document.addEventListener('keydown', event => {
+    const handle = event.target.closest?.(wrapperSelector + ' .us-milestone__handle');
+    if (!handle) return;
+    if (event.key === 'Escape' && drag) {
+      event.preventDefault();
+      endDrag(true);
+      return;
+    }
+    const wrapper = handle.closest(wrapperSelector);
+    const section = handle.closest('.QueryTemplateSet > *');
+    const sections = sectionsOf(wrapper);
+    const index = sections.indexOf(section);
+    const targets = {ArrowUp: index - 1, ArrowDown: index + 1, Home: 0, End: sections.length - 1};
+    if (!(event.key in targets)) return;
+    event.preventDefault();
+    if (moveTo(wrapper, section, targets[event.key])) announceMove(wrapper, section);
+    handle.focus({preventScroll: true});
+  });
+
+  // ── Dragging ─────────────────────────────────────────────────────
+  // Positions come from offsetTop, which the slide animations leave alone,
+  // so the rows' midpoints stay steady while they move. The dragged row
+  // keeps its place in the list as a dashed placeholder; only its content
+  // follows the pointer.
+
+  function midpoints(wrapper, except) {
+    return sectionsOf(wrapper).filter(section => section !== except).map(section => section.offsetTop + section.offsetHeight / 2);
+  }
+
+  function follow(clientY) {
+    const {section, wrapper, startY, startTop} = drag;
+    const top = startTop + (clientY - startY);
+    const centre = top + section.offsetHeight / 2;
+    moveTo(wrapper, section, midpoints(wrapper, section).filter(mid => mid < centre).length, {except: section});
+    heldOf(section).style.transform = `translateY(${top - section.offsetTop}px)`;
+  }
+
+  function endDrag(cancel) {
+    if (!drag) return;
+    const {section, wrapper, handle, startIndex} = drag;
+    drag = null;
+    if (cancel) moveTo(wrapper, section, startIndex, {except: section});
+    // The held content settles into the placeholder, then the row is plain.
+    const held = heldOf(section);
+    const offset = held.style.transform;
+    held.style.transform = '';
+    document.documentElement.removeAttribute('data-us-milestones-dragging');
+    const settled = () => section.removeAttribute('data-us-dragging');
+    if (offset && !reducedMotion() && held.animate) {
+      held.animate([{transform: offset}, {transform: 'none'}], {duration: 160, easing}).finished.then(settled, settled);
+    } else {
+      settled();
+    }
+    announceMove(wrapper, section);
+    handle.focus({preventScroll: true});
+  }
+
+  document.addEventListener('pointerdown', event => {
+    const handle = event.target.closest(wrapperSelector + ' .us-milestone__handle');
+    if (!handle || event.button !== 0 || drag) return;
+    event.preventDefault();
+    const wrapper = handle.closest(wrapperSelector);
+    const section = handle.closest('.QueryTemplateSet > *');
+    handle.focus({preventScroll: true});
+    try {
+      handle.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // Not every pointer can be captured; the document listeners still follow it.
+    }
+    drag = {wrapper, section, handle, pointer: event.pointerId, startY: event.clientY, startTop: section.offsetTop,
+      startIndex: sectionsOf(wrapper).indexOf(section)};
+    section.setAttribute('data-us-dragging', '');
+    document.documentElement.setAttribute('data-us-milestones-dragging', '');
+  });
+
+  document.addEventListener('pointermove', event => {
+    if (drag && event.pointerId === drag.pointer) follow(event.clientY);
+  });
+
+  document.addEventListener('pointerup', event => {
+    if (drag && event.pointerId === drag.pointer) endDrag(false);
+  });
+
+  document.addEventListener('pointercancel', event => {
+    if (drag && event.pointerId === drag.pointer) endDrag(true);
+  });
+
+  window.UnionSuiteMilestoneOrder = Object.freeze({
+    defineSaver(fn) {
+      if (typeof fn !== 'function') throw new TypeError('The milestone order saver must be a function.');
+      saver = fn;
+    },
+    version: '1.0'
+  });
+})();
+/* US-MILESTONE-ORDER:END */
 
 /* US-ATTACHMENTS:START — inline name and tag editor for us-attachments rows. */
 (function () {

@@ -1,0 +1,444 @@
+/* US-MILESTONE-TASKS (candidate) — tasks linked to milestones (stages) on a
+   us-milestones--tasks list (milestone-tasks.candidate.js). The stage row
+   is the control that opens its tasks; under it the tasks hang from a
+   thin line, with the quick add at the foot. The in-progress segment of
+   the progress bar fills as its tasks are done.
+   Target in the theme: zUnionSuite.css beside US-MILESTONES. */
+
+/* The fill is a registered property so it can be animated. */
+@property --us-segment-fill {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+.us-milestones--tasks .us-milestones__segment {
+  transition: background-color .2s, transform .15s, --us-segment-fill .35s cubic-bezier(.2, 0, 0, 1);
+}
+
+/* The in-progress segment: solid as far as its tasks have got, then a
+   paler accent for the rest. */
+.us-milestones--tasks .us-milestones__segment[data-us-milestone-status="In Progress" i] {
+  background-image: linear-gradient(to right,
+    var(--accent) var(--us-segment-fill),
+    color-mix(in srgb, var(--accent) 32%, var(--bg-surface)) var(--us-segment-fill));
+  background-clip: content-box;
+}
+
+/* The theme's status menu, under Complete, when the stage still has open
+   tasks: lined up with the item's words (8px padding, 18px icon, 8px gap). */
+.us-milestone-status-menu__note {
+  margin-top: -4px;
+  padding: 0 8px 6px 34px;
+  color: var(--warning);
+  font: var(--fw-medium) var(--fs-xs)/16px var(--font-ui);
+}
+
+.us-milestone-status-menu__note[hidden] {
+  display: none;
+}
+
+/* ── The stage row ─────────────────────────────────────────────── */
+
+/* The whole row opens its tasks, so all of it highlights, as a term row
+   does. The status icon and the pencil keep their own clicks. */
+.us-milestones--tasks .us-milestone {
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color .15s, box-shadow .15s;
+}
+
+.us-milestones--tasks:not([data-us-milestones-reordering]) .us-milestone:hover {
+  background: var(--bg-sunken);
+  box-shadow: 0 0 0 4px var(--bg-sunken);
+}
+
+.us-milestones--tasks[data-us-milestones-reordering] .us-milestone {
+  cursor: default;
+}
+
+/* The stage's name and counts: the button that opens the tasks. */
+.us-milestones--tasks .us-milestone__expand {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.us-milestones--tasks .us-milestone__expand:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+/* "2 of 5 tasks" after the status, with the same dot as the date had. */
+.us-milestones--tasks .us-milestone__tasks {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-milestones--tasks .us-milestone__state:not(:empty) + .us-milestone__tasks:not(:empty)::before {
+  content: "·";
+  margin-inline-end: var(--space-1);
+  color: var(--text-faint);
+}
+
+/* "1 overdue" after the count, in red with the words carrying it. */
+.us-milestones--tasks .us-milestone__overdue {
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+}
+
+.us-milestones--tasks .us-milestone__overdue:empty {
+  display: none;
+}
+
+.us-milestones--tasks .us-milestone__overdue::before {
+  content: "·";
+  margin-inline-end: var(--space-1);
+  color: var(--text-faint);
+  font-weight: var(--fw-normal);
+}
+
+/* Tabler "chevron-down" (MIT); turns over when the stage is open. */
+.us-milestones--tasks .us-milestone__chevron {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") center / contain no-repeat;
+  transition: transform .2s cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-milestones--tasks .us-milestone:has(> .us-milestone__expand[aria-expanded="true"]) .us-milestone__chevron {
+  transform: rotate(180deg);
+}
+
+.us-milestones--tasks[data-us-milestones-reordering] .us-milestone__chevron {
+  display: none;
+}
+
+/* ── The tasks under a stage ──────────────────────────────────── */
+
+/* Indented to the stage's name (32px icon from 4px into the gutter, then
+   the row's 12px gap), hanging from a thin line. */
+.us-milestones--tasks .us-milestone__subtasks {
+  margin: var(--space-2) 0 var(--space-1) 28px;
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--border);
+}
+
+.us-milestones--tasks .us-milestone__task-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-milestones--tasks .us-milestone-task {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  transition: opacity .2s;
+  /* Palette for the shared completion effect (UnionSuiteTaskRows.celebrate). */
+  --task-confetti-1: var(--success);
+  --task-confetti-2: var(--accent);
+  --task-confetti-3: var(--brand-500);
+}
+
+.us-milestones--tasks .us-milestone-task[aria-busy="true"] {
+  opacity: .6;
+}
+
+/* The tick box, as the Tasks panel's (US-TASK-ROWS), a size smaller. */
+.us-milestones--tasks .us-milestone-task__check {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: -7px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+}
+
+.us-milestones--tasks .us-milestone-task__check::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-surface);
+  transition: background .16s, border-color .16s;
+}
+
+.us-milestones--tasks .us-milestone-task__check:hover::before {
+  border-color: var(--success);
+}
+
+.us-milestones--tasks .us-milestone-task__check:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+.us-milestones--tasks .us-milestone-task__check > svg {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transition: opacity .16s;
+  pointer-events: none;
+}
+
+.us-milestones--tasks .us-milestone-task__check[aria-checked="true"]::before {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.us-milestones--tasks .us-milestone-task__check[aria-checked="true"] > svg {
+  opacity: 1;
+}
+
+.us-milestones--tasks .us-milestone-task__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  min-width: 0;
+}
+
+.us-milestones--tasks .us-milestone-task__title {
+  color: var(--text-strong);
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+  transition: color .2s;
+}
+
+.us-milestones--tasks .us-milestone-task[data-done="true"] .us-milestone-task__title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.us-milestones--tasks .us-milestone-task__meta {
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+}
+
+.us-milestones--tasks .us-milestone-task__meta[hidden] {
+  display: none;
+}
+
+/* A task past its due date: the date and "Overdue" in red. */
+.us-milestones--tasks .us-milestone-task[data-overdue] :is(.us-milestone-task__date, .us-milestone-task__overdue) {
+  color: var(--danger);
+}
+
+.us-milestones--tasks .us-milestone-task__overdue {
+  font-weight: var(--fw-semi);
+}
+
+/* The task's pencil, at the end of the row. It shows when the row is
+   pointed at or has focus (always on touch screens), so a long list
+   stays calm; a task still being added has none yet. */
+.us-milestones--tasks .us-milestone-task__edit {
+  flex: none;
+  margin-inline-start: auto;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.us-milestones--tasks .us-milestone-task:is(:hover, :focus-within) .us-milestone-task__edit {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .us-milestones--tasks .us-milestone-task__edit {
+    opacity: 1;
+  }
+}
+
+.us-milestones--tasks .us-milestone-task[aria-busy="true"] .us-milestone-task__edit {
+  visibility: hidden;
+}
+
+/* Done tasks after the open ones, behind "3 done" with Show / Hide. */
+.us-milestones--tasks .us-milestone__done-group[hidden] {
+  display: none;
+}
+
+.us-milestones--tasks .us-milestone__done-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-xs)/16px var(--font-ui);
+  text-align: start;
+  cursor: pointer;
+}
+
+.us-milestones--tasks .us-milestone__done-toggle:focus-visible {
+  outline: 0;
+  box-shadow: var(--focus-ring);
+}
+
+/* A small tick where the tick boxes sit, so the group lines up. */
+.us-milestones--tasks .us-milestone__done-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: -7px;
+  background: var(--success);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 12 4 4 8-8'/></svg>") center / 16px no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 12 4 4 8-8'/></svg>") center / 16px no-repeat;
+}
+
+.us-milestones--tasks .us-milestone__done-action {
+  margin-inline-start: var(--space-1);
+  color: var(--text-link);
+  font-weight: var(--fw-semi);
+}
+
+.us-milestones--tasks .us-milestone__done-toggle:hover .us-milestone__done-action {
+  text-decoration: underline;
+}
+
+/* Every task done and the stage still open: offer to complete it. */
+.us-milestones--tasks .us-milestone__complete-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-1) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  /* Palette for the stage's completion effect. */
+  --task-confetti-1: var(--accent);
+  --task-confetti-2: var(--brand-500);
+  --task-confetti-3: var(--success);
+}
+
+.us-milestones--tasks .us-milestone__complete-prompt[hidden] {
+  display: none;
+}
+
+.us-milestones--tasks .us-milestone__complete-button {
+  margin-inline-start: auto;
+}
+
+/* Loading, empty, added and error messages. */
+.us-milestones--tasks .us-milestone__task-state {
+  margin: 2px 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-milestones--tasks .us-milestone__task-state:empty {
+  display: none;
+}
+
+.us-milestones--tasks .us-milestone__task-state[data-us-error] {
+  color: var(--danger);
+}
+
+.us-milestones--tasks .us-milestone__task-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--fw-semi);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* The quick add at the foot: a plus where the tick box would be, the
+   field, and Add (Enter does the same). */
+.us-milestones--tasks .us-milestone__quick-add {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 2px 0 0;
+}
+
+.us-milestones--tasks .us-milestone__quick-add-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: -7px;
+  background: var(--text-faint);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M12 7v10M7 12h10'/></svg>") center / 18px no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M12 7v10M7 12h10'/></svg>") center / 18px no-repeat;
+}
+
+.us-milestones--tasks .us-milestone__quick-add-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-strong);
+  font: var(--fs-sm) var(--font-ui);
+  transition: border-color .15s, background-color .15s;
+}
+
+.us-milestones--tasks .us-milestone__quick-add-input::placeholder {
+  color: var(--text-faint);
+}
+
+.us-milestones--tasks .us-milestone__quick-add-input:hover {
+  border-color: var(--border);
+}
+
+.us-milestones--tasks .us-milestone__quick-add-input:focus {
+  border-color: var(--border-focus);
+  outline: 0;
+  background: var(--bg-surface);
+  box-shadow: var(--focus-ring);
+}
+
+/* Add shows once there is something to add. */
+.us-milestones--tasks .us-milestone__quick-add-button:disabled {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-milestones--tasks .us-milestones__segment,
+  .us-milestones--tasks .us-milestone,
+  .us-milestones--tasks .us-milestone__chevron,
+  .us-milestones--tasks .us-milestone-task,
+  .us-milestones--tasks .us-milestone-task__check::before,
+  .us-milestones--tasks .us-milestone-task__check > svg,
+  .us-milestones--tasks .us-milestone-task__edit,
+  .us-milestones--tasks .us-milestone__quick-add-input {
+    transition: none;
+  }
+}
