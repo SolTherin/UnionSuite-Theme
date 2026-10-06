@@ -7333,7 +7333,15 @@ SOFTWARE.
    const current=host.querySelector(':scope > .us-native-section-spinner');
    if(current)current.removeAttribute('data-us-leaving');
    else{
-    const spinner=document.createElement('span');spinner.className='section-loader-spinning-circles us-native-section-spinner';spinner.setAttribute('aria-hidden','true');host.append(spinner);
+    const spinner=document.createElement('span');spinner.className='section-loader-spinning-circles us-native-section-spinner';spinner.setAttribute('aria-hidden','true');
+    // A popup's spinner revs and sends out ripples on a long wait; the
+    // ripples sit inside it so they fade and go with it (zUnionSuite.css).
+    if(host.matches('.rwWindowContent,.rwContent')){
+     const ripples=document.createElement('span');ripples.className='us-native-loader-ripples';
+     ripples.append(document.createElement('span'),document.createElement('span'),document.createElement('span'));
+     spinner.append(ripples);
+    }
+    host.append(spinner);
    }
    host.classList.add('us-native-loader-host');
   });

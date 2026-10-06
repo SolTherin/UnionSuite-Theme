@@ -5512,6 +5512,138 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
   }
 }
 
+/* A popup still loading after 2s revs every 2s, to show it is working
+   while iMIS builds a slow page: the rings whirl an extra turn (the middle
+   one against the others) and stretch, and as they stretch three ripples
+   leave 180ms apart, each fainter than the one before, like a stone
+   dropped in a pond (prototypes/wip/popup-loader, option 6b).
+   The spin is restated because an element has one animation list. The
+   rev uses the individual rotate and scale properties, so it composes
+   with the spin's transform. US-NATIVE-LOADERS adds the ripples inside a
+   popup's spinner, so they fade and go with it; each is an outline over
+   the spinner's border box, so it needs no background colour behind it. */
+:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  animation:
+    section-circles-forward 1.428571s linear infinite,
+    us-popup-loader-rev-outer 2s 2s infinite;
+}
+
+:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
+  animation:
+    section-circles-back .714286s linear infinite,
+    us-popup-loader-rev-middle 2s 2s infinite;
+}
+
+:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  animation:
+    section-circles-forward 2.142857s linear infinite,
+    us-popup-loader-rev-inner 2s 2s infinite;
+}
+
+@keyframes us-popup-loader-rev-outer {
+  0% {
+    rotate: 0deg;
+    scale: 1;
+    animation-timing-function: cubic-bezier(.6, 0, .2, 1);
+  }
+
+  26% {
+    scale: 1.12;
+  }
+
+  55%,
+  100% {
+    rotate: 360deg;
+    scale: 1;
+  }
+}
+
+/* -720deg inside an outer ring turning +360deg reads as one turn back. */
+@keyframes us-popup-loader-rev-middle {
+  0% {
+    rotate: 0deg;
+    animation-timing-function: cubic-bezier(.6, 0, .2, 1);
+  }
+
+  55%,
+  100% {
+    rotate: -720deg;
+  }
+}
+
+@keyframes us-popup-loader-rev-inner {
+  0% {
+    rotate: 0deg;
+    animation-timing-function: cubic-bezier(.6, 0, .2, 1);
+  }
+
+  55%,
+  100% {
+    rotate: 360deg;
+  }
+}
+
+.us-native-section-spinner > .us-native-loader-ripples:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+}
+
+.us-native-loader-ripples > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  outline: 2px solid transparent;
+  --us-ripple-strength: 85%;
+  animation: us-popup-loader-ripple 2s 2s infinite;
+}
+
+.us-native-loader-ripples > span:nth-child(2):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-ripple-strength: 55%;
+  animation-delay: 2.18s;
+}
+
+.us-native-loader-ripples > span:nth-child(3):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --us-ripple-strength: 30%;
+  animation-delay: 2.36s;
+}
+
+/* Each ripple leaves as the rings stretch (26%) and fades out by 72%. */
+@keyframes us-popup-loader-ripple {
+  0%,
+  24% {
+    outline-offset: 0;
+    outline-color: transparent;
+  }
+
+  26% {
+    outline-offset: 0;
+    outline-color: color-mix(in srgb, var(--accent) var(--us-ripple-strength), transparent);
+    animation-timing-function: cubic-bezier(.2, 0, .2, 1);
+  }
+
+  72% {
+    outline-offset: 40px;
+    outline-color: transparent;
+  }
+
+  72.01%,
+  100% {
+    outline-offset: 0;
+    outline-color: transparent;
+  }
+}
+
+/* The shared rule stops the spin; the popup's own lists need stopping too. */
+@media (prefers-reduced-motion: reduce) {
+  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
+  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after,
+  .us-native-loader-ripples > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    animation: none;
+  }
+}
+
 /* US-SECTION-LOADING:END */
 
 /* Native sign-in keeps its text; JS reserves leading space for the ring. */
