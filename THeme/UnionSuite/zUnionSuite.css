@@ -5475,7 +5475,9 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
   }
 }
 
-.rwWindowContent.rwLoading.us-native-loader-host:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+/* A popup's content cell is a host while Telerik marks it rwLoading and
+   while its frame loads a page (data-us-frame-loading, set by the theme). */
+:is(.rwWindowContent, .rwContent).us-native-loader-host:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: relative;
 }
 
@@ -5490,6 +5492,24 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
   margin: -24px 0 0 -24px;
   pointer-events: none;
   z-index: 1;
+  opacity: 1;
+  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@starting-style {
+  .us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    opacity: 0;
+  }
+}
+
+.us-native-loader-host > .us-native-section-spinner[data-us-leaving]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
 }
 
 /* US-SECTION-LOADING:END */

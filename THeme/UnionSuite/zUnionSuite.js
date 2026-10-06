@@ -7280,13 +7280,59 @@ SOFTWARE.
 /* US-NATIVE-LOADERS:START — decorate native indicators; no request interception. */
 (function(){
  if(window.UnionSuiteSectionLoading)return;
- const selector='.rwWindowContent.rwLoading,.RadAjax > .raDiv';
+ const selector='.rwWindowContent.rwLoading,:is(.rwWindowContent,.rwContent)[data-us-frame-loading],.RadAjax > .raDiv';
+ const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+ // A popup frame counts as loading from the moment its src changes until the
+ // new document's load event. iMIS can take several seconds to build a page
+ // whose cache has expired, and rwLoading alone left that wait a blank window.
+ const frames=new WeakMap();
+ function watchFrame(frame){
+  const src=frame.getAttribute('src')||'';
+  if(frames.get(frame)?.src===src)return;
+  const host=frame.closest('.rwWindowContent,.rwContent');
+  if(!host)return;
+  const seen=frames.has(frame);
+  frames.get(frame)?.stop();
+  let before=null;try{before=frame.contentDocument}catch{}
+  // A frame first seen with a page already in it (or one on another origin)
+  // loaded before the theme started; waiting for its load would never end.
+  const loadedAlready=!seen&&(!before||before.URL!=='about:blank'&&before.readyState!=='loading');
+  if(!src||/^about:blank/i.test(src)||loadedAlready){frames.set(frame,{src,stop(){}});return}
+  function stop(){
+   frame.removeEventListener('load',loaded);
+   host.removeAttribute('data-us-frame-loading');host.removeAttribute('aria-busy');
+   schedule();
+  }
+  // Ignore the initial about:blank load some browsers report; a frame on
+  // another origin has no readable document, so its load is the real one.
+  function loaded(){
+   let doc=null;try{doc=frame.contentDocument}catch{}
+   if(doc?.URL==='about:blank')return;
+   stop();
+  }
+  frame.addEventListener('load',loaded);
+  host.setAttribute('data-us-frame-loading','');host.setAttribute('aria-busy','true');
+  frames.set(frame,{src,stop});
+ }
+ const leaving=new WeakMap();
  function refresh(){
+  document.querySelectorAll('.RadWindow iframe').forEach(watchFrame);
   document.querySelectorAll('.us-native-loader-host').forEach(host=>{
-   if(!host.matches(selector)){host.classList.remove('us-native-loader-host');host.querySelector(':scope > .us-native-section-spinner')?.remove()}
+   if(host.matches(selector)||leaving.has(host))return;
+   const spinner=host.querySelector(':scope > .us-native-section-spinner');
+   // Fade the spinner out before the host loses the positioning it sits in.
+   spinner?.setAttribute('data-us-leaving','');
+   leaving.set(host,setTimeout(()=>{
+    leaving.delete(host);
+    if(host.matches(selector))return;
+    spinner?.remove();host.classList.remove('us-native-loader-host');
+   },spinner&&!reduceMotion.matches?180:0));
   });
   document.querySelectorAll(selector).forEach(host=>{
-   if(!host.querySelector(':scope > .us-native-section-spinner')){
+   clearTimeout(leaving.get(host));leaving.delete(host);
+   const current=host.querySelector(':scope > .us-native-section-spinner');
+   if(current)current.removeAttribute('data-us-leaving');
+   else{
     const spinner=document.createElement('span');spinner.className='section-loader-spinning-circles us-native-section-spinner';spinner.setAttribute('aria-hidden','true');host.append(spinner);
    }
    host.classList.add('us-native-loader-host');
@@ -7294,8 +7340,13 @@ SOFTWARE.
  }
  let queued=false;
  function schedule(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;refresh()})}
- function start(){refresh();new MutationObserver(records=>{if(records.some(r=>r.type==='childList'||r.oldValue!==r.target.getAttribute('class')))schedule()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class'],attributeOldValue:true})}
- window.UnionSuiteSectionLoading={version:'1.0',refresh};
+ function changed(r){
+  if(r.type==='childList')return true;
+  if(r.attributeName==='src')return r.target.tagName==='IFRAME';
+  return r.oldValue!==r.target.getAttribute('class');
+ }
+ function start(){refresh();new MutationObserver(records=>{if(records.some(changed))schedule()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','src'],attributeOldValue:true})}
+ window.UnionSuiteSectionLoading={version:'1.1',refresh};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* US-NATIVE-LOADERS:END */
