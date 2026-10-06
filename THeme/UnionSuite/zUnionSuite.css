@@ -21111,6 +21111,60 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 }
 
+/* The copy icon slides out on hover (owner, 7 October 2026). The chip
+   keeps its full width, room for the icon included, so nothing beside it
+   moves. At rest the icon is hidden and the ID sits centred (19px each
+   side); pointing at the ID slides it left to the usual 10px and the icon
+   slides in from the left into the space it leaves, fading up. The icon
+   also shows while the button has keyboard focus, while the tick or the
+   error shows, and always where there is no hover (touch screens). The
+   button still covers the whole chip, so the click target is unchanged. */
+.us-banner .us-banner__record-copy > .us-banner__record-id {
+  padding-inline: 19px;
+  transition:
+    padding-inline-start 180ms cubic-bezier(.2, 0, 0, 1),
+    padding-inline-end 180ms cubic-bezier(.2, 0, 0, 1),
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy):not(:disabled):not([data-us-copy-state]) {
+  opacity: 0;
+}
+
+.us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {
+  padding-inline-end: 20px;
+  transition:
+    opacity 180ms cubic-bezier(.2, 0, 0, 1),
+    padding-inline-end 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-banner .us-banner__record-copy:is(:hover, :has(> :is(button.us-copy, button.us-banner__copy):is(:focus-visible, [data-us-copy-state]))) > .us-banner__record-id {
+  padding-inline: 10px 28px;
+}
+
+.us-banner .us-banner__record-copy:is(:hover, :has(> :is(button.us-copy, button.us-banner__copy):is(:focus-visible, [data-us-copy-state]))) > :is(button.us-copy, button.us-banner__copy) {
+  padding-inline-end: 8px;
+}
+
+.us-banner .us-banner__record-copy:is(:hover, :has(> :is(button.us-copy, button.us-banner__copy):focus-visible)) > :is(button.us-copy, button.us-banner__copy):not(:disabled):not([data-us-copy-state]) {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .us-banner .us-banner__record-copy > .us-banner__record-id {
+    padding-inline: 10px 28px;
+  }
+
+  .us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {
+    padding-inline-end: 8px;
+  }
+
+  .us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy):not(:disabled):not([data-us-copy-state]) {
+    opacity: .55;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .us-banner .us-banner__record-copy > .us-banner__record-id,
   .us-banner .us-banner__record-copy > :is(button.us-copy, button.us-banner__copy) {

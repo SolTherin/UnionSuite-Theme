@@ -6,6 +6,8 @@
      Return one row for the current record. Brackets are not IQA syntax.
      Quick Actions requires the site popup functions. Optional tabs are in Banner-Template.html.
      StatusColour must return #RRGGBB; StatusDescription is plain text. Rename these IQA aliases as needed.
+     The contact ID sits in the ID chip shared with the case and agreement
+     banners (us-banner__record-copy): the copy icon slides out on hover.
      [Contact type] fills the eyebrow and picks the avatar drawing: Organisation,
      Organization or Company show a building; any other value a person.
      Optional blocks, each hidden when its IQA returns nothing or fails; remove
@@ -19,7 +21,7 @@
     <div class="us-banner__identity">
       <span class="us-banner__avatar" data-us-contact-kind="[Contact type]" aria-hidden="true"></span>
       <div class="us-banner__identity-text">
-        <span class="us-banner__eyebrow">[Contact type] · <span id="contact-banner-id">[Contact ID]</span><button type="button" class="us-copy" data-us-copy-target="contact-banner-id" aria-label="Copy contact ID" title="Copy contact ID"></button></span>
+        <span class="us-banner__eyebrow">[Contact type] · <span class="us-banner__record-copy"><span class="us-banner__record-id" id="contact-banner-id">[Contact ID]</span><button type="button" class="us-copy" data-us-copy-target="contact-banner-id" aria-label="Copy contact ID" title="Copy contact ID"></button></span></span>
         <h1 class="us-banner__title">[Full name]</h1>
         <p class="us-banner__subtitle">[Member type] · Member since [Join date]</p>
       </div>

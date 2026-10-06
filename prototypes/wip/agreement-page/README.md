@@ -127,6 +127,12 @@ the theme alone:
   saver in `Scripts/ActionDefinitions.js`. Option 7 (tasks linked to
   stages) is not promoted: `milestone-tasks.candidate.*` until tasks can be
   linked in iMIS.
+- Banner ID chip, 7 October 2026 (owner): the copy icon is hidden at rest
+  and slides out on hover, the ID centred until then; the chip keeps its
+  width. Shared by the agreement, case and member banners: the member
+  banner's contact ID moves into the same chip (`Banner-Contact-Template.html`
+  and contact page v3). Shows on keyboard focus, during the tick or error,
+  and always on touch screens.
 
 Checked against the pre-promotion version in headless Edge: every tab of
 both layouts, light and dark, is pixel-identical, and the task tick,
