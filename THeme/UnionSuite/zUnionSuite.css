@@ -5684,7 +5684,12 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   overflow-wrap: anywhere;
 }
 
-.PanelFieldValue > :is(
+/* A field iMIS wraps in a RadAjaxPanel for its own partial update (the
+   Communication Creator's Cc and Bcc) takes the same look, hover and
+   focus as one placed directly in .PanelFieldValue (owner, 6 October
+   2026). The wrapper sits in :where(), so the rules keep their
+   specificity. */
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -5717,7 +5722,7 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   box-shadow: none;
 }
 
-.PanelFieldValue > :is(
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -5740,7 +5745,7 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   border-color: var(--brand-600);
 }
 
-.PanelFieldValue > :is(
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -5766,7 +5771,7 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   box-shadow: var(--field-focus-glow);
 }
 
-.PanelFieldValue > :is(
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -5792,7 +5797,7 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   opacity: 1;
 }
 
-.PanelFieldValue > :is(
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -5816,7 +5821,7 @@ input[type="radio"]:not(:where(.RadButton *, .RadCheckBox *, .RadRadioButton *, 
   color: var(--text-strong);
 }
 
-.PanelFieldValue > :is(
+:is(.PanelFieldValue, :where(.PanelFieldValue > .RadAjaxPanel)) > :is(
   input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image]),
   select,
   textarea
@@ -10494,7 +10499,9 @@ html.us-taskbar-mounted #hd .search-dropdown {
    corners, hover and focus), and its ::before shows the prefix,
    "Agreement A107 –", read-only before the cursor: an input cannot carry
    ::before. The proxy inside has no border or background of its own. The
-   wrapper keeps the native field's classes, so InputXLarge sets its width.
+   wrapper keeps the native field's classes, so it takes the width of the
+   fields around it: InputXLarge, or the wider header fields of the
+   agreement send pages (US-AGREEMENT-COMMS-PAGE, below).
    Every rule sits inside .us-agreement-comms, the iPart class. */
 .us-agreement-comms .PanelFieldValue > input[data-us-subject-tag] {
   display: none;
@@ -10573,6 +10580,21 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-SUBJECT-TAG:END */
 
+/* US-AGREEMENT-COMMS-PAGE:START — the agreement send pages' Header tab
+   (owner, 6 October 2026), scoped to the pages' own body class,
+   us-agreement-comms-page. From, To, Cc, Bcc and the Subject (the
+   US-SUBJECT-TAG wrapper, which keeps InputXLarge) share one wider width,
+   so the subject and its "Agreement A107 –" prefix have room and every
+   field lines up. None passes its column. Type keeps its own width: a short
+   list reads better in a short field. */
+.us-agreement-comms-page [id$="_CommunicationCreatorHeader_DivEmailHeader"] .PanelFieldValue .InputXLarge {
+  box-sizing: border-box;
+  width: 720px;
+  max-width: 100%;
+}
+
+/* US-AGREEMENT-COMMS-PAGE:END */
+
 /* US-COMMS-LOG:START — the status line zUnionSuite.js (US-COMMS-LOG) puts at
    the top of the us-agreement-comms iPart after a send, directly under
    iMIS's message: logging (a spinner), done, or a warning. Its colours ease
@@ -10589,13 +10611,55 @@ html.us-taskbar-mounted #hd .search-dropdown {
   display: none;
 }
 
+/* « Back and iMIS's "Return to previous page", held while the email is
+   being added: dimmed and not clickable (the script blocks the click), and
+   they ease back when it ends. */
+a.back-link-control,
+.user-message-area a {
+  transition: opacity 200ms cubic-bezier(.2, 0, 0, 1);
+}
+
+a[data-us-comms-log-held] {
+  opacity: .4;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .us-agreement-comms > .us-comms-log__status {
+  .us-agreement-comms > .us-comms-log__status,
+  a.back-link-control,
+  .user-message-area a {
     transition: none;
   }
 }
 
 /* US-COMMS-LOG:END */
+
+/* US-COMMS-FACETS:START — Audience chips on the Communications panel
+   (zUnionSuite.js, US-COMMS-FACETS). The chips, count and clear use the
+   contact facet styles; this adds the dot on the funnel while a chip is
+   pressed, as on the terms and increases panels, and room for the label:
+   "Audience" is wider than the shared 42px label column. */
+.us-records .us-contact-facets__row[data-us-contact-facet="audience"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.us-records[data-us-comms-facet-active] .us-iqa-filter-toggle {
+  position: relative;
+}
+
+.us-records[data-us-comms-facet-active] .us-iqa-filter-toggle::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-link);
+}
+
+/* US-COMMS-FACETS:END */
 
 /* US-SEND-RECIPIENTS:START — who an email will go to, above a Communication
    Creator: an empty <div class="us-send-recipients"></div> in a Content HTML

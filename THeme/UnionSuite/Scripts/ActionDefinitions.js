@@ -353,18 +353,22 @@
   // log row's Audience=Members), and a Content HTML iPart above it shows the
   // count only (us-send-recipients--summary) with a link back to the
   // agreement's Coverage tab. The IQA, API - Communication Recipient List -
-  // Members, has a hidden AgreementOrdinal = @url:AgreementNum filter.
-  // The send icon in the Covered Members report's heading (owner, 6 October
-  // 2026), as Email contacts in the Contacts heading; a labelled item in the
-  // banner's Actions menu. It emails every covered member, whatever the
-  // report's own filters show.
+  // Members, takes the agreement's ordinal directly in its AgreementOrdinal
+  // filter: queryparams=[{"Item1":"AgreementOrdinal","Item2":"123"}]. A
+  // value passed through @url:AgreementNum did not filter reliably (owner,
+  // 6 October 2026).
+  // A labelled button, send icon and "Email Members", in the Covered Members
+  // report's heading, and a labelled item in the banner's Actions menu
+  // (owner, 6 October 2026). It emails every covered member, whatever the
+  // report's own filters show, so it is drawn in the danger tone (red) to
+  // say it matters and needs care.
   const emailMembers = {
     page: '/_i4u_/Core/Collective_Agreements/v2/Popups/SendEmail-Members.aspx',
     query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List - Members',
-    agreementFilter: '@url:AgreementNum'
+    agreementFilter: 'AgreementOrdinal'
   };
   define('agreements.email-members', {
-    presentation: {label: 'Email members', icon: 'ti-send', default: 'button', header: 'icon', menu: 'menu-item'},
+    presentation: {label: 'Email Members', icon: 'ti-send', default: 'button', header: 'button', menu: 'menu-item', tone: 'danger'},
     context: {agreementId, agreementNum},
     action: {type: 'function', recordKey: ['agreementId'],
       run: ({context}) => location.assign(sendPage(emailMembers, context, 'Members', [

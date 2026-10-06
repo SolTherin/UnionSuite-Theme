@@ -2243,20 +2243,24 @@
 
     // A button cannot hold another button, so the row wraps the open button
     // and a copy button. The theme's shared US-COPY controller (zUnionSuite.js)
-    // copies the folder text, shows its tick and "Copied", and flashes the
-    // folder, as copy buttons do elsewhere.
+    // copies the full path, folder and name ("$/_i4u_/…/Jobs List", owner
+    // 6 October 2026), shows its tick and "Copied", and flashes the folder,
+    // as copy buttons do elsewhere.
     const row = document.createElement('div');
     row.className = 'us-recent-row';
     row.append(node);
     const path = node.querySelector('.us-recent-item__path');
     if (path) {
+      const fullPath = item.Path.trim();
+      const kind = section.type === 'iqa' ? 'IQA' : 'page';
       path.id = 'us-tb-recent-path-' + (++recentPathCount);
       const copy = document.createElement('button');
       copy.type = 'button';
       copy.className = 'us-copy us-recent-copy';
       copy.dataset.usCopyTarget = path.id;
-      copy.setAttribute('aria-label', 'Copy folder path: ' + folder);
-      copy.title = 'Copy folder path';
+      copy.dataset.usCopyText = fullPath;
+      copy.setAttribute('aria-label', 'Copy full ' + kind + ' path: ' + fullPath);
+      copy.title = 'Copy full ' + kind + ' path';
       row.append(copy);
     }
     return row;

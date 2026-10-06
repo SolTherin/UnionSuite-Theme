@@ -8312,7 +8312,9 @@ SOFTWARE.
       CommunicationLogKey, Audience and CommunicationType.
    Everything it reads or changes is inside .us-agreement-comms except
    iMIS's message, which iMIS renders in the page template, outside the
-   iPart; the script only reads its text. A status line at the top of the
+   iPart (the script reads its text, and holds its link back to the
+   agreement while it works), and the iPart's « Back link, also held. A
+   status line at the top of the
    iPart, directly under iMIS's message, follows the work (owner, 5 October
    2026): "Adding this email to agreement A107…" with a spinner, then
    "Added to agreement A107's communications.", or a warning that the email
@@ -8494,6 +8496,68 @@ SOFTWARE.
 
   let running = false;
 
+  // The ways back to the agreement are held while the email is being added
+  // (owner, 6 October 2026): leaving then would skip the link to the
+  // agreement. They are the iPart's « Back (a.back-link-control) and, in
+  // iMIS's sent message, the link to the same page ("Return to previous
+  // page"), matched on its address, not its words, which can be translated;
+  // the page's ReturnUrl counts too. The communication log link stays.
+  // Held links are dimmed, skipped by Tab and ignore clicks; they come back
+  // when the work ends, however it ends.
+  const BACK_LINK = 'a.back-link-control';
+  const HELD = 'data-us-comms-log-held';
+  let held = [];
+
+  const address = href => {
+    try {
+      const url = new URL(href, location.href);
+      return url.pathname.toLowerCase() + url.search;
+    } catch (_) {
+      return '';
+    }
+  };
+
+  function leavingLinks() {
+    const backs = [...document.querySelectorAll(BACK_LINK)];
+    const targets = new Set(backs.map(link => address(link.getAttribute('href') || '')));
+    const returnUrl = new URLSearchParams(location.search).get('ReturnUrl');
+    if (returnUrl) targets.add(address(returnUrl));
+    targets.delete('');
+    const returns = [...document.querySelectorAll('.user-message-area a[href]')]
+      .filter(link => targets.has(address(link.getAttribute('href'))));
+    return backs.concat(returns);
+  }
+
+  function blockHeld(event) {
+    if (!event.target.closest?.('[' + HELD + ']')) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function holdLinks(hold) {
+    if (hold) {
+      held = leavingLinks();
+      held.forEach(link => {
+        link.setAttribute(HELD, link.getAttribute('tabindex') ?? '');
+        link.setAttribute('aria-disabled', 'true');
+        link.tabIndex = -1;
+      });
+      document.addEventListener('click', blockHeld, true);
+      document.addEventListener('auxclick', blockHeld, true);
+      return;
+    }
+    held.forEach(link => {
+      const tabindex = link.getAttribute(HELD);
+      if (tabindex) link.setAttribute('tabindex', tabindex);
+      else link.removeAttribute('tabindex');
+      link.removeAttribute('aria-disabled');
+      link.removeAttribute(HELD);
+    });
+    held = [];
+    document.removeEventListener('click', blockHeld, true);
+    document.removeEventListener('auxclick', blockHeld, true);
+  }
+
   function ownerEntry() {
     return Object.entries(PAGES)
       .map(([ownerClass, config]) => ({owner: document.querySelector('.' + ownerClass), config}))
@@ -8516,6 +8580,7 @@ SOFTWARE.
       if (!/^\d+$/.test(details.record)) throw new Error('No agreement number (' + config.recordParameter + ') in the page address.');
       if (!details.subject) throw new Error('No subject on the page.');
       if (!details.audience || !details.type) throw new Error('Audience or CommunicationType in the address is not one of ' + config.audiences.concat(config.types).join(', ') + '.');
+      holdLinks(true);
       showStatus(owner, 'AsiInformation', 'Adding this email to ' + agreement + '…', true);
       busySince = Date.now();
       const key = await findLogKey(config, details);
@@ -8536,6 +8601,7 @@ SOFTWARE.
       await settle();
       showStatus(owner, 'AsiWarning', 'The email was sent, but it could not be added to ' + agreement + '. ' + error.message);
     } finally {
+      holdLinks(false);
       running = false;
     }
   }
@@ -9148,6 +9214,243 @@ SOFTWARE.
   window.UnionSuiteCommsRecipients = {load};
 })();
 /* US-COMMS-RECIPIENTS:END */
+
+/* US-COMMS-FACETS:START — Audience quick filters on the agreement's
+   Communications panel (owner, 6 October 2026): a Members and a Staff chip,
+   with counts, above the search in the theme's filter disclosure
+   (us-query-search); the count beside the panel title, with a clear; a dot
+   on the funnel while a chip is pressed. As the terms and increases chips,
+   and in the contact facet classes, so the agreement panels match.
+   No iPart class: the panel's CSS class field is full (98 of 100
+   characters). It switches on for a us-records list whose cards carry
+   their audience, as the Communications template already does on its
+   recipients block (data-us-comms-audience="{#query.Audience}"). Chips
+   exist when the list has two or more audiences. A card the chip excludes
+   gets the hidden attribute on its result section. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteCommsFacets) return;
+
+  // Members first (owner's order), then Staff, then any other.
+  const ORDER = ['members', 'staff'];
+  const AUDIENCE = '[data-us-comms-audience]';
+  const states = new WeakMap();
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  const wrapperOf = set => set.closest('.us-records');
+
+  function rowsOf(set) {
+    return [...set.children]
+      .filter(child => child.localName === 'section')
+      .map(section => ({section, card: section.querySelector('.us-record')}))
+      .filter(entry => entry.card)
+      .map(entry => {
+        const label = (entry.card.querySelector(AUDIENCE)?.getAttribute('data-us-comms-audience') || '').trim() || 'No audience';
+        return {section: entry.section, audience: label.toLowerCase(), label};
+      });
+  }
+
+  // Only lists whose cards carry an audience: other record lists (notes,
+  // the contact page's activity) are left alone.
+  const isComms = set => !!set.querySelector(':scope > section .us-record ' + AUDIENCE);
+
+  function audiences(rows) {
+    const labels = new Map();
+    rows.forEach(row => {
+      if (!labels.has(row.audience)) labels.set(row.audience, row.label);
+    });
+    const rank = audience => {
+      const index = ORDER.indexOf(audience);
+      return index < 0 ? ORDER.length : index;
+    };
+    return [...labels.keys()]
+      .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+      .map(audience => ({audience, label: labels.get(audience)}));
+  }
+
+  function chip(item) {
+    const button = el('button', 'us-contact-chip');
+    button.type = 'button';
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('data-us-contact-facet-value', item.audience);
+    button.append(el('span', '', item.label), el('span', 'us-contact-chip__count', ''));
+    return button;
+  }
+
+  function buildStrip() {
+    const strip = el('div', 'us-contact-facets us-contact-facets--filter');
+    const row = el('div', 'us-contact-facets__row');
+    row.setAttribute('data-us-contact-facet', 'audience');
+    row.append(el('span', 'us-contact-facets__label', 'Audience'), el('div', 'us-contact-facets__chips'));
+    strip.append(row);
+    return strip;
+  }
+
+  // Beside the panel title: the count, the pressed audience and a clear.
+  function buildHeadingCount() {
+    const node = el('span', 'us-contact-facets__heading-count');
+    node.setAttribute('role', 'status');
+    node.setAttribute('aria-live', 'polite');
+    node.setAttribute('aria-atomic', 'true');
+    const clear = el('button', 'us-contact-facets__clear us-contact-facets__clear--icon');
+    clear.type = 'button';
+    clear.hidden = true;
+    clear.setAttribute('aria-label', 'Clear the communication filters');
+    clear.title = 'Clear the communication filters';
+    const icon = el('i', 'ti ti-x');
+    icon.setAttribute('aria-hidden', 'true');
+    clear.append(icon);
+    node.append(el('span', 'us-contact-facets__count', ''), clear);
+    return node;
+  }
+
+  function onClick(set, event) {
+    const state = states.get(set);
+    const target = event.target.closest('button');
+    if (!state || !target) return;
+    if (target.classList.contains('us-contact-facets__clear')) {
+      state.filter = null;
+      // The clear also empties the text search, as on the other panels.
+      const input = wrapperOf(set)?.querySelector(':scope > .panel > .us-query-search-controls input');
+      if (input && input.value) {
+        input.value = '';
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+    } else if (target.classList.contains('us-contact-chip')) {
+      const value = target.getAttribute('data-us-contact-facet-value');
+      state.filter = state.filter === value ? null : value;
+    } else {
+      return;
+    }
+    apply(set);
+  }
+
+  // Chips are rebuilt only when the audiences change; counts and pressed
+  // state update in place, so focus stays on the chip just pressed.
+  function syncChips(container, items) {
+    const current = [...container.querySelectorAll('.us-contact-chip')];
+    const same = current.length === items.length &&
+      current.every((node, index) => node.getAttribute('data-us-contact-facet-value') === items[index].audience);
+    if (!same) container.replaceChildren(...items.map(chip));
+  }
+
+  // The chips live in the theme's filter disclosure (us-query-search).
+  function mount(state, set) {
+    const controls = wrapperOf(set).querySelector(':scope > .panel > .us-query-search-controls');
+    if (!controls) {
+      state.strip.remove();
+      return;
+    }
+    if (controls.firstElementChild !== state.strip) controls.prepend(state.strip);
+  }
+
+  function mountHeadingCount(state, set) {
+    const title = wrapperOf(set).querySelector(':scope > .panel > .panel-heading > .panel-title');
+    if (!title) {
+      state.headingCount.remove();
+      return;
+    }
+    if (title.nextElementSibling !== state.headingCount) title.after(state.headingCount);
+  }
+
+  function apply(set) {
+    const state = states.get(set);
+    const wrapper = wrapperOf(set);
+    if (!state || !wrapper) return;
+    const rows = rowsOf(set);
+    const total = rows.length;
+    const items = audiences(rows);
+    const noun = total === 1 ? 'communication' : 'communications';
+    mountHeadingCount(state, set);
+    const count = state.headingCount.querySelector('.us-contact-facets__count');
+    const clear = state.headingCount.querySelector('.us-contact-facets__clear');
+
+    // One audience, or none: nothing to filter by.
+    if (items.length < 2) {
+      rows.forEach(row => {
+        if (row.section.hidden) row.section.hidden = false;
+      });
+      state.filter = null;
+      state.strip.remove();
+      wrapper.removeAttribute('data-us-comms-facet-active');
+      count.replaceChildren(total + ' ' + noun);
+      clear.hidden = true;
+      return;
+    }
+    mount(state, set);
+    if (state.filter && !items.some(item => item.audience === state.filter)) state.filter = null;
+
+    const chips = state.strip.querySelector('.us-contact-facets__chips');
+    syncChips(chips, items);
+    chips.querySelectorAll('.us-contact-chip').forEach(node => {
+      const value = node.getAttribute('data-us-contact-facet-value');
+      node.querySelector('.us-contact-chip__count').textContent = String(rows.filter(row => row.audience === value).length);
+      node.setAttribute('aria-pressed', String(state.filter === value));
+    });
+
+    // Rows, then the count, which follows the theme's text search too.
+    let shown = 0, searching = false;
+    rows.forEach(row => {
+      const match = !state.filter || row.audience === state.filter;
+      const searchHidden = row.section.hasAttribute('data-us-query-search-hidden');
+      if (searchHidden) searching = true;
+      if (match && !searchHidden) shown++;
+      if (row.section.hidden !== !match) row.section.hidden = !match;
+    });
+    const filtered = !!state.filter || searching;
+    count.replaceChildren(filtered ? shown + ' of ' + total + ' ' + noun : total + ' ' + noun);
+    if (state.filter) count.append(' · ', el('span', 'us-contact-facets__token', items.find(item => item.audience === state.filter).label));
+    clear.hidden = !filtered;
+    wrapper.toggleAttribute('data-us-comms-facet-active', !!state.filter);
+  }
+
+  function stateFor(set) {
+    let state = states.get(set);
+    if (!state) {
+      state = {filter: null, strip: buildStrip(), headingCount: buildHeadingCount()};
+      state.strip.addEventListener('click', event => onClick(set, event));
+      state.headingCount.addEventListener('click', event => onClick(set, event));
+      states.set(set, state);
+    }
+    return state;
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      document.querySelectorAll('.us-records .QueryTemplateSet').forEach(set => {
+        if (set.closest('.us-report-no-styling') || !isComms(set)) return;
+        stateFor(set);
+        apply(set);
+      });
+    });
+  }
+
+  // The search controls arrive after the rows (US-QUERY-SEARCH builds them),
+  // so their arrival and the search's own marks reschedule this.
+  document.addEventListener('us:panel-actions-ready', schedule);
+  document.addEventListener('us:query-template-refreshed', schedule);
+  document.addEventListener('us:cco-tab-shown', schedule);
+  new MutationObserver(records => {
+    if (records.some(record => (record.type === 'childList' &&
+        [...record.addedNodes, ...record.removedNodes].some(node => node.localName === 'section' || node.localName === 'div')) ||
+        (record.type === 'attributes' && record.target.closest?.('.us-records')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-query-search-hidden']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+
+  window.UnionSuiteCommsFacets = Object.freeze({refresh: schedule, version: '1.0'});
+})();
+/* US-COMMS-FACETS:END */
 
 /* US-ACTION-MENUS:START — approved option 5; explicit actions, no evaluated HTML. */
 (function(){
@@ -15785,7 +16088,11 @@ SOFTWARE.
     button.setAttribute('aria-busy','true');
     try {
       if (!target || target.contains(button)) throw new Error('Missing, duplicate or recursive target');
-      var text = (target.matches('input,textarea') ? target.value : target.textContent).trim();
+      // data-us-copy-text on the button copies that instead of the target's
+      // text; the target still flashes (taskbar Recents: the visible folder
+      // flashes, the full path is copied).
+      var given = button.getAttribute('data-us-copy-text');
+      var text = (given != null ? given : target.matches('input,textarea') ? target.value : target.textContent).trim();
       if (!text) throw new Error('Empty target');
       if (navigator.clipboard && navigator.clipboard.writeText) {
         try { await navigator.clipboard.writeText(text); } catch (_) { fallback(text); }
