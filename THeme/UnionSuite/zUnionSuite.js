@@ -5239,15 +5239,18 @@ SOFTWARE.
 /* US-CONTACT-COPY:START — copy a contact's email or phone from its icon.
    The icon is a .us-contact-tile__copy button on the same line as the
    value, which is marked .us-contact-tile__value (a class, because the iMIS
-   editor can strip a bare span and turns <i> into <em>). Pressing it copies
-   the value, swaps the icon for a green copy icon and flashes the
-   line, with no visible text; a hidden status line tells screen readers.
+   editor can strip a bare span and turns <i> into <em>). Pointing at the
+   icon shows a copy icon (CSS); pressing it copies the value, turns the
+   icon into a green tick and flashes the line, with no visible text; a
+   hidden status line tells screen readers. The icons are drawn by the
+   stylesheet from data-us-copied, so the template's icon class stays.
    A button whose value is blank is disabled, so it does nothing. */
 (function () {
   'use strict';
   if (window.UnionSuiteContactCopy) return;
 
-  const FLASH_MS = 1400;
+  // The tick shows for as long as the shared copy glow (us-copy-glow, 1.6s).
+  const FLASH_MS = 1600;
   const timers = new WeakMap();
   let status = null;
 
@@ -5295,20 +5298,16 @@ SOFTWARE.
 
   function flash(button) {
     const line = button.parentElement;
-    const icon = button.querySelector('.ti');
-    if (!icon) return;
-    if (!icon.dataset.usIcon) icon.dataset.usIcon = icon.className;
     clearTimeout(timers.get(button));
-    // Restart the flash even on a quick second press.
+    // Restart the tick and the flash even on a quick second press.
     line.removeAttribute('data-us-copied');
+    button.removeAttribute('data-us-copied');
     void line.offsetWidth;
     line.setAttribute('data-us-copied', '');
     button.setAttribute('data-us-copied', '');
-    icon.className = 'ti ti-copy';
     timers.set(button, setTimeout(() => {
       line.removeAttribute('data-us-copied');
       button.removeAttribute('data-us-copied');
-      icon.className = icon.dataset.usIcon;
     }, FLASH_MS));
   }
 
