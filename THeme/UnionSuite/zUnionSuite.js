@@ -7395,6 +7395,56 @@ SOFTWARE.
 })();
 /* US-IQA-NATIVE-ACTIONS:END */
 
+/* US-GRID-SHOW-ALL:START — the native pager's "Show all N" through page size.
+   iMIS's own Show all command returns the grid empty: the async postback
+   succeeds, but the grid comes back with no table, on native pages without
+   the theme too (Panel Designer properties, 7 October 2026). Changing the
+   page size is a separate RadGrid command that works, so a Show all click
+   sets the page size to N instead. With one page, Telerik hides the pager as
+   it would after a working Show all; reloading the page restores paging.
+   Anything unexpected leaves the native click alone. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteGridShowAll) return;
+
+  // The item count from the control's own label, else the pager summary.
+  function itemCount(control, pager) {
+    const label = control.value || control.textContent || '';
+    const summary = pager.querySelector('.rgInfoPart strong');
+    const text = /\d/.test(label) ? label : (summary ? summary.textContent : '');
+    const count = parseInt(text.replace(/[^\d]/g, ''), 10);
+    return count > 0 ? count : 0;
+  }
+
+  // A table view registers under its table's id, so this finds the view the
+  // pager belongs to, including a nested detail table. Expand moves the
+  // pager out of its table into a pinned footer; that one is the grid's
+  // master view.
+  function tableView(pager) {
+    const table = pager.closest('table.rgMasterTable[id], table.rgDetailTable[id]');
+    if (table) return window.$find(table.id);
+    const grid = pager.closest('.us-iqa-pinned-pager') && pager.closest('.RadGrid[id]');
+    const control = grid && window.$find(grid.id);
+    return control && control.get_masterTableView ? control.get_masterTableView() : null;
+  }
+
+  // Capture phase, so this runs before the control's inline postback.
+  document.addEventListener('click', event => {
+    const control = event.target.closest?.('.rgPager [id$="_ShowAll"]');
+    if (!control || !window.$find) return;
+    const pager = control.closest('.rgPager');
+    const view = tableView(pager);
+    const count = itemCount(control, pager);
+    if (!view || typeof view.set_pageSize !== 'function' || !count) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    view.set_pageSize(count);
+  }, true);
+
+  window.UnionSuiteGridShowAll = Object.freeze({version: '1.0'});
+})();
+/* US-GRID-SHOW-ALL:END */
+
 /* US-THEME-UPLOAD-DROP:START — native input events retain Telerik processing. */
 (function(){
  if(window.UnionSuiteThemeUpload)return;
