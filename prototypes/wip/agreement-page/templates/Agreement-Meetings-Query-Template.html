@@ -13,7 +13,9 @@
      Rows per page: 30. No results: "No meetings scheduled."
 
      Fields (aliases from the current template):
-     Ordinal (required)      meeting ordinal; opens the meeting
+     Ordinal (required)      meeting ordinal; the pencil (agreements.edit-meeting)
+                             opens the meeting (owner, 7 October 2026: the
+                             title is plain text)
      Date-ISO (required)     yyyy-MM-dd; past meetings are worked out from it
                              and hidden until "Show past meetings"
      Date-Month (required)   short month (Aug)
@@ -32,10 +34,11 @@
     <span class="us-meeting__day">{#query.Date-Day}</span>
   </span>
   <span class="us-meeting__copy">
-    <a class="us-meeting__title us-action-agreements-view-meeting" href="#" data-ordinal="{#query.Ordinal}">{#query.MeetingType} – {#query.Matter}</a>
+    <span class="us-meeting__title">{#query.MeetingType} – {#query.Matter}</span>
     <span class="us-meeting__meta">
       <span>{#query.Date-Time}</span>
       <span>{#query.Location}</span>
     </span>
   </span>
+  <button type="button" class="us-action-agreements-edit-meeting" data-ordinal="{#query.Ordinal}"></button>
 </div>

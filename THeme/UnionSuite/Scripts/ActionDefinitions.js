@@ -419,19 +419,24 @@
   const noteDetails = mode => ({context}) => page('/_i4u_/Core/Zidebar/NoteDetails.aspx', {
     NoteOrdinal: context.ordinal, AgreementID: context.agreementId, ...(mode ? {[mode]: 'true'} : {})
   });
+  // A row's edit is a pencil at its end everywhere on the page, and task,
+  // milestone and meeting titles are plain text (owner, 6 and 7 October
+  // 2026): these popups open forms that change the record. The open-link
+  // actions remain for the earlier templates' title links.
   rowPopup('agreements.view-note', 'Open note', openLink, noteDetails(''), 'Note', formWidth);
-  // The eye button on a ledger note row (us-notes--ledger); same popup as Open note.
-  rowPopup('agreements.preview-note', 'View note', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails(''), 'Note', formWidth);
+  // The button on a ledger or reading note row (us-notes--ledger,
+  // us-notes--reading); it was an eye. Its key stays, so the templates need
+  // no change.
+  rowPopup('agreements.preview-note', 'Edit note', editIcon, noteDetails(''), 'Note', formWidth);
   rowPopup('agreements.view-task', 'Open task', openLink, noteDetails('Task'), 'Task', formWidth);
-  // The eye button at the end of a task row; same popup as the title link.
-  rowPopup('agreements.preview-task', 'View task', {icon: 'ti-eye', default: 'button', row: 'icon'}, noteDetails('Task'), 'Task', formWidth);
-  // The earlier milestone template's title link; the current template has
-  // a plain title and the pencil below (owner, 7 October 2026).
+  rowPopup('agreements.edit-task', 'Edit task', editIcon, noteDetails('Task'), 'Task', formWidth);
+  // The earlier task template's eye button, a pencil now too.
+  rowPopup('agreements.preview-task', 'Edit task', editIcon, noteDetails('Task'), 'Task', formWidth);
   rowPopup('agreements.view-milestone', 'Open milestone', openLink, noteDetails('Milestones'), 'Milestone', formWidth);
   rowPopup('agreements.edit-milestone', 'Edit milestone', editIcon, noteDetails('Milestones'), 'Milestone', formWidth);
-  rowPopup('agreements.view-meeting', 'Open meeting', openLink,
-    ({context}) => page('/Agreements_EditMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum, MeetingOrdinal: context.ordinal}),
-    'Edit meeting', formWidth);
+  const meetingForm = ({context}) => page('/Agreements_EditMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum, MeetingOrdinal: context.ordinal});
+  rowPopup('agreements.view-meeting', 'Open meeting', openLink, meetingForm, 'Edit meeting', formWidth);
+  rowPopup('agreements.edit-meeting', 'Edit meeting', editIcon, meetingForm, 'Edit meeting', formWidth);
   rowPopup('agreements.edit-contact', 'Edit contact', editIcon,
     ({context}) => page('/_i4u_/Core/Collective_Agreements/Contact/Edit-Contact-Information.aspx', {ID: context.ordinal}),
     'Edit contact', formWidth);

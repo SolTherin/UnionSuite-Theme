@@ -127,6 +127,15 @@ the theme alone:
   saver in `Scripts/ActionDefinitions.js`. Option 7 (tasks linked to
   stages) is not promoted: `milestone-tasks.candidate.*` until tasks can be
   linked in iMIS.
+- Edits are a pencil, 7 October 2026 (owner, 6 October 2026: "the eye and
+  pen icon seem to be used interchangeably for edit"): a popup that can
+  change the record is a pencil at the end of its row; the eye stays only
+  for a real look (attachment View). Tasks: plain title, `agreements.edit-task`
+  (the earlier template's eye, `agreements.preview-task`, is a pencil too).
+  Meetings: plain title and `agreements.edit-meeting`. Notes:
+  `agreements.preview-note` is now "Edit note" with a pencil (no template
+  change; note titles keep their links). Milestones: decision 16.
+  Templates: Tasks and Meetings (paste both in iMIS).
 - Banner ID chip, 7 October 2026 (owner): the copy icon is hidden at rest
   and slides out on hover, the ID centred until then; the chip keeps its
   width. Shared by the agreement, case and member banners: the member
@@ -829,7 +838,7 @@ guide (templates, field definitions and component sections).
     - A task past its due date says "Overdue" in red after its date, and
       the stage adds "· 1 overdue" (Milestones IQA: `TasksOverdue`).
     - Each task has a pencil, shown on hover or focus (always on touch
-      screens): `agreements.edit-task`, the task in NoteDetails
+      screens): `agreements.edit-stage-task`, the task in NoteDetails
       (`Task=true`); closing it reloads the stage's tasks. This is the
       `agreements.preview-task` eye becoming a pencil, as agreed for the
       Tasks panel.

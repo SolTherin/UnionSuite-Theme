@@ -9,14 +9,14 @@
      iPart CSS class: us-agreement-notes (add us-panel-fill when it shares a row)
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-notes us-notes--ledger us-query-search us-list-scroll us-action-agreements-add-note
-     Actions: us-action-agreements-preview-note on each row (icon presentation), defined
-     in agreement-actions.candidate.js.
+     Actions: us-action-agreements-preview-note on each row, an Edit note pencil
+     (it was an eye; owner, 7 October 2026), defined in ActionDefinitions.js.
      Native title: Notes. Display in cards: unchecked. Display in columns: unchecked.
      Header/Footer blank. Rows per page: 30. No results: "No notes yet."
 
      Fields (the same aliases as Agreement-Notes-Query-Template.html):
-     Ordinal (required)      note ordinal; the eye icon (agreements.preview-note, an
-                             icon-only row action in agreement-actions.candidate.js) opens it
+     Ordinal (required)      note ordinal; the pencil (agreements.preview-note, an
+                             icon-only row action in ActionDefinitions.js) opens it
      Note (required)         note text; three lines, all of it after More. For a
                              restricted note the IQA returns the word
                              "Restricted" instead, so the text never reaches

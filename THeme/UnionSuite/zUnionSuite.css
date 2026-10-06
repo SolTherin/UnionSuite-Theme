@@ -14056,8 +14056,17 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   text-decoration: none;
 }
 
-.us-meeting .us-meeting__title:hover {
+/* Only the earlier template's title is a link; the current one is plain
+   text and the pencil opens the meeting (owner, 7 October 2026). */
+.us-meeting a.us-meeting__title:hover {
   text-decoration: underline;
+}
+
+/* The pencil (agreements.edit-meeting) at the end of the row, centred on
+   the date tile. */
+.us-meeting > .us-action-agreements-edit-meeting {
+  flex: none;
+  align-self: center;
 }
 
 .us-meeting__meta {
@@ -14536,8 +14545,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   margin-inline-start: auto;
 }
 
-/* The view action (agreements.preview-note) is painted by the theme as an
-   icon button; the ledger only sits it after the badges. Its 36px square
+/* The edit action (agreements.preview-note, a pencil) is painted by the
+   theme as an icon button; the ledger only sits it after the badges. Its 36px square
    would lift the author off the date line, so it overhangs the 18px line
    instead; the row padding absorbs the overhang. */
 .us-note--ledger .us-note__aside .us-note__open:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -18826,11 +18835,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   display: contents;
 }
 
-/* The title wins every tie for width and is the affordance for opening the
-   task. Medium weight, so a long list scans without every row shouting.
+/* The title wins every tie for width. Medium weight, so a long list scans
+   without every row shouting. It is plain text now and the pencil opens the
+   task (owner, 7 October 2026); the earlier template's title is a link.
    Matched as a.us-task__title on purpose: dark mode colours links inside
    .panel-body at (0,3,1), so a class-only rule loses and titles turn link blue. */
-.us-task--detail a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-task--detail :is(a, span).us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   grid-area: title;
   justify-content: flex-start;
   max-width: 62ch;
@@ -18961,8 +18971,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   color: var(--success);
 }
 
-.us-task--detail.us-task--complete a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)),
-.us-task--detail[data-us-task-completed="true" i] a.us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-task--detail.us-task--complete :is(a, span).us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-task--detail[data-us-task-completed="true" i] :is(a, span).us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   color: var(--text-muted);
   text-decoration: line-through;
 }

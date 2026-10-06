@@ -25,7 +25,8 @@
 
      Ticking the box plays the theme's completion effect and saves through
      CloudToolz /ca/complete-task (data-us-task-save="agreements.item-status").
-     The title and the eye button both open the task.
+     The title is plain text; the pencil (agreements.edit-task) opens the task
+     (owner, 7 October 2026: edits are a pencil at the end of the row).
      Replaces the old toggleTask() and confetti; the count, assignee
      search and view button return through theme options. -->
 <div class="us-task us-task--detail" data-us-task-completed="false" data-us-task-state="{#query.TAskCheckCSS}"
@@ -37,7 +38,7 @@
   </button>
   <div class="us-task__open">
     <span class="us-task__copy">
-      <a class="us-task__title us-action-agreements-view-task" href="#" data-ordinal="{#query.Ordinal}">{#query.Note}</a>
+      <span class="us-task__title">{#query.Note}</span>
     </span>
     <span class="us-task__meta">
       <span class="us-task__member">
@@ -49,6 +50,6 @@
   </div>
   <span class="us-task__aside">
     <span class="us-badge us-badge--danger">{#query.PriorityBadge}</span>
-    <button type="button" class="us-action-agreements-preview-task" data-ordinal="{#query.Ordinal}"></button>
+    <button type="button" class="us-action-agreements-edit-task" data-ordinal="{#query.Ordinal}"></button>
   </span>
 </div>

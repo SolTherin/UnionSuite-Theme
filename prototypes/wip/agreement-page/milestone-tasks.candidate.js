@@ -12,7 +12,7 @@
      through /ca/complete-task, as on the Tasks panel, then moves it to the
      other group; the counts and the progress bar follow. A task past its
      due date says "Overdue". Each task has a pencil for the full task
-     (agreements.edit-task, NoteDetails).
+     (agreements.edit-stage-task, NoteDetails).
    - When the last open task is ticked, the stage offers "Complete stage"
      (through UnionSuiteMilestones.setStatus, in the theme); it is never automatic.
    - The foot of the list adds a task to the stage: type and press Enter.
@@ -223,7 +223,7 @@
     // The pencil opens the full task, as everywhere on the page.
     const edit = document.createElement('button');
     edit.type = 'button';
-    edit.className = 'us-action-agreements-edit-task us-milestone-task__edit';
+    edit.className = 'us-action-agreements-edit-stage-task us-milestone-task__edit';
     edit.setAttribute('data-ordinal', ordinal);
     item.append(check, copy, edit);
     writeMeta(item);
@@ -443,10 +443,10 @@
     const agreementId = {from: 'query', parameter: 'AgreementID', required: true, validate: value => /^[A-Za-z0-9_-]+$/.test(String(value)) || 'Invalid agreement ID.'};
     const rowOrdinal = {from: 'trigger', attribute: 'data-ordinal', required: true, validate: value => /^\d+$/.test(String(value)) || 'Invalid record ordinal.'};
     try {
-      actions.define('agreements.edit-task', {
-        className: 'us-action-agreements-edit-task',
+      actions.define('agreements.edit-stage-task', {
+        className: 'us-action-agreements-edit-stage-task',
         owner: 'UnionSuite',
-        source: 'milestone-tasks.candidate.js:agreements.edit-task',
+        source: 'milestone-tasks.candidate.js:agreements.edit-stage-task',
         presentation: {label: 'Edit task', icon: 'pencil', default: 'button', row: 'icon', menu: 'menu-item'},
         context: {agreementId, ordinal: rowOrdinal},
         action: {
@@ -467,7 +467,7 @@
         }
       });
     } catch (error) {
-      console.warn('agreements.edit-task is already defined; the stage tasks use it.');
+      console.warn('agreements.edit-stage-task is already defined.');
     }
   }
 
