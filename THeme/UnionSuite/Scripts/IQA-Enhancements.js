@@ -23,6 +23,9 @@
  *     • DragSort            — Display options toolbar + drag ordering (on by default)
  *     • FilterWorkspace     — compact Filters layout + staged within-group reorder
  *     • SourceWorkspace     — staged business-object reorder with one final refresh
+ *     • Branchify           — adds i4u_UT_EntityAccess and its "@LoggedInUser"
+ *                             filter in the background; the Branchify tab in the
+ *                             relationship editor joins it
  *     • TemplateHtml        — Template tab HTML view: highlighting, formatting,
  *                             tag pairing and {#query.…} field suggestions, from
  *                             the shared Scripts/HtmlSourceEditor.js
@@ -2194,8 +2197,64 @@ function createSourceWorkspace() {
   const SourceWorkspace = createSourceWorkspace();
   // END SOURCE WORKSPACE V1
 
+  // BEGIN NATIVE BACKGROUND POSTS
+/* One native postback built from a page's own form (the visible document or a
+ * previous response), with only the named fields changed, for features that run
+ * several native steps in the background before one refresh. The response is
+ * parsed, never inserted, and its scripts never run. onRequest is called once
+ * the request is sent: from then the server may have applied the step even if
+ * the fetch fails, so the caller must not retry on the old form.
+ */
+function createNativePost() {
+  function checkURL(value, base, original, stage, allowed = []) {
+    const url = new URL(value, base), start = new URL(original); url.hash = ''; start.hash = '';
+    const query = item => { const params = new URLSearchParams(item.search); params.sort(); return params.toString(); };
+    const endpoint = item => item.origin === start.origin && item.pathname.toLowerCase() === start.pathname.toLowerCase();
+    if (!endpoint(url) || (stage === 'response' && ![start, ...allowed.map(item => new URL(item))].some(item => endpoint(item) && query(item) === query(url)))) {
+      throw new Error('response-or-action-url-changed');
+    }
+    return url.href;
+  }
+  // The target a select's own setTimeout('__doPostBack(…)') onchange posts to.
+  function postbackTarget(control) {
+    return /__doPostBack\(\\?'([^'\\]+)\\?'/.exec(control?.getAttribute('onchange') || '')?.[1] || null;
+  }
+  async function post(page, original, { changes = {}, target = '', argument = '', onRequest } = {}) {
+    const form = page.doc.querySelector('input[name="__VIEWSTATE"]')?.form;
+    if (!form || form.method.toLowerCase() !== 'post') throw new Error('native-post-form-unavailable');
+    const url = checkURL(form.getAttribute('action') || page.url, page.url, original, 'action');
+    const data = new FormData(form);
+    data.delete('__ASYNCPOST');
+    data.set('__EVENTTARGET', target); data.set('__EVENTARGUMENT', argument);
+    Object.entries(changes).forEach(([name, value]) => data.set(name, value));
+    const body = new URLSearchParams();
+    for (const [name, value] of data) {
+      if (typeof value === 'string') body.append(name, value);
+      else if (value.size > 0) throw new Error('file-upload-present');
+    }
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 30000);
+    onRequest?.();
+    try {
+      const response = await fetch(url, { method: 'POST', body, credentials: 'same-origin', redirect: 'follow', signal: controller.signal, headers: { Accept: 'text/html' } });
+      const finalURL = checkURL(response.url, page.url, original, 'response', [url, page.url]);
+      if (!response.ok || !/text\/html/i.test(response.headers.get('content-type') || '')) throw new Error('non-html-or-error-response');
+      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+      if ([...doc.querySelectorAll('[id$="_ErrorMsgLabel"]')].some(label => label.textContent.trim())) throw new Error('native-error-message');
+      return { doc, url: finalURL };
+    } finally { clearTimeout(timer); }
+  }
+  return { post, postbackTarget };
+}
+
+  const NativePost = createNativePost();
+  // END NATIVE BACKGROUND POSTS
+
   // BEGIN RELATIONSHIP WORKSPACE V1
-/* Sources relationship editor. All additions still use the native Add action. */
+/* Sources relationship editor. Join by ID, Branchify and Choose fields open
+ * the native field controls and add in the background (NativePost), then
+ * refresh once, showing the fields in this page's own selects. When the native
+ * field controls are already open, and for Predefined relationship, the native
+ * controls are used. */
 function createRelationshipWorkspace() {
   function editorURL(value, base) {
     const url = new URL(value, base); url.hash = ''; url.searchParams.sort();
@@ -2208,7 +2267,7 @@ function createRelationshipWorkspace() {
     return { ...data, urls: [...new Set(urls)], at };
   }
   function readIntent(saved, current, now = Date.now()) {
-    if (!saved || !['id', 'fields', 'predefined'].includes(saved.mode) || !Number.isFinite(saved.at) || now - saved.at < 0 || now - saved.at >= 300000) return null;
+    if (!saved || !['id', 'entity', 'fields', 'predefined'].includes(saved.mode) || !Number.isFinite(saved.at) || now - saved.at < 0 || now - saved.at >= 300000) return null;
     try {
       const urls = saved.urls || [saved.url];
       return urls.some(url => typeof url === 'string' && editorURL(url) === editorURL(current)) ? saved : null;
@@ -2222,6 +2281,17 @@ function createRelationshipWorkspace() {
     return sources.flatMap(source => {
       const matches = fields.filter(item => item.slot === source.slot && /^id$/i.test(item.property));
       return matches.length === 1 ? [{ ...matches[0], alias: source.alias }] : [];
+    });
+  }
+  // The Branchify tab: a branch code on any other business object, against
+  // i4u_UT_EntityAccess's EntityCode (see Branchify).
+  const ENTITY_ACCESS = /^_?i4u_UT_EntityAccess$/i, ENTITY_CODE = /^(org_?code|entity_?code)$/i;
+  function entityFields(fields, sources, side) {
+    return fields.flatMap(item => {
+      const source = sources.find(entry => entry.slot === item.slot);
+      if (!source) return [];
+      const wanted = side === 'access' ? source.access && /^entitycode$/i.test(item.property) : !source.access && ENTITY_CODE.test(item.property);
+      return wanted ? [{ ...item, alias: source.alias }] : [];
     });
   }
   function isDuplicate(relations, left, right, type) {
@@ -2259,8 +2329,82 @@ function createRelationshipWorkspace() {
     } finally { combo.commitChanges(); }
     if (combo.get_value() !== value) throw new Error('field-selection-failed');
   }
-  if (typeof document === 'undefined') return { field, idFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent };
+  // A field picker's item list from its startup $create(…, {"itemData":[…]}, …,
+  // $get("id")). Responses are parsed, never run, so this is read as text.
+  function itemData(scripts, id) {
+    for (const text of scripts) {
+      let at = text.indexOf('$get("' + id + '")'); if (at < 0) at = text.indexOf("$get('" + id + "')");
+      if (at < 0) continue;
+      const start = text.lastIndexOf('$create(', at), key = text.indexOf('"itemData":', start);
+      if (start < 0 || key < 0 || key > at) continue;
+      const open = key + '"itemData":'.length;
+      let depth = 0, quoted = false, end = -1;
+      for (let i = open; i < at && end < 0; i++) {
+        const c = text[i];
+        if (quoted) { if (c === '\\') i++; else if (c === '"') quoted = false; }
+        else if (c === '"') quoted = true;
+        else if (c === '[' || c === '{') depth++;
+        else if ((c === ']' || c === '}') && --depth === 0) end = i;
+      }
+      if (end > open) return JSON.parse(text.slice(open, end + 1));
+    }
+    return null;
+  }
+  if (typeof document === 'undefined') return { field, idFields, entityFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent, itemData };
   const KEY = 'iqa:relationship-intent:v1';
+
+  // The relationship editor in a page or response: the "Predefined relationship"
+  // select, whose Custom value opens the field controls.
+  function kindSelect(doc) {
+    return [...doc.querySelectorAll('select')].find(select => [...select.options].some(option => option.value === 'Custom')
+      && [...select.options].some(option => option.value === 'None') && select.closest('tr')?.querySelector('.JoinButton')) || null;
+  }
+  const relationCount = doc => [...doc.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).length;
+  // The field controls in a response with Custom selected: each picker's posted
+  // names and items (text from its dropdown list, values from its itemData),
+  // the join type and the hidden AddJoin submit that ConfirmCrossJoin clicks.
+  function readFieldEditor(doc) {
+    const kind = kindSelect(doc);
+    if (kind?.value !== 'Custom') throw new Error('field-controls-not-open');
+    const row = kind.closest('tr'), scripts = [...doc.querySelectorAll('script')].map(script => script.textContent);
+    const type = row.querySelector('select[id$="_mRelationTypeDropDown"]');
+    const addJoin = doc.querySelector('input[type="submit"][name$="$AddJoin"]');
+    const combos = [...row.querySelectorAll('.RadComboBox[id]')].map(node => {
+      const input = node.querySelector('input.rcbInput'), state = doc.getElementById(node.id + '_ClientState');
+      const texts = [...(doc.getElementById(node.id + '_DropDown')?.querySelectorAll('li') || [])].map(item => item.textContent.trim());
+      const data = itemData(scripts, node.id);
+      if (!input?.name || !state?.name || !texts.length || !Array.isArray(data) || data.length !== texts.length) throw new Error('field-list-unreadable');
+      const items = texts.map((text, index) => data[index]?.enabled === false ? null : field(data[index]?.value ?? text, text)).filter(Boolean);
+      return { inputName: input.name, stateName: state.name, items };
+    });
+    if (combos.length !== 2 || !type?.name || !addJoin?.name) throw new Error('field-controls-incomplete');
+    return { combos, type: { name: type.name, value: type.value, options: [...type.options].map(option => ({ value: option.value, text: option.text })) }, addJoin: { name: addJoin.name, value: addJoin.value } };
+  }
+  // Background step: select Custom, as the native select's own postback does.
+  async function openFieldsInBackground(page, original, onRequest) {
+    const kind = kindSelect(page.doc);
+    if (!kind?.name) throw new Error('relationship-editor-unavailable');
+    if (kind.value !== 'Custom') {
+      const target = NativePost.postbackTarget(kind);
+      if (!target) throw new Error('relationship-postback-unavailable');
+      page = await NativePost.post(page, original, { changes: { [kind.name]: 'Custom' }, target, onRequest });
+    }
+    return { page, editor: readFieldEditor(page.doc) };
+  }
+  // Background step: both pickers' text and client state, the join type and the
+  // AddJoin submit, as the native Add posts them; one more relationship after.
+  async function addInBackground(page, original, editor, left, right, type, onRequest) {
+    const changes = { [editor.type.name]: type, [editor.addJoin.name]: editor.addJoin.value };
+    [left, right].forEach((item, side) => {
+      const combo = editor.combos[side];
+      changes[combo.inputName] = item.text;
+      changes[combo.stateName] = JSON.stringify({ logEntries: [], value: item.value, text: item.text, enabled: true, checkedIndices: [], checkedItemsTextOverflows: false });
+    });
+    const before = relationCount(page.doc);
+    const next = await NativePost.post(page, original, { changes, onRequest });
+    if (relationCount(next.doc) <= before) throw new Error('relationship-not-added');
+    return next;
+  }
   let mounted = null, undo = [], timer = null;
   function el(tag, text, className) { const node = document.createElement(tag); if (text != null) node.textContent = text; if (className) node.className = className; return node; }
   function listen(node, event, callback) { node.addEventListener(event, callback); undo.push(() => node.removeEventListener(event, callback)); }
@@ -2342,11 +2486,28 @@ function createRelationshipWorkspace() {
     const leftID = el('select'), rightID = el('select'); leftID.id = 'iqaJoinIdLeft'; rightID.id = 'iqaJoinIdRight';
     const idLeftBox = el('div'), idRightBox = el('div'); labelBox(idLeftBox, 'Left business object', leftID); labelBox(idRightBox, 'Right business object', rightID);
     idLeftBox.appendChild(leftID); idRightBox.appendChild(rightID); idPanel.append(idLeftBox, idRightBox);
+    const leftLabel = idLeftBox.querySelector('label'), rightLabel = idRightBox.querySelector('label');
+    // Source rows, read once: their alias and whether each is i4u_UT_EntityAccess.
+    const sourceRows = [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value)).map(input => {
+      const sourceRow = input.closest('tr'), alias = sourceRow.querySelector('input[id*="txtAlias"]')?.value || input.value;
+      const name = (sourceRow.cells[0]?.textContent || '').replace(/\s+/g, ' ').trim();
+      return { slot: input.value, alias, access: ENTITY_ACCESS.test(name) || ENTITY_ACCESS.test(alias) };
+    });
+    const hasAccess = sourceRows.some(source => source.access);
+    const pairModes = hasAccess ? ['id', 'entity'] : ['id'], isPair = value => pairModes.includes(value);
     custom.append(leftBox, typeBox, rightBox);
     const preview = el('div', '', 'iqa-relationship-preview'); preview.setAttribute('aria-live', 'polite');
     const add = el('button', 'Add relationship', 'TextButton'); add.type = 'button';
     const actions = el('div', null, 'iqa-relationship-actions'); actions.append(preview, add);
     panel.append(heading, modes, message, predefined, idPanel, custom, actions); cell.appendChild(panel); undo.unshift(() => panel.remove());
+    // The Filters tab's type-to-search picker over both field selects. It reads
+    // their options when opened; its shown value is re-synced after each fill.
+    const syncPickers = [leftID, rightID].map(select => {
+      FilterSortDropdowns._create(select, 'Select a field');
+      const item = FilterSortDropdowns._items.find(entry => entry.select === select);
+      undo.push(() => { item?.dispose(); FilterSortDropdowns._items = FilterSortDropdowns._items.filter(entry => entry !== item); });
+      return () => item?.sync();
+    });
     let intent = null;
     try { intent = readIntent(JSON.parse(sessionStorage.getItem(KEY) || 'null'), location.href); } catch (_) {}
     // Keep the choice through repeated native refreshes/remounts, not just the
@@ -2354,52 +2515,128 @@ function createRelationshipWorkspace() {
     if (!intent) forget();
     const scrollToRestore = intent?.scroll;
     if (scrollToRestore) remember({ ...intent, scroll: null }); // One navigation only.
-    let mode = kind.value === 'Custom' ? intent?.mode === 'id' ? 'id' : 'fields' : kind.value !== 'None' ? 'predefined' : '';
+    let mode = kind.value === 'Custom' ? isPair(intent?.mode) ? intent.mode : 'fields' : kind.value !== 'None' ? 'predefined' : '';
     let freshFields = intent?.freshFields === true;
     let clients = null, initialized = false, loading = false, loadFailed = false, loadingTimer = null, pendingScroll = null;
     undo.push(() => clearTimeout(loadingTimer));
     const buttons = new Map();
+    // The field controls opened in the background for Join by ID and Join by
+    // entity, when the visible page does not have them: the response page and
+    // its pickers. The join type is then this page's own select, filled from it.
+    let remote = null, adding = false, failed = false;
+    const ownType = el('select'); ownType.id = 'iqaJoinType';
+    const fieldsFor = side => clients ? comboFields(clients[side]) : remote ? remote.editor.combos[side].items : [];
+    const typeControl = () => clients ? nativeType : remote ? ownType : null;
+    // Modes shown in this page's pair of field selects: Join by ID, Join by
+    // entity, and Choose fields unless the native pickers are open.
+    const paired = value => isPair(value) || value === 'fields' && !clients;
+    // Field choices for Join by ID and the Branchify tab, built once the field
+    // controls load; the shared pair of selects shows the current mode's.
+    let pairOptions = null, filledFor = null;
+    function buildPairs() {
+      const left = fieldsFor(0), right = fieldsFor(1);
+      const options = (list, label) => list.map(entry => ({ value: entry.value, label: entry.alias + ' · ' + label(entry) }));
+      // Choose fields: every field, grouped by business object.
+      const everyField = list => list.map(entry => ({ value: entry.value, label: entry.text, group: sourceRows.find(source => source.slot === entry.slot)?.alias || entry.slot }));
+      pairOptions = {
+        id: [idFields(left, sourceRows), idFields(right, sourceRows)].map(list => options(list, () => 'Id')),
+        entity: [entityFields(left, sourceRows, 'other'), entityFields(right, sourceRows, 'access')].map(list => options(list, entry => entry.property)),
+        fields: [everyField(left), everyField(right)]
+      };
+      filledFor = null;
+    }
+    function fillPairs() {
+      if (!pairOptions || !paired(mode) || filledFor === mode) return;
+      filledFor = mode;
+      [leftID, rightID].forEach((select, side) => {
+        const nodes = [], groups = new Map();
+        // Choose fields starts unselected, so both fields are a deliberate choice.
+        if (mode === 'fields') { const blank = el('option', 'Select a field'); blank.value = ''; nodes.push(blank); }
+        for (const entry of pairOptions[mode][side]) {
+          const option = el('option', entry.label); option.value = entry.value;
+          if (!entry.group) { nodes.push(option); continue; }
+          if (!groups.has(entry.group)) { const group = el('optgroup'); group.label = entry.group; groups.set(entry.group, group); nodes.push(group); }
+          groups.get(entry.group).appendChild(option);
+        }
+        select.replaceChildren(...nodes);
+      });
+      const saved = intent?.mode === mode ? intent : null;
+      if (saved?.left && [...leftID.options].some(option => option.value === saved.left)) leftID.value = saved.left;
+      if (saved?.right && [...rightID.options].some(option => option.value === saved.right)) rightID.value = saved.right;
+      else if (mode === 'id' && rightID.options.length > 1) rightID.selectedIndex = 1;
+      syncPickers.forEach(sync => sync());
+    }
     function persist() { remember({ mode, left: leftID.value, right: rightID.value, freshFields, scroll: pendingScroll }); }
+    // The native switch to the field controls: a postback that reloads the editor.
+    function openNative(next) {
+      pendingScroll = captureScroll(kind);
+      freshFields = next === 'fields' && kind.value === 'None';
+      loading = true; render();
+      loadingTimer = setTimeout(() => {
+        loading = false; loadFailed = true; render();
+        message.textContent = 'The field editor has not finished loading. Refresh the editor if it does not open.';
+      }, 30000);
+      persist(); kind.value = 'Custom'; kind.dispatchEvent(new Event('change', { bubbles: true }));
+      message.textContent = 'Opening the field controls…'; add.disabled = true;
+    }
+    // The same switch in the background, for the pair modes: no reload. If the
+    // response cannot be read, the native switch is used instead.
+    async function openRemote() {
+      loading = true; render();
+      const original = location.href.split('#')[0];
+      try {
+        remote = { original, ...(await openFieldsInBackground({ doc: document, url: original }, original)) };
+        ownType.replaceChildren(...remote.editor.type.options.filter(option => option.value !== 'Cross|AND').map(option => {
+          const item = el('option', option.text); item.value = option.value; return item;
+        }));
+        ownType.value = remote.editor.type.value;
+        if (!ownType.isConnected) { typeBox.replaceChildren(); labelBox(typeBox, 'Join type', ownType); typeBox.appendChild(ownType); }
+        buildPairs();
+        loading = false; persist(); render();
+      } catch (error) {
+        remote = null; loading = false;
+        console.warn('[IQA relationships] background field controls unavailable:', /^[a-z-]+$/.test(error.message) ? error.message : 'request-or-browser-error');
+        openNative(mode);
+      }
+    }
     function choose(next) {
-      if (loading) return;
+      if (loading || adding) return;
       mode = next;
       if (next !== 'predefined' && kind.value !== 'Custom') {
-        pendingScroll = captureScroll(kind);
-        freshFields = next === 'fields' && kind.value === 'None';
-        loading = true; render();
-        loadingTimer = setTimeout(() => {
-          loading = false; loadFailed = true; render();
-          message.textContent = 'The field editor has not finished loading. Refresh the editor if it does not open.';
-        }, 30000);
-        persist(); kind.value = 'Custom'; kind.dispatchEvent(new Event('change', { bubbles: true }));
-        message.textContent = 'Opening the field controls…'; add.disabled = true; return;
+        if (!remote) { openRemote(); return; }
       }
       if (next === 'predefined' && kind.value === 'Custom') kind.value = 'None';
       persist();
       render();
     }
-    for (const [value, text] of [['id', 'Join by ID'], ['fields', 'Choose fields'], ['predefined', 'Predefined relationship']]) {
+    // Predefined relationship is offered only when the native select has one.
+    const hasPredefined = [...kind.options].some(option => !['None', 'Custom'].includes(option.value));
+    const modeButtons = [['id', 'Join by ID'], ...(hasAccess ? [['entity', 'Branchify']] : []), ['fields', 'Choose fields'], ...(hasPredefined ? [['predefined', 'Predefined relationship']] : [])];
+    for (const [value, text] of modeButtons) {
       const button = el('button', text); button.type = 'button'; listen(button, 'click', () => choose(value)); buttons.set(value, button); modes.appendChild(button);
     }
     function relationships() { return [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).map(input => {
       const relation = input.closest('tr'); return { description: relation.cells[0].textContent.trim(), type: relation.querySelector('select')?.value };
     }); }
     function selectedPair() {
+      if (paired(mode)) return [fieldsFor(0).find(item => item.value === leftID.value), fieldsFor(1).find(item => item.value === rightID.value)];
       if (!clients) return null;
-      if (mode === 'id') return [comboFields(clients[0]).find(item => item.value === leftID.value), comboFields(clients[1]).find(item => item.value === rightID.value)];
       return clients.map(combo => comboFields(combo).find(item => item.value === combo.get_value() && item.text === combo.get_text()));
     }
     function render() {
-      const pending = loading || mode === 'id' && !clients && !loadFailed;
+      if (failed) return;
+      const pending = loading || paired(mode) && !clients && !remote && !loadFailed;
       buttons.forEach((button, key) => {
         button.setAttribute('aria-pressed', String(mode === key));
         button.setAttribute('aria-busy', String(key === mode && pending));
         button.classList.toggle('iqa-relationship-loading', key === mode && pending);
-        button.disabled = loading || key === mode && pending;
+        button.disabled = loading || adding || key === mode && pending;
       });
-      if (mode === 'id' && typeBox.parentNode !== idPanel) idPanel.insertBefore(typeBox, idRightBox);
-      if (mode !== 'id' && typeBox.parentNode !== custom) custom.insertBefore(typeBox, rightBox);
-      hide(predefined, mode !== 'predefined'); hide(kindParent, mode !== 'predefined'); hide(idPanel, mode !== 'id'); hide(custom, mode !== 'fields');
+      if (paired(mode) && typeBox.parentNode !== idPanel) idPanel.insertBefore(typeBox, idRightBox);
+      if (!paired(mode) && typeBox.parentNode !== custom) custom.insertBefore(typeBox, rightBox);
+      hide(predefined, mode !== 'predefined'); hide(kindParent, mode !== 'predefined'); hide(idPanel, !paired(mode)); hide(custom, mode !== 'fields' || !clients);
+      leftLabel.textContent = mode === 'entity' ? 'Business object field' : mode === 'fields' ? 'Left field' : 'Left business object';
+      rightLabel.textContent = mode === 'entity' ? 'Entity access field' : mode === 'fields' ? 'Right field' : 'Right business object';
       hide(actions, !mode); add.disabled = true; add.textContent = 'Add relationship'; preview.textContent = '';
       if (loading) { message.textContent = 'Opening the field controls…'; return; }
       if (!mode) return;
@@ -2409,28 +2646,57 @@ function createRelationshipWorkspace() {
         if (!add.disabled) preview.textContent = kind.options[kind.selectedIndex]?.text || '';
         return;
       }
-      message.textContent = mode === 'id' ? 'Connect one pair using their Id fields. Review the fields and join type, then add.' : 'Choose a field from each business object and the join type.';
-      if (!clients) {
-        if (mode === 'id') message.textContent = loadFailed ? 'The Id shortcut is unavailable. Use Choose fields instead.' : 'Loading available Id fields…';
+      message.textContent = mode === 'id' ? 'Connect one pair using their Id fields. Review the fields and join type, then add.'
+        : mode === 'entity' ? 'Join a business object’s branch code to i4u_UT_EntityAccess. Review the fields and join type, then add.'
+        : 'Choose a field from each business object and the join type.';
+      if (!clients && !(remote && paired(mode))) {
+        if (paired(mode)) message.textContent = loadFailed ? 'The field controls are unavailable. Refresh the editor and try again.' : 'Loading available fields…';
         else add.disabled = combos.length !== 2 || !nativeType || nativeAdd.disabled === true;
         return;
       }
+      if (adding) { message.textContent = 'Adding the relationship…'; return; }
+      fillPairs();
       const pair = selectedPair();
-      if (mode === 'id' && (!leftID.options.length || !rightID.options.length)) { message.textContent = 'Id fields are not available for a pair of business objects. Use Choose fields instead.'; return; }
+      if (paired(mode) && (!leftID.options.length || !rightID.options.length)) {
+        message.textContent = mode === 'entity' ? 'No OrgCode, Org_Code, EntityCode or Entity_Code field to join to EntityCode. Use Choose fields instead.'
+          : mode === 'fields' ? 'No fields are available to join.' : 'Id fields are not available for a pair of business objects. Use Choose fields instead.';
+        return;
+      }
       if (!pair?.every(Boolean)) return;
       if (pair[0].source === pair[1].source) { preview.textContent = 'Choose two different business objects.'; return; }
-      const type = nativeType.value, label = nativeType.options[nativeType.selectedIndex]?.text || type;
+      const typeSelect = typeControl(), type = typeSelect.value, label = typeSelect.options[typeSelect.selectedIndex]?.text || type;
       preview.textContent = pair[0].text + '  ·  ' + label + '  ·  ' + pair[1].text;
       const duplicate = isDuplicate(relationships(), pair[0].text, pair[1].text, type);
-      add.disabled = duplicate || nativeAdd.disabled === true;
+      add.disabled = duplicate || (!remote || clients) && nativeAdd.disabled === true;
       if (duplicate) add.textContent = 'Already joined';
     }
+    // Add in the background from the field controls opened there, then refresh
+    // once. Any failure after the request stops here and offers a refresh.
+    async function addRemote(pair) {
+      adding = true; render();
+      const working = Busy.button(add);
+      try {
+        const page = await addInBackground(remote.page, remote.original, remote.editor, pair[0], pair[1], ownType.value);
+        forget();
+        message.textContent = 'Relationship added. Refreshing the editor…';
+        location.replace(page.url);
+      } catch (error) {
+        working.clear(); failed = true;
+        console.warn('[IQA relationships] background add failed:', /^[a-z-]+$/.test(error.message) ? error.message : 'request-or-browser-error');
+        message.textContent = 'The relationship could not be added. Refresh the editor to see the current relationships before trying again.';
+        add.textContent = 'Refresh editor'; add.disabled = false;
+      }
+    }
+    listen(ownType, 'change', render);
     listen(leftID, 'change', () => { persist(); render(); }); listen(rightID, 'change', () => { persist(); render(); });
-    listen(kind, 'change', () => { pendingScroll ||= captureScroll(kind); mode = kind.value === 'Custom' ? mode === 'id' ? 'id' : 'fields' : 'predefined'; persist(); render(); });
+    listen(kind, 'change', () => { pendingScroll ||= captureScroll(kind); mode = kind.value === 'Custom' ? isPair(mode) ? mode : 'fields' : 'predefined'; persist(); render(); });
     if (nativeType) listen(nativeType, 'change', () => { pendingScroll = captureScroll(nativeType); persist(); render(); });
     listen(add, 'click', () => {
+      if (failed) { location.replace(location.href.split('#')[0]); return; }
+      if (adding) return;
       render(); if (add.disabled) return;
-      if (mode === 'id') {
+      if (paired(mode) && remote && !clients) { addRemote(selectedPair()); return; }
+      if (isPair(mode)) {
         try {
           setComboValue(clients[0], leftID.value); setComboValue(clients[1], rightID.value);
         } catch (_) { message.textContent = 'The field selection could not be prepared. Use Choose fields to select the fields directly.'; return; }
@@ -2463,14 +2729,7 @@ function createRelationshipWorkspace() {
           });
           freshFields = false;
         }
-        const sources = [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value))
-          .map(input => ({ slot: input.value, alias: input.closest('tr').querySelector('input[id*="txtAlias"]')?.value || input.value }));
-        [leftID, rightID].forEach((select, side) => {
-          for (const entry of idFields(comboFields(clients[side]), sources)) { const option = el('option', entry.alias + ' · Id'); option.value = entry.value; select.appendChild(option); }
-        });
-        if (intent?.left && [...leftID.options].some(option => option.value === intent.left)) leftID.value = intent.left;
-        if (intent?.right && [...rightID.options].some(option => option.value === intent.right)) rightID.value = intent.right;
-        else if (rightID.options.length > 1) rightID.selectedIndex = 1;
+        buildPairs();
         clients.forEach(combo => {
           const changed = () => { persist(); render(); };
           if (typeof combo.add_selectedIndexChanged === 'function' && typeof combo.remove_selectedIndexChanged === 'function') {
@@ -2480,7 +2739,8 @@ function createRelationshipWorkspace() {
           combo.repaint?.();
         });
         initialized = true;
-        if (intent) persist(); // Preserve resolved ID choices, but do not re-clear fresh fields.
+        fillPairs();
+        if (intent) persist(); // Preserve resolved pair choices, but do not re-clear fresh fields.
       }
       render();
     }
@@ -2516,11 +2776,368 @@ function createRelationshipWorkspace() {
     .iqa-existing-relationship>td{padding-top:12px!important;padding-bottom:12px!important}
     @media(max-width:800px){.iqa-relationship-fields,.iqa-relationship-ids{grid-template-columns:1fr}.iqa-relationship-editor{padding:12px}}
   `;
-  return { mount, teardown() { restore(); forget(); document.getElementById('iqaRelationshipCss')?.remove(); } };
+  return { mount, openFieldsInBackground, addInBackground, teardown() { restore(); forget(); document.getElementById('iqaRelationshipCss')?.remove(); } };
 }
 
   const RelationshipWorkspace = createRelationshipWorkspace();
   // END RELATIONSHIP WORKSPACE V1
+
+  // BEGIN BRANCHIFY V1
+/* Branchify: limit a query to the records the signed-in user may see. One action
+ * adds the i4u_UT_EntityAccess business object and the filter
+ * ContactKey = "@LoggedInUser", as the designer's own postbacks sent in the
+ * background like the reorders, then refreshes the editor once. The relationship
+ * varies by business object, so it is chosen in the popup.
+ *
+ * Steps, each posted from the previous response and checked before the next:
+ *   1. Add the source: SelectedKeys = its key, a plain submit (AddQuickSource).
+ *      Skipped when the query already has it.
+ *   2. Open Filters: the inner tab strip's postback.
+ *   3. Add the filter: the "Add a filter" select's own postback. Skipped when a
+ *      ContactKey filter on that source already exists.
+ *   4. Return to Sources, posting "@LoggedInUser" in the new row's value.
+ *   5. Optional, when a branch code field is chosen: add that relationship
+ *      through the relationship editor's background open and Add.
+ */
+function createBranchify() {
+  const ACCESS_SOURCE = /^_?i4u_UT_EntityAccess$/i, ENTITY_CODE = /^(org_?code|entity_?code)$/i;
+  const PROPERTY = 'ContactKey', VALUE = '"@LoggedInUser"';
+  const RESULT_KEY = 'iqa:branchify:result:v1';
+  let host = null, toolbarButton = null, statusLine = null, dialog = null, busy = false, stale = false;
+
+  function element(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text != null) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  }
+  const normal = text => String(text || '').replace(/\s+/g, ' ').trim();
+
+  function sources(doc) {
+    return [...doc.querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value)).map(input => {
+      const row = input.closest('tr');
+      return { slot: input.value, name: normal(row?.cells[0]?.textContent), alias: row?.querySelector('input[id*="txtAlias"]')?.value || '', type: normal(row?.cells[2]?.textContent) };
+    });
+  }
+  const isAccess = source => ACCESS_SOURCE.test(source.name) || ACCESS_SOURCE.test(source.alias);
+
+  // What the relationship could join to EntityCode: the business objects with an
+  // OrgCode, Org_Code, EntityCode or Entity_Code field, from each definition.
+  async function branchCodes() {
+    const all = sources(document), access = all.find(isAccess);
+    if (access) {
+      const relations = [...document.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value))
+        .map(input => normal(input.closest('tr')?.cells[0]?.textContent).toLowerCase());
+      if (relations.some(text => text.includes((access.alias || access.name).toLowerCase() + '.'))) return { joined: true, objects: [] };
+    }
+    const token = (document.getElementById('__RequestVerificationToken') || document.querySelector('input[name="__RequestVerificationToken"]'))?.value || '';
+    const objects = await Promise.all(all.filter(source => !isAccess(source) && source.type === 'Business Object').map(async source => {
+      const response = await fetch(new URL('/api/BOEntityDefinition/' + encodeURIComponent(source.name), location.origin), {
+        credentials: 'same-origin', headers: { Accept: 'application/json', ...(token ? { RequestVerificationToken: token } : {}) }
+      });
+      if (!response.ok) throw new Error('definition-unavailable');
+      const data = await response.json(), values = (data?.Result || data)?.Properties?.$values;
+      if (!Array.isArray(values)) throw new Error('definition-unavailable');
+      return { ...source, fields: values.map(property => property?.Name).filter(name => typeof name === 'string' && ENTITY_CODE.test(name)) };
+    }));
+    return { joined: false, objects: objects.filter(source => source.fields.length) };
+  }
+
+  function filterRows(doc) {
+    return [...doc.querySelectorAll('input[type="hidden"]')].filter(input => input.value.startsWith('F|'))
+      .map(input => ({ slot: input.value, row: input.closest('tr') })).filter(item => item.row);
+  }
+  // "[alias] Contact Key" in the row's first cell.
+  function isAccessFilter(row, alias) {
+    const label = normal(row.cells[0]?.textContent).toLowerCase();
+    return label.startsWith('[' + alias.toLowerCase() + ']') && /contact\s*key$/.test(label);
+  }
+
+  // The key comes from the Union Template quick-add list, or the native panel.
+  async function accessKey() {
+    try {
+      const row = (await loadSection() || []).find(item => ACCESS_SOURCE.test(normal(item.name)));
+      if (row?.key) return row.key;
+    } catch (_) {}
+    for (const link of document.querySelectorAll('a[href*="AddQuickSource"]')) {
+      const match = /AddQuickSource\(\s*["']?([0-9a-fA-F-]{36})/.exec(link.getAttribute('href') || '');
+      if (match && ACCESS_SOURCE.test(normal(link.textContent))) return match[1];
+    }
+    return null;
+  }
+
+  // The inner tab strip (Summary, Sources, Filters…), read from the visible page:
+  // its postback target, the argument a tab click sends and its client state.
+  function tabStrip() {
+    for (const node of document.querySelectorAll('.RadTabStrip[id]')) {
+      const control = window.$find?.(node.id), tabs = control?.get_tabs?.();
+      if (!tabs) continue;
+      const names = Array.from({ length: tabs.get_count() }, (_, index) => normal(tabs.getTab(index).get_text()));
+      if (!names.includes('Sources') || !names.includes('Filters')) continue;
+      const reference = control._postBackReference || '';
+      const target = /WebForm_PostBackOptions\(\s*'([^']+)'\s*,\s*'arguments'/.exec(reference)?.[1];
+      if (!target) throw new Error('tab-postback-unavailable');
+      // A native tab click sends {"type":0,"index":"2"} (captured 7 October 2026).
+      const argument = name => {
+        const tab = tabs.getTab(names.indexOf(name));
+        const index = typeof tab._getHierarchicalIndex === 'function' ? String(tab._getHierarchicalIndex()) : String(names.indexOf(name));
+        return JSON.stringify({ type: 0, index });
+      };
+      return { id: node.id, target, names, argument, validates: /'arguments'\s*,\s*true/.test(reference) };
+    }
+    throw new Error('tab-strip-unavailable');
+  }
+  function tabChanges(page, strip, name) {
+    const field = page.doc.getElementById(strip.id + '_ClientState'), changes = {};
+    if (field?.name) {
+      let state = {};
+      try { state = JSON.parse(field.value || '{}') || {}; } catch (_) {}
+      changes[field.name] = JSON.stringify({ logEntries: [], scrollState: {}, ...state, selectedIndexes: [String(strip.names.indexOf(name))] });
+    }
+    return changes;
+  }
+
+  // Every step is a native postback (NativePost). Once one is sent, an uncertain
+  // outcome must never be retried on the old form.
+  const post = (page, original, changes, target, argument = '') =>
+    NativePost.post(page, original, { changes, target, argument, onRequest: () => { stale = true; } });
+
+  async function run(progress, join) {
+    const original = location.href.split('#')[0];
+    let page = { doc: document, url: original };
+    const strip = tabStrip();
+    if (strip.validates && typeof window.Page_ClientValidate === 'function' && window.Page_ClientValidate('') !== true) throw new Error('native-validation-failed');
+    const before = sources(document);
+    let access = before.filter(isAccess);
+    if (access.length > 1) throw new Error('several-entity-access-sources');
+    const added = { source: false, filter: false };
+
+    if (!access.length) {
+      const key = await accessKey();
+      const keys = document.querySelector('input[type="hidden"][name$="$SelectedKeys"]');
+      if (!key) throw new Error('entity-access-not-in-quick-add');
+      if (!keys) throw new Error('add-source-control-unavailable');
+      progress('Adding i4u_UT_EntityAccess…');
+      page = await post(page, original, { [keys.name]: key }, '');
+      access = sources(page.doc).filter(source => isAccess(source) && !before.some(item => item.slot === source.slot));
+      if (access.length !== 1) throw new Error('entity-access-not-added');
+      added.source = true;
+    }
+    const source = access[0], alias = source.alias || source.name;
+
+    progress('Opening Filters…');
+    page = await post(page, original, tabChanges(page, strip, 'Filters'), strip.target, strip.argument('Filters'));
+    const addFilter = page.doc.querySelector('select.property');
+    if (!addFilter?.name) throw new Error('filters-tab-not-returned');
+    const existing = filterRows(page.doc);
+    const changes = {};
+
+    if (!existing.some(item => isAccessFilter(item.row, alias))) {
+      const option = [...addFilter.options].find(item => {
+        const match = /\.(SR\d+)\|([^|]+)$/.exec(item.value);
+        return match && match[1] === source.slot && match[2] === PROPERTY;
+      });
+      if (!option) throw new Error('contact-key-field-unavailable');
+      progress('Adding the Contact Key filter…');
+      page = await post(page, original, { [addFilter.name]: option.value }, addFilter.name);
+      const fresh = filterRows(page.doc).filter(item => !existing.some(old => old.slot === item.slot) && isAccessFilter(item.row, alias));
+      if (fresh.length !== 1) throw new Error('filter-not-added');
+      const row = fresh[0].row, selects = [...row.querySelectorAll('select')];
+      const comparison = selects.find(select => [...select.options].some(item => item.value === 'Between'));
+      const valueType = selects.find(select => [...select.options].some(item => item.value === 'Constant'));
+      const box = row.querySelector('input[type="text"][id$="_TextBox1"]');
+      // The new row's defaults are Equal and Constant; anything else is left for review.
+      if (comparison?.value !== 'Equal' || valueType?.value !== 'Constant' || !box?.name) throw new Error('filter-defaults-changed');
+      changes[box.name] = VALUE;
+      added.filter = true;
+    }
+
+    progress('Returning to Sources…');
+    page = await post(page, original, { ...changes, ...tabChanges(page, strip, 'Sources') }, strip.target, strip.argument('Sources'));
+    if (!sources(page.doc).some(item => item.slot === source.slot)) throw new Error('sources-tab-not-returned');
+
+    // The relationship, as the Branchify tab adds it: open the field controls, then
+    // the native Add, both in the background. The source and filter are already
+    // in place, so a join that fails is reported rather than failing Branchify.
+    if (join) {
+      try {
+        progress('Adding the relationship…');
+        const opened = await RelationshipWorkspace.openFieldsInBackground(page, original, () => { stale = true; });
+        page = opened.page;
+        const pick = (side, slot, property) => opened.editor.combos[side].items.find(item => item.slot === slot && item.property.toLowerCase() === property.toLowerCase());
+        const left = pick(0, join.slot, join.property), right = pick(1, source.slot, 'EntityCode');
+        if (!left || !right) throw new Error('join-fields-unavailable');
+        const type = opened.editor.type.options.some(option => option.value === 'Equal|AND') ? 'Equal|AND' : opened.editor.type.value;
+        page = await RelationshipWorkspace.addInBackground(page, original, opened.editor, left, right, type, () => { stale = true; });
+        added.join = join.label;
+      } catch (error) {
+        added.joinFailed = join.label;
+        console.warn('[IQA Branchify] relationship not added:', /^[a-z-]+$/.test(error.message) ? error.message : 'request-or-browser-error');
+      }
+    }
+    return { page, original, added };
+  }
+
+  function openDialog() {
+    if (dialog || busy) return;
+    stale = false;
+    dialog = element('dialog', null, 'iqa-source-reorder-dialog iqa-branchify-dialog');
+    const title = element('h2', 'Branchify this query'); title.id = 'iqaBranchifyTitle';
+    dialog.setAttribute('aria-labelledby', title.id);
+    // The Filters tab is not in this page, so with the source already present
+    // the popup says Branchify will check there rather than guessing.
+    const help = element('div'), present = sources(document).some(isAccess);
+    if (present) {
+      const added = element('p'), filters = element('p');
+      added.append(element('strong', 'i4u_UT_EntityAccess'), ' is already in this query, so it will not be added again.');
+      filters.append('The Filters tab cannot be seen from here: Branchify checks it and adds the filter ',
+        element('strong', 'Contact Key = ' + VALUE), ' only if it is missing.');
+      help.append(added, filters);
+    } else {
+      help.append('Adds ', element('strong', 'i4u_UT_EntityAccess'), ' and the filter ',
+        element('strong', 'Contact Key = ' + VALUE), ', so results are limited to the entities the signed-in user can access.');
+    }
+    const status = element('p', '', 'iqa-source-reorder-status'); status.setAttribute('role', 'status');
+    const footer = element('div', null, 'iqa-source-reorder-actions');
+    const start = element('button', 'Branchify', 'TextButton PrimaryButton'); start.type = 'button';
+    const cancel = element('button', 'Cancel', 'TextButton us-outline-button'); cancel.type = 'button';
+
+    // The relationship is offered only when it is unambiguous: one business
+    // object with one branch code field. Otherwise the reason is shown instead.
+    injectStyle('iqaBranchifyCss', `
+      .iqa-branchify-join>p{margin:0 0 var(--space-3,12px)}
+      .iqa-branchify-option{display:flex;align-items:flex-start;gap:var(--space-2,8px);margin:0 0 var(--space-3,12px)}
+      .iqa-branchify-option>input{flex:none;margin:3px 0 0}
+      .iqa-branchify-option>label{margin:0;font-weight:var(--fw-normal,400)}
+      .iqa-branchify-choices{margin:0 0 var(--space-3,12px);padding:0;border:0}
+      .iqa-branchify-choices>legend{margin:0 0 var(--space-2,8px);padding:0;border:0;font-size:inherit;font-weight:var(--fw-semi,600);color:inherit}
+      .iqa-branchify-choices>.iqa-branchify-option{margin-bottom:var(--space-2,8px)}
+      .iqa-branchify-object{color:var(--text-muted,#545962);font-weight:var(--fw-normal,400)}
+    `);
+    const joinBlock = element('div', null, 'iqa-branchify-join');
+    const say = text => joinBlock.replaceChildren(element('p', text));
+    // Each choice is { join, input }; the chosen one is the checked input's join.
+    let choices = [];
+    const chosenJoin = () => choices.find(choice => choice.input.checked)?.join || null;
+    // "[alias].[field]", followed by the business object's own name, faded,
+    // when its alias differs.
+    function option(input, candidate, prefix) {
+      const text = element('label'); text.htmlFor = input.id;
+      if (prefix) text.append(prefix);
+      if (candidate) {
+        text.append(element('strong', candidate.label));
+        if (candidate.alias.toLowerCase() !== candidate.name.toLowerCase()) text.append(' - ', element('em', candidate.name, 'iqa-branchify-object'));
+      }
+      const row = element('div', null, 'iqa-branchify-option'); row.append(input, text);
+      return row;
+    }
+    say('Checking your business objects for a branch code field…');
+    start.disabled = true;
+    branchCodes().then(found => {
+      if (!dialog) return;
+      const candidates = found.objects.flatMap(source => source.fields.map(property => {
+        const alias = source.alias || source.name;
+        return { slot: source.slot, property, alias, name: source.name, label: '[' + alias + '].[' + property + ']' };
+      }));
+      const joinOf = candidate => ({ slot: candidate.slot, property: candidate.property, label: candidate.label });
+      if (found.joined) say('i4u_UT_EntityAccess is already joined to a business object.');
+      else if (!candidates.length) say('No business object has an OrgCode, Org_Code, EntityCode or Entity_Code field. Add the relationship yourself afterwards.');
+      else if (candidates.length === 1) {
+        const input = element('input'); input.type = 'checkbox'; input.id = 'iqaBranchifyJoin'; input.checked = true;
+        choices = [{ input, join: joinOf(candidates[0]) }];
+        joinBlock.replaceChildren(option(input, candidates[0], 'Branchify on: '));
+      } else {
+        // Several fields could be the branch: list each, with no join chosen
+        // until one is picked.
+        const group = element('fieldset', null, 'iqa-branchify-choices');
+        group.append(element('legend', 'Branchify on:'));
+        const radio = (index, checked) => {
+          const input = element('input'); input.type = 'radio'; input.name = 'iqaBranchifyJoin'; input.id = 'iqaBranchifyJoin' + index; input.checked = checked;
+          return input;
+        };
+        candidates.forEach((candidate, index) => {
+          const input = radio(index, false);
+          choices.push({ input, join: joinOf(candidate) });
+          group.append(option(input, candidate));
+        });
+        const none = radio('None', true);
+        choices.push({ input: none, join: null });
+        group.append(option(none, null, 'Don’t add a relationship'));
+        joinBlock.replaceChildren(group);
+      }
+    }).catch(() => {
+      if (dialog) say('The business objects could not be checked. Join it with the Branchify tab under Add relationship afterwards.');
+    }).finally(() => { if (dialog && !busy) start.disabled = false; });
+    const close = () => { dialog?.remove(); dialog = null; toolbarButton?.focus(); };
+    cancel.addEventListener('click', () => { if (busy) return; if (stale) location.replace(location.href.split('#')[0]); else close(); });
+    dialog.addEventListener('cancel', event => { event.preventDefault(); if (!busy && !stale) close(); });
+    start.addEventListener('click', async () => {
+      if (busy || stale) return;
+      const working = Busy.button(start);
+      busy = true; start.disabled = true; cancel.disabled = true;
+      choices.forEach(choice => { choice.input.disabled = true; });
+      try {
+        const result = await run(text => { status.textContent = text; }, chosenJoin());
+        try { sessionStorage.setItem(RESULT_KEY, JSON.stringify({ at: Date.now(), urls: [result.original, result.page.url], added: result.added })); } catch (_) {}
+        status.textContent = 'Done. Refreshing the editor…';
+        location.replace(result.page.url);
+      } catch (error) {
+        working.clear(); busy = false; cancel.disabled = false;
+        const reason = /^[a-z-]+$/.test(error.message) ? error.message : 'request-or-browser-error';
+        const messages = {
+          'entity-access-not-in-quick-add': 'i4u_UT_EntityAccess is not in the Union Template quick-add list.',
+          'several-entity-access-sources': 'This query already has more than one i4u_UT_EntityAccess source. Branchify it by hand.',
+          'native-validation-failed': 'Check the editor’s validation messages, then try again.',
+          'filter-defaults-changed': 'The filter was added, but its comparison or value type was not the default. Set it on the Filters tab.'
+        };
+        status.textContent = messages[reason] || (stale ? 'Branchify stopped part way. Refresh the editor to see what was added before continuing.' : 'Branchify could not start. Close this window and try again.');
+        if (stale) { cancel.textContent = 'Refresh editor'; start.hidden = true; }
+        else { start.disabled = false; choices.forEach(choice => { choice.input.disabled = false; }); }
+        console.warn('[IQA Branchify]', reason);
+      }
+    });
+    footer.append(start, cancel); dialog.append(title, help, joinBlock, status, footer);
+    document.body.appendChild(dialog); dialog.showModal();
+  }
+
+  // The action sits in the Sources toolbar beside Reorder business objects.
+  function mount() {
+    if (busy || stale) return;
+    const toolbar = document.querySelector('.iqa-source-toolbar');
+    if (!toolbar) { host = null; return; }
+    if (host === toolbar && toolbarButton?.isConnected) return;
+    host = toolbar;
+    toolbarButton = element('button', 'Branchify', 'TextButton us-outline-button iqa-branchify-button'); toolbarButton.type = 'button';
+    toolbarButton.title = 'Limit results to the entities the signed-in user can access';
+    toolbarButton.addEventListener('click', openDialog);
+    statusLine = element('span', '', 'iqa-source-feedback iqa-branchify-feedback'); statusLine.setAttribute('role', 'status');
+    const reorder = toolbar.querySelector('.iqa-source-reorder-button');
+    toolbar.insertBefore(toolbarButton, reorder);
+    toolbar.insertBefore(statusLine, toolbar.firstChild);
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(RESULT_KEY) || 'null');
+      sessionStorage.removeItem(RESULT_KEY);
+      if (saved && Date.now() - saved.at < 120000 && saved.urls?.includes(location.href.split('#')[0])) {
+        const added = saved.added || {};
+        const done = [added.source && 'i4u_UT_EntityAccess', added.filter && 'the Contact Key = ' + VALUE + ' filter', added.join && 'the relationship on ' + added.join];
+        const list = done.filter(Boolean), last = list.pop();
+        statusLine.textContent = (last ? 'Added ' + (list.length ? list.join(', ') + ' and ' : '') + last + '. ' : 'Already branchified. ')
+          + (added.joinFailed ? 'The relationship on ' + added.joinFailed + ' could not be added; use the Branchify tab under Add relationship. '
+            : added.join ? '' : 'Join it with the Branchify tab under Add relationship if it is not joined yet. ')
+          + 'Save the query when you are ready.';
+      }
+    } catch (_) {}
+  }
+
+  return { mount, teardown() {
+    if (busy || stale) return;
+    dialog?.remove(); dialog = null;
+    toolbarButton?.remove(); statusLine?.remove(); toolbarButton = statusLine = host = null;
+  } };
+}
+
+  const Branchify = createBranchify();
+  // END BRANCHIFY V1
 
   // BEGIN SQL EDITOR V1
 /* SQL colouring keeps the native textarea as the editable/submitted control. */
@@ -3011,7 +3628,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
   // END TEMPLATE HTML EDITOR V2
 
   const ALWAYS = [QuickAdd, { mount: () => SqlEditor.captureSources() }];
-  const GATED  = [OverhaulCss, BoSearch, SqlTools, FilterSortDropdowns, UncheckAll, FilterAutocomplete, DragSort, FilterWorkspace, SourceWorkspace, RelationshipWorkspace, SqlEditor, TemplateHtml];
+  const GATED  = [OverhaulCss, BoSearch, SqlTools, FilterSortDropdowns, UncheckAll, FilterAutocomplete, DragSort, FilterWorkspace, SourceWorkspace, Branchify, RelationshipWorkspace, SqlEditor, TemplateHtml];
 
   const mountAlways  = () => ALWAYS.forEach(m => safe(() => m.mount?.()));
   const enableGated  = () => { document.body.classList.add('iqa-enhanced'); GATED.forEach(m => safe(() => m.mount?.())); };
@@ -3056,7 +3673,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
               <ol><li>Quick add business objects via search or the <strong>Union Template</strong> quick-add list.</li>
               <li>Drag and drop to reorder business objects (via popup).</li>
               <li>Quick add relationships using <strong>Join by ID</strong>. Original relationships are still available via <strong>Choose fields</strong>, or <strong>Predefined relationship</strong>.</li>
-              <li>See when a matching relationship already exists.</li></ol>
+              <li>See when a matching relationship already exists.</li>
+              <li><strong>Branchify</strong> limits results to the entities the signed-in user can access. It adds <strong>i4u_UT_EntityAccess</strong> and the filter <strong>Contact Key = "@LoggedInUser"</strong> in the background, then refreshes the editor once. Anything already in place is kept. When exactly one business object has an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field, it can also add that relationship. When there are several such fields, choose which one to join, or none.</li>
+              <li>With <strong>i4u_UT_EntityAccess</strong> in the query, the <strong>Branchify</strong> tab under Add relationship joins its <strong>Entity Code</strong> to an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field on another business object.</li></ol>
               <h3>Filters</h3>
               <ol><li>Type to search on field dropdowns.</li>
               <li>Drag and drop to reorder filters (via popup).</li>
