@@ -11887,27 +11887,42 @@ SOFTWARE.
   // ---------------------------------------------------------------------------
   // Initialization of the inserted view
 
+  // A live copy of an imported view script, which the browser leaves inert.
+  function liveScript(inert) {
+    const script = document.createElement('script');
+    for (const { name, value } of inert.attributes) script.setAttribute(name, value);
+    return script;
+  }
+
   // Execute server-provided script text in global scope, as the page would.
   // Errors are captured without wrapping the code in try, which would change
-  // function-declaration scope.
-  function execute(code) {
+  // function-declaration scope. A view script replaces its inert copy, so
+  // document.currentScript and its neighbours are where the server put
+  // them: BeyondFormz finds its placeholder as the script's previous
+  // sibling, and from <head> rendered every form off the page (owner,
+  // 8 October 2026). Other code runs from <head> and is removed.
+  function execute(code, inert) {
     const errors = [];
     const capture = event => {
       errors.push(brief(event.error || event.message));
       event.preventDefault();
     };
     window.addEventListener('error', capture);
-    const script = document.createElement('script');
+    const script = inert ? liveScript(inert) : document.createElement('script');
     script.textContent = code;
-    document.head.append(script);
-    script.remove();
+    if (inert) {
+      inert.replaceWith(script);
+    } else {
+      document.head.append(script);
+      script.remove();
+    }
     window.removeEventListener('error', capture);
     return errors;
   }
 
-  function loadScript(src) {
+  function loadScript(inert, src) {
     return new Promise(resolve => {
-      const script = document.createElement('script');
+      const script = liveScript(inert);
       const done = result => {
         clearTimeout(timer);
         resolve(result);
@@ -11916,18 +11931,20 @@ SOFTWARE.
       script.src = src;
       script.onload = () => done('loaded');
       script.onerror = () => done('failed');
-      document.head.append(script);
+      inert.replaceWith(script);
     });
   }
 
   // Only types the browser itself would execute; JSON and template blocks stay inert.
   const isJavaScript = script => !script.type || /^(?:text|application)\/(?:x-)?(?:java|ecma)script$|^text\/jscript$/i.test(script.type.trim());
 
+  // Scripts are run in document order, each in place. One removed by an
+  // earlier script is skipped, as the browser would.
   async function runViewScripts(scripts) {
     const result = { inline: 0, loaded: 0, present: 0, skipped: 0, errors: [] };
     const present = new Set([...document.scripts].map(node => node.src).filter(Boolean));
     for (const script of scripts) {
-      if (!isJavaScript(script)) {
+      if (!isJavaScript(script) || !script.isConnected) {
         result.skipped++;
       } else if (script.src) {
         const src = new URL(script.getAttribute('src'), location.href).href;
@@ -11935,13 +11952,13 @@ SOFTWARE.
           result.present++;
           continue;
         }
-        const loaded = await loadScript(src);
+        const loaded = await loadScript(script, src);
         present.add(src);
         if (loaded === 'loaded') result.loaded++;
         else result.errors.push({ script: new URL(src).pathname, message: loaded });
       } else {
         result.inline++;
-        for (const message of execute(script.textContent)) result.errors.push({ script: 'inline ' + result.inline, message });
+        for (const message of execute(script.textContent, script)) result.errors.push({ script: 'inline ' + result.inline, message });
       }
     }
     return result;
@@ -12254,9 +12271,9 @@ SOFTWARE.
         leaving.replaceChildren(placeholder());
         leaving.classList.add('rmpHidden');
       }
+      // Imported scripts arrive inert and stay in place until run.
       const content = document.importNode(fetchedView, true);
       const scripts = [...content.querySelectorAll('script')];
-      scripts.forEach(script => script.remove());
       targetView.replaceChildren(...content.childNodes);
       targetView.classList.remove('rmpHidden');
       selectedAhead.delete(cco.strip);

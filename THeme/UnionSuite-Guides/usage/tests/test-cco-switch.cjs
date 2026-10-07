@@ -71,7 +71,8 @@ function viewContent(name, options, inner) {
     return `<div class="ContentWizardDisplay"><div id="ste_container_Cases">
       <div id="${base}Cases_UpdateProgress1" style="display:none"><img alt="Loading"></div>
       ${lister('Cases')}
-      <script>window.casesScriptRuns = (window.casesScriptRuns || 0) + 1;${options.badViewScript ? 'undefinedHelper();' : ''}</script>
+      <div id="casesFormPlaceholder"></div>
+      <script>window.casesScriptRuns = (window.casesScriptRuns || 0) + 1;window.casesScriptPlaceholder = document.currentScript?.previousElementSibling?.id;${options.badViewScript ? 'undefinedHelper();' : ''}</script>
       <script type="application/json">{"not": "executed"}</script></div></div>`;
   }
   if (name === 'Participation') {
@@ -362,6 +363,8 @@ function page(selected, state, options) {
         panels: fixturePrm._updatePanelIDs,
         created: fixtureCreated,
         casesScriptRuns: window.casesScriptRuns,
+        casesScriptPlaceholder: window.casesScriptPlaceholder,
+        jsonBlockKept: !!document.querySelector('#ste_container_Cases > script[type="application/json"]'),
         postBacks,
         progressRegistered: !!$find(base + 'Cases_UpdateProgress1'),
         gridRegistered: !!$find(base + 'Cases_ResultsGrid_Grid1')
@@ -379,6 +382,9 @@ function page(selected, state, options) {
       assert.equal(await selected(tab), 'Cases');
       assert.deepEqual(state.panels, ['ctl01$UserMessagesUpdatePanel', uniqueBase + 'Cases$ListerPanel']);
       assert.equal(state.casesScriptRuns, 1);
+      // Each view script runs in place, as BeyondFormz relies on.
+      assert.equal(state.casesScriptPlaceholder, 'casesFormPlaceholder');
+      assert.equal(state.jsonBlockKept, true);
       // The tab strip is outside the view; the grid is left to the native refresh.
       assert.equal(state.created.includes(base + 'radTab_Top'), false);
       assert.equal(state.progressRegistered, true);

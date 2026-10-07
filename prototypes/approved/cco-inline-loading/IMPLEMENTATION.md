@@ -137,8 +137,9 @@ These steps follow the trial's `show()`; the trial function names are in bracket
      the view.
    - Replace its content with `<span class="Info">Loading...</span>` and add
      `rmpHidden`.
-6. **Insert the new view:** use `document.importNode`, then remove its `<script>`
-   elements into a list for step 8 and remove `rmpHidden`.
+6. **Insert the new view:** use `document.importNode`, list its `<script>`
+   elements for step 8 and remove `rmpHidden`. Imported scripts are inert, so
+   they stay in place until step 8 runs them.
 7. **Switch form state** (`switchFormState`):
    - Copy `__VIEWSTATE`, `__VIEWSTATEGENERATOR`, `__EVENTVALIDATION`,
      `__RequestVerificationToken` and `PageInstanceKey` from the fetched form.
@@ -164,10 +165,14 @@ These steps follow the trial's `show()`; the trial function names are in bracket
    (`tracking`):
    1. **View scripts** (`runViewScripts`): execute JavaScript-typed scripts only
       (`isJavaScript`); JSON and template blocks stay inert. Load external
-      scripts that are not already present, and wait for them. Execute inline
-      ones through a `<script>` element appended to `head`, capturing errors
-      with a temporary `window` `error` listener (`execute`). Do not wrap them
-      in `try`, which would change function-declaration scope.
+      scripts that are not already present, and wait for them. Run each script
+      **in place**: a live copy replaces the inert one, so `document.currentScript`
+      and its neighbours are where the server put them. CloudToolz BeyondFormz
+      finds its placeholder as `document.currentScript.previousElementSibling`;
+      run from `head`, every form rendered off the page and its prefill flow
+      received an empty form (8 October 2026). Capture inline errors with a
+      temporary `window` `error` listener (`execute`). Do not wrap them in
+      `try`, which would change function-declaration scope.
    2. **Grid managers** (`managerStatements`, `replayManagers`): page-level
       `window['<id>_jsmanager'] = new Ctor(…)` statements. Extract only the call,
       using balanced parentheses and quote tracking (`callEnd`). Replay those
