@@ -2704,8 +2704,10 @@ function createRelationshipWorkspace() {
       if (mode !== 'id') return;
       rightID.value = option(rightID, slot).value;
       const first = option(leftID, sourceRows[0].slot);
+      // The left side flashes only when this changed it; it often already
+      // shows the first source.
       const filled = [rightID];
-      if (first && sourceRows[0].slot !== slot) { leftID.value = first.value; filled.push(leftID); }
+      if (first && sourceRows[0].slot !== slot && leftID.value !== first.value) { leftID.value = first.value; filled.push(leftID); }
       separate(rightID); persist(); render();
       // Each prefilled picker flashes an accent outline to show what changed.
       filled.forEach(select => {
@@ -2947,11 +2949,13 @@ function createRelationshipWorkspace() {
         const sourceRow = [...table.querySelectorAll('input[type="hidden"]')].find(input => input.value === source.slot)?.closest('tr');
         // Drawn from an attribute, so the cell's text (read elsewhere as the
         // business object's name) stays as iMIS rendered it.
+        // In Tree view it is only a small !, the tree showing the detail; the
+        // List view keeps the amber row and the tag's words.
         if (sourceRow?.cells[0]) {
-          const cell = sourceRow.cells[0];
-          cell.setAttribute('data-iqa-tag', linked(node.index) ? 'Not joined to ' + rootAlias : 'No relationship');
+          const cell = sourceRow.cells[0], text = linked(node.index) ? 'Not joined to ' + rootAlias : 'No relationship';
+          cell.setAttribute('data-iqa-tag', text); cell.title = text;
           sourceRow.classList.add('iqa-source-unrelated');
-          undo.push(() => { sourceRow.classList.remove('iqa-source-unrelated'); cell.removeAttribute('data-iqa-tag'); });
+          undo.push(() => { sourceRow.classList.remove('iqa-source-unrelated'); cell.removeAttribute('data-iqa-tag'); cell.removeAttribute('title'); });
         }
         node.children.forEach(mark);
       });
@@ -3193,6 +3197,7 @@ function createRelationshipWorkspace() {
         [...relationRows, headerRow].forEach(row => row?.classList.toggle('iqa-relations-hidden', tree));
         [...treePanel.children].forEach(child => { if (child !== switcher) child.hidden = !tree; });
         treePanel.classList.toggle('is-list', !tree);
+        table.classList.toggle('iqa-relations-tree', tree);
         treePanel.hidden = !tree && Boolean(host);
         viewButtons.forEach(button => button.setAttribute('aria-pressed', String((button.dataset.view === 'tree') === tree)));
       }
@@ -3268,7 +3273,7 @@ function createRelationshipWorkspace() {
     .iqa-join-add::before{content:"+ "}
     .iqa-join-add:hover{background:var(--info-bg,#e4f0f4)}
     .iqa-join-node.is-linked{background-color:var(--info-bg,#e4f0f4)}
-    table tr.iqa-source-linked>td{background-color:var(--info-bg,#e4f0f4)!important}
+    table tr.iqa-source-linked[class]>td{background-color:var(--info-bg,#e4f0f4)!important}
     @media(prefers-reduced-motion:reduce){.iqa-join-warning,.iqa-join-tree:not(.show-warnings) .iqa-join-warning{transition:none}}
     .iqa-join-tree.is-busy>:not(.iqa-join-tree-spinner){opacity:.45;pointer-events:none;transition:opacity 180ms cubic-bezier(.2,0,0,1)}
     .iqa-join-tree-spinner{position:absolute;top:50%;left:50%;margin:-8px 0 0 -8px;color:var(--text-link,#006f94)}
@@ -3307,10 +3312,11 @@ function createRelationshipWorkspace() {
     .iqa-join-node .iqa-relation-tag{margin-left:0}
     .iqa-relation-check>td{background:var(--warning-bg,#fdf3e1)!important}
     .iqa-relation-check>td:first-child{box-shadow:inset 3px 0 0 var(--warning,#b45309)}
-    .iqa-source-unrelated>td{background:var(--warning-bg,#fdf3e1)!important}
-    .iqa-source-unrelated>td:first-child{box-shadow:inset 3px 0 0 var(--warning,#b45309)}
+    table:not(.iqa-relations-tree) .iqa-source-unrelated>td{background:var(--warning-bg,#fdf3e1)!important}
+    table:not(.iqa-relations-tree) .iqa-source-unrelated>td:first-child{box-shadow:inset 3px 0 0 var(--warning,#b45309)}
     td[data-iqa-tag]::after{content:attr(data-iqa-tag);display:inline-block;margin-left:8px;padding:1px 8px;border:1px dashed var(--border-strong,#94a3b8);border-radius:999px;font-size:12px;line-height:1.5;vertical-align:middle;white-space:nowrap;color:var(--text-muted,#545962)}
     .iqa-relation-check>td[data-iqa-tag]::after,.iqa-source-unrelated>td[data-iqa-tag]::after{border:1px solid var(--warning,#b45309);color:var(--text-strong,#1c2024);background:var(--warning-bg,#fdf3e1)}
+    table.iqa-relations-tree .iqa-source-unrelated>td[data-iqa-tag]::after{content:"!";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:var(--warning,#b45309);color:#fff;font-weight:700;line-height:1}
     @media(max-width:800px){.iqa-relationship-fields,.iqa-relationship-ids{grid-template-columns:1fr}.iqa-relationship-editor{padding:12px}}
   `;
   return { mount, openFieldsInBackground, addInBackground, teardown() { restore(); forget(); document.getElementById('iqaRelationshipCss')?.remove(); } };
