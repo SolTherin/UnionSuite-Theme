@@ -96,6 +96,27 @@
     ta.remove(); return ok;
   }
 
+  // The theme's own copy button (zUnionSuite.js US-COPY), whenever the theme
+  // is loaded: its copy icon turns into the success tick with "Copied", the
+  // target flashes in the accent, and the copy is announced. US-COPY copies a
+  // field's value; for other elements this passes the visible text (keeping
+  // line breaks) as the click starts. Null without the theme.
+  let copyTargets = 0;
+  function themeCopyButton(target, label) {
+    if (!window.UnionSuiteCopy || !target) return null;
+    if (!target.id) { target.id = 'iqaCopyTarget' + (++copyTargets); target.dataset.iqaCopyId = ''; }
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'us-copy'; button.dataset.iqaCopy = '';
+    button.dataset.usCopyTarget = target.id; button.title = label; button.setAttribute('aria-label', label);
+    if (!target.matches('input, textarea')) button.addEventListener('click', () => { button.dataset.usCopyText = target.innerText; }, true);
+    return button;
+  }
+  function removeThemeCopyButtons() {
+    document.querySelectorAll('button.us-copy[data-iqa-copy]').forEach(button => button.remove());
+    document.querySelectorAll('[data-iqa-copy-id]').forEach(target => { target.removeAttribute('id'); delete target.dataset.iqaCopyId; });
+  }
+  const TICK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>';
+
   const elFromHTML = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
   const injectStyle = (id, css) => { if (document.getElementById(id)) return; const s = document.createElement('style'); s.id = id; s.textContent = css; document.head.appendChild(s); };
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -592,16 +613,19 @@
    * ======================================================================== */
   const SqlTools = {
     _flashTimers: new Map(),
+    // With the theme loaded this is its accent copy glow (us-copy-flash,
+    // 1.6s), as the theme's own copy buttons use.
     _flash(field) {
       if (!field.isConnected) return;
+      const flash = window.UnionSuiteCopy ? 'us-copy-flash' : 'iqa-copy-flash';
       clearTimeout(this._flashTimers.get(field));
-      field.classList.remove('iqa-copy-flash');
+      field.classList.remove('us-copy-flash', 'iqa-copy-flash');
       void field.offsetWidth; // Restart the feedback when copying the same field again.
-      field.classList.add('iqa-copy-flash');
+      field.classList.add(flash);
       this._flashTimers.set(field, setTimeout(() => {
-        field.classList.remove('iqa-copy-flash');
+        field.classList.remove(flash);
         this._flashTimers.delete(field);
-      }, 800));
+      }, window.UnionSuiteCopy ? 1600 : 800));
     },
     mount() {
       injectStyle('iqaSqlToolsCss', SQLTOOLS_CSS);
@@ -610,9 +634,10 @@
       this._enhanceExpressions();
     },
     teardown() {
-      this._flashTimers.forEach((timer, field) => { clearTimeout(timer); field.classList.remove('iqa-copy-flash'); });
+      this._flashTimers.forEach((timer, field) => { clearTimeout(timer); field.classList.remove('iqa-copy-flash', 'us-copy-flash'); });
       this._flashTimers.clear();
       document.querySelectorAll('.sqltext-copy-btn, .copied-msg').forEach(e => e.remove());
+      removeThemeCopyButtons();
       document.querySelectorAll('.SQLText[data-copy-btn-added]').forEach(e => { delete e.dataset.copyBtnAdded; });
       document.querySelectorAll('.textarea-wrap').forEach(wrap => {
         const ta = wrap.querySelector('textarea'); if (!ta) return;
@@ -626,6 +651,15 @@
       document.querySelectorAll('.SQLText').forEach(el => {
         if (el.dataset.copyBtnAdded) return;
         el.dataset.copyBtnAdded = 'true';
+        // Beside the field's "SQL" label, so it is found without scrolling the
+        // full width of the SQL; after the field when no label is found.
+        const label = this._fieldLabel(el, 'SQL');
+        const place = button => {
+          if (label) label.appendChild(button); // inside, so it stays on the label's line
+          else (el.closest('div') || el.parentNode || el).insertAdjacentElement('beforeend', button);
+        };
+        const themed = themeCopyButton(el, 'Copy SQL');
+        if (themed) { place(themed); return; }
         const btn = elFromHTML(`<span class="sqltext-copy-btn" role="button" tabindex="0" title="Copy SQL">${COPY_ICON}</span>`);
         const doCopy = async () => {
           const ok = await copyText(el.innerText || el.textContent || el.value || '');
@@ -638,13 +672,26 @@
         };
         btn.addEventListener('click', doCopy);
         btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doCopy(); } });
-        (el.closest('div') || el.parentNode || el).insertAdjacentElement('beforeend', btn);
+        place(btn);
       });
+    },
+
+    // The nearest element reading exactly `text` around a field, walking out a
+    // few levels, that is not the field or a container of it.
+    _fieldLabel(field, text) {
+      for (let scope = field.parentElement, depth = 0; scope && depth < 4; scope = scope.parentElement, depth++) {
+        const label = [...scope.querySelectorAll('label, span, div, td, th')].find(node =>
+          !node.contains(field) && !node.children.length && node.textContent.trim() === text);
+        if (label) return label;
+      }
+      return null;
     },
 
     _copyPath() {
       const path = document.querySelector('span[id$="_QueryPath"]');
       if (!path || path.nextElementSibling?.classList.contains('iqa-path-copy')) return;
+      const themed = themeCopyButton(path, 'Copy query path');
+      if (themed) { themed.classList.add('iqa-path-copy'); path.insertAdjacentElement('afterend', themed); return; }
       const btn = elFromHTML(`<button type="button" class="sqltext-copy-btn iqa-path-copy" title="Copy path" aria-label="Copy query path">${COPY_ICON}</button>`);
       const msg = document.createElement('span');
       msg.className = 'copied-msg'; msg.setAttribute('role', 'status');
@@ -691,7 +738,8 @@
         const wrapper = document.createElement('div'); wrapper.className = 'textarea-wrap';
         const bar = document.createElement('div'); bar.className = 'icon-bar';
         const editBtn = iconBtn('Edit text'); editBtn.innerHTML = PENCIL_ICON;
-        const copyBtn = iconBtn('Copy text'); copyBtn.innerHTML = COPY_ICON;
+        const themedCopy = themeCopyButton(ta, 'Copy text');
+        const copyBtn = themedCopy || iconBtn('Copy text'); if (!themedCopy) copyBtn.innerHTML = COPY_ICON;
 
         ta.parentNode.replaceChild(wrapper, ta);
         wrapper.appendChild(ta); wrapper.appendChild(bar); bar.appendChild(editBtn); bar.appendChild(copyBtn);
@@ -714,6 +762,7 @@
         editBtn.addEventListener('click', toggleEdit);
         editBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleEdit(); } });
 
+        if (themedCopy) return; // the theme's US-COPY handles the click
         let statusTimer = null, statusEl = null;
         const doCopy = async () => {
           const ok = await copyText(ta.value);
@@ -2350,7 +2399,75 @@ function createRelationshipWorkspace() {
     }
     return null;
   }
-  if (typeof document === 'undefined') return { field, idFields, entityFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent, itemData };
+  // A predefined relationship's description starts with its own name instead
+  // of "Custom": "FK_Name_Member_Types (When … = …)". iMIS can add one by
+  // itself when a source is added, and unless it joins Id to Id it is often
+  // the wrong join, so it is marked for checking. A field counts as an Id
+  // when its name ends in Id (Id, Co Id, Contact Id).
+  function predefinedName(description) {
+    const name = (/^(.*?)\s*\(When /.exec(String(description)) || [])[1] || '';
+    return name.trim().toLowerCase() === 'custom' ? '' : name.trim();
+  }
+  // An Exists or Not Exist relation's description ends "… = X.Id Does Exist)"
+  // or "… Does Not Exist)"; the field is the part before that.
+  const plainField = field => String(field || '').trim().replace(/\s+(?:does\s+)?(?:not\s+)?exists?$/i, '');
+  const idField = field => /(^|[\s_])id$/i.test(plainField(field));
+  const checkEdge = edge => Boolean(edge.name && !(idField(edge.leftField) && idField(edge.rightField)));
+  // The join graph from the Relations list. Each relationship links the two
+  // sources its description names, with the field on each side:
+  // "Custom (When Finance.Frequency = _I4u_UT_Lookup_Frequency.Lookup Id)".
+  // One whose description cannot be read that way links the two aliases it
+  // mentions, without fields. Aliases cannot contain a dot.
+  function joinEdges(sources, relations) {
+    const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const longestFirst = sources.map((source, index) => ({ alias: source.alias, index })).sort((a, b) => b.alias.length - a.alias.length);
+    const sideOf = text => {
+      const match = longestFirst.find(entry => text.toLowerCase().startsWith(entry.alias.toLowerCase() + '.'));
+      return match ? { index: match.index, field: plainField(text.slice(match.alias.length + 1)) } : null;
+    };
+    return relations.flatMap((relation, id) => {
+      const kind = { id, type: relation.type || '', typeText: relation.typeText || relation.type || '', name: predefinedName(relation.description) };
+      const parts = /\(When (.+?) = (.+)\)\s*$/.exec(relation.description);
+      const left = parts && sideOf(parts[1].trim()), right = parts && sideOf(parts[2].trim());
+      if (left && right && left.index !== right.index) return [{ ...kind, left: left.index, right: right.index, leftField: left.field, rightField: right.field }];
+      const named = sources.map((source, index) => new RegExp('(^|[\\s(=])' + escape(source.alias) + '\\.', 'i').test(relation.description) ? index : -1).filter(index => index >= 0);
+      return named.length === 2 ? [{ ...kind, left: named[0], right: named[1], leftField: '', rightField: '' }] : [];
+    });
+  }
+  // Trees walked outward from the first source, then from the first source of
+  // each group it does not reach, in source order. Each node keeps the
+  // relationship that reached it; one between two sources already placed is
+  // an "also joined" note on whichever was placed later.
+  function joinForest(count, edges) {
+    const placed = new Map(), trees = [];
+    for (let start = 0; start < count; start++) {
+      if (placed.has(start)) continue;
+      const root = { index: start, edge: null, parent: null, children: [], also: [], order: placed.size };
+      placed.set(start, root); trees.push(root);
+      for (const queue = [root]; queue.length;) {
+        const node = queue.shift();
+        edges.forEach(edge => {
+          const other = edge.left === node.index ? edge.right : edge.right === node.index ? edge.left : -1;
+          if (other < 0 || placed.has(other)) return;
+          const child = { index: other, edge, parent: node, children: [], also: [], order: placed.size };
+          placed.set(other, child); node.children.push(child); queue.push(child);
+        });
+      }
+    }
+    edges.forEach(edge => {
+      const a = placed.get(edge.left), b = placed.get(edge.right);
+      if (!a || !b || a.edge === edge || b.edge === edge) return;
+      const [earlier, later] = a.order < b.order ? [a, b] : [b, a];
+      later.also.push({ edge, other: earlier.index });
+    });
+    return trees;
+  }
+  // A left join keeps every row of its left side, so the source on the right
+  // is optional. An Equals join beneath an optional source makes it required
+  // again: the first source's rows without it are dropped.
+  const optionalNode = node => Boolean(node?.edge && /^Left\|/.test(node.edge.type) && node.edge.right === node.index);
+  const requiresOptionalParent = node => Boolean(node.edge && node.edge.type === 'Equal|AND' && optionalNode(node.parent));
+  if (typeof document === 'undefined') return { field, idFields, entityFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent, itemData, joinEdges, joinForest, optionalNode, requiresOptionalParent, predefinedName, idField, checkEdge };
   const KEY = 'iqa:relationship-intent:v1';
 
   // The relationship editor in a page or response: the "Predefined relationship"
@@ -2360,6 +2477,8 @@ function createRelationshipWorkspace() {
       && [...select.options].some(option => option.value === 'None') && select.closest('tr')?.querySelector('.JoinButton')) || null;
   }
   const relationCount = doc => [...doc.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).length;
+  // A cell's own text, without the tags this editor adds to it.
+  const ownText = cell => [...(cell?.childNodes || [])].filter(node => node.nodeType === 3).map(node => node.textContent).join('').replace(/\s+/g, ' ').trim();
   // The field controls in a response with Custom selected: each picker's posted
   // names and items (text from its dropdown list, values from its itemData),
   // the join type and the hidden AddJoin submit that ConfirmCrossJoin clicks.
@@ -2491,7 +2610,7 @@ function createRelationshipWorkspace() {
     const sourceRows = [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value)).map(input => {
       const sourceRow = input.closest('tr'), alias = sourceRow.querySelector('input[id*="txtAlias"]')?.value || input.value;
       const name = (sourceRow.cells[0]?.textContent || '').replace(/\s+/g, ' ').trim();
-      return { slot: input.value, alias, access: ENTITY_ACCESS.test(name) || ENTITY_ACCESS.test(alias) };
+      return { slot: input.value, alias, name, access: ENTITY_ACCESS.test(name) || ENTITY_ACCESS.test(alias) };
     });
     const hasAccess = sourceRows.some(source => source.access);
     const pairModes = hasAccess ? ['id', 'entity'] : ['id'], isPair = value => pairModes.includes(value);
@@ -2564,6 +2683,52 @@ function createRelationshipWorkspace() {
       if (saved?.left && [...leftID.options].some(option => option.value === saved.left)) leftID.value = saved.left;
       if (saved?.right && [...rightID.options].some(option => option.value === saved.right)) rightID.value = saved.right;
       else if (mode === 'id' && rightID.options.length > 1) rightID.selectedIndex = 1;
+      separate(leftID);
+      applyPreselect();
+    }
+    // A join started from the tree's "+ Join": Join by ID with that business
+    // object on the right and the first source on the left, once the field
+    // selects are filled. Without an Id field it opens Choose fields instead.
+    let preselect = null;
+    function joinFrom(slot) {
+      preselect = { slot };
+      if (mode === 'id') applyPreselect(); else choose('id');
+      panel.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+    function applyPreselect() {
+      if (!preselect || !paired(mode) || filledFor !== mode || !leftID.options.length) return;
+      const slot = preselect.slot;
+      const option = (select, wanted) => [...select.options].find(item => item.value && field(item.value, '')?.slot === wanted);
+      if (mode === 'id' && !option(rightID, slot)) { preselect = null; choose('fields'); return; }
+      preselect = null;
+      if (mode !== 'id') return;
+      rightID.value = option(rightID, slot).value;
+      const first = option(leftID, sourceRows[0].slot);
+      const filled = [rightID];
+      if (first && sourceRows[0].slot !== slot) { leftID.value = first.value; filled.push(leftID); }
+      separate(rightID); persist(); render();
+      // Each prefilled picker flashes an accent outline to show what changed.
+      filled.forEach(select => {
+        const picker = select.previousElementSibling?.matches('.iqa-field-picker') ? select.previousElementSibling : select;
+        picker.classList.remove('iqa-prefill-flash'); void picker.offsetWidth;
+        picker.classList.add('iqa-prefill-flash');
+        setTimeout(() => picker.classList.remove('iqa-prefill-flash'), 1600);
+      });
+    }
+    // A business object cannot be joined to itself, so each side hides the
+    // business object chosen on the other. Choosing one the other side already
+    // has moves that side to its first remaining choice (or back to blank).
+    const sourceOf = value => field(value, '')?.source || '';
+    function separate(changed) {
+      const other = changed === leftID ? rightID : leftID, taken = sourceOf(changed.value);
+      if (taken && sourceOf(other.value) === taken) {
+        const next = [...other.options].find(option => !option.value ? mode === 'fields' : sourceOf(option.value) !== taken);
+        other.value = next ? next.value : '';
+      }
+      [[leftID, rightID], [rightID, leftID]].forEach(([select, opposite]) => {
+        const used = sourceOf(opposite.value);
+        [...select.options].forEach(option => { option.hidden = Boolean(used && option.value && sourceOf(option.value) === used); });
+      });
       syncPickers.forEach(sync => sync());
     }
     function persist() { remember({ mode, left: leftID.value, right: rightID.value, freshFields, scroll: pendingScroll }); }
@@ -2616,7 +2781,8 @@ function createRelationshipWorkspace() {
       const button = el('button', text); button.type = 'button'; listen(button, 'click', () => choose(value)); buttons.set(value, button); modes.appendChild(button);
     }
     function relationships() { return [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).map(input => {
-      const relation = input.closest('tr'); return { description: relation.cells[0].textContent.trim(), type: relation.querySelector('select')?.value };
+      const relation = input.closest('tr'), select = relation.querySelector('select');
+      return { description: ownText(relation.cells[0]), type: select?.value, typeText: select?.selectedOptions[0]?.text.trim() || '' };
     }); }
     function selectedPair() {
       if (paired(mode)) return [fieldsFor(0).find(item => item.value === leftID.value), fieldsFor(1).find(item => item.value === rightID.value)];
@@ -2688,7 +2854,7 @@ function createRelationshipWorkspace() {
       }
     }
     listen(ownType, 'change', render);
-    listen(leftID, 'change', () => { persist(); render(); }); listen(rightID, 'change', () => { persist(); render(); });
+    listen(leftID, 'change', () => { separate(leftID); persist(); render(); }); listen(rightID, 'change', () => { separate(rightID); persist(); render(); });
     listen(kind, 'change', () => { pendingScroll ||= captureScroll(kind); mode = kind.value === 'Custom' ? isPair(mode) ? mode : 'fields' : 'predefined'; persist(); render(); });
     if (nativeType) listen(nativeType, 'change', () => { pendingScroll = captureScroll(nativeType); persist(); render(); });
     listen(add, 'click', () => {
@@ -2749,8 +2915,296 @@ function createRelationshipWorkspace() {
     [...table.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).forEach(input => {
       const relation = input.closest('tr'), select = relation.querySelector('select'); relation.classList.add('iqa-existing-relationship');
       undo.push(() => relation.classList.remove('iqa-existing-relationship'));
+      // Predefined relationships are tagged; one not joining Id to Id is marked
+      // for checking. An alias cannot contain a dot, so each field follows it.
+      const description = ownText(relation.cells[0]), name = predefinedName(description);
+      if (name && relation.cells[0]) {
+        const sides = /\(When (.+?) = (.+)\)\s*$/.exec(description);
+        const fieldOf = side => plainField(side.slice(side.indexOf('.') + 1));
+        const check = checkEdge({ name, leftField: sides ? fieldOf(sides[1]) : '', rightField: sides ? fieldOf(sides[2]) : '' });
+        // Drawn from an attribute, so the description text stays readable.
+        const cell = relation.cells[0];
+        cell.setAttribute('data-iqa-tag', check ? 'Predefined: check' : 'Predefined');
+        cell.title = check ? 'Added from a predefined relationship and not joined Id to Id. Check it is the join you want.' : 'Added from a predefined relationship.';
+        relation.classList.add(check ? 'iqa-relation-check' : 'iqa-relation-predefined');
+        undo.push(() => { cell.removeAttribute('data-iqa-tag'); cell.removeAttribute('title'); relation.classList.remove('iqa-relation-check', 'iqa-relation-predefined'); });
+      }
       if (select) { const old = select.getAttribute('aria-label'); select.setAttribute('aria-label', 'Relationship join type'); undo.push(() => { if (old === null) select.removeAttribute('aria-label'); else select.setAttribute('aria-label', old); }); }
     });
+    // The join graph from the Relations list (joinEdges), walked from the first
+    // source (joinForest). It drives both the source-row markers and the tree.
+    const forest = sourceRows.length > 1 ? joinForest(sourceRows.length, joinEdges(sourceRows, relationships())) : [];
+    const rootAlias = sourceRows[0]?.alias || '';
+    const linked = index => forest.some(function has(node) { return node.index === index && Boolean(node.edge || node.children.length) || node.children.some(has); });
+    // While iMIS warns that one or more sources have no relation, mark each
+    // source the first one does not reach: with no relationship at all, or
+    // joined only within a separate group.
+    const warning = [...document.querySelectorAll('div, span, p, td')].find(node => !node.children.length
+      && /do not have a Relation defined/i.test(node.textContent) && node.offsetParent !== null);
+    if (warning) {
+      forest.slice(1).forEach(function mark(node) {
+        const source = sourceRows[node.index];
+        const sourceRow = [...table.querySelectorAll('input[type="hidden"]')].find(input => input.value === source.slot)?.closest('tr');
+        // Drawn from an attribute, so the cell's text (read elsewhere as the
+        // business object's name) stays as iMIS rendered it.
+        if (sourceRow?.cells[0]) {
+          const cell = sourceRow.cells[0];
+          cell.setAttribute('data-iqa-tag', linked(node.index) ? 'Not joined to ' + rootAlias : 'No relationship');
+          sourceRow.classList.add('iqa-source-unrelated');
+          undo.push(() => { sourceRow.classList.remove('iqa-source-unrelated'); cell.removeAttribute('data-iqa-tag'); });
+        }
+        node.children.forEach(mark);
+      });
+    }
+    // Relations: a join tree (the default) or iMIS's own list, switched in the
+    // Relations heading and remembered in this browser. The tree has one line
+    // per business object, branching from the first source: solid lines must
+    // match (Equals), dashed are optional (Left join), dotted filter (Exists)
+    // or exclude (Not exist). Groups the first source does not reach follow in
+    // an amber block. Each relationship's own join type select and Remove
+    // button are moved from its row onto its tree line, and back for the list,
+    // so every change is still iMIS's own postback.
+    if (forest.length) {
+      let warnings = 0;
+      const relationRows = [...table.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).map(input => input.closest('tr'));
+      const fieldsOf = (edge, from) => !edge.leftField ? '' : edge.left === from ? edge.leftField + ' = ' + edge.rightField : edge.rightField + ' = ' + edge.leftField;
+      // Exists and Not Exist are WHERE [NOT] EXISTS subqueries, not joins: the
+      // source filters the rows above it and adds no columns. Not Exist keeps
+      // only rows with no match, so it is drawn as an exclusion.
+      const kindOf = edge => /^Left\|/.test(edge.type) ? ' is-optional' : /^NotExist\|/.test(edge.type) ? ' is-exclude' : /^Exist\|/.test(edge.type) ? ' is-filter' : '';
+      const filterSentence = (edge, parent, child) => {
+        const fields = fieldsOf(edge, parent), or = /\|OR$/.test(edge.type) ? 'Or: only ' : 'Only ';
+        return or + sourceRows[parent].alias + (/^NotExist\|/.test(edge.type) ? ' with no matching ' : ' with a matching ')
+          + sourceRows[child].alias + (fields ? ' (' + fields + ')' : '');
+      };
+      const pill = edge => el('span', edge.typeText || edge.type, 'iqa-join-pill' + kindOf(edge));
+      const predefinedTag = edge => {
+        const tag = el('span', checkEdge(edge) ? 'Predefined: check' : 'Predefined', 'iqa-relation-tag' + (checkEdge(edge) ? ' is-check' : ''));
+        tag.title = edge.name; return tag;
+      };
+      const checkText = (edge, from) => {
+        const fields = fieldsOf(edge, from);
+        return 'Predefined relationship ' + edge.name + (fields ? ' joins ' + fields : '') + ', not Id to Id. Check it is the join you want.';
+      };
+      // A warning is an amber ! on its line, with the sentence as its tooltip;
+      // the summary's "N warnings" shows or hides every sentence under its line.
+      const warningIcons = [];
+      function addWarning(wrap, line, text) {
+        warnings++;
+        const icon = el('button', '!', 'iqa-join-alert'); icon.type = 'button';
+        icon.title = text; icon.setAttribute('aria-label', 'Warning: ' + text);
+        line.insertBefore(icon, line.querySelector(':scope > .iqa-join-type, :scope > .iqa-join-add'));
+        warningIcons.push(icon);
+        wrap.appendChild(el('div', text, 'iqa-join-warning'));
+      }
+      // A relationship's native controls, placed into slots on its tree line.
+      // Without a select (an unexpected row) the type shows as a pill instead.
+      const controls = [], used = new Set(), kinds = new Set();
+      function relationControls(id, kind, edge) {
+        used.add(id); if (edge) kinds.add(kind);
+        const row = relationRows[id], type = row?.querySelector('select'), remove = row?.querySelector('input[type="image"][title="Remove"]');
+        const typeSlot = el('span', null, 'iqa-join-type' + kind), removeSlot = el('span', null, 'iqa-join-remove');
+        [[type, typeSlot], [remove, removeSlot]].forEach(([node, slot]) => {
+          if (node) controls.push({ node, slot, parent: node.parentNode, next: node.nextSibling });
+        });
+        if (!type && edge) typeSlot.appendChild(pill(edge));
+        return { typeSlot, removeSlot };
+      }
+      // "+ Join" on a business object the first source does not reach starts
+      // a relationship for it in Add relationship below.
+      function joinButton(index) {
+        const button = el('button', 'Join', 'iqa-join-add'); button.type = 'button';
+        button.setAttribute('aria-label', 'Add a relationship for ' + sourceRows[index].alias);
+        listen(button, 'click', () => joinFrom(sourceRows[index].slot));
+        return button;
+      }
+      const lineBySource = new Map();
+      function branch(node, groupRoot) {
+        const source = sourceRows[node.index];
+        const wrap = el('div', null, node.edge ? 'iqa-join-branch' + kindOf(node.edge) : 'iqa-join-root');
+        const line = el('div', null, 'iqa-join-node');
+        lineBySource.set(node.index, line);
+        // A filter adds no columns, so its name is muted; Not Exist also gets ⊘.
+        const filterName = !node.edge ? '' : /^NotExist\|/.test(node.edge.type) ? ' is-excluded' : /^Exist\|/.test(node.edge.type) ? ' is-filtered' : '';
+        line.append(el('span', source.alias, 'iqa-join-name' + filterName));
+        if (source.name && source.name.toLowerCase() !== source.alias.toLowerCase()) line.append(el('span', source.name, 'iqa-join-object'));
+        if (node.edge) {
+          const slots = relationControls(node.edge.id, kindOf(node.edge), node.edge);
+          const filter = /Exist\|/.test(node.edge.type), fields = fieldsOf(node.edge, node.parent.index);
+          if (filter) line.append(el('span', filterSentence(node.edge, node.parent.index, node.index), 'iqa-join-fields'));
+          else if (fields) line.append(el('span', fields, 'iqa-join-fields'));
+          if (node.edge.name) line.append(predefinedTag(node.edge));
+          line.append(slots.typeSlot, slots.removeSlot);
+        } else if (node.index === 0) line.append(el('span', 'first source', 'iqa-join-fields'));
+        else {
+          if (!node.children.length) line.append(el('span', 'No relationship', 'iqa-join-fields'));
+          line.append(joinButton(node.index));
+        }
+        wrap.appendChild(line);
+        if (node.edge && checkEdge(node.edge)) addWarning(wrap, line, checkText(node.edge, node.parent.index));
+        if (requiresOptionalParent(node)) {
+          addWarning(wrap, line, 'Equals under a left join: ' + sourceRows[groupRoot.index].alias + ' rows with no '
+            + sourceRows[node.parent.index].alias + ' are dropped.');
+        }
+        node.also.forEach(also => {
+          const note = el('div', null, 'iqa-join-note'), fields = fieldsOf(also.edge, node.index);
+          const slots = relationControls(also.edge.id, kindOf(also.edge), also.edge);
+          note.append('Also joined to ' + sourceRows[also.other].alias);
+          if (fields) note.append(el('span', fields, 'iqa-join-fields'));
+          if (also.edge.name) note.append(predefinedTag(also.edge));
+          note.append(slots.typeSlot, slots.removeSlot);
+          wrap.appendChild(note);
+          if (checkEdge(also.edge)) addWarning(wrap, note, checkText(also.edge, node.index));
+        });
+        // Joins first, then Exists and Not Exist filters: those are conditions,
+        // not data sources. Otherwise iMIS's order is kept (the sort is stable).
+        const filtering = child => /Exist\|/.test(child.edge?.type || '') ? 1 : 0;
+        [...node.children].sort((a, b) => filtering(a) - filtering(b)).forEach(child => wrap.appendChild(branch(child, groupRoot)));
+        return wrap;
+      }
+      const treePanel = el('section', null, 'iqa-join-tree');
+      const summary = el('p', '', 'iqa-join-tree-summary');
+      const trees = [branch(forest[0], forest[0])];
+      if (forest.length > 1) {
+        const detached = el('div', null, 'iqa-join-detached');
+        detached.appendChild(el('div', 'Not joined to ' + rootAlias, 'iqa-join-detached-title'));
+        forest.slice(1).forEach(tree => detached.appendChild(branch(tree, tree)));
+        trees.push(detached);
+      }
+      // Relationships the tree could not read stay listed, with their controls.
+      const others = relationRows.map((row, id) => ({ row, id })).filter(item => item.row && !used.has(item.id));
+      if (others.length) {
+        const other = el('div', null, 'iqa-join-other');
+        other.appendChild(el('div', 'Other relationships', 'iqa-join-detached-title'));
+        others.forEach(item => {
+          const line = el('div', null, 'iqa-join-node'), slots = relationControls(item.id, '');
+          line.append(el('span', ownText(item.row.cells[0]), 'iqa-join-fields'), slots.typeSlot, slots.removeSlot);
+          other.appendChild(line);
+        });
+        trees.push(other);
+      }
+      // The legend lists only the join types this query uses.
+      const legend = el('div', null, 'iqa-join-legend');
+      [['Equals', '', 'must match'], ['Left join', ' is-optional', 'optional'], ['Exists', ' is-filter', 'keeps matches'], ['Not exist', ' is-exclude', 'excludes matches']]
+        .filter(([, kind]) => kinds.has(kind)).forEach(([text, kind, meaning]) => {
+          const item = el('span'); item.append(el('span', text, 'iqa-join-pill' + kind), ' ' + meaning); legend.appendChild(item);
+        });
+      treePanel.append(summary, ...(legend.children.length ? [legend] : []), ...trees);
+      const apart = forest.slice(1).reduce(function count(total, node) { return node.children.reduce(count, total + 1); }, 0);
+      summary.append(sourceRows.length + ' business objects · ' + (apart ? apart + ' not joined to ' + rootAlias : 'all joined'));
+      if (warnings) {
+        const WARNINGS_KEY = 'iqa:join-warnings-open';
+        const toggle = el('button', warnings + (warnings === 1 ? ' warning' : ' warnings'), 'iqa-join-warnings-toggle'); toggle.type = 'button';
+        summary.append(' · ', toggle);
+        let open = false; try { open = sessionStorage.getItem(WARNINGS_KEY) === '1'; } catch (_) {}
+        const show = next => {
+          open = next; treePanel.classList.toggle('show-warnings', open); toggle.setAttribute('aria-expanded', String(open));
+          try { sessionStorage.setItem(WARNINGS_KEY, open ? '1' : '0'); } catch (_) {}
+        };
+        show(open);
+        [toggle, ...warningIcons].forEach(button => listen(button, 'click', () => show(!open)));
+      }
+      cell.insertBefore(treePanel, panel); undo.unshift(() => treePanel.remove());
+
+      // Hovering a tree line or its business object's row in Sources above
+      // marks both, to match aliases to objects.
+      [...table.querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value)).forEach(input => {
+        const index = sourceRows.findIndex(source => source.slot === input.value), row = input.closest('tr'), line = lineBySource.get(index);
+        if (!row || !line) return;
+        const mark = on => { row.classList.toggle('iqa-source-linked', on); line.classList.toggle('is-linked', on); };
+        [row, line].forEach(node => { listen(node, 'mouseenter', () => mark(true)); listen(node, 'mouseleave', () => mark(false)); });
+        undo.push(() => { row.classList.remove('iqa-source-linked'); line.classList.remove('is-linked'); });
+      });
+
+      // The Tree / List switcher sits in iMIS's Relations heading row, so it
+      // stays put between views; without that row it heads the tree panel.
+      const titleRow = [...table.querySelectorAll('span.SectionTitle')].find(span => /^relations$/i.test(span.textContent.trim()))?.closest('tr');
+      const headerRow = titleRow?.nextElementSibling?.classList.contains('GridHeader') ? titleRow.nextElementSibling : null;
+      const switcher = el('div', null, 'iqa-relations-view'); switcher.setAttribute('role', 'group'); switcher.setAttribute('aria-label', 'Relations view');
+      const viewButtons = [['tree', 'Tree'], ['list', 'List']].map(([value, text]) => {
+        const button = el('button', text); button.type = 'button'; button.dataset.view = value; switcher.appendChild(button); return button;
+      });
+      const host = titleRow?.cells[0];
+      if (host) host.appendChild(switcher); else treePanel.insertBefore(switcher, treePanel.firstChild);
+      if (host) { host.classList.add('iqa-relations-heading'); undo.push(() => host.classList.remove('iqa-relations-heading')); }
+      const VIEW_KEY = 'iqaRelationsView';
+      // Sources and Relations share one table, so hiding the relationship rows
+      // would re-fit its columns. The source columns keep the widths they have
+      // with the list showing, as shares of the table, so they don't move.
+      const sourceHeader = [...table.rows].find(row => row.classList.contains('GridHeader'));
+      if (sourceHeader && table.offsetWidth) {
+        const widths = [...sourceHeader.cells].map(cell => cell.offsetWidth / table.offsetWidth * 100);
+        [...sourceHeader.cells].forEach((cell, index) => {
+          const before = cell.style.width; cell.style.width = widths[index].toFixed(2) + '%';
+          undo.push(() => { cell.style.width = before; });
+        });
+      }
+      // A join type change posts in the background (NativePost), as the
+      // select's own postback would, instead of reloading the page. The page
+      // then takes the response's hidden form state (ViewState, validation,
+      // tokens) so later native actions post current state, and the tree is
+      // rebuilt. Anything unexpected falls back to one ordinary refresh.
+      async function changeType(select) {
+        const original = location.href.split('#')[0], target = NativePost.postbackTarget(select) || select.name;
+        treePanel.classList.add('is-busy'); treePanel.setAttribute('aria-busy', 'true');
+        const spinner = el('span', null, 'us-button-spinner iqa-join-tree-spinner'); spinner.setAttribute('aria-hidden', 'true');
+        treePanel.appendChild(spinner);
+        // The relationship's own marker (RLn) identifies it in the response;
+        // control names can be numbered differently there.
+        const home = controls.find(control => control.node === select)?.parent?.closest('tr');
+        const marker = [...(home?.querySelectorAll('input[type="hidden"]') || [])].find(input => /^RL\d+$/.test(input.value))?.value;
+        try {
+          if (!marker) throw new Error('relationship-marker-missing');
+          const page = await NativePost.post({ doc: document, url: original }, original, { changes: { [select.name]: select.value }, target });
+          const row = [...page.doc.querySelectorAll('input[type="hidden"]')].find(input => input.value === marker)?.closest('tr');
+          const applied = row?.querySelector('select');
+          if (!applied) throw new Error('relationship-not-in-response');
+          if (applied.value !== select.value) throw new Error('join-type-not-applied');
+          if (applied.name !== select.name) throw new Error('control-names-changed');
+          // Matched by name in a map: this module's own CSS constant shadows
+          // the browser's CSS.escape.
+          const form = document.querySelector('input[name="__VIEWSTATE"]')?.form;
+          const mine = new Map([...(form?.querySelectorAll('input[type="hidden"][name]') || [])].map(input => [input.name, input]));
+          page.doc.querySelectorAll('input[type="hidden"][name]').forEach(input => {
+            const field = mine.get(input.name);
+            if (field && field.value !== input.value) field.value = input.value;
+          });
+          restore(); mount();
+        } catch (error) {
+          console.warn('[IQA relationships] background join type change failed:', /^[a-z-]+$/.test(error.message) ? error.message : error);
+          location.replace(original);
+        }
+      }
+      // Capture on the tree runs before the select's own onchange postback,
+      // which stopping the event here prevents.
+      const typeChanged = event => {
+        const select = event.target.closest?.('.iqa-join-type select');
+        if (!select || treePanel.classList.contains('is-busy')) return;
+        event.stopPropagation();
+        changeType(select);
+      };
+      treePanel.addEventListener('change', typeChanged, true);
+      undo.push(() => treePanel.removeEventListener('change', typeChanged, true));
+      function place(tree) {
+        controls.forEach(control => {
+          if (tree) control.slot.appendChild(control.node);
+          else control.parent.insertBefore(control.node, control.next?.parentNode === control.parent ? control.next : null);
+        });
+        [...relationRows, headerRow].forEach(row => row?.classList.toggle('iqa-relations-hidden', tree));
+        [...treePanel.children].forEach(child => { if (child !== switcher) child.hidden = !tree; });
+        treePanel.classList.toggle('is-list', !tree);
+        treePanel.hidden = !tree && Boolean(host);
+        viewButtons.forEach(button => button.setAttribute('aria-pressed', String((button.dataset.view === 'tree') === tree)));
+      }
+      let view = 'tree';
+      try { if (localStorage.getItem(VIEW_KEY) === 'list') view = 'list'; } catch (_) {}
+      place(view === 'tree');
+      viewButtons.forEach(button => listen(button, 'click', () => {
+        view = button.dataset.view; place(view === 'tree');
+        try { localStorage.setItem(VIEW_KEY, view); } catch (_) {}
+      }));
+      undo.push(() => { place(false); treePanel.hidden = false; switcher.remove(); });
+    }
     render(); hydrate();
     restoreScroll(scrollToRestore);
   }
@@ -2774,6 +3228,89 @@ function createRelationshipWorkspace() {
     .iqa-relationship-actions{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap}
     .iqa-relationship-preview{flex:1;min-width:200px;overflow-wrap:anywhere;padding:8px 10px;background:#f2f7fa;border-radius:4px;font-size:13px}.iqa-relationship-preview:empty{display:none}
     .iqa-existing-relationship>td{padding-top:12px!important;padding-bottom:12px!important}
+    .iqa-join-tree{margin:12px 0;padding:12px 18px;border:1px solid var(--border,#cbd5e1);border-radius:6px;background:var(--bg-surface,#fff);white-space:normal;color:var(--text-strong,#1c2024)}
+    .iqa-join-tree-summary{margin:0 0 8px;font-size:13px;color:var(--text-muted,#545962)}
+    .iqa-relations-heading>.iqa-relations-view{margin-left:16px;vertical-align:middle}
+    .iqa-relations-view{display:inline-flex;gap:0}
+    .iqa-join-tree>.iqa-relations-view{margin-bottom:10px}
+    .iqa-relations-view button{padding:4px 14px;border:1px solid #cbd5e1;background:#fff;color:#344454;font:inherit;font-size:13px;cursor:pointer}
+    .iqa-relations-view button+button{margin-left:-1px}
+    .iqa-relations-view button[aria-pressed=true]{position:relative;background:#dff4fc;border-color:#168eb8;color:#064b66;font-weight:600}
+    .iqa-relations-view button:focus-visible{outline:2px solid #087fae;outline-offset:2px}
+    .iqa-relations-hidden{display:none!important}
+    .iqa-join-tree.is-list{padding:10px 18px}
+    .iqa-join-type select{width:100%!important;min-width:0!important;max-width:none;height:28px;margin:0!important;padding:0 26px 0 10px;border-radius:999px;font-size:12px;line-height:26px}
+    .iqa-join-type.is-optional select{border-color:transparent;background-color:var(--info-bg,#e4f0f4);color:var(--text-link,#006f94)}
+    .iqa-join-type.is-filter select{border-style:dotted}
+    .iqa-join-type.is-exclude select{border:1px dotted var(--danger,#d03528);background-color:var(--danger-bg,#fbe4e2);color:var(--danger,#d03528)}
+    .iqa-join-node>*,.iqa-join-note>*{flex-shrink:0}
+    .iqa-join-node>.iqa-join-fields,.iqa-join-note>.iqa-join-fields{flex-shrink:1;min-width:0;overflow-wrap:anywhere}
+    .iqa-join-node>.iqa-join-type,.iqa-join-note>.iqa-join-type{margin-left:auto;flex:none;width:150px;display:inline-flex;justify-content:flex-end}
+    .iqa-join-remove{position:relative;display:inline-flex;flex:none;width:28px;height:28px;border-radius:6px;color:var(--text-muted,#545962)}
+    .iqa-join-remove:empty{display:none}
+    .iqa-join-remove:focus-within{outline:2px solid var(--border-focus,#006f94);outline-offset:1px}
+    .iqa-join-remove::before{content:"";position:absolute;inset:5px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none;transition:color 150ms cubic-bezier(.2,0,0,1)}
+    .iqa-join-remove:has(input:is(:hover,:focus-visible)){color:var(--danger,#d03528)}
+    .iqa-join-remove input[type=image]{position:absolute;inset:0;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:none!important;opacity:0;cursor:pointer}
+    .iqa-join-remove input[type=image]:focus{outline:none}
+    .iqa-join-other{margin-top:12px;padding-top:8px;border-top:1px solid var(--border,#e2e5e9)}
+    .iqa-join-tree{position:relative}
+    .iqa-prefill-flash{outline:2px solid var(--accent,#f39237);outline-offset:2px;animation:iqaPrefillFlash 1600ms cubic-bezier(.4,0,.6,1) forwards}
+    @keyframes iqaPrefillFlash{0%,35%{outline-color:var(--accent,#f39237)}100%{outline-color:transparent}}
+    @media(prefers-reduced-motion:reduce){.iqa-prefill-flash{animation:none}}
+    .iqa-join-alert{display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:var(--warning,#b45309);color:#fff;font:700 12px/1 inherit;cursor:pointer}
+    .iqa-join-alert:focus-visible,.iqa-join-warnings-toggle:focus-visible,.iqa-join-add:focus-visible{outline:2px solid var(--border-focus,#006f94);outline-offset:2px}
+    .iqa-join-warnings-toggle{padding:0;border:0;background:none;color:var(--text-link,#006f94);font:inherit;text-decoration:underline;cursor:pointer}
+    .iqa-join-warning{max-height:6em;overflow:hidden;transition:max-height 220ms cubic-bezier(.2,0,0,1),opacity 180ms cubic-bezier(.2,0,0,1),padding 220ms cubic-bezier(.2,0,0,1)}
+    .iqa-join-tree:not(.show-warnings) .iqa-join-warning{max-height:0;padding-top:0;padding-bottom:0;opacity:0;visibility:hidden;transition:max-height 220ms cubic-bezier(.2,0,0,1),opacity 180ms cubic-bezier(.2,0,0,1),padding 220ms cubic-bezier(.2,0,0,1),visibility 0s 220ms}
+    .iqa-join-node>.iqa-join-add{margin-left:auto;flex:none}
+    .iqa-join-add{padding:2px 10px;border:1px solid var(--border-strong,#94a3b8);border-radius:999px;background:var(--bg-surface,#fff);color:var(--text-link,#006f94);font:inherit;font-size:12px;cursor:pointer}
+    .iqa-join-add::before{content:"+ "}
+    .iqa-join-add:hover{background:var(--info-bg,#e4f0f4)}
+    .iqa-join-node.is-linked{background-color:var(--info-bg,#e4f0f4)}
+    table tr.iqa-source-linked>td{background-color:var(--info-bg,#e4f0f4)!important}
+    @media(prefers-reduced-motion:reduce){.iqa-join-warning,.iqa-join-tree:not(.show-warnings) .iqa-join-warning{transition:none}}
+    .iqa-join-tree.is-busy>:not(.iqa-join-tree-spinner){opacity:.45;pointer-events:none;transition:opacity 180ms cubic-bezier(.2,0,0,1)}
+    .iqa-join-tree-spinner{position:absolute;top:50%;left:50%;margin:-8px 0 0 -8px;color:var(--text-link,#006f94)}
+    .iqa-join-node,.iqa-join-note{border-radius:4px;transition:background-color 150ms cubic-bezier(.2,0,0,1)}
+    .iqa-join-node:has(.iqa-join-type select:is(:hover,:focus-visible)),.iqa-join-note:has(.iqa-join-type select:is(:hover,:focus-visible)){background-color:color-mix(in srgb,var(--text-link,#006f94) 12%,transparent)}
+    .iqa-join-node:has(.iqa-join-remove input:is(:hover,:focus-visible)),.iqa-join-note:has(.iqa-join-remove input:is(:hover,:focus-visible)){background-color:var(--danger-bg,#fbe4e2)}
+    @media(prefers-reduced-motion:reduce){.iqa-join-tree.is-busy>*,.iqa-join-node,.iqa-join-note{transition:none}}
+    .iqa-join-name.is-filtered{color:var(--text-muted,#545962)}
+    .iqa-join-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border,#e2e5e9);font-size:12px;color:var(--text-muted,#545962)}
+    .iqa-join-node{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:4px 0;font-size:14px}
+    .iqa-join-root>.iqa-join-node>.iqa-join-name{font-weight:600}
+    .iqa-join-object{font-size:12px;font-style:italic;color:var(--text-muted,#545962)}
+    .iqa-join-fields{font-size:12px;color:var(--text-muted,#545962)}
+    .iqa-join-pill{display:inline-block;padding:1px 8px;border:1px solid var(--border-strong,#94a3b8);border-radius:999px;font-size:12px;line-height:1.5;white-space:nowrap;background:var(--bg-surface,#fff)}
+    .iqa-join-pill.is-optional{border-color:transparent;background:var(--info-bg,#e4f0f4);color:var(--text-link,#006f94)}
+    .iqa-join-pill.is-filter{border-style:dotted}
+    .iqa-join-branch{position:relative;margin-left:11px;padding-left:20px;border-left:1.5px solid var(--border-strong,#94a3b8)}
+    .iqa-join-branch:last-child{border-left-color:transparent}
+    .iqa-join-branch::before{content:"";position:absolute;left:-1.5px;top:0;width:16px;height:16px;border-left:1.5px solid var(--border-strong,#94a3b8);border-bottom:1.5px solid var(--border-strong,#94a3b8)}
+    .iqa-join-branch.is-optional,.iqa-join-branch.is-optional::before{border-left-style:dashed}
+    .iqa-join-branch.is-optional::before{border-bottom-style:dashed}
+    .iqa-join-branch.is-filter,.iqa-join-branch.is-filter::before{border-left-style:dotted}
+    .iqa-join-branch.is-filter::before{border-bottom-style:dotted}
+    .iqa-join-branch.is-exclude,.iqa-join-branch.is-exclude::before{border-left-style:dotted}
+    .iqa-join-branch.is-exclude::before{border-bottom-style:dotted;border-color:var(--danger,#d03528)}
+    .iqa-join-pill.is-exclude{border:1px dotted var(--danger,#d03528);background:var(--danger-bg,#fbe4e2);color:var(--danger,#d03528)}
+    .iqa-join-name.is-excluded{color:var(--text-muted,#545962)}
+    .iqa-join-name.is-excluded::before{content:"\\2298";margin-right:4px;color:var(--danger,#d03528)}
+    .iqa-join-note{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:0 0 4px;font-size:12px;color:var(--text-muted,#545962)}
+    .iqa-join-warning{position:relative;padding:1px 0 4px 24px;font-size:12px;line-height:1.5;color:var(--text-strong,#1c2024)}
+    .iqa-join-warning::before{content:"!";position:absolute;left:2px;top:2px;display:flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--warning,#b45309);color:#fff;font-size:11px;font-weight:700}
+    .iqa-join-detached{margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--warning-bg,#fdf3e1)}
+    .iqa-join-detached-title{margin-bottom:4px;font-size:12px;font-weight:600}
+    .iqa-relation-tag{display:inline-block;margin-left:8px;padding:1px 8px;border:1px dashed var(--border-strong,#94a3b8);border-radius:999px;font-size:12px;line-height:1.5;vertical-align:middle;white-space:nowrap;color:var(--text-muted,#545962)}
+    .iqa-relation-tag.is-check{border:1px solid var(--warning,#b45309);color:var(--text-strong,#1c2024);background:var(--warning-bg,#fdf3e1)}
+    .iqa-join-node .iqa-relation-tag{margin-left:0}
+    .iqa-relation-check>td{background:var(--warning-bg,#fdf3e1)!important}
+    .iqa-relation-check>td:first-child{box-shadow:inset 3px 0 0 var(--warning,#b45309)}
+    .iqa-source-unrelated>td{background:var(--warning-bg,#fdf3e1)!important}
+    .iqa-source-unrelated>td:first-child{box-shadow:inset 3px 0 0 var(--warning,#b45309)}
+    td[data-iqa-tag]::after{content:attr(data-iqa-tag);display:inline-block;margin-left:8px;padding:1px 8px;border:1px dashed var(--border-strong,#94a3b8);border-radius:999px;font-size:12px;line-height:1.5;vertical-align:middle;white-space:nowrap;color:var(--text-muted,#545962)}
+    .iqa-relation-check>td[data-iqa-tag]::after,.iqa-source-unrelated>td[data-iqa-tag]::after{border:1px solid var(--warning,#b45309);color:var(--text-strong,#1c2024);background:var(--warning-bg,#fdf3e1)}
     @media(max-width:800px){.iqa-relationship-fields,.iqa-relationship-ids{grid-template-columns:1fr}.iqa-relationship-editor{padding:12px}}
   `;
   return { mount, openFieldsInBackground, addInBackground, teardown() { restore(); forget(); document.getElementById('iqaRelationshipCss')?.remove(); } };
@@ -3674,6 +4211,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
               <li>Drag and drop to reorder business objects (via popup).</li>
               <li>Quick add relationships using <strong>Join by ID</strong>. Original relationships are still available via <strong>Choose fields</strong>, or <strong>Predefined relationship</strong>.</li>
               <li>See when a matching relationship already exists.</li>
+              <li>Relations show as a <strong>join tree</strong> from the first business object, with each relationship's join type and delete beside it. Separate groups, Equals joins under a left join and predefined relationships that don't join Id to Id are flagged. Switch to <strong>List</strong> in the Relations heading for the standard view.</li>
               <li><strong>Branchify</strong> limits results to the entities the signed-in user can access. It adds <strong>i4u_UT_EntityAccess</strong> and the filter <strong>Contact Key = "@LoggedInUser"</strong> in the background, then refreshes the editor once. Anything already in place is kept. When exactly one business object has an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field, it can also add that relationship. When there are several such fields, choose which one to join, or none.</li>
               <li>With <strong>i4u_UT_EntityAccess</strong> in the query, the <strong>Branchify</strong> tab under Add relationship joins its <strong>Entity Code</strong> to an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field on another business object.</li></ol>
               <h3>Filters</h3>
@@ -3766,17 +4304,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
         button.setAttribute('aria-label', 'Copy query path');
         const status = document.createElement('span'); status.className = 'iqa-header-copy-status'; status.setAttribute('role', 'status');
         button.appendChild(status);
-        let timer;
         button.addEventListener('click', async () => {
           const current = this._read(); if (!current.path) return;
           const ok = await copyText(current.path);
           if (!button.isConnected) return;
-          clearTimeout(timer);
-          const label = button.querySelector('.iqa-header-copy-text');
-          label.textContent = ok ? 'Copied' : 'Copy failed';
-          status.textContent = ok ? 'Query path copied' : 'Could not copy query path';
+          headerCopied(button, ok, 'Path', ok ? 'Query path copied' : 'Could not copy query path');
           if (ok) SqlTools._flash(current.field || button);
-          timer = setTimeout(() => { label.textContent = 'Path'; status.textContent = ''; }, 1200);
         });
       }
       button.disabled = !state.path;
@@ -3784,6 +4317,25 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
       if (button.parentElement !== pill.parentElement || button.nextElementSibling !== pill) pill.before(button);
     }
   };
+  // A header copy button's feedback, as the theme's copy buttons give it: the
+  // copy icon turns into the success tick and the label reads "Copied" for
+  // the theme's 1.6s, then both turn back. Its value is not on the page, so
+  // there is nothing to flash.
+  const headerTimers = new WeakMap();
+  function headerCopied(button, ok, text, announcement) {
+    clearTimeout(headerTimers.get(button));
+    const label = button.querySelector('.iqa-header-copy-text'), status = button.querySelector('.iqa-header-copy-status');
+    const icon = button.querySelector(':scope > svg');
+    label.textContent = ok ? 'Copied' : 'Copy failed';
+    status.textContent = announcement;
+    if (icon) icon.outerHTML = ok ? TICK_ICON : COPY_ICON;
+    button.classList.toggle('is-copied', ok);
+    headerTimers.set(button, setTimeout(() => {
+      label.textContent = text; status.textContent = '';
+      button.classList.remove('is-copied');
+      const shown = button.querySelector(':scope > svg'); if (shown) shown.outerHTML = COPY_ICON;
+    }, 1600));
+  }
   const HeaderDocumentKey = {
     _record: null,
     _read() {
@@ -3812,16 +4364,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
         button.innerHTML = COPY_ICON + copyLabel('DocumentVersionKey');
         button.setAttribute('aria-label', 'Copy query DocumentVersionKey');
         const status = document.createElement('span'); status.className = 'iqa-header-copy-status'; status.setAttribute('role', 'status'); button.appendChild(status);
-        let timer;
         button.addEventListener('click', async () => {
           const current = this._read(); if (!current) return;
           const ok = await copyText(current); if (!button.isConnected) return;
-          clearTimeout(timer);
-          const label = button.querySelector('.iqa-header-copy-text');
-          label.textContent = ok ? 'Copied' : 'Copy failed';
-          status.textContent = ok ? 'DocumentVersionKey copied' : 'Could not copy DocumentVersionKey';
-          if (ok) SqlTools._flash(button);
-          timer = setTimeout(() => { label.textContent = 'DocumentVersionKey'; status.textContent = ''; }, 1200);
+          headerCopied(button, ok, 'DocumentVersionKey', ok ? 'DocumentVersionKey copied' : 'Could not copy DocumentVersionKey');
         });
       }
       button.disabled = !key;
@@ -3886,6 +4432,10 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
       '.iqa-editor-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:var(--space-2,8px);}' +
       '.iqa-header-copy-button{display:inline-flex;align-items:center;gap:var(--space-2,8px);margin:0;white-space:nowrap;}' +
       '.iqa-header-copy-button > svg{flex:none;width:16px;height:16px;}' +
+      // The success tick pops in, in the theme's success colour (as US-COPY).
+      '.iqa-header-copy-button.is-copied > svg{color:var(--success,#1f7a4d);animation:iqaCopyTick 180ms ease;}' +
+      '@keyframes iqaCopyTick{from{opacity:0;transform:scale(.65);}}' +
+      '@media(prefers-reduced-motion:reduce){.iqa-header-copy-button.is-copied > svg{animation:none;}}' +
       '.iqa-header-copy-label{display:grid;justify-items:center;}' +
       '.iqa-header-copy-label > span{grid-area:1/1;}' +
       '.iqa-header-copy-label > span + span{visibility:hidden;}' +
