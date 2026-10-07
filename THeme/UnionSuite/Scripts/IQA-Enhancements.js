@@ -3706,6 +3706,17 @@ function createSqlEditor(options = {}) {
     return result;
   }
   const quote = value => '[' + value.replace(/\]/g, ']]') + ']';
+  // iMIS SQL functions, offered only after "dbo.". The document path needs a
+  // DocumentVersionKey, so it appears only when a source has that field, and
+  // arrives prefilled with it (one option per source that has it).
+  function dboFunctions(search, sources) {
+    const options = [{ kind: 'function', label: 'asi_GetAppDatetime()', detail: 'Date and time in the instance’s configured time zone · use instead of GETDATE()', insert: 'asi_GetAppDatetime()' }];
+    sources.forEach(source => source.fields.filter(field => field.name.toLowerCase() === 'documentversionkey').forEach(field => {
+      const call = 'asi_PublishedDocumentPath(' + quote(source.sqlName) + '.' + quote(field.name) + ')';
+      options.push({ kind: 'function', label: call, detail: 'Published path of the document · nvarchar(4000)', insert: call });
+    }));
+    return options.filter(option => option.label.toLowerCase().includes(search));
+  }
   function complete(before, sources) {
     const fieldDetail = field => [field.label, field.dataType].filter(Boolean).join(' · ');
     const last = tokens(before).at(-1);
@@ -3714,8 +3725,9 @@ function createSqlEditor(options = {}) {
     if (field) {
       const name = field[1].replace(/^\[|\]$/g, '').replace(/\]\]/g, ']');
       const source = sources.find(item => item.sqlName.toLowerCase() === name.toLowerCase());
-      if (!source) return null;
       const search = field[2].replace(/^\[/, '').toLowerCase();
+      if (!source && name.toLowerCase() === 'dbo') return { start: before.length - field[2].length, options: dboFunctions(search, sources) };
+      if (!source) return null;
       return { start: before.length - field[2].length, options: source.fields.filter(item => item.name.toLowerCase().includes(search) || item.label.toLowerCase().includes(search)).map(item => ({ kind: 'field', label: item.name, detail: fieldDetail(item), insert: quote(item.name) })) };
     }
     const match = before.match(/\[?[A-Za-z_][\w]*$/);
@@ -3980,7 +3992,7 @@ function createSqlEditor(options = {}) {
       const menu = document.createElement('div'); menu.className = 'iqa-sql-complete'; menu.hidden = true; menu.id = 'iqaSqlComplete-' + Math.random().toString(36).slice(2); menu.setAttribute('role', 'listbox'); menu.setAttribute('aria-label', 'SQL suggestions'); document.body.appendChild(menu);
       const hint = document.createElement('small'); hint.className = 'iqa-sql-hint';
       hint.title = 'Suggestions use configured source mappings and authoritative field names from the Business Object definition API. Every Sources load refreshes the mapping, including added or removed objects, and takes precedence over the saved query definition.';
-      const readyHint = 'Type a source, field name or alias for suggestions. Use ↑ / ↓ and Tab or Enter to insert; Tab inserts 3 spaces when suggestions are closed; Esc dismisses.';
+      const readyHint = 'Type a source, field name or alias for suggestions, or dbo. for iMIS functions. Use ↑ / ↓ and Tab or Enter to insert; Tab inserts 3 spaces when suggestions are closed; Esc dismisses.';
       hint.textContent = sourceFields().length ? readyHint : 'Click the SQL box to load configured sources and their Business Object fields.';
       const attributes = Object.fromEntries(['role', 'aria-autocomplete', 'aria-expanded', 'aria-controls', 'aria-activedescendant', 'aria-invalid', 'aria-describedby'].map(name => [name, ta.getAttribute(name)]));
       const validation = document.createElement('div'); validation.className = 'iqa-sql-validation'; validation.id = menu.id + '-validation'; validation.setAttribute('role', 'status');
@@ -4032,12 +4044,14 @@ function createSqlEditor(options = {}) {
         active = 0; menu.replaceChildren();
         suggestions.options.forEach((option, index) => {
           const node = document.createElement('div'); node.setAttribute('role', 'option'); node.id = menu.id + '-' + index;
-          const kind = option.kind === 'source' ? 'source' : 'field';
-          node.setAttribute('aria-label', (kind === 'source' ? 'Source: ' : 'Field: ') + option.label + '. ' + option.detail);
+          const kind = option.kind === 'source' || option.kind === 'function' ? option.kind : 'field';
+          node.setAttribute('aria-label', { source: 'Source: ', field: 'Field: ', function: 'Function: ' }[kind] + option.label + '. ' + option.detail);
           const icon = document.createElement('span'); icon.className = 'iqa-sql-complete-icon'; icon.dataset.kind = kind; icon.setAttribute('aria-hidden', 'true');
           icon.innerHTML = kind === 'source'
             ? '<svg viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="currentColor"/><rect x="2" y="2" width="14" height="3.5" fill="#9aa2ac"/><path d="M1.5 5.5h15M6.5 5.5v11M11.5 5.5v11M1.5 9.17h15M1.5 12.83h15" fill="none" stroke="currentColor"/></svg>'
-            : '<svg viewBox="4 0 10 18"><rect x="5" y="1.5" width="8" height="15" fill="none" stroke="currentColor"/><rect x="5.5" y="2" width="7" height="3.5" fill="#9aa2ac"/><path d="M5 5.5h8M5 9.17h8M5 12.83h8" fill="none" stroke="currentColor"/></svg>';
+            : kind === 'function'
+              ? '<svg viewBox="0 0 18 18"><text x="9" y="13.5" text-anchor="middle" fill="currentColor" font-family="Georgia,serif" font-size="12" font-style="italic">fx</text></svg>'
+              : '<svg viewBox="4 0 10 18"><rect x="5" y="1.5" width="8" height="15" fill="none" stroke="currentColor"/><rect x="5.5" y="2" width="7" height="3.5" fill="#9aa2ac"/><path d="M5 5.5h8M5 9.17h8M5 12.83h8" fill="none" stroke="currentColor"/></svg>';
           const label = document.createElement('span'); label.className = 'iqa-sql-complete-label';
           if (kind === 'field' && option.sourceLabel) {
             const sourceName = document.createElement('span'); sourceName.className = 'iqa-sql-complete-source'; sourceName.textContent = option.sourceLabel + '.';
@@ -4239,7 +4253,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
               <li>Toggle drag and drop off when you don’t need it.</li>
               <li>Use <strong>Reset order</strong> to undo changes you've made via drag and drop.</li>
               <li>Edit or copy custom SQL using the buttons beside the field.</li>
-              <li>Type a business-object name, alias, or field name to see matching source and fully qualified field suggestions. All fields in each configured Business Object are included, whether selected or still available, and field suggestions show their data type. Source and field icons identify each result. Suggestions insert the actual SQL source name. Use the arrow keys and Tab or Enter to insert; Escape closes the list. With the list closed, Tab inserts three spaces.</li>
+              <li>Type a business-object name, alias, or field name to see matching source and fully qualified field suggestions. All fields in each configured Business Object are included, whether selected or still available, and field suggestions show their data type. Source and field icons identify each result. Suggestions insert the actual SQL source name.</li>
+              <li>Type <strong>dbo.</strong> to list iMIS SQL functions: <strong>asi_GetAppDatetime()</strong> returns the instance’s configured local date and time (use it instead of GETDATE()), and <strong>asi_PublishedDocumentPath()</strong> returns a document’s published path. The document path is listed only when a source has a DocumentVersionKey field, and is inserted with that field filled in.</li>
+              <li> Use the arrow keys and Tab or Enter to insert; Escape closes the list. With the list closed, Tab inserts three spaces.</li>
               <li>Configured source mappings are loaded from the current Sources tab or saved query definition. Field names and captions are loaded from the Business Object definition API.</li>
               <li>Common SQL syntax errors show a line and column number and disable <strong>Add</strong> until corrected. These basic checks do not replace full SQL validation when running the query.</li></ol>
               <h3>Sorting</h3>
