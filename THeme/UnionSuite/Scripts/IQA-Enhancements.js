@@ -3093,7 +3093,11 @@ function createRelationshipWorkspace() {
         .filter(([, kind]) => kinds.has(kind)).forEach(([text, kind, meaning]) => {
           const item = el('span'); item.append(el('span', text, 'iqa-join-pill' + kind), ' ' + meaning); legend.appendChild(item);
         });
-      treePanel.append(summary, ...(legend.children.length ? [legend] : []), ...trees);
+      // The summary and legend share a header row; the legend sits right, over
+      // the join-type selects it explains, and wraps below when space runs out.
+      const head = el('div', null, 'iqa-join-tree-head');
+      head.append(summary, ...(legend.children.length ? [legend] : []));
+      treePanel.append(head, ...trees);
       const apart = forest.slice(1).reduce(function count(total, node) { return node.children.reduce(count, total + 1); }, 0);
       summary.append(sourceRows.length + ' business objects · ' + (apart ? apart + ' not joined to ' + rootAlias : 'all joined'));
       if (warnings) {
@@ -3234,7 +3238,9 @@ function createRelationshipWorkspace() {
     .iqa-relationship-preview{flex:1;min-width:200px;overflow-wrap:anywhere;padding:8px 10px;background:#f2f7fa;border-radius:4px;font-size:13px}.iqa-relationship-preview:empty{display:none}
     .iqa-existing-relationship>td{padding-top:12px!important;padding-bottom:12px!important}
     .iqa-join-tree{margin:12px 0;padding:12px 18px;border:1px solid var(--border,#cbd5e1);border-radius:6px;background:var(--bg-surface,#fff);white-space:normal;color:var(--text-strong,#1c2024)}
-    .iqa-join-tree-summary{margin:0 0 8px;font-size:13px;color:var(--text-muted,#545962)}
+    .iqa-join-tree-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border,#e2e5e9)}
+    .iqa-join-tree:has(.iqa-join-remove:not(:empty))>.iqa-join-tree-head{padding-right:36px}
+    .iqa-join-tree-summary{margin:0;font-size:13px;color:var(--text-muted,#545962)}
     .iqa-relations-heading>.iqa-relations-view{margin-left:16px;vertical-align:middle}
     .iqa-relations-view{display:inline-flex;gap:0}
     .iqa-join-tree>.iqa-relations-view{margin-bottom:10px}
@@ -3282,7 +3288,7 @@ function createRelationshipWorkspace() {
     .iqa-join-node:has(.iqa-join-remove input:is(:hover,:focus-visible)),.iqa-join-note:has(.iqa-join-remove input:is(:hover,:focus-visible)){background-color:var(--danger-bg,#fbe4e2)}
     @media(prefers-reduced-motion:reduce){.iqa-join-tree.is-busy>*,.iqa-join-node,.iqa-join-note{transition:none}}
     .iqa-join-name.is-filtered{color:var(--text-muted,#545962)}
-    .iqa-join-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border,#e2e5e9);font-size:12px;color:var(--text-muted,#545962)}
+    .iqa-join-legend{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;font-size:12px;color:var(--text-muted,#545962)}
     .iqa-join-node{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:4px 0;font-size:14px}
     .iqa-join-root>.iqa-join-node>.iqa-join-name{font-weight:600}
     .iqa-join-object{font-size:12px;font-style:italic;color:var(--text-muted,#545962)}
