@@ -11853,6 +11853,59 @@ SOFTWARE.
     return fields;
   }
 
+  // The master page's Save/Cancel bar (div.button-panel, a sibling of .main)
+  // belongs to whichever content the server rendered: the Login Credentials
+  // tab has one, most tabs do not. It sits outside the CCO view, so swapping
+  // the view alone left the first tab's bar in place (owner, 8 October 2026).
+  // Each panel is replaced with the fetched page's copy, added beside its
+  // fetched neighbour, or removed when the fetched page has none. Its buttons
+  // post back against the form state switched above.
+  function syncButtonPanels(job, fetchedForm) {
+    const panels = root => [...root.querySelectorAll('div.button-panel[id]')].filter(panel => !panel.closest('.rmpView'));
+    const live = panels(job.form);
+    const fetched = panels(fetchedForm);
+    const changes = [];
+
+    for (const panel of live) {
+      if (fetched.some(source => source.id === panel.id)) continue;
+      panel.remove();
+      changes.push('removed ' + panel.id);
+    }
+
+    for (const source of fetched) {
+      const copy = document.importNode(source, true);
+      const existing = document.getElementById(source.id);
+      if (existing && job.form.contains(existing)) {
+        existing.replaceWith(copy);
+        changes.push('replaced ' + source.id);
+        continue;
+      }
+
+      // Place it after the nearest preceding sibling the live page shares,
+      // then past the same number of unnamed siblings (the float-clearing
+      // div between .main and the bar).
+      let anchor = source.previousElementSibling;
+      let unnamed = 0;
+      while (anchor && !(anchor.id && document.getElementById(anchor.id))) {
+        anchor = anchor.previousElementSibling;
+        unnamed += 1;
+      }
+      let after = anchor && document.getElementById(anchor.id);
+      if (!after || !job.form.contains(after)) {
+        changes.push('unplaced ' + source.id);
+        continue;
+      }
+      while (unnamed > 0 && after.nextElementSibling && !after.nextElementSibling.id) {
+        after = after.nextElementSibling;
+        unnamed -= 1;
+      }
+      after.after(copy);
+      changes.push('added ' + source.id);
+    }
+
+    return changes;
+  }
+
   // Read the fetched page's PageRequestManager._initialize(...) arrays.
   function parseInitialize(doc) {
     const script = [...doc.scripts].find(node => node.textContent.includes('PageRequestManager._initialize('));
@@ -12279,6 +12332,7 @@ SOFTWARE.
       selectedAhead.delete(cco.strip);
 
       entry.fields = switchFormState(job, fetchedForm);
+      entry.buttonPanels = syncButtonPanels(job, fetchedForm);
       entry.registration = registerPanels(prm, parsed);
       history.replaceState(history.state, '', url);
 
