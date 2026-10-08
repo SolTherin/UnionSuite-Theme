@@ -67,6 +67,10 @@
     --dm-accent-text: #ffd4a8;
     --dm-muted: var(--text-muted);
     --dm-border: var(--border);
+
+    /* Section switcher track: below the page, as in light mode, so the
+       surface-coloured active tab matches the cards. */
+    --us-section-track: color-mix(in srgb, var(--bg-page) 70%, #000);
     --auxiliary-nav-icon-color: var(--text-base);
     --us-pip-fur: #ebc492;
     --us-pip-fur-edge: #c39a6c;
@@ -597,13 +601,6 @@
   :root[data-us-color-scheme="dark"] :is(.ContentItemContainer, .ContentItemContainer > div):has(> .panel > .panel-body-container > .panel-body):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     --iqa-selected: var(--dm-selected);
     --iqa-sort-bg: var(--dm-hover);
-  }
-
-  /* Report column heads: one step darker than the panel header, as in light
-     mode, instead of the light --neutral-200. */
-  :root[data-us-color-scheme="dark"] :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    --iqa-table-head: var(--bg-sunken);
-    --iqa-table-head-border: var(--border-strong);
   }
 
   :root[data-us-color-scheme="dark"] :is(.RadGrid, .k-grid):not(:where(.us-report-no-styling, .us-report-no-styling *)) {

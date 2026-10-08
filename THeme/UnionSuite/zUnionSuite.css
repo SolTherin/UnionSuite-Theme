@@ -1296,7 +1296,12 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
   --iqa-header: var(--bg-subtle, #f8fafc);
-  --iqa-table-head: var(--bg-sunken, #e2e8f0);
+
+  /* The panel title bar matches the card, so the card reads as one white
+     surface against the grey page. Column heads take the light tint below
+     it; the title's type, not a fill, ranks it above them. */
+  --iqa-panel-header: var(--iqa-surface);
+  --iqa-table-head: var(--bg-subtle, #f8fafc);
   --iqa-border: var(--border, #e2e8f0);
   --iqa-divider: var(--bg-sunken, #f1f5f9);
   --iqa-text: var(--text-base, #334155);
@@ -1321,16 +1326,6 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   font-family: var(--iqa-font);
   font-size: 13px;
   line-height: 1.5;
-}
-
-/* Report column headers: clearly darker than the panel header. The token
-   block's --bg-sunken resolves almost to the panel header shade, so the
-   column head takes its own neutral step and a firmer rule below it (the
-   header rule's border-bottom). Declared on the grid, so it applies to the
-   table only. */
-:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  --iqa-table-head: var(--neutral-200, #e2e8f0);
-  --iqa-table-head-border: var(--neutral-300, #cbd5e1);
 }
 
 /* Only the outer panel is a card. Keep overflow visible for native menus. */
@@ -1377,9 +1372,9 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   min-height: var(--panel-header-min-height);
   padding: var(--panel-header-padding-block) var(--iqa-inset);
   border: 0;
-  border-bottom: 1px solid var(--iqa-divider);
+  border-bottom: 1px solid var(--iqa-border);
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
-  background: var(--iqa-header);
+  background: var(--iqa-panel-header);
   color: var(--iqa-title);
   box-shadow: none;
 }
@@ -2759,6 +2754,7 @@ SOFTWARE.
   .us-panel-tone-auto:has(> .panel :is(.us-badge--danger, .us-badge--warning))
 ) > .panel:not(:has(.rgNoRecords)):not(.us-query-template > .panel:not(:has(.QueryTemplateSet))):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-header: var(--us-panel-tone-bg);
+  --iqa-panel-header: var(--us-panel-tone-bg);
   --iqa-border: color-mix(in srgb, var(--us-panel-tone) 35%, var(--border));
   --iqa-divider: color-mix(in srgb, var(--us-panel-tone) 25%, var(--bg-sunken));
 }
@@ -9985,9 +9981,9 @@ html.us-taskbar-mounted #hd .search-dropdown {
   margin: 0;
   padding: var(--panel-header-padding-block) var(--us-credentials-inset);
   border: 0;
-  border-bottom: 1px solid var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
   border-radius: calc(var(--us-credentials-radius) - 1px) calc(var(--us-credentials-radius) - 1px) 0 0;
-  background: var(--bg-subtle);
+  background: var(--bg-surface);
   box-shadow: none;
 }
 
@@ -10122,6 +10118,27 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--text-base);
   font: 13px/1.5 var(--font-ui);
   box-shadow: none;
+}
+
+/* Hover and focus as the shared form fields (us-form): the field rule above
+   replaced the native look, so the states are restored here. */
+.us-credentials :is(
+  input[type="text"],
+  input[type="password"],
+  select
+):not(.riTextBox, .rdfd_):hover:not(:disabled, .aspNetDisabled, [readonly]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--brand-600);
+}
+
+.us-credentials :is(
+  input[type="text"],
+  input[type="password"],
+  select
+):not(.riTextBox, .rdfd_):focus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
 }
 
 /* Username and email are shown, not edited, here. */
@@ -17557,6 +17574,14 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 /* US-STAFF-BULLETIN:END */
 
 /* US-SECTION-TABS:START — approved option 6 standalone submenu */
+
+/* The track sits below the page, so the white active tab matches the cards
+   beneath it (owner, 8 October 2026). zzDarkMode.css re-points the track. */
+:root {
+  --us-section-track: var(--neutral-200);
+  --us-section-tab-hover: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+}
+
 .us-section-navigation:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin-block: 4px 16px;
   padding-bottom: 0;
@@ -17572,8 +17597,10 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: thin;
-  background: var(--bg-sunken);
-  border: 1px solid var(--border);
+  background: var(--us-section-track);
+
+  /* Transparent keeps the geometry and still draws in forced colours. */
+  border: 1px solid transparent;
   border-radius: 8px;
 }
 
@@ -17591,6 +17618,16 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font: 600 12.5px var(--font-ui);
   white-space: nowrap;
   cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-section-tabs > [data-us-tab] {
+    transition: none;
+  }
 }
 
 /* 950px or narrower: 44px touch targets. */
@@ -17601,7 +17638,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 .us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:hover:not(:disabled) {
-  background: var(--bg-surface);
+  background: var(--us-section-tab-hover);
 }
 
 .us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:is(.is-active, [aria-selected=true]) {
