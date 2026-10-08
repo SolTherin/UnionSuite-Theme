@@ -9507,18 +9507,23 @@ html.us-taskbar-mounted #hd .search-dropdown {
   color: var(--info);
 }
 
-/* Short tabs: the page-level rail CCO reaches the window's bottom when
-   nothing follows it (US-CCO-RAIL-FILL sets the height), and the rail's
-   column stretches with it. The page keeps its bottom padding; the rail
-   alone bleeds through it (a stretched grid item grows by a negative
-   margin), so it meets the window's edge without adding a scrollbar. */
+/* Short tabs: the page-level rail runs on to the footer, or to the window's
+   bottom when nothing follows (US-CCO-RAIL-FILL measures the distance). The
+   CCO keeps its natural height; the rail alone grows (a stretched grid item
+   grows by a negative margin), so nothing after the CCO moves and no
+   scrollbar is added. */
 @media screen and (min-width: 601px) {
-  :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-    min-height: var(--us-cco-fill-height, 0);
-  }
-
   :root .us-cco-rail :is(.cco, .tabs-wrapper).tabs-vertical:not([data-us-cco-rail="collapsed"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .RadTabStripVertical {
     margin-bottom: calc(-1 * var(--us-cco-fill-bleed, 0px));
+  }
+}
+
+/* The master page's Save/Cancel bar beside a rail CCO: it keeps to the
+   content column, its buttons in line with the content's right edge, while
+   the rail runs on past it (US-CCO-RAIL-FILL measures the inset). */
+@media screen and (min-width: 601px) {
+  .button-panel[data-us-cco-rail-bar] {
+    margin-right: var(--us-cco-bar-inset, 0px);
   }
 }
 

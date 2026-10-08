@@ -314,6 +314,18 @@ selectors, so it moves across unchanged.
       `zUnionSuite.js` (after `US-CCO-STICKY-TABS`) and a rule at the end of
       `US-CCO-RAIL` in `zUnionSuite.css`. Check on the tenant that nothing
       iMIS renders after the CCO (footer, button panel) is visible there.
+      Revised 8 October 2026 (owner), probed on the tenant: the fill walked up
+      to the first wrapper with any spare space (14px in `.col-sm-12`) and grew
+      the CCO into it, so the rail stopped well short of the footer. It now
+      walks up while nothing but the Save/Cancel bar follows the CCO; the
+      highest such container (`.col-primary`) sets the end, cut at the top of
+      whatever follows (the footer overlaps `.col-primary`), or the window
+      bottom when nothing does. Only the rail grows (`--us-cco-fill-bleed`);
+      the CCO keeps its natural height (`--us-cco-fill-height` and its CSS
+      rule are gone). The master page's `div.button-panel` keeps to the content
+      column (`data-us-cco-rail-bar`, `--us-cco-bar-inset`) with the rail
+      running past it. Values are written only when they change, as the fill
+      re-runs on every class change (hover). Not when the rail is collapsed.
 
 ## Usage guide
 

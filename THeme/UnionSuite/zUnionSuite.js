@@ -10186,16 +10186,23 @@ SOFTWARE.
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* US-CCO-STICKY-TABS:END */
-/* US-CCO-RAIL-FILL:START — a page-level us-cco-rail CCO with nothing after
-   it runs to the end of the page on short tabs, so the rail's column does
-   too. The space to fill is either
-   - inside a stretched page wrapper (the site's footer is pinned to the
-     window bottom, leaving empty space below the content), or
-   - below the document, when the page is shorter than the window.
-   Sets --us-cco-fill-height (a min-height) on the CCO, measured from its
-   natural height each time so it shrinks again on longer tabs. Wrapper
-   padding is kept; the rail alone bleeds through it (--us-cco-fill-bleed).
-   Desktop only; not in Easy Edit or print. */
+/* US-CCO-RAIL-FILL:START — a page-level us-cco-rail CCO runs its rail to
+   the end of the page on short tabs.
+   From the CCO, walk up while nothing but the master page's Save/Cancel bar
+   (div.button-panel, a sibling of .main) follows it; the highest such
+   container (.col-primary on the live tenant) is where the rail ends: at its
+   content edge, cut at the top of whatever follows it (the footer overlaps
+   .col-primary there). With nothing after it at all, the rail ends at the
+   window's bottom instead.
+   Only the rail grows (--us-cco-fill-bleed, a negative bottom margin on the
+   stretched rail); the CCO keeps its natural height, so a Save/Cancel bar
+   stays directly under the content. The bar keeps to the content column,
+   its buttons in line with the content's right edge (data-us-cco-rail-bar,
+   --us-cco-bar-inset).
+   The natural rail bottom is derived from the bleed already set, and values
+   are written only when they change, so the frequent re-runs (every class
+   change on the page) cause no layout churn.
+   Desktop only; not in Easy Edit or print; not while the rail is collapsed. */
 (function () {
   'use strict';
 
@@ -10204,9 +10211,11 @@ SOFTWARE.
     return;
   }
 
-  const PROPERTY = '--us-cco-fill-height';
   const BLEED = '--us-cco-fill-bleed';
+  const INSET = '--us-cco-bar-inset';
+  const BAR = 'data-us-cco-rail-bar';
   const filled = new Set();
+  const barred = new Set();
   const resize = new ResizeObserver(schedule);
   const observed = new Set();
   let queued = false;
@@ -10225,48 +10234,69 @@ SOFTWARE.
   const edge = (style, side) => ['padding', 'border'].reduce((sum, box) =>
     sum + (parseFloat(style[box + side + (box === 'border' ? 'Width' : '')]) || 0), 0);
 
-  // Walk up from the CCO. Content after it at any level: nothing to fill.
-  // Otherwise the first ancestor with empty space under its last child is a
-  // stretched wrapper: fill that space. Returns { space, bottom } (bottom:
-  // the wrapper's content edge, page coordinates), or null.
-  function wrapperSpace(cco) {
+  // The master page's Save/Cancel bar: a page-level button panel.
+  const isBar = node => node.matches('div.button-panel') && !node.closest('.rmpView');
+
+  // Write a custom property only when its value changes.
+  function setStyle(element, name, value) {
+    if (value === null) {
+      if (element.style.getPropertyValue(name)) element.style.removeProperty(name);
+    } else if (element.style.getPropertyValue(name) !== value) {
+      element.style.setProperty(name, value);
+    }
+  }
+
+  // Walk up from the CCO while nothing but Save/Cancel bars follows it.
+  // Returns { top, blocker }: the highest such container and the visible
+  // content after it (null when nothing follows at any level).
+  function reach(cco) {
+    let top = null;
     let child = cco;
     for (let node = cco.parentElement; node && node !== document.documentElement; node = node.parentElement) {
       for (let next = child.nextElementSibling; next; next = next.nextElementSibling) {
-        if (visible(next)) return null;
+        if (visible(next) && !isBar(next)) return { top, blocker: next };
       }
-      let last = 0;
-      Array.from(node.children).forEach(item => {
-        if (!inFlow(item)) return;
-        const margin = parseFloat(getComputedStyle(item).marginBottom) || 0;
-        last = Math.max(last, item.getBoundingClientRect().bottom + Math.max(0, margin));
-      });
-      const bottom = node.getBoundingClientRect().bottom - edge(getComputedStyle(node), 'Bottom');
-      if (bottom - last > 1) return { space: Math.floor(bottom - last), bottom: bottom + window.scrollY };
+      top = node;
       child = node;
     }
-    return { space: 0, bottom: 0 };
+    return { top, blocker: null };
   }
 
-  // The bottom of the page's in-flow content, plus the body's own bottom
-  // padding, margin and border, in page coordinates.
-  function documentBottom() {
-    let bottom = 0;
-    Array.from(document.body.children).forEach(child => {
-      if (!child.getClientRects().length) return;
-      const position = getComputedStyle(child).position;
-      if (position === 'fixed' || position === 'absolute') return;
-      bottom = Math.max(bottom, child.getBoundingClientRect().bottom);
-    });
-    const style = getComputedStyle(document.body);
-    const after = ['paddingBottom', 'marginBottom', 'borderBottomWidth']
-      .reduce((sum, key) => sum + (parseFloat(style[key]) || 0), 0);
-    return bottom + window.scrollY + after;
+  // Where the rail ends, page coordinates.
+  function railEnd(top, blocker) {
+    let end = top.getBoundingClientRect().bottom - edge(getComputedStyle(top), 'Bottom');
+    if (blocker) {
+      const margin = Math.max(0, parseFloat(getComputedStyle(blocker).marginTop) || 0);
+      end = Math.min(end, blocker.getBoundingClientRect().top - margin);
+    } else {
+      end = Math.max(end, window.innerHeight);
+    }
+    return end + window.scrollY;
+  }
+
+  // Line the bar's buttons up with the content column's right edge, clear
+  // of the rail. The current inset is added back, so it is not removed to
+  // measure.
+  function placeBar(bar, cco) {
+    if (!bar.hasAttribute(BAR)) bar.setAttribute(BAR, '');
+    barred.add(bar);
+    const content = cco.querySelector(':scope > .RadMultiPage');
+    if (!content) return;
+    const buttons = bar.querySelector('.CommandBar') || bar;
+    const current = parseFloat(bar.style.getPropertyValue(INSET)) || 0;
+    const contentRight = buttons.getBoundingClientRect().right + current - (parseFloat(getComputedStyle(buttons).paddingRight) || 0);
+    const inset = Math.round(contentRight - content.getBoundingClientRect().right);
+    setStyle(bar, INSET, inset > 0 ? inset + 'px' : null);
+  }
+
+  function releaseBar(bar) {
+    bar.style.removeProperty(INSET);
+    bar.removeAttribute(BAR);
+    barred.delete(bar);
   }
 
   function clear(cco) {
-    cco.style.removeProperty(PROPERTY);
-    cco.style.removeProperty(BLEED);
+    setStyle(cco, BLEED, null);
     filled.delete(cco);
   }
 
@@ -10275,35 +10305,13 @@ SOFTWARE.
     const desktop = window.matchMedia('(min-width: 601px)').matches;
     const easy = window.gIsEasyEditEnabled === true || document.body.classList.contains('TemplateAreaEasyEditOn');
     const next = new Set();
+    const nextBars = new Set();
 
     if (desktop && !easy) {
       document.querySelectorAll('.us-cco-rail').forEach(owner => {
         if (owner.closest('.us-report-no-styling')) return;
         const cco = owner.querySelector(':scope .cco.tabs-wrapper.tabs-vertical');
         if (!cco || cco.parentElement.closest('.cco') || cco.closest('.us-cco-rail') !== owner) return;
-
-        // Measure without the fill: a stretched wrapper's empty space first,
-        // otherwise the window's spare height below a short document.
-        cco.style.removeProperty(PROPERTY);
-        cco.style.removeProperty(BLEED);
-        if (!cco.getClientRects().length) return;
-        const wrapper = wrapperSpace(cco);
-        if (!wrapper) return;
-        const rect = cco.getBoundingClientRect();
-        const top = rect.top + window.scrollY;
-        let space = wrapper.space;
-        let end = wrapper.bottom;
-        if (!space) {
-          space = Math.floor(window.innerHeight - documentBottom());
-          end = window.innerHeight + window.scrollY;
-        }
-        if (space > 0) {
-          const height = Math.ceil(rect.height + space);
-          cco.style.setProperty(PROPERTY, height + 'px');
-          cco.style.setProperty(BLEED, Math.max(0, Math.floor(end - (top + height))) + 'px');
-          next.add(cco);
-          filled.add(cco);
-        }
 
         // Tab content changing height re-measures.
         cco.querySelectorAll(':scope > .RadMultiPage > .rmpView').forEach(view => {
@@ -10312,11 +10320,36 @@ SOFTWARE.
             resize.observe(view);
           }
         });
+
+        const rail = cco.querySelector(':scope > .RadTabStripVertical');
+        if (!rail || !cco.getClientRects().length || cco.getAttribute('data-us-cco-rail') === 'collapsed') return;
+        const { top, blocker } = reach(cco);
+        if (!top) return;
+
+        top.querySelectorAll('div.button-panel').forEach(bar => {
+          if (!isBar(bar) || cco.contains(bar) || !visible(bar)) return;
+          if (!(cco.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING)) return;
+          placeBar(bar, cco);
+          nextBars.add(bar);
+        });
+
+        // The rail's bottom without the fill: its bottom now, less the bleed.
+        const current = parseFloat(cco.style.getPropertyValue(BLEED)) || 0;
+        const natural = rail.getBoundingClientRect().bottom + window.scrollY - current;
+        const bleed = Math.floor(railEnd(top, blocker) - natural);
+        if (bleed > 0) {
+          setStyle(cco, BLEED, bleed + 'px');
+          next.add(cco);
+          filled.add(cco);
+        }
       });
     }
 
     Array.from(filled).forEach(cco => {
       if (!next.has(cco)) clear(cco);
+    });
+    Array.from(barred).forEach(bar => {
+      if (!nextBars.has(bar)) releaseBar(bar);
     });
   }
 
