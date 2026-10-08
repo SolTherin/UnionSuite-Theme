@@ -8285,7 +8285,9 @@ SOFTWARE.
    collapsed: open it once per render (a manual collapse holds until the next
    render). Add "Set all to" to its heading: one select, with no name so it is
    never posted, that sets every access level to one value. The native selects
-   keep their names, values and validators; saving is unchanged. */
+   keep their names, values and validators; saving is unchanged. Add on Roles
+   and Security groups opens an in-place checklist in place of the native
+   popup (see the picker functions below). */
 (function () {
   'use strict';
 
@@ -8359,10 +8361,535 @@ SOFTWARE.
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Roles and Security groups: Add opens an in-place checklist instead of the
+  // native popup (owner, 8 October 2026). The choices are read from the
+  // popup's own page (UserRoleSelect.aspx / UserGroupSelect.aspx) in a hidden
+  // frame, so iMIS still decides what this user may assign (SysAdmin, for
+  // example). Apply does what the native callbacks (RoleSelectCallback,
+  // GroupSelectCallback) do: the keys go in the hidden AddedRoles or
+  // AddedGroups field and the hidden Add button posts back. Anything the
+  // picker cannot find or load opens the native popup instead.
+
+  const PICKERS = [
+    { opener: 'AddRole', list: '_RoleList', field: '_AddedRoles', button: '_AddRoleButton', key: 'RoleKey', one: 'role', many: 'roles', append: false },
+    { opener: 'AddGroup', list: '_GroupList', field: '_AddedGroups', button: '_AddGroupButton', key: 'GroupKey', one: 'group', many: 'groups', append: true }
+  ];
+  const ADD_LINK = OWNER + ' [id$="_UserSecurityInfoPanel_Body"] [id$="_TopRightPanel"] > a[onclick]';
+  const LOAD_TIMEOUT = 15000;
+  const choiceCache = new Map();
+  let pickerCount = 0;
+
+  const pickerKind = link => PICKERS.find(kind => (link.getAttribute('onclick') || '').includes(kind.opener + '(')) || null;
+
+  const fold = (element, open) => window.UnionSuiteRecordCards?.fold
+    ? window.UnionSuiteRecordCards.fold(element, open)
+    : Promise.resolve(element.hidden = !open);
+
+  // The popup page the native opener would show, found by letting the opener
+  // run against a stand-in ShowDialog, so nothing opens.
+  function popupPage(kind) {
+    const open = window[kind.opener];
+    const show = window.ShowDialog;
+    if (typeof open !== 'function' || typeof show !== 'function') return null;
+    let raw = null;
+    window.ShowDialog = url => { raw = url; };
+    try {
+      open();
+    } catch {
+      raw = null;
+    } finally {
+      window.ShowDialog = show;
+    }
+    if (typeof raw !== 'string') return null;
+    const instance = document.querySelector('input[name="PageInstanceKey"]')?.value || '';
+    const path = raw.replace(/^~\//, '/');
+    const url = path + (path.includes('?') ? '&' : '?') +
+      'TemplateType=E&PreserveStatefulBusinessContainer=true&ParentPageInstanceKey=' + encodeURIComponent(instance) +
+      '&DialogCacheParam=' + Math.random() + '&IsPopup=true';
+    return { raw, url };
+  }
+
+  // Every choice the popup page lists for this user, as { key, name }, in
+  // its order. The page shows ten at a time, so its own Show all runs first.
+  function loadChoices(kind) {
+    const page = popupPage(kind);
+    if (!page) return Promise.reject(new Error('The native picker is not available.'));
+    if (choiceCache.has(page.raw)) return choiceCache.get(page.raw);
+
+    const frame = document.createElement('iframe');
+    frame.className = 'us-credentials-picker__source';
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    const read = () => {
+      try {
+        const win = frame.contentWindow;
+        const doc = win.document;
+        const grid = doc.querySelector('[id$="_Lister1_Grid1"]');
+        const view = grid && win.$find?.(grid.id)?.get_masterTableView();
+        if (!view) return null;
+        const keyName = view.get_clientDataKeyNames()?.[0];
+        const items = view.get_dataItems().map(item => {
+          const cell = Array.from(item.get_element().cells)
+            .find(td => !td.querySelector('input') && win.getComputedStyle(td).display !== 'none');
+          return { key: String(item.getDataKeyValue(keyName) ?? ''), name: (cell?.textContent || '').trim() };
+        }).filter(choice => choice.key && choice.name);
+        const counts = doc.querySelectorAll('.rgInfoPart strong');
+        const total = Number(counts[counts.length - 1]?.textContent) || items.length;
+        return { doc, items, total, empty: !!doc.querySelector('.rgNoRecords') };
+      } catch {
+        return null;
+      }
+    };
+
+    const until = async (test, deadline) => {
+      while (Date.now() < deadline) {
+        const state = read();
+        if (state && test(state)) return state;
+        await wait(200);
+      }
+      throw new Error('The native picker page did not load.');
+    };
+
+    const run = async () => {
+      const deadline = Date.now() + LOAD_TIMEOUT;
+      frame.src = page.url;
+      document.body.append(frame);
+      try {
+        let state = await until(current => current.items.length > 0 || current.empty, deadline);
+        if (state.items.length < state.total) {
+          const total = state.total;
+          const link = Array.from(state.doc.querySelectorAll('a[href*="__doPostBack"]'))
+            .find(anchor => /\$ShowAll'/.test(anchor.getAttribute('href')) || /show all/i.test(anchor.textContent));
+          const target = link?.getAttribute('href').match(/__doPostBack\('([^']+)'/)?.[1];
+          if (!target) throw new Error('The native picker has no Show all.');
+          frame.contentWindow.__doPostBack(target, '');
+          state = await until(current => current.items.length >= total, deadline);
+        }
+        return state.items;
+      } finally {
+        frame.remove();
+      }
+    };
+
+    const promise = run();
+    choiceCache.set(page.raw, promise);
+    promise.catch(() => choiceCache.delete(page.raw));
+    return promise;
+  }
+
+  // What the list already holds: its grid keys, and its names as a fallback.
+  function assignedIn(list, kind) {
+    const keys = new Set();
+    const names = new Set();
+    try {
+      const grid = list.querySelector('.RadGrid');
+      const view = grid && window.$find?.(grid.id)?.get_masterTableView();
+      view?.get_dataItems().forEach(item => {
+        const key = item.getDataKeyValue(kind.key);
+        if (key) keys.add(String(key).toLowerCase());
+      });
+    } catch {
+      // Names below are enough.
+    }
+    list.querySelectorAll('.rgMasterTable > tbody > tr:not(.rgNoRecords)').forEach(row => {
+      const name = row.cells[0]?.textContent.trim();
+      if (name) names.add(name.toLowerCase());
+    });
+    return choice => keys.has(choice.key.toLowerCase()) || names.has(choice.name.toLowerCase());
+  }
+
+  function buildPicker(link, kind) {
+    const picker = document.createElement('div');
+    picker.className = 'us-credentials-picker';
+    picker.id = 'us-credentials-picker-' + (++pickerCount);
+    picker.hidden = true;
+    picker.setAttribute('role', 'group');
+    picker.setAttribute('aria-label', 'Add ' + kind.many);
+    // No names on these controls: nothing here is posted with the form.
+    picker.innerHTML =
+      '<div class="us-credentials-picker__search">' +
+        '<i class="ti ti-search" aria-hidden="true"></i>' +
+        '<input type="search" class="us-credentials-picker__filter" autocomplete="off">' +
+      '</div>' +
+      '<p class="us-credentials-picker__status" role="status"></p>' +
+      '<ul class="us-credentials-picker__list" hidden></ul>' +
+      '<div class="us-credentials-picker__footer">' +
+        '<span class="us-credentials-picker__count" aria-live="polite"></span>' +
+        '<span class="us-credentials-picker__actions">' +
+          '<input type="button" class="TextButton us-credentials-picker__cancel" value="Cancel">' +
+          '<input type="button" class="TextButton PrimaryButton us-credentials-picker__apply">' +
+        '</span>' +
+      '</div>';
+    const filter = picker.querySelector('.us-credentials-picker__filter');
+    filter.placeholder = 'Find a ' + kind.one;
+    filter.setAttribute('aria-label', 'Find a ' + kind.one);
+    picker.dataset.kind = kind.opener;
+    link.setAttribute('aria-controls', picker.id);
+
+    const title = link.closest('.GridTitlePanel');
+    title.after(picker);
+    countPicked(picker, kind);
+    return picker;
+  }
+
+  // Runs a change that alters the picker's height, then eases the height
+  // from the old value to the new one (the loading spinner giving way to
+  // the list).
+  function resizeAround(picker, change) {
+    const before = picker.getBoundingClientRect().height;
+    change();
+    if (picker.hidden || !picker.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const after = picker.getBoundingClientRect().height;
+    if (Math.abs(after - before) < 1) return;
+    picker.style.overflow = 'hidden';
+    picker.animate([{ height: before + 'px' }, { height: after + 'px' }], {
+      duration: 220,
+      easing: 'cubic-bezier(.2, 0, 0, 1)'
+    }).finished.then(() => { picker.style.overflow = ''; }, () => {});
+  }
+
+  function fillPicker(picker, kind, choices, isAssigned) {
+    resizeAround(picker, () => fillChoices(picker, kind, choices, isAssigned));
+  }
+
+  function fillChoices(picker, kind, choices, isAssigned) {
+    picker.querySelector('.us-credentials-picker__status').classList.remove('is-loading');
+    const list = picker.querySelector('.us-credentials-picker__list');
+    list.replaceChildren(...choices.map(choice => {
+      const item = document.createElement('li');
+      const label = document.createElement('label');
+      label.className = 'us-credentials-picker__option';
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.value = choice.key;
+      const text = document.createElement('span');
+      text.textContent = choice.name;
+      label.append(box, text);
+      if (isAssigned(choice)) {
+        box.checked = true;
+        box.disabled = true;
+        label.classList.add('is-assigned');
+        const note = document.createElement('span');
+        note.className = 'us-credentials-picker__note';
+        note.textContent = 'Assigned';
+        label.append(note);
+      }
+      item.append(label);
+      return item;
+    }));
+    list.hidden = false;
+    picker.dataset.loaded = '';
+    filterPicker(picker, kind);
+  }
+
+  function filterPicker(picker, kind) {
+    const query = picker.querySelector('.us-credentials-picker__filter').value.trim().toLowerCase();
+    const items = Array.from(picker.querySelectorAll('.us-credentials-picker__list > li'));
+    let shown = 0;
+    let open = 0;
+    items.forEach(item => {
+      const match = !query || item.textContent.toLowerCase().includes(query);
+      item.hidden = !match;
+      if (match) shown++;
+      if (!item.querySelector('input:disabled')) open++;
+    });
+    const status = picker.querySelector('.us-credentials-picker__status');
+    if (!('loaded' in picker.dataset)) return;
+    status.textContent = !open ? 'Every ' + kind.one + ' is already assigned.'
+      : !shown ? 'No ' + kind.many + ' match.' : '';
+    status.hidden = !status.textContent;
+  }
+
+  function countPicked(picker, kind) {
+    const count = picker.querySelectorAll('.us-credentials-picker__list input:checked:not(:disabled)').length;
+    picker.querySelector('.us-credentials-picker__count').textContent = count ? count + ' selected' : '';
+    const apply = picker.querySelector('.us-credentials-picker__apply');
+    apply.value = count ? 'Add ' + count + ' ' + (count === 1 ? kind.one : kind.many) : 'Add ' + kind.many;
+    apply.disabled = !count;
+  }
+
+  function closePicker(picker, focusLink) {
+    const link = picker.parentElement?.querySelector('[aria-controls="' + picker.id + '"]');
+    link?.setAttribute('aria-expanded', 'false');
+    void fold(picker, false);
+    if (focusLink) link?.focus();
+  }
+
+  // The native popup, as Add opened it before.
+  function openNative(kind, picker) {
+    if (picker) closePicker(picker, false);
+    if (typeof window[kind.opener] === 'function') window[kind.opener]();
+  }
+
+  function togglePicker(link, kind) {
+    const panel = link.closest('[id$="_GridPanel1"]');
+    if (!panel || !link.closest('.GridTitlePanel')) {
+      openNative(kind);
+      return;
+    }
+    let picker = panel.querySelector(':scope > .us-credentials-picker');
+    if (picker && !picker.hidden && link.getAttribute('aria-expanded') === 'true') {
+      closePicker(picker, true);
+      return;
+    }
+    picker = picker || buildPicker(link, kind);
+    link.setAttribute('aria-expanded', 'true');
+    void fold(picker, true);
+    picker.querySelector('.us-credentials-picker__filter').focus();
+
+    // While the choices load: the theme's spinner, small, before the text,
+    // as the taskbar search shows "Searching…".
+    const status = picker.querySelector('.us-credentials-picker__status');
+    if (!('loaded' in picker.dataset)) {
+      const spinner = document.createElement('span');
+      spinner.className = 'section-loader-spinning-circles';
+      spinner.setAttribute('aria-hidden', 'true');
+      status.replaceChildren(spinner, document.createTextNode('Loading ' + kind.many + '…'));
+      status.classList.add('is-loading');
+      status.hidden = false;
+    }
+    const owner = link.closest(OWNER);
+    const list = owner.querySelector('[id$="' + kind.list + '"]') || panel;
+    loadChoices(kind)
+      .then(choices => {
+        if (!picker.isConnected) return;
+        if (!('loaded' in picker.dataset)) fillPicker(picker, kind, choices, assignedIn(list, kind));
+      })
+      .catch(() => {
+        if (picker.isConnected && !picker.hidden) openNative(kind, picker);
+      });
+  }
+
+  // As the native callback: keys in the hidden field, then the hidden button.
+  function applyPicker(picker) {
+    const kind = PICKERS.find(item => item.opener === picker.dataset.kind);
+    const owner = picker.closest(OWNER);
+    const keys = Array.from(picker.querySelectorAll('.us-credentials-picker__list input:checked:not(:disabled)'))
+      .map(box => box.value);
+    if (!kind || !owner || !keys.length) return;
+    const field = owner.querySelector('input[id$="' + kind.field + '"]');
+    const button = owner.querySelector('input[id$="' + kind.button + '"]');
+    if (!field || !button) {
+      openNative(kind, picker);
+      return;
+    }
+    field.value = kind.append && field.value ? field.value + ',' + keys.join(',') : keys.join(',');
+
+    // The shared button spinner, as the native Save shows, until iMIS's
+    // postback ends (it re-renders the list, picker included).
+    const apply = picker.querySelector('.us-credentials-picker__apply');
+    apply.disabled = true;
+    const busy = window.UnionSuiteBusy?.show(apply, { mode: 'center' });
+    const manager = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+    if (busy && manager) {
+      const done = () => {
+        manager.remove_endRequest(done);
+        busy.clear();
+      };
+      manager.add_endRequest(done);
+    }
+    button.click();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Roles and groups added or removed wait for the page's Save (the owner
+  // confirmed removals do too), so User information says so until then
+  // (owner, 8 October 2026). Set when a hidden Add button posts (the
+  // picker's Apply, or the native popup's callback) or a row's delete button
+  // is clicked; kept through the partial postbacks that re-render the lists;
+  // cleared by Save or Cancel, and gone with any full page load.
+
+  const ADD_BUTTONS = OWNER + ' input:is([id$="_AddRoleButton"], [id$="_AddGroupButton"]), ' +
+    OWNER + ' [id$="_UserSecurityInfoPanel_Body"] input[type="image"][id$="_gbcDeleteColumn"]';
+  const PAGE_BUTTONS = '.CommandBar input.TextButton:is(.Save, .Cancel)';
+  let unsaved = new WeakSet();
+
+  function showUnsaved(owner) {
+    const body = owner.querySelector('[id$="_CommonUserPanel_Body"]');
+    if (!body || body.querySelector(':scope > .us-credentials__unsaved')) return;
+    const notice = document.createElement('div');
+    notice.className = 'AsiWarning us-credentials__unsaved';
+    notice.setAttribute('role', 'status');
+    notice.textContent = 'Changes to roles and security groups take effect when you save.';
+    notice.hidden = true;
+    body.prepend(notice);
+    void fold(notice, true);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Account: a disabled or expired login cannot sign in, so the Account box
+  // takes the danger tone, as the contact page's arrears panels do, with a
+  // badge naming each reason (owner, 8 October 2026). It follows the fields
+  // as they are edited; Save makes the change real. Expired means the
+  // expiration date is before today. Writes only on a change: the update
+  // loop runs on every DOM change.
+
+  function accountReasons(owner) {
+    const reasons = [];
+    if (owner.querySelector('input[type="checkbox"][id$="_Disabled_CheckBoxSet"]')?.checked) reasons.push('Disabled');
+    // The picker's hidden input holds the date as yyyy-mm-dd.
+    const value = owner.querySelector('input[id$="_ExpirationDate_Calendarrad_Dp"]')?.value || '';
+    const parts = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (parts) {
+      const expiry = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (expiry < today) {
+        const shown = owner.querySelector('input[id$="_ExpirationDate_Calendarrad_Dp_dateInput"]')?.value;
+        reasons.push(shown ? 'Expired ' + shown : 'Expired');
+      }
+    }
+    return reasons;
+  }
+
+  function markAccount(owner) {
+    const panel = owner.querySelector('[id$="_AccountPanel"].panel-border');
+    const title = panel?.querySelector('.GridTitlePanel');
+    if (!title) return;
+    const reasons = accountReasons(owner);
+    panel.toggleAttribute('data-us-account-blocked', reasons.length > 0);
+    let badges = title.querySelector(':scope > .us-credentials__account-reasons');
+    if (!reasons.length) {
+      badges?.remove();
+      return;
+    }
+    if (badges && badges.dataset.reasons === reasons.join('|')) return;
+    if (!badges) {
+      badges = document.createElement('span');
+      badges.className = 'us-credentials__account-reasons';
+      title.append(badges);
+    }
+    badges.dataset.reasons = reasons.join('|');
+    badges.replaceChildren(...reasons.map(reason => {
+      const badge = document.createElement('span');
+      badge.className = 'us-badge us-badge--danger';
+      badge.textContent = reason;
+      return badge;
+    }));
+  }
+
+  // ---------------------------------------------------------------------------
+  // A login that cannot sign in, for any of its three reasons (locked out,
+  // disabled, expired), is named first thing on the tab: a native error
+  // message above the control's cards (owner, 8 October 2026). A lockout
+  // brings an Unlock account button that clicks the native unlock (the
+  // pencil in the Locked out row, hidden here); unlocking is immediate.
+
+  function lockout(owner) {
+    const unlock = owner.querySelector('input[id$="_LockoutStatusControl_ClearLockoutStatus"]');
+    if (!unlock) return null;
+    // "Account locked out as of 8/10/2026 3:52:27 PM." → "8/10/2026 3:52 PM"
+    const text = owner.querySelector('[id$="_LockoutStatusControl_LockoutStatusLabel"]')?.textContent || '';
+    const since = (text.match(/as of\s+(.+?)\.?\s*$/i)?.[1] || '').replace(/(\d{1,2}:\d{2}):\d{2}/, '$1');
+    return { unlock, since };
+  }
+
+  function markBlocked(owner) {
+    const locked = lockout(owner);
+    const row = owner.querySelector('#LockoutStatus');
+    row?.toggleAttribute('data-us-locked', !!locked);
+    if (locked && !locked.unlock.hasAttribute('data-us-unlock-moved')) locked.unlock.setAttribute('data-us-unlock-moved', '');
+
+    const lines = [];
+    if (locked) lines.push('Locked out after too many failed sign-in attempts' + (locked.since ? ', since ' + locked.since : '') + '.');
+    accountReasons(owner).forEach(reason => {
+      if (reason === 'Disabled') lines.push('The account is disabled.');
+      else if (reason === 'Expired') lines.push('The account has expired.');
+      else lines.push('The account expired on ' + reason.replace(/^Expired\s+/, '') + '.');
+    });
+
+    let alert = owner.querySelector(':scope > .us-credentials__blocked');
+    if (!lines.length) {
+      if (alert && !alert.hasAttribute('data-leaving')) {
+        alert.setAttribute('data-leaving', '');
+        fold(alert, false).then(() => alert.remove());
+      }
+      return;
+    }
+    const state = lines.join('|') + (locked ? '|unlock' : '');
+    if (alert && alert.dataset.state === state && !alert.hasAttribute('data-leaving')) return;
+    if (!alert || alert.hasAttribute('data-leaving')) {
+      alert?.remove();
+      alert = document.createElement('div');
+      alert.className = 'AsiError us-credentials__blocked';
+      alert.setAttribute('role', 'status');
+      owner.prepend(alert);
+    }
+    alert.dataset.state = state;
+
+    const text = document.createElement('div');
+    text.className = 'us-credentials__blocked-text';
+    const heading = document.createElement('strong');
+    heading.textContent = 'This user can’t sign in.';
+    const list = document.createElement('ul');
+    list.className = 'us-credentials__blocked-reasons';
+    list.replaceChildren(...lines.map(line => {
+      const item = document.createElement('li');
+      item.textContent = line;
+      return item;
+    }));
+    text.append(heading, list);
+    const parts = [text];
+    if (locked) {
+      const button = document.createElement('input');
+      button.type = 'button';
+      button.className = 'TextButton us-credentials__unlock';
+      button.value = 'Unlock account';
+      parts.push(button);
+    }
+    alert.replaceChildren(...parts);
+  }
+
+  // Unlock account: the native unlock, with the shared button spinner.
+  function unlockAccount(button) {
+    const owner = button.closest(OWNER);
+    const locked = owner && lockout(owner);
+    if (!locked) return;
+    button.disabled = true;
+    const busy = window.UnionSuiteBusy?.show(button, { mode: 'center' });
+    const manager = window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
+    if (busy && manager) {
+      const done = () => {
+        manager.remove_endRequest(done);
+        busy.clear();
+        button.disabled = false;
+      };
+      manager.add_endRequest(done);
+    }
+    locked.unlock.click();
+  }
+
+  // Arrow keys move between the filter and the visible, open checkboxes.
+  function moveFocus(picker, step) {
+    const stops = [picker.querySelector('.us-credentials-picker__filter')]
+      .concat(Array.from(picker.querySelectorAll('.us-credentials-picker__list > li:not([hidden]) input:not(:disabled)')));
+    const index = stops.indexOf(document.activeElement);
+    stops[Math.max(0, Math.min(stops.length - 1, index + step))]?.focus();
+  }
+
   function update() {
     queued = false;
     document.querySelectorAll(OWNER).forEach(owner => {
       if (!eligible(owner)) return;
+      if (unsaved.has(owner)) showUnsaved(owner);
+      markAccount(owner);
+      markBlocked(owner);
+
+      // Password and Confirm password set a new password for the contact:
+      // the browser must not fill in the signed-in staff member's own saved
+      // one. new-password is the standard signal; the data attributes ask
+      // common password-manager extensions to skip the fields too.
+      owner.querySelectorAll('input[type="password"]:not([autocomplete="new-password"])').forEach(input => {
+        input.setAttribute('autocomplete', 'new-password');
+        input.setAttribute('data-lpignore', 'true');
+        input.setAttribute('data-1p-ignore', '');
+        input.setAttribute('data-bwignore', '');
+        input.setAttribute('data-form-type', 'other');
+      });
+
       const panel = owner.querySelector(PANEL);
       if (!panel) return;
       expand(panel);
@@ -8383,6 +8910,72 @@ SOFTWARE.
     const panel = level.closest(PANEL);
     const control = panel?.querySelector(':scope > .panel-heading .us-credentials__set-all select');
     if (control) sync(control, Array.from(panel.querySelectorAll(LEVELS)));
+  });
+
+  // Add: taken before the link's own onclick (AddRole/AddGroup) and href
+  // postback run, in the capture phase.
+  document.addEventListener('click', event => {
+    const link = event.target.closest?.(ADD_LINK);
+    const kind = link && pickerKind(link);
+    if (!kind || !eligible(link.closest(OWNER))) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    togglePicker(link, kind);
+  }, true);
+
+  // Account fields edited: re-check Disabled and the expiration date. The
+  // date picker writes its hidden value without a change event, so leaving
+  // the field or using its calendar popup re-checks too.
+  ['change', 'focusout', 'click'].forEach(type => document.addEventListener(type, event => {
+    if (event.target.closest?.(OWNER + ' [id$="_AccountPanel"], .RadCalendarPopup')) setTimeout(schedule, 0);
+  }));
+
+  // A hidden Add button posting: the additions now wait for Save.
+  document.addEventListener('click', event => {
+    const button = event.target.matches?.(ADD_BUTTONS) && event.target;
+    const owner = button && button.closest(OWNER);
+    if (owner && eligible(owner)) {
+      unsaved.add(owner);
+      schedule();
+    }
+    if (event.target.matches?.(PAGE_BUTTONS)) {
+      unsaved = new WeakSet();
+      document.querySelectorAll('.us-credentials__unsaved').forEach(notice => notice.remove());
+    }
+  }, true);
+
+  document.addEventListener('click', event => {
+    if (event.target.matches?.(OWNER + ' .us-credentials__unlock')) unlockAccount(event.target);
+    const picker = event.target.closest?.('.us-credentials-picker');
+    if (!picker) return;
+    if (event.target.matches('.us-credentials-picker__cancel')) closePicker(picker, true);
+    if (event.target.matches('.us-credentials-picker__apply')) applyPicker(picker);
+  });
+
+  document.addEventListener('input', event => {
+    const picker = event.target.matches?.('.us-credentials-picker__filter') && event.target.closest('.us-credentials-picker');
+    if (picker) filterPicker(picker, PICKERS.find(kind => kind.opener === picker.dataset.kind));
+  });
+
+  document.addEventListener('change', event => {
+    const picker = event.target.matches?.('.us-credentials-picker__list input') && event.target.closest('.us-credentials-picker');
+    if (picker) countPicked(picker, PICKERS.find(kind => kind.opener === picker.dataset.kind));
+  });
+
+  document.addEventListener('keydown', event => {
+    const picker = event.target.closest?.('.us-credentials-picker');
+    if (!picker) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePicker(picker, true);
+    } else if (event.key === 'Enter' && event.target.matches('input[type="search"], input[type="checkbox"]')) {
+      // Enter would otherwise submit the iMIS form.
+      event.preventDefault();
+      applyPicker(picker);
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      moveFocus(picker, event.key === 'ArrowDown' ? 1 : -1);
+    }
   });
 
   // Postbacks (user class, roles, groups) re-render the control.

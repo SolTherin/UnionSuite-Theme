@@ -10456,21 +10456,34 @@ html.us-taskbar-mounted #hd .search-dropdown {
   padding: 14px 16px 16px;
 }
 
+/* Roles and groups: one box per list. Its header bar is the native title
+   row (title, Add on the right), replacing the card label and the grid's
+   column head (owner, 8 October 2026). The Add picker opens between the
+   bar and the rows (US-CREDENTIALS JS). */
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] [id$="_GridPanel1"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 28px;
-  margin: 0 0 12px;
-  padding: 0 !important;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 8px 6px 12px !important;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
 }
 
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel .Title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
   padding: 0;
   color: var(--text-strong);
-  font: 600 14px/1.4 var(--font-ui);
+  font: 600 13px/1.4 var(--font-ui);
 }
 
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .GridTitlePanel > [id$="_TopLeftPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -10514,6 +10527,60 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background: var(--brand-50);
 }
 
+/* Account: the same box as Roles and Security groups (owner, 8 October
+   2026). Its body is the box; its title row is the grey header bar (the
+   shared GridTitlePanel rule above); the fields sit inset below it. */
+.us-credentials [id$="_AccountPanel"].panel-border > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 14px 16px 16px;
+  padding: 0 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.us-credentials [id$="_AccountPanel_Body"] > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline: 12px;
+}
+
+/* A disabled or expired account (US-CREDENTIALS JS sets
+   data-us-account-blocked and the reason badges): the danger tone of the
+   panel tones (us-panel-tone-danger), so it reads at a glance. */
+.us-credentials [id$="_AccountPanel"].panel-border > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_AccountPanel_Body"] > .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  transition:
+    background-color 180ms cubic-bezier(.2, 0, 0, 1),
+    border-color 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-credentials [id$="_AccountPanel"][data-us-account-blocked].panel-border > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+}
+
+.us-credentials [id$="_AccountPanel"][data-us-account-blocked] [id$="_AccountPanel_Body"] > .GridTitlePanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom-color: color-mix(in srgb, var(--danger) 25%, var(--bg-sunken));
+  background: var(--danger-bg);
+}
+
+.us-credentials .us-credentials__account-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-credentials [id$="_AccountPanel"].panel-border > .panel-body-container > .panel-body,
+  .us-credentials [id$="_AccountPanel_Body"] > .GridTitlePanel {
+    transition: none;
+  }
+}
+
+.us-credentials [id$="_AccountPanel_Body"] > .GridTitlePanel + .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 12px;
+}
+
 /* Account: Disabled as a checkbox row, dates labelled above. The date
    picker floats, so each field contains its floats. */
 .us-credentials [id$="_AccountPanel"] .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -10545,29 +10612,20 @@ html.us-taskbar-mounted #hd .search-dropdown {
   margin-bottom: 6px;
 }
 
-/* Roles and groups: compact lists rather than bordered grids. */
+/* Roles and groups: compact lists inside the box above. */
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .RadGrid:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-surface);
-  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-collapse: collapse;
 }
 
-.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > thead > tr > th:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  height: auto;
-  padding: 6px 12px;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-subtle);
-  color: var(--text-muted);
-  font: 600 11px/1.4 var(--font-ui);
-  letter-spacing: .04em;
-  text-align: start;
-  text-transform: uppercase;
+/* The header bar names the list; the one-column head repeats it. */
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > thead:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
 }
 
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -10661,6 +10719,208 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
   .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     margin-top: 6px;
+  }
+}
+
+/* Roles and Security groups: Add opens this checklist inside the list's
+   box, between its header bar and the rows (US-CREDENTIALS JS), in place of
+   the native popup. */
+.us-credentials .us-credentials-picker {
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.us-credentials .us-credentials-picker__search {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+/* The search row shows focus; the field itself draws no outline. */
+.us-credentials .us-credentials-picker__search:focus-within {
+  box-shadow: inset 0 -2px 0 var(--field-focus-colour);
+}
+
+.us-credentials .us-credentials-picker__search > .ti {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  color: var(--text-muted);
+  font-size: 15px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.us-credentials .us-credentials-picker__filter {
+  box-sizing: border-box;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 0 10px 0 32px;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+  box-shadow: none;
+}
+
+.us-credentials .us-credentials-picker__status {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-ui);
+}
+
+/* Loading: the theme spinner, small, before the text, as the taskbar
+   search shows "Searching…". */
+.us-credentials .us-credentials-picker__status.is-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.us-credentials .us-credentials-picker__status.is-loading > .section-loader-spinning-circles {
+  --size: .42px;
+}
+
+/* Roles or groups added but not yet saved: a native warning message at the
+   top of User information until Save or Cancel (US-CREDENTIALS JS). */
+.us-credentials .us-credentials__unsaved {
+  margin: 0 0 16px;
+}
+
+/* A login that cannot sign in (locked out, disabled or expired): a native
+   error message above the control's cards, the reasons listed, and Unlock
+   account beside them for a lockout (US-CREDENTIALS JS). */
+.us-credentials > .us-credentials__blocked {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0 0 18px;
+}
+
+.us-credentials .us-credentials__blocked-text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.us-credentials .us-credentials__blocked-text > strong {
+  display: block;
+  font-weight: 600;
+}
+
+.us-credentials .us-credentials__blocked-reasons {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.us-credentials .us-credentials__blocked-reasons > li {
+  margin: 0;
+}
+
+.us-credentials .us-credentials__unlock {
+  flex: none;
+}
+
+/* Locked: the status reads in the danger colour, and the native unlock
+   pencil is hidden (Unlock account in the message above clicks it). */
+.us-credentials #LockoutStatus[data-us-locked] .PanelFieldValue > span {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.us-credentials input[data-us-unlock-moved] {
+  display: none !important;
+}
+
+.us-credentials .us-credentials-picker__list {
+  max-height: 240px;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.us-credentials .us-credentials-picker__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  margin: 0;
+  padding: 4px 12px;
+  color: var(--text-base);
+  font: 400 13px/1.4 var(--font-ui);
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-credentials .us-credentials-picker__option:hover {
+  background: var(--bg-subtle);
+}
+
+.us-credentials .us-credentials-picker__option > input {
+  flex: none;
+  margin: 0;
+}
+
+.us-credentials .us-credentials-picker__option.is-assigned {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.us-credentials .us-credentials-picker__option.is-assigned:hover {
+  background: transparent;
+}
+
+.us-credentials .us-credentials-picker__note {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.us-credentials .us-credentials-picker__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.us-credentials .us-credentials-picker__count {
+  color: var(--text-muted);
+  font: 12px/1.4 var(--font-ui);
+}
+
+.us-credentials .us-credentials-picker__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* The native popup page, read in the background; never shown. */
+.us-credentials-picker__source {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 0;
+  visibility: hidden;
+}
+
+/* 950px or narrower: 44px touch targets. */
+@media (max-width: 950px) {
+  .us-credentials .us-credentials-picker__option {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-credentials :is(.us-credentials-picker__search, .us-credentials-picker__option) {
+    transition: none;
   }
 }
 
