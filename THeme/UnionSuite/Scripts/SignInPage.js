@@ -86,11 +86,12 @@
     },
     // Shown above the gravity well as the share of caught stars passes each
     // mark, once per browser session each. The counter shows from the mark
-    // with showCount.
+    // with showCount. A mark with no text shows nothing; 75% only starts the
+    // counter (owner, 8 October 2026; it said "You can do it!").
     milestones: [
       { at: 0.2, text: "This is unexpected" },
       { at: 0.4, text: "I see you\u2019re determined" },
-      { at: 0.75, text: "You can do it!", showCount: true },
+      { at: 0.75, text: "", showCount: true },
       { at: 0.9, text: "Almost there\u2026" },
       { at: 1, text: "Nailed it!" }
     ]
@@ -172,6 +173,9 @@
   var LOGO_SELECTOR = ".SignIn-Container > .iMIS-WebPart:first-child img";
   var FIELD_SELECTOR = ".SignInPage .forgot-link-field input";
   var SUBMIT_SELECTOR = ".SignInPage .SignIn input[type='submit']";
+  var MESSAGES_SELECTOR = "[id$='_UserMessagesUpdatePanel']";
+  var ERROR_SELECTOR = MESSAGES_SELECTOR + " .AsiMessage li.AsiError";
+  var ERROR_SHAKE_MS = 480;      // just past the CSS shake (420ms)
   var BACKGROUND_IGNORE = CARD_SELECTOR + ", a, button, input, select, textarea, dialog, .modal";
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -310,6 +314,23 @@
       link.appendChild(logoHover);
       credit.appendChild(link);
       stage.appendChild(credit);
+    }
+
+    placeMessages();
+  }
+
+  // iMIS shows sign-in messages in its user messages panel above the card.
+  // The panel itself moves into the card, between the divider and the
+  // Username field, where people are looking when they retry (owner,
+  // 8 October 2026). PageRequestManager finds the panel by its ID, so
+  // partial updates still fill it here. If the Sign In iPart is missing it
+  // stays where it was.
+  function placeMessages() {
+    var panel = document.querySelector(MESSAGES_SELECTOR);
+    var signInPage = document.querySelector(CARD_SELECTOR + " .SignInPage");
+    var signInPart = signInPage && signInPage.closest(".iMIS-WebPart");
+    if (panel && signInPart && panel.parentElement !== signInPart) {
+      signInPart.insertBefore(panel, signInPart.firstChild);
     }
   }
 
@@ -1360,6 +1381,71 @@
     });
   }
 
+  // A failed sign-in puts an error in the user messages panel by partial
+  // update. Each new error turns both fields coral and shakes them once
+  // (owner, 8 October 2026); typing in either field clears it. An error
+  // already there when the page loads marks the fields without a shake.
+  function watchErrors() {
+    var seen = typeof WeakSet === "function" ? new WeakSet() : null;
+    var shakeTimer = 0;
+
+    function fields() {
+      return document.querySelectorAll(FIELD_SELECTOR);
+    }
+
+    function markFields(on) {
+      root.classList.toggle("hub-signin-error", on);
+      fields().forEach(function (input) {
+        if (on) {
+          input.setAttribute("aria-invalid", "true");
+        } else {
+          input.removeAttribute("aria-invalid");
+        }
+      });
+    }
+
+    function shake() {
+      clearTimeout(shakeTimer);
+      root.classList.remove("hub-signin-error-shake");
+      // Restart the animation when errors arrive back to back.
+      void root.offsetWidth;
+      root.classList.add("hub-signin-error-shake");
+      shakeTimer = setTimeout(function () {
+        root.classList.remove("hub-signin-error-shake");
+      }, ERROR_SHAKE_MS);
+    }
+
+    function check(animate) {
+      var errors = document.querySelectorAll(ERROR_SELECTOR);
+      var fresh = false;
+      errors.forEach(function (error) {
+        if (seen && !seen.has(error)) {
+          seen.add(error);
+          fresh = true;
+        }
+      });
+      if (fresh || (!seen && errors.length)) {
+        markFields(true);
+        if (animate && motionAllowed()) {
+          shake();
+        }
+      }
+    }
+
+    check(false);
+    new MutationObserver(function () {
+      check(true);
+    }).observe(document.body, { subtree: true, childList: true });
+
+    // Delegated, so the Sign In iPart can re-render in a partial postback.
+    document.addEventListener("input", function (event) {
+      if (root.classList.contains("hub-signin-error") &&
+          event.target.matches && event.target.matches(FIELD_SELECTOR)) {
+        markFields(false);
+      }
+    });
+  }
+
   function bindInteraction() {
     var glowFrame = 0;
     var lastEvent = null;
@@ -1568,6 +1654,7 @@
       resize();
       bindInteraction();
       watchBusy();
+      watchErrors();
       whenReady(playIntro);
       startShootingStars();
     } catch (error) {

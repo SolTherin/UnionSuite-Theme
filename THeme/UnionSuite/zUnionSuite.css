@@ -247,6 +247,11 @@
   --shadow-sm: 0 1px 2px rgba(0, 27, 35, .07);
   --shadow: 0 2px 4px rgba(0, 27, 35, .11);
   --shadow-lg: 0 8px 20px rgba(0, 27, 35, .16);
+  /* Popup windows: the theme dialog and the native RadWindow share these. */
+  --us-dialog-radius: var(--radius-lg);
+  --us-dialog-shadow: 0 24px 48px -12px rgba(0, 27, 35, .32), 0 2px 6px rgba(0, 27, 35, .08);
+  --us-dialog-scrim: #001b23;
+  --us-dialog-scrim-opacity: .45;
   --page-gutter: 20px;
   --card-pad-x: 18px;
   --card-pad-y: 16px;
@@ -5398,6 +5403,72 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
   border-radius: 4px;
 }
 
+/* US-SYSTEM-ALERTS — the native System Notification panel (#SystemAlertPanel)
+   above the page content. The alert sits inset from the page edges with the
+   information colours and the us-alerts leading edge. Native alerts carry the
+   iMIS logo; an alert whose content includes .uhubAlert carries its own hub
+   mark in the authored HTML, so it is left untagged. iMIS hides a dismissed
+   or inactive alert with an inline display: none on its .media; the empty
+   list item goes with it, so no gap is left. */
+#SystemAlertPanel .AsiSystem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-ink: var(--text-strong);
+  --message-bg: var(--info-bg);
+  --message-border: var(--info);
+
+  width: auto;
+  margin: var(--space-3) var(--space-4);
+  padding: 10px 14px;
+  overflow: visible;
+  color: var(--message-ink);
+  background-color: var(--message-bg);
+  border: 1px solid color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+  border-radius: 6px;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+#SystemAlertPanel .AsiSystem .AlertSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem:has(
+  > .media[style*="display: none"],
+  > .media[style*="display:none"]
+):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem > .media:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The gap spaces the tag, icon and text; the native icon margin would double it. */
+#SystemAlertPanel .AsiSystem .AlertItem > .media > img:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+}
+
+/* The iMIS tag. The logo is images/imis-logo.svg, embedded here so no
+   separate image upload is needed; re-embed it if that file changes. The
+   empty content carries "iMIS" as alternative text for screen readers. */
+#SystemAlertPanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --system-alert-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='5 87.5 217.25 67'%3E%3Cpath fill='%234a4d57' d='m172.55,137.14c.91,1.36,3.01,2.66,4.44,3.52s3.82,1.29,5.7,1.6c1.98.32,3.15.41,5.16.41,1.43,0,3.56-.11,5.16-.22s3.42-.56,4.79-.97,3.29-1.49,4.34-2.33c2.12-1.7,1.93-3.15,1.95-4.71.06-3.31-2.27-4.93-8.83-6.12-4.2-.76-9.2-1.45-16.46-2.77-2.96-.57-6.73-1.03-9.55-1.81-2.82-.78-5.3-1.76-7.5-3.04-2.2-1.27-3.35-2.76-4.62-5.25-1.06-2.09-1.54-5.06-1.54-7.85,0-4.11.93-7.65,2.79-10.28,1.86-2.63,3.99-4.25,7.05-5.77,3.06-1.52,6.5-2.59,10.32-3.2,3.82-.62,7.32-.72,11.33-.72s8.34.45,12.11,1.11c3.77.66,6.63,1.64,9.59,3.2,2.96,1.56,5.42,3.49,7.38,6.08,1.96,2.59,3.17,6.67,3.55,10.61h-16.93c-.29-3.37-3.17-6.5-5.84-7.69-2.67-1.19-6.04-2.13-9.67-2.13-1.15,0-3.32.04-4.66.16-1.34.12-3,.37-4.1.67s-2.79.91-3.71,1.5c-1.17.75-2.82,1.7-3,4.46-.1,1.54-.23,3.37,2.05,4.89,1.14.76,5.83,1.8,9,2.17,2.27.27,4.46.74,7.25,1.04s6.02.78,8.88,1.36c2.96.57,5.76,1.13,8.58,1.95,2.82.82,5.09,1.55,7.29,2.9,2.2,1.36,3.96,3.04,5.3,5.05,1.34,2.02,2.01,4.5,2.01,7.46,0,4.19-.98,7.7-2.94,10.54-1.96,2.84-4.51,5.11-7.67,6.84-3.15,1.73-6.76,2.94-10.82,3.64-4.06.7-8.19,1.05-12.39,1.05s-8.5-.37-12.61-1.11c-4.11-.74-7.76-1.97-10.96-3.7-3.2-1.73-5.83-4-7.88-6.84-2.05-2.84-3.18-6.39-3.37-10.66h17.28c0,1.89.83,3.63,1.74,4.99h0Z'/%3E%3Cpolygon fill='%2300a9e0' points='5 106.04 5 88.36 20.66 88.36 20.66 95.01 5 106.04'/%3E%3Cpath fill='%234a4d57' d='m5,113.65l.03,40.07h10.15s5.48.62,5.5-6.08v-34.67s0-4.79-3.57-4.83c0,0-1.65-.29-5.89,2.05l-6.22,3.46Z'/%3E%3Crect fill='%234a4d57' x='131.08' y='88.36' width='17.53' height='65.38'/%3E%3Cpath fill='%234a4d57' d='m61.02,88.36l19.44,44.49h.23l18.39-44.49h25.72v64.7h-17.11v-45.85h-.23l-20.37,45.85h-14.08l-20.37-45.4h-.23v45.4h-12.73c-2.42,0-4.38-1.96-4.38-4.38v-60.32h25.72Z'/%3E%3C/svg%3E");
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem > .media:not(:has(.uhubAlert))::before {
+  content: "";
+  content: "" / "iMIS";
+  flex: 0 0 auto;
+  height: 14px;
+  aspect-ratio: 217.25 / 67;
+  background: var(--system-alert-logo) center / contain no-repeat;
+}
+
 /* US-MESSAGES:END */
 
 /* US-SECTION-LOADING:START — selected circles and native Telerik presentation */
@@ -5472,8 +5543,9 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
 }
 
 /* A popup's content cell is a host while Telerik marks it rwLoading and
-   while its frame loads a page (data-us-frame-loading, set by the theme). */
-:is(.rwWindowContent, .rwContent).us-native-loader-host:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+   while its frame loads a page (data-us-frame-loading, set by the theme).
+   The theme dialog's body is a host while its page loads (data-us-loading). */
+:is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: relative;
 }
 
@@ -5518,19 +5590,19 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
    with the spin's transform. US-NATIVE-LOADERS adds the ripples inside a
    popup's spinner, so they fade and go with it; each is an outline over
    the spinner's border box, so it needs no background colour behind it. */
-:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+:is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   animation:
     section-circles-forward 1.428571s linear infinite,
     us-popup-loader-rev-outer 2s 2s infinite;
 }
 
-:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
+:is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   animation:
     section-circles-back .714286s linear infinite,
     us-popup-loader-rev-middle 2s 2s infinite;
 }
 
-:is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+:is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
   animation:
     section-circles-forward 2.142857s linear infinite,
     us-popup-loader-rev-inner 2s 2s infinite;
@@ -5632,9 +5704,9 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
 
 /* The shared rule stops the spin; the popup's own lists need stopping too. */
 @media (prefers-reduced-motion: reduce) {
-  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)),
-  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
-  :is(.rwWindowContent, .rwContent).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after,
+  :is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+  :is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
+  :is(.rwWindowContent, .rwContent, .us-dialog__body).us-native-loader-host > .us-native-section-spinner:not(:where(.us-report-no-styling, .us-report-no-styling *))::after,
   .us-native-loader-ripples > span:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     animation: none;
   }
@@ -10823,7 +10895,117 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 .us-credentials .us-credentials__unlock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: none;
+}
+
+.us-credentials .us-credentials__unlock > .ti {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Roles: an info button left of each row's delete (US-CREDENTIALS JS),
+   matching it: 32px, no border until hover. Open, it takes the link colour.
+   The cell keeps the two buttons on one line. */
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .rgMasterTable > tbody > tr > td.ListerColumnHeader:has(> .us-credentials__role-info) {
+  white-space: nowrap;
+}
+
+.us-credentials .us-credentials__role-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  margin: 0 2px 0 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  vertical-align: middle;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-credentials .us-credentials__role-info > .ti {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.us-credentials .us-credentials__role-info:hover {
+  border-color: var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-credentials .us-credentials__role-info[aria-expanded="true"] {
+  color: var(--text-link);
+}
+
+.us-credentials .us-credentials__role-info:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] td.ListerColumnHeader > input[type="image"][id$="_gbcDeleteColumn"] {
+  vertical-align: middle;
+}
+
+/* Rows with an info button align to the top, so the buttons stay level with
+   the name when a description opens below it. The name cell's padding
+   centres the name on the 32px buttons; a closed row keeps its 40px. */
+.us-credentials [id$="_RoleList_Grid1"] .rgMasterTable > tbody > tr:has(.us-credentials__role-info) > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  vertical-align: top;
+}
+
+.us-credentials [id$="_RoleList_Grid1"] .rgMasterTable > tbody > tr:has(.us-credentials__role-info) > td:first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+/* The description: its own line under the role's name, in the name cell.
+   The native grid floats the name's PanelField, so the description clears
+   it rather than wrapping around it. */
+.us-credentials [id$="_RoleList_Grid1"] .us-credentials__role-description {
+  display: block;
+  clear: both;
+  max-width: 60ch;
+  margin: 3px 0 0;
+  padding: 0;
+  color: var(--text-muted);
+  font: 400 12px/1.45 var(--font-ui);
+  white-space: normal;
+}
+
+.us-credentials [id$="_RoleList_Grid1"] .us-credentials__role-description[hidden] {
+  display: none;
+}
+
+.us-credentials [id$="_RoleList_Grid1"] .us-credentials__role-description.is-empty {
+  font-style: italic;
+}
+
+.us-credentials [id$="_RoleList_Grid1"] .us-credentials__role-description.is-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.us-credentials .us-credentials__role-description.is-loading > .section-loader-spinning-circles {
+  --size: .34px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-credentials .us-credentials__role-info {
+    transition: none;
+  }
 }
 
 /* Locked: the status reads in the danger colour, and the native unlock
@@ -12012,9 +12194,38 @@ a[data-us-comms-log-held] {
 /* US-ACTION-MENUS:END */
 
 /* US-DIALOG-CHROME:START — classic table-rendered Bootstrap RadWindow. */
+
+/* The window is a table: corner and side cells are its resize handles, so
+   they keep their native widths and cursors and only lose the skin's grey
+   and sprites. The wrapper clips them to its rounded corners. */
+:root .RadWindow.RadWindow_Bootstrap:not(.RadEditor):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border: 1px solid var(--border);
+  background-color: var(--bg-surface);
+  overflow: hidden;
+}
+
+:root .RadWindow.RadWindow_Bootstrap.rwMaximizedWindow:not(.RadEditor):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-radius: 0;
+}
+
+:root .RadWindow.RadWindow_Bootstrap:not(.RadEditor):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .rwTable > tbody > tr > :is(.rwCorner, .rwTitlebar, .rwWindowContent, .rwFooterCenter, .rwStatusbar) {
+  border-color: var(--border);
+  background-color: var(--bg-surface);
+  background-image: none;
+}
+
+/* One rule under the title, across the corner cells as well. */
+:root .RadWindow.RadWindow_Bootstrap:not(.RadEditor):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .rwTable > tbody > .rwTitleRow > td {
+  border-bottom: 1px solid var(--border);
+}
+
+:root .RadWindow.RadWindow_Bootstrap:not(.RadEditor):not(:where(.us-report-no-styling, .us-report-no-styling *)) > .rwTable > tbody > .rwTitleRow > .rwTitlebar {
+  padding-block: 6px;
+}
+
 :root .RadWindow_Bootstrap:not(:where(.us-report-no-styling, .us-report-no-styling *)) .rwTitlebarControls em {
   box-sizing: border-box;
-  padding-inline: 10px;
+  padding-inline: 12px 10px;
   font: 600 14px/1.4 var(--font-ui);
   color: var(--text-strong);
   overflow: hidden;
@@ -12152,6 +12363,241 @@ a[data-us-comms-log-held] {
 }
 
 /* US-DIALOG-CHROME:END */
+
+/* US-DIALOG:START — the theme dialog (UnionSuiteDialog in zUnionSuite.js).
+   Same frame, title and close control as the RadWindow above. The script
+   sets --us-dialog-width, --us-dialog-max-width, --us-dialog-height and
+   --us-dialog-max-height on the dialog, and --us-dialog-content (the page's
+   height) on its body. */
+:root[data-us-dialog-open] {
+  overflow: hidden;
+}
+
+:root[data-us-dialog-open="gutter"] {
+  scrollbar-gutter: stable;
+}
+
+.us-dialog {
+  --us-dialog-gap: 16px;
+  box-sizing: border-box;
+  width: min(
+    var(--us-dialog-width, 900px),
+    var(--us-dialog-max-width, 100vw),
+    100vw - 2 * var(--us-dialog-gap)
+  );
+  max-width: none;
+  max-height: min(
+    var(--us-dialog-max-height, 100dvh),
+    100dvh - 2 * var(--us-dialog-gap)
+  );
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--us-dialog-radius);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--us-dialog-shadow);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+.us-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.us-dialog--fixed {
+  height: min(
+    var(--us-dialog-height),
+    var(--us-dialog-max-height, 100dvh),
+    100dvh - 2 * var(--us-dialog-gap)
+  );
+}
+
+.us-dialog--full {
+  width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Older browsers do not pass custom properties to ::backdrop. */
+.us-dialog::backdrop {
+  background: var(--us-dialog-scrim, #001b23);
+  opacity: var(--us-dialog-scrim-opacity, .45);
+}
+
+.us-dialog__head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 6px 10px 6px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-dialog__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font: 600 14px/1.4 var(--font-ui);
+  color: var(--text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-dialog__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 30px;
+  height: 28px;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms,
+    border-color 120ms;
+}
+
+.us-dialog__close::before {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.us-dialog__close:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.us-dialog__close:active {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.us-dialog__close:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.us-dialog__close:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Fits the page (--us-dialog-content) until the dialog reaches its maximum
+   height; then the body shrinks and the page scrolls inside its frame. */
+.us-dialog__body {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 0;
+  height: var(--us-dialog-content, 180px);
+  transition: height 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-dialog--fixed .us-dialog__body {
+  flex: 1 1 auto;
+  height: auto;
+  transition: none;
+}
+
+.us-dialog__frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bg-surface);
+  opacity: 1;
+  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-dialog__body[data-us-loading] > .us-dialog__frame {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .us-dialog[open] {
+    animation: us-dialog-in 220ms cubic-bezier(.2, 0, 0, 1);
+  }
+
+  .us-dialog[open]::backdrop {
+    animation: us-dialog-fade-in 220ms cubic-bezier(.2, 0, 0, 1);
+  }
+
+  .us-dialog[data-us-closing] {
+    animation: us-dialog-out 160ms cubic-bezier(.2, 0, 0, 1) forwards;
+  }
+
+  .us-dialog[data-us-closing]::backdrop {
+    animation: us-dialog-fade-out 160ms cubic-bezier(.2, 0, 0, 1) forwards;
+  }
+}
+
+@keyframes us-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+  }
+}
+
+@keyframes us-dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(.98);
+  }
+}
+
+@keyframes us-dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes us-dialog-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-dialog__body,
+  .us-dialog__frame,
+  .us-dialog__close {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-dialog {
+    border-color: CanvasText;
+  }
+
+  .us-dialog__close::before {
+    background: ButtonText;
+  }
+
+  .us-dialog__close:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* US-DIALOG:END */
 
 /* Reserve the loading slot before a request, so native tabs never jump. */
 :root :is(.RadTabStrip, .RadTabStripVertical) > .rtsLevel > .rtsUL > .rtsLI > .rtsLink .rtsTxt:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -22800,9 +23246,186 @@ html.hub-signin .SignInPage .SignIn input[type="submit"]:disabled {
   }
 }
 
+/* iMIS's page-wide "Loading" box (#ctl00_TemplateFillLoadingPanel >
+   #FillProgressDiv) shows at the top of the page while signing in. The card
+   already shows that with its sweep, glow and sparks, so the box is hidden
+   here only (owner, 8 October 2026). iMIS shows it with an inline style, so
+   this needs !important. */
+html.hub-signin [id$="_TemplateFillLoadingPanel"],
+html.hub-signin #FillProgressDiv {
+  display: none !important;
+}
+
 /* An empty account link row would only add space. */
 html.hub-signin .SignInPage [id$="_accountLinkDiv"]:not(:has(a[href])) {
   display: none;
+}
+
+/* ---------- Messages ----------
+   iMIS shows sign-in messages, such as a wrong password, in the page's user
+   messages panel, which Scripts/SignInPage.js moves into the card between
+   the divider and the Username field. A failed sign-in fills it by partial
+   update. Each message is a slim box toned by its kind, with an outline icon
+   in place of the native image. Should the move not happen, the panel stays
+   above the card at the card's width. */
+
+/* The panel arrives with the intro, just before the Username row; messages
+   that arrive later slide in on their own (below). */
+html.hub-signin [id$="_UserMessagesUpdatePanel"] {
+  width: min(var(--hub-signin-card-width), 100%);
+  margin: 0 auto;
+  transition:
+    opacity 1000ms var(--hub-signin-ease-soft) 900ms,
+    transform 1000ms var(--hub-signin-ease-soft) 900ms;
+}
+
+html.hub-signin-intro [id$="_UserMessagesUpdatePanel"] {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: none;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li {
+  --hub-signin-message-tone: #ff8a7a;
+  --hub-signin-message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--hub-signin-message-tone) 50%, transparent);
+  border-radius: var(--hub-signin-radius);
+  background: color-mix(in srgb, var(--hub-signin-message-tone) 14%, transparent);
+  box-shadow: none;
+  color: var(--hub-signin-text-strong);
+  font: 13px/20px var(--hub-signin-face-body);
+  list-style: none;
+  transition:
+    opacity 240ms cubic-bezier(0.2, 0, 0, 1),
+    transform 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* A message arriving by partial update slides down into place. */
+@starting-style {
+  html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li + li {
+  margin-top: 8px;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li::before {
+  content: "";
+  flex: 0 0 18px;
+  height: 18px;
+  margin-top: 1px;
+  background: var(--hub-signin-message-tone);
+  -webkit-mask: var(--hub-signin-message-icon) center / contain no-repeat;
+  mask: var(--hub-signin-message-icon) center / contain no-repeat;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage .iMISUserMessageIcon {
+  display: none;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage .AsiMessageText {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li.AsiSuccess {
+  --hub-signin-message-tone: #6fdba0;
+  --hub-signin-message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M9 12l2 2l4 -4'/%3E%3C/svg%3E");
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li.AsiInformation {
+  --hub-signin-message-tone: var(--hub-signin-star);
+  --hub-signin-message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 9h.01'/%3E%3Cpath d='M11 12h1v4h1'/%3E%3C/svg%3E");
+}
+
+html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li:is(.AsiWarning, .AsiImportant) {
+  --hub-signin-message-tone: #ffcf70;
+  --hub-signin-message-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
+}
+
+/* A failed sign-in: Scripts/SignInPage.js marks <html> when the error
+   arrives. Both fields take a muted coral rim, the message's own border, and
+   shake once; typing in either field clears it. The message above them
+   carries the error, and it cannot say which field was wrong, so the fields
+   stay quieter than it (owner, 8 October 2026). Solid coral is kept for a
+   "Required" field, which does name the field; its rule outranks these. The
+   type selectors outrank the base field rules above. */
+html.hub-signin.hub-signin-error .SignInPage .forgot-link-field input:is([type="text"], [type="password"]),
+html.hub-signin.hub-signin-error .SignInPage .forgot-link-field input:is([type="text"], [type="password"]):hover {
+  border-color: rgba(255, 138, 122, 0.5);
+}
+
+html.hub-signin.hub-signin-error .SignInPage .forgot-link-field input:is([type="text"], [type="password"]):focus {
+  border-color: #ff8a7a;
+  box-shadow: 0 0 0 3px rgba(255, 138, 122, 0.25);
+}
+
+html.hub-signin-error-shake .SignInPage .forgot-link-field input {
+  animation: hub-signin-field-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes hub-signin-field-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  15% {
+    transform: translateX(-6px);
+  }
+
+  35% {
+    transform: translateX(6px);
+  }
+
+  55% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(3px);
+  }
+
+  90% {
+    transform: translateX(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.hub-signin [id$="_UserMessagesUpdatePanel"] {
+    transform: none;
+    transition: opacity 300ms ease;
+  }
+
+  /* Hiding stays instant, as for the rest of the intro. */
+  html.hub-signin-intro [id$="_UserMessagesUpdatePanel"] {
+    transition: none;
+  }
+
+  html.hub-signin [id$="_UserMessagesUpdatePanel"] .AsiMessage li {
+    transform: none;
+    transition: none;
+  }
+
+  html.hub-signin-error-shake .SignInPage .forgot-link-field input {
+    animation: none;
+  }
 }
 
 /* ---------- Site credit ---------- */

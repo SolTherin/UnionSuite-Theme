@@ -1,8 +1,286 @@
 /* Generated from zUnionSuite.css. */
-/* Native feedback messages. No author wrapper or JavaScript required. */
-:where(.AsiInformation,.AsiSuccess,.AsiWarning,.AsiError,.AsiValidation,.AsiValidationSummary,.AsiNeutral,.AsiImportant){--message-ink:var(--text-strong);--message-bg:var(--bg-subtle);--message-border:var(--border-strong)}:is(.AsiInformation,.AsiSuccess,.AsiWarning,.AsiError,.AsiValidation,.AsiValidationSummary,.AsiNeutral,.AsiImportant):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){color:var(--message-ink);background-color:var(--message-bg);border:1px solid var(--message-border);border-radius:6px;padding:12px 16px;line-height:1.5}.AsiSuccess:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){--message-bg:var(--success-bg);--message-border:var(--success)}.AsiInformation:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){--message-bg:var(--info-bg);--message-border:var(--info)}:is(.AsiWarning,.AsiImportant):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){--message-bg:var(--warning-bg);--message-border:var(--warning)}:is(.AsiError,.AsiValidation,.AsiValidationSummary):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){--message-bg:var(--danger-bg);--message-border:var(--danger)}.AsiMessage > :is(ul,ol):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){margin:0;padding:0}.AsiMessage li:has(> .iMISUserMessageIcon):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){display:flex;gap:12px;align-items:center}.AsiMessage .iMISUserMessageIcon:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){float:none;width:24px;height:24px !important;flex:0 0 24px;margin:0}.AsiMessage .AsiMessageText:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){margin:0;min-width:0;overflow-wrap:anywhere}.AsiValidationSummary:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){padding-left:48px;background-position:14px 14px;background-size:22px}.AsiErrorInline:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){display:block;background:var(--danger-bg);color:var(--text-strong);border:1px solid var(--danger) !important;border-radius:4px;padding:8px 12px;margin:6px 0 0;font-size:13px}span:is(.AsiSuccess,.AsiInformation,.AsiWarning,.AsiError,.AsiNeutral):not([class*=Icon]):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){display:inline;vertical-align:baseline;line-height:inherit;margin:0;padding:2px 6px;overflow:visible}div.AsiSystem:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){background:var(--warning-bg);color:var(--text-strong);border:1px solid var(--warning);border-radius:6px;padding:12px 16px}.iMISUserMessageError:not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){color:var(--danger)}:is(.iMISUserMessageWarning,.iMISUserMessageInformation):not(:where(.SecurityIndicator,.SecurityIndicator *,span[class$="Icon"])){color:var(--text-strong)}
 
-.us-form .AsiErrorInline{background:var(--danger-bg);color:var(--text-strong);border-radius:4px;padding:8px 12px;margin:6px 0 0;font-size:13px}
+/* Native feedback messages. No author wrapper or JavaScript required. */
+:where(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-ink: var(--text-strong);
+  --message-bg: var(--bg-subtle);
+  --message-border: var(--border-strong);
+}
+
+:is(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--message-ink);
+  background-color: var(--message-bg);
+  border: 1px solid var(--message-border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  line-height: 1.5;
+}
+
+/* Authored paragraphs inside any message: trim the first child's top margin
+   and the last child's bottom margin, so the padding is even. Margins between
+   paragraphs stay; iMIS-generated messages hold bare text and are unchanged. */
+:is(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])) > :first-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 0;
+}
+
+:is(
+  .AsiInformation,
+  .AsiSuccess,
+  .AsiWarning,
+  .AsiError,
+  .AsiValidation,
+  .AsiValidationSummary,
+  .AsiNeutral,
+  .AsiImportant
+):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])) > :last-child:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-bottom: 0;
+}
+
+
+.AsiSuccess:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-bg: var(--success-bg);
+  --message-border: var(--success);
+}
+
+.AsiInformation:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-bg: var(--info-bg);
+  --message-border: var(--info);
+}
+
+:is(.AsiWarning, .AsiImportant):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-bg: var(--warning-bg);
+  --message-border: var(--warning);
+}
+
+:is(.AsiError, .AsiValidation, .AsiValidationSummary):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-bg: var(--danger-bg);
+  --message-border: var(--danger);
+}
+
+.AsiMessage > :is(ul, ol):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 0;
+}
+
+.AsiMessage li:has(> .iMISUserMessageIcon):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.AsiMessage .iMISUserMessageIcon:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  float: none;
+  width: 24px;
+  height: 24px !important;
+  flex: 0 0 24px;
+  margin: 0;
+}
+
+.AsiMessage .AsiMessageText:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.AsiValidationSummary:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-left: 48px;
+  background-position: 14px 14px;
+  background-size: 22px;
+}
+
+.AsiErrorInline:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  background: var(--danger-bg);
+  color: var(--text-strong);
+  border: 1px solid var(--danger) !important;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+span:is(.AsiSuccess, .AsiInformation, .AsiWarning, .AsiError, .AsiNeutral):not([class*=Icon]):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline;
+  vertical-align: baseline;
+  line-height: inherit;
+  margin: 0;
+  padding: 2px 6px;
+  overflow: visible;
+}
+
+div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--warning-bg);
+  color: var(--text-strong);
+  border: 1px solid var(--warning);
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.iMISUserMessageError:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--danger);
+}
+
+:is(.iMISUserMessageWarning, .iMISUserMessageInformation):not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="Icon"])):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-strong);
+}
+
+.us-form .AsiErrorInline:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--danger-bg);
+  color: var(--text-strong);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 6px 0 0;
+  font-size: 13px;
+}
 
 /* Combined message/icon containers need their own icon gutter. Standalone icon spans retain native sizing. */
-:is(.AsiInformation,.AsiSuccess,.AsiWarning,.AsiError):is(.AsiInformationIcon,.AsiSuccessIcon,.AsiWarningIcon,.AsiErrorIcon):not(:where(span,.SecurityIndicator,.SecurityIndicator *)){padding-left:48px;background-position:12px center;background-size:24px 24px;background-repeat:no-repeat}
+:is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError):is(.AsiInformationIcon, .AsiSuccessIcon, .AsiWarningIcon, .AsiErrorIcon):not(:where(span, .SecurityIndicator, .SecurityIndicator *)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-left: 48px;
+  background-position: 12px center;
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+}
+
+/* US-ALERTS — us-alerts on the alerts iPart (a contact's Summary tab):
+   lighter native messages with a coloured leading edge and an optional
+   action group (.us-alerts__actions). The banner bell lists the same alerts
+   on every tab. */
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span):not(:where(.SecurityIndicator, .SecurityIndicator *, .us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+  padding: 9px 14px;
+  border-color: color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+  font-size: var(--fs-sm);
+}
+
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span) + :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):not(span):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: var(--space-2);
+}
+
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):has(> .us-alerts__actions):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The buttons sit at the alert's right edge (owner, 26 September 2026), so
+   every alert's actions line up in one column down the Summary. When they
+   no longer fit beside the message, they wrap underneath, still at the
+   right. Alert actions are registered actions, which the runtime paints as
+   outline buttons with icons; none is filled, since the alert itself
+   carries the emphasis, and the likelier step comes first. */
+.us-alerts :is(.AsiInformation, .AsiSuccess, .AsiWarning, .AsiError, .AsiNeutral, .AsiImportant):has(> .us-alerts__actions) > p:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 20rem;
+  margin: 0;
+}
+
+.us-alerts .us-alerts__actions:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+/* Alert actions are small without an author class. */
+.us-alerts .us-alerts__actions :is(.TextButton, .btn):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 18px;
+  border-radius: 4px;
+}
+
+/* US-SYSTEM-ALERTS — the native System Notification panel (#SystemAlertPanel)
+   above the page content. The alert sits inset from the page edges with the
+   information colours and the us-alerts leading edge. Native alerts carry the
+   iMIS logo; an alert whose content includes .uhubAlert carries its own hub
+   mark in the authored HTML, so it is left untagged. iMIS hides a dismissed
+   or inactive alert with an inline display: none on its .media; the empty
+   list item goes with it, so no gap is left. */
+#SystemAlertPanel .AsiSystem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --message-ink: var(--text-strong);
+  --message-bg: var(--info-bg);
+  --message-border: var(--info);
+
+  width: auto;
+  margin: var(--space-3) var(--space-4);
+  padding: 10px 14px;
+  overflow: visible;
+  color: var(--message-ink);
+  background-color: var(--message-bg);
+  border: 1px solid color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+  border-radius: 6px;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+#SystemAlertPanel .AsiSystem .AlertSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem:has(
+  > .media[style*="display: none"],
+  > .media[style*="display:none"]
+):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem > .media:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* The gap spaces the tag, icon and text; the native icon margin would double it. */
+#SystemAlertPanel .AsiSystem .AlertItem > .media > img:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 0;
+}
+
+/* The iMIS tag. The logo is images/imis-logo.svg, embedded here so no
+   separate image upload is needed; re-embed it if that file changes. The
+   empty content carries "iMIS" as alternative text for screen readers. */
+#SystemAlertPanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --system-alert-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='5 87.5 217.25 67'%3E%3Cpath fill='%234a4d57' d='m172.55,137.14c.91,1.36,3.01,2.66,4.44,3.52s3.82,1.29,5.7,1.6c1.98.32,3.15.41,5.16.41,1.43,0,3.56-.11,5.16-.22s3.42-.56,4.79-.97,3.29-1.49,4.34-2.33c2.12-1.7,1.93-3.15,1.95-4.71.06-3.31-2.27-4.93-8.83-6.12-4.2-.76-9.2-1.45-16.46-2.77-2.96-.57-6.73-1.03-9.55-1.81-2.82-.78-5.3-1.76-7.5-3.04-2.2-1.27-3.35-2.76-4.62-5.25-1.06-2.09-1.54-5.06-1.54-7.85,0-4.11.93-7.65,2.79-10.28,1.86-2.63,3.99-4.25,7.05-5.77,3.06-1.52,6.5-2.59,10.32-3.2,3.82-.62,7.32-.72,11.33-.72s8.34.45,12.11,1.11c3.77.66,6.63,1.64,9.59,3.2,2.96,1.56,5.42,3.49,7.38,6.08,1.96,2.59,3.17,6.67,3.55,10.61h-16.93c-.29-3.37-3.17-6.5-5.84-7.69-2.67-1.19-6.04-2.13-9.67-2.13-1.15,0-3.32.04-4.66.16-1.34.12-3,.37-4.1.67s-2.79.91-3.71,1.5c-1.17.75-2.82,1.7-3,4.46-.1,1.54-.23,3.37,2.05,4.89,1.14.76,5.83,1.8,9,2.17,2.27.27,4.46.74,7.25,1.04s6.02.78,8.88,1.36c2.96.57,5.76,1.13,8.58,1.95,2.82.82,5.09,1.55,7.29,2.9,2.2,1.36,3.96,3.04,5.3,5.05,1.34,2.02,2.01,4.5,2.01,7.46,0,4.19-.98,7.7-2.94,10.54-1.96,2.84-4.51,5.11-7.67,6.84-3.15,1.73-6.76,2.94-10.82,3.64-4.06.7-8.19,1.05-12.39,1.05s-8.5-.37-12.61-1.11c-4.11-.74-7.76-1.97-10.96-3.7-3.2-1.73-5.83-4-7.88-6.84-2.05-2.84-3.18-6.39-3.37-10.66h17.28c0,1.89.83,3.63,1.74,4.99h0Z'/%3E%3Cpolygon fill='%2300a9e0' points='5 106.04 5 88.36 20.66 88.36 20.66 95.01 5 106.04'/%3E%3Cpath fill='%234a4d57' d='m5,113.65l.03,40.07h10.15s5.48.62,5.5-6.08v-34.67s0-4.79-3.57-4.83c0,0-1.65-.29-5.89,2.05l-6.22,3.46Z'/%3E%3Crect fill='%234a4d57' x='131.08' y='88.36' width='17.53' height='65.38'/%3E%3Cpath fill='%234a4d57' d='m61.02,88.36l19.44,44.49h.23l18.39-44.49h25.72v64.7h-17.11v-45.85h-.23l-20.37,45.85h-14.08l-20.37-45.4h-.23v45.4h-12.73c-2.42,0-4.38-1.96-4.38-4.38v-60.32h25.72Z'/%3E%3C/svg%3E");
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem > .media:not(:has(.uhubAlert))::before {
+  content: "";
+  content: "" / "iMIS";
+  flex: 0 0 auto;
+  height: 14px;
+  aspect-ratio: 217.25 / 67;
+  background: var(--system-alert-logo) center / contain no-repeat;
+}
+

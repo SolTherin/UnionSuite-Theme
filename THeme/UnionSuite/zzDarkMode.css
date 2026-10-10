@@ -60,6 +60,9 @@
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 20%);
     --shadow: 0 2px 5px rgb(0 0 0 / 24%);
     --shadow-lg: 0 12px 30px rgb(0 0 0 / 30%);
+    --us-dialog-shadow: 0 24px 48px -12px rgb(0 0 0 / 60%), 0 2px 6px rgb(0 0 0 / 30%);
+    --us-dialog-scrim: #000;
+    --us-dialog-scrim-opacity: .6;
     --focus-ring: 0 0 0 2px var(--bg-surface),0 0 0 4px var(--border-focus);
     --dm-hover: #263f4c;
     --dm-selected: #314959;
@@ -1088,5 +1091,12 @@
 
   :root[data-us-color-scheme="dark"] .us-contacts-group-tone {
     --us-group-purple: color-mix(in srgb, var(--status-purple) 40%, #fff);
+  }
+
+  /* System alert iMIS logo (US-SYSTEM-ALERTS): the dark grey letters would
+     vanish on the dark alert, so the logo is drawn in one light colour. */
+  :root[data-us-color-scheme="dark"] #SystemAlertPanel .AsiSystem .AlertItem > .media:not(:has(.uhubAlert))::before {
+    background: var(--text-strong);
+    mask: var(--system-alert-logo) center / contain no-repeat;
   }
 }

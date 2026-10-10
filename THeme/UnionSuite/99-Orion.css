@@ -6302,8 +6302,8 @@ input[type="button"].header-search-submit {
 /* RadWindow
    ========================================================================== */
 .RadWindow.RadWindow_Bootstrap {
-  border-radius: 8px;
-  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+  border-radius: var(--us-dialog-radius, 8px);
+  box-shadow: var(--us-dialog-shadow, 0 3px 9px rgba(0, 0, 0, 0.5));
 }
 
 .RadWindow.RadWindow_Bootstrap,
@@ -6336,8 +6336,10 @@ input[type="button"].header-search-submit {
   background-color: transparent;
 }
 
+/* Telerik sets the overlay's opacity inline. */
 .TelerikModalOverlay {
-  background-color: #000 !important;
+  background-color: var(--us-dialog-scrim, #000) !important;
+  opacity: var(--us-dialog-scrim-opacity, .5) !important;
 }
 
 /* RadTreeView

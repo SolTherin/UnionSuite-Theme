@@ -924,6 +924,321 @@ SOFTWARE.
 })();
 /* US-ROW-PATCH:END */
 
+/* US-DIALOG:START — the theme dialog: a native <dialog> around a same-site page.
+   UnionSuiteDialog.open(href, options) returns a handle whose `closed` promise
+   settles once the dialog has gone. Use it for read-only and theme-owned
+   pages. iMIS editors that close themselves through the RadWindow
+   (Save & Close, CloseWindowOnCommit) or open their own popups stay on the
+   native RadWindow: a RadWindow opened from here would sit beneath this
+   dialog, and the editor could not close it. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteDialog) return;
+
+  const CLOSE_FALLBACK_MS = 260;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const shown = new Set();
+  let sequence = 0;
+
+  // Dialog sizes: positive pixels, a px string, or a whole percentage of the
+  // window (vw across, dvh down). Height also takes 'auto': fit the page.
+  function length(value, axis) {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value + 'px';
+    if (typeof value === 'string' && /^\d+(?:\.\d+)?px$/.test(value) && parseFloat(value) > 0) return value;
+    if (typeof value === 'string' && /^(?:[1-9]\d?|100)%$/.test(value)) return parseInt(value, 10) + (axis === 'x' ? 'vw' : 'dvh');
+    throw new TypeError('Dialog sizes need positive pixels or whole percentages from 1% to 100%.');
+  }
+
+  // Same-site pages only: the dialog reads the page to fit its height and
+  // to close on Escape from inside it. imisPopup asks iMIS for its popup
+  // layout, as the native popup does.
+  function destination(href, imisPopup) {
+    if (typeof href !== 'string' || !href) throw new TypeError('The dialog needs a page URL.');
+    const target = new URL(href, document.baseURI);
+    if (!/^https?:$/.test(target.protocol) || target.username || target.password) throw new TypeError('Use an HTTP(S) dialog URL without credentials.');
+    if (target.origin !== window.location.origin) throw new TypeError('The dialog opens pages on this site only.');
+    if (imisPopup) {
+      if (!target.searchParams.has('TemplateType')) target.searchParams.set('TemplateType', 'E');
+      target.searchParams.set('IsPopup', 'true');
+    }
+    return target.href;
+  }
+
+  function lockScroll() {
+    const root = document.documentElement;
+    if (shown.size !== 1) return;
+    // Keep the page from shifting when its scrollbar goes away.
+    const gutter = window.innerWidth - root.clientWidth > 0;
+    root.setAttribute('data-us-dialog-open', gutter ? 'gutter' : '');
+  }
+
+  function unlockScroll() {
+    if (!shown.size) document.documentElement.removeAttribute('data-us-dialog-open');
+  }
+
+  function build(id, title) {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'us-dialog';
+    dialog.setAttribute('aria-labelledby', id + '-title');
+
+    const head = document.createElement('div');
+    head.className = 'us-dialog__head';
+
+    const heading = document.createElement('h2');
+    heading.className = 'us-dialog__title';
+    heading.id = id + '-title';
+    heading.textContent = title;
+
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'us-dialog__close';
+    close.setAttribute('aria-label', 'Close');
+    close.title = 'Close';
+
+    const body = document.createElement('div');
+    body.className = 'us-dialog__body';
+    body.setAttribute('data-us-loading', '');
+
+    const frame = document.createElement('iframe');
+    frame.className = 'us-dialog__frame';
+    frame.title = title;
+
+    head.append(heading, close);
+    body.append(frame);
+    dialog.append(head, body);
+    return {dialog, close, body, frame};
+  }
+
+  // The page's own height, whatever height the frame has now. Collapsing the
+  // frame for one synchronous read lets a page whose html/body are 100% tall
+  // report its content rather than the frame; nothing paints in between.
+  // Overflowing content leaves the body's bottom padding out of scrollHeight,
+  // so the bottom of the body's last block is measured too.
+  function contentHeight(frame) {
+    const doc = frame.contentDocument, win = frame.contentWindow;
+    if (!doc?.documentElement || !doc.body || !win) return 0;
+    const saved = frame.style.height;
+    frame.style.height = '0px';
+    let bottom = 0;
+    for (const child of doc.body.children) {
+      const style = win.getComputedStyle(child);
+      if (style.display === 'none' || style.position === 'absolute' || style.position === 'fixed') continue;
+      bottom = Math.max(bottom, child.getBoundingClientRect().bottom + (parseFloat(style.marginBottom) || 0));
+    }
+    const edge = (element, names) => {
+      const style = win.getComputedStyle(element);
+      return names.reduce((sum, name) => sum + (parseFloat(style[name]) || 0), 0);
+    };
+    const below = edge(doc.body, ['paddingBottom', 'borderBottomWidth', 'marginBottom']) +
+      edge(doc.documentElement, ['paddingBottom', 'borderBottomWidth']);
+    const height = Math.max(doc.documentElement.scrollHeight, bottom + below);
+    frame.style.height = saved;
+    return Math.ceil(height);
+  }
+
+  function open(href, options = {}) {
+    if (!options || typeof options !== 'object') throw new TypeError('Dialog options must be an object.');
+    const title = String(options.title ?? '');
+    const src = destination(href, options.imisPopup !== false);
+    const width = length(options.width ?? 900, 'x');
+    const maxWidth = options.maxWidth == null ? null : length(options.maxWidth, 'x');
+    const autoHeight = options.height == null || options.height === 'auto';
+    const height = autoHeight ? null : length(options.height, 'y');
+    const maxHeight = options.maxHeight == null ? null : length(options.maxHeight, 'y');
+    if (options.onBeforeClose != null && typeof options.onBeforeClose !== 'function') throw new TypeError('onBeforeClose must be a function.');
+    if (options.fullscreenBelow != null && !(Number.isFinite(options.fullscreenBelow) && options.fullscreenBelow >= 0)) throw new TypeError('fullscreenBelow must be nonnegative pixels.');
+
+    const id = 'us-dialog-' + (++sequence);
+    const {dialog, close, body, frame} = build(id, title);
+    if (options.name) frame.name = String(options.name);
+    dialog.style.setProperty('--us-dialog-width', width);
+    if (maxWidth) dialog.style.setProperty('--us-dialog-max-width', maxWidth);
+    if (maxHeight) dialog.style.setProperty('--us-dialog-max-height', maxHeight);
+    if (height) {
+      dialog.style.setProperty('--us-dialog-height', height);
+      dialog.classList.add('us-dialog--fixed');
+    }
+    if (options.fullscreenBelow && window.innerWidth < options.fullscreenBelow) dialog.classList.add('us-dialog--full');
+
+    const returnTo = options.returnFocus || document.activeElement;
+    let state = 'open', settle, pageCleanup = null, measureFrame = 0, lastHeight = -1;
+    const closed = new Promise(resolve => { settle = resolve; });
+
+    // The popup loader (US-NATIVE-LOADERS) shows its spinner in the body.
+    function loading(on) {
+      body.toggleAttribute('data-us-loading', on);
+      window.UnionSuiteSectionLoading?.refresh();
+    }
+
+    function measure() {
+      measureFrame = 0;
+      if (!autoHeight || state === 'closed') return;
+      const next = contentHeight(frame);
+      if (!next || next === lastHeight) return;
+      lastHeight = next;
+      body.style.setProperty('--us-dialog-content', next + 'px');
+    }
+
+    function scheduleMeasure() {
+      if (!measureFrame) measureFrame = requestAnimationFrame(measure);
+    }
+
+    // Escape inside the page never reaches this document, so listen there
+    // too. A page control that is open (a combo box, its own popup) keeps
+    // the key; the page can also close the dialog with data-us-dialog-close.
+    function attachPage() {
+      pageCleanup?.();
+      pageCleanup = null;
+      let win, doc;
+      try {
+        win = frame.contentWindow;
+        doc = frame.contentDocument;
+      } catch {
+        return;
+      }
+      if (!doc || doc.URL === 'about:blank') return;
+      loading(false);
+
+      function keydown(event) {
+        if (event.key !== 'Escape' || event.defaultPrevented) return;
+        if (event.target?.closest?.('[aria-expanded="true"]')) return;
+        const busy = doc.querySelectorAll('dialog[open], .RadWindow, .RadComboBoxDropDown');
+        if (Array.from(busy).some(node => node.getClientRects().length && win.getComputedStyle(node).visibility !== 'hidden')) return;
+        event.preventDefault();
+        requestClose('escape');
+      }
+      function click(event) {
+        const control = event.target?.closest?.('[data-us-dialog-close]');
+        if (!control) return;
+        event.preventDefault();
+        requestClose('dismiss');
+      }
+      function leaving() {
+        if (state === 'open') loading(true);
+      }
+
+      win.addEventListener('keydown', keydown);
+      doc.addEventListener('click', click);
+      win.addEventListener('pagehide', leaving);
+      const mutations = new MutationObserver(scheduleMeasure);
+      mutations.observe(doc.body, {childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden', 'open']});
+      const sizes = new ResizeObserver(scheduleMeasure);
+      sizes.observe(doc.body);
+      pageCleanup = () => {
+        mutations.disconnect();
+        sizes.disconnect();
+        try {
+          win.removeEventListener('keydown', keydown);
+          doc.removeEventListener('click', click);
+          win.removeEventListener('pagehide', leaving);
+        } catch {
+          /* The page has already gone. */
+        }
+      };
+      scheduleMeasure();
+    }
+
+    // closeEvent mirrors the RadWindow one, so a single onBeforeClose suits
+    // either presenter: return false or call set_cancel(true) to keep it open.
+    function requestClose(reason) {
+      if (state !== 'open') return false;
+      if (options.onBeforeClose) {
+        let cancel = false;
+        const closeEvent = {reason, set_cancel: value => { cancel = value === true; }, get_cancel: () => cancel};
+        try {
+          if (options.onBeforeClose(handle, closeEvent) === false || cancel) return false;
+        } catch (error) {
+          console.error('[UnionSuiteDialog] onBeforeClose failed', error);
+          return false;
+        }
+      }
+      state = 'closing';
+      if (reduceMotion.matches || !dialog.open) {
+        finish(reason);
+        return true;
+      }
+      dialog.setAttribute('data-us-closing', '');
+      const timer = setTimeout(() => finish(reason), CLOSE_FALLBACK_MS);
+      dialog.addEventListener('animationend', function ended(event) {
+        if (event.target !== dialog || event.pseudoElement) return;
+        dialog.removeEventListener('animationend', ended);
+        clearTimeout(timer);
+        finish(reason);
+      });
+      return true;
+    }
+
+    function finish(reason) {
+      if (state === 'closed') return;
+      state = 'closed';
+      cancelAnimationFrame(measureFrame);
+      pageCleanup?.();
+      window.removeEventListener('resize', scheduleMeasure);
+      frame.src = 'about:blank';
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      shown.delete(handle);
+      unlockScroll();
+      if (returnTo?.isConnected && returnTo.getClientRects().length) returnTo.focus({preventScroll: true});
+      settle({reason});
+    }
+
+    // Native Escape on the dialog itself. Browsers force the close if Escape
+    // is pressed again without other input; finish() handles that too.
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      requestClose('escape');
+    });
+    dialog.addEventListener('close', () => finish('escape'));
+    close.addEventListener('click', () => requestClose('close'));
+
+    // A press that starts and ends on the backdrop closes; dragging a text
+    // selection out of the dialog does not.
+    let pressedOutside = false;
+    function outside(event) {
+      if (event.target !== dialog) return false;
+      const box = dialog.getBoundingClientRect();
+      return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+    }
+    dialog.addEventListener('pointerdown', event => { pressedOutside = outside(event); });
+    dialog.addEventListener('click', event => {
+      if (options.dismissible !== false && pressedOutside && outside(event)) requestClose('backdrop');
+      pressedOutside = false;
+    });
+
+    frame.addEventListener('load', attachPage);
+    window.addEventListener('resize', scheduleMeasure);
+
+    const handle = Object.freeze({
+      dialog,
+      frame,
+      closed,
+      close: (reason = 'script') => requestClose(reason),
+      reload() {
+        loading(true);
+        frame.contentWindow?.location.reload();
+      }
+    });
+
+    document.body.append(dialog);
+    frame.src = src;
+    shown.add(handle);
+    lockScroll();
+    dialog.showModal();
+    loading(true);
+    return handle;
+  }
+
+  // Lets a page inside the dialog close it: parent.UnionSuiteDialog.close(window).
+  function closeFrom(win, reason = 'dismiss') {
+    for (const handle of shown) if (handle.frame.contentWindow === win) return handle.close(reason);
+    return false;
+  }
+
+  window.UnionSuiteDialog = Object.freeze({version: '1.0', open, close: closeFrom});
+})();
+/* US-DIALOG:END */
+
 /* US-UNIFIED-ACTIONS:START — one definition, per-control context, one lifecycle. */
 (function () {
   'use strict';
@@ -1050,7 +1365,14 @@ SOFTWARE.
     if (a.type === 'navigate' && (a.confirm || a.refresh)) throw new TypeError('Use a function action for confirmation or refresh around navigation.');
     if (a.target != null && !['_self','_blank'].includes(a.target)) throw new TypeError('Navigation target must be _self or _blank.');
     if (a.popup != null) {
-      object(a.popup,'popup'); size(a.popup.width,'90%'); size(a.popup.height,'90%');
+      object(a.popup,'popup');
+      if (a.popup.presenter != null && !['radwindow','dialog'].includes(a.popup.presenter)) throw new TypeError('popup.presenter must be radwindow or dialog.');
+      const themeDialog = a.popup.presenter === 'dialog';
+      size(a.popup.width,'90%');
+      if (!(themeDialog && a.popup.height === 'auto')) size(a.popup.height,'90%');
+      // The theme dialog has no RadWindow behind it to receive these.
+      if (themeDialog) for (const name of ['args','iconUrl','templateType','closeWindowOnCommit','preserveStatefulBusinessContainer','sourceObject']) if (a.popup[name] != null) throw new TypeError('popup.' + name + ' applies to the RadWindow presenter only.');
+      if (a.popup.dismissible != null && (!themeDialog || typeof a.popup.dismissible !== 'boolean')) throw new TypeError('popup.dismissible is a boolean for the dialog presenter.');
       for (const name of ['onBeforeClose','onClose','onError']) if (a.popup[name] != null && typeof a.popup[name] !== 'function') throw new TypeError('popup.' + name + ' must be a function.');
       for (const name of ['title','iconUrl','templateType','windowName']) if (a.popup[name] != null && typeof a.popup[name] !== 'string') throw new TypeError('popup.' + name + ' must be a string.');
       for (const name of ['closeWindowOnCommit','preserveStatefulBusinessContainer']) if (a.popup[name] != null && typeof a.popup[name] !== 'boolean') throw new TypeError('popup.' + name + ' must be boolean.');
@@ -1145,7 +1467,8 @@ SOFTWARE.
     if (definition.action.disabled || state.element.disabled || state.original['aria-disabled']==='true' || state.element.closest('fieldset[disabled],.disabled,.aspNetDisabled')) return {status:'disabled',reason:'This action is disabled.'};
     const missing = definition.action.requires?.find(name => typeof dependency(name) !== 'function');
     if (missing) return {status:'dependency',reason:'Required function is unavailable: ' + missing};
-    if (definition.action.type === 'popup' && typeof window.ShowDialog_NoReturnValue !== 'function') return {status:'dependency',reason:'The native popup service is unavailable.'};
+    if (definition.action.type === 'popup' && definition.action.popup?.presenter !== 'dialog' && typeof window.ShowDialog_NoReturnValue !== 'function') return {status:'dependency',reason:'The native popup service is unavailable.'};
+    if (definition.action.popup?.presenter === 'dialog' && !window.UnionSuiteDialog) return {status:'dependency',reason:'The theme dialog is unavailable.'};
     const context = contextFor(definition,env);
     function contextual(context) {
       const ready = {...env,context}, access = definition.action.access;
@@ -1327,7 +1650,8 @@ SOFTWARE.
     const action=definition.action, options=action.popup||{};
     const destination=typeof action.href==='function'?await action.href(env):action.href;
     if (!await isCurrent()) throw new Error('The action or record changed before the editor opened.');
-    const target=url(destination,true); if(options.fullscreenBelow&&innerWidth<options.fullscreenBelow)target.searchParams.set('Mode','Maximized');
+    const themeDialog=options.presenter==='dialog';
+    const target=url(destination,true); if(!themeDialog&&options.fullscreenBelow&&innerWidth<options.fullscreenBelow)target.searchParams.set('Mode','Maximized');
     const name=options.windowName || 'UnionSuite-'+env.key.replace(/\./g,'-')+'-'+(++sequence);
     if(windows.has(name))throw new Error('This editor window is already open.');
     windows.add(name);
@@ -1338,6 +1662,22 @@ SOFTWARE.
         catch(error){closeEvent?.set_cancel?.(true);announce('The editor could not close.',env,'beforeClose',error);popupError(definition,env,error,'beforeClose');}
       }
       function close(dialog,closeEvent){if(closed)return;closed=true;windows.delete(name);queueMicrotask(async()=>{try{const result={...env,dialog,closeEvent};if(options.onClose)await options.onClose(result);resolve(result);}catch(error){reject(error);}});}
+      // The theme dialog takes the same sizes and close hooks; its closeEvent
+      // carries set_cancel like the RadWindow one, so before() serves both.
+      if(themeDialog){
+        try{
+          const dialog=window.UnionSuiteDialog.open(target.href,{
+            title:options.title||definition.presentation.label,
+            width:options.width??'90%',maxWidth:options.maxWidth,
+            height:options.height??'auto',maxHeight:options.maxHeight,
+            fullscreenBelow:options.fullscreenBelow,dismissible:options.dismissible,
+            name,returnFocus:env.trigger,onBeforeClose:options.onBeforeClose?before:null
+          });
+          dialog.closed.then(({reason})=>close(dialog,{reason}));
+        }
+        catch(error){windows.delete(name);reject(error);}
+        return;
+      }
       try{window.ShowDialog_NoReturnValue(target.href,options.args??null,capped(options.width,options.maxWidth,innerWidth),capped(options.height,options.maxHeight,innerHeight),options.title||definition.presentation.label,
         options.iconUrl||null,options.templateType||'E',options.onBeforeClose?before:null,name,options.closeWindowOnCommit===true,options.preserveStatefulBusinessContainer===true,close,options.sourceObject??env.trigger);}
       catch(error){windows.delete(name);reject(error);}
@@ -2785,7 +3125,7 @@ SOFTWARE.
 
   function nativePopupOpen() {
     return Array.from(document.querySelectorAll(
-      ".RadWindow, .rwWindow, .modal.show, .modal.in, [role='dialog'][aria-modal='true'], " +
+      ".RadWindow, .rwWindow, .modal.show, .modal.in, [role='dialog'][aria-modal='true'], dialog[open], " +
       ".RadComboBoxDropDown, .chosen-with-drop .chosen-drop, .us-iqa-native-export.open .dropdown-menu, " +
       ".us-iqa-native-export.show .dropdown-menu"
     )).some(visibleElement);
@@ -7280,7 +7620,7 @@ SOFTWARE.
 /* US-NATIVE-LOADERS:START — decorate native indicators; no request interception. */
 (function(){
  if(window.UnionSuiteSectionLoading)return;
- const selector='.rwWindowContent.rwLoading,:is(.rwWindowContent,.rwContent)[data-us-frame-loading],.RadAjax > .raDiv';
+ const selector='.rwWindowContent.rwLoading,:is(.rwWindowContent,.rwContent)[data-us-frame-loading],.us-dialog__body[data-us-loading],.RadAjax > .raDiv';
  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
  // A popup frame counts as loading from the moment its src changes until the
  // new document's load event. iMIS can take several seconds to build a page
@@ -7336,7 +7676,7 @@ SOFTWARE.
     const spinner=document.createElement('span');spinner.className='section-loader-spinning-circles us-native-section-spinner';spinner.setAttribute('aria-hidden','true');
     // A popup's spinner revs and sends out ripples on a long wait; the
     // ripples sit inside it so they fade and go with it (zUnionSuite.css).
-    if(host.matches('.rwWindowContent,.rwContent')){
+    if(host.matches('.rwWindowContent,.rwContent,.us-dialog__body')){
      const ripples=document.createElement('span');ripples.className='us-native-loader-ripples';
      ripples.append(document.createElement('span'),document.createElement('span'),document.createElement('span'));
      spinner.append(ripples);
@@ -8834,10 +9174,16 @@ SOFTWARE.
     text.append(heading, list);
     const parts = [text];
     if (locked) {
-      const button = document.createElement('input');
+      // A button, not an input, so it can hold the open-lock icon.
+      const button = document.createElement('button');
       button.type = 'button';
       button.className = 'TextButton us-credentials__unlock';
-      button.value = 'Unlock account';
+      const icon = document.createElement('i');
+      icon.className = 'ti ti-lock-open';
+      icon.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span');
+      label.textContent = 'Unlock account';
+      button.append(icon, label);
       parts.push(button);
     }
     alert.replaceChildren(...parts);
@@ -8862,6 +9208,118 @@ SOFTWARE.
     locked.unlock.click();
   }
 
+  // ---------------------------------------------------------------------------
+  // Roles: an info button beside each row's delete opens the role's
+  // description under its name (owner, 8 October 2026). The descriptions
+  // come from /api/Role (RoleKey, RoleName, Description), fetched once on
+  // first use; only roles already assigned are looked up. The row's hidden
+  // cell carries its RoleKey; the name is the fallback. The description sits
+  // inside the name cell: the grid deletes rows on the client, so no row of
+  // its own is added.
+
+  const ROLE_ROWS = '[id$="_RoleList_Grid1"] .rgMasterTable > tbody > tr:is(.rgRow, .rgAltRow)';
+  let roleDescriptions = null;
+  let roleInfoCount = 0;
+
+  function loadRoleDescriptions() {
+    if (roleDescriptions) return roleDescriptions;
+    const token = document.getElementById('__RequestVerificationToken')?.value;
+    const headers = { Accept: 'application/json' };
+    if (token) headers.RequestVerificationToken = token;
+    roleDescriptions = (async () => {
+      const byKey = new Map();
+      const byName = new Map();
+      let offset = 0;
+      for (let page = 0; page < 20; page++) {
+        const response = await fetch('/api/Role?limit=100&offset=' + offset, { credentials: 'same-origin', headers });
+        if (!response.ok) throw new Error('Roles could not be read (' + response.status + ').');
+        const data = await response.json();
+        (data.Items?.$values || []).forEach(role => {
+          const description = String(role.Description || '').trim();
+          if (role.RoleKey) byKey.set(String(role.RoleKey).toLowerCase(), description);
+          if (role.RoleName) byName.set(String(role.RoleName).toLowerCase(), description);
+        });
+        if (!data.HasNext) break;
+        offset = Number(data.NextOffset) || offset + 100;
+      }
+      return { byKey, byName };
+    })();
+    roleDescriptions.catch(() => { roleDescriptions = null; });
+    return roleDescriptions;
+  }
+
+  const roleName = row => row.cells[0]?.querySelector('[data-propertyname="RoleKey"]')?.textContent.trim() ||
+    row.cells[0]?.textContent.trim() || '';
+
+  function decorateRoles(owner) {
+    owner.querySelectorAll(ROLE_ROWS).forEach(row => {
+      const cell = row.querySelector(':scope > td.ListerColumnHeader');
+      const remove = cell?.querySelector('input[type="image"][id$="_gbcDeleteColumn"]');
+      if (!remove || cell.querySelector(':scope > .us-credentials__role-info')) return;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'us-credentials__role-info';
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', 'About ' + (roleName(row) || 'this role'));
+      button.title = 'About this role';
+      const icon = document.createElement('i');
+      icon.className = 'ti ti-info-circle';
+      icon.setAttribute('aria-hidden', 'true');
+      button.append(icon);
+      cell.insertBefore(button, remove);
+    });
+  }
+
+  async function toggleRoleInfo(button) {
+    const row = button.closest('tr');
+    const nameCell = row?.cells[0];
+    if (!nameCell) return;
+    let note = nameCell.querySelector(':scope > .us-credentials__role-description');
+    if (note && button.getAttribute('aria-expanded') === 'true') {
+      button.setAttribute('aria-expanded', 'false');
+      void fold(note, false);
+      return;
+    }
+    if (!note) {
+      note = document.createElement('p');
+      note.className = 'us-credentials__role-description';
+      note.id = 'us-credentials-role-description-' + (++roleInfoCount);
+      note.hidden = true;
+      nameCell.append(note);
+      button.setAttribute('aria-controls', note.id);
+    }
+    button.setAttribute('aria-expanded', 'true');
+    if (!('loaded' in note.dataset)) {
+      const spinner = document.createElement('span');
+      spinner.className = 'section-loader-spinning-circles';
+      spinner.setAttribute('aria-hidden', 'true');
+      note.replaceChildren(spinner, document.createTextNode('Loading description…'));
+      note.classList.add('is-loading');
+    }
+    void fold(note, true);
+    if ('loaded' in note.dataset) return;
+
+    let text;
+    let empty = false;
+    try {
+      const { byKey, byName } = await loadRoleDescriptions();
+      const key = Array.from(row.cells).map(cell => cell.textContent.trim().toLowerCase()).find(value => byKey.has(value));
+      const found = key ? byKey.get(key) : byName.get(roleName(row).toLowerCase());
+      text = found === undefined ? 'No description found.' : found || 'No description.';
+      empty = !found;
+      note.dataset.loaded = '';
+    } catch {
+      text = 'The description could not be loaded.';
+      empty = true;
+    }
+    if (!note.isConnected) return;
+    resizeAround(note, () => {
+      note.classList.remove('is-loading');
+      note.classList.toggle('is-empty', empty);
+      note.replaceChildren(document.createTextNode(text));
+    });
+  }
+
   // Arrow keys move between the filter and the visible, open checkboxes.
   function moveFocus(picker, step) {
     const stops = [picker.querySelector('.us-credentials-picker__filter')]
@@ -8877,6 +9335,7 @@ SOFTWARE.
       if (unsaved.has(owner)) showUnsaved(owner);
       markAccount(owner);
       markBlocked(owner);
+      decorateRoles(owner);
 
       // Password and Confirm password set a new password for the contact:
       // the browser must not fill in the signed-in staff member's own saved
@@ -8930,6 +9389,19 @@ SOFTWARE.
     if (event.target.closest?.(OWNER + ' [id$="_AccountPanel"], .RadCalendarPopup')) setTimeout(schedule, 0);
   }));
 
+  // A role's info button: handled in the capture phase and stopped there,
+  // so the grid does not also select the row (rgSelectedRow).
+  document.addEventListener('click', event => {
+    const roleInfo = event.target.closest?.(OWNER + ' .us-credentials__role-info');
+    if (!roleInfo) return;
+    event.stopPropagation();
+    void toggleRoleInfo(roleInfo);
+  }, true);
+
+  document.addEventListener('mousedown', event => {
+    if (event.target.closest?.(OWNER + ' .us-credentials__role-info')) event.stopPropagation();
+  }, true);
+
   // A hidden Add button posting: the additions now wait for Save.
   document.addEventListener('click', event => {
     const button = event.target.matches?.(ADD_BUTTONS) && event.target;
@@ -8945,7 +9417,8 @@ SOFTWARE.
   }, true);
 
   document.addEventListener('click', event => {
-    if (event.target.matches?.(OWNER + ' .us-credentials__unlock')) unlockAccount(event.target);
+    const unlock = event.target.closest?.(OWNER + ' .us-credentials__unlock');
+    if (unlock) unlockAccount(unlock);
     const picker = event.target.closest?.('.us-credentials-picker');
     if (!picker) return;
     if (event.target.matches('.us-credentials-picker__cancel')) closePicker(picker, true);
@@ -15865,7 +16338,11 @@ SOFTWARE.
    The feed loads when it is first visible: one GET /api/query per source, in
    parallel. Rows merge newest first. A row shows only once no source that
    still holds unloaded rows could have a newer one, so Show more and the type
-   filter page every source correctly. A date range change keeps what is
+   filter page every source correctly. After a record is added,
+   UnionSuiteActivityFeed.reload(feed, {quiet: true, types: ['note']}) asks
+   those sources for their newest rows again and folds in only the new
+   cards, keeping everything else (and the chosen type) as it is; plain
+   reload(feed) starts the feed again. A date range change keeps what is
    loaded (narrowing folds the older cards away; widening pages on) and only
    re-queries the counts. Search covers the loaded rows (and the details of
    cards already opened) only, says so, and faintly highlights matches. Cards fold in and out as filters change, and
@@ -16394,6 +16871,37 @@ SOFTWARE.
     render(state);
     await Promise.all(state.sources.map(source => loadPage(state, source)));
     if (generation === state.generation) fill(state);
+  }
+
+  // A record just added (owner, 10 October 2026: "no report reloading, no
+  // flashes"): the newest page of the chosen sources again, without
+  // clearing the feed. Rows not loaded yet join their source in order (its
+  // paging moves on by as many), the feed shows that many more so none
+  // drops off the end, and the usual render folds the new cards in where
+  // they belong; nothing else moves. The type counts are re-queried.
+  async function refreshSources(state, chosen) {
+    const generation = state.generation;
+    const sources = state.sources.filter(source => source.status === 'ready' && chosen(source));
+    let added = 0;
+    await Promise.all(sources.map(async source => {
+      const page = await request(state, source, { offset: 0 });
+      if (generation !== state.generation) return;
+      page.rows.forEach(row => {
+        const entry = normalize(row, source.def, state.cfg.timeZone);
+        if (!entry || source.ids.has(entry.id)) return;
+        source.ids.add(entry.id);
+        source.rows.push(entry);
+        source.offset += 1;
+        added += 1;
+      });
+      source.rows.sort(newestFirst);
+      if (page.total !== null) source.total = page.total;
+    }));
+    if (generation !== state.generation || !added) return added;
+    state.shown += added;
+    render(state);
+    refreshCounts(state);
+    return added;
   }
 
   // Every source is sorted newest first, so a shorter date range is the front
@@ -17175,11 +17683,21 @@ SOFTWARE.
     if (changed) schedule();
   }).observe(document.documentElement, { subtree: true, childList: true });
 
+  // reload(root) clears and loads the feed again. reload(root, {quiet: true,
+  // types: ['note']}) only adds the records the chosen sources (by data-type;
+  // all without types) have that the feed has not loaded, and resolves with
+  // how many were added. A feed not loaded yet is left to load as usual.
   window.UnionSuiteActivityFeed = {
     refresh,
-    reload(root) {
-      const targets = root && states.has(root) ? [states.get(root)] : [...states.values()];
-      targets.filter(state => state.loaded).forEach(reload);
+    reload(root, options = {}) {
+      const targets = (root && states.has(root) ? [states.get(root)] : [...states.values()]).filter(state => state.loaded);
+      if (!options.quiet) {
+        targets.forEach(reload);
+        return Promise.resolve();
+      }
+      const types = options.types ? new Set(options.types) : null;
+      return Promise.all(targets.map(state => refreshSources(state, source => !types || types.has(source.def.type))))
+        .then(counts => counts.reduce((sum, count) => sum + count, 0));
     }
   };
 
