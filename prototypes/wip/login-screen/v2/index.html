@@ -76,6 +76,16 @@
 </head>
 <body id="MainBody" class="fade HubWrapper-StaffSignIn">
 <form method="post" action="#" id="aspnetForm" onsubmit="return false;">
+<!-- iMIS's page-wide loading box, captured while signing in (8 October
+     2026). Shown here as iMIS shows it; the theme hides it on this page.
+     Its /images/ImageLibrary/loading.gif is left out of the mockup. -->
+<div id="ctl00_TemplateFillLoadingPanel">
+  <div id="FillProgressDiv" class="NotPrinted ProgressDiv" style="display: block;">
+    <div id="FillProgressLoadingDiv">
+      <span id="ctl00_LoadingLabel" translate="yes">Loading</span>
+    </div>
+  </div>
+</div>
 <div id="MainPanel">
 <div id="ctl00_ContentPanel" class="EmptyMasterContentPanel" translate="yes" style="overflow:auto;">
   <div id="ctl00_UserMessagesUpdatePanel"></div>
@@ -239,7 +249,13 @@
     });
 
     var submit = document.getElementById("x_SubmitButton");
-    var message = document.getElementById("x_confirmationMessageContainer");
+    // A failed sign-in fills the user messages panel by partial update, with
+    // the native markup captured from the live page (8 October 2026).
+    var messages = document.getElementById("ctl00_UserMessagesUpdatePanel");
+    var failure = '<div class="AsiMessage"><ul><li role="alert" class="AsiError">' +
+      '<img class="iMISUserMessageIcon" src="../../../../THeme/UnionSuite/images/AsiError.png" alt="Error icon">' +
+      '<div class="AsiMessageText" translate="yes">The username or password you entered is incorrect.</div>' +
+      '</li></ul></div>';
     var timer = 0;
 
     function validate(inputId, messageId) {
@@ -251,7 +267,7 @@
     submit.addEventListener("click", function () {
       var valid = validate("x_signInUserName", "x_UserNameRequired") &
         validate("x_signInPassword", "x_PasswordRequired");
-      message.textContent = "";
+      messages.innerHTML = "";
       if (!valid) {
         return;
       }
@@ -263,7 +279,7 @@
       if (outcome === "fail") {
         timer = setTimeout(function () {
           submit.disabled = false;
-          message.innerHTML = '<span class="Error">Sign in failed. Check your username and password.</span>';
+          messages.innerHTML = failure;
         }, 2800);
       }
     });

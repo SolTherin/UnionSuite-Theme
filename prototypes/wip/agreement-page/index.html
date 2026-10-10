@@ -203,23 +203,86 @@
       </div>
 
       <!-- ── COVERAGE ────────────────────────────────────────── -->
+      <!-- ── COVERAGE: who the agreement covers ──────────────────
+           As live (owner, 9 October 2026): a section switcher, Summary
+           (the covered counts, then the rules), Members (a report of the
+           covered members) and Organisations (a report of the employers and
+           workplaces covered). Content HTML (title blank, panel styling
+           off) holds the switcher; each section's iPart carries
+           us-tab-panel us-tabset-coverage us-tab-<key> after its own class. -->
       <div class="rmpView rmpHidden" id="view-coverage">
-        <!-- Query Menu (Covered Entities / Covered Members) · CSS class: us-action-agreements-edit-coverage.
-             Replaces the separate Coverage anchor iPart: the title and button now belong to the report's own panel. -->
-        <div class="ContentItemContainer" id="ste_container_ciCoverage"><div class="us-action-agreements-edit-coverage"><div class="panel">
-          <div class="panel-heading Distinguish"><h2 class="panel-title">[[user-shield]] Coverage</h2></div>
-          <div class="panel-body-container"><div class="panel-body"><div id="ap-coverage_ContentPanel"><div id="ap-coverage_ListerPanel"><div data-gridid="ap-coverage"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
-            <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">Record type</th><th class="rgHeader" scope="col">Employer</th><th class="rgHeader" scope="col">Members covered</th></tr></thead>
+        <div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="coverage" data-us-tab-adapter="page-sections" aria-label="Coverage sections">
+          <button type="button" data-us-tab="summary" class="is-active">Summary</button>
+          <button type="button" data-us-tab="members">Members</button>
+          <button type="button" data-us-tab="organisations">Organisations</button>
+        </div></div></div>
+
+        <!-- Summary 1 · Content HTML (title and CSS class blank, panel styling off) · Needs
+             Attention tracker (US-ATTENTION) scoped to this agreement: data-us-iqa-filter="AgreementNum"
+             runs each IQA in $/_i4u_/Core/CA/v2/Coverage Trackers with the AgreementNum from the
+             page URL. The section wrapper carries us-tab-panel us-tabset-coverage us-tab-summary. -->
+        <div class="ContentItemContainer" id="ste_container_ciCoverageTrackers"><div class="us-tab-panel us-tabset-coverage us-tab-summary">
+          <section class="us-attention"
+            data-us-iqa-folder="$/_i4u_/Core/CA/v2/Coverage Trackers"
+            data-us-iqa-filter="AgreementNum"
+            aria-label="Coverage">
+            <header class="us-attention__heading">
+              <h2>Coverage</h2>
+              <span>Covered by this agreement</span>
+            </header>
+            <ul class="us-attention__items" aria-label="Coverage counts"></ul>
+            <p class="us-attention__status" role="status" aria-live="polite">Loading counts…</p>
+            <button type="button" class="TextButton us-attention__retry" hidden>Retry</button>
+          </section>
+        </div></div>
+
+        <!-- Summary 2 · Query Template Display (Agreement Coverage Rules IQA) · CSS class:
+             us-agreement-coverage us-tab-panel us-tabset-coverage us-tab-summary ·
+             Display in cards: off · Rows per page: 100 · rule groups (US-COVERAGE-RULES) ·
+             templates/Agreement-Coverage-Rules-Query-Template.html. Update coverage opens
+             v2/Popups/Coverage.aspx (agreements.edit-coverage). -->
+        <div class="ContentItemContainer" id="ste_container_ciCoverageRules"><div class="us-agreement-coverage us-tab-panel us-tabset-coverage us-tab-summary"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[filter]] Coverage rules</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-coverage-rules"></div></div></div>
+        </div></div></div>
+
+        <!-- Members · Query Menu (covered members IQA) · CSS class:
+             us-tab-panel us-tabset-coverage us-tab-members. Sample columns: the
+             live report's columns are not in this prototype yet. -->
+        <div class="ContentItemContainer" id="ste_container_ciCoveredMembers"><div class="us-tab-panel us-tabset-coverage us-tab-members"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[users]] Covered members</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="ap-covered-members_ContentPanel"><div id="ap-covered-members_ListerPanel"><div data-gridid="ap-covered-members"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">Member number</th><th class="rgHeader" scope="col">Category</th><th class="rgHeader" scope="col">Workplace</th><th class="rgHeader" scope="col">Status</th></tr></thead>
             <tbody>
-              <tr class="rgRow"><td>Stark Industries – Malibu Works</td><td>Workplace</td><td>Stark Industries</td><td class="ap-num">212</td></tr>
-              <tr class="rgAltRow"><td>Stark Industries</td><td>Employer</td><td>Stark Industries</td><td class="ap-num">640</td></tr>
-              <tr class="rgRow"><td>Stark Enterprise</td><td>Non Member Company</td><td>Stark Industries</td><td class="ap-num">38</td></tr>
+              <tr class="rgRow"><td>Aaliyah Brooks</td><td class="ap-num">20311</td><td>RN</td><td>RMIT Melbourne</td><td>Financial</td></tr>
+              <tr class="rgAltRow"><td>Ben Okafor</td><td class="ap-num">20348</td><td>RN</td><td>RMIT Melbourne</td><td>Financial</td></tr>
+              <tr class="rgRow"><td>Chloe Tran</td><td class="ap-num">20402</td><td>RN</td><td>TestOrg10</td><td>Financial</td></tr>
+              <tr class="rgAltRow"><td>Daniel Murphy</td><td class="ap-num">20417</td><td>EN</td><td>Stark Enterprise - Melbourne</td><td>Unfinancial</td></tr>
+              <tr class="rgRow"><td>Grace Liu</td><td class="ap-num">20455</td><td>RN</td><td>TestOrg10</td><td>Financial</td></tr>
+              <tr class="rgAltRow"><td>Hamish Doyle</td><td class="ap-num">20488</td><td>AIN</td><td>Stark Enterprise - Melbourne</td><td>Financial</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
+        </div></div></div>
+
+        <!-- Organisations · Query Menu (covered organisations IQA: employers and
+             workplaces) · CSS class: us-tab-panel us-tabset-coverage us-tab-organisations.
+             Sample columns, as the covered records report had them. -->
+        <div class="ContentItemContainer" id="ste_container_ciCoveredOrganisations"><div class="us-tab-panel us-tabset-coverage us-tab-organisations"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[building]] Covered organisations</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="ap-covered-organisations_ContentPanel"><div id="ap-covered-organisations_ListerPanel"><div data-gridid="ap-covered-organisations"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Name</th><th class="rgHeader" scope="col">iMIS ID</th><th class="rgHeader" scope="col">Record type</th><th class="rgHeader" scope="col">Employer</th><th class="rgHeader" scope="col">Members covered</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>RMIT Melbourne</td><td class="ap-num">103997</td><td>Workplace</td><td>RMIT University</td><td class="ap-num">14</td></tr>
+              <tr class="rgAltRow"><td>Stark Enterprise - Melbourne</td><td class="ap-num">103842</td><td>Workplace</td><td>Stark Industries</td><td class="ap-num">15</td></tr>
             </tbody>
           </table></div></div></div></div></div></div>
         </div></div></div>
       </div>
 
-      <!-- ── TERMS & SCHEDULE ────────────────────────────────── -->
+      <!-- ── TERMS & SCHEDULE: as live (owner, 9 October 2026): the terms,
+           then the scheduled increases as expandable groups with a totals
+           strip (increases-compare.html option 4). Add increase replaces
+           the BeyondForm panel; the summary Query Menu is gone. -->
       <div class="rmpView rmpHidden" id="view-terms">
         <!-- Query Template Display (Terms IQA) · CSS class: us-agreement-terms ·
              Display in cards: unchecked · expandable rows (US-TERMS, decided
@@ -229,40 +292,15 @@
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-terms"></div></div></div>
         </div></div></div>
 
-        <div class="row ap-row">
-          <div class="col-md-5">
-            <!-- BeyondForm iPart (unchanged) · CSS class: us-query-template us-form us-panel-fill
-                 (us-query-template gives it the shared card shell; us-form styles the fields).
-                 Native title: Add scheduled increase. The separate "Increase anchor"
-                 Content iPart is no longer needed. -->
-            <div class="ContentItemContainer"><div class="us-query-template us-form us-panel-fill"><div class="panel">
-              <div class="panel-heading Distinguish"><h2 class="panel-title">[[trending-up]] Add scheduled increase</h2></div>
-              <div class="panel-body-container"><div class="panel-body">
-                <div class="rendered-form">
-                  <div class="form-group"><label for="ap-si-type">Type</label><select id="ap-si-type" class="form-control"><option>General</option><option>Class</option><option>Fixed Amount</option></select></div>
-                  <div class="form-group"><label for="ap-si-date">Effective date</label><input id="ap-si-date" type="date" class="form-control"></div>
-                  <div class="form-group"><label for="ap-si-increase">Increase type</label><select id="ap-si-increase" class="form-control"><option>CPI</option><option>Negotiated</option></select></div>
-                  <button type="button" class="TextButton PrimaryButton ap-demo">Add scheduled increase</button>
-                </div>
-              </div></div>
-            </div></div></div>
-          </div>
-          <div class="col-md-7">
-            <!-- Query Menu (Scheduled Increases) · CSS class: us-panel-fill. -->
-            <div class="ContentItemContainer"><div class="us-panel-fill"><div class="panel">
-              <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
-              <div class="panel-body-container"><div class="panel-body"><div id="ap-increases_ContentPanel"><div id="ap-increases_ListerPanel"><div data-gridid="ap-increases"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
-                <thead><tr><th class="rgHeader" scope="col">Class</th><th class="rgHeader" scope="col">Total increase (%)</th></tr></thead>
-                <tbody>
-                  <tr class="rgRow"><td>General</td><td class="ap-num">97.00</td></tr>
-                  <tr class="rgAltRow"><td>Fixed</td><td class="ap-num"></td></tr>
-                  <tr class="rgRow"><td>C88</td><td class="ap-num">12.00</td></tr>
-                  <tr class="rgAltRow"><td>Test</td><td class="ap-num">2.00</td></tr>
-                </tbody>
-              </table></div></div></div></div></div></div>
-            </div></div></div>
-          </div>
-        </div>
+        <!-- Query Template Display (Agreement Increases IQA) · CSS class: us-agreement-increases ·
+             Display in cards: unchecked · Rows per page: 100 · expandable groups with a
+             totals strip (US-INCREASES, decided 4 October 2026) ·
+             templates/Agreement-Increases-Query-Template.html. Add increase opens the
+             form in a popup (agreements.add-increase; its page URL is a placeholder). -->
+        <div class="ContentItemContainer" id="ste_container_ciIncreases"><div class="us-agreement-increases"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[chart-line]] Scheduled increases</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="ap-increases"></div></div></div>
+        </div></div></div>
       </div>
 
       <!-- ── REPORTS ─────────────────────────────────────────── -->

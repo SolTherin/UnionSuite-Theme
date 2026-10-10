@@ -65,6 +65,33 @@ breathes, the neon comes up to full and a sweep crosses the button; the
 theme's busy ring is unchanged. The pointer's own pull eases off while signing
 in, as the pointer is on the button then.
 
+Messages (8 October 2026): iMIS shows sign-in messages, such as "The username
+or password you entered is incorrect.", in the page's user messages panel,
+filled by partial update when sign-in fails. `placeMessages` in
+`SignInPage.js` moves that panel (the element itself, so partial updates still
+find it by ID) into the card, between the divider and the Username field:
+where people look when they retry, and the card no longer jumps as a strip
+appears above it (owner chose in the card over above it or both). Without the
+Sign In iPart it stays above the card. Each message is a slim box toned by its
+kind (error coral, success green, information blue, warning amber) with an
+outline icon in place of the native image. It slides down into place when it
+arrives, joins the intro just before the Username row when the page loads with
+one, and simply appears with reduced motion.
+Each new error also gives both fields the message's muted coral rim (with
+`aria-invalid`) and shakes them once. The message carries the error and cannot
+say which field was wrong, so the fields stay quieter than it; solid coral is
+kept for a "Required" field, which does name the field (`watchErrors` in `SignInPage.js` marks
+`<html>` with `hub-signin-error` and `hub-signin-error-shake`); typing in
+either field clears it. Reduced motion keeps the colour and drops the shake;
+an error already there when the page loads marks the fields without a shake.
+The mockup's Fails control shows the native markup captured from the live page.
+
+iMIS's page-wide "Loading" box (`#ctl00_TemplateFillLoadingPanel` >
+`#FillProgressDiv`, captured 8 October 2026) appeared at the top of the page
+while signing in. The card already shows that, so it is hidden on this page
+only (`display: none !important`, as iMIS shows it with an inline style). The
+mockup includes the captured markup.
+
 Tried and dropped: stars relighting in a loop from the corners in, and stars
 closing in on the card while signing in.
 
@@ -81,7 +108,8 @@ their words in `EGG_MESSAGES`:
 
 - **Gravity well:** press and hold on the open background; stars that come
   close are caught and follow the well, which grows as it catches more, with
-  messages at 20/40/75/90/100%. Catching every star sets off a supernova.
+  messages at 20/40/90/100% and a counter from 75%. Catching every star sets
+  off a supernova.
 - **Shooting star:** 1 in 5 visits, or after 45s idle; clicking it opens a
   dialog with the next of five curiosity quotes.
 

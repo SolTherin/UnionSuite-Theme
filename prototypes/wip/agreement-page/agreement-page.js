@@ -75,23 +75,35 @@
       {Ordinal: '602', CreatedOn: '28/04/2026', CreatedTime: '1:20 pm', CreatedBy: 'Christina Zerk', Priority: '', AccessClass: '', Note: 'Met with the employer bargaining team at their offices. They tabled a revised classification structure that collapses levels 3 and 4 into a single band, with the new band paid at the current level 3 rate plus 1.5%. Our delegates are concerned this is a pay cut for anyone currently at level 4, which is about forty members at this site. We asked for the modelling behind the proposal and they agreed to send it by the end of next week. We also raised the outstanding rostering grievance from February, which they say is still with their legal team. Next meeting is pencilled in for the 12th.', Category: 'Agreement'},
       {Ordinal: '588', CreatedOn: '14/04/2026', CreatedTime: '8:55 am', CreatedBy: 'Andrew O Newnham', Priority: 'High', AccessClass: 'restricted', Note: 'Confidential: a member has reported that the site manager has been asking individual staff to sign a new individual flexibility arrangement before the agreement is finalised.\nWe need to confirm how many have been approached and whether anyone has signed. Do not raise this with the employer until we have spoken to the members directly.\nFollow up with the delegate on Thursday.', Category: 'Agreement'}
     ],
+    // Terms and scheduled increases as live (owner's screenshot, 9 October
+    // 2026): two terms; 13 general increases (107% + CPI + $4,788.00, 10 Jul
+    // 2026 to 1 Jan 2028) and two classes (C88, three steps to 16.5%; Test,
+    // one step of 2%). The live amounts are test data; the general dates
+    // and split are made up to give the live totals.
     terms: [
-      {Ordinal: '59', Term: 'Paid meetings', Category: 'General', Amount: '', StatusClass: 'not-included', StatusLabel: 'Not Included', Comment: 'Meetings relevant to this agreement are paid for employees.'},
-      {Ordinal: '58', Term: 'Staff entitled to a half day off on Fridays', Category: 'General', Amount: '', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: 'A commitment from the employer to recognise the dangerous working bonus.'},
-      {Ordinal: '60', Term: 'Employer superannuation contribution', Category: 'Superannuation', Amount: '12.00', StatusClass: 'included', StatusLabel: 'Included', Comment: 'Paid on all ordinary time earnings, including leave loading.'}
+      {Ordinal: '58', Term: 'Paid Meetings', Category: 'General', Amount: '0.00', StatusClass: 'negotiating', StatusLabel: 'Negotiating', Comment: ''},
+      {Ordinal: '59', Term: "Staff entitled to half-day off on Friday's", Category: 'General', Amount: '0.00', StatusClass: 'included', StatusLabel: 'Included', Comment: 'This is a commitment from the employer to recognise dangerous working bonus'}
     ],
     // Scheduled increases, as the Agreement Increases IQA returns them: sorted
     // general first, then each class; When and AmountText built by the IQA.
     increases: [
-      {Ordinal: '201', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '3.50', Amount: '', AmountPeriod: '', EffectiveDate: '2026-07-01', MonthsInClass: '', When: '1 Jul 2026', AmountText: '3.5%', IncreaseNum: '1', Comment: ''},
-      {Ordinal: '202', Kind: 'General', IncreaseType: 'Fixed amount', Class: '', ClassOrder: '', Percent: '', Amount: '40.00', AmountPeriod: 'per week', EffectiveDate: '2027-01-01', MonthsInClass: '', When: '1 Jan 2027', AmountText: '$40.00 per week', IncreaseNum: '2', Comment: 'Flat amount for all classifications, paid on ordinary hours.'},
-      {Ordinal: '203', Kind: 'General', IncreaseType: 'CPI', Class: '', ClassOrder: '', Percent: '', Amount: '', AmountPeriod: '', EffectiveDate: '2027-07-01', MonthsInClass: '', When: '1 Jul 2027', AmountText: 'CPI', IncreaseNum: '3', Comment: 'CPI (all groups, Australia) for the March quarter, with a 2% floor.'},
-      {Ordinal: '204', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '3.00', Amount: '', AmountPeriod: '', EffectiveDate: '2028-07-01', MonthsInClass: '', When: '1 Jul 2028', AmountText: '3%', IncreaseNum: '4', Comment: ''},
-      {Ordinal: '211', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C1', ClassOrder: '1', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '6', When: 'After 6 months', AmountText: '2%', IncreaseNum: '', Comment: ''},
-      {Ordinal: '212', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C1', ClassOrder: '1', Percent: '3.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '12', When: 'After 12 months', AmountText: '3%', IncreaseNum: '', Comment: ''},
-      {Ordinal: '213', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C2', ClassOrder: '2', Percent: '4.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '12', When: 'After 12 months', AmountText: '4%', IncreaseNum: '', Comment: ''},
-      {Ordinal: '214', Kind: 'Class', IncreaseType: 'Fixed amount', Class: 'C3', ClassOrder: '3', Percent: '', Amount: '25.00', AmountPeriod: 'per week', EffectiveDate: '', MonthsInClass: '6', When: 'After 6 months', AmountText: '$25.00 per week', IncreaseNum: '', Comment: ''},
-      {Ordinal: '215', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C3', ClassOrder: '3', Percent: '2.50', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '24', When: 'After 24 months', AmountText: '2.5%', IncreaseNum: '', Comment: 'On completion of the Certificate IV.'}
+      {Ordinal: '301', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '50.00', Amount: '', AmountPeriod: '', EffectiveDate: '2026-07-10', MonthsInClass: '', When: '10 July 2026', AmountText: '50%', IncreaseNum: '1', Comment: ''},
+      {Ordinal: '302', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '20.00', Amount: '', AmountPeriod: '', EffectiveDate: '2026-08-01', MonthsInClass: '', When: '1 Aug 2026', AmountText: '20%', IncreaseNum: '2', Comment: ''},
+      {Ordinal: '303', Kind: 'General', IncreaseType: 'Fixed amount', Class: '', ClassOrder: '', Percent: '', Amount: '4000.00', AmountPeriod: '', EffectiveDate: '2026-09-01', MonthsInClass: '', When: '1 Sept 2026', AmountText: '$4,000.00', IncreaseNum: '3', Comment: ''},
+      {Ordinal: '304', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '10.00', Amount: '', AmountPeriod: '', EffectiveDate: '2026-10-01', MonthsInClass: '', When: '1 Oct 2026', AmountText: '10%', IncreaseNum: '4', Comment: ''},
+      {Ordinal: '305', Kind: 'General', IncreaseType: 'CPI', Class: '', ClassOrder: '', Percent: '', Amount: '', AmountPeriod: '', EffectiveDate: '2026-11-01', MonthsInClass: '', When: '1 Nov 2026', AmountText: 'CPI', IncreaseNum: '5', Comment: ''},
+      {Ordinal: '306', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '10.00', Amount: '', AmountPeriod: '', EffectiveDate: '2026-12-01', MonthsInClass: '', When: '1 Dec 2026', AmountText: '10%', IncreaseNum: '6', Comment: ''},
+      {Ordinal: '307', Kind: 'General', IncreaseType: 'Fixed amount', Class: '', ClassOrder: '', Percent: '', Amount: '500.00', AmountPeriod: '', EffectiveDate: '2027-01-01', MonthsInClass: '', When: '1 Jan 2027', AmountText: '$500.00', IncreaseNum: '7', Comment: ''},
+      {Ordinal: '308', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '5.00', Amount: '', AmountPeriod: '', EffectiveDate: '2027-03-01', MonthsInClass: '', When: '1 Mar 2027', AmountText: '5%', IncreaseNum: '8', Comment: ''},
+      {Ordinal: '309', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '5.00', Amount: '', AmountPeriod: '', EffectiveDate: '2027-05-01', MonthsInClass: '', When: '1 May 2027', AmountText: '5%', IncreaseNum: '9', Comment: ''},
+      {Ordinal: '310', Kind: 'General', IncreaseType: 'Fixed amount', Class: '', ClassOrder: '', Percent: '', Amount: '288.00', AmountPeriod: '', EffectiveDate: '2027-07-01', MonthsInClass: '', When: '1 July 2027', AmountText: '$288.00', IncreaseNum: '10', Comment: ''},
+      {Ordinal: '311', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '3.00', Amount: '', AmountPeriod: '', EffectiveDate: '2027-09-01', MonthsInClass: '', When: '1 Sept 2027', AmountText: '3%', IncreaseNum: '11', Comment: ''},
+      {Ordinal: '312', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '2027-11-01', MonthsInClass: '', When: '1 Nov 2027', AmountText: '2%', IncreaseNum: '12', Comment: ''},
+      {Ordinal: '313', Kind: 'General', IncreaseType: 'Negotiated', Class: '', ClassOrder: '', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '2028-01-01', MonthsInClass: '', When: '1 Jan 2028', AmountText: '2%', IncreaseNum: '13', Comment: ''},
+      {Ordinal: '321', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C88', ClassOrder: '1', Percent: '12.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '7', When: 'After 7 months', AmountText: '12%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '322', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C88', ClassOrder: '1', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '12', When: 'After 12 months', AmountText: '2%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '323', Kind: 'Class', IncreaseType: 'Percentage', Class: 'C88', ClassOrder: '1', Percent: '2.50', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '24', When: 'After 24 months', AmountText: '2.5%', IncreaseNum: '', Comment: ''},
+      {Ordinal: '324', Kind: 'Class', IncreaseType: 'Percentage', Class: 'Test', ClassOrder: '2', Percent: '2.00', Amount: '', AmountPeriod: '', EffectiveDate: '', MonthsInClass: '6', When: 'After 6 months', AmountText: '2%', IncreaseNum: '', Comment: ''}
     ]
   };
 
@@ -120,22 +132,23 @@
   }
 
   // Coverage rules, as the Agreement Coverage Rules IQA returns the iMIS
-  // copy of the rules table (owner's export, 4 October 2026): sorted Rank,
-  // then Ordinal; no names for the values.
+  // copy of the rules table: sorted Rank, then Ordinal, with ValueLabel
+  // naming an .ImisId rule's contact. As live (owner's screenshot,
+  // 9 October 2026): rank 4 has a disabled rule.
   const coverageRules = [
-    {Ordinal: '99', Rank: '1', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103841', ValueLabel: ''},
-    {Ordinal: '112', Rank: '2', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103997', ValueLabel: ''},
-    {Ordinal: '117', Rank: '2', Enabled: '1', Rule1: 'ZenCrm.Individuals.Category', MatchCondition: 'Equals', Rule2: 'RN', ValueLabel: ''},
-    {Ordinal: '113', Rank: '3', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '101', ValueLabel: ''},
-    {Ordinal: '114', Rank: '3', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '23101', ValueLabel: ''},
-    {Ordinal: '115', Rank: '4', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '23309', ValueLabel: ''}
+    {Ordinal: '112', Rank: '2', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103997', ValueLabel: 'RMIT Melbourne'},
+    {Ordinal: '115', Rank: '4', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '23309', ValueLabel: 'TestOrg10'},
+    {Ordinal: '117', Rank: '4', Enabled: '1', Rule1: 'ZenCrm.Individuals.Category', MatchCondition: 'Equals', Rule2: 'RN', ValueLabel: ''},
+    {Ordinal: '118', Rank: '4', Enabled: '0', Rule1: 'UnionTemplate.Profile.Division', MatchCondition: 'Equals', Rule2: 'Nursing', ValueLabel: ''},
+    {Ordinal: '119', Rank: '5', Enabled: '1', Rule1: 'ZenCrm.Organisations.ImisId', MatchCondition: 'Equals', Rule2: '103842', ValueLabel: 'Stark Enterprise - Melbourne'}
   ];
 
   // Coverage trackers: the folder's IQAs by name, each one summary row.
   const trackerFolder = '$/_i4u_/Core/CA/v2/Coverage Trackers';
+  // As live (owner's screenshot, 9 October 2026): Contacts, then Workplaces.
   const coverageTrackers = {
-    '01 Covered Workplaces': {Count: 6, Header: 'Workplaces', Label: 'covered by this agreement', Link: ''},
-    '02 Covered Members': {Count: 5431, Header: 'Members', Label: 'covered by this agreement', Link: ''}
+    '01 Covered Contacts': {Count: 29, Header: 'Contacts', Label: 'covered by this agreement', Link: ''},
+    '02 Covered Workplaces': {Count: 2, Header: 'Workplaces', Label: 'covered by this agreement', Link: ''}
   };
 
   // Which template fills which list, and whether "Display in cards" is on.

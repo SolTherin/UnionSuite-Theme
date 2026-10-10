@@ -17,10 +17,11 @@ linger or play find them; nobody else is affected.
      reaches 330px and 130px. The well's glow grows with it, and a pulse goes
      out at each step.
    - **Messages along the way,** above the well, each once per browser
-     session: 20% "This is unexpected", 40% "I see you're determined", 75%
-     "You can do it!", 90% "Almost there…", 100% "Nailed it!". If one sweep
-     passes several marks at once, only the highest shows. The counter
-     (e.g. "71 / 88") shows from 75%. Screen readers hear each message.
+     session: 20% "This is unexpected", 40% "I see you're determined",
+     90% "Almost there…", 100% "Nailed it!". If one sweep passes several
+     marks at once, only the highest shows. The counter (e.g. "71 / 88")
+     shows from 75%, which has no message of its own (it said "You can do
+     it!" until 8 October 2026). Screen readers hear each message.
    - **Supernova (second egg):** catch every star in one hold. They collapse
      into a single point under "Nailed it!", then burst out with a flash and
      spring home.
