@@ -1,0 +1,53 @@
+<!-- Case notes as a ledger · Query Template Display on Case Notes
+     ($/_i4u_/Core/Cases/Manage Case/Case Notes), plus CreatedTime, NoteClass
+     and AccessClass as on the agreement Notes IQA. The agreement ledger
+     template with the case action; the same fields.
+     iPart CSS class: us-case-notes
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-notes us-notes--ledger us-query-search us-query-search-open us-list-scroll us-action-cases-add-note
+       The filters (the search) start open under the heading's funnel (C24),
+       and the list scrolls taller than other lists (owner, 8 October 2026).
+     Native title: Notes. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results (C13, paste as HTML):
+       <div class="us-placeholder us-placeholder--compact"><span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-notes"></i></span><h3>No notes yet</h3><p>Record calls and conversations as notes.</p><button type="button" class="us-action-cases-add-note"></button></div>
+
+     Fields:
+     Ordinal (required)      note ordinal; the pencil (cases.edit-note) opens it
+     Note (required)         note text, or "Restricted" for a restricted note
+     NoteClass (required)    us-restricted-note for a restricted note, else blank
+                             (Show note checks access through /ca/note-access)
+     CreatedBy               author name
+     CreatedOn               date text
+     CreatedTime             time text; blank collapses
+     Category                note type; blank hides the badge
+     Priority                "High" or blank; blank hides the badge
+     AccessClass             "restricted" or blank
+     Staff                   staff the note is assigned to (C29; owner,
+                             9 October 2026): "Mary O'Conner"; blank hides it
+     Members                 members the note is assigned to; blank hides it
+     FollowUpText            a note marked follow-up (converted to a task):
+                             "Follow-up 13 Oct", "Overdue 6 Oct",
+                             "Follow-up done"; blank hides the badge
+     FollowUpTone            warning (overdue) | success (done) | blank -->
+<div class="us-note us-note--ledger" data-us-search="{#query.Note} {#query.CreatedBy} {#query.Category} {#query.Staff} {#query.Members}" data-us-note-access="{#query.AccessClass}">
+  <span class="us-note__when">
+    <span class="us-note__date">{#query.CreatedOn}</span>
+    <span class="us-note__time">{#query.CreatedTime}</span>
+  </span>
+  <p class="us-note__meta">
+    <strong class="us-note__author">{#query.CreatedBy}</strong>
+    <span class="us-note__aside">
+      <span class="us-badge us-badge--{#query.FollowUpTone} us-note__follow-up">{#query.FollowUpText}</span>
+      <span class="us-badge us-note__type">{#query.Category}</span>
+      <span class="us-badge us-badge--danger">{#query.Priority}</span>
+      <span class="us-badge us-note__restricted">Restricted</span>
+      <button type="button" class="us-note__open us-action-cases-edit-note" data-ordinal="{#query.Ordinal}"></button>
+    </span>
+  </p>
+  <p class="us-note__assigned">
+    <span class="us-note__assignee"><i class="ti ti-briefcase" aria-hidden="true"></i><span class="sr-only">Staff: </span><span>{#query.Staff}</span></span>
+    <span class="us-note__assignee"><i class="ti ti-user" aria-hidden="true"></i><span class="sr-only">Members: </span><span>{#query.Members}</span></span>
+  </p>
+  <p class="us-note__body"><span class="{#query.NoteClass}">{#query.Note}</span></p>
+  <button type="button" class="us-note__more" aria-expanded="false" hidden>More</button>
+</div>

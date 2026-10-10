@@ -1,0 +1,58 @@
+<!-- Case staff · Query Template Display on Get All Staff On Case By Case
+     Ordinal ($/_i4u_/Core/Cases/Edit/), as the agreement's grouped contact
+     tiles. Each person has a role and a type; a delegate or member
+     representative can be assigned to assist (owner, 8 October 2026), and
+     is listed under their own group.
+     iPart CSS class: us-case-staff (add us-panel-fill when it shares a row)
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-contacts-tiles us-contacts-grouped us-contacts-group-tone us-action-cases-add-staff
+     Native title: Staff. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No staff assigned." (the banner's Lead
+     staff fact already says when no lead is set).
+
+     Lead staff (C8, owner, 8 October 2026): a crown on each card. On the
+     lead it is a solid amber mark; on everyone else it is a quiet button,
+     Make lead staff (cases.set-lead-staff), which saves, then slides that card
+     to the top while the others move down (no re-render), and reloads the
+     banner's Lead staff fact.
+     Both crowns are in every row; CSS shows the one that fits.
+     IQA sort: ContactIsLead (descending), then ContactGroupOrder, then ContactName:
+     the lead is first in the whole list, whatever their group (owner, 8 October 2026).
+
+     Fields:
+     Ordinal (required)      case staff row ordinal; the pencil opens it
+     ContactId (required)    the person's iMIS ID
+     ContactName (required)  name; also the avatar initials
+     ContactUrl              their record; blank leaves the name as text
+     ContactIsLead           true for the lead staff member: a crown on the
+                             card, and first in the list (the IQA sorts on it)
+     ContactRole             the role on this case (Case manager, Support,
+                             Assisting …); the crown, not the role, marks the lead
+     ContactType             the staff type (Staff, Delegate, Member
+                             representative …); muted
+     ContactGroup            Case team | Delegates; the group heading only (the type already says it on the card)
+     ContactGroupOrder       1 for Case team, 2 for Delegates (sort only)
+     ContactGroupTone        info for Case team, success for Delegates
+     ContactEmail, ContactPhone  as text; the icon copies; blank shows a dash -->
+<article class="us-contact-tile us-contact-tile--card" data-us-contact-id="{#query.ContactId}" data-us-contact-ordinal="{#query.Ordinal}" data-us-contact-name="{#query.ContactName}"
+  data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-group="{#query.ContactGroup}" data-us-contact-group-tone="{#query.ContactGroupTone}"
+  data-us-contact-role="{#query.ContactRole}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.ContactType} {#query.ContactGroup} {#query.ContactEmail} {#query.ContactPhone}">
+  <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+  <div class="us-contact-tile__body">
+    <p class="us-contact-tile__name"><a href="{#query.ContactUrl}">{#query.ContactName}</a></p>
+    <p class="us-contact-tile__meta us-contact-tile__meta--inline">
+      <span class="us-contact-tile__role">{#query.ContactRole}</span>
+      <span class="us-contact-tile__type">{#query.ContactType}</span>
+    </p>
+    <p class="us-contact-tile__reach">
+      <span class="us-contact-tile__email"><button type="button" class="us-contact-tile__copy" aria-label="Copy email address" title="Copy email address"><i class="ti ti-mail" aria-hidden="true"></i></button><span class="us-contact-tile__value">{#query.ContactEmail}</span></span>
+      <span class="us-contact-tile__phone"><button type="button" class="us-contact-tile__copy" aria-label="Copy phone number" title="Copy phone number"><i class="ti ti-phone" aria-hidden="true"></i></button><span class="us-contact-tile__value">{#query.ContactPhone}</span></span>
+    </p>
+  </div>
+  <div class="us-contact-tile__actions">
+    <span class="us-case-staff__crown" role="img" aria-label="Lead staff member" title="Lead staff member"><i class="ti ti-crown" aria-hidden="true"></i></span>
+    <button type="button" class="us-case-staff__make-lead us-action-cases-set-lead-staff" data-ordinal="{#query.Ordinal}">Make lead staff</button>
+    <button type="button" class="us-contact-tile__edit us-action-cases-edit-staff" data-ordinal="{#query.Ordinal}">Edit staff</button>
+  </div>
+</article>

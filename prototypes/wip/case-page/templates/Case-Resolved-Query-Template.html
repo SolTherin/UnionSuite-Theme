@@ -1,0 +1,19 @@
+<!-- Case resolved (Overview) · Query Template Display, one record, first on
+     the Overview's main column, above Tasks: once a case is resolved, the
+     outcome is the first thing staff need (owner, 8 October 2026). While the
+     case is open the iPart is hidden (C6).
+     iPart CSS class: us-query-template us-case-resolved
+     Native title: [[trophy]] Resolution. Rows per page: 1. Header/Footer blank.
+     No results (paste exactly; it hides the iPart while the case is open):
+       <span class="us-case-unresolved" hidden></span>
+
+     Source IQA: Get Case Details with one more filter, so it returns the case
+     only once it is resolved (for example Outcome type not blank, or the
+     closed statuses; for the owner to confirm).
+     The fields come from the same Case Resolution IQA as the Resolution tab
+     (Case-Field-Groups-Query-Template.html), through US-FIELD-GROUPS. When
+     resolved it returns a success alert first:
+       Alert-Title "Resolved", Alert-Message "Closed 20 Nov 2026 by Mary
+       O'Conner.", Alert-Tone success; then Outcome type, 1-Amount won,
+       2-Outcome. -->
+<div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/Cases/Case Resolution" data-us-fields-filter="CaseNum"></div>

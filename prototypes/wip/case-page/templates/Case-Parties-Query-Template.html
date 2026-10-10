@@ -1,0 +1,85 @@
+<!-- Case parties (C7, US-CASE-PARTIES) · Query Template Display on
+     Manage Case - Case Contacts (party rows only). A list and a preview
+     (owner, 8 October 2026): each party is a selectable row card on the
+     left third; the chosen one's card, the Overview member card's markup,
+     fills the right two-thirds. The primary party is chosen first.
+     Usually one member; sometimes several members, sometimes an employer.
+     iPart CSS class: us-case-parties
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-parties us-query-search us-action-cases-add-party
+     The list's toolbar (C7, added by the script, owner 8 October 2026): the
+     search field, Select (checkboxes on the cards) and Email parties
+     (C17) sit over the list they act on, with a line saying who the email
+     goes to; while Select is on, the email goes to exactly the ticked; the email sends to the
+     parties the search leaves shown, or all of them
+     (data-us-contact-ordinal). Add party stays in the panel heading:
+     it adds to the case, not to the current search.
+     View profile: the person's contact profile (ContactUrl).
+     Native title: Parties. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results: "No parties on this case."
+     IQA sort: the primary party first, then members, then employers, then name.
+
+     Fields:
+     Ordinal (required)      case contact row ordinal; Make primary party
+                             and the email send it. There is no Edit: a
+                             party's only case setting is whether they are
+                             primary (owner, 8 October 2026); their details are
+                             edited on their profile (View profile).
+     ContactId (required)    the iMIS ID; filters the details IQA
+     ContactName (required)  name; also the avatar initials
+     ContactUrl              their record, for View profile (the name is plain
+                             text; owner, 9 October 2026)
+     ContactIsLead           true for the primary party (crowned, first, chosen first)
+     ContactRole             Primary party | Party; read to screen
+                             readers after the name (the crown shows it)
+     ContactType             Member | Former member | Employer; the avatar's
+                             colour, and Employer hides Make primary party
+     MemberType              the second line, first (owner, 8 October 2026):
+                             the iMIS member type ("Full member", "Associate");
+                             "Employer" for an organisation
+     MemberStatus            the second line, after the type: the membership
+                             status ("Financial", "Unfinancial", "Resigned");
+                             blank (an employer) collapses
+     MemberStanding          Unfinancial | Former member | New member, or blank
+                             for a financial member and for employers (C2)
+     MemberStandingTone      danger | warning, or blank
+     MemberLine              the line under the name in the preview:
+                             "Member 20544 · Full member", "Employer 30112"
+
+     Make primary party (owner, 8 and 9 October 2026): a quiet crown icon
+     button right after the name in the preview's header, for a member who is not the primary
+     party (cases.set-primary-party). The primary party
+     shows a crown instead; an employer shows neither (CSS, from the row's
+     data-us-contact-lead and data-us-contact-type, which the preview copies).
+
+     The preview's details: US-FIELD-GROUPS runs Case - Member Details on the
+     person's ID, as on the member card (see Case-Member-Query-Template.html).
+     For an employer the same IQA returns the organisation's fields (contact,
+     address); it has no membership warning. -->
+<div class="us-party" data-us-contact-id="{#query.ContactId}" data-us-contact-ordinal="{#query.Ordinal}" data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.MemberType} {#query.MemberStatus} {#query.MemberStanding}">
+  <button type="button" class="us-party__select" aria-pressed="false">
+    <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+    <span class="us-party__copy">
+      <span class="us-party__name">{#query.ContactName}</span>
+      <span class="sr-only">, {#query.ContactRole}</span>
+      <span class="us-party__meta"><span>{#query.MemberType}</span><span>{#query.MemberStatus}</span></span>
+    </span>
+    <span class="us-badge us-badge--{#query.MemberStandingTone} us-party__standing">{#query.MemberStanding}</span>
+  </button>
+  <div class="us-party__detail" hidden>
+    <div class="us-case-member">
+      <div class="us-case-member__head">
+        <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+        <div class="us-case-member__who">
+          <p class="us-case-member__name"><span class="us-case-member__name-text">{#query.ContactName}</span><span class="us-party__crown" role="img" aria-label="Primary party" title="Primary party"><i class="ti ti-crown" aria-hidden="true"></i></span><button type="button" class="us-party__make-primary us-action-cases-set-primary-party" data-ordinal="{#query.Ordinal}">Make primary party</button></p>
+          <p class="us-case-member__meta">{#query.MemberLine}</p>
+        </div>
+        <div class="us-case-member__actions">
+          <a class="TextButton us-outline-button us-case-member__profile" href="{#query.ContactUrl}"><i class="ti ti-id" aria-hidden="true"></i>View profile</a>
+        </div>
+      </div>
+      <div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/Cases/Case - Member Details" data-us-fields-filter="ID" data-us-fields-value="{#query.ContactId}"></div>
+    </div>
+  </div>
+</div>

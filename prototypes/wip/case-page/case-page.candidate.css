@@ -1,0 +1,1327 @@
+/* Case page candidates. Nothing here is in the theme yet; each section
+   names its target. */
+
+/* ── C4 US-CASE-MEMBER ─────────────────────────────────────────
+   The member card on Overview (owner, 8 October 2026: most cases have one
+   member and one staff member, and staff need the member's details at
+   once). A one-row Query Template: the head (avatar, name linked to the
+   record, member number and type) is fixed; the details below are a
+   us-field-groups panel run on the member's iMIS ID, so the client picks
+   the fields by editing that IQA's columns, and its Alert-* columns carry
+   the membership warning (unfinancial, former member, new member).
+   Other parties, when there are any, are named in one line at the end.
+   Target: zUnionSuite.css, a new block after US-FIELD-GROUPS. */
+.us-case-member__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.us-case-member__head .us-avatar {
+  flex: none;
+}
+
+.us-case-member__who {
+  min-width: 0;
+}
+
+.us-case-member__name {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.us-case-member__meta {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-member__meta:empty {
+  display: none;
+}
+
+.us-case-member__others {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-member__others:empty {
+  display: none;
+}
+
+/* ── C9 Banner member line ─────────────────────────────────────
+   The primary party under the case title (owner, 8 October 2026:
+   one of the most important things on the page). It sits in the banner's
+   top row, and is not a us-banner__subtitle (which folds away), so it
+   stays when the banner condenses on scroll: the name in the title's
+   colour and weight, linked to their record, then the member number,
+   muted, and the standing badge when it needs a check.
+   Target: US-BANNER-COMPONENT, a new us-banner__member element. */
+.us-banner .us-banner__member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-2);
+  margin: var(--space-1) 0 0;
+  color: var(--banner-muted);
+  font-size: var(--fs-base);
+}
+
+.us-banner.us-banner--compact .us-banner__member {
+  margin-top: 0;
+  font-size: var(--fs-sm);
+}
+
+.us-banner .us-banner__member > .ti {
+  color: var(--banner-muted);
+  font-size: 16px;
+}
+
+.us-banner .us-banner__member-name {
+  color: var(--banner-text);
+  font-weight: var(--fw-semi);
+  text-decoration: none;
+}
+
+.us-banner .us-banner__member-name:is(:hover, :focus-visible) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.us-banner .us-banner__member-line {
+  color: var(--banner-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-banner .us-banner__member :is(.us-banner__member-line, .us-banner__badge):empty {
+  display: none;
+}
+
+/* ── C5 Case team cards, one per row ───────────────────────────
+   The staff cards fill their container, one per row (owner, 8 October
+   2026): the team sits in the Overview's narrow side column, where the
+   tile grid's 230px tracks would overflow, and is usually one person.
+   Target: US-CONTACT-TILES, as an opt-in modifier (us-contacts-tiles--stack)
+   added to the us-case-staff preset. */
+.us-case-staff.us-contacts-tiles .QueryTemplateSet {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── C8 Lead staff crown ───────────────────────────────────────
+   A crown on each staff card (owner, 8 October 2026). The lead's is a
+   solid amber mark; everyone else's is the quiet Make lead staff button
+   (cases.set-lead-staff), which brightens on hover. The theme's crown badge
+   on the lead's avatar is left off here, so the lead has one crown.
+   Target: US-CONTACT-TILES, as part of the us-case-staff preset. */
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: none;
+}
+
+.us-case-staff .us-contact-tile__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.us-case-staff__crown {
+  display: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  color: var(--warning-fill);
+  font-size: 17px;
+}
+
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__crown {
+  display: inline-grid;
+}
+
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__make-lead {
+  display: none;
+}
+
+/* A new lead (cases.set-lead-staff): the initials circle turns to its
+   reversed, solid colour gradually rather than at once (owner, 8 October
+   2026), and the card's crown pops in while the card slides to the top
+   (data-us-lead-arrived, set by the action for the slide's length).
+   Target: US-AVATARS (the transition, for every lead change) and
+   US-CONTACT-TILES (the crown). */
+.us-avatar {
+  transition:
+    background-color 240ms cubic-bezier(.2, 0, 0, 1),
+    color 240ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+[data-us-lead-arrived] :is(.us-case-staff__crown, .us-party__crown) {
+  animation: us-case-crown-in 240ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes us-case-crown-in {
+  from {
+    opacity: 0;
+    transform: scale(.6) rotate(-12deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-avatar {
+    transition: none;
+  }
+
+  [data-us-lead-arrived] :is(.us-case-staff__crown, .us-party__crown) {
+    animation: none;
+  }
+}
+
+.us-case-staff .us-case-staff__make-lead {
+  color: var(--text-faint);
+  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-case-staff .us-case-staff__make-lead:is(:hover, :focus-visible) {
+  color: var(--warning-fill);
+}
+
+/* ── C7 US-CASE-PARTIES ───────────────────────────────────
+   The Parties tab as a list and a preview (owner, 8 October 2026):
+   selectable row cards on the left third, the chosen party's card
+   on the right two-thirds, in the member card's markup (C4). The script
+   (case-parties.candidate.js) wraps the list and the preview in
+   .us-parties__layout and moves the chosen row's detail into the
+   preview. A narrow panel stacks them, the preview under the list.
+   Target: zUnionSuite.css / .js, new blocks after US-CONTACT-TILES. */
+.us-parties__layout {
+  container: us-parties / inline-size;
+}
+
+.us-parties__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  /* The list column's rows (toolbar, scope line, list, status), then a
+     flexible row that takes the preview's extra height, so the list's
+     rows keep their own heights. */
+  grid-template-rows: repeat(4, auto) 1fr;
+  gap: var(--space-2) var(--space-4);
+  align-items: start;
+}
+
+/* Fixed places: the theme puts its search status line straight after the
+   list, so anything that is not the list or the preview stays in the list
+   column, and the preview spans the rows beside them. */
+.us-parties__columns > :not(.us-parties__preview) {
+  grid-column: 1;
+}
+
+.us-parties__columns > .us-parties__preview {
+  grid-column: 2;
+  grid-row: 1 / span 5;
+}
+
+/* Stacked below 800px of panel (owner, 9 October 2026: at 620px the list
+   third was about 200px and names broke letter by letter); from 800px the
+   list keeps a usable 260px or more. */
+@container us-parties (max-width: 800px) {
+  .us-parties__columns {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .us-parties__columns > .us-parties__preview {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* Stacked, a press on a party scrolls their card into view; it stops
+   clear of the condensed banner that stays at the top. */
+.us-parties__preview {
+  scroll-margin-top: 110px;
+}
+
+.us-party__select {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-party__select:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-subtle);
+}
+
+.us-party__select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.us-party__select[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.us-party__select .us-avatar {
+  flex: none;
+}
+
+.us-party__copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.us-party__name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-party__meta {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-party__meta > span:empty {
+  display: none;
+}
+
+.us-party__meta > span + span::before {
+  content: " · ";
+}
+
+.us-party__standing {
+  flex: none;
+}
+
+.us-party__standing:empty {
+  display: none;
+}
+
+.us-parties__preview {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+
+.us-parties__preview .us-case-member__head .us-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 17px;
+}
+
+/* The name keeps room for itself; when the header's buttons do not fit
+   beside it, they move to the next line rather than squeezing it. */
+.us-parties__preview .us-case-member__who {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+/* The preview's header: the crown sits right after the name (owner,
+   9 October 2026), as on the Case team cards: the primary party's is a
+   solid amber mark; any other member's is the quiet Make primary party
+   button, which brightens on hover; an employer gets neither. View
+   profile keeps the right. */
+.us-parties__preview .us-case-member__head {
+  flex-wrap: wrap;
+}
+
+.us-parties__preview .us-case-member__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+:root .us-parties__preview .us-party__make-primary.us-icon-button {
+  width: 26px;
+  min-width: 0;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  color: var(--text-faint);
+  font-size: 16px;
+  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:root .us-parties__preview .us-party__make-primary.us-icon-button:is(:hover, :focus-visible) {
+  color: var(--warning-fill);
+}
+
+/* One crown: the header's, not the theme's badge on the avatar as well. */
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: none;
+}
+
+.us-party__crown {
+  display: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  color: var(--warning-fill);
+  font-size: 16px;
+}
+
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-party__crown {
+  display: inline-grid;
+}
+
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"], [data-us-contact-type="employer" i]) .us-party__make-primary {
+  display: none;
+}
+
+/* The list's toolbar (C7): the search field filling the column, the send
+   button beside it, and the line saying who it emails. The heading's funnel
+   would open an empty filter area, and the theme's own result line repeats
+   the scope line, so both step aside. */
+/* One line: the search fills it, then Select and Email parties as
+   icon buttons (owner, 8 October 2026). */
+.us-parties__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.us-parties__toolbar > .us-query-search-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-inline-end: var(--space-1);
+}
+
+.us-parties__toolbar > .us-query-search-field input[type="search"] {
+  min-height: 34px;
+  padding-block: 6px;
+}
+
+.us-parties__toolbar > .us-parties__send {
+  flex: none;
+}
+
+.us-parties__scope {
+  margin: calc(var(--space-1) * -1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-parties__scope:has(> span:empty) {
+  display: none;
+}
+
+.us-parties .us-iqa-report-utilities .us-iqa-filter-toggle,
+.us-parties .us-parties__columns > .us-query-search-status {
+  display: none;
+}
+
+/* ── C6 Resolved panel, hidden while open ──────────────────────
+   The Overview's Resolution panel sits above Tasks once the case is
+   resolved (owner, 8 October 2026). Its source IQA returns no row while
+   the case is open, and the iPart's No results field holds the marker
+   <span class="us-case-unresolved" hidden></span>, so the whole iPart is
+   hidden rather than showing an empty panel. The marker is authored, as
+   the theme's Home tasks empty marker is, so a failed query is not taken
+   for an open case. Target: zUnionSuite.css, beside US-PANEL-FILL. */
+:is(.ContentItemContainer, .ContentItemContainer > div):has(> .panel .us-case-unresolved) {
+  display: none;
+}
+
+/* ── C2 Party membership badge ───────────────────────────
+   The member's standing beside the name on a party tile (the
+   Parties tab): blank for a financial member (nothing to check),
+   otherwise Unfinancial, Former member or New member in the warning's
+   tone. Target: US-CONTACT-TILES. */
+.us-contact-tile__name:has(> .us-contact-tile__standing) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-2);
+}
+
+.us-contact-tile__standing:empty {
+  display: none;
+}
+
+/* ── C3 Email direction in a Query Template ────────────────────
+   The activity feed draws the direction arrow in script; a Query Template
+   carries both arrows and shows the one data-us-record-direction names
+   (in | out). Target: US-RECORD-CARDS. */
+.us-record[data-us-record-direction="in" i] .us-record__arrow--out,
+.us-record:not([data-us-record-direction="in" i]) .us-record__arrow--in {
+  display: none;
+}
+
+/* ── C11 Details updated (change history) cards ────────────────
+   The case's change history (the current page's Summary tab) as its own
+   activity type in Recent activity (owner, 8 October 2026), type change,
+   labelled "Details updated" by the source. A hue family no other type
+   uses (brown; amber and red stay for the flags), with the Tabler history
+   icon. Target: the --activity-* tokens in zUnionSuite.css (:root) and
+   zzDarkMode.css, and the type rules in US-RECORD-CARDS. */
+:root {
+  --activity-change: #7a4b2a;
+  --activity-change-bg: #f5ece5;
+}
+
+@media screen {
+  :root[data-us-color-scheme="dark"] {
+    --activity-change: #e3b896;
+    --activity-change-bg: #3d2c22;
+  }
+}
+
+.us-record[data-us-record-type="change"] {
+  --us-record-hue: var(--activity-change);
+  --us-record-tint: var(--activity-change-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8l0 4l2 2'/%3E%3Cpath d='M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5'/%3E%3C/svg%3E");
+}
+
+/* ── C12 Taller Notes ──────────────────────────────────────────
+   The case Notes list scrolls taller than the theme's 414px, as the
+   Activity tab gives it the full width. (C12's search in the heading is
+   retired: the Activity tab's lists use the theme's filter toggle, open
+   by default, C24.) Target: the height in the us-case-notes preset. */
+.us-case-notes {
+  --us-list-max-height: min(75vh, 800px);
+}
+
+/* ── C13 Empty states ───────────────────────────────────────────
+   A new case has nothing recorded (owner, 8 October 2026), so each list's
+   No results field holds the theme's placeholder (US-PLACEHOLDER) with an
+   add button, compact so a side-column list stays short. The button is
+   the list's own add action. Target: US-PLACEHOLDER, a --compact modifier. */
+.us-placeholder.us-placeholder--compact {
+  min-height: 0;
+  padding: var(--space-5) var(--space-4);
+  gap: var(--space-1);
+}
+
+.us-placeholder--compact .us-placeholder__icon {
+  margin-bottom: var(--space-2);
+}
+
+.us-placeholder--compact h3 {
+  margin: 0;
+  font-size: var(--fs-base);
+}
+
+.us-placeholder--compact p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-placeholder--compact > button {
+  margin-top: var(--space-3);
+}
+
+/* With the placeholder showing, the list's footer line ("No matching
+   results on this page") repeats it, so it steps aside. */
+.panel:has(.QueryTemplateSet > .us-placeholder--compact) :is(.us-query-footer, .us-query-search-status) {
+  display: none;
+}
+
+/* ── C14 Member card first on narrow screens ───────────────────
+   Below the md breakpoint (992px) Bootstrap stacks the Overview's columns
+   in source order, which put the member card under Tasks and the whole
+   activity feed. There, the row holding the member card becomes one
+   column of panels (its two columns step aside with display: contents),
+   the member card first, then the main column's panels (resolution,
+   tasks, recent activity), then the side column's others (meetings, case
+   team). No author class is needed: the row is found by the card it
+   holds. Target: zUnionSuite.css, with US-CASE-MEMBER. */
+@media (max-width: 991px) {
+  .row:has(> [class*="col-"] [data-us-case-member]) {
+    display: flex;
+    flex-direction: column;
+    margin-inline: 0;
+  }
+
+  .row:has(> [class*="col-"] [data-us-case-member]) > [class*="col-"] {
+    display: contents;
+  }
+
+  .row:has(> [class*="col-"] [data-us-case-member]) > [class*="col-"] > .ContentItemContainer:has([data-us-case-member]) {
+    order: -2;
+  }
+
+  .row:has(> [class*="col-"] [data-us-case-member]) > [class*="col-"]:has([data-us-case-member]) > .ContentItemContainer:not(:has([data-us-case-member])) {
+    order: 1;
+  }
+}
+
+/* ── C15 Recent activity, capped ───────────────────────────────
+   The Overview's feed scrolls inside its panel past 560px (owner, 8 October
+   2026), so Load all cannot push the page out of reach; the Activity tab's
+   All activity feed is not capped. iPart CSS class: us-case-recent.
+   Target: US-ACTIVITY-FEED, an opt-in cap. */
+.us-case-recent .us-activity__body {
+  max-height: 560px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* ── View profile, and the parties link ───────────────────
+   Both member cards (Overview, Parties preview) open the person's
+   contact profile (owner, 8 October 2026). On the Overview card it is the
+   panel's heading button (cases.view-member; owner, 9 October 2026); in
+   the preview, with the header's other buttons. */
+.us-case-member__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  white-space: nowrap;
+}
+
+/* The preview header's buttons stay together: beside the name when they
+   fit, otherwise on their own line, right-aligned. */
+.us-case-member__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.us-case-member__others > span:empty,
+.us-case-member__others:has(> span:empty) {
+  display: none;
+}
+
+/* ── C7 Select toggle: checkboxes on the party cards ─────
+   The toolbar's Select button (owner, 8 October 2026) shows a checkbox at
+   the start of each card; the card's own content slides right to make
+   room, and the box fades in. Pressed, the toggle takes the accent tint.
+   Select all and Clear sit in the line under the toolbar as text buttons. */
+.us-parties__pick {
+  flex: none;
+  font-size: 18px;
+}
+
+/* Pressed: the icon button keeps a tint and a border while Select is on. */
+.us-parties__toolbar .us-parties__pick[aria-pressed="true"] {
+  --button-bg: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
+  border-color: var(--accent);
+}
+
+.us-party {
+  position: relative;
+}
+
+.us-parties__columns .us-party__select {
+  transition:
+    padding-inline-start 200ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-parties--selecting .us-party__select {
+  padding-inline-start: 50px;
+}
+
+/* As specific as the theme's checkbox rule (input[type="checkbox"]),
+   which would otherwise hold it at 18px. */
+.us-party > input.us-party__check {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 14px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  transform: translateY(-50%);
+  animation: us-party-check-in 200ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes us-party-check-in {
+  from {
+    opacity: 0;
+    transform: translate(-6px, -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+.us-parties__scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-3);
+}
+
+.us-parties__scope-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--fw-semi);
+  cursor: pointer;
+}
+
+.us-parties__scope-action:is(:hover, :focus-visible) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-parties__columns .us-party__select {
+    transition: none;
+  }
+
+  .us-party > input.us-party__check {
+    animation: none;
+  }
+}
+
+/* ── C19 Recent activity, locked to a window ───────────────────
+   data-us-activity-window (case-activity.candidate.js): the source IQAs
+   give only the last 30 days, so the feed's timeframe choice, which would
+   offer more, is hidden. Target: US-ACTIVITY-FEED, a native option. */
+.us-activity-feed[data-us-activity-window] .us-activity__range {
+  display: none;
+}
+
+/* ── C22 Detailed meeting rows ──────────────────────────────────
+   The Activity tab's Meetings section (us-meeting--full, owner 9 October
+   2026): the theme's meeting row with who attends on the details line,
+   the agenda or notes up to three lines, and the outcome once held.
+   Blank parts collapse. Target: US-MEETINGS, a --full modifier. */
+.us-meeting--full {
+  align-items: start;
+}
+
+.us-meeting--full .us-meeting__people {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.us-meeting--full .us-meeting__people > .ti {
+  align-self: center;
+  font-size: 13px;
+}
+
+.us-meeting--full :is(.us-meeting__people, .us-meeting__outcome):has(> span:last-child:empty) {
+  display: none;
+}
+
+.us-meeting--full :is(.us-meeting__notes, .us-meeting__outcome) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  max-width: 78ch;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.us-meeting--full .us-meeting__notes:empty {
+  display: none;
+}
+
+.us-meeting--full .us-meeting__outcome {
+  color: var(--text-base);
+}
+
+.us-meeting--full .us-meeting__outcome > strong {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+/* ── C23 Quick status change ────────────────────────────────────
+   The banner's status pill is the toggle of a small us-actions menu
+   (owner, 9 October 2026). It keeps the pill's look, with a chevron to say
+   it opens, and the current status is ticked in the menu. The banner's
+   tone and rail follow data-us-record-status, so a change recolours them.
+   Target: US-BANNER-COMPONENT (the pill as a menu toggle). */
+/* The status pill's own look (the theme's v1 tinted pill with its dot),
+   restated over the Actions toggle's, which the menu would otherwise give it. */
+:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  padding: 3px 8px 3px 10px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  background: var(--record-tone-bg, color-mix(in srgb, var(--banner-text) 15%, transparent));
+  color: var(--record-tone, var(--banner-text));
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background-color 200ms cubic-bezier(.2, 0, 0, 1),
+    color 200ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge::after {
+  content: "\ea5f";
+  font: normal 12px/1 "tabler-icons";
+}
+
+:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.us-case-status .us-actions__item[aria-current="true"] {
+  font-weight: var(--fw-semi);
+}
+
+.us-case-status .us-actions__item[aria-current="true"]::after {
+  content: "\ea5e";
+  margin-inline-start: auto;
+  padding-inline-start: var(--space-3);
+  color: var(--success);
+  font: normal 15px/1 "tabler-icons";
+}
+
+/* ── C25 Overview balance ───────────────────────────────────────
+   The side column had grown much longer than the main one (owner, 9
+   October 2026). Meetings move to the main column under Tasks (what is
+   coming up, beside what is to do; index.html), and the member card's
+   fields sit two across where they fit; a link (email) or a long value
+   still takes the full row (the theme's us-fields__field--wide). Target:
+   the case page layout, and US-FIELD-GROUPS (a narrower column minimum
+   for side-column cards). */
+[data-us-case-member] .us-fields {
+  grid-template-columns: repeat(auto-fill, minmax(min(130px, 100%), 1fr));
+}
+
+/* ── C26 Files on the Overview ──────────────────────────────────
+   The newest three files under the member card (us-case-attachments-recent, owner 9
+   October 2026): the theme's attachment row without tags or Edit, and
+   View all attachments (N) under the last row only, opening Activity ›
+   Attachments. In All activity each file added is a card of its own
+   type (file): indigo, a hue no other type uses, with the paperclip icon.
+   Target: US-ATTACHMENTS (a compact use), the --activity-* tokens and the
+   type rules in US-RECORD-CARDS. */
+.us-case-attachments-recent .us-attachment {
+  align-items: center;
+}
+
+.us-case-attachments-recent .us-attachment__file {
+  width: 36px;
+  height: 36px;
+}
+
+.us-case-attachments-recent .us-case-attachments-recent__all {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semi);
+}
+
+.us-case-attachments-recent .QueryTemplateSet > section:not(:last-of-type) .us-case-attachments-recent__all {
+  display: none;
+}
+
+:root {
+  --activity-attachment: #3d3d9e;
+  --activity-attachment-bg: #ebebf8;
+}
+
+@media screen {
+  :root[data-us-color-scheme="dark"] {
+    --activity-attachment: #b9b9f2;
+    --activity-attachment-bg: #26264a;
+  }
+}
+
+.us-record[data-us-record-type="attachment"] {
+  --us-record-hue: var(--activity-attachment);
+  --us-record-tint: var(--activity-attachment-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5'/%3E%3C/svg%3E");
+}
+
+/* Recent activity fills the main column down to the side column's end (C25,
+   with us-panel-fill on its iPart): its feed scrolls in whatever height
+   that leaves, never less than C15's 560px, so the two columns end
+   together and the extra room shows more of the last 30 days. The flex
+   chain runs from the panel to the feed's body; the body's zero basis
+   keeps the feed's length out of the row's height. */
+.us-case-recent.us-panel-fill > .panel,
+.us-case-recent.us-panel-fill > .panel > .panel-body-container,
+.us-case-recent.us-panel-fill > .panel > .panel-body-container > .panel-body,
+.us-case-recent.us-panel-fill .panel-body > .QueryTemplateSet,
+.us-case-recent.us-panel-fill .QueryTemplateSet > section,
+.us-case-recent.us-panel-fill .QueryTemplateSet > section > .QueryTemplateItem,
+.us-case-recent.us-panel-fill .us-activity-feed {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.us-case-recent.us-panel-fill .us-activity__body {
+  flex: 1 1 0;
+  min-height: 560px;
+  max-height: none;
+}
+
+/* ── C27 Details view ───────────────────────────────────────────
+   All activity's toggle (case-activity.candidate.js; owner, 9 October
+   2026): the theme's View all link gives way to a Details view button in
+   the panel heading, pressed while the chosen type's detailed iPart shows
+   in place of the timeline. A detailed iPart shows only then; the
+   timeline (notice, cards, footer) and its search step aside. The type
+   filters, search and timeframe share one line where it fits, from the
+   left edge, and wrap onto their own lines where it does not.
+   Target: US-ACTIVITY-FEED (the toggle, and the search line). */
+.us-activity-detail:not(.is-open) {
+  display: none;
+}
+
+.us-activity-details .us-activity__type-history {
+  display: none !important;
+}
+
+.us-activity__details-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-activity__details-toggle[hidden] {
+  display: none;
+}
+
+.us-activity__details-toggle > .ti {
+  font-size: 16px;
+}
+
+/* Pressed, it wears the theme's one "on" state for heading toggles (the
+   filter button's: US-QUERY-SEARCH), not a colour of its own (owner,
+   9 October 2026). */
+:root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
+  background: var(--iqa-selected, var(--brand-100));
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
+  color: var(--iqa-link, var(--text-link));
+}
+
+@media (forced-colors: active) {
+  :root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
+    border: 2px solid Highlight;
+  }
+}
+
+.us-activity-feed[data-us-activity-showing] :is(.us-activity__controls, .us-activity__notice, .us-activity__body, .us-activity__footer) {
+  display: none !important;
+}
+
+.us-activity-feed[data-us-activity-showing] .us-activity__bar {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* With a detailed view showing, the panel is just its heading and the
+   filters: no funnel (its search is hidden) and no gap under the chips. */
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-heading .us-activity__utilities {
+  display: none;
+}
+
+.us-activity-details .QueryTemplateSet > section:has(.us-activity-feed[data-us-activity-showing]) {
+  margin-bottom: 0 !important;
+}
+
+/* All activity and the Overview's Recent activity (owner, 9 October 2026)
+   alike. After the type filters at every width (the theme puts them above on a
+   narrow feed), on their line while there is room for a usable search
+   and otherwise on the next, filling it; search and timeframe part on a
+   very narrow feed. As specific as the theme's wide-feed rule, and later. */
+:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__bar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  justify-content: flex-start;
+}
+
+:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 360px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  order: 1;
+}
+
+/* Search fills the line between the type filters and the timeframe,
+   which keeps to the right edge (owner, 9 October 2026). */
+:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 220px;
+  max-width: none;
+}
+
+:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-activity__details-toggle {
+    transition: none;
+  }
+}
+
+/* The heading's add button follows the chosen type (owner, 9 October
+   2026): Add note for Notes, Add meeting for Meetings, Upload for Files;
+   none for All and Emails. While a Details view shows, the button adds to
+   the open list (whose own heading is hidden: C27). */
+.us-activity-details:not([data-us-activity-type="note"]) > .panel > .panel-heading .us-action-cases-add-note,
+.us-activity-details:not([data-us-activity-type="meeting"]) > .panel > .panel-heading .us-action-cases-add-meeting,
+.us-activity-details:not([data-us-activity-type="attachment"]) > .panel > .panel-heading .us-action-cases-add-attachment {
+  display: none !important;
+}
+
+/* A details feed of one type (the Changes section): no filters to choose
+   from, so they hide. */
+.us-activity-feed[data-us-activity-single] .us-activity__types {
+  display: none;
+}
+
+/* ── C28, C29, C31 Timeline cards ─────────────────────────────────
+   C28 View email: the open button's eye. C29 a restricted note's card
+   takes the notes screen's notice (US-NOTES-RESTRICTED) in place of its
+   summary. C31 a change's fields as a list, the field name
+   leading each line. Target: US-RECORD-CARDS. */
+.us-record__more a > .ti {
+  margin-inline-end: 6px;
+  font-size: 16px;
+}
+
+/* The notice, then the unlocked note on its own line under it, as on the
+   notes screen: one line while the card is closed, all of it open. As
+   specific as the card's own one-line summary rule, and later. */
+.us-record .us-note .us-record__text.us-note__body:has(> .us-restricted-note) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 2px;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.us-record .us-note .us-note__unlocked-text {
+  flex: 1 0 100%;
+}
+
+.us-record:not(.is-expanded) .us-note .us-note__unlocked-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.us-record__changes {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: normal;
+}
+
+.us-record__changes > li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+}
+
+.us-record__change-field {
+  min-width: 9em;
+  color: var(--text-muted);
+  font-weight: var(--fw-semi);
+}
+
+/* The notes ledger (C29): who a note is assigned to, under it; blank
+   people collapse, and the line with them. */
+.us-note--ledger .us-note__assigned {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 2;
+  gap: 2px var(--space-3);
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-note__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.us-note__assignee:has(> span:last-child:empty),
+.us-note__assigned:not(:has(.us-note__assignee > span:last-child:not(:empty))) {
+  display: none;
+}
+
+/* ── C32 Activity feed funnel order ────────────────────────────
+   On a narrow feed the theme's activity feed adds its funnel after the
+   heading's buttons (Add note, Details view), where every other list puts
+   its filter controls before them (Tasks: completed, funnel, Add task;
+   Notes: funnel, Add note). Seen on the Overview's Recent activity beside
+   Tasks (owner, 9 October 2026). The funnel leads, as elsewhere.
+   Target: US-ACTIVITY-FEED's headingToggle (add the utilities into the
+   heading's actions slot, before the panel's buttons, as
+   orderHeaderActions does for US-QUERY-SEARCH). */
+.us-panel-actions > .us-activity__utilities {
+  order: -1;
+}
+
+/* ── C33 Restricted files ───────────────────────────────────────
+   A sensitive document's actions stay hidden behind Unlock, at the right
+   where they sit (owner, 9 October 2026); the button wears the notes'
+   restricted look (US-NOTES-RESTRICTED): a quiet pill with the padlock,
+   red and shaking when refused. Unlocked, the padlock opens green and stays
+   ahead of the actions. Target: US-ATTACHMENTS. */
+.us-attachment[data-us-attachment-access="restricted" i]:not([data-us-attachment-unlocked]) .us-attachment__actions > :not(.us-attachment__unlock, .us-attachment__unlock-message) {
+  display: none !important;
+}
+
+.us-attachment__actions:has(> .us-attachment__unlock, > .us-attachment__lock-mark) {
+  align-items: center;
+}
+
+.us-attachment__unlock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock:hover:not([aria-busy="true"]) {
+  border-color: var(--text-link);
+  background: var(--brand-50);
+  color: var(--text-link);
+}
+
+.us-attachment__unlock:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* While the access check runs, the word gives way to a spinner in its
+   place, so the button keeps its size; the padlock stays. */
+.us-attachment__unlock[aria-busy="true"] {
+  cursor: progress;
+}
+
+.us-attachment__unlock-label {
+  position: relative;
+}
+
+.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label {
+  color: transparent;
+}
+
+.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 12px;
+  height: 12px;
+  margin: auto;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-link);
+  border-radius: 50%;
+  animation: us-attachment-unlock-spin 700ms linear infinite;
+}
+
+@keyframes us-attachment-unlock-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.us-attachment__unlock.is-denied {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+  animation: us-note-reveal-shake 360ms cubic-bezier(.36, .07, .19, .97);
+}
+
+.us-attachment__lock {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: color 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__shackle {
+  transform-box: view-box;
+  transform-origin: 8px 11px;
+  transition: transform 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock.is-unlocked {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+:is(.us-attachment__unlock.is-unlocked, .us-attachment__lock-mark) .us-attachment__shackle {
+  transform: translateY(-2px) rotate(-30deg);
+}
+
+.us-attachment__lock-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--success);
+}
+
+/* The refusal, to the left of the button that was pressed. */
+.us-attachment__unlock-message {
+  max-width: 320px;
+  margin-inline-end: 6px;
+  color: var(--danger);
+  font: var(--fw-medium) var(--fs-xs)/1.4 var(--font-ui);
+  text-align: end;
+  animation: us-note-reveal-message-in 180ms cubic-bezier(.2, 0, 0, 1);
+  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock-message[data-us-leaving] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-attachment__unlock,
+  .us-attachment__unlock-message,
+  .us-attachment__lock,
+  .us-attachment__shackle {
+    animation: none;
+    transition: none;
+  }
+
+  .us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
+    animation-duration: 1600ms;
+  }
+}
+
+/* ── C36 Section link in the heading ───────────────────────────
+   View all attachments, while Attachments is chosen in All activity
+   (owner, 9 October 2026): an outline heading button with a trailing
+   arrow, opening the Attachments tab. Target: US-ACTIVITY-FEED. */
+.us-activity__section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.us-activity__section-link[hidden] {
+  display: none !important;
+}
+
+.us-activity__section-link > .ti {
+  font-size: 15px;
+}
+
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-heading .us-activity__section-link {
+  display: none !important;
+}
+
+/* C34, C35, C37, C38, C39: the composers are US-INLINE-COMPOSER now
+   (composer.candidate.css, C40). */
+
+/* ── C27 Details view in the same card ─────────────────────────
+   The detailed list continues the All activity card under its switcher
+   (owner, 9 October 2026: "it should sit within the same card"), rather
+   than showing as a second card: the two iParts close up, the card above
+   loses its bottom edge and the list below its heading and top edge, with
+   one rule between the switcher and the list. The heading's add button
+   (All activity's) adds to the list; the list's search stays open. The
+   theme's panel rules carry heavyweight selectors, so these few structural
+   overrides are !important. */
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom-width: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-body-container > .panel-body {
+  padding-bottom: 0 !important;
+}
+
+.ContentItemContainer:has(> .us-activity-detail.is-open) {
+  margin-top: 0 !important;
+}
+
+.us-activity-detail.is-open > .panel {
+  border-top: 1px solid var(--border) !important;
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+}
+
+.us-activity-detail.is-open > .panel > .panel-heading {
+  display: none !important;
+}

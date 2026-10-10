@@ -1,0 +1,83 @@
+<!-- Case all activity · Query Template Display, one record, on the Activity
+     tab's All activity section: the case's whole timeline (owner, 8 October
+     2026: "full activity should be on the activity tab"). The template is the
+     theme's activity feed (US-ACTIVITY-FEED): notes, emails in and out,
+     meetings and files, newest first, with the type filters,
+     the timeframe (All time first: a case is short and its whole story
+     matters), Show more and Load all.
+     iPart CSS class: us-case-all-activity
+       Section preset (case-presets.candidate.js), standing in for
+       us-action-cases-add-note us-action-cases-add-meeting us-action-cases-add-attachment
+       us-activity-details us-tab-panel us-tabset-activity us-tab-all
+       The heading's add button follows the chosen type (owner, 9 October
+       2026): Add note for Notes, Add meeting for Meetings, Upload for
+       Files, none for All and Emails, and none while a Details view shows
+       (the detailed list has its own).
+     Native title: [[activity]] All activity. Display in cards: unchecked.
+     Rows per page: 1. Source IQA: any one-row IQA on @url:CaseID that
+     returns CaseNum (Get Case Details).
+
+     The feed runs one IQA per source in the folder below, each filtered on
+     CaseNum and on the feed's StartDate (sent unless All time), with the
+     feed's fixed columns (ActivityKey, ActivityDate, Subject or Summary;
+     optional Detail, CreatedBy, Priority, Category, RecordUrl, Direction,
+     FollowUpRequired, FollowUpDate, FollowUpActioned, FollowUpNotes).
+     data-details on a source names a second IQA in the same folder, run for
+     one record when its card opens (filtered on CaseNum and ActivityKey);
+     each Additional-* column it returns is a labelled line in the card's
+     expanded view.
+
+     Details view (C27; owner, 9 October 2026, comparison option 2): the
+     feed's iPart carries us-activity-details. data-history="#<key>" on a
+     source gives its type a Details view toggle at the end of the type
+     filters (case-activity.candidate.js), which swaps the timeline for the
+     detailed iPart marked us-activity-detail-<key>: Notes and Meetings.
+     Changes are their own section (Case-Changes-Query-Template.html;
+     owner, 9 October 2026), with the History log as their Details view. Emails and files have none:
+     the email's card holds everything, and files have their own section.
+
+     Sources:
+       Notes        type note. Restricted notes are included, with "Restricted"
+                    as the Summary (data-restricted="Restricted"): the card
+                    shows the notes screen's restricted notice and Show note
+                    (C29). ActivityKey's digits are the note ordinal (n940).
+                    A note marked follow-up (converted to a task) returns
+                    FollowUpRequired, FollowUpDate and FollowUpActioned, and
+                    shows the theme's follow-up badge. Tasks are notes with a
+                    follow-up (owner, 9 October 2026), so they are here too:
+                    no Tasks source.
+       Notes Details   Additional-Staff, Additional-Members: who the note is
+                    assigned to; blank lines are left out.
+       Emails Out / Emails In   type email. data-record-label: the card's
+                    open button reads View email, with an eye (C28).
+       Emails Details   Additional-From, Additional-To, Additional-Cc,
+                    Additional-Bcc.
+       Meetings     type meeting; Detail is the description (headed
+                    Description). Meetings Details: Additional-Location,
+                    Additional-Attendees.
+       Attachments  type file (C26): Subject the file name, Summary its tags.
+       Changes      the Changes section's (Case-Changes-Query-Template.html):
+                    type change, one card per save grouped by broad kind
+                    (C31), Subject the kind (Case updated, Party added,
+                    Staff removed, Staff updated), Summary what it touched,
+                    Detail one "Field: old → new" per line, CreatedBy who
+                    saved it.
+     View all attachments (C36; owner, 9 October 2026): with Attachments
+     chosen, the heading shows View all attachments beside Upload, opening
+     the Attachments tab (data-section-link, -tab and -label on the source).
+     Proposed IQAs (not built): Notes, Notes Details, Emails Out, Emails In,
+     Emails Details, Meetings, Meetings Details, Attachments, and Changes (the
+     history IQA behind the current Summary tab, grouped by save). -->
+<div class="us-activity-feed"
+  data-us-activity-folder="$/_i4u_/SandBox/Cases/Case Activity"
+  data-us-activity-filter="CaseNum" data-us-activity-value="{#query.CaseNum}"
+  data-us-activity-days="0" data-us-activity-limit="10" data-us-activity-page="10"
+  data-us-activity-load-all data-us-activity-filters-open>
+  <ul class="us-activity__sources" hidden>
+    <li data-source="notes" data-query="Notes" data-details="Notes Details" data-type="note" data-history="#notes" data-restricted="Restricted"></li>
+    <li data-source="emails-out" data-query="Emails Out" data-details="Emails Details" data-type="email" data-direction="out" data-record-label="View email" data-record-icon="ti-eye"></li>
+    <li data-source="emails-in" data-query="Emails In" data-details="Emails Details" data-type="email" data-direction="in" data-record-label="View email" data-record-icon="ti-eye"></li>
+    <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-detail-label="Description" data-type="meeting" data-history="#meetings"></li>
+    <li data-source="attachments" data-query="Attachments" data-type="attachment" data-label="Attachment added" data-plural="Attachments" data-section-link="case:attachments" data-section-tab="Attachments" data-section-label="View all attachments"></li>
+  </ul>
+</div>

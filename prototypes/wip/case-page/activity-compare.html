@@ -1,0 +1,336 @@
+<!doctype html>
+<!--
+  Case Activity tab, three ways (owner, 9 October 2026: the section switcher
+  and the All activity type filters sit one above the other and read as the
+  same control twice). Each option is the Activity tab alone, filled from the
+  case page's sample data (case-page.js) and the live theme. Pick one with
+  the bar at the top (?option=switcher | toggle | timeline).
+
+  1. switcher: the prototype today. A section switcher (All activity, Tasks,
+     Meetings, Notes, Emails, Attachments, History) above the feed's own type
+     filters.
+  2. toggle: no switcher. Choosing a type in the feed shows "View all notes"
+     (tasks, meetings, emails, files, changes) at the end of the filters,
+     as on contact page v3; pressing it swaps the timeline for that type's
+     detailed view, and pressing it again (or choosing another type) brings
+     the timeline back. Detailed views are the same iParts as option 1,
+     marked us-activity-detail us-activity-detail-<key>; the script below
+     points each type's View all link at its view.
+  3. timeline: the feed alone, as the full history. No detailed views: the
+     Overview's panels hold what is open (tasks, upcoming meetings, newest
+     files), and each card's View full details opens the record.
+
+  What the detailed views add over the timeline (README, Open decisions):
+  actions and current state more than information. Notes: edit, priority,
+  restricted notes (left out of the feed). Tasks: what is open, tick and
+  edit. Meetings: upcoming, attendees, agenda, outcome. Emails: preview and
+  recipients. Attachments: view, download, rename and tag. History: Export.
+
+  Serve the project root (static-node) and open
+  http://localhost:8778/prototypes/wip/case-page/activity-compare.html
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Activity Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="case-page.candidate.css">
+  <link rel="stylesheet" href="case-page.css">
+  <style>
+    /* Comparison page only. */
+    .ac-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ac-options a {
+      padding: 3px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-pill);
+      color: var(--text-strong);
+      font: 600 12px var(--font-ui);
+      text-decoration: none;
+    }
+
+    .ac-options a[aria-current="page"] {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, var(--bg-surface));
+    }
+
+    .ac-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .ac-intro {
+      max-width: 78ch;
+      margin: 0 0 20px;
+      color: var(--text-muted);
+    }
+
+    .ac-intro strong {
+      color: var(--text-strong);
+    }
+
+    .ac-page .ContentItemContainer + .ContentItemContainer {
+      margin-top: 20px;
+    }
+
+    /* ── Option 2: the View all toggle (candidate) ──────────────────
+       A detailed view shows only while its type's View all is pressed;
+       the timeline (notice, cards, footer) and its search step aside, and
+       the view sits right under the filters. */
+    .us-activity-detail:not(.is-open) {
+      display: none;
+    }
+
+    .us-activity-feed[data-us-activity-showing] :is(.us-activity__controls, .us-activity__notice, .us-activity__body, .us-activity__footer) {
+      display: none;
+    }
+
+    .us-activity-feed[data-us-activity-showing] .us-activity__bar {
+      margin-bottom: 0;
+    }
+
+    /* Pressed: the link reads as a toggle that is on. */
+    .us-activity-details .us-activity__type-history {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      transition: background-color 150ms cubic-bezier(.2, 0, 0, 1), border-color 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    .us-activity-details .us-activity__type-history[aria-pressed="true"] {
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
+      text-decoration: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .us-activity-details .us-activity__type-history {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="us-banner-page cp-page">
+
+<object hidden type="application/json"><param name="__ClientContext" id="__ClientContext" value='{"baseUrl":"/","isAnonymous":false,"loggedInPartyId":"104203","selectedPartyId":"104203","websiteRoot":"/"}'></object>
+<input type="hidden" name="__RequestVerificationToken" id="__RequestVerificationToken" value="prototype-token">
+
+<div class="cp-toolbar" aria-label="Comparison controls">
+  <strong>Case activity</strong>
+  <span class="cp-tag">Comparison · sample data · live theme CSS/JS + case candidates</span>
+  <nav class="ac-options" aria-label="Options">
+    <a href="?option=switcher">1. Switcher (today)</a>
+    <a href="?option=toggle">2. View all toggle</a>
+    <a href="?option=timeline">3. Timeline only</a>
+  </nav>
+  <span class="cp-toolbar__controls">
+    <button type="button" class="cp-toggle" id="cp-variant-age" aria-pressed="false">Age: recent</button>
+    <button type="button" class="cp-toggle" id="cp-color-scheme" aria-pressed="false">Mode: light</button>
+    <a class="cp-toggle" href="index.html#activity">Open the case page</a>
+  </span>
+</div>
+
+<main class="main ac-page">
+  <p class="ac-intro" id="ac-intro"></p>
+  <div id="ac-activity"></div>
+</main>
+
+<p class="cp-toast" id="cp-toast" role="status" aria-live="polite"></p>
+
+<!-- The detailed views, shared by options 1 and 2. Option 1 adds the
+     switcher's us-tab-panel classes; option 2 marks them us-activity-detail. -->
+<template id="ac-details">
+  <div class="ContentItemContainer" id="ste_container_ciTasksDetail"><div class="us-case-tasks-detail {tasks}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[square-check]] Tasks</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-tasks-detail"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
+  </div></div></div>
+  <div class="ContentItemContainer" id="ste_container_ciMeetingsDetail"><div class="us-case-meetings-detail {meetings}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[calendar]] Meetings</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-meetings-detail"></div><div class="us-query-footer"><span data-us-task-summary></span></div></div></div>
+  </div></div></div>
+  <div class="ContentItemContainer" id="ste_container_ciNotes"><div class="us-case-notes {notes}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[notes]] Notes</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-notes"></div></div></div>
+  </div></div></div>
+  <div class="ContentItemContainer" id="ste_container_ciEmails"><div class="us-case-emails {emails}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[mail]] Emails</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-emails"></div></div></div>
+  </div></div></div>
+  <div class="ContentItemContainer" id="ste_container_ciAttachments"><div class="us-case-attachments {attachments}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[paperclip]] Attachments</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-attachments"></div></div></div>
+  </div></div></div>
+  <div class="ContentItemContainer" id="ste_container_ciHistory"><div class="{history}"><div class="panel">
+    <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] History</h2></div>
+    <div class="panel-body-container"><div class="panel-body"><div id="cp-history_ContentPanel"><div id="cp-history_ListerPanel"><div data-gridid="cp-history"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+      <thead><tr><th class="rgHeader" scope="col">Updated on</th><th class="rgHeader" scope="col">Summary</th><th class="rgHeader" scope="col">Updated by</th></tr></thead>
+      <tbody>
+        <tr class="rgRow"><td>8/10/2026 1:48 PM</td><td>Staff updated. Mary O'Conner (10183)</td><td><a href="#activity">Andrew O Newnham</a></td></tr>
+        <tr class="rgAltRow"><td>8/10/2026 11:02 AM</td><td>Priority changed. Lowest to High</td><td><a href="#activity">Mary O'Conner</a></td></tr>
+        <tr class="rgRow"><td>7/10/2026 5:04 PM</td><td>Case created.</td><td><a href="#activity">Andrew O Newnham</a></td></tr>
+      </tbody>
+    </table></div></div></div></div></div></div>
+  </div></div></div>
+</template>
+
+<script>
+  // Builds the chosen option before the theme runs, so it sees the panels
+  // as iMIS would serve them.
+  (function () {
+    'use strict';
+    const options = {
+      switcher: {
+        intro: '<strong>1. Switcher (today).</strong> The section switcher picks a view; All activity then has its own type filters right under it, so "which kind of record" is asked twice.',
+        all: 'us-action-cases-add-note us-tab-panel us-tabset-activity us-tab-all',
+        details: key => 'us-tab-panel us-tabset-activity us-tab-' + key,
+        switcher: true
+      },
+      toggle: {
+        intro: '<strong>2. View all toggle.</strong> One row of filters. Choose a type (Notes) and "View all notes" shows at the end of the row; press it to swap the timeline for the detailed notes, and again (or choose another type) to come back.',
+        all: 'us-action-cases-add-note us-activity-details',
+        details: key => 'us-activity-detail us-activity-detail-' + key
+      },
+      timeline: {
+        intro: '<strong>3. Timeline only.</strong> The feed is the full history and nothing else. What is open lives on the Overview (Tasks, Meetings, Files), and a card\'s View full details opens the record.',
+        all: 'us-action-cases-add-note',
+        details: null
+      }
+    };
+    const key = new URLSearchParams(location.search).get('option');
+    const name = options[key] ? key : 'toggle';
+    const option = options[name];
+    document.querySelectorAll('.ac-options a').forEach(link => {
+      if (link.getAttribute('href') === '?option=' + name) link.setAttribute('aria-current', 'page');
+    });
+    document.getElementById('ac-intro').innerHTML = option.intro;
+
+    let html = '';
+    if (option.switcher) {
+      html += `<div class="ContentItemContainer"><div class="us-section-navigation"><div class="us-section-tabs" data-us-tabs="activity" data-us-tab-adapter="page-sections" aria-label="Activity sections">
+        <button type="button" data-us-tab="all" class="is-active">All activity</button>
+        <button type="button" data-us-tab="tasks">Tasks</button>
+        <button type="button" data-us-tab="meetings">Meetings</button>
+        <button type="button" data-us-tab="notes">Notes</button>
+        <button type="button" data-us-tab="emails">Emails</button>
+        <button type="button" data-us-tab="attachments">Attachments</button>
+        <button type="button" data-us-tab="history">History</button>
+      </div></div></div>`;
+    }
+    html += `<div class="ContentItemContainer" id="ste_container_ciAllActivity"><div class="${option.all}"><div class="panel">
+      <div class="panel-heading Distinguish"><h2 class="panel-title">[[activity]] All activity</h2></div>
+      <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet" id="cp-all-activity"></div></div></div>
+    </div></div></div>`;
+    if (option.details) {
+      html += document.getElementById('ac-details').innerHTML
+        .replace(/\{(\w+)\}/g, (_, section) => option.details(section));
+    }
+    document.getElementById('ac-activity').innerHTML = html;
+  })();
+</script>
+
+<script src="case-page.js"></script>
+<script src="case-presets.candidate.js"></script>
+<script src="case-activity.candidate.js"></script>
+<script src="search-open.candidate.js"></script>
+<script>
+  /* US-ACTIVITY-DETAILS (option 2, candidate) — the feed's View all link
+     swaps the timeline for a detailed view on the same tab (owner, 9
+     October 2026). Target: US-ACTIVITY-FEED, beside data-history.
+
+     Opt in with us-activity-details on the feed's iPart. Each detailed view
+     is its own iPart, marked us-activity-detail us-activity-detail-<key>.
+     Before the theme reads the feed, each type's first source gets
+     data-history="#<key>" (notes, emails, meetings, tasks, attachments,
+     history) when that view is on the page, so the theme shows its View all
+     link. Pressing the link (aria-pressed) hides the timeline and its
+     search and shows the view under the filters; pressing it again, or
+     choosing another type, brings the timeline back. Loads before
+     zUnionSuite.js. On promotion, the template carries data-history and
+     the theme toggles instead of navigating when it starts with #. */
+  (function () {
+    'use strict';
+    const SECTIONS = {note: 'notes', email: 'emails', meeting: 'meetings', task: 'tasks', file: 'attachments', change: 'history'};
+    const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+    const panelFor = key => document.querySelector('.us-activity-detail.us-activity-detail-' + key);
+
+    function prime(feed) {
+      feed.setAttribute('data-us-activity-primed', '');
+      const seen = new Set();
+      feed.querySelectorAll('.us-activity__sources > li[data-type]').forEach(source => {
+        const key = SECTIONS[source.dataset.type];
+        if (!key || seen.has(key) || source.hasAttribute('data-history') || !panelFor(key)) return;
+        seen.add(key);
+        source.setAttribute('data-history', '#' + key);
+      });
+    }
+
+    new MutationObserver(() => {
+      document.querySelectorAll('.us-activity-details .us-activity-feed:not([data-us-activity-primed])').forEach(prime);
+    }).observe(document.documentElement, {subtree: true, childList: true});
+
+    function show(feed, key) {
+      const current = feed.getAttribute('data-us-activity-showing');
+      if (current === key) return;
+      panelFor(current)?.classList.remove('is-open');
+      const link = feed.querySelector('.us-activity__type-history');
+      link?.setAttribute('aria-pressed', String(Boolean(key)));
+      if (!key) {
+        feed.removeAttribute('data-us-activity-showing');
+        fadeIn(feed.querySelector('.us-activity__body'));
+        return;
+      }
+      feed.setAttribute('data-us-activity-showing', key);
+      const panel = panelFor(key);
+      panel.classList.add('is-open');
+      fadeIn(panel);
+    }
+
+    function fadeIn(element) {
+      if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      element.animate([{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}], {duration: 200, easing: EASE});
+    }
+
+    document.addEventListener('click', event => {
+      const link = event.target.closest('.us-activity-details .us-activity__type-history');
+      if (link) {
+        event.preventDefault();
+        const feed = link.closest('.us-activity-feed');
+        const key = (link.getAttribute('href') || '').replace(/^#/, '');
+        if (!panelFor(key)) return;
+        show(feed, feed.getAttribute('data-us-activity-showing') === key ? null : key);
+        return;
+      }
+      const type = event.target.closest('.us-activity-details .us-activity__types button');
+      if (type) show(type.closest('.us-activity-feed'), null);
+    }, true);
+
+    // The link is a toggle: a button to assistive technology.
+    new MutationObserver(() => {
+      document.querySelectorAll('.us-activity-details .us-activity__type-history:not([role])').forEach(link => {
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-pressed', 'false');
+      });
+    }).observe(document.documentElement, {subtree: true, childList: true});
+  })();
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
+<script src="../../../THeme/UnionSuite-Client/Actions.js"></script>
+<script src="case-actions.candidate.js"></script>
+</body>
+</html>

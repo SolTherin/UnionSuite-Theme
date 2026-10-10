@@ -1,0 +1,48 @@
+<!-- Case files, newest three (C26) · Query Template Display in the Overview's
+     side column, under the member card (owner, 9 October 2026: attachments
+     on the main tab; a statement or letter that has just come in is wanted
+     at once). The theme's attachment row (US-ATTACHMENTS), compact: the
+     name, who added it and when, and View and Download; no tags and no
+     Edit (those stay on the Attachments tab). Below the rows, View all attachments (N)
+     opens the Attachments tab (owner, 9 October 2026) through the theme's section
+     link, as See all parties opens its tab.
+     iPart CSS class: us-case-attachments-recent
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-attachments us-action-cases-add-attachment
+       (Upload in the heading)
+     Native title: Attachments. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 3, no pager. No results (C13, paste as HTML):
+       <div class="us-placeholder us-placeholder--compact"><span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-paperclip"></i></span><h3>No attachments yet</h3><p>Upload statements, letters and other documents.</p><button type="button" class="us-action-cases-add-attachment"></button></div>
+
+     IQA: the case's CloudFiles IQA (as Activity › Attachments), sorted by
+     CreatedOn descending, limited to the first 3 results, plus:
+     AttachmentCount (required)    every file on the case, for View all (a count
+                             subquery on the same CloudFiles rows); the link
+                             shows under the last row only (CSS). It is
+                             marked data-us-live: after an upload in place
+                             (C40) its new count is copied across from the
+                             page, with the new row
+
+     Fields (the Attachments template's, less the tags):
+     Ordinal (required)      file ordinal (view and download)
+     UniqueID (required)     SharePoint unique ID
+     EntityCode (required)   SharePoint branch
+     FileName (required)     display name
+     CreatedBy               uploader name
+     CreatedOn               upload date
+     AccessClass             "restricted" for a sensitive document, else blank
+                             (C33): its actions stay locked behind Unlock,
+                             which checks access through /cases/attachment-access -->
+<div class="us-attachment us-case-attachment" data-ordinal="{#query.Ordinal}" data-us-attachment-access="{#query.AccessClass}" data-us-file-id="{#query.UniqueID}" data-us-file-branch="{#query.EntityCode}"
+  data-us-file-name="{#query.FileName}">
+  <span class="us-attachment__file" aria-hidden="true"><i class="ti ti-file-text"></i></span>
+  <div class="us-attachment__copy">
+    <span class="us-attachment__name">{#query.FileName}</span>
+    <p class="us-attachment__meta"><span>{#query.CreatedBy}</span><span>{#query.CreatedOn}</span></p>
+  </div>
+  <div class="us-attachment__actions">
+    <button type="button" class="us-action-agreements-view-attachment" data-ordinal="{#query.Ordinal}">View</button>
+    <button type="button" class="us-action-agreements-download-attachment" data-ordinal="{#query.Ordinal}">Download</button>
+  </div>
+</div>
+<a class="us-case-attachments-recent__all" data-us-live href="#attachments" data-us-section-link="case:attachments" data-us-cco-tab="Attachments">View all attachments ({#query.AttachmentCount})</a>

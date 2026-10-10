@@ -1,0 +1,32 @@
+<!-- Case meetings · Query Template Display on Manage Case - Meetings - All.
+     The agreement meetings template with the case action; the same fields.
+     iPart CSS class: us-case-meetings (add us-panel-fill when it shares a row)
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-meetings us-task-completed-filter us-task-progress us-list-scroll us-action-cases-add-meeting
+     Native title: Meetings. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results (C13, paste as HTML):
+       <div class="us-placeholder us-placeholder--compact"><span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-calendar-plus"></i></span><h3>No meetings</h3><p>Schedule one to meet the member or the employer.</p><button type="button" class="us-action-cases-add-meeting"></button></div>
+
+     Fields:
+     Ordinal (required)      meeting ordinal; the pencil opens it
+     Date-ISO (required)     yyyy-MM-dd; past meetings hide until "Show past meetings"
+     Date-Month (required)   short month (Oct)
+     Date-Day (required)     day of month (14)
+     MeetingType (required)  first half of the title (General, Hearing …)
+     Matter (required)       second half of the title
+     Date-Time               time text; blank hides it
+     Location                location or link text; blank hides it -->
+<div class="us-meeting" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingType} {#query.Matter} {#query.Location}">
+  <span class="us-meeting__tile" aria-hidden="true">
+    <span class="us-meeting__month">{#query.Date-Month}</span>
+    <span class="us-meeting__day">{#query.Date-Day}</span>
+  </span>
+  <span class="us-meeting__copy">
+    <span class="us-meeting__title">{#query.MeetingType} – {#query.Matter}</span>
+    <span class="us-meeting__meta">
+      <span>{#query.Date-Time}</span>
+      <span>{#query.Location}</span>
+    </span>
+  </span>
+  <button type="button" class="us-action-cases-edit-meeting" data-ordinal="{#query.Ordinal}"></button>
+</div>

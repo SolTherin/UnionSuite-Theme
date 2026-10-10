@@ -1,0 +1,43 @@
+<!-- Case recent activity · Query Template Display, one record, on the
+     Overview: what happened with the member lately, so staff see it before
+     they act. The theme's activity feed (US-ACTIVITY-FEED) over notes, emails
+     in and out, and meetings, locked to the last 30 days (owner, 8 October
+     2026); no details updated cards, no timeframe and no Load all: the full
+     timeline is All activity on the Activity tab
+     (Case-All-Activity-Query-Template.html), and the footer's View all
+     activity opens it.
+     iPart CSS class: us-case-recent us-action-cases-add-note
+       (C15: capped and scrolling, with Add note in its heading)
+     Native title: [[activity]] Recent activity. Display in cards: unchecked.
+     Rows per page: 1. Source IQA: any one-row IQA on @url:CaseID that
+     returns CaseNum (Get Case Details).
+
+     The 30 days (C19, data-us-activity-window="30"): the theme's feed offers
+     90 days, 6 months, 12 months and All time, and no fixed choice, so the
+     window is the IQAs': the four sources sit in a Last 30 Days folder, each
+     the All activity IQA of the same name with one more filter, the
+     activity date within the last 30 days (SQL expression filter, for
+     example DATEDIFF(day, <date>, GETDATE()) <= 30). The feed asks All time
+     (data-us-activity-days="0"); the candidate script hides the timeframe,
+     says "last 30 days" in the count, and makes the footer link View all
+     activity, opening the Activity tab's All activity section. On promotion,
+     a native fixed-window option in US-ACTIVITY-FEED replaces both.
+
+     The cards match All activity's (Case-All-Activity-Query-Template.html):
+     restricted notes with Show note (C29), follow-up badges, the Notes,
+     Emails and Meetings Details IQAs in the expanded view, and View email
+     (C28). The details IQAs are the All activity folder's
+     (data-us-activity-details-folder), shared by both feeds. -->
+<div class="us-activity-feed"
+  data-us-activity-folder="$/_i4u_/SandBox/Cases/Case Activity/Last 30 Days"
+  data-us-activity-filter="CaseNum" data-us-activity-value="{#query.CaseNum}"
+  data-us-activity-days="0" data-us-activity-limit="10" data-us-activity-page="5"
+  data-us-activity-details-folder="$/_i4u_/SandBox/Cases/Case Activity"
+  data-us-activity-window="30" data-us-activity-history="#activity">
+  <ul class="us-activity__sources" hidden>
+    <li data-source="notes" data-query="Notes" data-details="Notes Details" data-type="note" data-restricted="Restricted"></li>
+    <li data-source="emails-out" data-query="Emails Out" data-details="Emails Details" data-type="email" data-direction="out" data-record-label="View email" data-record-icon="ti-eye"></li>
+    <li data-source="emails-in" data-query="Emails In" data-details="Emails Details" data-type="email" data-direction="in" data-record-label="View email" data-record-icon="ti-eye"></li>
+    <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-detail-label="Description" data-type="meeting"></li>
+  </ul>
+</div>

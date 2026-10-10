@@ -1,0 +1,41 @@
+<!-- Case attachments · Query Template Display on the case's CloudFiles IQA
+     (the current page's attachments source; see Case Testing/CloudFiles
+     Storage Query + Tags). The agreement attachments template; the same
+     fields. View, Download and Edit keep the agreement actions: they read
+     only the row (case-actions.candidate.js header).
+     On the case's Files tab (owner, 9 October 2026).
+     iPart CSS class: us-case-attachments (add us-panel-fill when it shares a row)
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-attachments us-query-search us-query-search-open us-list-scroll us-action-cases-add-attachment
+       (the filters start open under the heading's funnel, C24; Upload opens the composer above them, C39)
+     Native title: Attachments. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 30. No results (C13, paste as HTML):
+       <div class="us-placeholder us-placeholder--compact"><span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-paperclip"></i></span><h3>No attachments yet</h3><p>Upload statements, letters and other documents.</p><button type="button" class="us-action-cases-add-attachment"></button></div>
+
+     Fields:
+     Ordinal (required)      file ordinal (download and edit)
+     UniqueID (required)     SharePoint unique ID
+     EntityCode (required)   SharePoint branch
+     FileName (required)     display name
+     CreatedBy               uploader name
+     CreatedOn               upload date
+     TagNames                tag names, comma-separated (rendered as badges)
+     TagOrdinals             tag ordinals, same order as TagNames
+     AccessClass             "restricted" for a sensitive document, else blank
+                             (C33): its actions stay locked behind Unlock,
+                             which checks access through /cases/attachment-access -->
+<div class="us-attachment" data-ordinal="{#query.Ordinal}" data-us-attachment-access="{#query.AccessClass}" data-us-file-id="{#query.UniqueID}" data-us-file-branch="{#query.EntityCode}"
+  data-us-file-name="{#query.FileName}" data-us-file-tags="{#query.TagNames}" data-us-file-tag-ordinals="{#query.TagOrdinals}"
+  data-us-search="{#query.FileName} {#query.TagNames}">
+  <span class="us-attachment__file" aria-hidden="true"><i class="ti ti-file-text"></i></span>
+  <div class="us-attachment__copy">
+    <span class="us-attachment__name">{#query.FileName}</span>
+    <p class="us-attachment__meta"><span>{#query.CreatedBy}</span><span>{#query.CreatedOn}</span></p>
+    <div class="us-attachment__tags"></div>
+  </div>
+  <div class="us-attachment__actions">
+    <button type="button" class="us-action-agreements-view-attachment" data-ordinal="{#query.Ordinal}">View</button>
+    <button type="button" class="us-action-agreements-download-attachment" data-ordinal="{#query.Ordinal}">Download</button>
+    <button type="button" class="us-action-agreements-edit-attachment" data-ordinal="{#query.Ordinal}">Edit name and tags</button>
+  </div>
+</div>

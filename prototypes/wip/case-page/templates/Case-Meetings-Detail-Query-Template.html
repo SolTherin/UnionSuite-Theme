@@ -1,0 +1,48 @@
+<!-- Case meetings, detailed (C22) · Query Template Display on the Activity
+     tab's Meetings section (owner, 9 October 2026: "meetings should have a
+     detailed view on the activity tab"). The theme's meeting rows
+     (us-meetings, as on the Overview), each with more of the meeting: the
+     date tile and title, then time, location and who attends; the agenda or
+     notes, up to three lines; and once it has happened, the outcome. Past
+     meetings sit behind the theme's Show past meetings toggle, as on the
+     Overview. The filters (the search) start open under the heading's
+     funnel (C24).
+     iPart CSS class: us-case-meetings-detail us-tab-panel us-tabset-activity us-tab-meetings
+       Section preset (case-presets.candidate.js), standing in for
+       us-query-template us-meetings us-query-search us-query-search-open us-task-completed-filter us-task-progress us-action-cases-add-meeting
+     Native title: Meetings. Display in cards / columns: unchecked. Header/Footer blank.
+     Rows per page: 50. No results (C13, paste as HTML):
+       <div class="us-placeholder us-placeholder--compact"><span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-calendar-plus"></i></span><h3>No meetings</h3><p>Schedule one to meet the member or the employer.</p><button type="button" class="us-action-cases-add-meeting"></button></div>
+
+     IQA: Manage Case - Meetings - All, with three more columns.
+
+     Fields (the Overview's, plus):
+     Ordinal (required)      meeting ordinal; the pencil opens it
+     Date-ISO (required)     yyyy-MM-dd; past meetings hide until "Show past meetings"
+     Date-Month (required)   short month (Oct)
+     Date-Day (required)     day of month (14)
+     MeetingType (required)  first half of the title (Employer meeting …)
+     Matter (required)       second half of the title
+     Date-Time               time text; blank hides it
+     Location                location or link text; blank hides it
+     Attendees               who attends: "Priya Natarajan, Mary O'Conner,
+                             HR Manager"; blank hides it
+     Description             the agenda or notes, up to three lines; blank collapses
+     Outcome                 what came of it, once held; blank collapses -->
+<div class="us-meeting us-meeting--full" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingType} {#query.Matter} {#query.Location} {#query.Attendees} {#query.Description} {#query.Outcome}">
+  <span class="us-meeting__tile" aria-hidden="true">
+    <span class="us-meeting__month">{#query.Date-Month}</span>
+    <span class="us-meeting__day">{#query.Date-Day}</span>
+  </span>
+  <span class="us-meeting__copy">
+    <span class="us-meeting__title">{#query.MeetingType} – {#query.Matter}</span>
+    <span class="us-meeting__meta">
+      <span>{#query.Date-Time}</span>
+      <span>{#query.Location}</span>
+      <span class="us-meeting__people"><i class="ti ti-users" aria-hidden="true"></i><span class="sr-only">Attending: </span><span>{#query.Attendees}</span></span>
+    </span>
+    <span class="us-meeting__notes">{#query.Description}</span>
+    <span class="us-meeting__outcome"><strong>Outcome</strong> <span>{#query.Outcome}</span></span>
+  </span>
+  <button type="button" class="us-action-cases-edit-meeting" data-ordinal="{#query.Ordinal}"></button>
+</div>

@@ -1,0 +1,28 @@
+<!-- Case field panels, on the Details tab · Query Template Display, one record,
+     used twice; only the IQA path and CSS class change. The template renders
+     no fields itself: US-FIELD-GROUPS runs the IQA in data-us-fields-query,
+     filtered on CaseNum from the page URL, and lays the panel out from its
+     column names (see the agreement's Field-Groups-IQA-Build.md for the
+     rules). iPart source: any one-row IQA on @url:CaseID (Get Case Details).
+     Rows per page: 1.
+
+     Panel          iPart CSS class                                       data-us-fields-query
+     Case details   us-query-template us-action-cases-edit us-panel-fill   $/_i4u_/SandBox/Cases/Case Details
+     Resolution     us-query-template us-action-cases-resolve              $/_i4u_/SandBox/Cases/Case Resolution
+                    us-action-cases-edit-resolution us-action-cases-reopen
+                    us-panel-fill (C16: one of the three shows, by status)
+
+     Case details (owner, 8 October 2026: "incorporate details into the case"),
+     proposed columns, all the client's to change:
+       Case-Reference, Case-Type, Case-Subtype, Tone-Priority with Case-Priority,
+       Case-Source, Case-Access level, Workplace-Employer, Workplace-Site,
+       Workplace-Workbench, Dates-Opened, Dates-Incident date,
+       Dates-Limitation date, 1-Tags, 2-Description (long text takes the row)
+     Case Resolution (proposed, SandBox until approved):
+       an open case: Alert-Title "Not yet resolved", Alert-Message "Resolve
+       the case when it is finished: its outcome is recorded and it closes.",
+       Alert-Tone info, Alert-Only true
+       a closed case: Alert-Title "Resolved", Alert-Message "Closed <date> by
+       <name>.", Alert-Tone success; Outcome type, Closed date, Closed by,
+       1-Amount won, 2-Outcome -->
+<div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/Cases/Case Details" data-us-fields-filter="CaseNum"></div>

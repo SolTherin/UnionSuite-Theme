@@ -1,0 +1,476 @@
+/* US-INLINE-COMPOSER (C40, candidate). Target: zUnionSuite.css, a new
+   section; it uses theme tokens only, so zzDarkMode.css needs nothing.
+
+   The composer at the top of a section: the main field (a note, a title, a
+   person or a drop zone for files), then one line of the other fields, a
+   message, More options, Cancel and Save, on the sunken background. Its
+   fields take the theme's form field focus; the add button that opened it
+   wears the theme's pressed state for heading toggles. */
+.us-composer {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+}
+
+/* Above a list's search (outside the panel body): the body's side padding
+   and gap, so it lines up with the search and the rows. */
+.us-composer.us-composer--above-search {
+  margin: 12px 18px;
+}
+
+/* The main field. */
+.us-composer > .us-composer__main:is(textarea, input),
+.us-composer__combo > .us-composer__field {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fs-sm)/1.5 var(--font-ui);
+}
+
+.us-composer > textarea.us-composer__main {
+  min-height: 72px;
+  resize: vertical;
+}
+
+/* The bar: fields, the message, then More options, Cancel and Save at the
+   right; it wraps on a narrow section. */
+.us-composer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.us-composer__bar .us-composer__field:is(select, input:not([type="checkbox"])) {
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: var(--fs-sm) var(--font-ui);
+}
+
+.us-composer__bar .us-composer__field--grow {
+  flex: 0 1 220px;
+  min-width: 140px;
+}
+
+.us-composer__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-sm) var(--font-ui);
+  cursor: pointer;
+}
+
+.us-composer__message {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--fs-xs);
+}
+
+/* A question before saving ("Save anyway"), not an error. */
+.us-composer__message.is-warning {
+  color: var(--warning);
+  font-weight: var(--fw-medium);
+}
+
+.us-composer__more {
+  margin-inline-start: auto;
+}
+
+/* The theme's form field focus (as its native fields): a transparent
+   outline (for forced colours), the field focus colour as the border and
+   the soft field focus glow. As specific as the vendor's field focus rules
+   (99-Orion's inset shadow and blue border), and later. */
+:root .us-composer :is(textarea, select, input:not([type="checkbox"], [type="file"])).us-composer__field:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+/* A date or time's active part in the field focus colour, not the
+   browser's blue (Chromium and Edge). */
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-day-field:focus,
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-month-field:focus,
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-year-field:focus,
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-hour-field:focus,
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-minute-field:focus,
+.us-composer__field:is([type="date"], [type="time"])::-webkit-datetime-edit-ampm-field:focus {
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--field-focus-colour) 18%, transparent);
+  color: var(--text-strong);
+}
+
+/* The pickers' buttons: the vendor sheet (99-Orion) draws a grey box round
+   an icon sprite the theme does not ship; the browser's own icon shows
+   instead, quiet, darkening on hover. */
+.us-composer__field:is([type="date"], [type="time"])::-webkit-calendar-picker-indicator {
+  margin-inline-start: 4px;
+  padding: 2px;
+  border: 0;
+  border-radius: 3px;
+  background-color: transparent;
+  opacity: .6;
+  cursor: pointer;
+  filter: none;
+}
+
+.us-composer__field:is([type="date"], [type="time"])::-webkit-calendar-picker-indicator:hover {
+  background-color: var(--bg-sunken);
+  opacity: 1;
+}
+
+/* ── Files: a dashed drop zone the height of a note, listing the files
+   chosen. The file input inside takes the focus (its ring shows on the
+   zone) and opens the picker; dragging over the zone tints it. */
+.us-composer__drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 72px;
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font: var(--fs-sm) var(--font-ui);
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+}
+
+.us-composer__drop > .ti {
+  font-size: 20px;
+}
+
+.us-composer__browse {
+  color: var(--iqa-link, var(--text-link));
+  font-weight: var(--fw-medium);
+  text-decoration: underline;
+}
+
+.us-composer__drop:hover,
+.us-composer__drop.is-over {
+  border-color: var(--field-focus-colour);
+  background: color-mix(in srgb, var(--field-focus-colour) 6%, var(--bg-surface));
+}
+
+.us-composer__drop > .us-composer__field--files {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.us-composer__drop:has(> .us-composer__field--files:focus-visible) {
+  border-style: solid;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+.us-composer__files {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-composer__files[hidden] {
+  display: none;
+}
+
+.us-composer__files > li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 4px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  font-size: var(--fs-sm);
+}
+
+.us-composer__file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-composer__file-size {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-composer__remove {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.us-composer__remove:hover {
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+}
+
+/* ── Combobox: a person or record picked from a list, never free text.
+   The list sits under the field, over what follows, or over the field when
+   the window has no room below (is-above). */
+.us-composer__combo {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.us-composer__options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  max-height: 264px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-lg, 0 8px 24px rgb(0 0 0 / .12));
+  list-style: none;
+}
+
+.us-composer__options[hidden] {
+  display: none;
+}
+
+.us-composer__options.is-above {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.us-composer__option {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.us-composer__option.us-composer__option--plain {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.us-composer__option > .us-avatar {
+  grid-row: span 2;
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+
+.us-composer__option-name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font: var(--fw-medium) 13px/1.3 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-composer__option-meta {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-composer__option-meta:empty {
+  display: none;
+}
+
+.us-composer__option:is(:hover, [aria-selected="true"]):not([aria-disabled="true"]) {
+  background: var(--bg-sunken);
+}
+
+.us-composer__option[aria-selected="true"] {
+  box-shadow: inset 2px 0 0 var(--field-focus-colour);
+}
+
+.us-composer__option[aria-disabled="true"] {
+  cursor: default;
+  opacity: .55;
+}
+
+.us-composer__option.is-empty {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  opacity: 1;
+}
+
+/* ── The holding row: where a saved entry is on its way into the list,
+   until the real row takes its place (owner, 10 October 2026: "something
+   to give the impression that it's quicker"). What was typed, a tick that
+   draws itself (the ring, then the check) and "Saved" fading in; then a
+   soft shimmer sweeps across it, as a row being filled in, until the real
+   row takes over. With reduced motion, the tick and "Saved" just show. */
+.us-composer-holding {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 10px 20px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: var(--fs-sm) var(--font-ui);
+}
+
+/* In a feed (US-ACTIVITY-FEED) it is a record card at the top of the newest
+   month: the feed's own node and card frame it, so the card keeps their
+   border all round and the head's 12px inset; the tick sits in the node. */
+.us-record__card.us-composer-holding {
+  padding: 10px 12px;
+}
+
+.us-composer-holding-card .us-record__node {
+  display: grid;
+  place-items: center;
+  background: var(--success-bg);
+}
+
+.us-composer-holding-card .us-composer-holding__tick {
+  width: 18px;
+  height: 18px;
+}
+
+.us-composer-holding::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-base) 6%, transparent), transparent);
+  transform: translateX(-100%);
+  animation: us-composer-shimmer 1200ms ease-in-out 1300ms infinite;
+  pointer-events: none;
+}
+
+.us-composer-holding__tick {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--success);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.us-composer-holding__tick circle {
+  fill: color-mix(in srgb, var(--success) 12%, transparent);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: us-composer-draw 640ms cubic-bezier(.2, 0, 0, 1) forwards;
+}
+
+.us-composer-holding__tick path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: us-composer-draw 480ms cubic-bezier(.2, 0, 0, 1) 440ms forwards;
+}
+
+@keyframes us-composer-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes us-composer-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes us-composer-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+.us-composer-holding__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-base);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-composer-holding__meta {
+  flex: none;
+  color: var(--success);
+  font: var(--fw-medium) var(--fs-xs) var(--font-ui);
+  opacity: 0;
+  animation: us-composer-appear 400ms ease-out 760ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-composer-holding::after {
+    display: none;
+  }
+
+  .us-composer-holding__tick :is(circle, path),
+  .us-composer-holding__meta {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── The add button, pressed while its composer is open: the theme's one
+   "on" state for heading toggles (the filter button's, US-QUERY-SEARCH). */
+:root .panel-heading .us-composer-toggle.TextButton[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
+  background: var(--iqa-selected, var(--brand-100));
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
+  color: var(--iqa-link, var(--text-link));
+}
+
+@media (forced-colors: active) {
+  :root .panel-heading .us-composer-toggle.TextButton[aria-pressed="true"] {
+    border: 2px solid Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-composer__drop {
+    transition: none;
+  }
+}

@@ -1,0 +1,109 @@
+<!-- Case banner · Query Template Display, one record. Two-row record banner
+     (us-banner__surface--rows), as the agreement banner.
+     iPart CSS class: us-banner us-banner-collapsible
+     Page CSS class (optional): us-banner-page
+     Native title and description blank; border disabled. Header/Footer blank.
+     Rows per page: 1. No results: "Case not found."
+     Source IQA: proposed $/_i4u_/Core/Cases/Get Case Details (exists; columns
+     to check) or a new Banner primary IQA, filtered on @url:CaseID.
+
+     Top row (fixed, from this IQA):
+     CaseID (required)    case reference (C217); also the copy button's text
+     CaseTitle (required) the case title
+     Status (required)    status pill text; also sets the pill and left rail
+                          tone (New, Open, In progress amber; Closed and
+                          others neutral; list in the theme's A6 CSS)
+     The primary party, under the title (C9; owner, 8 October 2026:
+     one of the most important things on the page, so it is in the top row,
+     which stays when the banner condenses):
+     MemberName (required) the primary party's name
+     MemberUrl            their record; blank leaves the name as text
+     MemberLine           "Member 20544", "Former member 20544",
+                          "Employer 30112"; blank collapses
+     MemberStanding       Unfinancial | No longer a member | New member, or
+                          blank for a financial member (and employers)
+     MemberStandingTone   danger | warning, or blank
+
+     Second row (client-configurable): filled by US-BANNER-FACTS from the
+     Banner Details IQA in data-us-facts-query (proposed, not built), filtered
+     with the page's CaseNum URL parameter (the case's Ordinal; search label
+     CaseNum). It replaces the current page's Details block:
+       Description                     shown first
+       Additional-Opened               the case date with its age (C18, owner,
+                                       8 October 2026): "7 Oct 2026 · 2 days";
+                                       once closed, "7 Oct 2026 · closed after 44 days"
+       Additional-Type                 Bullying / Harassment
+       Additional-Subtype              blank is left out
+       Additional-Priority, Tone-Priority
+       Additional-Lead staff, Tone-Lead staff
+                                       "No lead staff assigned" with tone
+                                       danger, as the current page shows it in red
+       Additional-Last member contact, Tone-Last member contact
+                                       the latest note, email, call or meeting
+                                       with the member: "Yesterday", "21 days ago";
+                                       warning from 14 days (the dashboards' no-update
+                                       rule), danger from 28; blank once closed.
+                                       Replaces Last activity, which the Details
+                                       updated cards now show.
+     Confirm the filter name with GET /api/QueryParameterDefinition.
+
+     The status is a menu (C23; owner, 9 October 2026: click the status to
+     quick update): the open statuses, the current one ticked, each a
+     cases.set-status item (data-us-case-status, the status as the case's
+     Status value list holds it; the list here is a placeholder for the
+     real one); then Resolve case, as closing goes through the resolution.
+     Once closed it offers Edit resolution and Reopen case instead.
+     The Actions menu holds registered case actions (case-actions.candidate.js).
+     Resolve case shows while the case is open; Edit resolution and Reopen
+     case once it is closed (C16). The lead staff crown replaces Reassign. -->
+<header class="us-banner__surface us-banner__surface--glass us-banner__surface--status us-banner__surface--rows" data-us-record-status="{#query.Status}">
+  <div class="us-banner__summary">
+    <div class="us-banner__identity">
+      <span class="us-banner__record-copy"><span class="us-banner__record-id" id="case-banner-id">{#query.CaseID}</span><button type="button" class="us-copy" data-us-copy-target="case-banner-id" aria-label="Copy case ID" title="Copy case ID"></button></span>
+      <div class="us-banner__identity-text">
+        <h1 class="us-banner__title">{#query.CaseTitle}</h1>
+        <p class="us-banner__member"><i class="ti ti-user" aria-hidden="true"></i><a class="us-banner__member-name" href="{#query.MemberUrl}">{#query.MemberName}</a><span class="us-banner__member-line">{#query.MemberLine}</span><span class="us-banner__badge us-banner__badge--{#query.MemberStandingTone}">{#query.MemberStanding}</span></p>
+      </div>
+    </div>
+    <div class="us-banner__status">
+      <div class="us-actions us-case-status">
+        <button type="button" class="us-actions__toggle us-banner__badge us-banner__badge--record-status" title="Change status">{#query.Status}</button>
+        <ul class="us-actions__list">
+          <li><h6 class="us-actions__heading">Status</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="New">New</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="Open">Open</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="In progress">In progress</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="On hold">On hold</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><button type="button" class="us-actions__item us-action-cases-resolve">Resolve case</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit-resolution">Edit resolution</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-reopen">Reopen case</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="us-banner__actions">
+      <div class="us-actions">
+        <button type="button" class="us-actions__toggle">Actions</button>
+        <ul class="us-actions__list">
+          <li><h6 class="us-actions__heading">Add entry</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-note-form">Add note</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-task-form">Add task</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-meeting-form">Add meeting</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-attachment-form">Upload attachment</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">People</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-party-form">Add party</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-staff-form">Add staff</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-email-parties">Email parties</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">Case</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit">Update case details</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-resolve">Resolve case</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit-resolution">Edit resolution</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-reopen">Reopen case</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="us-banner__details" data-us-facts-query="$/_i4u_/Core/Cases/API/API - Manage Case - Banner Details" data-us-facts-filter="CaseNum"></div>
+</header>
