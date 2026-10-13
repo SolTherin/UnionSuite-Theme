@@ -13,6 +13,7 @@ const queryFields = require('./query-template-fields.cjs');
 const reportIconExample = require('./report-icon-example.cjs');
 const popupActionExample = require('./popup-action-example.cjs');
 const queryTemplateRefreshExample = require('./query-template-refresh-example.cjs');
+const inlineComposerExample = require('./inline-composer-example.cjs');
 const actionConflictExample = require('./action-conflict-example.cjs');
 const membership = require('./membership-stats-example.cjs');
 const actionBuilder = require('./build-action-builder.cjs');
@@ -137,6 +138,7 @@ allSources.push(...require('./attention-example.cjs').sources);
 allSources.push(...require('./heading-toggle-reference.cjs').sources);
 allSources.push(...membership.sources);
 allSources.push(...actionBuilder.sources);
+allSources.push(...inlineComposerExample.sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite-Guides/usage/examples/Query-Template-Refresh.js');
 allSources.push('THeme/UnionSuite-Guides/usage/build/embedded-cco-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/iqa-expand-example.cjs','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.html','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.css','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.js');
@@ -214,6 +216,7 @@ const inserts = {
  ATTENTION_TEMPLATE: snippet('attention'),
  TASK_DETAIL_ROW_TEMPLATE: snippet('task-detail-row'),
  QUERY_TEMPLATE_REFRESH_DEMO: iframe('query-template-refresh-demo', 'Query Template refresh and restored task controls', queryTemplateRefreshExample({read, css:nativePreviewCss+theme, themeJs}), true),
+ INLINE_COMPOSER_DEMO: iframe('inline-composer-demo', 'Adding a task in place: the composer, holding row and quiet insert', inlineComposerExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
  TASK_ROW_TEMPLATE: snippet('task-row'),
  QUERY_EMPTY_DEMO: iframe('query-empty-demo','Query template empty and populated cards',require('./query-empty-example.cjs').documentHtml(),true),
  HOME_TASK_EMPTY_DEMO: iframe('home-task-empty-demo','Biscuit: no outstanding tasks',require('./home-task-empty-example.cjs').documentHtml(),true),

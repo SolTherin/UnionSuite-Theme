@@ -1,4 +1,4 @@
-# Case page: handover (10 October 2026)
+# Case page: handover (12 October 2026)
 
 Start here, then read `README.md` (candidates C1–C41, files, data sources, open
 decisions). This file keeps what the README does not: the decisions and their
@@ -12,9 +12,15 @@ way.
   by the `static-node` launch config) has rail tabs Overview, Details,
   Activity, Parties, Attachments. Sample data and stubs: `case-page.js`.
   Standalone export: `node build-standalone.cjs` then `--check` (the output,
-  `Case-Page-Standalone.html`, is ignored by Git; 10 stylesheets, 10 scripts).
+  `Case-Page-Standalone.html`, is ignored by Git; 9 stylesheets, 9 scripts).
 - **Every add on the page is in place** (US-INLINE-COMPOSER, C40), approved by
-  the owner. Its next step is promotion into the theme (below).
+  the owner, and **now in the shared theme** (12 October 2026): the block
+  after the action engine in `zUnionSuite.js`, its section in
+  `zUnionSuite.css`, two dark details in `zzDarkMode.css`, and the usage
+  guide's `#inline-composer` (live example, copyable spec, field types,
+  popup contract; test `usage/tests/test-inline-composer.cjs`). The case
+  specs stay in `case-actions.candidate.js` until the case page moves to
+  `Scripts/ActionDefinitions.js`.
 - **Approved, not built:** `prototypes/approved/list-search-and-paging/`, the
   theme's own paging and search-everything for lists, with the found record
   kept in view in context. Read it before touching list search or paging.
@@ -33,7 +39,7 @@ The owner's brief, in order (all 10 October 2026):
    template (the definition blob holds the Query Template HTML) was explored
    and rejected as too complex for a transition. The simple version won.
 
-**The pieces** (`composer.candidate.js`, `composer.candidate.css`,
+**The pieces** (US-INLINE-COMPOSER in the theme; the case specs in
 `case-actions.candidate.js`):
 
 - `UnionSuiteComposers.define(key, spec)` defines two actions: `key` (the
@@ -44,7 +50,7 @@ The owner's brief, in order (all 10 October 2026):
 - A spec declares the composer's fields as data (textarea, text, date, time,
   select, checkbox, files, combobox), `required`, `shownBy`, `confirm` (an
   "are you sure"), `submit`, `lists`, `arrive`, `feed`, `keepOpen`. Field and
-  type details are in the file header.
+  type details are in the block's header and the guide.
 - **On save:** the button spins for the save only. On success the composer
   clears (keepOpen: tasks, staff, parties) or folds away, and at the same moment
   a **holding row** opens where `arrive` says (`top`, `bottom` of the rows
@@ -52,8 +58,9 @@ The owner's brief, in order (all 10 October 2026):
   typed, a tick that draws itself (ring 640ms, check 480ms after 440ms: the
   owner asked for it "2x as slow") and "Saved" (it is saved), then a soft
   shimmer until the real row arrives.
-- **Query Template sections:** the page is read quietly (the same URL the
-  theme's refresh uses), rows compared by record (ordinal, otherwise text), and
+- **Query Template sections:** `UnionSuiteRefresh.queryTemplate(selector,
+  {insert: true, holding})` (US-ACTION-REFRESH) reads the page quietly, with
+  the refresh's queue, timeout and checks; rows compared by record (ordinal, otherwise text), and
   only new rows go in. Each takes its holding row's place (matched by the
   `Ordinal` the save returns; otherwise in order): in the same place it grows
   from the holding row's height with its contents fading in; elsewhere the
@@ -63,7 +70,7 @@ The owner's brief, in order (all 10 October 2026):
   the section changes; the theme then dresses the new row
   (`UnionSuiteIqaFilters`, `UnionSuiteActions`, `UnionSuiteTaskRows`,
   `UnionSuiteActionMenus` refreshes, and a `us:query-template-refreshed` event
-  with `detail.inserted`).
+  whose `detail.inserted` is the number of rows added, 0 included).
 - **Feed sections (the timeline):** the holding row is a record card (the tick
   in the timeline node). The feed then calls the new theme method
   `UnionSuiteActivityFeed.reload(feed, {quiet: true, types})` (in
@@ -71,8 +78,16 @@ The owner's brief, in order (all 10 October 2026):
   record type's source IQAs from the start and folds in only the new cards: no
   "Loading activity…", no redraw. `types` is the spec's `feed`, default its kind
   (tasks show as notes).
-- **Other lists the save changes** follow: feeds quietly, Query Templates by
-  the theme's normal refresh.
+- **Other lists the save changes** take their new rows quietly too (feeds by
+  the quiet reload), and all the Query Template lists of one save share one
+  page read. Before, the others refreshed under the overlay.
+- **More options** (owner, 11 October 2026) carries the draft into the popup
+  (a one-time `usDraft` key; the popup's theme takes it and fills
+  `form.fill`, or HubForms reads `UnionSuiteComposers.received()`) and
+  leaves the composer underneath. The popup reports `{saved: true, Ordinal}`
+  or `{cancel: true}` as it closes (BeyondFormz: a submit script, in the
+  guide); saved clears the composer at once, cancel keeps it, nothing passed
+  compares the lists. Try it here with `window.casePopupResult`.
 - **Meetings dated before today** ask first: "That date has passed. Save the
   meeting anyway?", Save becoming "Save anyway"; changing anything withdraws it.
   Today is `UnionSuiteQueryStatesConfig.today` when set (previews pin it), else
@@ -106,25 +121,25 @@ The owner's brief, in order (all 10 October 2026):
 
 ## Next steps, in order
 
-1. **Promote the composer into the theme** ("step 3"): US-INLINE-COMPOSER
-   into `zUnionSuite.js`/`.css` (its own block after the action engine), the
-   quiet insert beside US-ACTION-REFRESH, a usage guide section with examples
-   and copyable spec, the guide build and checks. Use
-   `UnionSuiteRecordCards.fold` for reveal/collapse (AGENTS.md, Motion); the
-   prototype has its own `fold`/`unfold`.
-2. **List search and paging** (`prototypes/approved/list-search-and-paging/`).
-   Do it after or with step 1: the quick add must re-run the new pager.
-3. Smaller, open: the holding row's text starts slightly left of task titles
-   (cosmetic; it does not know each list's columns); a Query Template list over
-   30 rows still uses `simplePaginate` until step 2.
-4. Carried over: agreement banner match; agreement Members and Organisations
+1. **List search and paging** (`prototypes/approved/list-search-and-paging/`).
+   The quick insert must work with the new pager: today a paged list that
+   grows past its page is refreshed in full instead.
+2. **BeyondFormz fill:** needs a real BeyondFormz form's markup (field
+   names, when it has drawn, whether its upload takes files from a script) to
+   write each spec's `form.fill`; the guide's checklist covers setting one up.
+3. **Live checks** once uploaded: a composer save on the dev tenant, that the
+   theme loads inside iMIS popups (the draft hand-off needs it), and a
+   BeyondFormz close value.
+4. Smaller, open: the holding row's text starts slightly left of task titles
+   (cosmetic; it does not know each list's columns).
+5. Carried over: agreement banner match; agreement Members and Organisations
    report columns.
 
 ## Traps found this session
 
 - **Function names in one IIFE collide silently.** Twice a new helper
-  (`open`, then `place`) shadowed an existing one in `composer.candidate.js`
-  and every Add button stopped working. Grep for `function NAME(` before
+  (`open`, then `place`) shadowed an existing one in the composer (now in
+  `zUnionSuite.js`) and every Add button stopped working. Grep for `function NAME(` before
   adding one.
 - **`array.map(fn)` passes the index** as the second argument:
   `lists.map(renderList)` broke when `renderList` gained a second parameter.
@@ -144,6 +159,37 @@ The owner's brief, in order (all 10 October 2026):
   and reset it after.
 - **Cache:** reload changed files with `fetch(file, {cache: 'reload'})` then
   `location.reload()`; the theme file is at `../../../THeme/UnionSuite/zUnionSuite.js`.
+- **A guide example frame's `location.origin` reads `"null"`** (srcdoc),
+  so a page read there must use `url: 'about:blank'` (also `null`) and a
+  stubbed fetch, as the refresh and composer examples do.
+- **`String.replace` with theme code as the replacement** turns the ` `data-us-task-completed` comes
+  from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
+  completed filter and counts are the theme's (US-QUERY-SEARCH).
+
+## Owner preferences seen this session
+
+- UX first; smooth, honest feedback; no flashes or double animations.
+- Asks to talk plans through before code ("talk me through the plan for this
+  before writing anything"); give options with a clear recommendation, then
+  build when told.
+- Prefers the simple version when the complex one is mostly mechanism.
+- Terminology: parties (not complainants), attachments (not files).
+` in
+  `' `data-us-task-completed` comes
+  from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
+  completed filter and counts are the theme's (US-QUERY-SEARCH).
+
+## Owner preferences seen this session
+
+- UX first; smooth, honest feedback; no flashes or double animations.
+- Asks to talk plans through before code ("talk me through the plan for this
+  before writing anything"); give options with a clear recommendation, then
+  build when told.
+- Prefers the simple version when the complex one is mostly mechanism.
+- Terminology: parties (not complainants), attachments (not files).
+ + value` into the rest of the page: pass a function. It breaks the
+  guide's CCO sticky example today (flagged as its own task), which is why
+  `test-query-template-refresh.cjs` fails only its final no-errors check.
 - **Theme state is derived in the browser:** `data-us-task-completed` comes
   from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
   completed filter and counts are the theme's (US-QUERY-SEARCH).

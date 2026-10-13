@@ -552,6 +552,49 @@ SOFTWARE.
     try { node = set.querySelector(selector); } catch (_) { return null; }
     return node ? [...set.children].find(child => child.contains(node)) || null : null;
   }
+  // The page as the server renders it now, parsed but not shown. Every
+  // Query Template refresh reads it so.
+  async function freshDocument(url, signal) {
+    const response = await fetch(url.href, {credentials:'same-origin', cache:'no-store', redirect:'error', signal});
+    if (!response.ok) throw new Error('Query Template refresh failed (HTTP ' + response.status + ').');
+    if (!/\btext\/html\b/i.test(response.headers.get('content-type') || '')) throw new Error('Query Template refresh did not return HTML.');
+    if (response.redirected || (response.url && new URL(response.url).href !== url.href)) throw new Error('Query Template refresh returned a different page.');
+    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+    if (doc.querySelector('input.SignInButton')) throw new Error('Sign in again before refreshing the Query Template.');
+    return doc;
+  }
+  // The parts of the one iPart with this ID on a page read.
+  function freshParts(doc, id) {
+    const matches = doc.querySelectorAll('#' + CSS.escape(id));
+    if (matches.length !== 1) throw new Error('The refreshed page has no unique matching Query Template iPart.');
+    return templateParts(matches[0]);
+  }
+  async function freshTemplate(url, id, signal) {
+    return freshParts(await freshDocument(url, signal), id);
+  }
+  // Inserts asked for together (match: 'all') share one page read.
+  const sharedReads = Symbol('sharedReads');
+  // The same-origin page URL a refresh reads, without its hash.
+  function freshUrl(options) {
+    const url = new URL(options.url || pageUrl(), location.href);
+    if (url.origin !== location.origin || url.username || url.password) throw new Error('Query Template refresh requires a same-origin page URL.');
+    url.hash = '';
+    return url;
+  }
+  // A request's own signal: the caller's, the timeout's and leaving the page.
+  function deadline(timeout, signal) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal?.aborted) abort();
+    signal?.addEventListener('abort', abort, {once:true});
+    window.addEventListener('pagehide', abort, {once:true});
+    const timer = setTimeout(abort, timeout);
+    return {signal:controller.signal, done() {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      window.removeEventListener('pagehide', abort);
+    }};
+  }
   async function reloadRow(ref, options, requestedPage) {
     const {timeout=30000, signal} = options;
     if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
@@ -559,27 +602,12 @@ SOFTWARE.
     const live = templateParts(current(ref));
     const row = typeof options.row === 'string' ? rowOf(live.set, options.row) : null;
     if (!row) return reloadTemplate(ref, {...options, row: null}, requestedPage);
-    const url = new URL(options.url || pageUrl(), location.href);
-    if (url.origin !== location.origin || url.username || url.password) throw new Error('Query Template refresh requires a same-origin page URL.');
-    url.hash = '';
-    const controller = new AbortController();
-    const abort = () => controller.abort();
-    if (signal?.aborted) abort();
-    signal?.addEventListener('abort', abort, {once:true});
-    window.addEventListener('pagehide', abort, {once:true});
-    const timer = setTimeout(abort, timeout);
+    const url = freshUrl(options);
+    const request = deadline(timeout, signal);
     const idle = rowBusy(row);
     try {
-      const response = await fetch(url.href, {credentials:'same-origin', cache:'no-store', redirect:'error', signal:controller.signal});
-      if (!response.ok) throw new Error('Query Template refresh failed (HTTP ' + response.status + ').');
-      if (!/\btext\/html\b/i.test(response.headers.get('content-type') || '')) throw new Error('Query Template refresh did not return HTML.');
-      if (response.redirected || (response.url && new URL(response.url).href !== url.href)) throw new Error('Query Template refresh returned a different page.');
-      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
-      if (doc.querySelector('input.SignInButton')) throw new Error('Sign in again before refreshing the Query Template.');
-      const matches = doc.querySelectorAll('#' + CSS.escape(live.container.id));
-      if (matches.length !== 1) throw new Error('The refreshed page has no unique matching Query Template iPart.');
-      const fresh = templateParts(matches[0]);
-      if (controller.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
+      const fresh = await freshTemplate(url, live.container.id, request.signal);
+      if (request.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
       if (location.href !== requestedPage || !row.isConnected) throw new Error('The Query Template changed while its refresh was pending.');
       const replacement = rowOf(fresh.set, options.row);
       if (replacement) row.replaceWith(document.importNode(replacement, true));
@@ -588,29 +616,21 @@ SOFTWARE.
       live.container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container:live.container, row:options.row}}));
       return {status:'refreshed', controlId:live.container.id, row:options.row};
     } finally {
-      clearTimeout(timer);
-      signal?.removeEventListener('abort', abort);
-      window.removeEventListener('pagehide', abort);
+      request.done();
       idle();
     }
   }
   async function reloadTemplate(ref, options, requestedPage) {
     if (options.row) return reloadRow(ref, options, requestedPage);
+    if (options.insert) return insertTemplate(ref, options, requestedPage);
     const {timeout=30000, signal, initialize} = options;
     if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
     if (initialize != null && typeof initialize !== 'function') throw new TypeError('initialize must be a function.');
     if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
     const live = templateParts(current(ref));
     if (!live.container.id || uniqueId(live.container.id) !== live.container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
-    const url = new URL(options.url || pageUrl(), location.href);
-    if (url.origin !== location.origin || url.username || url.password) throw new Error('Query Template refresh requires a same-origin page URL.');
-    url.hash = '';
-    const controller = new AbortController();
-    const abort = () => controller.abort();
-    if (signal?.aborted) abort();
-    signal?.addEventListener('abort', abort, {once:true});
-    window.addEventListener('pagehide', abort, {once:true});
-    const timer = setTimeout(abort, timeout);
+    const url = freshUrl(options);
+    const request = deadline(timeout, signal);
     const {container, owner, set} = live;
     const focus = focusIdentity(owner), busy = container.getAttribute('aria-busy');
     const position = container.style.getPropertyValue('position'), priority = container.style.getPropertyPriority('position');
@@ -635,17 +655,9 @@ SOFTWARE.
     container.append(overlay);
     const scrollTop = container.scrollTop, scrollLeft = container.scrollLeft;
     try {
-      const response = await fetch(url.href, {credentials:'same-origin', cache:'no-store', redirect:'error', signal:controller.signal});
-      if (!response.ok) throw new Error('Query Template refresh failed (HTTP ' + response.status + ').');
-      if (!/\btext\/html\b/i.test(response.headers.get('content-type') || '')) throw new Error('Query Template refresh did not return HTML.');
-      if (response.redirected || (response.url && new URL(response.url).href !== url.href)) throw new Error('Query Template refresh returned a different page.');
-      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
-      if (doc.querySelector('input.SignInButton')) throw new Error('Sign in again before refreshing the Query Template.');
-      const matches = doc.querySelectorAll('#' + CSS.escape(container.id));
-      if (matches.length !== 1) throw new Error('The refreshed page has no unique matching Query Template iPart.');
-      const fresh = templateParts(matches[0]), settings = pagination(fresh);
+      const fresh = await freshTemplate(url, container.id, request.signal), settings = pagination(fresh);
       if ((owner === container) !== (fresh.owner === fresh.container)) throw new Error('The Query Template wrapper changed; reload the page.');
-      if (controller.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
+      if (request.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
       if (location.href !== requestedPage || current(ref) !== container || !owner.isConnected || !set.isConnected || templateParts(container).set !== set) {
         throw new Error('The Query Template changed while its refresh was pending.');
       }
@@ -666,9 +678,7 @@ SOFTWARE.
       container.scrollLeft = scrollLeft;
       return {status:'refreshed', controlId:container.id};
     } finally {
-      clearTimeout(timer);
-      signal?.removeEventListener('abort', abort);
-      window.removeEventListener('pagehide', abort);
+      request.done();
       overlay.remove();
       for (const [node, inert] of inertNodes) node.inert = inert;
       if (busy === null) container.removeAttribute('aria-busy'); else container.setAttribute('aria-busy', busy);
@@ -681,6 +691,145 @@ SOFTWARE.
         if (target?.setSelectionRange && focus.start != null) target.setSelectionRange(focus.start, focus.end);
       }
     }
+  }
+  // Only the rows the page has gained (owner, 10 October 2026: "save data,
+  // row slides down. no report reloading. no flashes"). The page is read
+  // quietly, with no overlay, and the iPart's rows compared with it by
+  // record: a row's ordinal (data-us-task-ordinal, data-us-contact-ordinal
+  // or data-ordinal), otherwise its text. New rows go in where the page has
+  // them; rows the page no longer has (a list of the newest few) close; the
+  // parts of staying rows their template marks data-us-live (a count) take
+  // the page's text. Nothing else in the iPart changes. options.holding
+  // lists rows already waiting in the set for the new entries (the
+  // composer's holding rows): each new row takes its holding row's place,
+  // matched by data-us-holding-id against the row's ordinal, the rest in
+  // order. A paged list that grows past its page is refreshed in full.
+  const rowsOf = set => [...set.children].filter(child => child.matches('section'));
+  function rowKey(row) {
+    const marked = row.querySelector('[data-us-task-ordinal], [data-us-contact-ordinal], [data-ordinal]');
+    return marked?.getAttribute('data-us-task-ordinal') || marked?.getAttribute('data-us-contact-ordinal') ||
+      marked?.getAttribute('data-ordinal') || row.textContent.replace(/\s+/g, ' ').trim();
+  }
+  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Closes and removes a row with the shared fold (US-RECORD-CARDS).
+  function leave(row) {
+    const fold = window.UnionSuiteRecordCards?.fold;
+    if (!fold || !row.isConnected) { row.remove(); return; }
+    fold(row, false).then(() => { if (row.hidden) row.remove(); });
+  }
+  // The first row after this one that was there before (holding rows and
+  // new rows skipped): two rows with the same one stand in the same place.
+  function nextRow(row, skip) {
+    let next = row.nextElementSibling;
+    while (next && skip.has(next)) next = next.nextElementSibling;
+    return next;
+  }
+  // A new row and its holding row. In the same place, the row takes over:
+  // from the holding row's height to its own, its contents fading in. In
+  // another place (the report sorts it elsewhere), the holding row closes
+  // as the row opens. A row the theme hides (a filter) stays hidden.
+  function land(node, held, same) {
+    const reset = () => ['height', 'overflow', 'opacity'].forEach(name => node.style.removeProperty(name));
+    if (held && !same) leave(held);
+    if (!node.getClientRects().length) {
+      reset();
+      if (held && same) leave(held);
+      return;
+    }
+    const height = node.scrollHeight;
+    const from = same ? held.getBoundingClientRect().height : 0;
+    if (same) held.remove();
+    if (reducedMotion() || !node.animate) {
+      reset();
+      return;
+    }
+    node.animate([
+      {height: from + 'px', opacity: 0},
+      {height: height + 'px', opacity: 1}
+    ], {duration: same ? 220 : 280, easing: 'cubic-bezier(.2, 0, 0, 1)'}).finished.catch(() => {}).then(reset);
+    node.style.removeProperty('opacity');
+    node.style.removeProperty('height');
+  }
+  async function insertTemplate(ref, options, requestedPage) {
+    const {timeout=30000, signal} = options;
+    if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
+    if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
+    const live = templateParts(current(ref));
+    if (!live.container.id || uniqueId(live.container.id) !== live.container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
+    const {container, set} = live;
+    const holding = (Array.isArray(options.holding) ? options.holding : []).filter(row => row.parentElement === set);
+    const url = freshUrl(options);
+    const request = deadline(timeout, signal);
+    let fresh;
+    try {
+      const reads = options[sharedReads];
+      let read = reads?.get(url.href);
+      if (!read) {
+        read = freshDocument(url, request.signal);
+        reads?.set(url.href, read);
+      }
+      fresh = freshParts(await read, container.id);
+      if (request.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
+    } finally {
+      request.done();
+    }
+    if (location.href !== requestedPage || current(ref) !== container || !set.isConnected || templateParts(container).set !== set) {
+      throw new Error('The Query Template changed while its refresh was pending.');
+    }
+    const incoming = rowsOf(fresh.set);
+    const settings = pagination(fresh);
+    if (settings && incoming.length > settings.elementsPerPage) {
+      holding.forEach(row => row.remove());
+      return reloadTemplate(ref, {...options, insert:false}, location.href);
+    }
+    const incomingKeys = new Set(incoming.map(rowKey));
+    const known = new Set(rowsOf(set).map(rowKey));
+    const added = incoming.filter(row => !known.has(rowKey(row)));
+    // An empty list's No results content gives way to the first row.
+    if (added.length && !rowsOf(set).length) [...set.children].filter(child => !holding.includes(child)).forEach(child => child.remove());
+    const item = rowsOf(set)[0]?.getAttribute('data-item');
+    const nodes = [];
+    added.forEach(row => {
+      const node = document.importNode(row, true);
+      if (item) node.setAttribute('data-item', item);
+      Object.assign(node.style, {height: '0px', overflow: 'hidden', opacity: '0'});
+      const following = incoming.slice(incoming.indexOf(row) + 1).map(rowKey);
+      const next = rowsOf(set).find(existing => !nodes.includes(existing) && following.includes(rowKey(existing)));
+      if (next) next.before(node);
+      else set.append(node);
+      nodes.push(node);
+    });
+    const gone = rowsOf(set).filter(row => !nodes.includes(row) && !incomingKeys.has(rowKey(row)));
+    const freshByKey = new Map(incoming.map(row => [rowKey(row), row]));
+    const texts = rowsOf(set).filter(row => !nodes.includes(row) && freshByKey.has(rowKey(row))).flatMap(row => {
+      const next = freshByKey.get(rowKey(row)).querySelectorAll('[data-us-live]');
+      return [...row.querySelectorAll('[data-us-live]')].map((node, index) => [node, next[index]?.textContent]);
+    }).filter(([node, text]) => text != null && node.textContent !== text);
+    const waiting = [...holding];
+    const take = test => {
+      const index = waiting.findIndex(test);
+      return index < 0 ? null : waiting.splice(index, 1)[0];
+    };
+    // An ID that matches no new row still has a row to become: the rest
+    // pair in order, so a holding row never closes beside its own entry.
+    const pairs = nodes.map(node => [node, take(row => row.getAttribute('data-us-holding-id') === rowKey(node))]);
+    pairs.forEach(pair => { pair[1] ||= take(() => true); });
+    // Themed before the browser paints them (task state, the completed
+    // filter, counts, actions), as a full refresh does.
+    refreshTemplateTheme();
+    container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container, inserted:nodes.length}}));
+    requestAnimationFrame(() => {
+      // Where each pair stands is read before any of them moves.
+      const skip = new Set([...holding, ...nodes]);
+      pairs.map(([node, held]) => [node, held, Boolean(held?.isConnected) && nextRow(held, skip) === nextRow(node, skip)])
+        .forEach(([node, held, same]) => land(node, held, same));
+      // Holding rows with no row to become (a filter hides it, or the
+      // report does not have it) close, as do rows the page no longer has.
+      waiting.forEach(leave);
+      gone.forEach(leave);
+      texts.forEach(([node, text]) => { node.textContent = text; });
+    });
+    return {status:'inserted', controlId:container.id, inserted:nodes.length, removed:gone.length};
   }
   function enqueueTemplate(ref, options={}) {
     const requestedPage = location.href;
@@ -705,10 +854,11 @@ SOFTWARE.
       return identity(container);
     });
     const results = [], seen = new Set();
+    const each = options.insert ? {...options, [sharedReads]: new Map()} : options;
     for (const ref of refs) {
       if (seen.has(ref.key)) continue;
       seen.add(ref.key);
-      results.push(await enqueueTemplate(ref, options));
+      results.push(await enqueueTemplate(ref, each));
     }
     return results;
   }
@@ -1757,6 +1907,945 @@ SOFTWARE.
   window.addEventListener('load',()=>refresh(true),{once:true});window.addEventListener('popstate',()=>refresh(true));
 })();
 /* US-UNIFIED-ACTIONS:END */
+
+/* US-INLINE-COMPOSER:START — add a record in place, in the section it belongs to.
+   Owner, 10 October 2026: "apply the same format to all add functions ...
+   then wrap that style into the theme". Its styles are US-INLINE-COMPOSER in
+   zUnionSuite.css. UnionSuiteComposers.define(key, spec) defines two actions
+   with the action engine (US-UNIFIED-ACTIONS):
+
+   - key: the section's add button. A toggle: it opens the composer at the
+     top of the section it was pressed in (above a list's search, otherwise
+     at the top of the body, above a feed's filters), shows pressed while the
+     composer is open, and puts it away when pressed again, keeping what was
+     written. A composer only ever opens in the section whose button was
+     pressed. Cancel and Escape discard it.
+   - key + '-form': the full form, a popup. It is the composer's More
+     options, and the button to use outside a section (a banner's Actions
+     menu). It keeps the authored label, so one action serves both.
+
+   A composer is the main field, then one line of the other fields, a
+   message, More options, Cancel and Save. Ctrl+Enter saves (Enter in a
+   one-line field). On save the composer clears (keepOpen) or folds away and
+   a holding row (what was typed, a drawn tick and "Saved", then a shimmer)
+   opens where the spec's arrive says the entry lands. The real row then
+   takes its place: a Query Template list is read quietly
+   (UnionSuiteRefresh.queryTemplate with insert) and gains only its new
+   rows; a feed asks its sources of the record's types for their newest rows
+   (UnionSuiteActivityFeed.reload, quiet). The other lists the save changes
+   follow the same way. Nothing reloads in view (owner, 10 October 2026:
+   "save data, row slides down. no report reloading. no flashes").
+
+   More options carries the draft into the popup (owner, 11 October 2026:
+   saved values "should definitely carry over") and leaves the composer open
+   underneath. The popup's URL gets a one-time usDraft key; in the popup the
+   theme takes the draft from the page that opened it, fills the fields the
+   spec's form.fill names, and keeps it for the form's own script
+   (UnionSuiteComposers.received()). A form says how it closed by passing
+   {saved: true, Ordinal} or {cancel: true} as the popup closes (a
+   BeyondFormz submit script; HubForms). Saved: the lists take the new row
+   quietly and the composer clears. Cancelled: the composer stays as typed.
+   Neither (the popup's ×, a native editor): the lists are read quietly, and
+   a new row means it saved.
+
+   spec: {
+     label, icon                 the add button (icon: plus by default)
+     context, recordKey          as any action; the save receives the context
+     owner, source               the actions' metadata
+     form: {label, href, title, maxWidth, fill}
+                                 the full form; fill maps a composer field's
+                                 name to the popup's field (a selector) or to
+                                 function (value, document) that sets it
+     lists(values)               classes of the iParts the save changes: the
+                                 composer's own takes the holding rows
+     feed                        the timeline types (data-type) the record
+                                 shows as (default: the composer's kind)
+     arrive                      where the holding row opens: 'top' (the
+                                 default), 'bottom' (of the rows showing) or
+                                 {field, attribute, order} (among them by a
+                                 value); the report still places the row
+     pageUrl                     the page a quiet insert reads (default:
+                                 this page, as the Query Template refresh)
+     composer: {
+       kind                      the modifier class (us-composer--KIND)
+       label                     the group's accessible name
+       save                      the Save button's text
+       keepOpen                  clear and stay open after a save
+       main, fields              the main field, then the bar's fields
+       confirm(values)           a question to ask before saving, or none: the
+                                 first Save shows it and becomes "Save
+                                 anyway"; changing anything withdraws it
+       submit(values, context)   resolves once saved, with the new record's
+                                 {Ordinal} (or {Ordinals}); throws on failure
+       saved(values) or text     announced after a save
+       failed                    shown when the save fails
+     }
+   }
+   field: {type, name, label, placeholder, required (its message), shownBy
+   (a checkbox's name: shown, and required, only while it is ticked),
+   width ('grow'), options (select), search({term, wrapper}) and empty(term)
+   (combobox: resolves [{value, name, meta, disabled}]), avatars (combobox)}.
+   Types: textarea, text, date, time, select, checkbox, files, combobox. A
+   combobox's value is the option picked, never typed text. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteComposers) return;
+
+  const specs = new Map();
+  const drafts = new WeakMap();
+  const contexts = new WeakMap();
+  const searches = new WeakMap();
+  const homes = new Map();
+  const handoffs = new Map();
+  let serial = 0;
+  let received = null;
+
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+  const actionClass = key => 'us-action-' + key.replace(/\./g, '-');
+  const sectionOf = node => node?.closest('.ContentItemContainer > div');
+  const panelBody = wrapper => wrapper?.querySelector(':scope > .panel > .panel-body-container > .panel-body');
+  const buttonFor = (wrapper, key) => wrapper?.querySelector(':scope > .panel > .panel-heading .' + actionClass(key));
+  const fieldsOf = spec => [spec.composer.main, ...(spec.composer.fields || [])];
+  const fieldNamed = (composer, name) => composer.querySelector(`.us-composer__field[data-name="${CSS.escape(name)}"]`);
+  const specFor = composer => specs.get(composer.dataset.key);
+  const kindOf = (spec, key) => spec.composer.kind || key.split('.').pop();
+
+  function openIn(wrapper, key) {
+    const open = wrapper?.querySelectorAll(':scope > .panel > .us-composer, :scope > .panel > .panel-body-container > .panel-body > .us-composer') || [];
+    return [...open].find(composer => !composer.hasAttribute('data-closing') && (!key || composer.dataset.key === key));
+  }
+
+  function draftsFor(wrapper) {
+    if (!drafts.has(wrapper)) drafts.set(wrapper, {});
+    return drafts.get(wrapper);
+  }
+
+  // Shows or hides with the shared fold (US-RECORD-CARDS): a slide from the
+  // element's current size that reverses mid-way. Without it, at once.
+  function slide(element, open, duration) {
+    const fold = window.UnionSuiteRecordCards?.fold;
+    if (!fold) {
+      element.hidden = !open;
+      return Promise.resolve();
+    }
+    return fold(element, open, duration);
+  }
+
+  // Slides away and goes, unless something reopened it meanwhile.
+  function leave(element) {
+    slide(element, false).then(() => {
+      if (element.hidden) element.remove();
+    });
+  }
+
+  // ── Building ────────────────────────────────────────────────────
+  function fieldHtml(field, id, main) {
+    const classes = 'us-composer__field us-composer__field--' + field.type + (field.width === 'grow' ? ' us-composer__field--grow' : '');
+    const shown = field.shownBy ? ` data-shown-by="${escape(field.shownBy)}" hidden` : '';
+    const attributes = `id="${id}" data-name="${escape(field.name)}" aria-label="${escape(field.label)}"${shown}` +
+      (field.placeholder ? ` placeholder="${escape(field.placeholder)}"` : '');
+    const mainClass = main ? ' us-composer__main' : '';
+    switch (field.type) {
+      case 'textarea':
+        return `<textarea class="${classes + mainClass}" ${attributes} rows="3"></textarea>`;
+      case 'select':
+        return `<select class="${classes + mainClass}" ${attributes}>${field.options.map(option => `<option>${escape(option)}</option>`).join('')}</select>`;
+      case 'checkbox':
+        return `<label class="us-composer__check"><input type="checkbox" class="${classes}" id="${id}" data-name="${escape(field.name)}"> ${escape(field.label)}</label>`;
+      case 'files':
+        return `<label class="us-composer__drop${mainClass}" for="${id}">` +
+          `<input type="file" class="${classes}" ${attributes} multiple>` +
+          '<i class="ti ti-upload" aria-hidden="true"></i>' +
+          '<span>Drop files here or <span class="us-composer__browse">choose files</span></span></label>' +
+          `<ul class="us-composer__files" aria-label="${escape(field.label)} to upload" hidden></ul>`;
+      case 'combobox':
+        return `<span class="us-composer__combo${mainClass}">` +
+          `<input type="text" class="${classes}" ${attributes} role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-list" autocomplete="off">` +
+          `<ul class="us-composer__options" id="${id}-list" role="listbox" aria-label="${escape(field.label)}" hidden></ul></span>`;
+      default:
+        return `<input type="${field.type}" class="${classes + mainClass}" ${attributes} autocomplete="off">`;
+    }
+  }
+
+  function build(key, spec, context) {
+    const composer = document.createElement('div');
+    const id = 'us-composer-' + (++serial);
+    const config = spec.composer;
+    composer.className = 'us-composer us-composer--' + kindOf(spec, key);
+    composer.dataset.key = key;
+    composer.hidden = true;
+    composer.setAttribute('role', 'group');
+    composer.setAttribute('aria-label', config.label);
+    composer.innerHTML = fieldHtml(config.main, id, true) +
+      '<div class="us-composer__bar">' +
+      (config.fields || []).map((field, index) => fieldHtml(field, id + '-' + index, false)).join('') +
+      '<p class="us-composer__message" role="status"></p>' +
+      `<button type="button" class="TextButton us-outline-button us-composer__more ${actionClass(key + '-form')}">More options</button>` +
+      '<button type="button" class="TextButton us-outline-button us-composer__cancel">Cancel</button>' +
+      `<button type="button" class="TextButton PrimaryButton us-composer__save">${escape(config.save)}</button>` +
+      '</div>';
+    contexts.set(composer, context || {});
+    return composer;
+  }
+
+  // First in the section's content: above a list's search (US-QUERY-SEARCH
+  // puts it between the heading and the body), otherwise at the top of the
+  // body, above a feed's filters.
+  function place(wrapper, composer) {
+    homes.set(composer, wrapper.parentElement);
+    const search = wrapper.querySelector(':scope > .panel > .us-query-search-controls');
+    composer.classList.toggle('us-composer--above-search', Boolean(search));
+    if (search) search.before(composer);
+    else panelBody(wrapper).prepend(composer);
+  }
+
+  const focusMain = (composer, preventScroll) => composer.querySelector('.us-composer__field')?.focus({preventScroll});
+
+  // ── Opening and closing ─────────────────────────────────────────
+  function open(trigger, key, context) {
+    const spec = specs.get(key);
+    const wrapper = sectionOf(trigger);
+    if (!spec || !panelBody(wrapper)) return false;
+    const kept = draftsFor(wrapper);
+    const current = openIn(wrapper);
+    // Pressed again, the button puts the composer away with what was
+    // written (owner, 10 October 2026); Cancel and Escape discard it.
+    if (current?.dataset.key === key) {
+      kept[key] = current;
+      close(current, true);
+      return true;
+    }
+    if (current) {
+      kept[current.dataset.key] = current;
+      close(current, false);
+    }
+    const composer = kept[key] || build(key, spec, context);
+    delete kept[key];
+    composer.removeAttribute('data-closing');
+    place(wrapper, composer);
+    buttonFor(wrapper, key)?.setAttribute('aria-pressed', 'true');
+    slide(composer, true);
+    focusMain(composer, false);
+    window.UnionSuiteActions?.refresh();
+    return true;
+  }
+
+  function close(composer, returnFocus) {
+    closeOptions(composer);
+    const button = buttonFor(sectionOf(composer), composer.dataset.key);
+    button?.setAttribute('aria-pressed', 'false');
+    composer.setAttribute('data-closing', '');
+    homes.delete(composer);
+    slide(composer, false).then(() => {
+      if (composer.hasAttribute('data-closing')) composer.remove();
+    });
+    if (returnFocus) button?.focus({preventScroll: true});
+  }
+
+  function discard(composer, returnFocus) {
+    delete draftsFor(sectionOf(composer))[composer.dataset.key];
+    close(composer, returnFocus);
+  }
+
+  function clear(composer) {
+    composer.querySelectorAll('.us-composer__field').forEach(field => {
+      if (field.type === 'checkbox') field.checked = false;
+      else if (field.type === 'file') setFiles(field, []);
+      else if (field.tagName === 'SELECT') field.selectedIndex = 0;
+      else field.value = '';
+      delete field.dataset.value;
+      if (field.dataset.shownBy) field.hidden = true;
+    });
+    composer.querySelector('.us-composer__message').textContent = '';
+    withdraw(composer);
+  }
+
+  // ── Saving ──────────────────────────────────────────────────────
+  function valuesOf(composer) {
+    const values = {};
+    composer.querySelectorAll('.us-composer__field').forEach(field => {
+      const name = field.dataset.name;
+      if (field.type === 'checkbox') values[name] = field.checked;
+      else if (field.hidden) values[name] = '';
+      else if (field.type === 'file') values[name] = [...field.files];
+      else if (field.getAttribute('role') === 'combobox') values[name] = field.dataset.value || '';
+      else values[name] = field.value.trim();
+    });
+    return values;
+  }
+
+  function problemIn(composer, values) {
+    for (const field of fieldsOf(specFor(composer))) {
+      const element = fieldNamed(composer, field.name);
+      if (!field.required || !element || element.hidden) continue;
+      const value = values[field.name];
+      if (Array.isArray(value) ? !value.length : !value) return {element, message: field.required};
+    }
+    return null;
+  }
+
+  function announce(text) {
+    if (!text) return;
+    let live = document.getElementById('us-composer-live');
+    if (!live) {
+      live = document.createElement('p');
+      live.id = 'us-composer-live';
+      live.className = 'sr-only';
+      live.setAttribute('role', 'status');
+      live.setAttribute('aria-live', 'polite');
+      document.body.append(live);
+    }
+    live.textContent = '';
+    requestAnimationFrame(() => { live.textContent = text; });
+  }
+
+  function busy(button, on) {
+    button.disabled = on;
+    if (on) {
+      button.setAttribute('aria-busy', 'true');
+      button.insertAdjacentHTML('afterbegin', '<span class="us-button-spinner" aria-hidden="true"></span>');
+    } else {
+      button.removeAttribute('aria-busy');
+      button.querySelector('.us-button-spinner')?.remove();
+    }
+  }
+
+  // A question the composer asked, withdrawn: the message clears and Save
+  // has its own text again.
+  function withdraw(composer) {
+    if (!composer.hasAttribute('data-confirming')) return;
+    composer.removeAttribute('data-confirming');
+    const message = composer.querySelector('.us-composer__message');
+    message.textContent = '';
+    message.classList.remove('is-warning');
+    composer.querySelector('.us-composer__save').textContent = specFor(composer).composer.save;
+  }
+
+  async function save(composer) {
+    const spec = specFor(composer);
+    const config = spec.composer;
+    const message = composer.querySelector('.us-composer__message');
+    const button = composer.querySelector('.us-composer__save');
+    if (button.getAttribute('aria-busy') === 'true') return;
+    message.textContent = '';
+    const values = valuesOf(composer);
+    const problem = problemIn(composer, values);
+    if (problem) {
+      message.textContent = problem.message;
+      problem.element.focus();
+      return;
+    }
+    // "Are you sure": the first Save asks, the second saves.
+    const question = config.confirm?.(values);
+    if (question && !composer.hasAttribute('data-confirming')) {
+      composer.setAttribute('data-confirming', '');
+      message.textContent = question;
+      message.classList.add('is-warning');
+      button.textContent = 'Save anyway';
+      return;
+    }
+    withdraw(composer);
+    busy(button, true);
+    let result;
+    try {
+      result = await config.submit(values, contexts.get(composer));
+    } catch (error) {
+      busy(button, false);
+      message.textContent = config.failed || 'This could not be saved. Try again.';
+      console.warn('[US-INLINE-COMPOSER]', error?.message);
+      return;
+    }
+    announce(typeof config.saved === 'function' ? config.saved(values) : config.saved);
+    // Saved: the holding rows open in the list as the composer clears (or
+    // folds away), so something always shows the entry is on its way.
+    const container = sectionOf(composer)?.parentElement;
+    const holds = hold(container, spec, holdTitles(composer, values), idsOf(result), values);
+    busy(button, false);
+    if (config.keepOpen) {
+      clear(composer);
+      focusMain(composer, true);
+    } else {
+      discard(composer, true);
+    }
+    const types = spec.feed || [kindOf(spec, composer.dataset.key)];
+    const others = listContainers(spec.lists(values)).filter(other => other !== container);
+    await settle([container, ...others], holds, types, spec.pageUrl);
+  }
+
+  // ── The new entry ───────────────────────────────────────────────
+  const setOf = container => container?.querySelector(':scope > div > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
+  const rowsOf = set => [...(set?.children || [])].filter(child => child.matches('section'));
+  const queryTemplateOf = container => container?.id && !container.querySelector('.us-activity-feed') ? setOf(container) : null;
+  // A feed's newest cards (US-ACTIVITY-FEED): the first month's list, where
+  // a record just added lands.
+  const feedOf = container => container?.querySelector('.us-activity-feed');
+  const feedListOf = container => feedOf(container)?.querySelector('.us-records__items');
+
+  // The save's answer: the new record's ID (Ordinal), or several (Ordinals).
+  function idsOf(result) {
+    const ids = Array.isArray(result?.Ordinals) ? result.Ordinals : result?.Ordinal != null ? [result.Ordinal] : [];
+    return ids.map(String);
+  }
+
+  // One holding row per entry: the main field's text, the person picked, or
+  // each file chosen.
+  function holdTitles(composer, values) {
+    const main = specFor(composer).composer.main;
+    if (main.type === 'files') return values[main.name].map(file => file.name);
+    const text = main.type === 'combobox' ? fieldNamed(composer, main.name).value : String(values[main.name] ?? '');
+    return [text.split('\n')[0]];
+  }
+
+  function hold(container, spec, titles, ids, values) {
+    const set = queryTemplateOf(container);
+    const feedList = set ? null : feedListOf(container);
+    if (!set && !feedList) return [];
+    // It is saved: a tick that draws itself and "Saved" (the save's own
+    // announcement speaks for it), then a shimmer until the row arrives. In
+    // a feed it is a record card (US-RECORD-CARDS): the tick in the
+    // timeline's node, what was typed in the card.
+    const tick = '<svg class="us-composer-holding__tick" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<circle cx="12" cy="12" r="9" pathLength="1"></circle><path d="m8 12.5 2.8 2.8L16.2 9.6" pathLength="1"></path></svg>';
+    const text = '<span class="us-composer-holding__title"></span><span class="us-composer-holding__meta">Saved</span>';
+    const holds = titles.map((title, index) => {
+      const row = document.createElement(feedList ? 'li' : 'div');
+      if (feedList) {
+        row.className = 'us-composer-holding-card';
+        row.innerHTML = `<article class="us-record"><span class="us-record__node">${tick}</span>` +
+          `<div class="us-record__card us-composer-holding">${text}</div></article>`;
+      } else {
+        row.className = 'us-composer-holding';
+        row.innerHTML = tick + text;
+      }
+      if (ids[index]) row.setAttribute('data-us-holding-id', ids[index]);
+      row.querySelector('.us-composer-holding__title').textContent = title;
+      row.hidden = true;
+      return row;
+    });
+    if (!holds.length) return [];
+    if (feedList) {
+      // A feed is newest first: the card waits at the top.
+      feedList.prepend(...holds);
+    } else {
+      // An empty list's No results content gives way to the first entry.
+      if (!rowsOf(set).length) set.replaceChildren();
+      putHolds(set, holds, spec.arrive || 'top', values);
+    }
+    holds.forEach(row => slide(row, true, 260));
+    return holds;
+  }
+
+  // The rows showing, and the holding rows already waiting (so quick
+  // entries keep their order): top, bottom, or among them by a value (the
+  // composer's field against each row's attribute).
+  function putHolds(set, holds, arrive, values) {
+    const showing = [...set.children].filter(child => (child.matches('section') || child.matches('.us-composer-holding')) && child.getClientRects().length);
+    const put = anchor => anchor ? anchor.before(...holds) : set.append(...holds);
+    if (arrive === 'bottom') {
+      const last = showing[showing.length - 1];
+      return last ? last.after(...holds) : put(null);
+    }
+    if (arrive === 'top' || typeof arrive !== 'object') return put(showing[0] || set.firstElementChild);
+    const {field, attribute, order = 'ascending'} = arrive;
+    const value = String(values[field] ?? '');
+    const read = row => row.getAttribute('data-us-composer-value') ?? (row.matches(`[${attribute}]`) ? row : row.querySelector(`[${attribute}]`))?.getAttribute(attribute);
+    const sign = order === 'descending' ? -1 : 1;
+    holds.forEach(row => row.setAttribute('data-us-composer-value', value));
+    const next = showing.find(row => read(row) != null && sign * read(row).localeCompare(value) > 0);
+    if (next) return put(next);
+    const last = showing[showing.length - 1];
+    return last ? last.after(...holds) : put(null);
+  }
+
+  // The lists take what was saved without reloading in view: a feed asks
+  // its sources of the record's types for their newest rows; the Query
+  // Template lists gain only their new rows, from one quiet read of the
+  // page, each new row taking its holding row's place. A list that cannot
+  // do either refreshes as usual. Resolves with the number of rows added.
+  async function settle(containers, holds, types, pageUrl) {
+    const feeds = window.UnionSuiteActivityFeed;
+    const feedLists = containers.filter(container => feedOf(container));
+    const templates = containers.filter(container => !feedOf(container) && queryTemplateOf(container));
+    const counts = await Promise.all([
+      ...feedLists.map(async container => {
+        const ownHolds = holds.filter(row => container.contains(row));
+        try {
+          return Number(await feeds?.reload?.(feedOf(container), {quiet: true, types})) || 0;
+        } catch (error) {
+          console.warn('[US-INLINE-COMPOSER] Falling back to a feed reload:', error?.message);
+          await feeds?.reload?.(feedOf(container))?.catch?.(() => {});
+          return 0;
+        } finally {
+          ownHolds.forEach(leave);
+        }
+      }),
+      templates.length ? insertInto(templates, holds, pageUrl) : 0
+    ]);
+    holds.filter(row => row.isConnected && !row.hidden && !templates.some(container => container.contains(row)) &&
+      !feedLists.some(container => container.contains(row))).forEach(leave);
+    return counts.reduce((sum, count) => sum + count, 0);
+  }
+
+  async function insertInto(templates, holds, pageUrl) {
+    const selector = templates.map(container => '#' + CSS.escape(container.id)).join(', ');
+    try {
+      const results = await window.UnionSuiteRefresh.queryTemplate(selector, {match: 'all', insert: true, holding: holds, url: pageUrl});
+      return results.reduce((sum, result) => sum + (result?.inserted || 0), 0);
+    } catch (error) {
+      console.warn('[US-INLINE-COMPOSER] Falling back to a refresh:', error?.message);
+      holds.filter(row => row.isConnected && templates.some(container => container.contains(row))).forEach(leave);
+      await window.UnionSuiteRefresh?.queryTemplate(selector, {match: 'all', url: pageUrl}).catch(failure => {
+        console.warn('[US-INLINE-COMPOSER] The lists could not refresh:', failure?.message);
+      });
+      return 0;
+    }
+  }
+
+  function listContainers(classes) {
+    const selector = (classes || []).map(name => '.ContentItemContainer > .' + name).join(', ');
+    return selector ? [...new Set([...document.querySelectorAll(selector)].map(node => node.parentElement))].filter(node => node.id) : [];
+  }
+
+  // ── The full form (More options) ────────────────────────────────
+  // The popup's URL carries a one-time key to the draft, kept here; the
+  // popup takes it (takeDraft) when it loads.
+  function withDraft(href, trigger, key) {
+    const composer = trigger?.closest?.('.us-composer');
+    if (!href || composer?.dataset.key !== key) return href;
+    const values = valuesOf(composer);
+    const files = Object.values(values).filter(Array.isArray).flat();
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(9)), byte => byte.toString(16).padStart(2, '0')).join('');
+    if (composer.dataset.handoff) handoffs.delete(composer.dataset.handoff);
+    handoffs.set(token, Object.freeze({key, values, files, fill: specs.get(key).form.fill || null}));
+    composer.dataset.handoff = token;
+    const url = new URL(href, document.baseURI);
+    url.searchParams.set('usDraft', token);
+    return url.href;
+  }
+
+  function takeDraft(token) {
+    const draft = handoffs.get(String(token)) || null;
+    handoffs.delete(String(token));
+    return draft;
+  }
+
+  // How the popup closed: what the form passed as it closed (the RadWindow's
+  // close argument, or the theme dialog's reason).
+  function outcomeOf(closeEvent) {
+    let value = null;
+    try {
+      value = typeof closeEvent?.get_argument === 'function' ? closeEvent.get_argument() : closeEvent?.reason;
+    } catch (error) {
+      value = null;
+    }
+    if (value && typeof value === 'object') {
+      if (value.saved === true) return 'saved';
+      if (value.cancel === true) return 'cancel';
+    }
+    return null;
+  }
+
+  // Saved: the lists take the new rows quietly and the composer clears.
+  // Cancelled: nothing changed, and the composer is still there as typed.
+  // Neither: the lists are read quietly, and a new row means it saved.
+  async function formClosed(env, key) {
+    const spec = specs.get(key);
+    const composer = env.trigger?.closest?.('.us-composer');
+    if (composer?.dataset.handoff) {
+      handoffs.delete(composer.dataset.handoff);
+      delete composer.dataset.handoff;
+    }
+    const waiting = composer?.isConnected && !composer.hasAttribute('data-closing') ? composer : null;
+    const outcome = outcomeOf(env.result?.closeEvent);
+    if (outcome === 'cancel') {
+      if (waiting) focusMain(waiting, true);
+      return;
+    }
+    // Known to have saved: the draft is done with at once, and the cursor
+    // goes back to the section's add button.
+    if (outcome === 'saved' && waiting) discard(waiting, true);
+    const types = spec.feed || [kindOf(spec, key)];
+    const added = await settle(listContainers(spec.lists({})), [], types, spec.pageUrl);
+    if (!waiting || outcome === 'saved' || !waiting.isConnected || waiting.hasAttribute('data-closing')) return;
+    if (added > 0) discard(waiting, true);
+    else focusMain(waiting, true);
+  }
+
+  // In the popup: the draft from the page that opened it, once. Fields the
+  // spec's form.fill names are filled as they appear (a form drawn after
+  // the page loads, such as BeyondFormz); the form's own script can read
+  // the rest (UnionSuiteComposers.received()).
+  function receive() {
+    let token = null;
+    try {
+      token = new URLSearchParams(location.search).get('usDraft');
+      if (token && window.parent !== window) received = window.parent.UnionSuiteComposers?.takeDraft?.(token) || null;
+    } catch (error) {
+      received = null;
+    }
+    if (!received?.fill) return;
+    Object.entries(received.fill).forEach(([name, target]) => {
+      const value = received.values[name];
+      if (value == null || value === '' || value === false || (Array.isArray(value) && !value.length)) return;
+      if (typeof target === 'function') afterLoad(() => target(value, document));
+      else if (typeof target === 'string') whenPresent(target, element => setField(element, value));
+    });
+  }
+
+  function afterLoad(run) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, {once: true});
+    else run();
+  }
+
+  // Waits up to 15 seconds for a field to be drawn.
+  function whenPresent(selector, run) {
+    afterLoad(() => {
+      const found = document.querySelector(selector);
+      if (found) return run(found);
+      const observer = new MutationObserver(() => {
+        const element = document.querySelector(selector);
+        if (!element) return;
+        observer.disconnect();
+        clearTimeout(timer);
+        run(element);
+      });
+      const timer = setTimeout(() => observer.disconnect(), 15000);
+      observer.observe(document.documentElement, {subtree: true, childList: true});
+    });
+  }
+
+  // Sets a field as a person would, so the form's own script sees it: the
+  // value through the element's own setter, then input and change.
+  function setField(element, value) {
+    if (element.type === 'checkbox' || element.type === 'radio') {
+      element.checked = Boolean(value);
+    } else if (element.type === 'file') {
+      try {
+        const transfer = new DataTransfer();
+        [].concat(value).forEach(file => transfer.items.add(file));
+        element.files = transfer.files;
+      } catch (error) {
+        console.warn('[US-INLINE-COMPOSER] The files could not be added to the form:', error?.message);
+        return;
+      }
+    } else if (element.tagName === 'SELECT') {
+      const option = [...element.options].find(item => item.value === String(value)) ||
+        [...element.options].find(item => item.text.trim() === String(value));
+      if (!option) return;
+      element.value = option.value;
+    } else {
+      const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value')?.set;
+      if (setter) setter.call(element, String(value));
+      else element.value = String(value);
+    }
+    element.dispatchEvent(new Event('input', {bubbles: true}));
+    element.dispatchEvent(new Event('change', {bubbles: true}));
+  }
+
+  // ── Files ───────────────────────────────────────────────────────
+  function setFiles(input, files) {
+    const transfer = new DataTransfer();
+    files.forEach(file => transfer.items.add(file));
+    input.files = transfer.files;
+    const list = input.closest('.us-composer__drop').nextElementSibling;
+    list.replaceChildren(...files.map((file, index) => {
+      const item = document.createElement('li');
+      const size = file.size < 1048576 ? Math.max(1, Math.round(file.size / 1024)) + ' KB' : (file.size / 1048576).toFixed(1) + ' MB';
+      item.innerHTML = '<i class="ti ti-file" aria-hidden="true"></i><span class="us-composer__file-name"></span>' +
+        `<span class="us-composer__file-size">${size}</span>` +
+        `<button type="button" class="us-composer__remove" data-index="${index}"><i class="ti ti-x" aria-hidden="true"></i><span class="sr-only"></span></button>`;
+      item.querySelector('.us-composer__file-name').textContent = file.name;
+      item.querySelector('.sr-only').textContent = 'Remove ' + file.name;
+      return item;
+    }));
+    list.hidden = !files.length;
+  }
+
+  // ── Combobox ────────────────────────────────────────────────────
+  // The options open under the field, or over it when the window has no
+  // room below and more above, as a native dropdown does.
+  const listOf = input => document.getElementById(input.getAttribute('aria-controls'));
+  const fieldSpec = input => fieldsOf(specFor(input.closest('.us-composer'))).find(field => field.name === input.dataset.name);
+
+  function searchSoon(input) {
+    clearTimeout(searches.get(input));
+    searches.set(input, setTimeout(() => void search(input), 150));
+  }
+
+  async function search(input) {
+    const field = fieldSpec(input);
+    const term = input.value.trim();
+    let options;
+    try {
+      options = await field.search({term, wrapper: sectionOf(input)});
+    } catch (error) {
+      console.warn('[US-INLINE-COMPOSER] Search failed:', error?.message);
+      showOptions(input, [], 'The list could not load.');
+      return;
+    }
+    if (input.value.trim() !== term || !input.isConnected) return;
+    showOptions(input, options || [], field.empty ? field.empty(term) : 'No matches.');
+  }
+
+  function showOptions(input, options, emptyText) {
+    const list = listOf(input);
+    const avatars = fieldSpec(input)?.avatars;
+    list.replaceChildren();
+    if (!options.length) {
+      const empty = document.createElement('li');
+      empty.className = 'us-composer__option is-empty';
+      empty.setAttribute('role', 'option');
+      empty.setAttribute('aria-disabled', 'true');
+      empty.textContent = emptyText;
+      list.append(empty);
+    }
+    options.forEach((option, index) => {
+      const item = document.createElement('li');
+      item.className = 'us-composer__option' + (avatars ? '' : ' us-composer__option--plain');
+      item.id = list.id + '-' + index;
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', 'false');
+      item.dataset.value = option.value;
+      item.dataset.name = option.name;
+      if (option.disabled) item.setAttribute('aria-disabled', 'true');
+      if (avatars) {
+        const avatar = document.createElement('span');
+        avatar.className = 'us-avatar us-avatar--sm';
+        avatar.setAttribute('data-us-avatar-name', option.name);
+        avatar.setAttribute('aria-hidden', 'true');
+        item.append(avatar);
+      }
+      const name = document.createElement('span');
+      name.className = 'us-composer__option-name';
+      name.textContent = option.name;
+      const meta = document.createElement('span');
+      meta.className = 'us-composer__option-meta';
+      meta.textContent = option.meta || '';
+      item.append(name, meta);
+      list.append(item);
+    });
+    list.hidden = false;
+    list.classList.remove('is-above');
+    const box = list.parentElement.getBoundingClientRect();
+    const below = window.innerHeight - box.bottom;
+    if (below < Math.min(list.scrollHeight, 264) + 12 && box.top > below) list.classList.add('is-above');
+    input.setAttribute('aria-expanded', 'true');
+    input.removeAttribute('aria-activedescendant');
+  }
+
+  function closeOptions(scope) {
+    scope.querySelectorAll?.('.us-composer__field[role="combobox"][aria-expanded="true"]').forEach(input => {
+      listOf(input).hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+    });
+  }
+
+  function choose(input, option) {
+    if (!option || option.getAttribute('aria-disabled') === 'true') return;
+    input.value = option.dataset.name;
+    input.dataset.value = option.dataset.value;
+    input.closest('.us-composer').querySelector('.us-composer__message').textContent = '';
+    closeOptions(input.parentElement);
+  }
+
+  function moveActive(input, step) {
+    const options = [...listOf(input).querySelectorAll('.us-composer__option:not([aria-disabled="true"])')];
+    if (!options.length) return;
+    const current = options.findIndex(option => option.id === input.getAttribute('aria-activedescendant'));
+    const next = options[(current + step + options.length) % options.length] || options[0];
+    options.forEach(option => option.setAttribute('aria-selected', String(option === next)));
+    input.setAttribute('aria-activedescendant', next.id);
+    next.scrollIntoView({block: 'nearest'});
+  }
+
+  // Arrow keys move through the options, Enter picks, Escape closes the
+  // list; returns true when the key was the list's.
+  function comboKey(input, event) {
+    const shown = !listOf(input).hidden;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      if (shown) moveActive(input, step);
+      else void search(input).then(() => moveActive(input, step));
+      return true;
+    }
+    if (event.key === 'Escape' && shown) {
+      event.preventDefault();
+      closeOptions(input.parentElement);
+      return true;
+    }
+    if (event.key === 'Enter' && shown) {
+      const active = document.getElementById(input.getAttribute('aria-activedescendant') || '');
+      if (active) {
+        event.preventDefault();
+        choose(input, active);
+        return true;
+      }
+    }
+    if (event.key === 'Tab') closeOptions(input.parentElement);
+    return false;
+  }
+
+  // ── Events ──────────────────────────────────────────────────────
+  // More options is the -form action's own button (the action engine opens
+  // the popup); the composer stays open beneath it.
+  document.addEventListener('click', event => {
+    const composer = event.target.closest('.us-composer');
+    if (!composer) return;
+    const remove = event.target.closest('.us-composer__remove');
+    if (remove) {
+      const input = composer.querySelector('.us-composer__field--files');
+      setFiles(input, [...input.files].filter((file, index) => index !== Number(remove.dataset.index)));
+      input.focus();
+    } else if (event.target.closest('.us-composer__save')) void save(composer);
+    else if (event.target.closest('.us-composer__cancel')) discard(composer, true);
+  });
+
+  document.addEventListener('input', event => {
+    const composer = event.target.closest?.('.us-composer');
+    if (composer) withdraw(composer);
+    const input = event.target.closest?.('.us-composer__field[role="combobox"]');
+    if (!input) return;
+    // Typing again lets go of the pick: only a pick counts.
+    delete input.dataset.value;
+    searchSoon(input);
+  });
+
+  document.addEventListener('change', event => {
+    const field = event.target.closest?.('.us-composer__field');
+    const composer = field?.closest('.us-composer');
+    if (!composer) return;
+    withdraw(composer);
+    if (field.type === 'file') {
+      setFiles(field, [...field.files]);
+      composer.querySelector('.us-composer__message').textContent = '';
+    } else if (field.type === 'checkbox') {
+      const revealed = [...composer.querySelectorAll(`[data-shown-by="${CSS.escape(field.dataset.name)}"]`)];
+      revealed.forEach(element => { element.hidden = !field.checked; });
+      if (field.checked) revealed[0]?.focus();
+    }
+  });
+
+  // Files dropped on the drop zone join those already chosen.
+  document.addEventListener('dragover', event => {
+    const drop = event.target.closest?.('.us-composer__drop');
+    if (!drop) return;
+    event.preventDefault();
+    drop.classList.add('is-over');
+  });
+  document.addEventListener('dragleave', event => {
+    const drop = event.target.closest?.('.us-composer__drop');
+    if (drop && !drop.contains(event.relatedTarget)) drop.classList.remove('is-over');
+  });
+  document.addEventListener('drop', event => {
+    const drop = event.target.closest?.('.us-composer__drop');
+    if (!drop) return;
+    event.preventDefault();
+    drop.classList.remove('is-over');
+    const input = drop.querySelector('.us-composer__field--files');
+    setFiles(input, [...input.files, ...event.dataTransfer.files]);
+  });
+
+  document.addEventListener('keydown', event => {
+    const composer = event.target.closest?.('.us-composer');
+    if (!composer) return;
+    if (event.target.getAttribute('role') === 'combobox' && comboKey(event.target, event)) return;
+    const oneLine = event.target.matches('input:not([type="checkbox"], [type="file"])');
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      discard(composer, true);
+    } else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey || oneLine)) {
+      event.preventDefault();
+      void save(composer);
+    }
+  });
+
+  // Pressing an option keeps the cursor in the field.
+  document.addEventListener('mousedown', event => {
+    const option = event.target.closest('.us-composer__option');
+    if (!option) return;
+    event.preventDefault();
+    choose(option.closest('.us-composer__combo').querySelector('input'), option);
+  });
+
+  document.addEventListener('focusin', event => {
+    const input = event.target.closest?.('.us-composer__field[role="combobox"]');
+    if (input && !input.dataset.value) void search(input);
+  });
+
+  document.addEventListener('focusout', event => {
+    const combo = event.target.closest?.('.us-composer__combo');
+    if (combo && !combo.contains(event.relatedTarget)) closeOptions(combo);
+  });
+
+  // ── Keeping up with the page ────────────────────────────────────
+  // The add buttons are toggles from the start, and stay pressed when a
+  // refresh redraws the heading under an open composer; a composer a
+  // refresh redrew away goes back in its section.
+  let queued = false;
+  function sync() {
+    queued = false;
+    homes.forEach((container, composer) => {
+      if (composer.isConnected) return;
+      const wrapper = container.isConnected && container.querySelector(':scope > div');
+      if (!panelBody(wrapper)) return;
+      place(wrapper, composer);
+      if (document.activeElement === document.body) focusMain(composer, true);
+    });
+    specs.forEach((spec, key) => {
+      document.querySelectorAll('.panel-heading .' + actionClass(key)).forEach(button => {
+        button.classList.add('us-composer-toggle');
+        const pressed = String(Boolean(openIn(sectionOf(button), key)));
+        if (button.getAttribute('aria-pressed') !== pressed) button.setAttribute('aria-pressed', pressed);
+      });
+    });
+  }
+  new MutationObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(sync);
+  }).observe(document.documentElement, {subtree: true, childList: true});
+
+  // A feed's type filter moved off the composer's type: its button hides
+  // while the section still shows, so the composer closes and is kept.
+  new MutationObserver(records => {
+    new Set(records.map(record => sectionOf(record.target) || record.target)).forEach(wrapper => {
+      const composer = openIn(wrapper);
+      const button = composer && buttonFor(wrapper, composer.dataset.key);
+      if (!button || button.getClientRects().length || !wrapper.getClientRects().length) return;
+      draftsFor(wrapper)[composer.dataset.key] = composer;
+      close(composer, false);
+    });
+  }).observe(document.documentElement, {subtree: true, attributes: true, attributeFilter: ['data-us-activity-type', 'hidden']});
+
+  function define(key, spec) {
+    const actions = window.UnionSuiteActions;
+    if (!actions?.define) throw new Error('Load the action engine before US-INLINE-COMPOSER.');
+    specs.set(key, spec);
+    const shared = {owner: spec.owner || 'UnionSuite', context: spec.context || {}};
+    const recordKey = spec.recordKey ? {recordKey: spec.recordKey} : {};
+    const source = spec.source || 'US-INLINE-COMPOSER:' + key;
+    actions.define(key, {
+      ...shared, className: actionClass(key), source,
+      presentation: {label: spec.label, icon: spec.icon || 'plus', default: 'button', menu: 'menu-item'},
+      action: {type: 'function', ...recordKey, run: env => ({opened: open(env.trigger, key, env.context)})}
+    });
+    actions.define(key + '-form', {
+      ...shared, className: actionClass(key + '-form'), source: source + '-form',
+      presentation: {label: spec.form.label || spec.label, useAuthoredLabel: true, default: 'button', menu: 'menu-item'},
+      action: {type: 'popup', ...recordKey,
+        href: async env => withDraft(typeof spec.form.href === 'function' ? await spec.form.href(env) : spec.form.href, env.trigger, key),
+        popup: {title: spec.form.title || spec.label, width: '90%', height: '90%', maxWidth: spec.form.maxWidth || 800},
+        refresh: {when: 'close', run: env => formClosed(env, key)}}
+    });
+    sync();
+  }
+
+  receive();
+  window.UnionSuiteComposers = Object.freeze({version: '1.0', define, open, refresh: sync, takeDraft, received: () => received});
+})();
+/* US-INLINE-COMPOSER:END */
 
 /* Union Suite IQA reports: filter disclosure, grouped utilities and expanded view.
    Native Query Menu full report styling and available filter/export utilities are automatic.

@@ -1100,3 +1100,17 @@
     mask: var(--system-alert-logo) center / contain no-repeat;
   }
 }
+
+/* US-INLINE-COMPOSER: the dark field and outline button rules above would
+   take over two composer details; it keeps its own. The bar's fields keep
+   the composer's text colour, and the pressed add button its link-tinted
+   border (the heading toggles' "on" state). */
+@media screen {
+  :root[data-us-color-scheme="dark"] .us-composer__bar .us-composer__field:is(select, input:not([type="checkbox"])) {
+    color: var(--text-base);
+  }
+
+  :root[data-us-color-scheme="dark"] .panel-heading .us-composer-toggle.TextButton[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
+  }
+}

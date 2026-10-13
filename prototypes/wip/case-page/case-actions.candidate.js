@@ -73,7 +73,7 @@
   // options is the full form (KEY-form), which the banner's Actions menu
   // opens directly. The saves are proposed CloudToolz endpoints.
   const composers = window.UnionSuiteComposers;
-  if (!composers?.define) throw new Error('Load composer.candidate.js before case-actions.candidate.js.');
+  if (!composers?.define) throw new Error('Load zUnionSuite.js (US-INLINE-COMPOSER) before case-actions.candidate.js.');
 
   // The endpoint's answer: the new record's {Ordinal} (or {Ordinals}).
   async function send(path, body) {

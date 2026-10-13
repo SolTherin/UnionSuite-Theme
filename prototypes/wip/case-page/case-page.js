@@ -438,7 +438,7 @@
   // A refreshed iPart comes back with its (empty) fixture list; refill it.
   // Not after the composer's quiet insert, which adds rows to the list.
   document.addEventListener('us:query-template-refreshed', event => {
-    if (event.detail?.inserted) return;
+    if (event.detail?.inserted != null) return;
     const sets = [...(event.detail?.container?.querySelectorAll('.QueryTemplateSet[id], #cp-banner') || [])].map(set => set.id);
     if (sets.length) renderLists(sets).catch(error => console.error(error));
   });
@@ -681,7 +681,11 @@
       next.searchParams.set('case', 'closed');
       history.replaceState(null, '', next);
     }
-    if (typeof close === 'function') setTimeout(() => close(null, null), 600);
+    // The value a form passes as it closes (the usage guide's #composer-popup-forms), as the
+    // RadWindow's close argument: set window.casePopupResult to
+    // {saved: true} or {cancel: true} to try either; nothing, as the ×.
+    const result = window.casePopupResult ?? null;
+    if (typeof close === 'function') setTimeout(() => close(null, {get_argument: () => result}), 600);
   };
 
   // ── 5. Prototype chrome ──────────────────────────────────────

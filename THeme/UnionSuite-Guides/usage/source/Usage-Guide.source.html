@@ -533,11 +533,142 @@ window.UnionSuiteLoader.ready.then(function () {
   });
 }</code></pre></div>
     <p>Options are <code>url</code> (an explicit same-origin page URL), <code>timeout</code> (30000ms by default), <code>signal</code>, <code>initialize</code> and <code>match: 'all'</code> for deliberately refreshing several selected iParts. Explicit selectors are page-scoped and each selected iPart is matched by its own ID; list position is not an identity. Calls are queued and deduplicated within each selection. Custom action callbacks can also use <code>refresh.queryTemplate(selector, options)</code>. The CDN's legacy <code>refreshQueryTemplate()</code> is unchanged: replace its call sites with the shared method to get this lifecycle.</p>
+    <p><strong>Adding without a reload:</strong> <code>insert: true</code> reads the page quietly, with no overlay, and adds only the rows the iPart does not have yet, each sliding in where the page has it. Rows the page no longer has fold away (a list of the newest few), and parts of staying rows the template marks <button type="button" data-copy-text="data-us-live"><code>data-us-live</code></button> (a count such as View all attachments (7)) take the page's new text. Nothing else in the iPart changes: search, filters, open rows and focus stay. Rows are compared by <code>data-us-task-ordinal</code>, <code>data-us-contact-ordinal</code> or <code>data-ordinal</code>, otherwise by their text. <code>holding</code> lists placeholder rows already in the set (the <a href="#inline-composer">composer's</a> holding rows): each new row takes one's place, matched by its <code>data-us-holding-id</code>, the rest in order. iParts selected together with <code>match: 'all'</code> share one page read. The Promise resolves with <code>{status: 'inserted', inserted, removed}</code> for each iPart, and <code>us:query-template-refreshed</code> carries <code>detail.inserted</code>. A paged list that grows past its page is refreshed in full.</p>
+    <div class="snippet"><div class="snippet-bar"><span>Add the task just saved without reloading the list</span><button type="button" data-copy="query-template-insert-call">Copy JavaScript</button></div><pre><code id="query-template-insert-call">await UnionSuiteRefresh.queryTemplate('#ste_container_ciTasks', { insert: true });</code></pre></div>
 
     <h4 id="activity-feed-quiet-reload">Activity feed: adding a record without a reload</h4>
     <p>After saving a record that an activity feed shows, ask only the feed's sources of that type for their newest rows. <code>UnionSuiteActivityFeed.reload(feed, {quiet: true, types})</code> re-runs those sources' API IQAs from the start, adds the records the feed has not loaded, and folds their cards in where they belong. Nothing else in the feed changes: no "Loading activity…", no redraw, the chosen type, search and open cards stay as they are, and the type counts are re-queried. <code>types</code> lists source <code>data-type</code> values; leave it out to ask every source. The Promise resolves with the number of records added. A feed that has not loaded yet is left to load as usual, and plain <code>reload(feed)</code> still starts the feed again.</p>
     <div class="snippet"><div class="snippet-bar"><span>Fold a note just saved into the feed</span><button type="button" data-copy="activity-feed-quiet-reload-call">Copy JavaScript</button></div><pre><code id="activity-feed-quiet-reload-call">const feed = document.querySelector('#ste_container_ciAllActivity .us-activity-feed');
 await UnionSuiteActivityFeed.reload(feed, { quiet: true, types: ['note'] });</code></pre></div>
+
+    <h3 id="inline-composer">Adding in place: composers</h3>
+    <p><strong>Implemented in the shared theme</strong> (<code>US-INLINE-COMPOSER</code> in <code>zUnionSuite.js</code> and <code>zUnionSuite.css</code>, with two dark mode details in <code>zzDarkMode.css</code>). A section's add button opens a small form at the top of that section. After a save, the entry slides into the list where it belongs: no report reload, no loading overlay and nothing else in the section changes. The example's save, page read and popup are stand-ins; the composer, holding row and insert are the theme's own code.</p>
+    {{INLINE_COMPOSER_DEMO}}
+    <h4>What the user sees</h4>
+    <ol>
+      <li>The section's add button opens the composer at the top of that section only, with the cursor in the main field. The button shows pressed while it is open. Pressed again, it puts the composer away and keeps what was typed for next time; Cancel and Escape discard it.</li>
+      <li>Save (Ctrl+Enter, or Enter in a one-line field) checks the required fields, then asks the spec's question if it has one; the button then reads <strong>Save anyway</strong>, and changing anything withdraws the question.</li>
+      <li>The Save button spins for the save only. Once it has saved, the composer clears (<code>keepOpen</code>) or folds away, and a <strong>holding row</strong> opens where the entry will land: what was typed, a tick that draws itself and <strong>Saved</strong>, then a soft shimmer.</li>
+      <li>The real row takes the holding row's place, growing from its height. If the report sorts it elsewhere, the holding row closes as the row opens there.</li>
+      <li>If the save fails, the composer stays as typed and shows the spec's <code>failed</code> message.</li>
+    </ol>
+    <h4>Setting one up</h4>
+    <p>Three parts. Put the action class on the iPart that shows the list (its CSS class field): the add button appears in that panel's heading, and the class also tells the composer which list takes the new row. Register the composer with <code>UnionSuiteComposers.define(key, spec)</code> in the client registrations, inside <code>UnionSuiteLoader.ready</code> as for any action. Give it a save that returns the new record's <code>{Ordinal}</code>. The key's class is <code>us-action-</code> followed by the key with dots as hyphens; the full form is a second action, <code>KEY-form</code>, for a banner's Actions menu.</p>
+    <div class="snippet"><div class="snippet-bar"><span>iPart CSS class — the list the meeting composer belongs to</span><button type="button" data-copy="composer-ipart-class">Copy</button></div><pre><code id="composer-ipart-class">us-action-cases-add-meeting</code></pre></div>
+    <div class="snippet"><div class="snippet-bar"><span>A composer: required and optional fields, a question before saving and the save call</span><button type="button" data-copy="composer-spec">Copy JavaScript</button></div><pre><code id="composer-spec">// In the client registrations, after the theme loader (see Installation).
+UnionSuiteComposers.define('cases.add-meeting', {
+  label: 'Add meeting',                          // the section's add button
+  context: {
+    caseId: {from: 'query', parameter: 'CaseID', required: true},
+    caseNum: {from: 'query', parameter: 'CaseNum', required: true}
+  },
+  recordKey: ['caseId'],
+  form: {                                        // More options and the banner's Actions item
+    href: ({context}) =&gt; '/Cases_CreateMeeting?CaseID=' + encodeURIComponent(context.caseId),
+    title: 'Schedule meeting',
+    fill: {Title: '#MeetingTitle', Date: '#MeetingDate'}   // optional: the popup's fields
+  },
+  lists: () =&gt; ['us-action-cases-add-meeting'], // the iPart classes the save changes
+  arrive: {field: 'Date', attribute: 'data-us-meeting-date', order: 'ascending'},
+  composer: {
+    kind: 'meeting', label: 'New meeting', save: 'Save meeting',
+    main: {type: 'text', name: 'Title', label: 'Meeting title',
+           placeholder: 'Meeting title…', required: 'Give the meeting a title.'},
+    fields: [
+      {type: 'date', name: 'Date', label: 'Meeting date', required: 'Choose the meeting date.'},
+      {type: 'time', name: 'Time', label: 'Start time'},
+      {type: 'text', name: 'Location', label: 'Location', placeholder: 'Location', width: 'grow'}
+    ],
+    confirm: values =&gt; values.Date &amp;&amp; values.Date &lt; new Date().toISOString().slice(0, 10)
+      ? 'That date has passed. Save the meeting anyway?' : null,
+    submit: async (values, context) =&gt; {
+      const response = await UnionSuiteAgreements.cloudToolz('/cases/add-meeting', {
+        method: 'POST',
+        body: JSON.stringify({CaseID: context.caseId, Title: values.Title, Date: values.Date,
+          Time: values.Time, Location: values.Location})
+      });
+      return response.json();                    // {Ordinal: 1234}
+    },
+    saved: 'Meeting saved.',
+    failed: 'The meeting could not be saved. Try again.'
+  }
+});</code></pre></div>
+    <table><thead><tr><th>Spec</th><th>Purpose</th></tr></thead><tbody>
+      <tr><td><code>label</code>, <code>icon</code></td><td>The add button's text and icon (<code>plus</code> by default).</td></tr>
+      <tr><td><code>context</code>, <code>recordKey</code>, <code>owner</code>, <code>source</code></td><td>As for any action (<a href="#unified-action-route">unified actions</a>). <code>submit</code> receives the resolved context.</td></tr>
+      <tr><td><code>form</code></td><td>The full form: <code>href</code> (a URL or a function of the action's context), <code>title</code>, <code>label</code> (the banner item's text), <code>maxWidth</code> (800 by default) and optional <code>fill</code> (<a href="#composer-popup-forms">below</a>).</td></tr>
+      <tr><td><code>lists(values)</code></td><td>The iPart classes the save changes. The composer's own list takes the holding rows; every list named takes the new rows quietly. A note with a follow-up can name the tasks list too.</td></tr>
+      <tr><td><code>arrive</code></td><td>Where the holding row opens: <code>'top'</code> (default), <code>'bottom'</code> of the rows showing, or <code>{field, attribute, order}</code> to sit among the rows by a value, such as a meeting by date. The report still decides where the real row goes.</td></tr>
+      <tr><td><code>feed</code></td><td>For an activity feed: the source <code>data-type</code> values the record shows as (default: the composer's <code>kind</code>).</td></tr>
+      <tr><td><code>pageUrl</code></td><td>The page the quiet insert reads. Leave it out: it reads the current page, as the Query Template refresh does.</td></tr>
+      <tr><td><code>composer.kind</code>, <code>label</code>, <code>save</code></td><td>The modifier class (<code>us-composer--KIND</code>), the group's accessible name and the Save button's text.</td></tr>
+      <tr><td><code>composer.keepOpen</code></td><td>Clear and stay open after a save, for adding several in a row (tasks, staff).</td></tr>
+      <tr><td><code>composer.main</code>, <code>fields</code></td><td>The main field, then the fields on the bar below it (see the table of field types).</td></tr>
+      <tr><td><code>composer.confirm(values)</code></td><td>Optional. Returns a question to ask before saving, or nothing.</td></tr>
+      <tr><td><code>composer.submit(values, context)</code></td><td>Saves. Resolves once saved with <code>{Ordinal}</code> (or <code>{Ordinals}</code> for several); throws on failure.</td></tr>
+      <tr><td><code>composer.saved</code>, <code>failed</code></td><td>Announced after a save (text, or a function of the values); shown when the save fails.</td></tr>
+    </tbody></table>
+    <h4>Field types</h4>
+    <p>Every field has <code>type</code>, <code>name</code> (its key in <code>values</code>) and <code>label</code> (its accessible name); <code>placeholder</code> is optional. A field is required when it has a <code>required</code> message, the text shown when it is left empty. <code>shownBy</code> names a checkbox: the field shows, and is required, only while that box is ticked. <code>width: 'grow'</code> lets a bar field take spare width.</p>
+    <table><thead><tr><th>Type</th><th>Value <code>submit</code> receives</th><th>Notes</th></tr></thead><tbody>
+      <tr><td><code>text</code>, <code>textarea</code></td><td>The text, trimmed; <code>''</code> if empty</td><td>A <code>textarea</code> main field is three lines and grows.</td></tr>
+      <tr><td><code>date</code>, <code>time</code></td><td><code>'YYYY-MM-DD'</code>, <code>'HH:MM'</code>; <code>''</code> if empty</td><td>The browser's own pickers.</td></tr>
+      <tr><td><code>select</code></td><td>The chosen option's text</td><td><code>options</code>: an array of strings.</td></tr>
+      <tr><td><code>checkbox</code></td><td><code>true</code> or <code>false</code></td><td>Can reveal <code>shownBy</code> fields.</td></tr>
+      <tr><td><code>files</code></td><td>An array of <code>File</code> objects</td><td>A drop zone that lists the files chosen. One holding row per file.</td></tr>
+      <tr><td><code>combobox</code></td><td>The picked option's <code>value</code>, never typed text</td><td><code>search({term, wrapper})</code> resolves <code>[{value, name, meta, disabled}]</code>; <code>empty(term)</code> is the no-matches text; <code>avatars</code> adds initials. A disabled option shows but cannot be picked (someone already on the case).</td></tr>
+    </tbody></table>
+    <p><strong>Validation</strong> is the required check, the optional question and the server. There are no format, range or cross-field checks: the date and time inputs keep their own formats, and anything else is the save endpoint's to refuse. A field hidden by <code>shownBy</code> sends <code>''</code>.</p>
+    <h4>Where the new entry lands</h4>
+    <p>A <strong>Query Template list</strong> is read quietly with <code>UnionSuiteRefresh.queryTemplate(selector, {insert: true})</code> (<a href="#query-template-refresh">above</a>): only its new rows go in, matched to the holding rows by <code>Ordinal</code>. Rows are known by <code>data-us-task-ordinal</code>, <code>data-us-contact-ordinal</code> or <code>data-ordinal</code> in the template, otherwise by their text, so give each template one. An <strong>activity feed</strong> asks only its sources of the record's types for their newest rows (<a href="#activity-feed-quiet-reload">the quiet feed reload</a>). All the lists one save changes share one read of the page. A list that cannot be read refreshes as usual instead.</p>
+    <p>The save endpoint must return the new record's <code>{Ordinal}</code>, or <code>{Ordinals}</code> for several. Without it the new rows still arrive, matched to the holding rows in order.</p>
+    <h4 id="composer-popup-forms">The full form: carrying the draft over and reporting a save</h4>
+    <p><strong>More options</strong> opens the full form with what was typed already filled in, and leaves the composer open underneath. The popup's URL gets a one-time <code>usDraft</code> key; the theme in the popup takes the draft from the page that opened it, once, so a postback or reload in the popup does not fill it again.</p>
+    <ul>
+      <li><strong>The theme fills the form</strong> when the spec has <code>form.fill</code>: each composer field name maps to the popup's field, a selector (<code>'#MeetingTitle'</code>) or a function <code>(value, document)</code>. It waits up to 15 seconds for each field to be drawn, so a form drawn after the page loads (BeyondFormz) works. Values go in through the field's own setter, followed by <code>input</code> and <code>change</code>; a select matches by value, then by text; files are handed over as files.</li>
+      <li><strong>The form fills itself</strong> (HubForms): <code>UnionSuiteComposers.received()</code> in the popup returns <code>{key, values, files}</code>, keyed by the composer's field names, or <code>null</code>.</li>
+    </ul>
+    <p>Neither iMIS nor the theme can tell a save from a cancel on its own, so the form says how it closed by passing a value as the popup closes:</p>
+    <table><thead><tr><th>The form passes</th><th>What happens</th></tr></thead><tbody>
+      <tr><td><code>{saved: true, Ordinal: 1234}</code> (or <code>Ordinals</code>)</td><td>The composer clears at once and the lists take the new row quietly.</td></tr>
+      <tr><td><code>{cancel: true}</code> (iMIS's <code>CloseAndCancelRadWindow()</code>)</td><td>Nothing is read; the composer is still there as typed, with the cursor back in it.</td></tr>
+      <tr><td>Nothing (the popup's ×, a native editor)</td><td>The lists are read quietly. A new row means it saved and the composer clears; otherwise it stays. Someone else adding to the same list meanwhile looks like a save.</td></tr>
+    </tbody></table>
+    <div class="snippet"><div class="snippet-bar"><span>BeyondFormz custom script on submit (success) — tells the page that opened it the form saved</span><button type="button" data-copy="composer-form-saved">Copy JavaScript</button></div><pre><code id="composer-form-saved">/* UnionSuite popup result: tell the page that opened this form it saved. */
+(function () {
+  var result = { saved: true };
+  // When the new record's ordinal is known, add it: result.Ordinal = 1234;
+
+  var radWindow = typeof GetRadWindow === 'function' ? GetRadWindow() : null;
+  if (radWindow) {
+    radWindow.close(result);
+    return;
+  }
+  try {
+    if (window.parent !== window &amp;&amp; window.parent.UnionSuiteDialog) {
+      window.parent.UnionSuiteDialog.close(window, result);
+    }
+  } catch (error) {
+    // Not opened by a UnionSuite page: leave the form as it is.
+  }
+})();</code></pre></div>
+    <p>Run it only after the save has succeeded; a failed save keeps the popup open with the form's error. Add the new record's ordinal when the form can read it. It works in the native popup and the theme dialog, and does nothing when the form is opened as an ordinary page. The banner's Actions item opens the same form with no draft; its close is handled the same way.</p>
+    <p><strong>Setting up a BeyondFormz form:</strong></p>
+    <ol>
+      <li>Map the composer's fields to the form's in the spec's <code>form.fill</code>, using the form's own field selectors.</li>
+      <li>Paste the script above into the form's custom script on submit, so it runs after a successful save only.</li>
+      <li>If the submit step can read the new record's ordinal (from the Flowz or endpoint response), set <code>result.Ordinal</code>; otherwise leave it out.</li>
+      <li>Give the form's Cancel button, if it has one, <code>CloseAndCancelRadWindow()</code>.</li>
+      <li>Check on the live site: the draft fills in, a save slides the row in and clears the composer, and Cancel leaves the composer as typed.</li>
+    </ol>
+    <p><strong>HubForms</strong> follows the same contract from its own code: on load in a popup, read <code>UnionSuiteComposers.received()</code> and prefill the fields whose names match (ignoring the rest); after a successful save, close with <code>{saved: true, Ordinal}</code> (<code>Ordinals</code> for several); on Cancel, close with <code>{cancel: true}</code>; on a failed save, stay open and show the error.</p>
+    <h4>Limits</h4>
+    <ul>
+      <li>Lists are Query Template Displays and activity feeds. A native IQA grid is not a composer list.</li>
+      <li>A paged list (native <code>simplePaginate</code>) that grows past its page is refreshed in full instead.</li>
+      <li>The fill sets plain fields. Telerik date, time and combo boxes ignore a value set by script: map those to a function that uses the control's own client API.</li>
+      <li>Saves, popups and BeyondFormz forms need verifying on the live site; the example simulates them.</li>
+    </ul>
 
     <h3 id="report-icon-actions">Presentation comes from the definition</h3>
     <p>The same action class can render a labelled button in a heading, an icon in a row and text with an icon in a menu. Configure the presentation section; there are no separate button/link/icon business-action class families. The following uses the actual renderer with example-only definitions.</p>
