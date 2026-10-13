@@ -7,6 +7,14 @@ Local implementation is distinct from live deployment verification.
 
 ## Latest live checks
 
+- [ ] System Alerts (14 October 2026): `i4u_UT_SystemAlerts` feeds both the Staff Bulletin (`Bulletin-SystemAlerts-Query-Template.html`) and sitewide alerts (`System-Alert-Message.html`, in the `i4u_StaffSystemNotificationMessage` alert task). Each alert is now its own block; ours carry the hub badge from the site's `/images/Hub/UHUB_Logo.png` (20px high). Check live:
+  - whether an alert task shows one alert per data-source row or only the first (until confirmed, keep one sitewide alert active);
+  - the hotfix alert and ours as separate blocks, the hub badge beside ours (light and dark);
+  - dismissing each (Dismiss alert button, added by `zUnionSuite.js`): it slides away, stays away on the next page, and returns when its text changes; no flash of a dismissed alert on page load;
+  - the merge field inside `href` with a real Link (the editor kept the classes; a blank Link rendered as `href=""` and was hidden);
+  - how a Date property prints in the Query Template (format StartDate with a custom SQL expression if a time appears);
+  - a post with and without Link, and with a blank LinkText (reads Read more).
+
 - [ ] After uploading the refreshed theme/client ZIPs, confirm client Config.js loads before the taskbar, Biscuit greets the signed-in user on the header divider, the five-minute/15-second timings and click sequence work, and native search/partial updates remain usable. Local behaviour and package contents are verified; live deployment is separate.
 
 - [ ] Verify approved V5/H2 native tabs in live iMIS: native selection/cancellation, validation, partial refresh, nested Address tabs and mobile All sections.
@@ -68,7 +76,7 @@ all validation, error and recovery paths.
 
 ## Parked by owner
 
-- Staff Bulletin authoring redesign — deferred by owner on 12 September 2026; revisit only when requested. Current workflow is a bulletin management page with editable content blocks and a title/HTML-editor popup. Explore an Add/Edit bulletin form with a template picker (Announcement, Policy/action required, Staff welcome), relevant content fields, an optional link toggle with label/URL, visibility/expiry controls and a card preview. Assess a dedicated standalone iMIS panel/data source versus generating HTML for the existing Content Block; the storage/save approach is not decided or implemented. On resumption, confirm the actual iPart/editor, verify saving and reopening all fields, plan any existing-post migration, and map the homepage query to the chosen source, including blank AlertUrl values for unlinked records. Keep the existing approved card styling and Query Template Display working while this is parked.
+- Staff Bulletin authoring redesign — deferred by owner on 12 September 2026; revisit only when requested. Current workflow is a bulletin management page with editable content blocks and a title/HTML-editor popup. Explore an Add/Edit bulletin form with a template picker (Announcement, Policy/action required, Staff welcome), relevant content fields, an optional link toggle with label/URL, visibility/expiry controls and a card preview. Storage is now the standalone `i4u_UT_SystemAlerts` table (14 October 2026), shared with sitewide alerts; its homepage recipe is `Bulletin-SystemAlerts-Query-Template.html`. The table has no title or author: add a Title property if posts need the approved title line. On resumption, confirm the actual iPart/editor, verify saving and reopening all fields, plan any existing-post migration, and map the homepage query to the chosen source, including blank AlertUrl values for unlinked records. Keep the existing approved card styling and Query Template Display working while this is parked.
 
 - CCO navigation on grey page backgrounds: design decision deferred by owner. Revisit in the existing [CCO menu comparison](references/CCO-Tabs-Comparison.html). Consider an optional standalone secondary navigation style when there is no shared content container: self-contained pale accent selection, orange left marker, closed rounded edges, transparent inactive rows and a gutter beside white panel cards. Compare this with the existing attached V5 treatment; neither the grey page background nor the standalone variant is approved. Keep V5/H2 and current mobile behaviour unchanged until reviewed. This is separate from banner tab-to-zone switching.
 

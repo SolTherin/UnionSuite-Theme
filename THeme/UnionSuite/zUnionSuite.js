@@ -7569,6 +7569,188 @@ SOFTWARE.
   else update();
 })();
 /* US-BANNER-ALERTS:END */
+/* US-SYSTEM-ALERTS:START — dismiss alerts in the System Notification panel.
+   Every alert gets a close button, ASI's as well as ours, because only ours
+   can be edited. A dismissed alert stays hidden in this browser, for the
+   signed-in user, until its text or link changes. iMIS fills the panel after
+   the page loads, so an observer handles each alert as it arrives, before
+   it is drawn. An alert slides closed (US-RECORD-CARDS fold); the last one
+   to go takes the panel's spacing with it. iMIS hides some alerts itself
+   with an inline display: none on their .media; those are left alone. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteSystemAlerts) {
+    window.UnionSuiteSystemAlerts.refresh();
+    return;
+  }
+
+  const STORE_KEY = 'UnionSuiteDismissedAlerts';
+  const KEEP = 50; // dismissals remembered per user, newest kept
+  const DISMISS = 'us-system-alert__dismiss';
+  const folding = new Set();
+  let observed = null;
+
+  function userKey() {
+    try {
+      const context = JSON.parse(document.getElementById('__ClientContext')?.value || '{}');
+      if (context.isAnonymous !== true && ['string', 'number'].includes(typeof context.loggedInPartyId)) {
+        return String(context.loggedInPartyId).trim() || 'anonymous';
+      }
+    } catch (_) { /* Missing or invalid client context: one shared list. */ }
+    return 'anonymous';
+  }
+
+  function stored() {
+    try {
+      const all = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+      return all && typeof all === 'object' ? all : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function dismissed() {
+    const list = stored()[userKey()];
+    return new Set(Array.isArray(list) ? list : []);
+  }
+
+  function remember(key) {
+    try {
+      const all = stored();
+      const user = userKey();
+      const list = (Array.isArray(all[user]) ? all[user] : []).filter(item => item !== key);
+      list.push(key);
+      all[user] = list.slice(-KEEP);
+      localStorage.setItem(STORE_KEY, JSON.stringify(all));
+    } catch (_) {
+      // Storage unavailable: the alert stays dismissed on this page only.
+    }
+  }
+
+  // FNV-1a over the alert's text and link destinations: a changed alert is
+  // a new alert, and shows again.
+  function keyOf(item) {
+    const links = [...item.querySelectorAll('a[href]')].map(link => link.getAttribute('href')).join(' ');
+    const value = item.textContent.replace(/\s+/g, ' ').trim() + '|' + links;
+    let hash = 0x811c9dc5;
+    for (let index = 0; index < value.length; index++) {
+      hash ^= value.charCodeAt(index);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return (hash >>> 0).toString(36);
+  }
+
+  const nativelyHidden = item => Boolean(item.querySelector(
+    ':scope > .media[style*="display: none"], :scope > .media[style*="display:none"]'));
+
+  const visibleItems = container => [...container.querySelectorAll('.AlertItem')]
+    .filter(item => !item.hidden && !nativelyHidden(item));
+
+  function addButton(item) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = DISMISS;
+    button.setAttribute('aria-label', 'Dismiss alert');
+    button.title = 'Dismiss alert';
+    item.append(button);
+  }
+
+  // Writes only on change: the observer watches style changes, and an
+  // unconditional write would wake it again.
+  function refresh() {
+    const panel = document.getElementById('SystemAlertPanel');
+    if (!panel || panel.closest('.us-report-no-styling')) return;
+    const hidden = dismissed();
+    panel.querySelectorAll('.AsiSystem').forEach(container => {
+      container.querySelectorAll('.AlertItem').forEach(item => {
+        if (folding.has(item) || nativelyHidden(item)) return;
+        const key = keyOf(item);
+        if (item.getAttribute('data-us-alert-key') !== key) item.setAttribute('data-us-alert-key', key);
+        if (hidden.has(key)) {
+          if (!item.hidden) item.hidden = true;
+        } else if (!item.querySelector(':scope > .' + DISMISS)) {
+          addButton(item);
+        }
+      });
+      if (folding.has(container)) return;
+      const empty = visibleItems(container).length === 0;
+      if (container.hidden !== empty) container.hidden = empty;
+    });
+  }
+
+  // Focus would fall to the page when its button goes: hand it to the next
+  // alert's button, else the previous one, else the start of the content.
+  function moveFocus(item, others) {
+    if (!item.contains(document.activeElement)) return;
+    const next = others.find(other => item.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING) ||
+      others[others.length - 1];
+    const target = next?.querySelector(':scope > .' + DISMISS) || document.getElementById('contentstart');
+    target?.focus({ preventScroll: true });
+  }
+
+  function dismiss(item) {
+    const container = item.closest('.AsiSystem');
+    if (!container || folding.has(item)) return;
+    remember(item.getAttribute('data-us-alert-key') || keyOf(item));
+    const others = visibleItems(container).filter(other => other !== item && !folding.has(other));
+    moveFocus(item, others);
+    // The last alert folds the whole panel, so its margins close up too.
+    const target = others.length ? item : container;
+    const fold = window.UnionSuiteRecordCards?.fold;
+    folding.add(item);
+    folding.add(target);
+    const done = fold ? fold(target, false) : Promise.resolve(target.hidden = true);
+    done.then(() => {
+      item.hidden = true;
+      folding.delete(item);
+      folding.delete(target);
+      refresh();
+    });
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('#SystemAlertPanel .' + DISMISS);
+    const item = button?.closest('.AlertItem');
+    if (item) dismiss(item);
+  });
+
+  function watch() {
+    const panel = document.getElementById('SystemAlertPanel');
+    if (!panel || panel === observed) return;
+    observed = panel;
+    refresh();
+    new MutationObserver(refresh).observe(panel, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['style']
+    });
+  }
+
+  window.UnionSuiteSystemAlerts = {
+    refresh() {
+      watch();
+      refresh();
+    },
+    // Shows this user's dismissed alerts again and forgets the dismissals.
+    restore() {
+      try {
+        const all = stored();
+        delete all[userKey()];
+        localStorage.setItem(STORE_KEY, JSON.stringify(all));
+      } catch (_) { /* Storage unavailable: nothing was remembered. */ }
+      document.querySelectorAll('#SystemAlertPanel .AlertItem[data-us-alert-key][hidden]').forEach(item => {
+        item.hidden = false;
+      });
+      refresh();
+    }
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch, { once: true });
+  else watch();
+})();
+/* US-SYSTEM-ALERTS:END */
 /* US-BANNER-POSITIONS:START — the contact's active positions as one banner badge.
    Author placeholder inside .us-banner__status, after the status badge (a
    Query Template banner):

@@ -35,6 +35,12 @@ module.exports = {
     ...bulletin,
     AlertUrl:optional('Trimmed destination URL. Blank hides the Read more link and whole-card click target. Use a verified http(s) URL, root-relative path or nonempty #anchor; this example path is illustrative.', '/staff/announcements/membership-fees')
   },
+  'Bulletin-SystemAlerts-Query-Template.html':{
+    StartDate:required('i4u_UT_SystemAlerts.StartDate: the day the post goes live, shown as the card’s date line. The query’s date filter also needs it. If iMIS adds a time, select a custom SQL expression that formats the date, with this alias.', '14/10/2026'),
+    Alert:required('i4u_UT_SystemAlerts.Alert: the post. Rendered as HTML (noencode) so paragraphs, line breaks and inline links work. Plain text displays too, but its line breaks are lost; enter them as HTML. The same value is the system alert when SitewideAlert is checked.', '<p>The updated fee schedule is now available.</p>'),
+    Link:optional('i4u_UT_SystemAlerts.Link, trimmed. A value makes the whole card clickable, with a footer link. Blank leaves a plain card with no footer, click target or tab stop. Use an http(s) URL, a site path starting with one slash, or a nonempty #anchor; other formats are treated as blank. This example path is illustrative.', '/staff/announcements/membership-fees'),
+    LinkText:optional('i4u_UT_SystemAlerts.LinkText: the footer link’s visible label and accessible name. Blank reads Read more. Not shown when Link is blank.', 'Latest membership fees')
+  },
   'Member-Notes-Query-Template.html':notes,
   'Recent-History-Query-Template.html':{
     ActivityTitle:required('Activity summary.', 'Membership renewed'),

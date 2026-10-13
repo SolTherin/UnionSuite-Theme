@@ -5404,36 +5404,49 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
 }
 
 /* US-SYSTEM-ALERTS — the native System Notification panel (#SystemAlertPanel)
-   above the page content. The alert sits inset from the page edges with the
-   information colours and the us-alerts leading edge. Native alerts carry the
-   iMIS logo; an alert whose content includes .uhubAlert carries its own hub
-   mark in the authored HTML, so it is left untagged. iMIS hides a dismissed
-   or inactive alert with an inline display: none on its .media; the empty
-   list item goes with it, so no gap is left. */
+   above the page content. Each alert in the alert set is its own block,
+   inset from the page edges, with the information colours and the us-alerts
+   leading edge; several alerts stack 8px apart. An alert's message is the
+   list item's content: ASI's alerts supply their own .media icon row and
+   carry the iMIS logo; ours (System-Alert-Message.html, .uhubAlert) carry
+   the hub logo when also marked .IsSystem. iMIS hides a dismissed or inactive alert with an
+   inline display: none on its .media; the empty list item goes with it, so
+   no gap is left. */
 #SystemAlertPanel .AsiSystem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --message-ink: var(--text-strong);
   --message-bg: var(--info-bg);
   --message-border: var(--info);
 
+  display: flow-root;
   width: auto;
   margin: var(--space-3) var(--space-4);
-  padding: 10px 14px;
+  padding: 0;
   overflow: visible;
   color: var(--message-ink);
-  background-color: var(--message-bg);
-  border: 1px solid color-mix(in srgb, var(--message-border) 35%, transparent);
-  border-inline-start: 4px solid var(--message-border);
-  border-radius: 6px;
+  background: none;
+  border: 0;
   font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
+/* Alerts are spaced by their own top margin, with the set pulled up by the
+   same amount, rather than by a gap: a dismissed alert's margin then closes
+   with it as it slides shut, instead of the gap jumping at the end. The
+   panel's flow-root keeps the pulled-up margin from merging with its own. */
 #SystemAlertPanel .AsiSystem .AlertSet:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin: 0;
+  margin: calc(-1 * var(--space-2)) 0 0;
   padding: 0;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: var(--space-2);
+  padding: 10px 14px;
+  background-color: var(--message-bg);
+  border: 1px solid color-mix(in srgb, var(--message-border) 35%, transparent);
+  border-inline-start: 4px solid var(--message-border);
+  border-radius: 6px;
 }
 
 #SystemAlertPanel .AsiSystem .AlertItem:has(
@@ -5460,13 +5473,164 @@ div.AsiSystem:not(:where(.SecurityIndicator, .SecurityIndicator *, span[class$="
   --system-alert-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='5 87.5 217.25 67'%3E%3Cpath fill='%234a4d57' d='m172.55,137.14c.91,1.36,3.01,2.66,4.44,3.52s3.82,1.29,5.7,1.6c1.98.32,3.15.41,5.16.41,1.43,0,3.56-.11,5.16-.22s3.42-.56,4.79-.97,3.29-1.49,4.34-2.33c2.12-1.7,1.93-3.15,1.95-4.71.06-3.31-2.27-4.93-8.83-6.12-4.2-.76-9.2-1.45-16.46-2.77-2.96-.57-6.73-1.03-9.55-1.81-2.82-.78-5.3-1.76-7.5-3.04-2.2-1.27-3.35-2.76-4.62-5.25-1.06-2.09-1.54-5.06-1.54-7.85,0-4.11.93-7.65,2.79-10.28,1.86-2.63,3.99-4.25,7.05-5.77,3.06-1.52,6.5-2.59,10.32-3.2,3.82-.62,7.32-.72,11.33-.72s8.34.45,12.11,1.11c3.77.66,6.63,1.64,9.59,3.2,2.96,1.56,5.42,3.49,7.38,6.08,1.96,2.59,3.17,6.67,3.55,10.61h-16.93c-.29-3.37-3.17-6.5-5.84-7.69-2.67-1.19-6.04-2.13-9.67-2.13-1.15,0-3.32.04-4.66.16-1.34.12-3,.37-4.1.67s-2.79.91-3.71,1.5c-1.17.75-2.82,1.7-3,4.46-.1,1.54-.23,3.37,2.05,4.89,1.14.76,5.83,1.8,9,2.17,2.27.27,4.46.74,7.25,1.04s6.02.78,8.88,1.36c2.96.57,5.76,1.13,8.58,1.95,2.82.82,5.09,1.55,7.29,2.9,2.2,1.36,3.96,3.04,5.3,5.05,1.34,2.02,2.01,4.5,2.01,7.46,0,4.19-.98,7.7-2.94,10.54-1.96,2.84-4.51,5.11-7.67,6.84-3.15,1.73-6.76,2.94-10.82,3.64-4.06.7-8.19,1.05-12.39,1.05s-8.5-.37-12.61-1.11c-4.11-.74-7.76-1.97-10.96-3.7-3.2-1.73-5.83-4-7.88-6.84-2.05-2.84-3.18-6.39-3.37-10.66h17.28c0,1.89.83,3.63,1.74,4.99h0Z'/%3E%3Cpolygon fill='%2300a9e0' points='5 106.04 5 88.36 20.66 88.36 20.66 95.01 5 106.04'/%3E%3Cpath fill='%234a4d57' d='m5,113.65l.03,40.07h10.15s5.48.62,5.5-6.08v-34.67s0-4.79-3.57-4.83c0,0-1.65-.29-5.89,2.05l-6.22,3.46Z'/%3E%3Crect fill='%234a4d57' x='131.08' y='88.36' width='17.53' height='65.38'/%3E%3Cpath fill='%234a4d57' d='m61.02,88.36l19.44,44.49h.23l18.39-44.49h25.72v64.7h-17.11v-45.85h-.23l-20.37,45.85h-14.08l-20.37-45.4h-.23v45.4h-12.73c-2.42,0-4.38-1.96-4.38-4.38v-60.32h25.72Z'/%3E%3C/svg%3E");
 }
 
-#SystemAlertPanel .AsiSystem .AlertItem > .media:not(:has(.uhubAlert))::before {
+#SystemAlertPanel .AsiSystem .AlertItem > .media::before {
   content: "";
   content: "" / "iMIS";
   flex: 0 0 auto;
   height: 14px;
   aspect-ratio: 217.25 / 67;
   background: var(--system-alert-logo) center / contain no-repeat;
+}
+
+/* Our alerts: iMIS puts the message straight into the list item, with no
+   .media row, so the item lines it up itself. .uhubAlert.IsSystem adds the
+   hub tag; .uhubAlert alone is the message without it. The logo (521 x 245,
+   the HUB badge on a transparent background) is served by the iMIS site, so
+   it suits light and dark mode alike. The empty content carries "Union
+   Innovation Hub" as alternative text. */
+#SystemAlertPanel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --system-alert-hub-logo: url("/images/Hub/UHUB_Logo.png");
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem:has(.uhubAlert):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem:has(.uhubAlert.IsSystem):not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "";
+  content: "" / "Union Innovation Hub";
+  flex: 0 0 auto;
+  height: 20px;
+  aspect-ratio: 521 / 245;
+  background: var(--system-alert-hub-logo) center / contain no-repeat;
+}
+
+#SystemAlertPanel .AsiSystem .AlertItem > .uhubAlert:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The optional link in our alert. A blank or unsupported Link adds no link
+   or tab stop; supply an http(s) URL, a single-slash site path or an anchor.
+   A blank LinkText reads "Read more". The message editor turns the space
+   before the link into &nbsp;, so the link adds no margin of its own. */
+.uhubAlert a.uhubAlert__link:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.uhubAlert a.uhubAlert__link:not(:where(.us-report-no-styling, .us-report-no-styling *)):is(
+  [href^="/"]:not([href^="//"]),
+  [href^="https://" i],
+  [href^="http://" i],
+  [href^="#"]:not([href="#"])
+) {
+  display: inline;
+  font-weight: var(--fw-semi);
+  white-space: nowrap;
+}
+
+.uhubAlert a.uhubAlert__link:empty:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "Read more";
+}
+
+/* The dismiss button zUnionSuite.js adds to every alert (US-SYSTEM-ALERTS
+   script). It sits on the alert's right edge, outside the message's own
+   layout, so ASI's .media row and our flex row are left as they are. */
+#SystemAlertPanel .AsiSystem .AlertItem:has(> .us-system-alert__dismiss):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  padding-inline-end: 48px;
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 30px;
+  height: 28px;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  translate: 0 -50%;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)):hover {
+  background: color-mix(in srgb, var(--message-border) 14%, transparent);
+  color: var(--text-strong);
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)):active {
+  border-color: var(--message-border);
+  background: color-mix(in srgb, var(--message-border) 22%, transparent);
+  color: var(--text-strong);
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+#SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)):focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (max-width: 950px) {
+  /* Tall enough for the 44px button, which would otherwise overhang a
+     one-line alert. Padding, not min-height: a min-height would stop the
+     alert sliding shut when it is dismissed. */
+  #SystemAlertPanel .AsiSystem .AlertItem:has(> .us-system-alert__dismiss):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    padding-block: 12px;
+    padding-inline-end: 56px;
+  }
+
+  #SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    inset-inline-end: 4px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  #SystemAlertPanel .AsiSystem .us-system-alert__dismiss:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+    background: ButtonText;
+  }
+}
+
+/* A dismissed alert, and the panel once every alert is dismissed. The
+   layout rules above set a display, which would outrank the hidden
+   attribute on its own. */
+#SystemAlertPanel .AsiSystem[hidden],
+#SystemAlertPanel .AsiSystem .AlertItem[hidden] {
+  display: none;
 }
 
 /* US-MESSAGES:END */
@@ -18714,6 +18878,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   background: var(--accent-100);
   color: var(--text-strong);
   font-size: 16px;
+}
+
+/* A label filled from the query (Bulletin-SystemAlerts-Query-Template.html)
+   reads "Read more" when its LinkText is blank. */
+.us-staff-bulletin .QueryTemplateItem .BulletinCard > a.us-bulletin__link > .us-bulletin__label:empty:not(:where(.us-report-no-styling, .us-report-no-styling *))::before {
+  content: "Read more";
 }
 
 /* Keep the stretched link within one card. Unchecked/plain items retain a

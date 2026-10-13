@@ -38,6 +38,22 @@ module.exports = [
     ]
   },
   {
+    id:'bulletin-system-alerts',title:'Staff bulletin from System Alerts',panelTitle:'Staff Bulletin',
+    description:'Posts from the i4u_UT_SystemAlerts table, the same rows that feed system alerts. A Link makes the card clickable; without one the card stays plain.',
+    file:'Bulletin-SystemAlerts-Query-Template.html',classes:'us-query-template us-staff-bulletin',rows:3,
+    query:'An IQA on the i4u_UT_SystemAlerts business object, selecting StartDate, Alert, Link and LinkText.',
+    order:'Filters: Bulletin equals true, StartDate is less than or equal to @Date, and EndDate is greater than or equal to @Date, so a post shows from its start date to its end date inclusive. Give every post both dates (a far-off EndDate for an open-ended one): a blank date fails its filter. Sort by StartDate, newest first.',
+    fields:fields['Bulletin-SystemAlerts-Query-Template.html'],
+    mapping:'StartDate, Alert, Link and LinkText are the table’s own properties, so their names need no aliases. Bulletin, EndDate and SitewideAlert are filters only; CreatedOn, UpdatedOn and Ordinal are not used.',
+    optional:'Leave Link blank for a plain card: the footer link, divider, arrow and whole-card click target are all hidden. A blank LinkText reads Read more, supplied by zUnionSuite.css, so the query needs no expression for it. Keep Link encoded, not noencode. Links inside Alert still open their own destinations. The table has no title or author, so the card leads with its date; an Alert can start with its own heading if a post needs one. No production JavaScript is required.',
+    empty:'No staff announcements to show.',
+    records:[
+      {StartDate:'12/10/2026',Alert:'<p>Our membership fees have been updated. The latest fee schedule is available now.</p>',Link:'#example-announcement',LinkText:'Latest membership fees'},
+      {StartDate:'08/10/2026',Alert:'<p>Starting from today, employees are not to bring pet snakes into the office.</p>',Link:'#example-policy',LinkText:''},
+      {StartDate:'01/10/2026',Alert:'<p>Please welcome our newest staff members!</p><p>Raphael Chambers<br>Heinrich Reimer<br>Milton Chiu</p>',Link:'',LinkText:''}
+    ]
+  },
+  {
     id:'notes',title:'Member notes',panelTitle:'Member Notes',
     description:'The same card shell with a note title, author, date and contact method.',
     file:'Member-Notes-Query-Template.html',classes:'us-query-template',rows:5,

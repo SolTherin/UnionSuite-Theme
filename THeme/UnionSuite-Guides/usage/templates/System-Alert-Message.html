@@ -1,0 +1,10 @@
+<!-- Paste into the alert message of the Process Automation alert task that
+     feeds the System Notification panel (i4u_StaffSystemNotificationMessage),
+     using the editor's HTML view. Replace SystemAlerts with the name of the
+     task's data source. IsSystem adds the hub logo; remove it (keeping
+     uhubAlert) for an alert without the logo. A blank Link hides the link;
+     a blank LinkText reads "Read more". -->
+<div class="uhubAlert IsSystem">
+  {#SystemAlerts.Alert}
+  <a class="uhubAlert__link" href="{#SystemAlerts.Link}">{#SystemAlerts.LinkText}</a>
+</div>

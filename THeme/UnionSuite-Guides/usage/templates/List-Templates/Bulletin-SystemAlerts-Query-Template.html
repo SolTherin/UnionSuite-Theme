@@ -1,0 +1,13 @@
+<!-- Paste into the repeating Query Template field only. iPart CSS class:
+     us-query-template us-staff-bulletin. Source: i4u_UT_SystemAlerts rows with
+     Bulletin checked. A Link makes the whole card clickable; a blank Link
+     leaves a plain card. A blank LinkText reads "Read more".
+     iMIS creates all outer panel, list, card and card-body wrappers. -->
+<div class="BulletinCard">
+  <em>{#query.StartDate}</em>
+  <div class="us-list__body">{#query.Alert noencode}</div>
+  <a class="us-bulletin__link" href="{#query.Link}">
+    <span class="us-bulletin__label">{#query.LinkText}</span>
+    <span aria-hidden="true">→</span>
+  </a>
+</div>

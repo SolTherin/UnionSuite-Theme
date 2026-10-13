@@ -50,6 +50,7 @@ const snippets = {
   'case-details': ['THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html', read('THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html')],
   'copy-button': ['THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html')],
   'contact-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html')],
+  'system-alert': ['THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html', read('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html')],
   attention: ['THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html', read('THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html')],
   'task-detail-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html')],
   'task-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Completion-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Completion-Query-Template.html')],
@@ -119,6 +120,7 @@ const allSources = ['THeme/UnionSuite-Guides/usage/build/switch-examples.cjs','T
   'THeme/UnionSuite-Guides/usage/source/usage-guide.js', 'THeme/UnionSuite-Guides/usage/source/guide-search.js', 'THeme/UnionSuite-Guides/usage/source/Brand-Preview.source.html', 'THeme/UnionSuite-Guides/usage/build/build-theme-usage.cjs', 'THeme/UnionSuite-Guides/usage/build/theme-sources.cjs',
   'THeme/UnionSuite-Guides/usage/build/theme-gallery.cjs', 'THeme/UnionSuite-Guides/usage/source/action-catalog.cjs', 'THeme/UnionSuite-Guides/usage/source/example-gallery.css',
   'THeme/UnionSuite-Guides/usage/source/IQA-Example.source.html', 'THeme/UnionSuite-Guides/usage/source/iqa-example.js', 'THeme/UnionSuite/Tabler/tabler-icons.min.css'];
+allSources.push('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html');
 allSources.push('THeme/UnionSuite-Guides/usage/templates/Banner-Agreement-Facts.html', 'THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html', 'THeme/UnionSuite-Guides/usage/templates/Banner-Case-Template.html', 'THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html');
 allSources.push(...listTemplates.sources);
 allSources.push(...require('./build-taskbar-dark-mode.cjs').sources);
@@ -195,16 +197,24 @@ const parts = `<header class="us-banner__surface"><div class="us-banner__summary
 const iframe = (id,title,content,auto=false) => `<iframe class="example-frame" id="${id}" data-theme-preview${auto?' data-autofit':''} title="${esc(title)}" srcdoc="${esc(content)}" loading="${auto?'eager':'lazy'}"></iframe>`;
 const formMarkup='<form class="us-form" onsubmit="event.preventDefault()"><div class="field-grid">'+read('THeme/UnionSuite-Guides/usage/examples/Form-Fields.source.html')+'</div><div class="form-footer"><button type="submit" class="TextButton PrimaryButton">Validate example</button><button type="reset" class="TextButton">Reset</button></div></form>';
 const formDemo='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+nativePreviewCss+'\n'+theme+'\n'+read('THeme/UnionSuite-Guides/usage/examples/Form-Fields.layout.css')+'</style></head><body><main>'+formMarkup+'</main><script>'+themeJs+'</script></body></html>';
-// System Notification panel as iMIS renders it: a native alert (iMIS logo),
-// a uhub alert (hub mark authored in its content) and the hidden upgrade alert.
+// System Notification panel as iMIS renders it: an ASI alert (its message
+// supplies the .media icon row; the theme adds the iMIS logo), our alerts
+// (System-Alert-Message.html with sample values, placed straight in the list
+// item as iMIS does): one with IsSystem (the hub logo) and a link, one with
+// neither, and the hidden upgrade alert.
+const uhubAlert = (values, system = true) => read('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html').replace(/<!--[\s\S]*?-->\s*/g, '').replace(/\{#SystemAlerts\.(\w+)\}/g, (_, field) => esc(values[field])).replace(system ? '' : ' IsSystem', '').trim();
 const systemAlertIcon='data:image/png;base64,'+fs.readFileSync(path.join(root,'THeme/UnionSuite/images/AsiInformation.png')).toString('base64');
 const systemAlertMarkup='<section><h2>System alerts</h2><div id="SystemAlertPanel"><div class="AsiMessage AsiSystem"><ul class="AlertSet">'
   +'<li class="AlertItem"><div class="media"><img alt="info" src="'+systemAlertIcon+'"><div class="media-body pt-1">A hotfix has been deployed. Review the Upgrade &amp; Hotfix Notifications Forum for details.</div></div></li>'
-  +'<li class="AlertItem"><div class="media"><img alt="info" src="'+systemAlertIcon+'"><div class="media-body pt-1"><span class="uhubAlert">UHub</span> Scheduled maintenance begins at 8 pm on Friday.</div></div></li>'
+  +'<li class="AlertItem">'+uhubAlert({Alert:'Scheduled maintenance begins at 8 pm on Friday.', Link:'#example-maintenance', LinkText:'Maintenance details'})+'</li>'
+  +'<li class="AlertItem">'+uhubAlert({Alert:'Payroll exports are paused until Monday.', Link:'', LinkText:''}, false)+'</li>'
   +'<li class="AlertItem"><div class="media" id="UpgradeAlert" style="display: none;"><div class="media-body py-2 pl-3">You have been upgraded to the latest version of iMIS EMS!</div></div></li>'
-  +'</ul></div></div></section>';
+  +'</ul></div></div><p><button type="button" class="TextButton" onclick="UnionSuiteSystemAlerts.restore()">Show dismissed alerts again</button></p></section>';
+// Only the dismiss script and the fold it uses, so the other messages in this
+// frame keep their plain native presentation.
+const systemAlertJs=['US-RECORD-CARDS','US-SYSTEM-ALERTS'].map(name=>read('THeme/UnionSuite/zUnionSuite.js').match(new RegExp('/\\* '+name+':START[\\s\\S]*?'+name+':END \\*/'))[0]).join('\n');
 const messageMarkup=['Success','Information','Warning','Error'].map((kind,i)=>'<section><h2>'+kind+'</h2><div class="user-message-area"><div class="AsiMessage"><ul><li class="Asi'+kind+'"><img class="iMISUserMessageIcon" alt="'+kind+' icon" src="data:image/png;base64,'+fs.readFileSync(path.join(root,'THeme/UnionSuite/images/Asi'+kind+'.png')).toString('base64')+'"><div class="AsiMessageText">'+['Successfully updated','Your changes will apply at renewal.','Review these details before continuing.','The update failed. Please try again.'][i]+'</div></li></ul></div></div></section>').join('')+'<p class="AsiNeutral">No outstanding items.</p><p class="AsiImportant">Check your contact details.</p><p>Inline: <span class="AsiSuccess">Updated</span></p><div class="AsiValidationSummary">Please correct the highlighted fields.</div><span class="AsiErrorInline">Enter a complete email address.</span>'+systemAlertMarkup;
-const messageDemo='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+nativePreviewCss+'\n'+theme+'\nbody{margin:0;padding:16px;background:var(--bg-page);font:14px/1.5 var(--font-ui);height:auto}h2{font-size:16px}section{margin-bottom:20px}</style></head><body>'+messageMarkup+'</body></html>';
+const messageDemo='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+nativePreviewCss+'\n'+theme+'\nbody{margin:0;padding:16px;background:var(--bg-page);font:14px/1.5 var(--font-ui);height:auto}h2{font-size:16px}section{margin-bottom:20px}</style></head><body>'+messageMarkup+'<script>'+systemAlertJs+'</script></body></html>';
 const inserts = {
  TASKBAR_DARK_MODE_DEMO: iframe('taskbar-dark-mode-demo','Shared dark mode: taskbar toggle with fictional workspace content',require('./build-taskbar-dark-mode.cjs').frameDocument(),true),
  QUERY_SEARCH_FIELDS: queryFields.table('query-search-template',html.match(/<code id="query-search-template">([\s\S]*?)<\/code>/)[1]),
@@ -213,6 +223,7 @@ const inserts = {
  MEMBERSHIP_STATS_DEMO: iframe('membership-stats-demo','Membership Overview: verified IQA counts and history placeholder',membership.documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  MEMBERSHIP_STATS_RECIPES: membership.recipes(),
  ATTENTION_DEMO: iframe('attention-demo','Needs Attention: four IQA count cards',require('./attention-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
+ SYSTEM_ALERT_TEMPLATE: snippet('system-alert'),
  ATTENTION_TEMPLATE: snippet('attention'),
  TASK_DETAIL_ROW_TEMPLATE: snippet('task-detail-row'),
  QUERY_TEMPLATE_REFRESH_DEMO: iframe('query-template-refresh-demo', 'Query Template refresh and restored task controls', queryTemplateRefreshExample({read, css:nativePreviewCss+theme, themeJs}), true),

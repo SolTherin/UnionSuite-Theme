@@ -1095,7 +1095,7 @@
 
   /* System alert iMIS logo (US-SYSTEM-ALERTS): the dark grey letters would
      vanish on the dark alert, so the logo is drawn in one light colour. */
-  :root[data-us-color-scheme="dark"] #SystemAlertPanel .AsiSystem .AlertItem > .media:not(:has(.uhubAlert))::before {
+  :root[data-us-color-scheme="dark"] #SystemAlertPanel .AsiSystem .AlertItem > .media::before {
     background: var(--text-strong);
     mask: var(--system-alert-logo) center / contain no-repeat;
   }
