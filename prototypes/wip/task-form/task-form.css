@@ -1,0 +1,771 @@
+/* Task form, drawn inside its own shadow root.
+
+   The prototype of Forms/UnionSuiteForms.css: the form brings every style
+   it needs, so it works on a page with the UnionSuite theme and on one
+   without it. Nothing outside reaches in (iMIS vendor sheets, 99-Orion,
+   zUnionSuite.css class rules) except inherited values and CSS custom
+   properties.
+
+   Theme tokens are read once, here on :host, each with a fallback. With the
+   theme the form takes its colours, font and dark mode; without it, the
+   fallbacks give a plain light form. Everything below uses only the --usf-*
+   names. */
+
+:host {
+  /* Drop whatever the host page set for inherited text properties (vendor
+     sheets set body line-height, letter-spacing and colour); custom
+     properties are untouched by all. */
+  all: initial;
+  display: block;
+
+  --usf-font: var(--font-ui, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  --usf-text: var(--text-base, #545962);
+  --usf-text-strong: var(--text-strong, #1c2024);
+  --usf-text-muted: var(--text-muted, #6b7580);
+  --usf-surface: var(--bg-surface, #ffffff);
+  --usf-subtle: var(--bg-subtle, #f8f9fa);
+  --usf-sunken: var(--bg-sunken, #f1f3f5);
+  --usf-border: var(--border, #e2e5e9);
+  --usf-border-strong: var(--border-strong, #9aa1aa);
+  --usf-link: var(--text-link, #006f94);
+  --usf-accent: var(--accent, #006f94);
+  --usf-accent-hover: var(--accent-hover, #005a78);
+  --usf-on-accent: var(--text-on-accent, #ffffff);
+  --usf-focus: var(--field-focus-colour, #006f94);
+  --usf-focus-glow: var(--field-focus-glow, 0 0 0 3px color-mix(in srgb, var(--usf-focus) 14%, transparent));
+  --usf-focus-ring: var(--focus-ring, 0 0 0 2px var(--usf-surface), 0 0 0 4px var(--usf-focus));
+  --usf-danger: var(--danger, #d03528);
+  --usf-danger-bg: var(--danger-bg, #fbe4e2);
+  --usf-success: var(--success, #1e7f4f);
+  --usf-radius: var(--radius, 8px);
+  --usf-radius-sm: var(--radius-sm, 4px);
+  --usf-shadow: 0 8px 24px rgb(15 23 42 / .14);
+  --usf-ease: cubic-bezier(.2, 0, 0, 1);
+
+  color: var(--usf-text);
+  font: 14px/1.5 var(--usf-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Icons: inline SVG, so the form needs no icon font. */
+.usf-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.usf-icon--filled {
+  fill: currentColor;
+}
+
+/* Layout. */
+.usf {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.usf__body {
+  container-type: inline-size;
+  display: grid;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
+}
+
+.usf__row {
+  display: grid;
+  /* Always two columns, so a lone field (Due date on a personal task) stays
+     half width; one column when the form itself is narrow. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* The record line: what this task is being added to. */
+.usf__record {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--usf-radius);
+  background: var(--usf-sunken);
+  color: var(--usf-text-muted);
+  font-size: 13px;
+}
+
+.usf__record .usf-icon {
+  font-size: 16px;
+}
+
+.usf__record-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.usf__record strong {
+  color: var(--usf-text-strong);
+  font-weight: 600;
+}
+
+/* Fields. */
+.usf__field {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.usf__label {
+  color: var(--usf-text-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usf__required {
+  color: var(--usf-danger);
+}
+
+.usf__optional {
+  margin-inline-start: 4px;
+  color: var(--usf-text-muted);
+  font-weight: 400;
+}
+
+.usf__error {
+  margin: 0;
+  color: var(--usf-danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.usf__input,
+.usf__textarea,
+.usf__control {
+  width: 100%;
+  min-height: 38px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--usf-border-strong);
+  border-radius: var(--usf-radius);
+  background: var(--usf-surface);
+  color: var(--usf-text-strong);
+  font: inherit;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.usf__textarea {
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.usf__input::placeholder,
+.usf__textarea::placeholder {
+  color: var(--usf-text-muted);
+  opacity: 1;
+}
+
+/* Field focus for pointer and keyboard alike. The transparent outline
+   keeps a focus indicator in forced colours. */
+.usf__input:focus,
+.usf__textarea:focus,
+.usf__search:focus,
+.usf__control:focus-within {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--usf-focus);
+  box-shadow: var(--usf-focus-glow);
+}
+
+.usf__field[data-invalid] .usf__input {
+  border-color: var(--usf-danger);
+}
+
+.usf__input[type="date"] {
+  min-height: 38px;
+}
+
+/* Due date with its optional time beside it. */
+.usf__due {
+  display: flex;
+  gap: 8px;
+}
+
+.usf__due .usf__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.usf__due .usf__time {
+  flex: 0 0 120px;
+}
+
+.usf__input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: .6;
+  cursor: pointer;
+}
+
+/* The task line: larger, with the High priority flag beside it. */
+.usf__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+}
+
+.usf__title-row {
+  display: flex;
+  gap: 8px;
+}
+
+.usf__title {
+  flex: 1;
+  min-height: 44px;
+  font-size: 16px;
+}
+
+.usf__flag {
+  display: inline-grid;
+  flex: 0 0 44px;
+  place-items: center;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--usf-border-strong);
+  border-radius: var(--usf-radius);
+  background: var(--usf-surface);
+  color: var(--usf-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    border-color 150ms var(--usf-ease),
+    background-color 150ms var(--usf-ease),
+    color 150ms var(--usf-ease);
+}
+
+.usf__flag:hover {
+  border-color: var(--usf-focus);
+  color: var(--usf-text-strong);
+}
+
+.usf__flag .usf-icon {
+  grid-area: 1 / 1;
+  transition: opacity 150ms var(--usf-ease);
+}
+
+.usf__flag .usf-icon--filled,
+.usf__flag[aria-pressed="true"] .usf-icon:not(.usf-icon--filled) {
+  opacity: 0;
+}
+
+.usf__flag[aria-pressed="true"] .usf-icon--filled {
+  opacity: 1;
+}
+
+.usf__flag[aria-pressed="true"],
+.usf__flag[aria-pressed="true"]:hover {
+  border-color: color-mix(in srgb, var(--usf-danger) 35%, var(--usf-border));
+  background: var(--usf-danger-bg);
+  color: var(--usf-danger);
+}
+
+/* The task list's High Priority badge, drawn here: it fades in while the
+   flag is on. */
+.usf__badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--usf-danger-bg);
+  color: var(--usf-danger);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  transition:
+    opacity 150ms var(--usf-ease),
+    transform 150ms var(--usf-ease),
+    visibility 0s linear 150ms;
+}
+
+.usf[data-high] .usf__badge {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 150ms var(--usf-ease),
+    transform 150ms var(--usf-ease),
+    visibility 0s;
+}
+
+/* Quiet text button: Add details. */
+.usf__link {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: var(--usf-radius-sm);
+  background: none;
+  color: var(--usf-link);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Revealed sections slide open; they clip while moving, then let a
+   dropdown inside spill out. */
+.usf__reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 220ms var(--usf-ease),
+    opacity 180ms;
+}
+
+.usf__reveal > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.usf__reveal[data-closed] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.usf__reveal[data-settled] > * {
+  overflow: visible;
+}
+
+.usf__reveal .usf__field {
+  padding-top: 6px;
+}
+
+/* Beside another field (Subtags beside Tags) the reveal only fades: the
+   row's height comes from its neighbour, so the label lines up. */
+.usf__row > .usf__reveal .usf__field {
+  padding-top: 0;
+}
+
+/* Quick dates. */
+.usf__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.usf__quick button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 9px;
+  border: 1px solid var(--usf-border);
+  border-radius: 999px;
+  background: var(--usf-surface);
+  color: var(--usf-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.usf__quick button:hover {
+  border-color: var(--usf-focus);
+  color: var(--usf-text-strong);
+}
+
+.usf__quick .usf__clear {
+  border-style: dashed;
+  color: var(--usf-text-muted);
+}
+
+/* Select: chips and a toggle in the control, a checklist below. */
+.usf__select {
+  position: relative;
+}
+
+.usf__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 4px 5px 6px;
+  cursor: pointer;
+}
+
+.usf__select[data-disabled] .usf__control {
+  background: var(--usf-subtle);
+  cursor: default;
+}
+
+.usf__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  padding: 1px 2px 1px 8px;
+  border: 1px solid var(--usf-border);
+  border-radius: 999px;
+  background: var(--usf-sunken);
+  color: var(--usf-text-strong);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.usf__chip-parent {
+  color: var(--usf-text-muted);
+  font-weight: 400;
+}
+
+.usf__chip-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--usf-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.usf__chip-remove:hover {
+  background: var(--usf-border);
+  color: var(--usf-text-strong);
+}
+
+.usf__toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 6em;
+  min-height: 28px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--usf-text-muted);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.usf__toggle:focus-visible {
+  outline: 0;
+}
+
+.usf__toggle:disabled {
+  cursor: default;
+}
+
+.usf__toggle .usf-icon {
+  font-size: 16px;
+  transition: transform 180ms;
+}
+
+.usf__select[data-open] .usf__toggle .usf-icon {
+  transform: rotate(180deg);
+}
+
+.usf__panel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  max-height: 260px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--usf-border);
+  border-radius: var(--usf-radius);
+  background: var(--usf-surface);
+  box-shadow: var(--usf-shadow);
+}
+
+.usf__search {
+  width: 100%;
+  margin: 0 0 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--usf-border);
+  border-radius: var(--usf-radius-sm);
+  background: var(--usf-surface);
+  color: var(--usf-text-strong);
+  font: inherit;
+}
+
+.usf__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--usf-radius-sm);
+  background: transparent;
+  color: var(--usf-text-strong);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.usf__option:hover,
+.usf__option:focus-visible {
+  outline: 0;
+  background: var(--usf-sunken);
+}
+
+/* The form draws its own tick box: the theme's checkbox styles don't reach
+   in here. */
+.usf__box {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--usf-border-strong);
+  border-radius: var(--usf-radius-sm);
+  color: transparent;
+  font-size: 12px;
+}
+
+.usf__option[aria-selected="true"] .usf__box {
+  border-color: var(--usf-accent);
+  background: var(--usf-accent);
+  color: var(--usf-on-accent);
+}
+
+/* Single choice: a tick at the end of the chosen row. */
+.usf__tick {
+  margin-inline-start: auto;
+  color: var(--usf-accent);
+  font-size: 16px;
+  visibility: hidden;
+}
+
+.usf__option[aria-selected="true"] .usf__tick {
+  visibility: visible;
+}
+
+.usf__option-parent {
+  color: var(--usf-text-muted);
+}
+
+.usf__empty {
+  margin: 6px 8px;
+  color: var(--usf-text-muted);
+}
+
+/* Edit: Completed, and who added the task, quietly, at the end. */
+.usf__complete-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--usf-border);
+}
+
+.usf__meta {
+  margin: 0;
+  color: var(--usf-text-muted);
+  font-size: 12px;
+}
+
+/* A labelled tick box: the native box is kept for keyboard and forms,
+   hidden under the drawn one. Sized to its contents, so only the box and
+   its words tick it. */
+.usf__check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  color: var(--usf-text-strong);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.usf__check input {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  opacity: 0;
+}
+
+.usf__check input:checked + .usf__box {
+  border-color: var(--usf-success);
+  background: var(--usf-success);
+  color: var(--usf-surface);
+}
+
+.usf__check input:focus-visible + .usf__box {
+  box-shadow: var(--usf-focus-ring);
+}
+
+/* Completed strikes the task line through, as the task rows do. */
+.usf[data-done] .usf__title {
+  color: var(--usf-text-muted);
+  text-decoration: line-through;
+}
+
+/* Footer. */
+.usf__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--usf-border);
+  background: var(--usf-subtle);
+}
+
+.usf__hint,
+.usf__saved {
+  margin-inline-end: auto;
+  font-size: 12px;
+}
+
+.usf__hint {
+  color: var(--usf-text-muted);
+}
+
+.usf__hint kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--usf-border-strong);
+  border-radius: var(--usf-radius-sm);
+  background: var(--usf-surface);
+  font: inherit;
+  font-size: 11px;
+}
+
+.usf__saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--usf-success);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usf__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--usf-border-strong);
+  border-radius: var(--usf-radius);
+  background: var(--usf-surface);
+  color: var(--usf-text-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    color 150ms;
+}
+
+.usf__button:hover {
+  background: var(--usf-sunken);
+}
+
+.usf__button--primary {
+  border-color: var(--usf-accent);
+  background: var(--usf-accent);
+  color: var(--usf-on-accent);
+}
+
+.usf__button--primary:hover {
+  border-color: var(--usf-accent-hover);
+  background: var(--usf-accent-hover);
+}
+
+/* Keyboard focus ring on every button. */
+.usf__button:focus-visible,
+.usf__flag:focus-visible,
+.usf__link:focus-visible,
+.usf__quick button:focus-visible,
+.usf__chip-remove:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--usf-focus-ring);
+}
+
+/* Narrow screens and touch: larger targets, and no keyboard hint
+   (AGENTS.md: touch sizes follow max-width: 950px, never input type). */
+@media (max-width: 950px) {
+  .usf__hint {
+    display: none;
+  }
+
+  .usf__quick button {
+    min-height: 32px;
+    padding-inline: 12px;
+  }
+
+  .usf__chip-remove {
+    width: 28px;
+    height: 28px;
+  }
+
+  .usf__option {
+    min-height: 40px;
+  }
+}
+
+/* One column when the form itself is narrow (a small popup or a phone). */
+@container (max-width: 520px) {
+  .usf__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usf__flag,
+  .usf__flag .usf-icon,
+  .usf__badge,
+  .usf__reveal,
+  .usf__toggle .usf-icon {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .usf__badge,
+  .usf__chip {
+    border: 1px solid CanvasText;
+  }
+}

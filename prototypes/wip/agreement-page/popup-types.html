@@ -1,12 +1,11 @@
 <!doctype html>
 <!--
-  The Zidebar Add Note form's other types, mocked up (owner, 19 October
-  2026): Add task (Type=task: its own task-first form, owner "good UX over
-  reusability"; the earlier note-layout version kept as "Task (note
-  layout)"), Add milestone (Type=milestone) and Add attachment
-  (Type=attachmentonly). Add note (Type=note) is built:
-  templates/Add-Note-Form-Content-HTML.html, previewed in
-  add-note-embed-preview.html.
+  The agreement and case popup forms side by side, one per type (owner,
+  19 October 2026): Add note (Type=note), Add task (Type=task: its own
+  task-first form, owner "good UX over reusability"), Add milestone
+  (Type=milestone) and Add attachment (Type=attachmentonly). Add note is
+  built: templates/Add-Note-Form-Content-HTML.html, previewed in
+  add-note-embed-preview.html; its tab here mirrors it for comparison.
 
   These are static mock-ups in the built form's own markup and styles: the
   embed's <style> is read from the template at load, so each type looks as
@@ -15,7 +14,7 @@
   (no field list yet) from how milestones work in the theme (US-MILESTONES:
   stages in order, status Not Complete | In Progress | Complete).
 
-  ?type=task|tasknote|milestone|attachmentonly picks the form. Serve the project root
+  ?type=note|task|milestone|attachmentonly picks the form. Serve the project root
   (static-node) and open this page.
 -->
 <html lang="en-AU">
@@ -218,20 +217,6 @@
       background: var(--success);
     }
 
-    /* ── Proposed for the embed (task) ──────────────────────────
-       On a task the who/when fields are always shown, so they are not
-       boxed: the same grid as the follow-up group, without its shading,
-       border or high-priority rail. The badge and the filled flag mark
-       High priority. */
-    .us-note-form .us-note-form__group.us-note-form__group--flat,
-    .us-note-form[data-nf-high-priority] .us-note-form__group.us-note-form__group--flat {
-      margin-top: 0;
-      padding: 0;
-      border: 0;
-      background: none;
-      box-shadow: none;
-    }
-
     /* ── Proposed: the task-first form (us-task-form) ───────────
        The task is one larger line with the High priority flag beside it;
        details are optional, behind a link. */
@@ -368,18 +353,14 @@
   <div class="pt-toolbar">
     <h1>Popup form types</h1>
     <div class="pt-segmented" role="group" aria-label="Form" data-control="type">
+      <button type="button" data-value="note">Add note</button>
       <button type="button" data-value="task">Add task</button>
-      <button type="button" data-value="tasknote">Task (note layout)</button>
       <button type="button" data-value="milestone">Add milestone</button>
       <button type="button" data-value="attachmentonly">Add attachment</button>
     </div>
     <div class="pt-segmented" role="group" aria-label="Task tags" data-control="tasktags" data-show-for="task">
       <button type="button" data-value="some">Task tags set up</button>
       <button type="button" data-value="none">No task tags</button>
-    </div>
-    <div class="pt-segmented" role="group" aria-label="Task layout" data-control="layout" data-show-for="tasknote">
-      <button type="button" data-value="flat">Flat</button>
-      <button type="button" data-value="boxed">Boxed</button>
     </div>
     <div class="pt-segmented" role="group" aria-label="Appearance" data-control="mode">
       <button type="button" data-value="light">Light</button>
@@ -528,20 +509,30 @@
     </div>
   </template>
 
-  <!-- Task in the note form's layout, kept for comparison -->
-  <template id="tpl-tasknote">
+  <!-- Add note: mirrors the built form (templates/Add-Note-Form-Content-HTML.html) -->
+  <template id="tpl-note">
     <div class="us-note-form">
       <div class="us-note-form__body">
         <div class="us-note-form__field">
           <div class="us-note-form__note-head">
-            <label class="us-note-form__label" for="pt-task">Task <span class="us-note-form__required" aria-hidden="true">*</span></label>
+            <label class="us-note-form__label" for="pt-note">Note <span class="us-note-form__required" aria-hidden="true">*</span></label>
             <span class="us-badge us-badge--danger us-note-form__priority-badge" aria-hidden="true">High Priority</span>
           </div>
-          <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-task" placeholder="What needs to be done…">Send the revised log of claims to Stark Industries HR</textarea>
+          <textarea class="us-note-form__textarea" id="pt-note" placeholder="What happened, what was said or agreed…">Met with Stark Industries HR. They will table a revised offer on Friday, and want our response on the casual conversion clause by the following Wednesday.</textarea>
         </div>
-        <div data-slot="assign"></div>
         <div data-slot="tags"></div>
         <div data-slot="files"></div>
+        <div class="us-note-form__followup">
+          <hr class="us-note-form__divider">
+          <label class="us-switch">
+            <input type="checkbox" data-pt-followup>
+            <span class="us-switch__track" aria-hidden="true"></span>
+            <span>Follow up required</span>
+          </label>
+          <div class="us-note-form__reveal" data-closed data-pt-followup-reveal>
+            <div><div data-slot="assign"></div></div>
+          </div>
+        </div>
         <div data-slot="access"></div>
       </div>
       <div data-slot="foot"></div>
@@ -606,7 +597,6 @@
           <label class="us-note-form__label" for="pt-desc">Description <span class="us-note-form__optional">(optional)</span></label>
           <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-desc" placeholder="What these files are…"></textarea>
         </div>
-        <div data-slot="tags"></div>
         <div data-slot="access"></div>
       </div>
       <div data-slot="foot"></div>
@@ -618,6 +608,17 @@
     'use strict';
 
     const TYPES = {
+      note: {
+        title: 'Add note', save: 'Save note', slots: {tags: 'tpl-tags', files: 'tpl-files-compact', assign: 'tpl-assign-group', access: 'tpl-access'},
+        notes: `
+          <h2>Add note (built)</h2>
+          <ol>
+            <li><strong>Built and live in the popup</strong>: templates/Add-Note-Form-Content-HTML.html. This tab mirrors it, so the four forms can be compared side by side.</li>
+            <li><strong>Note</strong> first and required; <strong>Tags | Subtags</strong> from the note tag IQAs; <strong>Attachments</strong> as one drop line.</li>
+            <li><strong>Follow up required</strong> reveals the boxed group: Assign to (one person, searchable), Deadline with quick dates, and High priority (the red rail, filled flag and High Priority badge). The box groups what the switch reveals.</li>
+            <li><strong>Access</strong> last, Open by default, with the line saying who can read the note and the lock-out warning.</li>
+          </ol>`
+      },
       task: {
         title: 'Add task', slots: {tags: 'tpl-task-tags'}, ownFoot: true,
         notes: `
@@ -633,21 +634,6 @@
           </ol>
           <p class="pt-confirm"><strong>To confirm:</strong> do task tags have subtags (shown), and what are the task tag IQAs? Should Save and add another keep the due date as well as the assignee (it does here)? How tags show on the task list, if at all.</p>`
       },
-      tasknote: {
-        title: 'Add task', save: 'Save task', slots: {assign: 'tpl-assign-group', tags: 'tpl-task-tags'},
-        notes: `
-          <h2>Task in the note layout (for comparison)</h2>
-          <ol>
-            <li><strong>The note form, minus the switch.</strong> A task is a note with a follow-up, so Assign to, Due date and High priority are always shown.</li>
-            <li><strong>Flat, not boxed</strong> (owner, 19 October 2026). The note form boxes these fields because its switch reveals them as one group; a task has no switch, and a shaded box would make the task's main facts read as secondary. Same grid: Assign to | Due date, High priority under Assign to. High priority shows as the badge (the task list's own) and the filled flag; the rail belonged to the box. Boxed is kept on the toolbar for comparison.</li>
-            <li><strong>Who and when come straight after the task</strong>, before Tags: on a task they matter more than its tags. Deadline reads <em>Due date</em>.</li>
-            <li><strong>A shorter text box</strong>: a task is usually one line, a note a paragraph.</li>
-            <li><strong>Task tags, not note tags</strong> (owner, 19 October 2026): the same Tags and Subtags fields, fed by a separate task tag list (its own Parent and Child IQAs), so what a task is (a call, correspondence, paperwork) stays apart from what a note is about. Sample values here.</li>
-            <li><strong>No attachments</strong> (owner, 19 October 2026): files go with the record, through a note or the Attachments screen, not on a task.</li>
-            <li><strong>No Access</strong> (owner, 19 October 2026): tasks are not restricted, so the form does not offer it; a task saves as Open.</li>
-          </ol>
-          <p class="pt-confirm"><strong>To confirm:</strong> is Due date required for a task (shown here optional)? Does a task save as a note with Follow up required set? Do task tags have subtags (shown), and what are the task tag IQAs?</p>`
-      },
       milestone: {
         title: 'Add milestone', save: 'Save milestone', slots: {files: 'tpl-files-compact'},
         notes: `
@@ -662,24 +648,24 @@
           <p class="pt-confirm"><strong>Proposed fields (no list yet):</strong> confirm the fields, whether a milestone needs a date after all, and whether new milestones always go at the end (then Position goes).</p>`
       },
       attachmentonly: {
-        title: 'Add attachment', save: 'Upload', slots: {tags: 'tpl-tags', access: 'tpl-access'},
+        title: 'Add attachment', save: 'Upload', slots: {access: 'tpl-access'},
         notes: `
           <h2>Add attachment</h2>
           <ol>
             <li><strong>Files lead</strong>, as a large drop area, and are the only required field. Each file uploads as it is added (the spinner), as on Add note.</li>
             <li><strong>File tags</strong> appear once a file is added and apply to every file in the upload.</li>
             <li><strong>Description</strong> is optional and replaces the note.</li>
-            <li><strong>Tags and Access</strong> as on Add note: file tags say what the files are, tags what the record is about. Access matters here as much as on a note: a statement or medical letter is often why a note is restricted.</li>
+            <li><strong>File tags only</strong> (owner, 19 October 2026): no note Tags or Subtags, since file tags already say what the files are.</li>
+            <li><strong>Access</strong> as on Add note: a statement or medical letter is often why something is restricted.</li>
             <li>No Follow up.</li>
           </ol>
-          <p class="pt-confirm"><strong>To confirm:</strong> is the description saved with the files? File tags per upload (shown) or per file? Does an attachment need both file tags and tags?</p>`
+          <p class="pt-confirm"><strong>To confirm:</strong> is the description saved with the files? File tags per upload (shown) or per file?</p>`
       }
     };
 
     const params = new URLSearchParams(location.search);
     const state = {
-      type: TYPES[params.get('type')] ? params.get('type') : 'task',
-      layout: params.get('layout') === 'boxed' ? 'boxed' : 'flat',
+      type: TYPES[params.get('type')] ? params.get('type') : 'note',
       tasktags: params.get('tasktags') === 'none' ? 'none' : 'some',
       mode: params.get('mode') === 'dark' ? 'dark' : 'light'
     };
@@ -703,11 +689,6 @@
       const save = slot.querySelector('[data-save]');
       if (save) save.textContent = type.save;
 
-      // Task: Due date, no switch, the fields straight under the task;
-      // flat unless Boxed is chosen for comparison.
-      const due = slot.querySelector('[data-due-label]');
-      if (due) due.textContent = 'Due date';
-      slot.querySelector('.us-note-form__group')?.classList.toggle('us-note-form__group--flat', state.layout === 'flat');
 
       wire();
     }
@@ -718,8 +699,21 @@
       const root = slot.querySelector('.us-note-form');
       if (root.classList.contains('us-task-form')) wireTask(root);
       const priority = root.querySelector('[data-pt-priority]');
-      if (priority) {
-        priority.addEventListener('change', () => root.toggleAttribute('data-nf-high-priority', priority.checked));
+      const followup = root.querySelector('[data-pt-followup]');
+      const reveal = root.querySelector('[data-pt-followup-reveal]');
+      const syncPriority = () => root.toggleAttribute('data-nf-high-priority', !!priority?.checked && (!followup || followup.checked));
+      priority?.addEventListener('change', syncPriority);
+      if (followup && reveal) {
+        followup.addEventListener('change', () => {
+          if (followup.checked) {
+            reveal.removeAttribute('data-closed');
+            setTimeout(() => reveal.setAttribute('data-settled', ''), 240);
+          } else {
+            reveal.removeAttribute('data-settled');
+            reveal.setAttribute('data-closed', '');
+          }
+          syncPriority();
+        });
       }
       const access = root.querySelector('[data-pt-access]');
       if (access) {
@@ -823,7 +817,7 @@
       });
       const url = new URL(location.href);
       url.searchParams.set('type', state.type);
-      url.searchParams.set('layout', state.layout);
+      url.searchParams.delete('layout');
       url.searchParams.set('tasktags', state.tasktags);
       url.searchParams.set('mode', state.mode);
       history.replaceState(null, '', url);
@@ -837,7 +831,7 @@
         const changed = state[key] !== button.dataset.value;
         state[key] = button.dataset.value;
         apply();
-        if (['type', 'layout', 'tasktags'].includes(key) && changed) build();
+        if (['type', 'tasktags'].includes(key) && changed) build();
       });
     });
 

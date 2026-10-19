@@ -1,0 +1,864 @@
+<!doctype html>
+<!--
+  One task form for every module (owner, 19 October 2026): personal tasks
+  (home page), cases and agreements, adding and editing.
+
+  The form is drawn in a shadow root with its own stylesheet (task-form.css),
+  the way Forms/UnionSuiteForms.js will draw it: the toolbar's Styling switch
+  takes the UnionSuite theme off the page to show the form still works
+  without it. The iMIS vendor sheet (10-UltraWaveResponsive.css) stays on in
+  both, as on a real iMIS page.
+
+  The selects, quick dates, flag, Add details, Completed and Save and add
+  another respond. Save and Cancel show what the form would send and how it
+  would close; nothing saves.
+
+  ?module=personal|case|agreement&mode=add|edit&styling=theme|none
+  &tasktags=some|none&assignlist=all|record&scheme=light|dark. Serve the project root
+  (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Form</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css" data-theme-css>
+  <style>
+    /* Mock-up page only. Fallbacks keep it readable with the theme off. */
+    body.tf-page {
+      margin: 0;
+      background: var(--bg-page, #eef0f3);
+      color: var(--text-base, #545962);
+      font: 14px/1.5 var(--font-ui, system-ui, sans-serif);
+    }
+
+    .tf-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border, #e2e5e9);
+      background: var(--bg-surface, #fff);
+    }
+
+    .tf-toolbar h1 {
+      margin: 0 12px 0 0;
+      color: var(--text-strong, #1c2024);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .tf-segmented {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 8px;
+      background: var(--bg-sunken, #f1f3f5);
+    }
+
+    .tf-segmented button {
+      padding: 5px 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-base, #545962);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tf-segmented button[aria-pressed="true"] {
+      background: var(--bg-surface, #fff);
+      color: var(--text-strong, #1c2024);
+      box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+    }
+
+    .tf-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 800px) minmax(260px, 360px);
+      justify-content: center;
+      align-items: start;
+      gap: 24px;
+      padding: 24px 16px 32px;
+    }
+
+    @media (max-width: 1180px) {
+      .tf-stage {
+        grid-template-columns: minmax(0, 800px);
+      }
+    }
+
+    /* The iMIS popup, drawn statically: its title bar holds the title. */
+    /* Not overflow: hidden, which focus can scroll: an open dropdown near
+       the bottom would push the title bar out of view. */
+    .tf-window {
+      border: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px;
+      background: var(--bg-surface, #fff);
+      box-shadow: 0 12px 40px rgb(15 23 42 / .18);
+    }
+
+    .tf-window__title {
+      margin: 0;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px 12px 0 0;
+      color: var(--text-strong, #1c2024);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .tf-notes {
+      padding: 16px 20px;
+      border: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px;
+      background: var(--bg-surface, #fff);
+      font-size: 13px;
+    }
+
+    .tf-notes h2 {
+      margin: 0 0 8px;
+      color: var(--text-strong, #1c2024);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tf-notes h2:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    .tf-notes ol,
+    .tf-notes ul {
+      margin: 0;
+      padding-inline-start: 18px;
+    }
+
+    .tf-notes li + li {
+      margin-top: 6px;
+    }
+
+    .tf-notes strong {
+      color: var(--text-strong, #1c2024);
+    }
+
+    .tf-notes pre {
+      overflow-x: auto;
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--bg-sunken, #f1f3f5);
+      color: var(--text-strong, #1c2024);
+      font: 12px/1.45 ui-monospace, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .tf-confirm {
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--warning-bg, #fdf1d8);
+      color: var(--text-strong, #1c2024);
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="tf-page">
+  <div class="tf-toolbar">
+    <h1>Task form</h1>
+    <div class="tf-segmented" role="group" aria-label="Module" data-control="module">
+      <button type="button" data-value="personal">Personal</button>
+      <button type="button" data-value="case">Case</button>
+      <button type="button" data-value="agreement">Agreement</button>
+    </div>
+    <div class="tf-segmented" role="group" aria-label="Mode" data-control="mode">
+      <button type="button" data-value="add">Add</button>
+      <button type="button" data-value="edit">Edit</button>
+    </div>
+    <div class="tf-segmented" role="group" aria-label="Agreement assign list" data-control="assignlist" data-agreement-only>
+      <button type="button" data-value="all">Assign: all staff</button>
+      <button type="button" data-value="record">Assign: agreement staff</button>
+    </div>
+    <div class="tf-segmented" role="group" aria-label="Task tags" data-control="tasktags">
+      <button type="button" data-value="some">Task tags set up</button>
+      <button type="button" data-value="none">No task tags</button>
+    </div>
+    <div class="tf-segmented" role="group" aria-label="Styling" data-control="styling">
+      <button type="button" data-value="theme">UnionSuite theme</button>
+      <button type="button" data-value="none">No theme</button>
+    </div>
+    <div class="tf-segmented" role="group" aria-label="Appearance" data-control="scheme" data-theme-only>
+      <button type="button" data-value="light">Light</button>
+      <button type="button" data-value="dark">Dark</button>
+    </div>
+  </div>
+
+  <main class="tf-stage">
+    <section class="tf-window" aria-labelledby="tf-title">
+      <p class="tf-window__title" id="tf-title"></p>
+      <div id="tf-host"></div>
+    </section>
+    <aside class="tf-notes">
+      <h2>One task form, three modules</h2>
+      <ol>
+        <li><strong>One form, three pages.</strong> Each page holds only a placeholder; the form is drawn by the shared script. The page fixes the module and its tag filter.</li>
+        <li><strong>The record line</strong> says where the task is going. From <code>ModuleID</code> at once, and the record's name from an optional IQA on the placeholder. Personal tasks say so.</li>
+        <li><strong>Personal tasks are the signed-in user's own</strong> (owner, 19 October 2026): always assigned to the signed-in user, so there is no Assign to field; the record line says so.</li>
+        <li><strong>Tags</strong> come from the task tag IQA, filtered by the page's module (optional), so each module shows its own list; shared tags such as Correspondence show everywhere. Subtags follow the chosen tags by parent ordinal alone. With no task tags set up the row is not drawn.</li>
+        <li><strong>Due date, then Assign to</strong>: the date starts empty and is what people set; the assignee starts as you. <strong>Assign to</strong> has its own list per module (owner, 19 October 2026): cases, the case's staff; agreements, all staff or the agreement's staff, set on the page's placeholder (<code>data-assign</code>; toolbar: Agreement assign list). <strong>Optional</strong> on cases and agreements: an unassigned task belongs to the record itself. It starts as you; clear it to leave it unassigned.</li>
+        <li><strong>Edit</strong> is the same form, opened with <code>Ordinal</code> (unique within its module): filled in, details open when there are any, <strong>Completed</strong> to tick off (or reopen) the task, <strong>Save changes</strong>, no Save and add another, and who added it. No Delete: admin only, v2.</li>
+        <li><strong>Save and add another</strong> saves, keeps the form open and clears the task line, details and flag; the assignee, due date and tags stay for the next one, and a line says what was saved.</li>
+        <li><strong>No theme</strong>: the form brings its own styles and icons and reads the theme's colours only when they are there.</li>
+      </ol>
+
+      <h2>This page's placeholder</h2>
+      <pre data-placeholder></pre>
+
+      <h2>Popup address</h2>
+      <pre data-address></pre>
+
+      <h2>Last action</h2>
+      <pre data-result>Save or Cancel to see what the form would send and how it would close.</pre>
+
+      <h2>To confirm</h2>
+      <ul class="tf-confirm">
+        <li>The three Assign to IQAs (case staff, agreement staff, all staff) and the task tag IQAs: names and fields.</li>
+        <li>The CloudToolz task endpoint, and its response (<code>{Ordinal}</code> assumed).</li>
+      </ul>
+    </aside>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Sample data ─────────────────────────────────────────── */
+
+    const ME = {id: '104002', name: 'James Driscoll'};
+
+    // Assign to lists, one IQA each (owner, 19 October 2026): every staff
+    // member, the case's staff, and the agreement's staff.
+    const STAFF = {
+      all: [
+        {id: '104002', name: 'James Driscoll (me)'},
+        {id: '104118', name: 'Sam Carter'},
+        {id: '104133', name: 'Morgan Lee'},
+        {id: '104140', name: 'Chris Tan'},
+        {id: '104152', name: 'Alex Nguyen'},
+        {id: '104167', name: 'Jo Whitfield'},
+        {id: '104171', name: 'Dana Russo'}
+      ],
+      case: [
+        {id: '104002', name: 'James Driscoll (me)'},
+        {id: '104118', name: 'Sam Carter'},
+        {id: '104140', name: 'Chris Tan'}
+      ],
+      agreement: [
+        {id: '104002', name: 'James Driscoll (me)'},
+        {id: '104133', name: 'Morgan Lee'},
+        {id: '104152', name: 'Alex Nguyen'}
+      ]
+    };
+
+    // The list a page uses: cases always their own staff; agreements by the
+    // placeholder's data-assign (all | record); personal tasks none.
+    const assignList = () => {
+      if (state.module === 'case') return STAFF.case;
+      if (state.module === 'agreement') return state.assignlist === 'record' ? STAFF.agreement : STAFF.all;
+      return [];
+    };
+
+    // Task tags as the IQAs would return them: parents filtered by module
+    // (null = every module), children by parent ordinal only.
+    const TAGS = [
+      {id: '1', name: 'Admin', module: 'personal'},
+      {id: '2', name: 'Training', module: 'personal'},
+      {id: '3', name: 'Representation', module: 'case'},
+      {id: '4', name: 'Evidence', module: 'case'},
+      {id: '5', name: 'Bargaining', module: 'agreement'},
+      {id: '6', name: 'Ballot', module: 'agreement'},
+      {id: '7', name: 'Correspondence', module: null}
+    ];
+
+    const SUBTAGS = [
+      {id: '21', parent: '2', name: 'Course booking'},
+      {id: '22', parent: '2', name: 'Certificate'},
+      {id: '31', parent: '3', name: 'Meeting prep'},
+      {id: '32', parent: '3', name: 'Hearing'},
+      {id: '41', parent: '4', name: 'Statements'},
+      {id: '51', parent: '5', name: 'Log of claims'},
+      {id: '52', parent: '5', name: 'Offer response'},
+      {id: '61', parent: '6', name: 'Ballot prep'},
+      {id: '71', parent: '7', name: 'Email'},
+      {id: '72', parent: '7', name: 'Letter'}
+    ];
+
+    const MODULES = {
+      personal: {
+        record: {icon: 'user', label: 'Personal task', detail: 'Assigned to you'},
+        address: {},
+        task: {
+          ordinal: '9851', title: 'Renew my first aid certificate',
+          details: 'Book the refresher before the end of November; the current one lapses on 3 December.',
+          assign: '104002', due: '2026-11-20', high: false, tags: ['2'], subtags: ['22'],
+          added: 'Added by James Driscoll on 2 October 2026'
+        }
+      },
+      case: {
+        record: {icon: 'briefcase', label: 'Case C217', detail: 'Priya Sharma · Unfair dismissal'},
+        address: {ModuleID: 'C217', ModuleOrdinal: '412'},
+        task: {
+          ordinal: '9874', title: 'Prepare Priya for the show cause meeting',
+          details: 'Go through the allegations letter with her and agree who speaks first.',
+          assign: '104118', due: '2026-10-23', high: true, tags: ['3'], subtags: ['31'],
+          added: 'Added by Sam Carter on 15 October 2026'
+        }
+      },
+      agreement: {
+        record: {icon: 'file', label: 'Agreement A107', detail: 'Stark Industries Enterprise Agreement 2026'},
+        address: {ModuleID: 'A107', ModuleOrdinal: '123'},
+        task: {
+          ordinal: '9876', title: 'Chase the response on casual conversion',
+          details: 'HR asked for our position by Wednesday 22 October. Check with the delegates first.',
+          assign: '104133', due: '2026-10-22', dueTime: '10:00', high: true, tags: ['5'], subtags: ['52'],
+          added: 'Added by James Driscoll on 14 October 2026'
+        }
+      }
+    };
+
+    /* ── Icons (inline SVG; the form needs no icon font) ─────── */
+
+    const ICONS = {
+      x: 'M18 6 6 18M6 6l12 12',
+      chevron: 'm6 9 6 6 6-6',
+      check: 'm5 12 5 5L20 7',
+      clock: 'M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M12 7v5l3 3',
+      plus: 'M12 5v14M5 12h14',
+      flag: 'M5 5a5 5 0 0 1 7 0 5 5 0 0 0 7 0v9a5 5 0 0 1-7 0 5 5 0 0 0-7 0V5zM5 21v-7',
+      user: 'M8 7a4 4 0 1 0 8 0 4 4 0 1 0-8 0M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2',
+      briefcase: 'M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13a20 20 0 0 0 18 0',
+      file: 'M14 3v4a1 1 0 0 0 1 1h4M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2zM9 13h6M9 17h6'
+    };
+
+    const icon = (name, filled) =>
+      '<svg class="usf-icon' + (filled ? ' usf-icon--filled' : '') + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>';
+
+    /* ── State ───────────────────────────────────────────────── */
+
+    const params = new URLSearchParams(location.search);
+    const pick = (key, values) => values.includes(params.get(key)) ? params.get(key) : values[0];
+    const state = {
+      module: pick('module', ['agreement', 'case', 'personal']),
+      mode: pick('mode', ['add', 'edit']),
+      tasktags: pick('tasktags', ['some', 'none']),
+      assignlist: pick('assignlist', ['all', 'record']),
+      styling: pick('styling', ['theme', 'none']),
+      scheme: pick('scheme', ['light', 'dark'])
+    };
+
+    const host = document.getElementById('tf-host');
+    const shadow = host.attachShadow({mode: 'open'});
+
+    /* ── Render ──────────────────────────────────────────────── */
+
+    function render() {
+      const module = MODULES[state.module];
+      const edit = state.mode === 'edit';
+      const task = edit ? module.task : {
+        title: '', details: '', assign: ME.id, due: '', high: false, tags: [], subtags: []
+      };
+      const tagsShown = state.tasktags === 'some';
+
+      document.getElementById('tf-title').textContent = edit ? 'Edit task' : 'Add task';
+
+      shadow.innerHTML = `
+        <div class="usf"${task.high ? ' data-high' : ''}>
+          <div class="usf__body">
+            <p class="usf__record">
+              ${icon(module.record.icon)}
+              <span class="usf__record-text"><strong>${module.record.label}</strong> · ${module.record.detail}</span>
+            </p>
+
+            <div class="usf__field" data-field="title">
+              <div class="usf__head">
+                <label class="usf__label" for="title">What needs doing? <span class="usf__required" aria-hidden="true">*</span></label>
+                <span class="usf__badge" aria-hidden="true">High Priority</span>
+              </div>
+              <div class="usf__title-row">
+                <input class="usf__input usf__title" id="title" type="text" autocomplete="off" required
+                  placeholder="e.g. Send the revised log of claims to HR" aria-describedby="title-error">
+                <button type="button" class="usf__flag" aria-pressed="${task.high}" aria-label="High priority" title="High priority" data-flag>${icon('flag')}${icon('flag', true)}</button>
+              </div>
+              <p class="usf__error" id="title-error" hidden>Say what needs doing before saving.</p>
+              <button type="button" class="usf__link" aria-expanded="false" aria-controls="details-wrap" data-details-toggle>${icon('plus')} Add details</button>
+              <div class="usf__reveal" id="details-wrap" data-closed data-details>
+                <div>
+                  <div class="usf__field">
+                    <label class="usf__label" for="details">Details <span class="usf__optional">(optional)</span></label>
+                    <textarea class="usf__textarea" id="details" placeholder="Anything the person doing it needs to know…"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Due date first: it starts empty and is the field people set;
+                 Assign to starts as the signed-in user. Personal tasks have
+                 no Assign to: the record line says they are yours. -->
+            <div class="usf__row">
+              <div class="usf__field">
+                <label class="usf__label" for="due">Due date <span class="usf__optional">(optional)</span></label>
+                <div class="usf__due">
+                  <input class="usf__input" id="due" type="date">
+                  <input class="usf__input usf__time" id="due-time" type="time" step="900" aria-label="Due time (optional)" hidden>
+                </div>
+                <div class="usf__quick" role="group" aria-label="Quick dates">
+                  <button type="button" data-days="0">Today</button>
+                  <button type="button" data-days="1">Tomorrow</button>
+                  <button type="button" data-days="7">In a week</button>
+                  <button type="button" class="usf__clear" data-add-time hidden>${icon('clock')} Add time</button>
+                  <button type="button" class="usf__clear" data-clear hidden>${icon('x')} Clear date</button>
+                </div>
+              </div>
+              ${state.module === 'personal' ? '' : `
+              <div class="usf__field">
+                <span class="usf__label" id="assign-label">Assign to <span class="usf__optional">(optional)</span></span>
+                <div class="usf__select" data-select="assign" data-single aria-labelledby="assign-label"></div>
+              </div>`}
+            </div>
+
+            ${tagsShown ? `
+            <div class="usf__row">
+              <div class="usf__field">
+                <span class="usf__label" id="tags-label">Tags <span class="usf__optional">(optional)</span></span>
+                <div class="usf__select" data-select="tags" aria-labelledby="tags-label"></div>
+              </div>
+              <div class="usf__reveal" data-closed data-subtags-reveal>
+                <div>
+                  <div class="usf__field">
+                    <span class="usf__label" id="subtags-label">Subtags <span class="usf__optional">(optional)</span></span>
+                    <div class="usf__select" data-select="subtags" aria-labelledby="subtags-label"></div>
+                  </div>
+                </div>
+              </div>
+            </div>` : ''}
+
+            ${edit ? `
+            <div class="usf__complete-row">
+              <label class="usf__check">
+                <input type="checkbox" data-completed${task.completed ? ' checked' : ''}>
+                <span class="usf__box" aria-hidden="true">${icon('check')}</span>
+                Completed
+              </label>
+              <p class="usf__meta">${task.added}</p>
+            </div>` : ''}
+          </div>
+
+          <footer class="usf__foot">
+            <span class="usf__hint" data-hint><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to save</span>
+            ${edit ? '' : `<span class="usf__saved" role="status" data-saved hidden>${icon('check')}<span></span></span>`}
+            <button type="button" class="usf__button" data-cancel>Cancel</button>
+            ${edit ? '' : '<button type="button" class="usf__button" data-again>Save and add another</button>'}
+            <button type="button" class="usf__button usf__button--primary" data-save>${edit ? 'Save changes' : 'Save task'}</button>
+          </footer>
+        </div>`;
+
+      wire(task, edit);
+      showAddress(edit);
+    }
+
+    /* ── Behaviour ───────────────────────────────────────────── */
+
+    function wire(task, edit) {
+      const root = shadow.querySelector('.usf');
+      const $ = selector => shadow.querySelector(selector);
+      const title = $('#title');
+      const details = $('#details');
+      const due = $('#due');
+      const flag = $('[data-flag]');
+      const toggle = $('[data-details-toggle]');
+      const reveal = $('[data-details]');
+      const clear = $('[data-clear]');
+
+      title.value = task.title;
+      // The root's own flag is data-done, so it never matches this input.
+      const completed = $('input[data-completed]');
+      const syncCompleted = () => root.toggleAttribute('data-done', Boolean(completed?.checked));
+      completed?.addEventListener('change', syncCompleted);
+      syncCompleted();
+      details.value = task.details;
+      due.value = task.due;
+
+      const setFlag = on => {
+        flag.setAttribute('aria-pressed', String(on));
+        root.toggleAttribute('data-high', on);
+      };
+      flag.addEventListener('click', () => setFlag(flag.getAttribute('aria-pressed') !== 'true'));
+
+      const setDetails = (open, instant) => {
+        toggle.hidden = open;
+        toggle.setAttribute('aria-expanded', String(open));
+        reveal.toggleAttribute('data-closed', !open);
+        if (!open) reveal.removeAttribute('data-settled');
+        else if (instant) reveal.setAttribute('data-settled', '');
+        else setTimeout(() => reveal.setAttribute('data-settled', ''), 240);
+      };
+      toggle.addEventListener('click', () => {
+        setDetails(true);
+        details.focus();
+      });
+      // Edit opens the details when the task has any.
+      setDetails(Boolean(task.details), true);
+
+      // Time is optional and only once there is a date: Add time shows the
+      // time field beside the date; emptying it hides it again; Clear date
+      // clears both.
+      const time = $('#due-time');
+      const addTime = $('[data-add-time]');
+      let timeShown = Boolean(task.dueTime);
+      time.value = task.dueTime || '';
+      const syncClear = () => {
+        if (!due.value) {
+          time.value = '';
+          timeShown = false;
+        }
+        clear.hidden = !due.value;
+        time.hidden = !timeShown;
+        addTime.hidden = !due.value || timeShown;
+      };
+      due.addEventListener('input', syncClear);
+      time.addEventListener('blur', () => {
+        if (!time.value) {
+          timeShown = false;
+          syncClear();
+        }
+      });
+      $('.usf__quick').addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.hasAttribute('data-add-time')) {
+          timeShown = true;
+          syncClear();
+          time.focus();
+          return;
+        }
+        if (button.hasAttribute('data-clear')) {
+          due.value = '';
+        } else {
+          const day = new Date();
+          day.setDate(day.getDate() + Number(button.dataset.days));
+          const pad = n => String(n).padStart(2, '0');
+          due.value = day.getFullYear() + '-' + pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+        }
+        syncClear();
+      });
+      syncClear();
+
+      // Selects. Subtags offer the children of the chosen tags only.
+      // Personal tasks are always the signed-in user's: no Assign to select.
+      const selects = {};
+      if ($('[data-select="assign"]')) {
+        selects.assign = makeSelect($('[data-select="assign"]'), {
+          single: true, search: true, placeholder: 'Choose…', emptyText: 'Unassigned',
+          options: () => assignList().map(person => ({id: person.id, label: person.name})),
+          value: [task.assign]
+        });
+      }
+      if ($('[data-select="tags"]')) {
+        selects.tags = makeSelect($('[data-select="tags"]'), {
+          placeholder: 'Choose…', searchPlaceholder: 'Search tags',
+          options: () => TAGS
+            .filter(tag => tag.module === null || tag.module === state.module)
+            .map(tag => ({id: tag.id, label: tag.name})),
+          value: task.tags,
+          onChange: () => {
+            selects.subtags.refresh();
+            syncSubtags();
+          }
+        });
+        const subtagOptions = () => SUBTAGS
+          .filter(subtag => selects.tags.value().includes(subtag.parent))
+          .map(subtag => ({id: subtag.id, label: subtag.name, parent: TAGS.find(tag => tag.id === subtag.parent).name}));
+        selects.subtags = makeSelect($('[data-select="subtags"]'), {
+          placeholder: 'Choose…', searchPlaceholder: 'Search subtags',
+          options: subtagOptions,
+          value: task.subtags
+        });
+
+        // Subtags fade in only when the chosen tags have subtags (owner,
+        // 20 October 2026), and fade out when they no longer do.
+        const subtagsReveal = $('[data-subtags-reveal]');
+        let settle;
+        const syncSubtags = instant => {
+          const open = subtagOptions().length > 0;
+          clearTimeout(settle);
+          subtagsReveal.toggleAttribute('data-closed', !open);
+          subtagsReveal.toggleAttribute('inert', !open);
+          if (!open) subtagsReveal.removeAttribute('data-settled');
+          else if (instant) subtagsReveal.setAttribute('data-settled', '');
+          else settle = setTimeout(() => subtagsReveal.setAttribute('data-settled', ''), 240);
+        };
+        syncSubtags(true);
+      }
+
+      // Save and Cancel: show the payload and the close result.
+      const payload = () => {
+        const assign = selects.assign
+          ? assignList().find(person => person.id === selects.assign.value()[0])
+          : {id: ME.id, name: ME.name};
+        return {
+          Type: 'task',
+          ID: ME.id,
+          Module: state.module,
+          ModuleID: MODULES[state.module].address.ModuleID || null,
+          ModuleOrdinal: MODULES[state.module].address.ModuleOrdinal || null,
+          Ordinal: edit ? task.ordinal : null,
+          Title: title.value.trim(),
+          Details: details.value.trim(),
+          AssignTo: assign ? {ID: assign.id, Name: assign.name.replace(' (me)', '')} : null,
+          DueDate: due.value || null,
+          DueTime: (due.value && time.value) || null,
+          HighPriority: flag.getAttribute('aria-pressed') === 'true',
+          ...(edit ? {Completed: completed.checked} : {}),
+          Tags: selects.tags ? selects.tags.value().map(id => ({TagOrdinal: id, TagName: TAGS.find(tag => tag.id === id).name})) : [],
+          Subtags: selects.subtags ? selects.subtags.value().map(id => {
+            const subtag = SUBTAGS.find(item => item.id === id);
+            return {TagOrdinal: subtag.parent, SubtagOrdinal: id, SubtagName: subtag.name};
+          }) : []
+        };
+      };
+
+      const valid = () => {
+        const ok = Boolean(title.value.trim());
+        $('[data-field="title"]').toggleAttribute('data-invalid', !ok);
+        $('#title-error').hidden = ok;
+        title.setAttribute('aria-invalid', String(!ok));
+        if (!ok) title.focus();
+        return ok;
+      };
+      title.addEventListener('input', () => {
+        if (title.value.trim()) {
+          $('[data-field="title"]').removeAttribute('data-invalid');
+          $('#title-error').hidden = true;
+          title.removeAttribute('aria-invalid');
+        }
+      });
+
+      const save = () => {
+        if (!valid()) return;
+        const data = payload();
+        report('POST to the CloudToolz task endpoint:\n' + JSON.stringify(data, null, 2) +
+          '\n\nThen close: ' + JSON.stringify(batch.length
+            ? {saved: true, Ordinals: [...batch, 9901 + batch.length]}
+            : {saved: true, Ordinal: edit ? Number(task.ordinal) : 9901}));
+      };
+      $('[data-save]').addEventListener('click', save);
+      // After Save and add another, closing is not a cancel: the tasks
+      // already saved are reported, so lists and the composer treat it as saved.
+      const batch = [];
+      $('[data-cancel]').addEventListener('click', () => report(batch.length
+        ? 'Close: ' + JSON.stringify({saved: true, Ordinals: batch}) + '\n\nThe tasks saved with Save and add another stay saved.'
+        : 'Close: {"cancel": true}'));
+      root.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          save();
+        }
+      });
+
+      // Save and add another: the task clears and the cursor goes back to
+      // it; the assignee, due date and tags stay; a quiet line says what saved.
+      $('[data-again]')?.addEventListener('click', () => {
+        if (!valid()) return;
+        batch.push(9901 + batch.length);
+        report('POST to the CloudToolz task endpoint:\n' + JSON.stringify(payload(), null, 2) +
+          '\n\nThe form stays open. Saved so far: ' + JSON.stringify(batch));
+        const text = title.value.trim();
+        const short = text.length > 40 ? text.slice(0, 40) + '…' : text;
+        const saved = $('[data-saved]');
+        saved.querySelector('span').textContent = 'Saved “' + short + '”. Add the next one.';
+        saved.hidden = false;
+        $('[data-hint]').hidden = true;
+        title.value = '';
+        details.value = '';
+        setDetails(false);
+        setFlag(false);
+        title.focus();
+      });
+
+      if (!edit) title.focus();
+    }
+
+    // A small select: chips in the control, a searchable checklist below.
+    function makeSelect(el, config) {
+      let selected = (config.value || []).filter(Boolean);
+      let open = false;
+
+      const draw = () => {
+        const options = config.options();
+        selected = selected.filter(id => options.some(option => option.id === id));
+        const disabled = !options.length;
+        el.toggleAttribute('data-disabled', disabled);
+        el.toggleAttribute('data-open', open && !disabled);
+        const chips = selected.map(id => {
+          const option = options.find(item => item.id === id);
+          return '<span class="usf__chip">' +
+            (option.parent ? '<span class="usf__chip-parent">' + option.parent + ' ›&nbsp;</span>' : '') +
+            option.label +
+            '<button type="button" class="usf__chip-remove" data-remove="' + id + '" aria-label="Remove ' + option.label + '">' + icon('x') + '</button></span>';
+        }).join('');
+        const empty = !selected.length;
+        el.innerHTML =
+          '<div class="usf__control">' + chips +
+          '<button type="button" class="usf__toggle" aria-haspopup="listbox" aria-expanded="' + (open && !disabled) + '"' + (disabled ? ' disabled' : '') + '>' +
+          '<span>' + (empty ? (disabled ? config.placeholder : config.emptyText || 'Choose…') : '') + '</span>' + icon('chevron') + '</button></div>' +
+          (open && !disabled ? '<div class="usf__panel">' +
+            (config.search !== false ? '<input class="usf__search" type="search" placeholder="' + (config.searchPlaceholder || 'Search') + '" aria-label="' + (config.searchPlaceholder || 'Search') + '">' : '') +
+            '<div role="listbox"' + (config.single ? '' : ' aria-multiselectable="true"') + ' data-list></div></div>' : '');
+        if (open && !disabled) drawList('');
+      };
+
+      const drawList = query => {
+        const list = el.querySelector('[data-list]');
+        const matches = config.options().filter(option =>
+          (option.label + ' ' + (option.parent || '')).toLowerCase().includes(query.toLowerCase()));
+        list.innerHTML = matches.length ? matches.map(option =>
+          '<button type="button" class="usf__option" role="option" data-id="' + option.id + '" aria-selected="' + selected.includes(option.id) + '">' +
+          (config.single ? '' : '<span class="usf__box">' + icon('check') + '</span>') +
+          '<span>' + (option.parent ? '<span class="usf__option-parent">' + option.parent + ' › </span>' : '') + option.label + '</span>' +
+          (config.single ? '<span class="usf__tick">' + icon('check') + '</span>' : '') + '</button>'
+        ).join('') : '<p class="usf__empty">No matches</p>';
+      };
+
+      el.addEventListener('click', event => {
+        const removeButton = event.target.closest('[data-remove]');
+        const optionButton = event.target.closest('[data-id]');
+        if (removeButton) {
+          selected = selected.filter(id => id !== removeButton.dataset.remove);
+          draw();
+          config.onChange?.();
+          return;
+        }
+        if (optionButton) {
+          const id = optionButton.dataset.id;
+          if (config.single) {
+            selected = [id];
+            open = false;
+          } else {
+            selected = selected.includes(id) ? selected.filter(item => item !== id) : [...selected, id];
+          }
+          const query = el.querySelector('.usf__search')?.value || '';
+          draw();
+          if (open) {
+            const search = el.querySelector('.usf__search');
+            if (search) search.value = query;
+            drawList(query);
+            el.querySelector('[data-id="' + id + '"]')?.focus();
+          } else {
+            el.querySelector('.usf__toggle').focus();
+          }
+          config.onChange?.();
+          return;
+        }
+        if (event.target.closest('.usf__control') && !el.hasAttribute('data-disabled')) {
+          open = !open;
+          draw();
+          el.querySelector('.usf__search')?.focus();
+        }
+      });
+      el.addEventListener('input', event => {
+        if (event.target.matches('.usf__search')) drawList(event.target.value);
+      });
+      el.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && open) {
+          event.stopPropagation();
+          open = false;
+          draw();
+          el.querySelector('.usf__toggle').focus();
+        }
+      });
+      // Close on a click anywhere else, inside the form or out.
+      document.addEventListener('click', event => {
+        if (open && !event.composedPath().includes(el)) {
+          open = false;
+          draw();
+        }
+      });
+
+      draw();
+      return {
+        value: () => selected.slice(),
+        refresh: draw
+      };
+    }
+
+    /* ── Page ────────────────────────────────────────────────── */
+
+    function report(text) {
+      document.querySelector('[data-result]').textContent = text;
+    }
+
+    function showAddress(edit) {
+      const module = MODULES[state.module];
+      const query = new URLSearchParams({Type: 'task', ID: ME.id, Module: state.module, ...module.address});
+      if (edit) query.set('Ordinal', module.task.ordinal);
+      const page = {personal: 'Task-Personal.aspx', case: 'Task-Case.aspx', agreement: 'Task-Agreement.aspx'}[state.module];
+      document.querySelector('[data-address]').textContent = '…/' + page + '?' + query.toString().replace(/&/g, '\n  &');
+      document.querySelector('[data-placeholder]').textContent =
+        '<div data-us-form="task"\n     data-module="' + state.module + '"\n     data-tags-module="' + state.module + '"' +
+        (state.module === 'agreement' ? '\n     data-assign="' + state.assignlist + '"' : '') + '></div>';
+      report('Save or Cancel to see what the form would send and how it would close.');
+    }
+
+    function apply() {
+      document.querySelectorAll('[data-control]').forEach(group => {
+        group.querySelectorAll('button').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.value === state[group.dataset.control]));
+        });
+      });
+      const themed = state.styling === 'theme';
+      document.querySelectorAll('link[data-theme-css]').forEach(link => { link.disabled = !themed; });
+      document.querySelector('[data-theme-only]').hidden = !themed;
+      document.querySelector('[data-agreement-only]').hidden = state.module !== 'agreement';
+      document.documentElement.setAttribute('data-us-color-scheme', themed ? state.scheme : 'light');
+      const url = new URL(location.href);
+      Object.entries(state).forEach(([key, value]) => url.searchParams.set(key, value));
+      history.replaceState(null, '', url);
+    }
+
+    document.querySelectorAll('[data-control]').forEach(group => {
+      group.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const key = group.dataset.control;
+        const changed = state[key] !== button.dataset.value;
+        state[key] = button.dataset.value;
+        apply();
+        if (changed && ['module', 'mode', 'tasktags', 'assignlist'].includes(key)) render();
+      });
+    });
+
+    // The stylesheet is fetched once and adopted, and the form is drawn only
+    // when it is ready: a <link> in the shadow root would show the form
+    // unstyled for a moment on every render.
+    apply();
+    fetch('task-form.css')
+      .then(response => response.text())
+      .then(css => {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(css);
+        shadow.adoptedStyleSheets = [sheet];
+        render();
+      });
+  })();
+  </script>
+</body>
+</html>

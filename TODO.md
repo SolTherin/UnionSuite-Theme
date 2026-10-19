@@ -138,6 +138,7 @@ Recommendations and proposed fixes for review: [theme consistency](prototypes/wi
 - [ ] add HTML styling to content HTML ipart
 - [ ] add open page link in content page document viewer screen
 - [ ] Enhanced BO — usage panel (owner, 19 October 2026). On the business object designer (`Scripts/BO-Enhancements.js`), a panel listing the IQAs that use the business object as a source, each with its path and an Open link to the IQA designer. It is the reverse of the IQA designer's Where used (`Scripts/IQA-WhereUsed.js`, [build plan](prototypes/wip/iqa-where-used/BUILD-PLAN.md)): read the IQAs' sources once into a cached index, as Where used builds its index, rather than opening every IQA each time. First find where an IQA document lists its sources and how one paged call can read them for every IQA; then decide whether the same index also shows other uses (value lists, panel sources).
+- [ ] Task form v2: Delete (owner, 19 October 2026). Deleting a task is an admin-only function, left out of the first task form (`prototypes/wip/task-form/`). When added: shown in edit only and to admins only (how the form learns the user is an admin is to be decided), asks once before deleting, and closes the popup with a third result beside saved and cancel (e.g. `{deleted: true, Ordinal}`), which the popup contract and the HubForms note (`C:\Dev\HubForms\docs\UNIONSUITE-POPUP-FORMS.md`) then need too.
 
 ## Cases
 
