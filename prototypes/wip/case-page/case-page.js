@@ -40,8 +40,8 @@
       DueState: done ? 'none' : row.TaskStatusCSS === 'overdue' ? 'overdue' : due ? 'soon' : 'none',
       TaskDateLabel: done ? (actioned ? 'Actioned ' + actioned : dueLabel.replace(/^Overdue /, 'Due ')) : dueLabel,
       DueLabel: dueLabel,
-      MemberName: row.AssignedTo,
-      MemberId: row.MemberId || '',
+      AssignedToName: row.AssignedTo,
+      AssignedToID: row.AssignedToID || '',
       TaskNote: row.TaskNote ?? row.Description ?? TASK_NOTES[row.Ordinal] ?? '',
       TaskTags: row.TaskTags ?? TASK_TAGS[row.Ordinal] ?? ''
     };

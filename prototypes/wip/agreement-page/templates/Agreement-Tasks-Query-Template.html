@@ -14,7 +14,10 @@
 
      Columns: the task lists' shared names (owner, 19 October 2026: one set
      for the homepage, agreement and case IQAs; renaming the current columns
-     is in TODO.md). Current column in brackets.
+     is in TODO.md), except the assignee (owner, 20 October 2026: case and
+     agreement tasks are assigned to a staff member to action, so
+     AssignedToName and AssignedToID, not the homepage's MemberName and
+     MemberId). Current column in brackets.
      TaskOrdinal (required)  the task note's ordinal; saves and opens it (Ordinal)
      TaskTitle (required)    task title (Note)
      IsCompleted             true when actioned, false otherwise (TAskCheckCSS "done")
@@ -26,9 +29,11 @@
                              blank for none (Deadline + OverdueText)
      DueLabel                the due label to restore if a completed row is
                              reopened; usually TaskDateLabel (new)
-     MemberName              assignee name, "Unassigned" when blank (AssignedTo)
-     MemberId                the assignee's party ID; "Personal Task" when it is
-                             the signed-in user (new)
+     AssignedToName          the staff member assigned to action it,
+                             "Unassigned" when blank (AssignedTo)
+     AssignedToID            their party ID, as text; blank when unassigned.
+                             The theme shows "Personal Task" when it is the
+                             signed-in user's (new)
      TaskNote                the task's note, plain text; the details button
                              opens it under the row; blank, no button (new)
      TaskTags                tags from the task tag list, comma-separated;
@@ -41,7 +46,7 @@
 <div class="us-task us-task--detail us-task--compact" data-us-task-completed="{#query.IsCompleted}"
   data-us-task-due-state="{#query.DueState}" data-us-task-due-label="{#query.DueLabel}"
   data-us-task-save="agreements.item-status" data-us-task-note-type="Task" data-us-task-ordinal="{#query.TaskOrdinal}"
-  data-us-search="{#query.TaskTitle} {#query.TaskNote} {#query.MemberName} {#query.TaskTags} {#query.PriorityBadge}">
+  data-us-search="{#query.TaskTitle} {#query.TaskNote} {#query.AssignedToName} {#query.TaskTags} {#query.PriorityBadge}">
   <button type="button" class="us-task__check" data-us-task-toggle
     role="checkbox" aria-checked="false" aria-label="Complete task: {#query.TaskTitle}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>
@@ -54,7 +59,7 @@
     <span class="us-task__meta">
       <span class="us-task__member">
         <i class="ti ti-user-filled" aria-hidden="true"></i>
-        <a class="us-task__member-name" data-id="{#query.MemberId}">{#query.MemberName}</a>
+        <a class="us-task__member-name" data-id="{#query.AssignedToID}">{#query.AssignedToName}</a>
       </span>
       <span class="us-task__tags" data-us-task-tags="{#query.TaskTags}">
         <i class="ti ti-tag" aria-hidden="true"></i>
