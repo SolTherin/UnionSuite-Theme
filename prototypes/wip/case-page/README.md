@@ -165,8 +165,8 @@ Known IQAs, from the live tenant's IQA list:
 
 | Panel | Current IQA | Change needed |
 | --- | --- | --- |
-| Banner top row | `$/_i4u_/Core/Cases/Get Case Details` | Check its columns (`CaseID`, `CaseTitle`, `Status`). |
-| Banner facts | none | New: `$/_i4u_/Core/Cases/API/API - Manage Case - Banner Details`, filter `CaseNum` (see the banner template). |
+| Banner top row | `$/_i4u_/Client/Cases/Layouts/Query Template - Manage Case - Banner Top` (owner, 20 October 2026; was `$/_i4u_/Core/Cases/Get Case Details`), filter `CaseID` | Columns `CaseID`, `CaseTitle`, `Status`, `MemberName` (required) and `MemberUrl`, `MemberLine`, `MemberStanding`, `MemberStandingTone` (selected, may be blank). |
+| Banner facts | none | New: `$/_i4u_/Client/Cases/Layouts/API - Manage Case - Banner Details` (live, 20 October 2026), filter `CaseNum` (see the banner template). `Tone-Priority` is controlled by the `I4U_UT_CASE_PRIORITY` general lookup table, not written into the IQA (owner, 20 October 2026; for the usage guide). |
 | Member card | none | New: `Case - Primary Member` (the primary party, one row) and `Case - Member Details` (filter `ID`; the details and the standing warning, column-named for `US-FIELD-GROUPS`). See the member template. |
 | Recent activity | none | New: `Notes`, `Emails Out`, `Emails In` and `Meetings` in one folder, filter `CaseNum`, with the activity feed's fixed columns. See the recent activity template. |
 | Parties | `$/_i4u_/Core/Cases/Manage Case/Manage Case - Case Contacts` | Party rows only, plus the tile columns and `MemberStanding` / `MemberStandingTone`. |

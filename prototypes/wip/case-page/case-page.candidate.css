@@ -1,53 +1,8 @@
 /* Case page candidates. Except where a section says it is in the theme,
    nothing here is in the theme yet; each section names its target. */
 
-/* ── C9 Banner member line ─────────────────────────────────────
-   The primary party under the case title (owner, 8 October 2026:
-   one of the most important things on the page). It sits in the banner's
-   top row, and is not a us-banner__subtitle (which folds away), so it
-   stays when the banner condenses on scroll: the name in the title's
-   colour and weight, linked to their record, then the member number,
-   muted, and the standing badge when it needs a check.
-   Target: US-BANNER-COMPONENT, a new us-banner__member element. */
-.us-banner .us-banner__member {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px var(--space-2);
-  margin: var(--space-1) 0 0;
-  color: var(--banner-muted);
-  font-size: var(--fs-base);
-}
-
-.us-banner.us-banner--compact .us-banner__member {
-  margin-top: 0;
-  font-size: var(--fs-sm);
-}
-
-.us-banner .us-banner__member > .ti {
-  color: var(--banner-muted);
-  font-size: 16px;
-}
-
-.us-banner .us-banner__member-name {
-  color: var(--banner-text);
-  font-weight: var(--fw-semi);
-  text-decoration: none;
-}
-
-.us-banner .us-banner__member-name:is(:hover, :focus-visible) {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.us-banner .us-banner__member-line {
-  color: var(--banner-muted);
-  font-size: var(--fs-sm);
-}
-
-.us-banner .us-banner__member :is(.us-banner__member-line, .us-banner__badge):empty {
-  display: none;
-}
+/* C9 Banner member line: in the theme (US-BANNER-COMPONENT,
+   us-banner__member, 20 October 2026). */
 
 /* ── C5 Case team cards, one per row ───────────────────────────
    The staff cards fill their container, one per row (owner, 8 October
@@ -352,54 +307,9 @@
   font-weight: var(--fw-semi);
 }
 
-/* ── C23 Quick status change ────────────────────────────────────
-   The banner's status pill is the toggle of a small us-actions menu
-   (owner, 9 October 2026). It keeps the pill's look, with a chevron to say
-   it opens, and the current status is ticked in the menu. The banner's
-   tone and rail follow data-us-record-status, so a change recolours them.
-   Target: US-BANNER-COMPONENT (the pill as a menu toggle). */
-/* The status pill's own look (the theme's v1 tinted pill with its dot),
-   restated over the Actions toggle's, which the menu would otherwise give it. */
-:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 0;
-  padding: 3px 8px 3px 10px;
-  border: 1px solid transparent;
-  border-radius: 99px;
-  background: var(--record-tone-bg, color-mix(in srgb, var(--banner-text) 15%, transparent));
-  color: var(--record-tone, var(--banner-text));
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  line-height: 1.5;
-  cursor: pointer;
-  transition:
-    background-color 200ms cubic-bezier(.2, 0, 0, 1),
-    color 200ms cubic-bezier(.2, 0, 0, 1),
-    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
-}
-
-:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge::after {
-  content: "\ea5f";
-  font: normal 12px/1 "tabler-icons";
-}
-
-:root .us-banner .us-banner__surface .us-banner__status .us-case-status.us-actions > .us-actions__toggle.us-banner__badge:is(:hover, :focus-visible, [aria-expanded="true"]) {
-  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 35%, transparent);
-}
-
-.us-case-status .us-actions__item[aria-current="true"] {
-  font-weight: var(--fw-semi);
-}
-
-.us-case-status .us-actions__item[aria-current="true"]::after {
-  content: "\ea5e";
-  margin-inline-start: auto;
-  padding-inline-start: var(--space-3);
-  color: var(--success);
-  font: normal 15px/1 "tabler-icons";
-}
+/* C23 Quick status change: the status menu pill and its tick are in the
+   theme (US-BANNER-COMPONENT, 20 October 2026); the action stays in
+   case-actions.candidate.js. */
 
 /* ── C25 Overview balance ───────────────────────────────────────
    The side column had grown much longer than the main one (owner, 9

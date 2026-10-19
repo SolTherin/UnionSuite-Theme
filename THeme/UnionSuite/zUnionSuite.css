@@ -4817,6 +4817,115 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
   }
 }
 
+/* us-banner__member. The record's primary party under the title (case
+   C9, owner, 8 October 2026: one of the most important things on the
+   page). It sits in the top row, not in a us-banner__subtitle (which folds
+   away), so it stays when the banner condenses: an icon, the name in the
+   title's colour linked to their record, the muted member line, and a
+   standing badge when it needs a check. Empty parts collapse. iMIS saves
+   the icon's <i> as <em>, so the icon is set upright. */
+.us-banner .us-banner__member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px var(--space-2);
+  margin: var(--space-1) 0 0;
+  color: var(--banner-muted);
+  font-size: var(--fs-base);
+}
+
+.us-banner.us-banner--compact .us-banner__member {
+  margin-top: 0;
+  font-size: var(--fs-sm);
+}
+
+.us-banner .us-banner__member > .ti {
+  color: var(--banner-muted);
+  font-size: 16px;
+  font-style: normal;
+}
+
+.us-banner .us-banner__member-name {
+  color: var(--banner-text);
+  font-weight: var(--fw-semi);
+  text-decoration: none;
+}
+
+.us-banner .us-banner__member-name:is(:hover, :focus-visible) {
+  color: var(--banner-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.us-banner .us-banner__member-line {
+  color: var(--banner-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-banner .us-banner__member :is(.us-banner__member-line, .us-banner__badge):empty {
+  display: none;
+}
+
+/* Status menu (case C23, owner, 9 October 2026: click the status to
+   change it). A record-status pill can be the toggle of a us-actions menu
+   in us-banner__status. It keeps the pill's tinted look and dot over the
+   glass Actions toggle's, keeps the toggle's chevron, and the menu ticks
+   the item marked aria-current="true" (the page's actions set it). */
+:root .us-banner .us-banner__surface[class] .us-banner__status .us-actions > .us-actions__toggle.us-banner__badge--record-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  padding: 3px 8px 3px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--record-tone-bg, color-mix(in srgb, var(--banner-text) 15%, transparent));
+  box-shadow: none;
+  color: var(--record-tone, var(--banner-text));
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  line-height: 1.5;
+  text-shadow: none;
+  cursor: pointer;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition:
+    background-color 200ms cubic-bezier(.2, 0, 0, 1),
+    color 200ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:root .us-banner .us-banner__surface[class] .us-banner__status .us-actions > .us-actions__toggle.us-banner__badge--record-status::after {
+  width: 8px;
+  height: 5px;
+  transition: transform 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:root .us-banner .us-banner__surface[class] .us-banner__status .us-actions > .us-actions__toggle.us-banner__badge--record-status:is(:hover, :focus-visible, :active, [aria-expanded="true"]) {
+  background: var(--record-tone-bg, color-mix(in srgb, var(--banner-text) 15%, transparent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 35%, transparent);
+  color: var(--record-tone, var(--banner-text));
+}
+
+.us-banner .us-banner__status .us-actions__item[aria-current="true"] {
+  font-weight: var(--fw-semi);
+}
+
+.us-banner .us-banner__status .us-actions__item[aria-current="true"]::after {
+  content: "\ea5e";
+  margin-inline-start: auto;
+  padding-inline-start: var(--space-3);
+  color: var(--success);
+  font: normal 15px/1 "tabler-icons";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .us-banner .us-banner__surface[class] .us-banner__status .us-actions > .us-actions__toggle.us-banner__badge--record-status,
+  :root .us-banner .us-banner__surface[class] .us-banner__status .us-actions > .us-actions__toggle.us-banner__badge--record-status::after {
+    transition: none;
+  }
+}
+
 /* US-BANNER-COMPONENT:END */
 
 /* Theme labels (owner, 19 October 2026). The vendor sheet gives every

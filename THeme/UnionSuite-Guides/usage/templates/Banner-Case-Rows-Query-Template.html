@@ -1,0 +1,51 @@
+<header class="us-banner__surface us-banner__surface--glass us-banner__surface--status us-banner__surface--rows" data-us-record-status="{#query.Status}">
+  <div class="us-banner__summary">
+    <div class="us-banner__identity">
+      <span class="us-banner__record-copy"><span class="us-banner__record-id" id="case-banner-id">{#query.CaseID}</span><button type="button" class="us-copy" data-us-copy-target="case-banner-id" aria-label="Copy case ID" title="Copy case ID"></button></span>
+      <div class="us-banner__identity-text">
+        <h1 class="us-banner__title">{#query.CaseTitle}</h1>
+        <p class="us-banner__member"><i class="ti ti-user" aria-hidden="true"></i><a class="us-banner__member-name" href="{#query.MemberUrl}">{#query.MemberName}</a><span class="us-banner__member-line">{#query.MemberLine}</span><span class="us-banner__badge us-banner__badge--{#query.MemberStandingTone}">{#query.MemberStanding}</span></p>
+      </div>
+    </div>
+    <div class="us-banner__status">
+      <div class="us-actions us-case-status">
+        <button type="button" class="us-actions__toggle us-banner__badge us-banner__badge--record-status" title="Change status">{#query.Status}</button>
+        <ul class="us-actions__list">
+          <li><h6 class="us-actions__heading">Status</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="New">New</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="Open">Open</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="In progress">In progress</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-set-status" data-us-case-status="On hold">On hold</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><button type="button" class="us-actions__item us-action-cases-resolve">Resolve case</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit-resolution">Edit resolution</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-reopen">Reopen case</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="us-banner__actions">
+      <div class="us-actions">
+        <button type="button" class="us-actions__toggle">Actions</button>
+        <ul class="us-actions__list">
+          <li><h6 class="us-actions__heading">Add entry</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-note-form">Add note</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-task-form">Add task</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-meeting-form">Add meeting</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-attachment-form">Upload attachment</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">People</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-party-form">Add party</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-add-staff-form">Add staff</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-email-parties">Email parties</button></li>
+          <li class="us-actions__separator" role="separator"></li>
+          <li><h6 class="us-actions__heading">Case</h6></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit">Update case details</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-resolve">Resolve case</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-edit-resolution">Edit resolution</button></li>
+          <li><button type="button" class="us-actions__item us-action-cases-reopen">Reopen case</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="us-banner__details" data-us-facts-query="$/_i4u_/Client/Cases/Layouts/API - Manage Case - Banner Details" data-us-facts-filter="CaseNum"></div>
+</header>

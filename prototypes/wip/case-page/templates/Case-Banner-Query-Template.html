@@ -4,8 +4,8 @@
      Page CSS class (optional): us-banner-page
      Native title and description blank; border disabled. Header/Footer blank.
      Rows per page: 1. No results: "Case not found."
-     Source IQA: proposed $/_i4u_/Core/Cases/Get Case Details (exists; columns
-     to check) or a new Banner primary IQA, filtered on @url:CaseID.
+     Source IQA: $/_i4u_/Client/Cases/Layouts/Query Template - Manage Case -
+     Banner Top (owner, 20 October 2026), filtered on @url:CaseID.
 
      Top row (fixed, from this IQA):
      CaseID (required)    case reference (C217); also the copy button's text
@@ -25,7 +25,7 @@
      MemberStandingTone   danger | warning, or blank
 
      Second row (client-configurable): filled by US-BANNER-FACTS from the
-     Banner Details IQA in data-us-facts-query (proposed, not built), filtered
+     Banner Details IQA in data-us-facts-query (live, 20 October 2026), filtered
      with the page's CaseNum URL parameter (the case's Ordinal; search label
      CaseNum). It replaces the current page's Details block:
        Description                     shown first
@@ -35,6 +35,8 @@
        Additional-Type                 Bullying / Harassment
        Additional-Subtype              blank is left out
        Additional-Priority, Tone-Priority
+                                       the tone comes from the I4U_UT_CASE_PRIORITY
+                                       general lookup table (owner, 20 October 2026)
        Additional-Lead staff, Tone-Lead staff
                                        "No lead staff assigned" with tone
                                        danger, as the current page shows it in red
@@ -105,5 +107,5 @@
       </div>
     </div>
   </div>
-  <div class="us-banner__details" data-us-facts-query="$/_i4u_/Core/Cases/API/API - Manage Case - Banner Details" data-us-facts-filter="CaseNum"></div>
+  <div class="us-banner__details" data-us-facts-query="$/_i4u_/Client/Cases/Layouts/API - Manage Case - Banner Details" data-us-facts-filter="CaseNum"></div>
 </header>

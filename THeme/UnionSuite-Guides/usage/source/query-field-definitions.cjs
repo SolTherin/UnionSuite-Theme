@@ -89,6 +89,16 @@ module.exports = {
   },
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},
   'explicit-query-search':{ContactName:contacts.ContactName, ContactId:contacts.ContactId},
+  'Banner-Case-Rows-Query-Template.html':{
+    CaseID:required('Case reference in the ID chip, copied by its copy button.', 'C217'),
+    CaseTitle:required('Case title, the banner heading.', 'Bullying complaint – Northside Distribution night shift'),
+    Status:required('Status text, as the case Status value list holds it. Fills the status pill and data-us-record-status, which colours the pill and left rail: New, Open and In progress amber; Active, Approved and Completed green; Expired, Terminated and Overdue red; any other status neutral. Match the status menu items’ data-us-case-status values to these words.', 'Open'),
+    MemberName:required('The primary party’s display name, under the title. It stays when the banner condenses.', 'Priya Natarajan'),
+    MemberUrl:optional('The primary party’s contact profile. Blank leaves the name as plain text. Example path is illustrative.', '/Party.aspx?ID=20544'),
+    MemberLine:optional('Muted text after the name, such as the member type and number. Blank hides it.', 'Member 20544'),
+    MemberStanding:optional('Standing badge text: Unfinancial, No longer a member or New member. Blank (a financial member, an employer) hides the badge.', 'Unfinancial'),
+    MemberStandingTone:optional('Standing badge colour: danger or warning. Blank gives the neutral badge. Use the same conditions, in the same order, as MemberStanding.', 'danger')
+  },
   'Banner-Contact-Template.html':{
     ContactId:required('Contact identifier in the eyebrow, copied by its copy button. Also the filter value for the optional positions, tab counts and alerts blocks.', '101000', '[Contact ID]'),
     ContactType:required('Display text for the contact type, in the eyebrow and on the avatar. Organisation, Organization or Company show a building; any other value a person. Derive it from the same COMPANY_RECORD flag the taskbar quick search uses.', 'Individual', '[Contact type]'),
