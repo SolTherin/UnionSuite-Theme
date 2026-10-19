@@ -1,0 +1,849 @@
+<!doctype html>
+<!--
+  The Zidebar Add Note form's other types, mocked up (owner, 19 October
+  2026): Add task (Type=task: its own task-first form, owner "good UX over
+  reusability"; the earlier note-layout version kept as "Task (note
+  layout)"), Add milestone (Type=milestone) and Add attachment
+  (Type=attachmentonly). Add note (Type=note) is built:
+  templates/Add-Note-Form-Content-HTML.html, previewed in
+  add-note-embed-preview.html.
+
+  These are static mock-ups in the built form's own markup and styles: the
+  embed's <style> is read from the template at load, so each type looks as
+  the real form does. Only the switches, High priority, Access and the
+  milestone status respond; nothing saves. Milestone fields are proposed
+  (no field list yet) from how milestones work in the theme (US-MILESTONES:
+  stages in order, status Not Complete | In Progress | Complete).
+
+  ?type=task|tasknote|milestone|attachmentonly picks the form. Serve the project root
+  (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Popup Form Types</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <style>
+    /* Mock-up page layout only. */
+    body.pt-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .pt-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pt-toolbar h1 {
+      margin: 0 var(--space-3) 0 0;
+      color: var(--text-strong);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .pt-segmented {
+      display: inline-flex;
+      padding: 3px;
+      gap: 2px;
+      background: var(--bg-sunken);
+      border-radius: var(--radius);
+    }
+
+    .pt-segmented button {
+      padding: 5px 12px;
+      border: 0;
+      border-radius: calc(var(--radius) - 2px);
+      background: transparent;
+      color: var(--text-base);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pt-segmented button[aria-pressed="true"] {
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+    }
+
+    .pt-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 800px) minmax(240px, 340px);
+      justify-content: center;
+      align-items: start;
+      gap: var(--space-6);
+      padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    @media (max-width: 1180px) {
+      .pt-stage {
+        grid-template-columns: minmax(0, 800px);
+      }
+    }
+
+    /* The iMIS popup, drawn statically: its title bar holds the title. */
+    .pt-window {
+      overflow: hidden;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 40px rgb(15 23 42 / .18);
+    }
+
+    .pt-window__title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: 0;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .pt-window__title .ti {
+      margin-inline-start: auto;
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .pt-notes {
+      padding: var(--space-4) var(--space-5);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 13px;
+    }
+
+    .pt-notes h2 {
+      margin: 0 0 var(--space-2);
+      color: var(--text-strong);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pt-notes ol {
+      margin: 0 0 var(--space-3);
+      padding-inline-start: 18px;
+    }
+
+    .pt-notes li + li {
+      margin-top: 6px;
+    }
+
+    .pt-notes strong {
+      color: var(--text-strong);
+    }
+
+    .pt-confirm {
+      margin: 0;
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius);
+      background: var(--warning-bg);
+      color: var(--text-strong);
+    }
+
+    /* ── Proposed for the embed (milestone status) ──────────────
+       A row of three pills, one chosen: a radio group in the
+       segmented-control style. */
+    .us-note-form__status {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      padding: 3px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--bg-sunken);
+    }
+
+    .us-note-form__status label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      padding: 5px 12px;
+      border-radius: calc(var(--radius) - 2px);
+      color: var(--text-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background-color 150ms cubic-bezier(.2, 0, 0, 1),
+        color 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    .us-note-form__status input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .us-note-form__status label:has(input:checked) {
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+    }
+
+    .us-note-form__status label:has(input:focus-visible) {
+      box-shadow: var(--focus-ring);
+    }
+
+    .us-note-form__status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+    }
+
+    .us-note-form__status-dot--progress {
+      background: var(--warning);
+    }
+
+    .us-note-form__status-dot--complete {
+      background: var(--success);
+    }
+
+    /* ── Proposed for the embed (task) ──────────────────────────
+       On a task the who/when fields are always shown, so they are not
+       boxed: the same grid as the follow-up group, without its shading,
+       border or high-priority rail. The badge and the filled flag mark
+       High priority. */
+    .us-note-form .us-note-form__group.us-note-form__group--flat,
+    .us-note-form[data-nf-high-priority] .us-note-form__group.us-note-form__group--flat {
+      margin-top: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    /* ── Proposed: the task-first form (us-task-form) ───────────
+       The task is one larger line with the High priority flag beside it;
+       details are optional, behind a link. */
+    .us-task-form__title-row {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .us-note-form .us-task-form__title {
+      flex: 1;
+      min-height: 44px;
+      font-size: 16px;
+    }
+
+    .us-task-form__flag {
+      display: inline-grid;
+      flex: 0 0 44px;
+      place-items: center;
+      height: 44px;
+      padding: 0;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition:
+        border-color 150ms cubic-bezier(.2, 0, 0, 1),
+        background-color 150ms cubic-bezier(.2, 0, 0, 1),
+        color 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    .us-task-form__flag:hover {
+      border-color: var(--field-focus-colour);
+      color: var(--text-strong);
+    }
+
+    .us-task-form__flag:focus-visible {
+      outline: 2px solid transparent;
+      box-shadow: var(--focus-ring);
+    }
+
+    .us-task-form__flag .ti {
+      grid-area: 1 / 1;
+      font-size: 18px;
+      transition: opacity 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    .us-task-form__flag .ti-flag-filled,
+    .us-task-form__flag[aria-pressed="true"] .ti-flag {
+      opacity: 0;
+    }
+
+    .us-task-form__flag[aria-pressed="true"] .ti-flag-filled {
+      opacity: 1;
+    }
+
+    .us-task-form__flag[aria-pressed="true"],
+    .us-task-form__flag[aria-pressed="true"]:hover {
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .us-task-form__details-toggle {
+      display: inline-flex;
+      justify-self: start;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 0;
+      border: 0;
+      background: none;
+      color: var(--text-link);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .us-task-form__details-toggle:focus-visible {
+      outline: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--focus-ring);
+    }
+
+    .us-task-form__saved {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-inline-end: auto;
+      color: var(--success);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .us-task-form__flag,
+      .us-task-form__flag .ti {
+        transition: none;
+      }
+    }
+
+    /* A large drop area when files are the point of the form. */
+    .us-note-form .us-note-form__drop--large {
+      flex-direction: column;
+      justify-content: center;
+      min-height: 140px;
+      text-align: center;
+    }
+
+    .us-note-form .us-note-form__drop--large .ti {
+      font-size: 28px;
+    }
+
+    .us-note-form .us-note-form__drop--large .us-note-form__limit {
+      margin: 0;
+    }
+
+    .us-note-form .us-note-form__textarea--short {
+      min-height: 72px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .us-note-form__status label {
+        transition: none;
+      }
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="pt-page">
+  <div class="pt-toolbar">
+    <h1>Popup form types</h1>
+    <div class="pt-segmented" role="group" aria-label="Form" data-control="type">
+      <button type="button" data-value="task">Add task</button>
+      <button type="button" data-value="tasknote">Task (note layout)</button>
+      <button type="button" data-value="milestone">Add milestone</button>
+      <button type="button" data-value="attachmentonly">Add attachment</button>
+    </div>
+    <div class="pt-segmented" role="group" aria-label="Task tags" data-control="tasktags" data-show-for="task">
+      <button type="button" data-value="some">Task tags set up</button>
+      <button type="button" data-value="none">No task tags</button>
+    </div>
+    <div class="pt-segmented" role="group" aria-label="Task layout" data-control="layout" data-show-for="tasknote">
+      <button type="button" data-value="flat">Flat</button>
+      <button type="button" data-value="boxed">Boxed</button>
+    </div>
+    <div class="pt-segmented" role="group" aria-label="Appearance" data-control="mode">
+      <button type="button" data-value="light">Light</button>
+      <button type="button" data-value="dark">Dark</button>
+    </div>
+  </div>
+
+  <main class="pt-stage">
+    <section class="pt-window" aria-labelledby="pt-title">
+      <p class="pt-window__title" id="pt-title"><span data-title></span><i class="ti ti-x" aria-hidden="true"></i></p>
+      <div id="form-slot"></div>
+    </section>
+    <aside class="pt-notes" id="notes"></aside>
+  </main>
+
+  <!-- Shared pieces, in the built form's markup. -->
+  <template id="tpl-tags">
+    <div class="us-note-form__row">
+      <div class="us-note-form__field">
+        <span class="us-note-form__label">Tags <span class="us-note-form__optional">(optional)</span></span>
+        <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip">Bargaining<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Remove Bargaining"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Tags"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+      </div>
+      <div class="us-note-form__field">
+        <span class="us-note-form__label">Subtags <span class="us-note-form__optional">(optional)</span></span>
+        <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Subtags"><span>Choose…</span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Task tags: the same field, fed by the task tag list, not the note tags. -->
+  <template id="tpl-task-tags">
+    <div class="us-note-form__row">
+      <div class="us-note-form__field">
+        <span class="us-note-form__label">Tags <span class="us-note-form__optional">(optional)</span></span>
+        <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip">Correspondence<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Remove Correspondence"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Tags"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+      </div>
+      <div class="us-note-form__field">
+        <span class="us-note-form__label">Subtags <span class="us-note-form__optional">(optional)</span></span>
+        <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip"><span class="us-note-form__chip-parent">Correspondence ›</span> Email<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Remove Email"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Subtags"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-files-compact">
+    <div class="us-note-form__field">
+      <span class="us-note-form__label">Attachments <span class="us-note-form__optional">(optional)</span></span>
+      <label class="us-note-form__drop"><i class="ti ti-upload" aria-hidden="true"></i><span>Drop files here or <span class="us-note-form__browse">choose files</span></span><span class="us-note-form__limit">Up to 20 MB each</span></label>
+    </div>
+  </template>
+
+  <template id="tpl-assign-group">
+    <div class="us-note-form__group">
+      <div class="us-note-form__field us-note-form__group-assign">
+        <span class="us-note-form__label">Assign to</span>
+        <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip">James Driscoll (me)<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Clear"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Assign to"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+      </div>
+      <div class="us-note-form__field us-note-form__group-deadline">
+        <label class="us-note-form__label" for="pt-due"><span data-due-label>Deadline</span> <span class="us-note-form__optional" data-due-optional>(optional)</span><span class="us-note-form__required" data-due-required hidden>*</span></label>
+        <input class="us-note-form__input" type="date" id="pt-due">
+        <div class="us-note-form__quick" role="group" aria-label="Quick dates">
+          <button type="button" tabindex="-1">Tomorrow</button>
+          <button type="button" tabindex="-1">In a week</button>
+          <button type="button" tabindex="-1">In 2 weeks</button>
+        </div>
+      </div>
+      <label class="us-note-form__check us-note-form__group-priority">
+        <input type="checkbox" data-pt-priority>
+        <span class="us-note-form__flag" aria-hidden="true"><i class="ti ti-flag"></i><i class="ti ti-flag-filled"></i></span>
+        High priority
+      </label>
+    </div>
+  </template>
+
+  <template id="tpl-access">
+    <div class="us-note-form__access">
+      <hr class="us-note-form__divider">
+      <div class="us-note-form__access-row">
+        <div class="us-note-form__field us-note-form__access-field">
+          <label class="us-note-form__label" for="pt-access">Access</label>
+          <select class="us-note-form__input" id="pt-access" data-pt-access>
+            <option value="Open" selected>Open</option>
+            <option value="Team">Team</option>
+            <option value="Individual">Individual</option>
+          </select>
+        </div>
+        <p class="us-note-form__access-hint" data-pt-access-hint><i class="ti ti-world" aria-hidden="true" data-pt-access-icon></i><span data-pt-access-text></span></p>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-foot">
+    <footer class="us-note-form__foot">
+      <span class="us-note-form__hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to save</span>
+      <button type="button" class="us-note-form__button">Cancel</button>
+      <button type="button" class="us-note-form__button us-note-form__button--primary" data-save></button>
+    </footer>
+  </template>
+
+  <!-- Add task, task-first (owner, 19 October 2026) -->
+  <template id="tpl-task">
+    <div class="us-note-form us-task-form">
+      <div class="us-note-form__body">
+        <div class="us-note-form__field">
+          <div class="us-note-form__note-head">
+            <label class="us-note-form__label" for="pt-t-title">What needs doing? <span class="us-note-form__required" aria-hidden="true">*</span></label>
+            <span class="us-badge us-badge--danger us-note-form__priority-badge" aria-hidden="true">High Priority</span>
+          </div>
+          <div class="us-task-form__title-row">
+            <input class="us-note-form__input us-task-form__title" type="text" id="pt-t-title" placeholder="e.g. Send the revised log of claims to HR" value="Send the revised log of claims to Stark Industries HR" autocomplete="off">
+            <button type="button" class="us-task-form__flag" aria-pressed="false" aria-label="High priority" title="High priority" data-pt-flag><i class="ti ti-flag" aria-hidden="true"></i><i class="ti ti-flag-filled" aria-hidden="true"></i></button>
+          </div>
+          <button type="button" class="us-task-form__details-toggle" aria-expanded="false" aria-controls="pt-t-details-wrap" data-pt-details-toggle><i class="ti ti-plus" aria-hidden="true"></i> Add details</button>
+          <div class="us-note-form__reveal" id="pt-t-details-wrap" data-closed data-pt-details>
+            <div>
+              <div class="us-note-form__field us-note-form__field--inset">
+                <label class="us-note-form__label" for="pt-t-details">Details <span class="us-note-form__optional">(optional)</span></label>
+                <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-t-details" placeholder="Anything the person doing it needs to know…"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="us-note-form__row">
+          <div class="us-note-form__field">
+            <span class="us-note-form__label">Assign to</span>
+            <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip">James Driscoll (me)<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Clear"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Assign to"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+          </div>
+          <div class="us-note-form__field">
+            <label class="us-note-form__label" for="pt-t-due">Due date <span class="us-note-form__optional">(optional)</span></label>
+            <input class="us-note-form__input" type="date" id="pt-t-due" data-pt-due>
+            <div class="us-note-form__quick" role="group" aria-label="Quick dates">
+              <button type="button" data-pt-days="0">Today</button>
+              <button type="button" data-pt-days="1">Tomorrow</button>
+              <button type="button" data-pt-days="7">In a week</button>
+            </div>
+          </div>
+        </div>
+        <div data-slot="tags"></div>
+      </div>
+      <footer class="us-note-form__foot">
+        <span class="us-note-form__hint" data-pt-hint><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to save</span>
+        <span class="us-task-form__saved" role="status" data-pt-saved hidden><i class="ti ti-check" aria-hidden="true"></i><span></span></span>
+        <button type="button" class="us-note-form__button">Cancel</button>
+        <button type="button" class="us-note-form__button" data-pt-again>Save and add another</button>
+        <button type="button" class="us-note-form__button us-note-form__button--primary">Save task</button>
+      </footer>
+    </div>
+  </template>
+
+  <!-- Task in the note form's layout, kept for comparison -->
+  <template id="tpl-tasknote">
+    <div class="us-note-form">
+      <div class="us-note-form__body">
+        <div class="us-note-form__field">
+          <div class="us-note-form__note-head">
+            <label class="us-note-form__label" for="pt-task">Task <span class="us-note-form__required" aria-hidden="true">*</span></label>
+            <span class="us-badge us-badge--danger us-note-form__priority-badge" aria-hidden="true">High Priority</span>
+          </div>
+          <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-task" placeholder="What needs to be done…">Send the revised log of claims to Stark Industries HR</textarea>
+        </div>
+        <div data-slot="assign"></div>
+        <div data-slot="tags"></div>
+        <div data-slot="files"></div>
+        <div data-slot="access"></div>
+      </div>
+      <div data-slot="foot"></div>
+    </div>
+  </template>
+
+  <!-- Add milestone -->
+  <template id="tpl-milestone">
+    <div class="us-note-form">
+      <div class="us-note-form__body">
+        <div class="us-note-form__field">
+          <label class="us-note-form__label" for="pt-ms-name">Milestone <span class="us-note-form__required" aria-hidden="true">*</span></label>
+          <input class="us-note-form__input" type="text" id="pt-ms-name" placeholder="e.g. Log of claims served" value="In-principle agreement reached">
+        </div>
+        <div class="us-note-form__field">
+          <label class="us-note-form__label" for="pt-ms-desc">Description <span class="us-note-form__optional">(optional)</span></label>
+          <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-ms-desc" placeholder="What reaching this stage means…"></textarea>
+        </div>
+        <div class="us-note-form__row">
+          <div class="us-note-form__field">
+            <span class="us-note-form__label" id="pt-ms-status-label">Status</span>
+            <div class="us-note-form__status" role="radiogroup" aria-labelledby="pt-ms-status-label">
+              <label><input type="radio" name="pt-ms-status" value="Not Complete" checked><span class="us-note-form__status-dot" aria-hidden="true"></span>Not started</label>
+              <label><input type="radio" name="pt-ms-status" value="In Progress"><span class="us-note-form__status-dot us-note-form__status-dot--progress" aria-hidden="true"></span>In progress</label>
+              <label><input type="radio" name="pt-ms-status" value="Complete"><span class="us-note-form__status-dot us-note-form__status-dot--complete" aria-hidden="true"></span>Complete</label>
+            </div>
+          </div>
+          <div class="us-note-form__field">
+            <label class="us-note-form__label" for="pt-ms-position">Position</label>
+            <select class="us-note-form__input" id="pt-ms-position">
+              <option>At the end, after “Ballot”</option>
+              <option>At the start</option>
+              <option>After “Log of claims served”</option>
+              <option>After “Bargaining meetings”</option>
+              <option>After “Offer received”</option>
+            </select>
+          </div>
+        </div>
+        <div data-slot="files"></div>
+      </div>
+      <div data-slot="foot"></div>
+    </div>
+  </template>
+
+  <!-- Add attachment -->
+  <template id="tpl-attachmentonly">
+    <div class="us-note-form">
+      <div class="us-note-form__body">
+        <div class="us-note-form__field">
+          <span class="us-note-form__label">Files <span class="us-note-form__required" aria-hidden="true">*</span></span>
+          <label class="us-note-form__drop us-note-form__drop--large"><i class="ti ti-upload" aria-hidden="true"></i><span>Drop files here or <span class="us-note-form__browse">choose files</span></span><span class="us-note-form__limit">Up to 20 MB each</span></label>
+          <ul class="us-note-form__files" aria-label="Files">
+            <li class="us-note-form__file" data-state="done"><i class="ti ti-file-text" aria-hidden="true"></i><span class="us-note-form__file-name">Stark Industries – offer 2.docx</span><span class="us-note-form__file-status">84 KB</span><button type="button" class="us-note-form__file-remove" tabindex="-1" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></li>
+            <li class="us-note-form__file" data-state="uploading"><i class="ti ti-loader-2" aria-hidden="true"></i><span class="us-note-form__file-name">Survey Responses.pdf</span><span class="us-note-form__file-status">Uploading…</span><button type="button" class="us-note-form__file-remove" tabindex="-1" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></li>
+          </ul>
+          <div class="us-note-form__field us-note-form__field--inset">
+            <span class="us-note-form__label">File tags <span class="us-note-form__optional">(apply to every file above)</span></span>
+            <div class="us-note-form__multi"><div class="us-note-form__control"><span class="us-note-form__chips"><span class="us-note-form__chip">Offer<button type="button" class="us-note-form__chip-remove" tabindex="-1" aria-label="Remove Offer"><i class="ti ti-x" aria-hidden="true"></i></button></span></span><button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="File tags"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div></div>
+          </div>
+        </div>
+        <div class="us-note-form__field">
+          <label class="us-note-form__label" for="pt-desc">Description <span class="us-note-form__optional">(optional)</span></label>
+          <textarea class="us-note-form__textarea us-note-form__textarea--short" id="pt-desc" placeholder="What these files are…"></textarea>
+        </div>
+        <div data-slot="tags"></div>
+        <div data-slot="access"></div>
+      </div>
+      <div data-slot="foot"></div>
+    </div>
+  </template>
+
+  <script>
+  (function () {
+    'use strict';
+
+    const TYPES = {
+      task: {
+        title: 'Add task', slots: {tags: 'tpl-task-tags'}, ownFoot: true,
+        notes: `
+          <h2>Add task (task-first)</h2>
+          <ol>
+            <li><strong>Its own form</strong> (owner, 19 October 2026: good UX over reusability). A task is a short instruction to someone, not a note: one line, who, and when.</li>
+            <li><strong>What needs doing?</strong> is one larger line, focused on open. <strong>Add details</strong> opens an optional description for the occasional task that needs more.</li>
+            <li><strong>High priority is the flag beside the task line</strong>: press it and it fills red and the High Priority badge (the task list's own) shows. It sits where the eye already is.</li>
+            <li><strong>Assign to | Due date</strong> straight under it, flat. Due date optional (owner), with Today, Tomorrow and In a week.</li>
+            <li><strong>Tags</strong> from the task tag list, last and quiet, and <strong>only when that list has values</strong> (owner): with no task tags set up the row is not drawn (toolbar: No task tags).</li>
+            <li><strong>Save and add another</strong> keeps the form open and clears the task, keeping the assignee and due date, for a batch of tasks after a meeting. A quiet line says what was saved. <strong>Save task</strong> saves and closes.</li>
+            <li>No Access and no attachments (owner, 19 October 2026).</li>
+          </ol>
+          <p class="pt-confirm"><strong>To confirm:</strong> do task tags have subtags (shown), and what are the task tag IQAs? Should Save and add another keep the due date as well as the assignee (it does here)? How tags show on the task list, if at all.</p>`
+      },
+      tasknote: {
+        title: 'Add task', save: 'Save task', slots: {assign: 'tpl-assign-group', tags: 'tpl-task-tags'},
+        notes: `
+          <h2>Task in the note layout (for comparison)</h2>
+          <ol>
+            <li><strong>The note form, minus the switch.</strong> A task is a note with a follow-up, so Assign to, Due date and High priority are always shown.</li>
+            <li><strong>Flat, not boxed</strong> (owner, 19 October 2026). The note form boxes these fields because its switch reveals them as one group; a task has no switch, and a shaded box would make the task's main facts read as secondary. Same grid: Assign to | Due date, High priority under Assign to. High priority shows as the badge (the task list's own) and the filled flag; the rail belonged to the box. Boxed is kept on the toolbar for comparison.</li>
+            <li><strong>Who and when come straight after the task</strong>, before Tags: on a task they matter more than its tags. Deadline reads <em>Due date</em>.</li>
+            <li><strong>A shorter text box</strong>: a task is usually one line, a note a paragraph.</li>
+            <li><strong>Task tags, not note tags</strong> (owner, 19 October 2026): the same Tags and Subtags fields, fed by a separate task tag list (its own Parent and Child IQAs), so what a task is (a call, correspondence, paperwork) stays apart from what a note is about. Sample values here.</li>
+            <li><strong>No attachments</strong> (owner, 19 October 2026): files go with the record, through a note or the Attachments screen, not on a task.</li>
+            <li><strong>No Access</strong> (owner, 19 October 2026): tasks are not restricted, so the form does not offer it; a task saves as Open.</li>
+          </ol>
+          <p class="pt-confirm"><strong>To confirm:</strong> is Due date required for a task (shown here optional)? Does a task save as a note with Follow up required set? Do task tags have subtags (shown), and what are the task tag IQAs?</p>`
+      },
+      milestone: {
+        title: 'Add milestone', save: 'Save milestone', slots: {files: 'tpl-files-compact'},
+        notes: `
+          <h2>Add milestone</h2>
+          <ol>
+            <li><strong>A stage, not a note.</strong> In the theme a milestone is a stage on the agreement's progress bar, with a status and a place in order, and no date. The form asks for those and nothing more.</li>
+            <li><strong>Milestone</strong> (required): a one-line name, as stages read on the bar. <strong>Description</strong> optional.</li>
+            <li><strong>Status</strong>: three pills, Not started by default. Saved as the theme's own values: Not Complete, In Progress, Complete.</li>
+            <li><strong>Position</strong>: at the end by default (the open question in TODO), or after any existing stage.</li>
+            <li>No Tags, Follow up or Access: a stage belongs to the whole agreement. Attachments optional.</li>
+          </ol>
+          <p class="pt-confirm"><strong>Proposed fields (no list yet):</strong> confirm the fields, whether a milestone needs a date after all, and whether new milestones always go at the end (then Position goes).</p>`
+      },
+      attachmentonly: {
+        title: 'Add attachment', save: 'Upload', slots: {tags: 'tpl-tags', access: 'tpl-access'},
+        notes: `
+          <h2>Add attachment</h2>
+          <ol>
+            <li><strong>Files lead</strong>, as a large drop area, and are the only required field. Each file uploads as it is added (the spinner), as on Add note.</li>
+            <li><strong>File tags</strong> appear once a file is added and apply to every file in the upload.</li>
+            <li><strong>Description</strong> is optional and replaces the note.</li>
+            <li><strong>Tags and Access</strong> as on Add note: file tags say what the files are, tags what the record is about. Access matters here as much as on a note: a statement or medical letter is often why a note is restricted.</li>
+            <li>No Follow up.</li>
+          </ol>
+          <p class="pt-confirm"><strong>To confirm:</strong> is the description saved with the files? File tags per upload (shown) or per file? Does an attachment need both file tags and tags?</p>`
+      }
+    };
+
+    const params = new URLSearchParams(location.search);
+    const state = {
+      type: TYPES[params.get('type')] ? params.get('type') : 'task',
+      layout: params.get('layout') === 'boxed' ? 'boxed' : 'flat',
+      tasktags: params.get('tasktags') === 'none' ? 'none' : 'some',
+      mode: params.get('mode') === 'dark' ? 'dark' : 'light'
+    };
+    const slot = document.getElementById('form-slot');
+    const clone = id => document.getElementById(id).content.cloneNode(true);
+
+    function build() {
+      const type = TYPES[state.type];
+      document.querySelector('[data-title]').textContent = type.title;
+      document.getElementById('notes').innerHTML = type.notes;
+      slot.innerHTML = '';
+      slot.append(clone('tpl-' + state.type));
+      const slots = {...type.slots, ...(type.ownFoot ? {} : {foot: 'tpl-foot'})};
+      // The task-first form draws Tags only when the task tag list has values.
+      if (state.type === 'task' && state.tasktags === 'none') delete slots.tags;
+      Object.entries(slots).forEach(([name, id]) => {
+        const target = slot.querySelector('[data-slot="' + name + '"]');
+        if (target) target.replaceWith(clone(id));
+      });
+      slot.querySelectorAll('[data-slot]').forEach(empty => empty.remove());
+      const save = slot.querySelector('[data-save]');
+      if (save) save.textContent = type.save;
+
+      // Task: Due date, no switch, the fields straight under the task;
+      // flat unless Boxed is chosen for comparison.
+      const due = slot.querySelector('[data-due-label]');
+      if (due) due.textContent = 'Due date';
+      slot.querySelector('.us-note-form__group')?.classList.toggle('us-note-form__group--flat', state.layout === 'flat');
+
+      wire();
+    }
+
+    // Enough behaviour to judge the mock-ups: High priority, Access, and
+    // the task-first form's flag, details, quick dates and save-and-again.
+    function wire() {
+      const root = slot.querySelector('.us-note-form');
+      if (root.classList.contains('us-task-form')) wireTask(root);
+      const priority = root.querySelector('[data-pt-priority]');
+      if (priority) {
+        priority.addEventListener('change', () => root.toggleAttribute('data-nf-high-priority', priority.checked));
+      }
+      const access = root.querySelector('[data-pt-access]');
+      if (access) {
+        const word = 'agreement';
+        const ACCESS = {
+          Open: ['ti-world', 'Standard. Anyone who can see this ' + word + ' can read the note.'],
+          Team: ['ti-users', 'Only the ' + word + ' team, managers and system administrators can read the note.'],
+          Individual: ['ti-lock', 'Only the staff assigned to this ' + word + ', managers and system administrators can read the note.']
+        };
+        const sync = () => {
+          const [icon, text] = ACCESS[access.value];
+          root.querySelector('[data-pt-access-icon]').className = 'ti ' + icon;
+          root.querySelector('[data-pt-access-text]').textContent = text;
+          root.querySelector('[data-pt-access-hint]').toggleAttribute('data-restricted', access.value !== 'Open');
+        };
+        access.addEventListener('change', sync);
+        sync();
+      }
+    }
+
+    function wireTask(root) {
+      const title = root.querySelector('#pt-t-title');
+      const flag = root.querySelector('[data-pt-flag]');
+      const toggle = root.querySelector('[data-pt-details-toggle]');
+      const details = root.querySelector('[data-pt-details]');
+      const due = root.querySelector('[data-pt-due]');
+      const hint = root.querySelector('[data-pt-hint]');
+      const saved = root.querySelector('[data-pt-saved]');
+
+      const setFlag = on => {
+        flag.setAttribute('aria-pressed', String(on));
+        root.toggleAttribute('data-nf-high-priority', on);
+      };
+      flag.addEventListener('click', () => setFlag(flag.getAttribute('aria-pressed') !== 'true'));
+
+      const setDetails = open => {
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.hidden = open;
+        if (open) {
+          details.removeAttribute('data-closed');
+          setTimeout(() => details.setAttribute('data-settled', ''), 240);
+        } else {
+          details.removeAttribute('data-settled');
+          details.setAttribute('data-closed', '');
+        }
+      };
+      toggle.addEventListener('click', () => {
+        setDetails(true);
+        root.querySelector('#pt-t-details').focus();
+      });
+
+      root.querySelector('.us-note-form__quick').addEventListener('click', event => {
+        const button = event.target.closest('[data-pt-days]');
+        if (!button) return;
+        const day = new Date();
+        day.setDate(day.getDate() + Number(button.dataset.ptDays));
+        const pad = n => String(n).padStart(2, '0');
+        due.value = day.getFullYear() + '-' + pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+      });
+
+      // Save and add another: the task clears and the cursor goes back to
+      // it; the assignee and due date stay; a quiet line says what saved.
+      root.querySelector('[data-pt-again]').addEventListener('click', () => {
+        const text = title.value.trim();
+        if (!text) {
+          title.focus();
+          return;
+        }
+        const short = text.length > 40 ? text.slice(0, 40) + '\u2026' : text;
+        saved.querySelector('span').textContent = 'Saved \u201c' + short + '\u201d. Add the next one.';
+        saved.hidden = false;
+        hint.hidden = true;
+        title.value = '';
+        root.querySelector('#pt-t-details').value = '';
+        setDetails(false);
+        setFlag(false);
+        title.focus();
+      });
+
+      title.focus();
+    }
+
+    // The built form's styles, so the mock-ups match it exactly.
+    fetch('templates/Add-Note-Form-Content-HTML.html')
+      .then(response => response.text())
+      .then(html => {
+        const style = document.createElement('style');
+        style.textContent = (html.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
+        document.head.insertBefore(style, document.head.querySelector('style'));
+      });
+
+    function apply() {
+      document.querySelectorAll('[data-control]').forEach(group => {
+        group.querySelectorAll('button').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.value === state[group.dataset.control]));
+        });
+      });
+      document.documentElement.setAttribute('data-us-color-scheme', state.mode);
+      document.querySelectorAll('[data-show-for]').forEach(control => {
+        control.hidden = control.dataset.showFor !== state.type;
+      });
+      const url = new URL(location.href);
+      url.searchParams.set('type', state.type);
+      url.searchParams.set('layout', state.layout);
+      url.searchParams.set('tasktags', state.tasktags);
+      url.searchParams.set('mode', state.mode);
+      history.replaceState(null, '', url);
+    }
+
+    document.querySelectorAll('[data-control]').forEach(group => {
+      group.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const key = group.dataset.control;
+        const changed = state[key] !== button.dataset.value;
+        state[key] = button.dataset.value;
+        apply();
+        if (['type', 'layout', 'tasktags'].includes(key) && changed) build();
+      });
+    });
+
+    apply();
+    build();
+  })();
+  </script>
+</body>
+</html>

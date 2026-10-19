@@ -1,0 +1,1643 @@
+<!-- Add note form (owner, 19 October 2026; popup-forms.html, Add note).
+     Placement: a Content HTML iPart on
+     /_i4u_/Core/Zidebar/Add-Note-New.aspx. Paste everything below into the
+     iPart's HTML/source view. Leave Title blank and "Display a border"
+     unchecked. The page must load the UnionSuite theme (zUnionSuite.js and
+     Scripts/ActionDefinitions.js), as every page on the site does.
+
+     The page address carries Type=note, ID (the signed-in user), Module
+     (agreement | case), ModuleID (the record's ID: AgreementID, CaseID) and
+     ModuleOrdinal (its ordinal: AgreementNum, CaseNum), as agreements.add-note
+     opens it. ModuleID and ModuleOrdinal are required to save.
+
+     Field order: Note (required), Tags | Subtags, Attachments (always
+     shown; file tags once a file is added), Follow up required (Assign to,
+     Deadline, High priority), then Access (rarely changed, so last; Open by
+     default, with a line saying who can read the note).
+
+     Save and Cancel follow the theme's popup contract (usage guide
+     #composer-popup-forms): a saved form closes with {saved: true, Ordinal},
+     Cancel calls iMIS's CloseAndCancelRadWindow(). Both work in the native
+     iMIS popup and the theme dialog.
+
+     Data it needs (set in CONFIG below):
+       parentTagsQuery  Tags: Ordinal, TagName.
+       childTagsQuery   Subtags of the chosen tags, asked for as
+                        ParentTag="32","58": Ordinal, TagName,
+                        ParentTagOrdinal, ParentTagName. Probed on the dev
+                        tenant 19 October 2026 (tags-iqa-probe.js): one call
+                        returns the children of every parent listed.
+       staffQuery     The case staff value list: ID (saved), Name (shown).
+                      Assign to takes one person.
+       fileTagsQuery  The theme's attachment tag IQA: Ordinal, TagName.
+       accessCheck()  PLACEHOLDER: whether the signed-in user keeps access
+                      at Team and Individual on this record (a CloudToolz
+                      flow; see the function). Until it answers, a
+                      restricted choice carries a softer caution.
+       submit()       PLACEHOLDER: the CloudToolz call that saves the note
+                      is not wired yet. Save checks the form, waits for the
+                      uploads, logs what it would send (payload()) and
+                      closes the popup as saved.
+       uploadEndpoint CloudToolz Fine Uploader endpoint, as BeyondFormz
+                      uses: each file is uploaded when it is added, under a
+                      UUID made in the browser, and the save sends
+                      [{UploadName, Uuid}] for the flow's SharePoint step. -->
+<div class="us-note-form" data-us-note-form>
+  <!-- A div, not a form: the iMIS page is one ASP.NET form, and a form
+       inside it is dropped by the browser. -->
+  <div class="us-note-form__body" role="form" aria-label="Add note">
+    <p class="us-note-form__alert" role="alert" data-nf-alert hidden></p>
+
+    <div class="us-note-form__field" data-nf-field="note">
+      <div class="us-note-form__note-head">
+        <label class="us-note-form__label" for="nf-note">Note <span class="us-note-form__required" aria-hidden="true">*</span></label>
+        <span class="us-badge us-badge--danger us-note-form__priority-badge" aria-hidden="true" data-nf-priority-badge>High Priority</span>
+      </div>
+      <textarea class="us-note-form__textarea" id="nf-note" required aria-describedby="nf-note-error" placeholder="What happened, what was said or agreed…"></textarea>
+      <p class="us-note-form__error" id="nf-note-error" hidden><i class="ti ti-alert-circle" aria-hidden="true"></i> Write the note before saving.</p>
+    </div>
+
+    <div class="us-note-form__row">
+      <div class="us-note-form__field">
+        <span class="us-note-form__label" id="nf-tags-label">Tags <span class="us-note-form__optional">(optional)</span></span>
+        <div class="us-note-form__multi" data-nf-multi="tags" aria-labelledby="nf-tags-label"></div>
+      </div>
+      <div class="us-note-form__reveal" data-nf-reveal="subtags" data-closed>
+        <div>
+          <div class="us-note-form__field">
+            <span class="us-note-form__label" id="nf-subtags-label">Subtags <span class="us-note-form__optional">(optional)</span></span>
+            <div class="us-note-form__multi" data-nf-multi="subtags" aria-labelledby="nf-subtags-label"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="us-note-form__field" data-nf-field="files">
+      <span class="us-note-form__label" id="nf-files-label">Attachments <span class="us-note-form__optional">(optional)</span></span>
+      <label class="us-note-form__drop" data-nf-drop>
+        <input type="file" multiple data-nf-file-input aria-labelledby="nf-files-label">
+        <i class="ti ti-upload" aria-hidden="true"></i>
+        <span>Drop files here or <span class="us-note-form__browse">choose files</span></span>
+        <span class="us-note-form__limit" data-nf-limit></span>
+      </label>
+      <ul class="us-note-form__files" aria-label="Files" data-nf-files></ul>
+      <div class="us-note-form__reveal" data-nf-reveal="filetags" data-closed>
+        <div>
+          <div class="us-note-form__field us-note-form__field--inset">
+            <span class="us-note-form__label" id="nf-filetags-label">File tags <span class="us-note-form__optional">(apply to every file above)</span></span>
+            <div class="us-note-form__multi" data-nf-multi="filetags" aria-labelledby="nf-filetags-label"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="us-note-form__followup">
+      <hr class="us-note-form__divider">
+      <label class="us-switch">
+        <input type="checkbox" data-nf-followup>
+        <span class="us-switch__track" aria-hidden="true"></span>
+        <span>Follow up required</span>
+      </label>
+      <div class="us-note-form__reveal" data-nf-reveal="followup" data-closed>
+        <div>
+          <div class="us-note-form__group">
+            <div class="us-note-form__field us-note-form__group-assign">
+              <span class="us-note-form__label" id="nf-assign-label">Assign to</span>
+              <div class="us-note-form__multi" data-nf-multi="assign" aria-labelledby="nf-assign-label"></div>
+            </div>
+            <div class="us-note-form__field us-note-form__group-deadline">
+              <label class="us-note-form__label" for="nf-deadline">Deadline <span class="us-note-form__optional">(optional)</span></label>
+              <input class="us-note-form__input" type="date" id="nf-deadline" data-nf-deadline>
+              <div class="us-note-form__quick" role="group" aria-label="Quick dates">
+                <button type="button" data-nf-days="1">Tomorrow</button>
+                <button type="button" data-nf-days="7">In a week</button>
+                <button type="button" data-nf-days="14">In 2 weeks</button>
+                <button type="button" class="us-note-form__clear" data-nf-clear hidden><i class="ti ti-x" aria-hidden="true"></i> Clear date</button>
+              </div>
+            </div>
+            <label class="us-note-form__check us-note-form__group-priority">
+              <input type="checkbox" data-nf-priority>
+              <span class="us-note-form__flag" aria-hidden="true"><i class="ti ti-flag"></i><i class="ti ti-flag-filled"></i></span>
+              High priority
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="us-note-form__access">
+      <hr class="us-note-form__divider">
+      <div class="us-note-form__access-row">
+        <div class="us-note-form__field us-note-form__access-field">
+          <label class="us-note-form__label" for="nf-access">Access</label>
+          <select class="us-note-form__input" id="nf-access" aria-describedby="nf-access-hint" data-nf-access>
+            <option value="Open" selected>Open</option>
+            <option value="Team">Team</option>
+            <option value="Individual">Individual</option>
+          </select>
+        </div>
+        <p class="us-note-form__access-hint" id="nf-access-hint" aria-live="polite" data-nf-access-hint>
+          <i class="ti ti-world" aria-hidden="true" data-nf-access-icon></i>
+          <span data-nf-access-text></span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="us-note-form__foot">
+    <span class="us-note-form__hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to save</span>
+    <button type="button" class="us-note-form__button" data-nf-cancel>Cancel</button>
+    <button type="button" class="us-note-form__button us-note-form__button--primary" data-nf-save>Save note</button>
+  </footer>
+</div>
+
+<style>
+  /* Add note form. Theme tokens and the theme's us-switch; nothing here
+     reaches outside .us-note-form. */
+  .us-note-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    color: var(--text-base);
+    font: 14px/1.5 var(--font-ui);
+  }
+
+  .us-note-form__body {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-5);
+    flex: 1;
+  }
+
+  .us-note-form__foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    background: var(--bg-subtle);
+    border-top: 1px solid var(--border);
+  }
+
+  .us-note-form__hint {
+    margin-inline-end: auto;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .us-note-form__hint kbd {
+    padding: 1px 5px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    font: inherit;
+    font-size: 11px;
+  }
+
+  .us-note-form__button {
+    min-height: 36px;
+    padding: 0 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms, border-color 150ms;
+  }
+
+  .us-note-form__button:hover:not(:disabled) {
+    background: var(--bg-sunken);
+  }
+
+  .us-note-form__button--primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-on-accent);
+  }
+
+  .us-note-form__button--primary:hover:not(:disabled) {
+    border-color: var(--accent-hover);
+    background: var(--accent-hover);
+  }
+
+  /* Save asks once before saving a note its author will be locked out of:
+     the button reads "Save anyway" in the warning colour. */
+  .us-note-form__button--primary[data-confirm],
+  .us-note-form__button--primary[data-confirm]:hover:not(:disabled) {
+    border-color: var(--warning);
+    background: var(--warning);
+    color: var(--bg-surface);
+  }
+
+  .us-note-form__button:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+
+  /* Buttons take the theme's keyboard focus ring. */
+  .us-note-form__button:focus-visible,
+  .us-note-form__quick button:focus-visible,
+  .us-note-form__chip-remove:focus-visible,
+  .us-note-form__file-remove:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--focus-ring);
+  }
+
+  .us-note-form__alert {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius);
+    background: var(--danger-bg);
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  /* Fields. */
+  .us-note-form__field {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .us-note-form__field--inset {
+    padding-top: 6px;
+  }
+
+  .us-note-form__label {
+    color: var(--text-strong);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .us-note-form__required {
+    color: var(--danger);
+  }
+
+  .us-note-form__optional {
+    margin-inline-start: 4px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .us-note-form__error {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Scoped under .us-note-form: the vendor sheets style inputs by type
+     (input[type="search"] { box-sizing: content-box }, text input padding),
+     which outranks a single class. */
+  .us-note-form .us-note-form__input,
+  .us-note-form .us-note-form__textarea,
+  .us-note-form .us-note-form__control {
+    width: 100%;
+    min-height: 38px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: inherit;
+    box-sizing: border-box;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+
+  .us-note-form .us-note-form__textarea {
+    min-height: 132px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  /* The theme's field focus, for pointer and keyboard alike: the thin
+     --field-focus-colour border and soft glow (client and dark mode set
+     the colour). The transparent outline keeps a focus indicator in forced
+     colours. */
+  .us-note-form .us-note-form__input:focus,
+  .us-note-form .us-note-form__textarea:focus,
+  .us-note-form .us-note-form__search:focus,
+  .us-note-form .us-note-form__control:focus-within {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: var(--field-focus-colour);
+    box-shadow: var(--field-focus-glow);
+  }
+
+  .us-note-form .us-note-form__field[data-invalid] .us-note-form__textarea {
+    border-color: var(--danger);
+  }
+
+  /* The browser's date icon, not 99-Orion's grey box (as the composer). */
+  .us-note-form__input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-inline-start: 4px;
+    padding: 2px;
+    border: 0;
+    border-radius: 3px;
+    background-color: transparent;
+    opacity: .6;
+    cursor: pointer;
+    filter: none;
+  }
+
+  .us-note-form__input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    background-color: var(--bg-sunken);
+    opacity: 1;
+  }
+
+  .us-note-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  /* Revealed sections slide open; they clip while moving, then let a
+     dropdown inside spill out. */
+  .us-note-form__reveal {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 220ms cubic-bezier(.2, 0, 0, 1),
+      opacity 180ms;
+  }
+
+  .us-note-form__reveal > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .us-note-form__reveal[data-closed] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+
+  .us-note-form__reveal[data-settled] > * {
+    overflow: visible;
+  }
+
+  /* Multi-select: chips and a toggle in the control, a checklist below. */
+  .us-note-form__multi {
+    position: relative;
+  }
+
+  .us-note-form .us-note-form__control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 4px 5px 6px;
+  }
+
+  /* The chips wrapper steps out of the layout, so each chip is a flex item
+     and the control's gap spaces them, across and between lines. */
+  .us-note-form__chips {
+    display: contents;
+  }
+
+  .us-note-form__toggle {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 6em;
+    min-height: 28px;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .us-note-form__toggle:focus-visible {
+    outline: 0;
+  }
+
+  .us-note-form__toggle .ti {
+    font-size: 16px;
+    transition: transform 180ms;
+  }
+
+  .us-note-form__multi[data-open] .us-note-form__toggle .ti {
+    transform: rotate(180deg);
+  }
+
+  .us-note-form__toggle:disabled {
+    cursor: default;
+  }
+
+  .us-note-form__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    max-width: 100%;
+    padding: 1px 2px 1px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-sunken);
+    color: var(--text-strong);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .us-note-form__chip-parent {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .us-note-form__chip-remove,
+  .us-note-form__file-remove {
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .us-note-form__chip-remove {
+    width: 20px;
+    height: 20px;
+  }
+
+  .us-note-form__chip-remove:hover,
+  .us-note-form__file-remove:hover {
+    background: var(--border);
+    color: var(--text-strong);
+  }
+
+  .us-note-form__panel {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 260px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgb(15 23 42 / .14);
+  }
+
+  .us-note-form .us-note-form__search {
+    width: 100%;
+    min-width: 0;
+    margin: 0 0 4px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: inherit;
+    box-sizing: border-box;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+
+  .us-note-form__group-name {
+    margin: 6px 8px 2px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .us-note-form__option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--text-strong);
+    cursor: pointer;
+  }
+
+  .us-note-form__option:hover {
+    background: var(--bg-sunken);
+  }
+
+  /* The theme draws the checkbox (size, border, tick); only its margin
+     goes, as the row's gap spaces it. */
+  .us-note-form__option input,
+  .us-note-form__check input {
+    margin: 0;
+  }
+
+  .us-note-form__empty {
+    margin: 6px 8px;
+    color: var(--text-muted);
+  }
+
+  /* Attachments: one dashed line until files are added. */
+  .us-note-form__drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    color: var(--text-base);
+    font-weight: 400;
+    cursor: pointer;
+    transition: border-color 150ms, background-color 150ms;
+  }
+
+  .us-note-form__drop:hover,
+  .us-note-form__drop[data-over] {
+    border-color: var(--field-focus-colour);
+    background: color-mix(in srgb, var(--field-focus-colour) 6%, var(--bg-surface));
+  }
+
+  .us-note-form__drop:focus-within {
+    border-color: var(--field-focus-colour);
+    box-shadow: var(--field-focus-glow);
+  }
+
+  /* The file input stays in the tab order, invisible over the drop line. */
+  .us-note-form__drop input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .us-note-form__drop .ti {
+    color: var(--text-muted);
+    font-size: 20px;
+  }
+
+  .us-note-form__browse {
+    color: var(--text-link);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .us-note-form__limit {
+    margin-inline-start: auto;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .us-note-form__files {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .us-note-form__files:empty {
+    display: none;
+  }
+
+  .us-note-form__file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 6px 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .us-note-form__file > .ti {
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+
+  .us-note-form__file[data-state="uploading"] > .ti {
+    animation: us-note-form-spin 900ms linear infinite;
+  }
+
+  @keyframes us-note-form-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .us-note-form__file[data-state="failed"] {
+    border-color: var(--danger);
+  }
+
+  .us-note-form__file-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-strong);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .us-note-form__file-status {
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .us-note-form__file[data-state="failed"] .us-note-form__file-status {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  .us-note-form__file-remove {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Follow up: a switch, then its fields in a sunken group. High priority
+     sits under Assign to, beside the deadline's quick dates. */
+  .us-note-form__divider {
+    height: 1px;
+    margin: 0 0 var(--space-2);
+    border: 0;
+    background: var(--border);
+  }
+
+  .us-note-form__group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "assign deadline"
+      "priority deadline";
+    column-gap: var(--space-4);
+    row-gap: var(--space-3);
+    align-items: start;
+    margin-top: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    transition:
+      border-color 150ms cubic-bezier(.2, 0, 0, 1),
+      box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+  }
+
+  /* High priority (owner, 19 October 2026; priority-compare.html option 2):
+     a red rail down the group's left edge (an inset shadow, so nothing
+     moves) and the border tinted as US-PANEL-TONES tints a danger panel.
+     The root carries data-nf-high-priority while Follow up and High
+     priority are both on. */
+  .us-note-form[data-nf-high-priority] .us-note-form__group {
+    border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+    box-shadow: inset 3px 0 0 var(--danger);
+  }
+
+  .us-note-form__group-assign {
+    grid-area: assign;
+  }
+
+  .us-note-form__group-deadline {
+    grid-area: deadline;
+  }
+
+  .us-note-form__group-priority {
+    grid-area: priority;
+  }
+
+  .us-note-form__quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .us-note-form__quick button {
+    padding: 2px 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-surface);
+    color: var(--text-base);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .us-note-form__quick button:hover {
+    border-color: var(--field-focus-colour);
+    color: var(--text-strong);
+  }
+
+  .us-note-form__quick .us-note-form__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-style: dashed;
+    color: var(--text-muted);
+  }
+
+  /* Sized to its contents, so only the box and its words tick it. */
+  .us-note-form__check {
+    display: inline-flex;
+    justify-self: start;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--text-strong);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* The outline flag gives way to a filled one while High priority is on. */
+  .us-note-form__flag {
+    display: inline-grid;
+  }
+
+  .us-note-form__flag > .ti {
+    grid-area: 1 / 1;
+    color: var(--danger);
+    transition: opacity 150ms cubic-bezier(.2, 0, 0, 1);
+  }
+
+  .us-note-form__flag > .ti-flag-filled,
+  .us-note-form[data-nf-high-priority] .us-note-form__flag > .ti-flag {
+    opacity: 0;
+  }
+
+  .us-note-form[data-nf-high-priority] .us-note-form__flag > .ti-flag-filled {
+    opacity: 1;
+  }
+
+  /* The task list's High Priority badge (us-badge us-badge--danger), at the
+     end of the Note label row; it fades in while High priority is on. */
+  .us-note-form__note-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 24px;
+  }
+
+  .us-note-form .us-note-form__priority-badge {
+    flex-shrink: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(2px);
+    transition:
+      opacity 150ms cubic-bezier(.2, 0, 0, 1),
+      transform 150ms cubic-bezier(.2, 0, 0, 1),
+      visibility 0s linear 150ms;
+  }
+
+  .us-note-form[data-nf-high-priority] .us-note-form__priority-badge {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity 150ms cubic-bezier(.2, 0, 0, 1),
+      transform 150ms cubic-bezier(.2, 0, 0, 1),
+      visibility 0s;
+  }
+
+  /* Access: rarely changed, so it sits last, small. The select keeps a
+     modest width; the line beside it says who can read the note, and reads
+     a little stronger once the note is restricted. */
+  .us-note-form__access-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  .us-note-form__access-field {
+    flex: 0 1 200px;
+  }
+
+  .us-note-form__access-hint {
+    display: flex;
+    flex: 1 1 260px;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 38px;
+    margin: 0;
+    padding-top: 9px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.45;
+    transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+  }
+
+  .us-note-form__access-hint .ti {
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 16px;
+  }
+
+  .us-note-form__access-hint[data-restricted] {
+    color: var(--text-strong);
+  }
+
+  .us-note-form__access-hint[data-warning] {
+    color: var(--warning);
+  }
+
+  [data-us-note-form] [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 560px) {
+    .us-note-form__body {
+      padding: var(--space-4);
+    }
+
+    .us-note-form__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .us-note-form__group {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "assign"
+        "deadline"
+        "priority";
+      row-gap: var(--space-4);
+    }
+
+    .us-note-form__hint {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .us-note-form__reveal,
+    .us-note-form__toggle .ti {
+      transition: none;
+    }
+
+    .us-note-form__file[data-state="uploading"] > .ti {
+      animation: none;
+    }
+
+    .us-note-form__group,
+    .us-note-form__flag > .ti,
+    .us-note-form .us-note-form__priority-badge,
+    .us-note-form__access-hint {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const CONFIG = {
+    parentTagsQuery: '$/_i4u_/SandBox/CRM Layouts/Parent Tags',
+    childTagsQuery: '$/_i4u_/SandBox/CRM Layouts/Child Tags',
+    childTagsParameter: 'ParentTag',
+    staffQuery: '$/_i4u_/Core/Cases/Value Lists/Case Value List - Case Staff',
+    fileTagsQuery: '$/_i4u_/SandBox/CA/ZenFileTags',
+    cloudToolzUrlQuery: '$/ZENTSO/Security/CloudToolzUrl',
+    uploadEndpoint: '/api/formz/fineUpload',
+    maxFileBytes: 20 * 1024 * 1024
+  };
+
+  const root = document.querySelector('[data-us-note-form]:not([data-nf-ready])');
+  if (!root) return;
+  root.setAttribute('data-nf-ready', '');
+
+  const page = new URLSearchParams(location.search);
+  const record = {
+    type: page.get('Type') || 'note',
+    module: page.get('Module') || '',
+    moduleId: page.get('ModuleID') || '',
+    moduleOrdinal: page.get('ModuleOrdinal') || '',
+    userId: page.get('ID') || ''
+  };
+
+  // ── iMIS helpers ────────────────────────────────────────────
+  function clientContext() {
+    try { return JSON.parse(document.getElementById('__ClientContext')?.value || '{}'); }
+    catch (_) { return {}; }
+  }
+
+  function verificationToken() {
+    return document.getElementById('__RequestVerificationToken')?.value || '';
+  }
+
+  // /api/query rows are flat alias-keyed objects; older endpoints return
+  // Name/Value property lists. Read either, ignoring case.
+  function propertyValue(item, name) {
+    const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+    const properties = unwrap(item?.Properties)?.$values;
+    if (Array.isArray(properties)) {
+      const match = properties.find(entry => String(entry.Name).toLowerCase() === name.toLowerCase());
+      return match ? unwrap(match.Value) : undefined;
+    }
+    const key = Object.keys(item || {}).find(entry => entry.toLowerCase() === name.toLowerCase());
+    return key ? unwrap(item[key]) : undefined;
+  }
+
+  async function query(name, limit = 500, filters = {}) {
+    const params = new URLSearchParams({QueryName: name, limit: String(limit), offset: '0', ...filters});
+    const response = await fetch('/api/query?' + params, {
+      credentials: 'same-origin',
+      headers: {RequestVerificationToken: verificationToken()}
+    });
+    if (!response.ok) throw new Error(name + ' could not be read (HTTP ' + response.status + ').');
+    const data = await response.json();
+    return data?.Items?.$values || [];
+  }
+
+  const text = (item, name) => String(propertyValue(item, name) ?? '').trim();
+
+  let cloudToolzBase = null;
+  async function cloudToolzUrl() {
+    if (cloudToolzBase) return cloudToolzBase;
+    const rows = await query(CONFIG.cloudToolzUrlQuery, 1);
+    const url = text(rows[0], 'Description');
+    if (!url) throw new Error('The CloudToolz URL is not configured in iMIS.');
+    cloudToolzBase = url.replace(/\/$/, '');
+    return cloudToolzBase;
+  }
+
+  // The popup contract (usage guide #composer-popup-forms): the native iMIS
+  // popup first, then the theme dialog. Opened as an ordinary page, nothing
+  // closes and the form stays as it is.
+  function closePopup(result) {
+    const radWindow = typeof window.GetRadWindow === 'function' ? window.GetRadWindow() : null;
+    if (radWindow) {
+      radWindow.close(result);
+      return true;
+    }
+    try {
+      if (window.parent !== window && window.parent.UnionSuiteDialog) {
+        return window.parent.UnionSuiteDialog.close(window, result) !== false;
+      }
+    } catch (_) {
+      // Not opened by a UnionSuite page.
+    }
+    return false;
+  }
+
+  function cancelPopup() {
+    if (typeof window.CloseAndCancelRadWindow === 'function') {
+      window.CloseAndCancelRadWindow();
+      return;
+    }
+    closePopup({cancel: true});
+  }
+
+  // ── Small helpers ───────────────────────────────────────────
+  function escape(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[ch]);
+  }
+
+  // instant: open or close without the slide (a restored form on load).
+  function reveal(name, open, instant = false) {
+    const element = root.querySelector('[data-nf-reveal="' + name + '"]');
+    if (open) {
+      if (!element.hasAttribute('data-closed')) return;
+      clearTimeout(element._settle);
+      if (instant) {
+        element.style.transition = 'none';
+        element.removeAttribute('data-closed');
+        element.setAttribute('data-settled', '');
+        void element.offsetHeight;
+        element.style.transition = '';
+        return;
+      }
+      element.removeAttribute('data-closed');
+      element._settle = setTimeout(() => element.setAttribute('data-settled', ''), 240);
+    } else {
+      clearTimeout(element._settle);
+      element.removeAttribute('data-settled');
+      element.setAttribute('data-closed', '');
+    }
+  }
+
+  function localDate(daysFromToday) {
+    const day = new Date();
+    day.setDate(day.getDate() + daysFromToday);
+    const pad = number => String(number).padStart(2, '0');
+    return day.getFullYear() + '-' + pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+  }
+
+  function localDateTime() {
+    const now = new Date();
+    const pad = number => String(number).padStart(2, '0');
+    return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+      'T' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+  }
+
+  function fileSize(bytes) {
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+    const megabytes = bytes / 1024 / 1024;
+    return (Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)) + ' MB';
+  }
+
+  function uuid() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+  }
+
+  // ── Multi-select ────────────────────────────────────────────
+  // groups(): [{group, items: [{value, label}]}]. Chips sit in the control
+  // with their own remove buttons; the toggle opens a searchable checklist.
+  // single: one choice (radios); picking closes the list, the chip's ×
+  // clears it, and Enter in the search picks the first match.
+  function multiSelect(container, groups, {placeholder = 'Choose…', onChange, single = false} = {}) {
+    let selected = [];
+    const labelledBy = container.getAttribute('aria-labelledby');
+    container.innerHTML =
+      '<div class="us-note-form__control"><span class="us-note-form__chips" data-chips></span>' +
+      '<button type="button" class="us-note-form__toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="' + labelledBy + '">' +
+      '<span data-placeholder></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button></div>' +
+      '<div class="us-note-form__panel" hidden>' +
+      '<input class="us-note-form__search" type="search" placeholder="Search" aria-label="Search options">' +
+      '<div data-list role="group" aria-labelledby="' + labelledBy + '"></div></div>';
+    const chips = container.querySelector('[data-chips]');
+    const toggle = container.querySelector('.us-note-form__toggle');
+    const placeholderText = container.querySelector('[data-placeholder]');
+    const panel = container.querySelector('.us-note-form__panel');
+    const search = container.querySelector('.us-note-form__search');
+    const list = container.querySelector('[data-list]');
+
+    const allItems = () => groups().flatMap(({group, items}) => items.map(item => ({...item, group})));
+    const find = value => allItems().find(item => item.value === value);
+
+    function drawChips() {
+      chips.innerHTML = selected.map(value => {
+        const item = find(value);
+        if (!item) return '';
+        const parent = item.group ? '<span class="us-note-form__chip-parent">' + escape(item.group) + ' ›</span> ' : '';
+        return '<span class="us-note-form__chip">' + parent + escape(item.label) +
+          '<button type="button" class="us-note-form__chip-remove" data-remove="' + escape(value) + '" aria-label="Remove ' + escape(item.label) + '">' +
+          '<i class="ti ti-x" aria-hidden="true"></i></button></span>';
+      }).join('');
+      placeholderText.textContent = selected.length ? '' : placeholder;
+    }
+
+    function drawList() {
+      const term = search.value.trim().toLowerCase();
+      const html = groups().map(({group, items}) => {
+        const shown = items.filter(item => !term || item.label.toLowerCase().includes(term) || (group || '').toLowerCase().includes(term));
+        if (!shown.length) return '';
+        return (group ? '<div class="us-note-form__group-name">' + escape(group) + '</div>' : '') +
+          shown.map(item =>
+            '<label class="us-note-form__option"><input type="' + (single ? 'radio' : 'checkbox') + '"' +
+            (single ? ' name="' + escape(labelledBy) + '-choice"' : '') + ' value="' + escape(item.value) + '"' +
+            (selected.includes(item.value) ? ' checked' : '') + '> ' + escape(item.label) + '</label>').join('');
+      }).join('');
+      list.innerHTML = html || '<p class="us-note-form__empty">No matches</p>';
+    }
+
+    function open(next) {
+      panel.hidden = !next;
+      toggle.setAttribute('aria-expanded', String(next));
+      container.toggleAttribute('data-open', next);
+      if (next) {
+        search.value = '';
+        drawList();
+        search.focus();
+      }
+    }
+
+    function set(next) {
+      selected = next;
+      drawChips();
+      onChange?.(selected.slice());
+    }
+
+    toggle.addEventListener('click', () => open(panel.hidden));
+    chips.addEventListener('click', event => {
+      const remove = event.target.closest('[data-remove]');
+      if (!remove) return;
+      set(selected.filter(value => value !== remove.dataset.remove));
+      toggle.focus();
+    });
+    search.addEventListener('input', drawList);
+    list.addEventListener('change', event => {
+      const value = event.target.value;
+      if (single) {
+        set([value]);
+        open(false);
+        toggle.focus();
+        return;
+      }
+      set(event.target.checked ? [...selected, value] : selected.filter(item => item !== value));
+    });
+    if (single) {
+      search.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        const first = list.querySelector('input');
+        if (!first) return;
+        event.preventDefault();
+        first.checked = true;
+        first.dispatchEvent(new Event('change', {bubbles: true}));
+      });
+    }
+    container.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !panel.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        open(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', event => {
+      if (!container.contains(event.target)) open(false);
+    });
+
+    drawChips();
+    return {
+      get: () => selected.map(find).filter(Boolean),
+      // Choose these values (those the options offer), replacing the choice.
+      select(values) {
+        set(values.filter(value => find(value)));
+      },
+      setDisabled(disabled, message) {
+        toggle.disabled = disabled;
+        if (message) placeholderText.textContent = message;
+        else drawChips();
+      },
+      // Drop values the options no longer offer (a removed tag's subtags).
+      prune() {
+        const kept = selected.filter(value => find(value));
+        if (kept.length !== selected.length) set(kept);
+        else drawChips();
+      }
+    };
+  }
+
+  // ── Tags and subtags ────────────────────────────────────────
+  // Tags load once. Subtags are asked for only for the tags chosen, in one
+  // call per change, and kept per tag (a tag with none is kept as []), so
+  // choosing a tag again asks nothing.
+  let tagList = [];                 // [{ordinal, name}]
+  const subtagCache = new Map();    // tag ordinal -> [{ordinal, name}]
+  let subtagRequest = 0;
+
+  const tags = multiSelect(root.querySelector('[data-nf-multi="tags"]'),
+    () => [{items: tagList.map(tag => ({value: tag.ordinal, label: tag.name, ordinal: tag.ordinal}))}],
+    {onChange: chosen => loadSubtags(chosen)});
+
+  const subtags = multiSelect(root.querySelector('[data-nf-multi="subtags"]'),
+    () => tags.get()
+      .filter(tag => subtagCache.get(tag.ordinal)?.length)
+      .map(tag => ({group: tag.label, items: subtagCache.get(tag.ordinal).map(sub => ({value: sub.ordinal, label: sub.name, ordinal: sub.ordinal, tagOrdinal: tag.ordinal}))})));
+
+  function showSubtags() {
+    const any = tags.get().some(tag => subtagCache.get(tag.ordinal)?.length);
+    reveal('subtags', any);
+    subtags.prune();
+  }
+
+  async function loadSubtags(chosen) {
+    const missing = chosen.filter(ordinal => !subtagCache.has(ordinal));
+    if (!missing.length) {
+      subtags.setDisabled(false);
+      showSubtags();
+      return;
+    }
+    const request = ++subtagRequest;
+    subtags.setDisabled(true, 'Loading subtags…');
+    try {
+      const rows = await query(CONFIG.childTagsQuery, 500, {
+        [CONFIG.childTagsParameter]: missing.map(ordinal => '"' + ordinal + '"').join(',')
+      });
+      missing.forEach(ordinal => subtagCache.set(ordinal, []));
+      rows.forEach(row => {
+        const parent = text(row, 'ParentTagOrdinal');
+        const ordinal = text(row, 'Ordinal');
+        const name = text(row, 'TagName');
+        if (parent && ordinal && name && subtagCache.has(parent)) subtagCache.get(parent).push({ordinal, name});
+      });
+      if (request !== subtagRequest) return;
+      subtags.setDisabled(false);
+      showSubtags();
+    } catch (error) {
+      if (request !== subtagRequest) return;
+      console.warn('[Add note]', error.message);
+      subtags.setDisabled(true, 'Subtags could not be loaded');
+      reveal('subtags', true);
+    }
+  }
+
+  tags.setDisabled(true, 'Loading tags…');
+  query(CONFIG.parentTagsQuery).then(rows => {
+    tagList = rows
+      .map(row => ({ordinal: text(row, 'Ordinal'), name: text(row, 'TagName')}))
+      .filter(tag => tag.ordinal && tag.name);
+    tags.setDisabled(!tagList.length, tagList.length ? '' : 'No tags set up');
+  }).catch(error => {
+    console.warn('[Add note]', error.message);
+    tags.setDisabled(true, 'Tags could not be loaded');
+  });
+
+  // ── Attachments ─────────────────────────────────────────────
+  // Each file uploads as soon as it is added, as the BeyondFormz form does,
+  // so Save only waits for uploads still running.
+  let fileTagList = [];
+  const files = [];   // {id, file, uuid, state: uploading|done|failed, upload}
+  const fileList = root.querySelector('[data-nf-files]');
+  const drop = root.querySelector('[data-nf-drop]');
+  const fileInput = root.querySelector('[data-nf-file-input]');
+  root.querySelector('[data-nf-limit]').textContent = 'Up to ' + fileSize(CONFIG.maxFileBytes) + ' each';
+
+  const fileTags = multiSelect(root.querySelector('[data-nf-multi="filetags"]'),
+    () => [{items: fileTagList.map(tag => ({value: tag.ordinal, label: tag.name, ordinal: tag.ordinal}))}]);
+
+  query(CONFIG.fileTagsQuery).then(rows => {
+    fileTagList = rows
+      .map(row => ({ordinal: text(row, 'Ordinal'), name: text(row, 'TagName')}))
+      .filter(tag => tag.ordinal && tag.name);
+    fileTags.prune();
+  }).catch(error => {
+    console.warn('[Add note]', error.message);
+    fileTags.setDisabled(true, 'File tags could not be loaded');
+  });
+
+  function drawFiles() {
+    fileList.innerHTML = files.map(entry => {
+      const status = entry.state === 'uploading' ? 'Uploading…'
+        : entry.state === 'failed' ? (entry.error || 'Upload failed')
+        : fileSize(entry.file.size);
+      return '<li class="us-note-form__file" data-state="' + entry.state + '">' +
+        '<i class="ti ' + (entry.state === 'uploading' ? 'ti-loader-2' : 'ti-file-text') + '" aria-hidden="true"></i>' +
+        '<span class="us-note-form__file-name">' + escape(entry.file.name) + '</span>' +
+        '<span class="us-note-form__file-status">' + escape(status) + '</span>' +
+        '<button type="button" class="us-note-form__file-remove" data-file-remove="' + entry.id + '" aria-label="Remove ' + escape(entry.file.name) + '">' +
+        '<i class="ti ti-x" aria-hidden="true"></i></button></li>';
+    }).join('');
+    reveal('filetags', files.length > 0);
+  }
+
+  async function upload(entry) {
+    const data = new FormData();
+    data.append('qquuid', entry.uuid);
+    data.append('qqfilename', entry.file.name);
+    data.append('qqtotalfilesize', String(entry.file.size));
+    data.append('qqfile', entry.file, entry.file.name);
+    const response = await fetch((await cloudToolzUrl()) + CONFIG.uploadEndpoint, {
+      method: 'POST',
+      credentials: 'omit',
+      headers: {Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: data
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.success === false) throw new Error(result.error || 'Upload failed');
+  }
+
+  function addFiles(list) {
+    [...list].forEach(file => {
+      const entry = {id: uuid(), file, uuid: uuid(), state: 'uploading'};
+      if (file.size > CONFIG.maxFileBytes) {
+        entry.state = 'failed';
+        entry.error = 'Larger than ' + fileSize(CONFIG.maxFileBytes);
+        files.push(entry);
+        return;
+      }
+      files.push(entry);
+      entry.upload = upload(entry).then(() => {
+        entry.state = 'done';
+      }).catch(error => {
+        entry.state = 'failed';
+        entry.error = error.message;
+      }).finally(drawFiles);
+    });
+    drawFiles();
+  }
+
+  fileInput.addEventListener('change', () => {
+    addFiles(fileInput.files);
+    fileInput.value = '';
+  });
+  drop.addEventListener('dragover', event => {
+    event.preventDefault();
+    drop.setAttribute('data-over', '');
+  });
+  drop.addEventListener('dragleave', () => drop.removeAttribute('data-over'));
+  drop.addEventListener('drop', event => {
+    event.preventDefault();
+    drop.removeAttribute('data-over');
+    addFiles(event.dataTransfer.files);
+  });
+  // Removing a file leaves it out of the save; an upload already made stays
+  // unused in the upload area, as with the BeyondFormz form.
+  fileList.addEventListener('click', event => {
+    const button = event.target.closest('[data-file-remove]');
+    if (!button) return;
+    const index = files.findIndex(entry => entry.id === button.dataset.fileRemove);
+    if (index > -1) files.splice(index, 1);
+    drawFiles();
+    fileInput.focus();
+  });
+
+  // ── Follow up ───────────────────────────────────────────────
+  const followup = root.querySelector('[data-nf-followup]');
+  const deadline = root.querySelector('[data-nf-deadline]');
+  const clearDate = root.querySelector('[data-nf-clear]');
+  const priority = root.querySelector('[data-nf-priority]');
+
+  // High priority counts only on a follow-up: the badge, the rail and the
+  // filled flag show while both are on.
+  const priorityBadge = root.querySelector('[data-nf-priority-badge]');
+  function syncPriority() {
+    const high = followup.checked && priority.checked;
+    root.toggleAttribute('data-nf-high-priority', high);
+    priorityBadge.setAttribute('aria-hidden', String(!high));
+  }
+
+  followup.addEventListener('change', () => {
+    reveal('followup', followup.checked);
+    syncPriority();
+  });
+  priority.addEventListener('change', syncPriority);
+
+  const syncClear = () => { clearDate.hidden = !deadline.value; };
+  deadline.addEventListener('input', syncClear);
+  deadline.addEventListener('change', syncClear);
+  root.querySelector('.us-note-form__quick').addEventListener('click', event => {
+    if (event.target.closest('[data-nf-clear]')) {
+      deadline.value = '';
+      syncClear();
+      deadline.focus();
+      return;
+    }
+    const button = event.target.closest('[data-nf-days]');
+    if (!button) return;
+    deadline.value = localDate(Number(button.dataset.nfDays));
+    syncClear();
+  });
+
+  // Staff: one person, searchable. The signed-in user is listed first as
+  // "(me)" and chosen to start with.
+  let staffList = [];
+  const assign = multiSelect(root.querySelector('[data-nf-multi="assign"]'),
+    () => [{items: staffList.map(person => ({value: person.id, label: person.name + (person.me ? ' (me)' : ''), name: person.name}))}],
+    {placeholder: 'Choose a person', single: true});
+
+  assign.setDisabled(true, 'Loading staff…');
+  query(CONFIG.staffQuery, 1000).then(rows => {
+    const me = String(clientContext().loggedInPartyId || record.userId || '');
+    staffList = rows
+      .map(row => ({id: text(row, 'ID'), name: text(row, 'Name')}))
+      .filter(person => person.id && person.name)
+      .map(person => ({...person, me: person.id === me}))
+      .sort((a, b) => b.me - a.me || a.name.localeCompare(b.name));
+    assign.setDisabled(!staffList.length, staffList.length ? '' : 'No staff set up');
+    if (staffList.some(person => person.me)) assign.select([me]);
+  }).catch(error => {
+    console.warn('[Add note]', error.message);
+    assign.setDisabled(true, 'Staff could not be loaded');
+  });
+
+  // ── Access ──────────────────────────────────────────────────
+  // Open by default. The line beside the select says who can read the note,
+  // in the record's own word (agreement, case). Team and Individual are about
+  // the record, not the note: the record's team, or the staff assigned to
+  // the record (owner, 19 October 2026).
+  const accessSelect = root.querySelector('[data-nf-access]');
+  const accessHint = root.querySelector('[data-nf-access-hint]');
+  const accessIcon = root.querySelector('[data-nf-access-icon]');
+  const accessText = root.querySelector('[data-nf-access-text]');
+  const recordWord = {agreement: 'agreement', case: 'case'}[record.module.toLowerCase()] || 'record';
+  const ACCESS = {
+    Open: {icon: 'ti-world', text: 'Standard. Anyone who can see this ' + recordWord + ' can read the note.'},
+    Team: {icon: 'ti-users', text: 'Only the ' + recordWord + ' team, managers and system administrators can read the note.'},
+    Individual: {icon: 'ti-lock', text: 'Only the staff assigned to this ' + recordWord + ', managers and system administrators can read the note.'}
+  };
+
+  // Whether the signed-in user keeps access at each restricted level, from
+  // accessCheck(): {Team: true|false, Individual: true|false}; null until
+  // known. The author does not keep access by being the author.
+  let myAccess = null;
+  const LOCKED_OUT = {
+    Team: 'You’re not on the ' + recordWord + ' team, so you won’t be able to open this note once it’s saved.',
+    Individual: 'You’re not assigned to this ' + recordWord + ', so you won’t be able to open this note once it’s saved.'
+  };
+  const CAUTION = {
+    Team: 'If you’re not on the ' + recordWord + ' team, you won’t be able to open it once it’s saved.',
+    Individual: 'If you’re not assigned to this ' + recordWord + ', you won’t be able to open it once it’s saved.'
+  };
+
+  // PLACEHOLDER: ask CloudToolz whether the signed-in user keeps access at
+  // each level on this record, for example
+  //   const response = await window.UnionSuiteAgreements.cloudToolz('/ca/record-access',
+  //     {method: 'POST', body: JSON.stringify({Module: record.module, ModuleID: record.moduleId})});
+  //   if (!response.ok) throw new Error('HTTP ' + response.status);
+  //   return response.json();   // {Team: true|false, Individual: true|false}
+  // The flow decides: the record's team, the staff assigned to the record,
+  // managers and system administrators (always true). Returning null keeps
+  // the softer caution.
+  async function accessCheck() {
+    return null;
+  }
+
+  function locksOut(level) {
+    return level !== 'Open' && myAccess?.[level] === false;
+  }
+
+  function syncAccess() {
+    const level = ACCESS[accessSelect.value] ? accessSelect.value : 'Open';
+    const lockedOut = locksOut(level);
+    let text = ACCESS[level].text;
+    if (lockedOut) text += ' ' + LOCKED_OUT[level];
+    else if (level !== 'Open' && !myAccess) text += ' ' + CAUTION[level];
+    accessIcon.className = 'ti ' + (lockedOut ? 'ti-alert-triangle' : ACCESS[level].icon);
+    accessText.textContent = text;
+    accessHint.toggleAttribute('data-restricted', level !== 'Open');
+    accessHint.toggleAttribute('data-warning', lockedOut);
+  }
+
+  accessSelect.addEventListener('change', syncAccess);
+  syncAccess();
+  accessCheck().then(result => {
+    if (result && typeof result === 'object') myAccess = result;
+    syncAccess();
+  }).catch(error => console.warn('[Add note] Access check:', error.message));
+
+  // ── Draft from the inline composer's More options ───────────
+  // The theme hands over what was typed once (usDraft key); only the note
+  // text is carried, as the composer has no other matching fields yet.
+  try {
+    const draft = window.UnionSuiteComposers?.received?.();
+    const note = draft?.values?.note ?? draft?.values?.Note;
+    if (note) root.querySelector('#nf-note').value = String(note);
+  } catch (_) {
+    // No draft.
+  }
+
+  // ── Save and cancel ─────────────────────────────────────────
+  const noteField = root.querySelector('[data-nf-field="note"]');
+  const noteInput = root.querySelector('#nf-note');
+  const noteError = root.querySelector('#nf-note-error');
+  const alertBox = root.querySelector('[data-nf-alert]');
+  const saveButton = root.querySelector('[data-nf-save]');
+  const cancelButton = root.querySelector('[data-nf-cancel]');
+  let saving = false;
+  let lockoutConfirmed = false;
+
+  // Changing Access withdraws a pending "Save anyway".
+  function clearLockoutConfirm() {
+    lockoutConfirmed = false;
+    saveButton.removeAttribute('data-confirm');
+    if (!saving) saveButton.textContent = 'Save note';
+  }
+  accessSelect.addEventListener('change', clearLockoutConfirm);
+
+  function showAlert(message) {
+    alertBox.textContent = message;
+    alertBox.hidden = !message;
+  }
+
+  function validate() {
+    const noteOk = noteInput.value.trim() !== '';
+    noteError.hidden = noteOk;
+    noteField.toggleAttribute('data-invalid', !noteOk);
+    noteInput.setAttribute('aria-invalid', String(!noteOk));
+    if (!noteOk) {
+      noteInput.focus();
+      return false;
+    }
+    if (files.some(entry => entry.state === 'failed')) {
+      showAlert('Remove the files that did not upload, or add them again.');
+      fileList.querySelector('[data-state="failed"] [data-file-remove]')?.focus();
+      return false;
+    }
+    if (!record.moduleId || !/^\d+$/.test(record.moduleOrdinal)) {
+      showAlert('This form was opened without a record to add the note to.');
+      return false;
+    }
+    return true;
+  }
+
+  // Everything the form holds, for the CloudToolz endpoint.
+  function payload() {
+    const followUp = followup.checked;
+    return {
+      Type: record.type,
+      ID: record.userId,
+      Module: record.module,
+      ModuleID: record.moduleId,
+      ModuleOrdinal: record.moduleOrdinal,
+      NoteDate: localDateTime(),
+      Note: noteInput.value.trim(),
+      Tags: tags.get().map(tag => ({TagOrdinal: tag.ordinal, TagName: tag.label})),
+      Subtags: subtags.get().map(sub => ({TagOrdinal: sub.tagOrdinal, SubtagOrdinal: sub.ordinal, SubtagName: sub.label})),
+      FollowUpRequired: followUp,
+      AssignTo: followUp && assign.get()[0]
+        ? {ID: assign.get()[0].value, Name: assign.get()[0].name}
+        : null,
+      Deadline: followUp ? deadline.value : '',
+      HighPriority: followUp && priority.checked,
+      Access: accessSelect.value,
+      Files: files.filter(entry => entry.state === 'done').map(entry => ({UploadName: entry.file.name, Uuid: entry.uuid})),
+      FileTags: files.length ? fileTags.get().map(tag => ({Ordinal: tag.ordinal, TagName: tag.label})) : []
+    };
+  }
+
+  // PLACEHOLDER: send the note to the CloudToolz endpoint here, for example
+  //   const response = await window.UnionSuiteAgreements.cloudToolz('/ca/add-note',
+  //     {method: 'POST', body: JSON.stringify(data)});
+  //   if (!response.ok) throw new Error('HTTP ' + response.status);
+  //   return response.json();   // {Ordinal: 1234}: the new note
+  // Throwing keeps the popup open with "The note was not saved."
+  async function submit(data) {
+    console.info('[Add note] submit placeholder, would send:', data);
+    return {};
+  }
+
+  async function save() {
+    if (saving) return;
+    showAlert('');
+    if (!validate()) return;
+    if (locksOut(accessSelect.value) && !lockoutConfirmed) {
+      lockoutConfirmed = true;
+      saveButton.textContent = 'Save anyway';
+      saveButton.setAttribute('data-confirm', '');
+      accessHint.scrollIntoView({block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      return;
+    }
+    saving = true;
+    saveButton.removeAttribute('data-confirm');
+    saveButton.disabled = true;
+    cancelButton.disabled = true;
+    saveButton.textContent = files.some(entry => entry.state === 'uploading') ? 'Uploading…' : 'Saving…';
+    try {
+      await Promise.all(files.map(entry => entry.upload).filter(Boolean));
+      if (files.some(entry => entry.state === 'failed')) throw new Error('A file did not upload. Remove it, or add it again.');
+      saveButton.textContent = 'Saving…';
+      const result = await submit(payload());
+      const ordinal = Number(result?.Ordinal ?? result?.ordinal);
+      const closeValue = Number.isFinite(ordinal) && ordinal > 0 ? {saved: true, Ordinal: ordinal} : {saved: true};
+      if (!closePopup(closeValue)) {
+        saveButton.textContent = 'Saved';
+        return;
+      }
+    } catch (error) {
+      console.error('[Add note]', error);
+      showAlert('The note was not saved. ' + (error.message || 'Try again.'));
+      saving = false;
+      saveButton.disabled = false;
+      cancelButton.disabled = false;
+      saveButton.textContent = lockoutConfirmed && locksOut(accessSelect.value) ? 'Save anyway' : 'Save note';
+    }
+  }
+
+  saveButton.addEventListener('click', save);
+  cancelButton.addEventListener('click', cancelPopup);
+  root.addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return;
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      save();
+      return;
+    }
+    // The form sits inside the iMIS page's own form: Enter in a one-line
+    // field would submit the whole page.
+    if (event.target.matches('input:not([type="checkbox"], [type="radio"], [type="file"])')) event.preventDefault();
+  });
+  noteInput.addEventListener('input', () => {
+    if (noteInput.value.trim()) {
+      noteError.hidden = true;
+      noteField.removeAttribute('data-invalid');
+      noteInput.removeAttribute('aria-invalid');
+    }
+  });
+
+  // A reload or the back button can bring back what was entered: the
+  // browser restores the note, the switches, the date and Access, sometimes
+  // after this script has run. The form follows the fields as they stand,
+  // opening what they need without the slide.
+  function followRestoredFields() {
+    reveal('followup', followup.checked, true);
+    syncPriority();
+    syncClear();
+    syncAccess();
+    clearLockoutConfirm();
+  }
+
+  followRestoredFields();
+  window.addEventListener('load', followRestoredFields, {once: true});
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) followRestoredFields();
+  });
+
+  noteInput.focus();
+})();
+</script>

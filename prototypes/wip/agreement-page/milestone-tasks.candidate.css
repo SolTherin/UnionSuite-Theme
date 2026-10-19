@@ -268,7 +268,7 @@
   opacity: 1;
 }
 
-@media (hover: none) {
+@media (max-width: 950px) {
   .us-milestones--tasks .us-milestone-task__edit {
     opacity: 1;
   }

@@ -1,0 +1,266 @@
+<!doctype html>
+<!--
+  High priority on the Add note form's follow-up group, three ways (owner,
+  19 October 2026: "some kind of visual … when high priority is selected").
+  1. Quieter: the flag fills and the words turn red.
+  2. Rail (recommended): a 3px red rail down the group's left edge and a
+     faint red border, as the banners' status rail and US-PANEL-TONES do,
+     plus the filled flag.
+  3. Louder: the rail and border, plus a light red wash on the whole group.
+
+  Each panel is the real follow-up group: the embed's own styles are read
+  from templates/Add-Note-Form-Content-HTML.html at load, so it stays in step.
+  The red is the theme's --danger / --danger-bg (High priority is the danger
+  tone in the banner). Tick High priority in each, or use Tick all. Serve the
+  project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>High Priority Comparison</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <style>
+    /* Comparison page layout only. */
+    body.pc-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .pc-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pc-toolbar h1 {
+      margin: 0 var(--space-3) 0 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .pc-button {
+      min-height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+      color: var(--text-strong);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pc-button[aria-pressed="true"] {
+      background: var(--bg-sunken);
+    }
+
+    .pc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 600px), 1fr));
+      gap: var(--space-5);
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4) var(--space-8);
+    }
+
+    .pc-card {
+      display: grid;
+      align-content: start;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5) var(--space-5);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .pc-card h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .pc-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .pc-recommended {
+      margin-inline-start: 6px;
+      padding: 1px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-sunken);
+      color: var(--text-strong);
+      font-size: 11px;
+      font-weight: 700;
+      vertical-align: 2px;
+    }
+
+    /* ── The three options (candidates for the embed) ───────────── */
+
+    /* All three: the outline flag gives way to a filled one. */
+    .us-note-form__check .us-note-form__flag {
+      position: relative;
+      display: inline-grid;
+      width: 1em;
+      height: 1em;
+    }
+
+    .us-note-form__flag > .ti {
+      grid-area: 1 / 1;
+      color: var(--danger);
+      transition: opacity 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    .us-note-form__flag > .ti-flag-filled {
+      opacity: 0;
+    }
+
+    .us-note-form__group:has([data-nf-priority]:checked) .us-note-form__flag > .ti-flag-filled {
+      opacity: 1;
+    }
+
+    .us-note-form__group:has([data-nf-priority]:checked) .us-note-form__flag > .ti-flag {
+      opacity: 0;
+    }
+
+    .us-note-form__group,
+    .us-note-form__check {
+      transition:
+        border-color 150ms cubic-bezier(.2, 0, 0, 1),
+        box-shadow 150ms cubic-bezier(.2, 0, 0, 1),
+        background-color 150ms cubic-bezier(.2, 0, 0, 1),
+        color 150ms cubic-bezier(.2, 0, 0, 1);
+    }
+
+    /* 1. Quieter: the words turn red. */
+    [data-option="quiet"] .us-note-form__group:has([data-nf-priority]:checked) .us-note-form__check {
+      color: var(--danger);
+    }
+
+    /* 2 and 3. A red rail down the left edge (an inset shadow, so nothing
+       moves) and the border tinted as US-PANEL-TONES tints a danger panel. */
+    :is([data-option="rail"], [data-option="wash"]) .us-note-form__group:has([data-nf-priority]:checked) {
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+      box-shadow: inset 3px 0 0 var(--danger);
+    }
+
+    /* 3. Louder: a light red wash over the group as well. */
+    [data-option="wash"] .us-note-form__group:has([data-nf-priority]:checked) {
+      background: var(--danger-bg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .us-note-form__group,
+      .us-note-form__check,
+      .us-note-form__flag > .ti {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="pc-page">
+  <div class="pc-toolbar">
+    <h1>High priority on the follow-up group</h1>
+    <button type="button" class="pc-button" data-pc-all>Tick all</button>
+    <button type="button" class="pc-button" data-pc-mode aria-pressed="false">Dark mode</button>
+  </div>
+
+  <main class="pc-grid" id="grid"></main>
+
+  <template id="tpl-group">
+    <div class="us-note-form">
+      <div class="us-note-form__group">
+        <div class="us-note-form__field us-note-form__group-assign">
+          <span class="us-note-form__label">Assign to</span>
+          <div class="us-note-form__multi">
+            <div class="us-note-form__control">
+              <span class="us-note-form__chips"><span class="us-note-form__chip">James Driscoll (me)<button type="button" class="us-note-form__chip-remove" aria-label="Remove James Driscoll (me)" tabindex="-1"><i class="ti ti-x" aria-hidden="true"></i></button></span></span>
+              <button type="button" class="us-note-form__toggle" tabindex="-1" aria-label="Assign to"><span></span><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="us-note-form__field us-note-form__group-deadline">
+          <span class="us-note-form__label">Deadline <span class="us-note-form__optional">(optional)</span></span>
+          <input class="us-note-form__input" type="date" value="2026-10-26" aria-label="Deadline">
+          <div class="us-note-form__quick" role="group" aria-label="Quick dates">
+            <button type="button" tabindex="-1">Tomorrow</button>
+            <button type="button" tabindex="-1">In a week</button>
+            <button type="button" tabindex="-1">In 2 weeks</button>
+            <button type="button" class="us-note-form__clear" tabindex="-1"><i class="ti ti-x" aria-hidden="true"></i> Clear date</button>
+          </div>
+        </div>
+        <label class="us-note-form__check us-note-form__group-priority">
+          <input type="checkbox" data-nf-priority>
+          <span class="us-note-form__flag" aria-hidden="true"><i class="ti ti-flag"></i><i class="ti ti-flag-filled"></i></span>
+          High priority
+        </label>
+      </div>
+    </div>
+  </template>
+
+  <script>
+  (function () {
+    'use strict';
+
+    const OPTIONS = [
+      {key: 'quiet', title: '1. Quieter', text: 'The flag fills and "High priority" turns red. Nothing else changes: easy to miss, never too much.'},
+      {key: 'rail', title: '2. Rail', recommended: true, text: 'A 3px red rail down the group\'s left edge and a faint red border, as the banners\' status rail and the theme\'s danger panels do, plus the filled flag. Seen at a glance; the fields stay plain.'},
+      {key: 'wash', title: '3. Louder', text: 'The rail and border, plus a light red wash over the whole group. The most visible, and the closest to a warning box.'}
+    ];
+
+    const grid = document.getElementById('grid');
+    const template = document.getElementById('tpl-group');
+    OPTIONS.forEach(option => {
+      const card = document.createElement('section');
+      card.className = 'pc-card';
+      card.dataset.option = option.key;
+      card.innerHTML = '<h2>' + option.title + (option.recommended ? '<span class="pc-recommended">Recommended</span>' : '') + '</h2><p></p>';
+      card.querySelector('p').textContent = option.text;
+      card.append(template.content.cloneNode(true));
+      grid.append(card);
+    });
+
+    // The embed's own styles, so the group looks exactly as it does in the form.
+    fetch('templates/Add-Note-Form-Content-HTML.html')
+      .then(response => response.text())
+      .then(html => {
+        const css = (html.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.insertBefore(style, document.head.querySelector('style'));
+      });
+
+    const tickAll = document.querySelector('[data-pc-all]');
+    tickAll.addEventListener('click', () => {
+      const boxes = [...document.querySelectorAll('[data-nf-priority]')];
+      const tick = boxes.some(box => !box.checked);
+      boxes.forEach(box => { box.checked = tick; });
+      tickAll.textContent = tick ? 'Untick all' : 'Tick all';
+    });
+
+    const mode = document.querySelector('[data-pc-mode]');
+    mode.addEventListener('click', () => {
+      const dark = mode.getAttribute('aria-pressed') !== 'true';
+      mode.setAttribute('aria-pressed', String(dark));
+      document.documentElement.setAttribute('data-us-color-scheme', dark ? 'dark' : 'light');
+    });
+  })();
+  </script>
+</body>
+</html>

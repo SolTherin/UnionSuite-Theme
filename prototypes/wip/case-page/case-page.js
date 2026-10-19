@@ -10,6 +10,43 @@
 (() => {
   'use strict';
 
+  // ── Task rows: the shared task columns ───────────────────────
+  // The compact task row (US-TASK-ROWS 1.2, owner, 19 October 2026) reads one
+  // set of column names on every page. The sample tasks keep the current
+  // IQA's columns; this maps them as the renamed IQA will return them, with
+  // the long-form date the homepage uses, and sample notes and tags.
+  const TASK_NOTES = {};
+  const TASK_TAGS = {
+      "929": "Correspondence",
+      "931": "Evidence, Statement",
+      "932": "Evidence, Employer, Records",
+      "933": "Membership"
+  };
+  function longDate(value) {
+    if (!value) return '';
+    const iso = /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : value.split('/').reverse().map(part => part.padStart(2, '0')).join('-');
+    return new Date(iso + 'T00:00:00').toLocaleDateString('en-AU', {day: 'numeric', month: 'long', year: 'numeric'});
+  }
+  function taskColumns(row) {
+    const done = /^(done|true|1)$/i.test(String(row.TAskCheckCSS || ''));
+    const due = longDate(row.Deadline);
+    const dueLabel = due ? (row.TaskStatusCSS === 'overdue' ? 'Overdue ' : 'Due ') + due : '';
+    const actioned = longDate(row.CompletedIso);
+    return {
+      ...row,
+      TaskOrdinal: row.Ordinal,
+      TaskTitle: row.Note,
+      IsCompleted: done ? 'true' : 'false',
+      DueState: done ? 'none' : row.TaskStatusCSS === 'overdue' ? 'overdue' : due ? 'soon' : 'none',
+      TaskDateLabel: done ? (actioned ? 'Actioned ' + actioned : dueLabel.replace(/^Overdue /, 'Due ')) : dueLabel,
+      DueLabel: dueLabel,
+      MemberName: row.AssignedTo,
+      MemberId: row.MemberId || '',
+      TaskNote: row.TaskNote ?? row.Description ?? TASK_NOTES[row.Ordinal] ?? '',
+      TaskTags: row.TaskTags ?? TASK_TAGS[row.Ordinal] ?? ''
+    };
+  }
+
   // ── 1. Page context ──────────────────────────────────────────
   const url = new URL(location.href);
   if (!url.searchParams.get('CaseID')) {
@@ -365,9 +402,10 @@
       {set: 'cp-recent', template: 'Case-Recent-Activity-Query-Template.html', rows: [{CaseNum: '214'}]},
       {set: 'cp-all-activity', template: 'Case-All-Activity-Query-Template.html', rows: [{CaseNum: '214'}]},
       {set: 'cp-changes', template: 'Case-Changes-Query-Template.html', rows: [{CaseNum: '214'}]},
-      {set: 'cp-parties', template: 'Case-Parties-Query-Template.html', rows: rows.parties},
+      // The parties template is the guide's (US-CASE-PARTIES is in the theme).
+      {set: 'cp-parties', template: 'Case-Parties-Query-Template.html', src: '../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html', rows: rows.parties},
       {set: 'cp-staff', template: 'Case-Staff-Query-Template.html', rows: rows.staff},
-      {set: 'cp-tasks', template: 'Case-Tasks-Query-Template.html', rows: rows.tasks, empty: emptyState('ti-checklist', 'No tasks yet', 'Add the first step for this case.', 'us-action-cases-add-task')},
+      {set: 'cp-tasks', template: 'Case-Tasks-Query-Template.html', rows: rows.tasks.map(taskColumns), empty: emptyState('ti-checklist', 'No tasks yet', 'Add the first step for this case.', 'us-action-cases-add-task')},
       {set: 'cp-meetings-detail', template: 'Case-Meetings-Detail-Query-Template.html', rows: rows.meetings, empty: emptyState('ti-calendar-plus', 'No meetings', 'Schedule one to meet the member or the employer.', 'us-action-cases-add-meeting')},
       {set: 'cp-meetings', template: 'Case-Meetings-Query-Template.html', rows: rows.meetings, empty: emptyState('ti-calendar-plus', 'No meetings', 'Schedule one to meet the member or the employer.', 'us-action-cases-add-meeting')},
       {set: 'cp-notes', template: 'Case-Notes-Ledger-Query-Template.html', rows: rows.notes, empty: emptyState('ti-notes', 'No notes yet', 'Record calls and conversations as notes.', 'us-action-cases-add-note')},
@@ -401,7 +439,7 @@
       // The standalone export embeds the templates (build-standalone.cjs);
       // the served page fetches them.
       const embedded = window.UnionSuiteCaseTemplates?.[list.template];
-      const text = embedded ?? await (await nativeFetch('templates/' + list.template)).text();
+      const text = embedded ?? await (await nativeFetch(list.src || 'templates/' + list.template)).text();
       templates.set(list.template, text.replace(/<!--[\s\S]*?-->/g, '').trim());
     }
     const template = templates.get(list.template);
@@ -498,7 +536,8 @@
         const found = directory.filter(person => !term || (person.ContactName + ' ' + person.Position).toLowerCase().includes(term));
         return reply(items(found.slice(0, Number(target.searchParams.get('limit')) || 8)), 200, 200);
       }
-      if (name.endsWith('/Case - Member Details')) {
+      // The member card's IQA, and the parties' (the guide's template).
+      if (name.endsWith('/Case - Member Details') || name.endsWith('/Query Template - Manage Case - Party Details')) {
         const details = detailsFor(target.searchParams.get('ID'));
         return reply(items(details ? [details] : []), 200, 250);
       }

@@ -9,6 +9,46 @@
 (() => {
   'use strict';
 
+  // ── Task rows: the shared task columns ───────────────────────
+  // The compact task row (US-TASK-ROWS 1.2, owner, 19 October 2026) reads one
+  // set of column names on every page. The sample tasks keep the current
+  // IQA's columns; this maps them as the renamed IQA will return them, with
+  // the long-form date the homepage uses, and sample notes and tags.
+  const TASK_NOTES = {
+      "811": "Include the redlined clauses 12 to 18 and the costings summary. The committee meets Thursday, so it needs to be with them by Tuesday.",
+      "812": "Seats for 120; check accessibility and parking. Hold the booking until the ballot date is confirmed."
+  };
+  const TASK_TAGS = {
+      "635": "Legal",
+      "811": "Bargaining, Correspondence",
+      "812": "Meeting",
+      "813": "Fair Work, Lodgement, Compliance"
+  };
+  function longDate(value) {
+    if (!value) return '';
+    const iso = /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : value.split('/').reverse().map(part => part.padStart(2, '0')).join('-');
+    return new Date(iso + 'T00:00:00').toLocaleDateString('en-AU', {day: 'numeric', month: 'long', year: 'numeric'});
+  }
+  function taskColumns(row) {
+    const done = /^(done|true|1)$/i.test(String(row.TAskCheckCSS || ''));
+    const due = longDate(row.Deadline);
+    const dueLabel = due ? (row.TaskStatusCSS === 'overdue' ? 'Overdue ' : 'Due ') + due : '';
+    const actioned = longDate(row.CompletedIso);
+    return {
+      ...row,
+      TaskOrdinal: row.Ordinal,
+      TaskTitle: row.Note,
+      IsCompleted: done ? 'true' : 'false',
+      DueState: done ? 'none' : row.TaskStatusCSS === 'overdue' ? 'overdue' : due ? 'soon' : 'none',
+      TaskDateLabel: done ? (actioned ? 'Actioned ' + actioned : dueLabel.replace(/^Overdue /, 'Due ')) : dueLabel,
+      DueLabel: dueLabel,
+      MemberName: row.AssignedTo,
+      MemberId: row.MemberId || '',
+      TaskNote: row.TaskNote ?? row.Description ?? TASK_NOTES[row.Ordinal] ?? '',
+      TaskTags: row.TaskTags ?? TASK_TAGS[row.Ordinal] ?? ''
+    };
+  }
+
   // ── 1. Page context ──────────────────────────────────────────
   const url = new URL(location.href);
   if (!url.searchParams.get('AgreementID')) {
@@ -153,7 +193,7 @@
 
   // Which template fills which list, and whether "Display in cards" is on.
   const lists = [
-    {set: 'ap-tasks', template: 'Agreement-Tasks-Query-Template.html', rows: allTasksDone ? rows.tasks.map(row => ({...row, TAskCheckCSS: 'done', TaskStatusCSS: 'actioned', OverdueText: ''})) : rows.tasks},
+    {set: 'ap-tasks', template: 'Agreement-Tasks-Query-Template.html', rows: (allTasksDone ? rows.tasks.map(row => ({...row, TAskCheckCSS: 'done', TaskStatusCSS: 'actioned', OverdueText: ''})) : rows.tasks).map(taskColumns)},
     {set: 'ap-milestones', template: 'Agreement-Milestones-Query-Template.html', rows: rows.milestones},
     {set: 'ap-contacts', template: 'Agreement-Contacts-Grouped-Tiles-Query-Template.html', rows: rows.contacts},
     {set: 'ap-attachments', template: 'Agreement-Attachments-Query-Template.html', rows: rows.attachments},

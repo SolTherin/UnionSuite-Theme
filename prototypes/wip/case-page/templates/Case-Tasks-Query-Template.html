@@ -1,5 +1,6 @@
-<!-- Case tasks · Query Template Display. The agreement tasks template with
-     the case actions; the same fields.
+<!-- Case tasks · Query Template Display. The compact task row (US-TASK-ROWS
+     1.2, owner, 19 October 2026): the guide's Tasks-Compact-Query-Template.html
+     with the case's save and pencil, as the homepage and the agreement page.
      iPart CSS class: us-case-tasks (add us-panel-fill when it shares a row)
        Section preset (case-presets.candidate.js), standing in for
        us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-cases-add-task
@@ -14,40 +15,60 @@
      (created date ascending; owner, 9 October 2026), so a task added in the
      composer (C40) lands at the end of the outstanding ones.
 
-     Fields (as the agreement Tasks IQA):
-     Ordinal (required)      note ordinal; saves and opens the task
-     Note (required)         task title
-     TAskCheckCSS            "done" when actioned, otherwise blank
-     TaskStatusCSS           actioned | outstanding | overdue; only overdue colours the date
-     Deadline                due date text; blank leaves the date empty
-     OverdueText             " - Overdue" or blank
-     AssignedTo              assignee name ("Unassigned" when blank)
-     PriorityBadge           "High Priority" or blank; blank hides the badge
+     Columns: the task lists' shared names (owner, 19 October 2026: one set
+     for the homepage, agreement and case IQAs; renaming the current columns
+     is in TODO.md). Current column in brackets.
+     TaskOrdinal (required)  the task note's ordinal; saves and opens it (Ordinal)
+     TaskTitle (required)    task title (Note)
+     IsCompleted             true when actioned, false otherwise (TAskCheckCSS "done")
+     DueState                overdue, today, soon or none; only overdue colours
+                             the date (TaskStatusCSS)
+     TaskDateLabel           long-form date with the state in words, as the
+                             homepage: "Overdue 28 September 2026", "Due today",
+                             "Due 14 October 2026", "Actioned 3 October 2026";
+                             blank for none (Deadline + OverdueText)
+     DueLabel                the due label to restore if a completed row is
+                             reopened; usually TaskDateLabel (new)
+     MemberName              assignee name, "Unassigned" when blank (AssignedTo)
+     MemberId                the assignee's party ID; "Personal Task" when it is
+                             the signed-in user (new)
+     TaskNote                the task's note, plain text; the details button
+                             opens it under the row; blank, no button (new)
+     TaskTags                tags from the task tag list, comma-separated;
+                             blank for none (new)
+     PriorityBadge           "High Priority" or blank (unchanged)
 
      The tick saves through CloudToolz /ca/complete-task
      (data-us-task-save="cases.item-status"; case and agreement tasks are
      both Zen_CloudFiles_Notes rows, to confirm). -->
-<div class="us-task us-task--detail" data-us-task-completed="false" data-us-task-state="{#query.TAskCheckCSS}"
-  data-us-task-due-state="{#query.TaskStatusCSS}" data-us-task-save="cases.item-status" data-us-task-note-type="Task"
-  data-us-task-ordinal="{#query.Ordinal}" data-us-search="{#query.Note} {#query.AssignedTo} {#query.PriorityBadge}">
+<div class="us-task us-task--detail us-task--compact" data-us-task-completed="{#query.IsCompleted}"
+  data-us-task-due-state="{#query.DueState}" data-us-task-due-label="{#query.DueLabel}"
+  data-us-task-save="cases.item-status" data-us-task-note-type="Task" data-us-task-ordinal="{#query.TaskOrdinal}"
+  data-us-search="{#query.TaskTitle} {#query.TaskNote} {#query.MemberName} {#query.TaskTags} {#query.PriorityBadge}">
   <button type="button" class="us-task__check" data-us-task-toggle
-    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.Note}">
+    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.TaskTitle}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>
   </button>
   <div class="us-task__open">
     <span class="us-task__copy">
-      <span class="us-task__title">{#query.Note}</span>
+      <span class="us-task__title">{#query.TaskTitle}</span>
+      <span class="us-task__note">{#query.TaskNote}</span>
     </span>
     <span class="us-task__meta">
       <span class="us-task__member">
         <i class="ti ti-user-filled" aria-hidden="true"></i>
-        <a class="us-task__member-name">{#query.AssignedTo}</a>
+        <a class="us-task__member-name" data-id="{#query.MemberId}">{#query.MemberName}</a>
+      </span>
+      <span class="us-task__tags" data-us-task-tags="{#query.TaskTags}">
+        <i class="ti ti-tag" aria-hidden="true"></i>
+        <span class="us-task__tags-text">{#query.TaskTags}</span>
       </span>
     </span>
-    <span class="us-task__date">{#query.Deadline}{#query.OverdueText}</span>
+    <span class="us-task__date">{#query.TaskDateLabel}</span>
   </div>
   <span class="us-task__aside">
     <span class="us-badge us-badge--danger">{#query.PriorityBadge}</span>
-    <button type="button" class="us-action-cases-edit-task" data-ordinal="{#query.Ordinal}"></button>
+    <button type="button" class="us-task__details" aria-expanded="false" aria-label="Show details: {#query.TaskTitle}" title="Show details"><i class="ti ti-file-description" aria-hidden="true"></i></button>
+    <button type="button" class="us-action-cases-edit-task" data-ordinal="{#query.TaskOrdinal}"></button>
   </span>
 </div>

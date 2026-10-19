@@ -1,55 +1,71 @@
-<!-- Agreement tasks · Query Template Display on the existing Tasks IQA
-     ("Query Template - Manage Agreement - Tasks"). The IQA is unchanged.
+<!-- Agreement tasks · Query Template Display on the Tasks IQA
+     ("Query Template - Manage Agreement - Tasks").
+     The compact task row (US-TASK-ROWS 1.2, owner, 19 October 2026): the
+     guide's Tasks-Compact-Query-Template.html with the agreement's save and
+     pencil, so the homepage, agreement and case lists are one row. Title,
+     then the date, assignee and tags; the High Priority badge, a details
+     button (when the task has a note) and the pencil on the title line.
      iPart CSS class: us-agreement-tasks (add us-panel-fill when it shares a row)
        Section preset in zUnionSuite.js, standing in for
        us-query-template us-query-search us-task-completed-filter us-task-progress us-list-scroll us-action-agreements-add-task
      Native title: Tasks. Display in cards / columns: unchecked. Header blank.
      Footer: blank. The theme adds the card footer with the results line
-     (us-task-progress); an existing <div class="us-query-footer"><span
-     data-us-task-summary></span></div> is harmless and stays hidden.
-     (the theme writes "n outstanding" into it, as on the Home tasks list;
-     us-task-progress keeps it for screen readers and shows "x of y complete"
-     in the heading instead).
-     Rows per page: 30. No results: "No tasks for this agreement."
+     (us-task-progress). Rows per page: 30. No results: "No tasks for this agreement."
 
-     Fields (aliases from the current template; ActionedCSS and
-     PriorityBadgeClass are no longer used):
-     Ordinal (required)      note ordinal (SeqN); saves and opens the task
-     Note (required)         task title
-     TAskCheckCSS            "done" when actioned, otherwise blank; read as completion
-     TaskStatusCSS           actioned | outstanding | overdue; only overdue colours the date
-     Deadline                due date text; blank leaves the date empty
-     OverdueText             " - Overdue" or blank, so the state is in words, not colour alone
-     AssignedTo              assignee name ("Unassigned" when blank)
-     PriorityBadge           "High Priority" or blank; blank hides the badge
+     Columns: the task lists' shared names (owner, 19 October 2026: one set
+     for the homepage, agreement and case IQAs; renaming the current columns
+     is in TODO.md). Current column in brackets.
+     TaskOrdinal (required)  the task note's ordinal; saves and opens it (Ordinal)
+     TaskTitle (required)    task title (Note)
+     IsCompleted             true when actioned, false otherwise (TAskCheckCSS "done")
+     DueState                overdue, today, soon or none; only overdue colours
+                             the date (TaskStatusCSS)
+     TaskDateLabel           long-form date with the state in words, as the
+                             homepage: "Overdue 28 September 2026", "Due today",
+                             "Due 14 October 2026", "Actioned 3 October 2026";
+                             blank for none (Deadline + OverdueText)
+     DueLabel                the due label to restore if a completed row is
+                             reopened; usually TaskDateLabel (new)
+     MemberName              assignee name, "Unassigned" when blank (AssignedTo)
+     MemberId                the assignee's party ID; "Personal Task" when it is
+                             the signed-in user (new)
+     TaskNote                the task's note, plain text; the details button
+                             opens it under the row; blank, no button (new)
+     TaskTags                tags from the task tag list, comma-separated;
+                             blank for none (new)
+     PriorityBadge           "High Priority" or blank (unchanged)
 
      Ticking the box plays the theme's completion effect and saves through
      CloudToolz /ca/complete-task (data-us-task-save="agreements.item-status").
-     The title is plain text; the pencil (agreements.edit-task) opens the task
-     (owner, 7 October 2026: edits are a pencil at the end of the row).
-     Replaces the old toggleTask() and confetti; the count, assignee
-     search and view button return through theme options. -->
-<div class="us-task us-task--detail" data-us-task-completed="false" data-us-task-state="{#query.TAskCheckCSS}"
-  data-us-task-due-state="{#query.TaskStatusCSS}" data-us-task-save="agreements.item-status" data-us-task-note-type="Task"
-  data-us-task-ordinal="{#query.Ordinal}" data-us-search="{#query.Note} {#query.AssignedTo} {#query.PriorityBadge}">
+     The title is plain text; the pencil (agreements.edit-task) opens the task. -->
+<div class="us-task us-task--detail us-task--compact" data-us-task-completed="{#query.IsCompleted}"
+  data-us-task-due-state="{#query.DueState}" data-us-task-due-label="{#query.DueLabel}"
+  data-us-task-save="agreements.item-status" data-us-task-note-type="Task" data-us-task-ordinal="{#query.TaskOrdinal}"
+  data-us-search="{#query.TaskTitle} {#query.TaskNote} {#query.MemberName} {#query.TaskTags} {#query.PriorityBadge}">
   <button type="button" class="us-task__check" data-us-task-toggle
-    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.Note}">
+    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.TaskTitle}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>
   </button>
   <div class="us-task__open">
     <span class="us-task__copy">
-      <span class="us-task__title">{#query.Note}</span>
+      <span class="us-task__title">{#query.TaskTitle}</span>
+      <span class="us-task__note">{#query.TaskNote}</span>
     </span>
     <span class="us-task__meta">
       <span class="us-task__member">
         <i class="ti ti-user-filled" aria-hidden="true"></i>
-        <a class="us-task__member-name">{#query.AssignedTo}</a>
+        <a class="us-task__member-name" data-id="{#query.MemberId}">{#query.MemberName}</a>
+      </span>
+      <span class="us-task__tags" data-us-task-tags="{#query.TaskTags}">
+        <i class="ti ti-tag" aria-hidden="true"></i>
+        <span class="us-task__tags-text">{#query.TaskTags}</span>
       </span>
     </span>
-    <span class="us-task__date">{#query.Deadline}{#query.OverdueText}</span>
+    <span class="us-task__date">{#query.TaskDateLabel}</span>
   </div>
   <span class="us-task__aside">
     <span class="us-badge us-badge--danger">{#query.PriorityBadge}</span>
-    <button type="button" class="us-action-agreements-edit-task" data-ordinal="{#query.Ordinal}"></button>
+    <button type="button" class="us-task__details" aria-expanded="false" aria-label="Show details: {#query.TaskTitle}" title="Show details"><i class="ti ti-file-description" aria-hidden="true"></i></button>
+    <button type="button" class="us-action-agreements-edit-task" data-ordinal="{#query.TaskOrdinal}"></button>
   </span>
 </div>
