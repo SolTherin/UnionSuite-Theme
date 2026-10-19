@@ -1,0 +1,27 @@
+<div class="us-party" data-us-contact-id="{#query.ContactId}" data-us-contact-ordinal="{#query.Ordinal}" data-us-contact-lead="{#query.ContactIsLead}" data-us-contact-type="{#query.ContactType}"
+  data-us-search="{#query.ContactName} {#query.ContactRole} {#query.MemberType} {#query.MemberStatus} {#query.MemberStanding}">
+  <button type="button" class="us-party__select" aria-pressed="false">
+    <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+    <span class="us-party__copy">
+      <span class="us-party__name">{#query.ContactName}</span>
+      <span class="sr-only">, {#query.ContactRole}</span>
+      <span class="us-party__meta"><span class="us-party__type">{#query.MemberType}</span><span class="us-party__status">{#query.MemberStatus}</span></span>
+    </span>
+    <span class="us-badge us-badge--{#query.MemberStandingTone} us-party__standing">{#query.MemberStanding}</span>
+  </button>
+  <div class="us-party__detail" hidden>
+    <div class="us-case-member">
+      <div class="us-case-member__head">
+        <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.ContactName}" aria-hidden="true"></span>
+        <div class="us-case-member__who">
+          <p class="us-case-member__name"><span class="us-case-member__name-text">{#query.ContactName}</span><span class="us-party__crown" role="img" aria-label="Primary party" title="Primary party"><i class="ti ti-crown" aria-hidden="true"></i></span><button type="button" class="us-party__make-primary us-action-cases-set-primary-party" data-ordinal="{#query.Ordinal}">Make primary party</button></p>
+          <p class="us-case-member__meta">{#query.MemberLine}</p>
+        </div>
+        <div class="us-case-member__actions">
+          <a class="TextButton us-outline-button us-case-member__profile" href="{#query.ContactUrl}"><i class="ti ti-id" aria-hidden="true"></i>View profile</a>
+        </div>
+      </div>
+      <div class="us-field-groups" data-us-fields-query="$/_i4u_/Core/Cases/Layouts v2/Query Template - Manage Case - Party Details" data-us-fields-filter="ID" data-us-fields-value="{#query.ContactId}"></div>
+    </div>
+  </div>
+</div>

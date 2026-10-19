@@ -62,6 +62,27 @@ const circular = [...inputs].filter(file => outputs.has(file));
 if (circular.length) {
   throw new Error('A generated guide output is also used as input:\n' + circular.join('\n'));
 }
+// The IQA where-used index finds the theme's own IQAs by scanning its
+// scripts for whole quoted $/ paths (Scripts/IQA-WhereUsed.js). A path
+// assembled from parts would be invisible to it, so none may be.
+const themeDir = path.join(root, 'THeme/UnionSuite');
+const themeScripts = ['index.js', 'zUnionSuite.js', ...fs.readdirSync(path.join(themeDir, 'Scripts'))
+  .filter(name => name.endsWith('.js')).map(name => 'Scripts/' + name)];
+const assembled = [
+  /['"`]\$\/[^'"`\r\n]*['"`]\s*\+/,
+  /\+\s*['"`]\$\/[^'"`\r\n]*['"`]/,
+  /`\$\/[^`]*\$\{/
+];
+const assembledPaths = [];
+for (const script of themeScripts) {
+  originalRead.call(fs, path.join(themeDir, script), 'utf8').split('\n').forEach((line, index) => {
+    if (assembled.some(pattern => pattern.test(line))) assembledPaths.push(script + ':' + (index + 1) + '  ' + line.trim());
+  });
+}
+if (assembledPaths.length) {
+  throw new Error('Write IQA paths in theme scripts as whole strings, so where used can find them:\n' + assembledPaths.join('\n'));
+}
+
 if (process.argv.includes('--json')) {
   console.log(JSON.stringify({inputs: [...inputs].sort(), outputs: [...outputs].sort()}, null, 2));
 } else {

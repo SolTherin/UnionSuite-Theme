@@ -16,7 +16,7 @@
  *   GATED (behind the toggle):
  *     • OverhaulCss         — editor layout/width/colour CSS (body.iqa-enhanced)
  *     • BoSearch            — searchable Business Object input on the source panel
- *     • SqlTools            — copy SQL + lock/unlock expression toolbar
+ *     • SqlTools            — copy SQL and copy-expression buttons
  *     • FilterSortDropdowns — type-to-filter dropdowns on Filters & Sort selects
  *     • UncheckAll          — "uncheck all" checkbox in the Display grid header
  *     • FilterAutocomplete  — per-property value history on filter value inputs
@@ -130,7 +130,6 @@
     + [text, 'Copied', 'Copy failed'].map(value => '<span aria-hidden="true">' + escapeHtml(value) + '</span>').join('')
     + '</span>';
 
-  const PENCIL_ICON = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41L18.37 3.29a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>`;
 
   /* ===========================================================================
    * Busy presentation
@@ -642,7 +641,7 @@
       document.querySelectorAll('.textarea-wrap').forEach(wrap => {
         const ta = wrap.querySelector('textarea'); if (!ta) return;
         wrap.parentNode.insertBefore(ta, wrap); wrap.remove();
-        ta.disabled = false; ta.style.resize = ''; ta.style.height = ''; ta.style.overflowY = ''; ta.style.boxSizing = '';
+        ta.style.resize = ''; ta.style.height = ''; ta.style.overflowY = ''; ta.style.boxSizing = '';
         delete ta.dataset.enhanced; delete ta.dataset.userResized;
       });
     },
@@ -733,34 +732,21 @@
         ta.dataset.enhanced = 'true';
         // Vertical-only: a manual width would become an inline style that
         // outlives the column it was dragged in, overflowing narrower layouts.
-        ta.disabled = true; ta.style.resize = 'vertical'; ta.style.overflowY = 'hidden'; ta.style.boxSizing = 'border-box';
+        ta.style.resize = 'vertical'; ta.style.overflowY = 'hidden'; ta.style.boxSizing = 'border-box';
 
         const wrapper = document.createElement('div'); wrapper.className = 'textarea-wrap';
         const bar = document.createElement('div'); bar.className = 'icon-bar';
-        const editBtn = iconBtn('Edit text'); editBtn.innerHTML = PENCIL_ICON;
         const themedCopy = themeCopyButton(ta, 'Copy text');
         const copyBtn = themedCopy || iconBtn('Copy text'); if (!themedCopy) copyBtn.innerHTML = COPY_ICON;
 
         ta.parentNode.replaceChild(wrapper, ta);
-        wrapper.appendChild(ta); wrapper.appendChild(bar); bar.appendChild(editBtn); bar.appendChild(copyBtn);
+        wrapper.appendChild(ta); wrapper.appendChild(bar); bar.appendChild(copyBtn);
 
         requestAnimationFrame(() => autoResize(ta));
         ta.addEventListener('input', () => autoResize(ta));
         if ('ResizeObserver' in window) {
           new ResizeObserver(entries => { for (const e of entries) { if (e.target.dataset.resizingProgrammatically === 'true') continue; e.target.dataset.userResized = 'true'; } }).observe(ta);
         }
-
-        const toggleEdit = () => {
-          const makingEditable = ta.disabled;
-          ta.disabled = !makingEditable;
-          editBtn.setAttribute('aria-label', makingEditable ? 'Lock text' : 'Edit text');
-          editBtn.title = makingEditable ? 'Lock text' : 'Edit text';
-          editBtn.classList.toggle('is-editing', makingEditable);
-          autoResize(ta);
-          if (makingEditable) { ta.focus(); const n = ta.value.length; try { ta.setSelectionRange(n, n); } catch (_) {} }
-        };
-        editBtn.addEventListener('click', toggleEdit);
-        editBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleEdit(); } });
 
         if (themedCopy) return; // the theme's US-COPY handles the click
         let statusTimer = null, statusEl = null;
@@ -1054,7 +1040,9 @@
            narrow enough for the source name to wrap. */
         .iqasort-prop { display:flex; align-items:flex-start; gap:var(--space-1,4px); min-width:0; }
         .iqasort-prop__body { flex:1 1 auto; min-width:0; }
-        #SelectedProperty .SQLExpression .iqasort-grip { margin-top:4px; }
+        /* An expression row is as tall as its field; its handle sits at the
+           row's middle, level with the row's checkbox. */
+        #SelectedProperty .SQLExpression .iqasort-prop { align-items:center; }
         .iqasort-nosel, .iqasort-nosel * { cursor:grabbing !important; user-select:none !important; -webkit-user-select:none !important; }
         .iqasort-dragging { display:none !important; }
         .iqasort-placeholder > td { padding:0 !important; border:0 !important; background:transparent !important; }
@@ -2326,12 +2314,32 @@ function createRelationshipWorkspace() {
     const match = String(value).match(/^(.+\.(SR\d+))\|([^|]+)$/);
     return match ? { value, text, source: match[1], slot: match[2], property: match[3] } : null;
   }
-  function idFields(fields, sources) {
-    return sources.flatMap(source => {
-      const matches = fields.filter(item => item.slot === source.slot && /^id$/i.test(item.property));
-      return matches.length === 1 ? [{ ...matches[0], alias: source.alias }] : [];
-    });
+  // Join by ID's key types. A field is a key when its name is the type or ends
+  // in it as its own word: ContactId, Contact_Id, Co Id, CreatedByUserKey.
+  // Paid and Barcode are not keys, as the ending does not start a word.
+  const KEY_TYPES = ['Id', 'Key', 'Code', 'Ordinal'];
+  function keyType(name) {
+    const text = String(name || '').trim();
+    return KEY_TYPES.find(type => {
+      const tail = text.slice(-type.length), before = text.charAt(text.length - type.length - 1);
+      if (tail.toLowerCase() !== type.toLowerCase()) return false;
+      return !before || /[\s_]/.test(before) || /[a-z0-9]/.test(before) && tail[0] === tail[0].toUpperCase();
+    }) || '';
   }
+  // A field picker item's text is "Alias.Field"; an alias cannot contain a dot.
+  const fieldName = item => item.text.slice(item.text.indexOf('.') + 1);
+  // Each business object's key fields of one type, in source order: the plain
+  // name first (Id before ContactId), then alphabetically.
+  function keyFields(fields, sources, type) {
+    const plain = item => [item.property, fieldName(item)].some(name => name.trim().toLowerCase() === type.toLowerCase()) ? 0 : 1;
+    return sources.flatMap(source => fields
+      .filter(item => item.slot === source.slot && (keyType(item.property) || keyType(fieldName(item))) === type)
+      .sort((a, b) => plain(a) - plain(b) || fieldName(a).localeCompare(fieldName(b), undefined, { sensitivity: 'base' }))
+      .map(item => ({ ...item, alias: source.alias })));
+  }
+  // The key types a pair can use: those on at least two business objects.
+  const keyTypes = (left, right, sources) => KEY_TYPES.filter(type =>
+    new Set([...keyFields(left, sources, type), ...keyFields(right, sources, type)].map(item => item.slot)).size > 1);
   // The Branchify tab: a branch code on any other business object, against
   // i4u_UT_EntityAccess's EntityCode (see Branchify).
   const ENTITY_ACCESS = /^_?i4u_UT_EntityAccess$/i, ENTITY_CODE = /^(org_?code|entity_?code)$/i;
@@ -2401,9 +2409,9 @@ function createRelationshipWorkspace() {
   }
   // A predefined relationship's description starts with its own name instead
   // of "Custom": "FK_Name_Member_Types (When … = …)". iMIS can add one by
-  // itself when a source is added, and unless it joins Id to Id it is often
-  // the wrong join, so it is marked for checking. A field counts as an Id
-  // when its name ends in Id (Id, Co Id, Contact Id).
+  // itself when a source is added, and unless it joins two keys of the same
+  // type (Id to Contact Id, Ordinal to Case Ordinal; see keyType) it is often
+  // the wrong join, so it is marked for checking.
   function predefinedName(description) {
     const name = (/^(.*?)\s*\(When /.exec(String(description)) || [])[1] || '';
     return name.trim().toLowerCase() === 'custom' ? '' : name.trim();
@@ -2411,8 +2419,10 @@ function createRelationshipWorkspace() {
   // An Exists or Not Exist relation's description ends "… = X.Id Does Exist)"
   // or "… Does Not Exist)"; the field is the part before that.
   const plainField = field => String(field || '').trim().replace(/\s+(?:does\s+)?(?:not\s+)?exists?$/i, '');
-  const idField = field => /(^|[\s_])id$/i.test(plainField(field));
-  const checkEdge = edge => Boolean(edge.name && !(idField(edge.leftField) && idField(edge.rightField)));
+  const checkEdge = edge => {
+    const left = keyType(plainField(edge.leftField));
+    return Boolean(edge.name && !(left && left === keyType(plainField(edge.rightField))));
+  };
   // The join graph from the Relations list. Each relationship links the two
   // sources its description names, with the field on each side:
   // "Custom (When Finance.Frequency = _I4u_UT_Lookup_Frequency.Lookup Id)".
@@ -2435,9 +2445,11 @@ function createRelationshipWorkspace() {
     });
   }
   // Trees walked outward from the first source, then from the first source of
-  // each group it does not reach, in source order. Each node keeps the
-  // relationship that reached it; one between two sources already placed is
-  // an "also joined" note on whichever was placed later.
+  // each group it does not reach, in source order. Each node's joins are taken
+  // in source order too, not the order iMIS added them, so the tree reads like
+  // the Sources table. Each node keeps the relationship that reached it; one
+  // between two sources already placed is an "also joined" note on whichever
+  // was placed later.
   function joinForest(count, edges) {
     const placed = new Map(), trees = [];
     for (let start = 0; start < count; start++) {
@@ -2446,12 +2458,12 @@ function createRelationshipWorkspace() {
       placed.set(start, root); trees.push(root);
       for (const queue = [root]; queue.length;) {
         const node = queue.shift();
-        edges.forEach(edge => {
-          const other = edge.left === node.index ? edge.right : edge.right === node.index ? edge.left : -1;
-          if (other < 0 || placed.has(other)) return;
-          const child = { index: other, edge, parent: node, children: [], also: [], order: placed.size };
-          placed.set(other, child); node.children.push(child); queue.push(child);
-        });
+        edges.map(edge => ({ edge, other: edge.left === node.index ? edge.right : edge.right === node.index ? edge.left : -1 }))
+          .filter(item => item.other >= 0).sort((a, b) => a.other - b.other).forEach(({ edge, other }) => {
+            if (placed.has(other)) return;
+            const child = { index: other, edge, parent: node, children: [], also: [], order: placed.size };
+            placed.set(other, child); node.children.push(child); queue.push(child);
+          });
       }
     }
     edges.forEach(edge => {
@@ -2467,7 +2479,7 @@ function createRelationshipWorkspace() {
   // again: the first source's rows without it are dropped.
   const optionalNode = node => Boolean(node?.edge && /^Left\|/.test(node.edge.type) && node.edge.right === node.index);
   const requiresOptionalParent = node => Boolean(node.edge && node.edge.type === 'Equal|AND' && optionalNode(node.parent));
-  if (typeof document === 'undefined') return { field, idFields, entityFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent, itemData, joinEdges, joinForest, optionalNode, requiresOptionalParent, predefinedName, idField, checkEdge };
+  if (typeof document === 'undefined') return { field, keyType, keyFields, keyTypes, entityFields, isDuplicate, comboFields, setComboValue, makeIntent, readIntent, itemData, joinEdges, joinForest, optionalNode, requiresOptionalParent, predefinedName, checkEdge };
   const KEY = 'iqa:relationship-intent:v1';
 
   // The relationship editor in a page or response: the "Predefined relationship"
@@ -2603,8 +2615,11 @@ function createRelationshipWorkspace() {
     if (blank) blank.text = 'Select a relationship';
     undo.push(() => { [...kind.options].forEach((option, i) => { option.hidden = originalOptionHidden[i]; }); if (blank) blank.text = blankText; });
     const leftID = el('select'), rightID = el('select'); leftID.id = 'iqaJoinIdLeft'; rightID.id = 'iqaJoinIdRight';
+    // Join by ID's key type (Id, Key, Code, Ordinal) filters both field selects.
+    const keySelect = el('select'), keyBox = el('div'); keySelect.id = 'iqaJoinKeyType';
+    labelBox(keyBox, 'Key type', keySelect); keyBox.appendChild(keySelect);
     const idLeftBox = el('div'), idRightBox = el('div'); labelBox(idLeftBox, 'Left business object', leftID); labelBox(idRightBox, 'Right business object', rightID);
-    idLeftBox.appendChild(leftID); idRightBox.appendChild(rightID); idPanel.append(idLeftBox, idRightBox);
+    idLeftBox.appendChild(leftID); idRightBox.appendChild(rightID); idPanel.append(keyBox, idLeftBox, idRightBox);
     const leftLabel = idLeftBox.querySelector('label'), rightLabel = idRightBox.querySelector('label');
     // Source rows, read once: their alias and whether each is i4u_UT_EntityAccess.
     const sourceRows = [...row.closest('table').querySelectorAll('input[type="hidden"]')].filter(input => /^SR\d+$/.test(input.value)).map(input => {
@@ -2636,6 +2651,7 @@ function createRelationshipWorkspace() {
     if (scrollToRestore) remember({ ...intent, scroll: null }); // One navigation only.
     let mode = kind.value === 'Custom' ? isPair(intent?.mode) ? intent.mode : 'fields' : kind.value !== 'None' ? 'predefined' : '';
     let freshFields = intent?.freshFields === true;
+    let keyKind = KEY_TYPES.includes(intent?.keyType) ? intent.keyType : 'Id';
     let clients = null, initialized = false, loading = false, loadFailed = false, loadingTimer = null, pendingScroll = null;
     undo.push(() => clearTimeout(loadingTimer));
     const buttons = new Map();
@@ -2651,27 +2667,38 @@ function createRelationshipWorkspace() {
     const paired = value => isPair(value) || value === 'fields' && !clients;
     // Field choices for Join by ID and the Branchify tab, built once the field
     // controls load; the shared pair of selects shows the current mode's.
+    // Join by ID has a list per key type; the Key type select offers only the
+    // types at least two of this query's business objects have.
     let pairOptions = null, filledFor = null;
+    const fillKey = () => mode === 'id' ? 'id:' + keyKind : mode;
+    const pairList = side => mode === 'id' ? pairOptions.id[keyKind]?.[side] || [] : pairOptions[mode][side];
     function buildPairs() {
       const left = fieldsFor(0), right = fieldsFor(1);
       const options = (list, label) => list.map(entry => ({ value: entry.value, label: entry.alias + ' · ' + label(entry) }));
       // Choose fields: every field, grouped by business object.
       const everyField = list => list.map(entry => ({ value: entry.value, label: entry.text, group: sourceRows.find(source => source.slot === entry.slot)?.alias || entry.slot }));
+      const types = keyTypes(left, right, sourceRows);
+      keySelect.replaceChildren(...types.map(type => { const option = el('option', type); option.value = type; return option; }));
+      if (!types.includes(keyKind)) keyKind = types[0] || 'Id';
+      keySelect.value = keyKind;
       pairOptions = {
-        id: [idFields(left, sourceRows), idFields(right, sourceRows)].map(list => options(list, () => 'Id')),
+        id: Object.fromEntries(types.map(type => [type, [keyFields(left, sourceRows, type), keyFields(right, sourceRows, type)].map(list => options(list, fieldName))])),
         entity: [entityFields(left, sourceRows, 'other'), entityFields(right, sourceRows, 'access')].map(list => options(list, entry => entry.property)),
         fields: [everyField(left), everyField(right)]
       };
       filledFor = null;
     }
+    // Join by ID keeps each side's business object when the key type changes,
+    // on its plain field (Id before ContactId), where it has that type.
     function fillPairs() {
-      if (!pairOptions || !paired(mode) || filledFor === mode) return;
-      filledFor = mode;
+      if (!pairOptions || !paired(mode) || filledFor === fillKey()) return;
+      const before = filledFor?.startsWith('id:') && mode === 'id' ? [sourceOf(leftID.value), sourceOf(rightID.value)] : null;
+      filledFor = fillKey();
       [leftID, rightID].forEach((select, side) => {
         const nodes = [], groups = new Map();
         // Choose fields starts unselected, so both fields are a deliberate choice.
         if (mode === 'fields') { const blank = el('option', 'Select a field'); blank.value = ''; nodes.push(blank); }
-        for (const entry of pairOptions[mode][side]) {
+        for (const entry of pairList(side)) {
           const option = el('option', entry.label); option.value = entry.value;
           if (!entry.group) { nodes.push(option); continue; }
           if (!groups.has(entry.group)) { const group = el('optgroup'); group.label = entry.group; groups.set(entry.group, group); nodes.push(group); }
@@ -2679,16 +2706,24 @@ function createRelationshipWorkspace() {
         }
         select.replaceChildren(...nodes);
       });
-      const saved = intent?.mode === mode ? intent : null;
-      if (saved?.left && [...leftID.options].some(option => option.value === saved.left)) leftID.value = saved.left;
-      if (saved?.right && [...rightID.options].some(option => option.value === saved.right)) rightID.value = saved.right;
-      else if (mode === 'id' && rightID.options.length > 1) rightID.selectedIndex = 1;
+      // Each side shows its saved field, or after a key type change the business
+      // object it showed before. Join by ID's right side otherwise starts on the
+      // first business object the left side does not have.
+      const saved = intent?.mode === mode && (mode !== 'id' || intent.keyType === keyKind) ? intent : null;
+      const find = (select, test) => [...select.options].find(option => option.value && test(option.value))?.value;
+      const left = before ? find(leftID, value => sourceOf(value) === before[0]) : find(leftID, value => value === saved?.left);
+      if (left) leftID.value = left;
+      const right = before ? find(rightID, value => sourceOf(value) === before[1] && before[1] !== sourceOf(leftID.value)) : find(rightID, value => value === saved?.right);
+      if (right) rightID.value = right;
+      else if (mode === 'id') rightID.value = find(rightID, value => sourceOf(value) !== sourceOf(leftID.value)) || rightID.value;
       separate(leftID);
       applyPreselect();
     }
     // A join started from the tree's "+ Join": Join by ID with that business
     // object on the right and the first source on the left, once the field
-    // selects are filled. Without an Id field it opens Choose fields instead.
+    // selects are filled. Without a field of the current key type it moves to
+    // the first key type the business object has, and without any key field
+    // it opens Choose fields instead.
     let preselect = null;
     function joinFrom(slot) {
       preselect = { slot };
@@ -2696,10 +2731,14 @@ function createRelationshipWorkspace() {
       panel.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
     function applyPreselect() {
-      if (!preselect || !paired(mode) || filledFor !== mode || !leftID.options.length) return;
+      if (!preselect || !paired(mode) || filledFor !== fillKey() || !leftID.options.length) return;
       const slot = preselect.slot;
       const option = (select, wanted) => [...select.options].find(item => item.value && field(item.value, '')?.slot === wanted);
-      if (mode === 'id' && !option(rightID, slot)) { preselect = null; choose('fields'); return; }
+      if (mode === 'id' && !option(rightID, slot)) {
+        const type = Object.keys(pairOptions.id).find(type => pairOptions.id[type][1].some(entry => field(entry.value, '')?.slot === slot));
+        if (type) { keyKind = keySelect.value = type; fillPairs(); return; }
+        preselect = null; choose('fields'); return;
+      }
       preselect = null;
       if (mode !== 'id') return;
       rightID.value = option(rightID, slot).value;
@@ -2733,7 +2772,7 @@ function createRelationshipWorkspace() {
       });
       syncPickers.forEach(sync => sync());
     }
-    function persist() { remember({ mode, left: leftID.value, right: rightID.value, freshFields, scroll: pendingScroll }); }
+    function persist() { remember({ mode, keyType: keyKind, left: leftID.value, right: rightID.value, freshFields, scroll: pendingScroll }); }
     // The native switch to the field controls: a postback that reloads the editor.
     function openNative(next) {
       pendingScroll = captureScroll(kind);
@@ -2803,8 +2842,10 @@ function createRelationshipWorkspace() {
       if (paired(mode) && typeBox.parentNode !== idPanel) idPanel.insertBefore(typeBox, idRightBox);
       if (!paired(mode) && typeBox.parentNode !== custom) custom.insertBefore(typeBox, rightBox);
       hide(predefined, mode !== 'predefined'); hide(kindParent, mode !== 'predefined'); hide(idPanel, !paired(mode)); hide(custom, mode !== 'fields' || !clients);
-      leftLabel.textContent = mode === 'entity' ? 'Business object field' : mode === 'fields' ? 'Left field' : 'Left business object';
-      rightLabel.textContent = mode === 'entity' ? 'Entity access field' : mode === 'fields' ? 'Right field' : 'Right business object';
+      const keyed = mode === 'id' && keySelect.options.length > 0;
+      hide(keyBox, !keyed); idPanel.classList.toggle('has-key-type', keyed);
+      leftLabel.textContent = mode === 'entity' ? 'Business object field' : 'Left field';
+      rightLabel.textContent = mode === 'entity' ? 'Entity access field' : 'Right field';
       hide(actions, !mode); add.disabled = true; add.textContent = 'Add relationship'; preview.textContent = '';
       if (loading) { message.textContent = 'Opening the field controls…'; return; }
       if (!mode) return;
@@ -2814,7 +2855,7 @@ function createRelationshipWorkspace() {
         if (!add.disabled) preview.textContent = kind.options[kind.selectedIndex]?.text || '';
         return;
       }
-      message.textContent = mode === 'id' ? 'Connect one pair using their Id fields. Review the fields and join type, then add.'
+      message.textContent = mode === 'id' ? 'Connect one pair by a key field. Review the fields and join type, then add.'
         : mode === 'entity' ? 'Join a business object’s branch code to i4u_UT_EntityAccess. Review the fields and join type, then add.'
         : 'Choose a field from each business object and the join type.';
       if (!clients && !(remote && paired(mode))) {
@@ -2827,7 +2868,7 @@ function createRelationshipWorkspace() {
       const pair = selectedPair();
       if (paired(mode) && (!leftID.options.length || !rightID.options.length)) {
         message.textContent = mode === 'entity' ? 'No OrgCode, Org_Code, EntityCode or Entity_Code field to join to EntityCode. Use Choose fields instead.'
-          : mode === 'fields' ? 'No fields are available to join.' : 'Id fields are not available for a pair of business objects. Use Choose fields instead.';
+          : mode === 'fields' ? 'No fields are available to join.' : 'No two business objects have an Id, Key, Code or Ordinal field. Use Choose fields instead.';
         return;
       }
       if (!pair?.every(Boolean)) return;
@@ -2856,6 +2897,7 @@ function createRelationshipWorkspace() {
       }
     }
     listen(ownType, 'change', render);
+    listen(keySelect, 'change', () => { keyKind = keySelect.value; fillPairs(); persist(); render(); });
     listen(leftID, 'change', () => { separate(leftID); persist(); render(); }); listen(rightID, 'change', () => { separate(rightID); persist(); render(); });
     listen(kind, 'change', () => { pendingScroll ||= captureScroll(kind); mode = kind.value === 'Custom' ? isPair(mode) ? mode : 'fields' : 'predefined'; persist(); render(); });
     if (nativeType) listen(nativeType, 'change', () => { pendingScroll = captureScroll(nativeType); persist(); render(); });
@@ -2917,8 +2959,8 @@ function createRelationshipWorkspace() {
     [...table.querySelectorAll('input[type="hidden"]')].filter(input => /^RL\d+$/.test(input.value)).forEach(input => {
       const relation = input.closest('tr'), select = relation.querySelector('select'); relation.classList.add('iqa-existing-relationship');
       undo.push(() => relation.classList.remove('iqa-existing-relationship'));
-      // Predefined relationships are tagged; one not joining Id to Id is marked
-      // for checking. An alias cannot contain a dot, so each field follows it.
+      // Predefined relationships are tagged; one not joining two keys of the same
+      // type is marked for checking. An alias cannot contain a dot, so each field follows it.
       const description = ownText(relation.cells[0]), name = predefinedName(description);
       if (name && relation.cells[0]) {
         const sides = /\(When (.+?) = (.+)\)\s*$/.exec(description);
@@ -2927,7 +2969,7 @@ function createRelationshipWorkspace() {
         // Drawn from an attribute, so the description text stays readable.
         const cell = relation.cells[0];
         cell.setAttribute('data-iqa-tag', check ? 'Predefined: check' : 'Predefined');
-        cell.title = check ? 'Added from a predefined relationship and not joined Id to Id. Check it is the join you want.' : 'Added from a predefined relationship.';
+        cell.title = check ? 'Added from a predefined relationship and not joined key to key. Check it is the join you want.' : 'Added from a predefined relationship.';
         relation.classList.add(check ? 'iqa-relation-check' : 'iqa-relation-predefined');
         undo.push(() => { cell.removeAttribute('data-iqa-tag'); cell.removeAttribute('title'); relation.classList.remove('iqa-relation-check', 'iqa-relation-predefined'); });
       }
@@ -2988,7 +3030,7 @@ function createRelationshipWorkspace() {
       };
       const checkText = (edge, from) => {
         const fields = fieldsOf(edge, from);
-        return 'Predefined relationship ' + edge.name + (fields ? ' joins ' + fields : '') + ', not Id to Id. Check it is the join you want.';
+        return 'Predefined relationship ' + edge.name + (fields ? ' joins ' + fields : '') + ', not key to key. Check it is the join you want.';
       };
       // A warning is an amber ! on its line, with the sentence as its tooltip;
       // the summary's "N warnings" shows or hides every sentence under its line.
@@ -3061,7 +3103,7 @@ function createRelationshipWorkspace() {
           if (checkEdge(also.edge)) addWarning(wrap, note, checkText(also.edge, node.index));
         });
         // Joins first, then Exists and Not Exist filters: those are conditions,
-        // not data sources. Otherwise iMIS's order is kept (the sort is stable).
+        // not data sources. Otherwise source order is kept (the sort is stable).
         const filtering = child => /Exist\|/.test(child.edge?.type || '') ? 1 : 0;
         [...node.children].sort((a, b) => filtering(a) - filtering(b)).forEach(child => wrap.appendChild(branch(child, groupRoot)));
         return wrap;
@@ -3231,6 +3273,7 @@ function createRelationshipWorkspace() {
     .iqa-relationship-editor [hidden]{display:none!important}.iqa-relationship-message{font-size:13px;color:#526173;margin:0 0 14px}
     .iqa-relationship-fields{display:grid;grid-template-columns:minmax(0,1fr) 165px minmax(0,1fr);gap:14px;align-items:start}
     .iqa-relationship-ids{display:grid;grid-template-columns:minmax(0,1fr) 165px minmax(0,1fr);gap:14px;margin-bottom:12px}
+    .iqa-relationship-ids.has-key-type{grid-template-columns:110px minmax(0,1fr) 165px minmax(0,1fr)}
     .iqa-relationship-fields>div,.iqa-relationship-ids>div{min-width:0}
     body.iqa-enhanced .iqa-relationship-editor .SubItems{margin:0!important;padding:0!important}
     body.iqa-enhanced .iqa-relationship-editor .InputXXLargeWrapper,body.iqa-enhanced .iqa-relationship-editor .RadComboBox,body.iqa-enhanced .iqa-relationship-editor select{width:100%!important;max-width:100%!important;box-sizing:border-box;min-width:0!important}
@@ -3323,7 +3366,7 @@ function createRelationshipWorkspace() {
     td[data-iqa-tag]::after{content:attr(data-iqa-tag);display:inline-block;margin-left:8px;padding:1px 8px;border:1px dashed var(--border-strong,#94a3b8);border-radius:999px;font-size:12px;line-height:1.5;vertical-align:middle;white-space:nowrap;color:var(--text-muted,#545962)}
     .iqa-relation-check>td[data-iqa-tag]::after,.iqa-source-unrelated>td[data-iqa-tag]::after{border:1px solid var(--warning,#b45309);color:var(--text-strong,#1c2024);background:var(--warning-bg,#fdf3e1)}
     table.iqa-relations-tree .iqa-source-unrelated>td[data-iqa-tag]::after{content:"!";display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:var(--warning,#b45309);color:#fff;font-weight:700;line-height:1}
-    @media(max-width:800px){.iqa-relationship-fields,.iqa-relationship-ids{grid-template-columns:1fr}.iqa-relationship-editor{padding:12px}}
+    @media(max-width:800px){.iqa-relationship-fields,.iqa-relationship-ids,.iqa-relationship-ids.has-key-type{grid-template-columns:1fr}.iqa-relationship-editor{padding:12px}}
   `;
   return { mount, openFieldsInBackground, addInBackground, teardown() { restore(); forget(); document.getElementById('iqaRelationshipCss')?.remove(); } };
 }
@@ -3706,6 +3749,67 @@ function createSqlEditor(options = {}) {
     return result;
   }
   const quote = value => '[' + value.replace(/\]/g, ']]') + ']';
+  // T-SQL functions with a parameter hint: each parameter's name, type and
+  // meaning, and for a parameter that takes a fixed set of values (a datepart,
+  // a data type, a date style), those values as suggestions.
+  // Common dateparts first; dayofyear and weekday count as day in DATEADD.
+  const DATEPARTS = [
+    ['year', 'yy, yyyy'], ['quarter', 'qq, q'], ['month', 'mm, m'], ['week', 'wk, ww'], ['day', 'dd, d'], ['hour', 'hh'], ['minute', 'mi, n'], ['second', 'ss, s'],
+    ['millisecond', 'ms'], ['microsecond', 'mcs'], ['nanosecond', 'ns'], ['dayofyear', 'dy, y'], ['weekday', 'dw, w']
+  ].map(([name, short]) => ({ label: name, detail: 'Also ' + short, insert: name, aliases: short.split(', ') }));
+  const DATA_TYPES = [
+    ['varchar(n)', 'varchar(30)', 'Text, up to n characters'], ['nvarchar(n)', 'nvarchar(100)', 'Unicode text, up to n characters'], ['char(n)', 'char(10)', 'Text, exactly n characters'],
+    ['date', 'date', 'Date only'], ['datetime', 'datetime', 'Date and time, to 3 ms'], ['datetime2', 'datetime2', 'Date and time, to 100 ns'], ['time', 'time', 'Time only'],
+    ['int', 'int', 'Whole number'], ['bigint', 'bigint', 'Large whole number'], ['decimal(p, s)', 'decimal(18, 2)', 'Exact number: p digits, s after the point'],
+    ['money', 'money', 'Currency, 4 decimal places'], ['float', 'float', 'Approximate number'], ['bit', 'bit', '1, 0 or NULL']
+  ].map(([label, insert, detail]) => ({ label, detail, insert }));
+  const DATE_STYLES = [
+    [0, 'mon dd yyyy hh:miAM (default)'], [23, 'yyyy-mm-dd'], [101, 'mm/dd/yyyy (US)'], [103, 'dd/mm/yyyy (Australia, UK)'], [104, 'dd.mm.yyyy'],
+    [105, 'dd-mm-yyyy'], [106, 'dd mon yyyy'], [107, 'Mon dd, yyyy'], [108, 'hh:mi:ss'], [110, 'mm-dd-yyyy'], [111, 'yyyy/mm/dd'],
+    [112, 'yyyymmdd (ISO)'], [113, 'dd mon yyyy hh:mi:ss:mmm'], [114, 'hh:mi:ss:mmm'], [120, 'yyyy-mm-dd hh:mi:ss (ODBC)'],
+    [121, 'yyyy-mm-dd hh:mi:ss.mmm'], [126, 'yyyy-mm-ddThh:mi:ss.mmm (ISO 8601)']
+  ].map(([code, format]) => ({ label: String(code), detail: format, insert: String(code) }));
+  const DATEPART = { name: 'datepart', type: 'keyword', detail: 'The unit, unquoted: year, quarter, month, day, week, hour, minute, second…', values: DATEPARTS };
+  const SQL_FUNCTIONS = {
+    DATEADD: {
+      detail: 'Adds a number of dateparts to a date · returns the date’s type',
+      params: [DATEPART,
+        { name: 'number', type: 'int', detail: 'How many dateparts to add; negative to subtract. Decimals are truncated' },
+        { name: 'date', type: 'date, datetime, datetime2, time', detail: 'The date to add to: a field, expression or quoted literal' }]
+    },
+    DATEDIFF: {
+      detail: 'Counts the datepart boundaries from startdate to enddate · returns int',
+      params: [DATEPART,
+        { name: 'startdate', type: 'date, datetime, datetime2, time', detail: 'The earlier date. A later startdate gives a negative result' },
+        { name: 'enddate', type: 'date, datetime, datetime2, time', detail: 'The later date. Boundaries are counted, so year from 31 Dec to 1 Jan is 1' }]
+    },
+    CONVERT: {
+      detail: 'Converts a value to another data type · returns data_type',
+      params: [
+        { name: 'data_type', type: 'data type', detail: 'The type to convert to, with a length where it has one: varchar(30), date, int…', values: DATA_TYPES },
+        { name: 'expression', type: 'any', detail: 'The value to convert: a field, expression or literal' },
+        { name: 'style', type: 'int, optional', detail: 'Date format: 103 dd/mm/yyyy, 112 yyyymmdd, 120 yyyy-mm-dd hh:mi:ss…', values: DATE_STYLES }]
+    }
+  };
+  const signatureText = name => name + '(' + SQL_FUNCTIONS[name].params.map(param => param.name).join(', ') + ')';
+  // The innermost unclosed call the caret is in, and which argument: commas at
+  // that call's own depth. Strings and comments are skipped. Only calls in
+  // SQL_FUNCTIONS are returned.
+  function callAt(before) {
+    const stack = []; let word = '';
+    for (const token of tokens(before)) {
+      if (token.type === 'comment') continue;
+      if (token.type || /^[A-Za-z_]/.test(token.text)) { word = token.type === 'keyword' || !token.type ? token.text.toUpperCase() : ''; continue; }
+      for (const char of token.text) {
+        if (char === '(') { stack.push({ name: word, arg: 0 }); word = ''; }
+        else if (char === ')') { stack.pop(); word = ''; }
+        else if (char === ',') { if (stack.length) stack.at(-1).arg++; word = ''; }
+        else if (!/\s/.test(char)) word = '';
+      }
+    }
+    const call = stack.at(-1), definition = call && SQL_FUNCTIONS[call.name];
+    return definition && call.arg < definition.params.length ? { name: call.name, arg: call.arg, ...definition } : null;
+  }
   // iMIS SQL functions, offered only after "dbo.". The document path needs a
   // DocumentVersionKey, so it appears only when a source has that field, and
   // arrives prefilled with it (one option per source that has it).
@@ -3721,6 +3825,13 @@ function createSqlEditor(options = {}) {
     const fieldDetail = field => [field.label, field.dataType].filter(Boolean).join(' · ');
     const last = tokens(before).at(-1);
     if (last && /^(comment|string)$/.test(last.type)) return null;
+    // An argument with a fixed set of values, started or not yet typed.
+    const call = callAt(before), values = call?.params[call.arg].values, typed = before.match(/[(,]\s*(\w*)$/);
+    if (values && typed) {
+      const search = typed[1].toLowerCase();
+      const options = values.filter(value => [value.label, ...(value.aliases || [])].some(name => name.toLowerCase().startsWith(search)));
+      if (options.length) return { start: before.length - typed[1].length, options: options.map(value => ({ kind: 'value', ...value })) };
+    }
     const field = before.match(/(\[(?:\]\]|[^\]])+\]|[\w]+)\.\s*(\[?[\w ]*)$/);
     if (field) {
       const name = field[1].replace(/^\[|\]$/g, '').replace(/\]\]/g, ']');
@@ -3733,7 +3844,9 @@ function createSqlEditor(options = {}) {
     const match = before.match(/\[?[A-Za-z_][\w]*$/);
     if (!match || before[match.index - 1] === '.') return null;
     const search = match[0].replace(/^\[/, '').toLowerCase();
-    const sourceOptions = sources.filter(item => item.sqlName.toLowerCase().includes(search) || item.label.toLowerCase().includes(search)).map(item => ({ kind: 'source', label: item.sqlName, detail: item.label, insert: quote(item.sqlName) + '.' }));
+    const functionOptions = match[0].startsWith('[') ? [] : Object.keys(SQL_FUNCTIONS).filter(name => name.toLowerCase().startsWith(search))
+      .map(name => ({ kind: 'function', label: signatureText(name), detail: SQL_FUNCTIONS[name].detail, insert: name + '(' }));
+    const sourceOptions =sources.filter(item => item.sqlName.toLowerCase().includes(search) || item.label.toLowerCase().includes(search)).map(item => ({ kind: 'source', label: item.sqlName, detail: item.label, insert: quote(item.sqlName) + '.' }));
     const fieldOptions = sources.flatMap(source => source.fields.filter(field => field.name.toLowerCase().includes(search) || field.label.toLowerCase().includes(search)).map(field => ({
       kind: 'field',
       label: quote(source.sqlName) + '.' + quote(field.name),
@@ -3742,7 +3855,7 @@ function createSqlEditor(options = {}) {
       detail: [source.label, field.label, field.dataType].filter(Boolean).join(' · '),
       insert: quote(source.sqlName) + '.' + quote(field.name)
     })));
-    return { start: match.index, options: [...sourceOptions, ...fieldOptions] };
+    return { start: match.index, options: [...functionOptions, ...sourceOptions, ...fieldOptions] };
   }
   // Deliberately a conservative lint check, not a complete T-SQL parser.
   function validate(sql) {
@@ -3893,7 +4006,7 @@ function createSqlEditor(options = {}) {
     }
     return fields;
   }
-  if (typeof document === 'undefined') return { tokens, complete, quote, validate, createSourceCache, catalog, definitionProperties, definitionRequest, definitionSources };
+  if (typeof document === 'undefined') return { tokens, complete, callAt, quote, validate, createSourceCache, catalog, definitionProperties, definitionRequest, definitionSources };
   const sourceCache = createSourceCache({ getItem: key => sessionStorage.getItem(key), setItem: (key, value) => sessionStorage.setItem(key, value) }, location);
   const boDefinitions = new Map(), boDefinitionLoads = new Map();
   async function loadBusinessObjectDefinitions(mapping) {
@@ -3960,7 +4073,7 @@ function createSqlEditor(options = {}) {
   const items = new Map();
   function dispose(ta, item) {
     item.observer?.disconnect(); item.abort.abort();
-    item.menu.remove(); item.hint.remove(); item.validation.remove();
+    item.menu.remove(); item.signature.remove(); item.hint.remove(); item.validation.remove();
     if (item.add) item.add.disabled = item.addDisabled;
     if (item.shell.parentNode) item.shell.replaceWith(ta);
     ta.classList.remove('iqa-sql-input');
@@ -3979,6 +4092,7 @@ function createSqlEditor(options = {}) {
         .iqa-sql-keyword{color:#7141ac;font-weight:normal}.iqa-sql-string{color:#9c3425}.iqa-sql-comment{color:#587747}.iqa-sql-number{color:#066c91}.iqa-sql-identifier{color:#005a9c}
         .iqa-sql-complete{position:fixed;z-index:100000;max-height:240px;overflow:auto;width:360px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #94a3b8;border-radius:4px;box-shadow:0 4px 12px #0002;padding:3px;color:#172b4d;font:13px/1.4 Consolas,monospace;}
         .iqa-sql-complete[hidden]{display:none}.iqa-sql-complete>[role=option]{display:grid;grid-template-columns:22px minmax(0,1fr);grid-template-areas:"icon label" "icon detail";padding:6px 8px;cursor:pointer;overflow-wrap:anywhere}.iqa-sql-complete>[aria-selected=true]{background:#dcedfc}.iqa-sql-complete-icon{grid-area:icon;align-self:center;display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#4b5563;background:none}.iqa-sql-complete-icon svg{display:block;width:18px;height:18px;overflow:visible;shape-rendering:crispEdges}.iqa-sql-complete-icon[data-kind=field] svg{width:10px;height:18px}.iqa-sql-complete-label{grid-area:label;min-width:0}.iqa-sql-complete-source{color:#7b8794}.iqa-sql-complete small{grid-area:detail;display:block;color:#64748b;font:12px/1.4 system-ui}.iqa-sql-hint{display:block;margin:5px 0 8px;color:#64748b;font-size:12px;}
+        .iqa-sql-signature{position:fixed;z-index:100000;max-width:min(480px,calc(100vw - 24px));background:#fff;border:1px solid #94a3b8;border-radius:4px;box-shadow:0 4px 12px #0002;padding:6px 8px;color:#475569;font:12px/1.4 system-ui}.iqa-sql-signature[hidden]{display:none}.iqa-sql-signature-call{margin-bottom:2px;color:#172b4d;font:13px/1.4 Consolas,monospace}.iqa-sql-signature strong{color:#0b5cad}
         .iqa-sql-validation{margin:5px 0;font-size:13px;color:#526173}.iqa-sql-validation[data-error=true]{color:#a12622}body.iqa-enhanced #CustomProperty textarea.iqa-sql-input[aria-invalid=true]{border-color:#a12622!important}
         @media(forced-colors:active){.iqa-sql-editor>pre{display:none}body.iqa-enhanced #CustomProperty .iqa-sql-editor>textarea.iqa-sql-input{color:CanvasText!important;-webkit-text-fill-color:CanvasText;caret-color:auto}}
       `;
@@ -3990,17 +4104,20 @@ function createSqlEditor(options = {}) {
       const shell = document.createElement('div'); shell.className = 'iqa-sql-editor';
       const pre = document.createElement('pre'); pre.setAttribute('aria-hidden', 'true');
       const menu = document.createElement('div'); menu.className = 'iqa-sql-complete'; menu.hidden = true; menu.id = 'iqaSqlComplete-' + Math.random().toString(36).slice(2); menu.setAttribute('role', 'listbox'); menu.setAttribute('aria-label', 'SQL suggestions'); document.body.appendChild(menu);
+      // The parameter hint: the DATEADD, DATEDIFF or CONVERT call the caret is
+      // in, with the current parameter in bold, its type and meaning, above the caret.
+      const signature = document.createElement('div'); signature.className = 'iqa-sql-signature'; signature.hidden = true; signature.id = menu.id + '-signature'; signature.setAttribute('role', 'tooltip'); document.body.appendChild(signature);
       const hint = document.createElement('small'); hint.className = 'iqa-sql-hint';
       hint.title = 'Suggestions use configured source mappings and authoritative field names from the Business Object definition API. Every Sources load refreshes the mapping, including added or removed objects, and takes precedence over the saved query definition.';
-      const readyHint = 'Type a source, field name or alias for suggestions, or dbo. for iMIS functions. Use ↑ / ↓ and Tab or Enter to insert; Tab inserts 3 spaces when suggestions are closed; Esc dismisses.';
+      const readyHint = 'Type a source, field name or alias for suggestions, dbo. for iMIS functions, or DATEADD, DATEDIFF or CONVERT for their parameters. Use ↑ / ↓ and Tab or Enter to insert; Tab inserts 3 spaces when suggestions are closed; Esc dismisses.';
       hint.textContent = sourceFields().length ? readyHint : 'Click the SQL box to load configured sources and their Business Object fields.';
       const attributes = Object.fromEntries(['role', 'aria-autocomplete', 'aria-expanded', 'aria-controls', 'aria-activedescendant', 'aria-invalid', 'aria-describedby'].map(name => [name, ta.getAttribute(name)]));
       const validation = document.createElement('div'); validation.className = 'iqa-sql-validation'; validation.id = menu.id + '-validation'; validation.setAttribute('role', 'status');
       const add = ta.closest('table')?.querySelector('input[type="submit"], button[type="submit"]');
-      const item = { shell, menu, hint, validation, add, addDisabled: add?.disabled, attributes, abort: new AbortController(), spellcheck: ta.getAttribute('spellcheck') };
+      const item = { shell, menu, signature, hint, validation, add, addDisabled: add?.disabled, attributes, abort: new AbortController(), spellcheck: ta.getAttribute('spellcheck') };
       ta.before(shell); shell.append(pre, ta); ta.classList.add('iqa-sql-input'); ta.spellcheck = false;
       shell.after(hint); ta.setAttribute('role', 'combobox'); ta.setAttribute('aria-autocomplete', 'list'); ta.setAttribute('aria-controls', menu.id); ta.setAttribute('aria-expanded', 'false');
-      hint.after(validation); ta.setAttribute('aria-describedby', [attributes['aria-describedby'], validation.id].filter(Boolean).join(' '));
+      hint.after(validation); ta.setAttribute('aria-describedby', [attributes['aria-describedby'], validation.id, signature.id].filter(Boolean).join(' '));
       const check = () => {
         const issue = validate(ta.value), hasText = !!ta.value.trim();
         validation.dataset.error = String(!!issue && hasText); ta.setAttribute('aria-invalid', String(!!issue && hasText));
@@ -4025,17 +4142,37 @@ function createSqlEditor(options = {}) {
           else if (node.offsetTop + node.offsetHeight > menu.scrollTop + menu.clientHeight) menu.scrollTop = node.offsetTop + node.offsetHeight - menu.clientHeight;
         }
       };
-      const position = () => {
+      // The caret's viewport position, from a hidden copy of the text before it.
+      const caretAt = () => {
         const mirror = document.createElement('div'), caret = document.createElement('span');
         const style = getComputedStyle(ta);
         Object.assign(mirror.style, { position: 'fixed', visibility: 'hidden', width: ta.clientWidth + 'px', boxSizing: 'border-box', font: style.font, padding: style.padding, whiteSpace: 'pre-wrap', overflowWrap: 'break-word', tabSize: '3' });
         mirror.textContent = ta.value.slice(0, ta.selectionStart); caret.textContent = '\u200b'; mirror.appendChild(caret); document.body.appendChild(mirror);
         const origin = mirror.getBoundingClientRect(), point = caret.getBoundingClientRect(), box = ta.getBoundingClientRect();
-        const left = box.left + point.left - origin.left - ta.scrollLeft;
-        const top = box.top + point.top - origin.top - ta.scrollTop + 22;
         mirror.remove();
+        return { left: box.left + point.left - origin.left - ta.scrollLeft, top: box.top + point.top - origin.top - ta.scrollTop };
+      };
+      const position = () => {
+        const { left, top } = caretAt();
         menu.style.left = Math.max(8, Math.min(left, window.innerWidth - menu.offsetWidth - 8)) + 'px';
-        menu.style.top = Math.max(8, Math.min(top, window.innerHeight - menu.offsetHeight - 8)) + 'px';
+        menu.style.top = Math.max(8, Math.min(top + 22, window.innerHeight - menu.offsetHeight - 8)) + 'px';
+      };
+      const hideSignature = () => { signature.hidden = true; };
+      const showSignature = () => {
+        const call = document.activeElement === ta && ta.selectionStart === ta.selectionEnd ? callAt(ta.value.slice(0, ta.selectionStart)) : null;
+        if (!call) return hideSignature();
+        const param = call.params[call.arg], head = document.createElement('div'); head.className = 'iqa-sql-signature-call';
+        head.append(call.name + '(');
+        call.params.forEach((item, index) => {
+          if (index) head.append(', ');
+          const name = document.createElement(index === call.arg ? 'strong' : 'span'); name.textContent = item.name; head.append(name);
+        });
+        head.append(')');
+        signature.replaceChildren(head, param.name + ' (' + param.type + '): ' + param.detail + '.');
+        signature.hidden = false;
+        const { left, top } = caretAt();
+        signature.style.left = Math.max(8, Math.min(left, window.innerWidth - signature.offsetWidth - 8)) + 'px';
+        signature.style.top = Math.max(8, top - signature.offsetHeight - 4) + 'px';
       };
       const suggest = () => {
         if (ta.selectionStart !== ta.selectionEnd) return close();
@@ -4044,14 +4181,16 @@ function createSqlEditor(options = {}) {
         active = 0; menu.replaceChildren();
         suggestions.options.forEach((option, index) => {
           const node = document.createElement('div'); node.setAttribute('role', 'option'); node.id = menu.id + '-' + index;
-          const kind = option.kind === 'source' || option.kind === 'function' ? option.kind : 'field';
-          node.setAttribute('aria-label', { source: 'Source: ', field: 'Field: ', function: 'Function: ' }[kind] + option.label + '. ' + option.detail);
+          const kind = ['source', 'function', 'value'].includes(option.kind) ? option.kind : 'field';
+          node.setAttribute('aria-label', { source: 'Source: ', field: 'Field: ', function: 'Function: ', value: 'Value: ' }[kind] + option.label + '. ' + option.detail);
           const icon = document.createElement('span'); icon.className = 'iqa-sql-complete-icon'; icon.dataset.kind = kind; icon.setAttribute('aria-hidden', 'true');
           icon.innerHTML = kind === 'source'
             ? '<svg viewBox="0 0 18 18"><rect x="1.5" y="1.5" width="15" height="15" fill="none" stroke="currentColor"/><rect x="2" y="2" width="14" height="3.5" fill="#9aa2ac"/><path d="M1.5 5.5h15M6.5 5.5v11M11.5 5.5v11M1.5 9.17h15M1.5 12.83h15" fill="none" stroke="currentColor"/></svg>'
             : kind === 'function'
               ? '<svg viewBox="0 0 18 18"><text x="9" y="13.5" text-anchor="middle" fill="currentColor" font-family="Georgia,serif" font-size="12" font-style="italic">fx</text></svg>'
-              : '<svg viewBox="4 0 10 18"><rect x="5" y="1.5" width="8" height="15" fill="none" stroke="currentColor"/><rect x="5.5" y="2" width="7" height="3.5" fill="#9aa2ac"/><path d="M5 5.5h8M5 9.17h8M5 12.83h8" fill="none" stroke="currentColor"/></svg>';
+              : kind === 'value'
+                ? '<svg viewBox="0 0 18 18"><path d="M3 5.5h12M3 9h12M3 12.5h8" fill="none" stroke="currentColor"/></svg>'
+                : '<svg viewBox="4 0 10 18"><rect x="5" y="1.5" width="8" height="15" fill="none" stroke="currentColor"/><rect x="5.5" y="2" width="7" height="3.5" fill="#9aa2ac"/><path d="M5 5.5h8M5 9.17h8M5 12.83h8" fill="none" stroke="currentColor"/></svg>';
           const label = document.createElement('span'); label.className = 'iqa-sql-complete-label';
           if (kind === 'field' && option.sourceLabel) {
             const sourceName = document.createElement('span'); sourceName.className = 'iqa-sql-complete-source'; sourceName.textContent = option.sourceLabel + '.';
@@ -4102,15 +4241,17 @@ function createSqlEditor(options = {}) {
         }
         fragment.appendChild(document.createTextNode('\n')); pre.replaceChildren(fragment); sync(); check();
       };
-      ta.addEventListener('input', event => { paint(); if (event.isComposing) close(); else suggest(); }, { signal: item.abort.signal });
+      ta.addEventListener('input', event => { paint(); if (event.isComposing) close(); else suggest(); showSignature(); }, { signal: item.abort.signal });
       ta.addEventListener('change', paint, { signal: item.abort.signal });
-      ta.addEventListener('scroll', () => { sync(); close(); }, { signal: item.abort.signal });
-      ta.addEventListener('blur', close, { signal: item.abort.signal });
-      ta.addEventListener('click', close, { signal: item.abort.signal });
-      window.addEventListener('resize', close, { signal: item.abort.signal });
+      ta.addEventListener('scroll', () => { sync(); close(); hideSignature(); }, { signal: item.abort.signal });
+      ta.addEventListener('blur', () => { close(); hideSignature(); }, { signal: item.abort.signal });
+      ta.addEventListener('click', () => { close(); showSignature(); }, { signal: item.abort.signal });
+      ta.addEventListener('keyup', event => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) showSignature(); }, { signal: item.abort.signal });
+      window.addEventListener('resize', () => { close(); hideSignature(); }, { signal: item.abort.signal });
       ta.addEventListener('keydown', event => {
         if (event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
         if (menu.hidden) {
+          if (event.key === 'Escape' && !signature.hidden) { event.preventDefault(); hideSignature(); }
           if (event.key === 'Tab' && !event.shiftKey) {
             event.preventDefault();
             ta.setRangeText('   ', ta.selectionStart, ta.selectionEnd, 'end');
@@ -4235,9 +4376,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
               <h3>Sources</h3>
               <ol><li>Quick add business objects via search or the <strong>Union Template</strong> quick-add list.</li>
               <li>Drag and drop to reorder business objects (via popup).</li>
-              <li>Quick add relationships using <strong>Join by ID</strong>. Original relationships are still available via <strong>Choose fields</strong>, or <strong>Predefined relationship</strong>.</li>
+              <li>Quick add relationships using <strong>Join by ID</strong>, choosing the key type (Id, Key, Code or Ordinal) your business objects share. Original relationships are still available via <strong>Choose fields</strong>, or <strong>Predefined relationship</strong>.</li>
               <li>See when a matching relationship already exists.</li>
-              <li>Relations show as a <strong>join tree</strong> from the first business object, with each relationship's join type and delete beside it. Separate groups, Equals joins under a left join and predefined relationships that don't join Id to Id are flagged. Switch to <strong>List</strong> in the Relations heading for the standard view.</li>
+              <li>Relations show as a <strong>join tree</strong> from the first business object, with each relationship's join type and delete beside it. Separate groups, Equals joins under a left join and predefined relationships that don't join key to key (Id, Key, Code or Ordinal) are flagged. Switch to <strong>List</strong> in the Relations heading for the standard view.</li>
               <li><strong>Branchify</strong> limits results to the entities the signed-in user can access. It adds <strong>i4u_UT_EntityAccess</strong> and the filter <strong>Contact Key = "@LoggedInUser"</strong> in the background, then refreshes the editor once. Anything already in place is kept. When exactly one business object has an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field, it can also add that relationship. When there are several such fields, choose which one to join, or none.</li>
               <li>With <strong>i4u_UT_EntityAccess</strong> in the query, the <strong>Branchify</strong> tab under Add relationship joins its <strong>Entity Code</strong> to an <strong>OrgCode</strong>, <strong>Org_Code</strong>, <strong>EntityCode</strong> or <strong>Entity_Code</strong> field on another business object.</li></ol>
               <h3>Filters</h3>
@@ -4567,13 +4708,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = createSqlE
     + '@keyframes iqaCopyFlash{0%,25%{box-shadow:inset 0 0 0 9999px rgba(0,126,168,.24);box-shadow:inset 0 0 0 9999px color-mix(in srgb,var(--border-focus,#006f94) 26%,transparent);}100%{box-shadow:inset 0 0 0 9999px transparent;}}'
     + '@media(prefers-reduced-motion:reduce){.iqa-copy-flash{animation:none;box-shadow:inset 0 0 0 9999px rgba(0,126,168,.20);box-shadow:inset 0 0 0 9999px color-mix(in srgb,var(--border-focus,#006f94) 22%,transparent);}}'
     + '.textarea-wrap textarea{display:block;width:100%;min-width:0;box-sizing:border-box;}'
-    + '.textarea-wrap textarea:disabled{background:#f7f8fa;color:#12283d;cursor:default;opacity:1;}'
     + '.icon-bar{display:flex;flex-direction:column;gap:4px;margin:0;align-items:center;}'
     + '.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:4px;border-radius:5px;border:1px solid #cbd5e1;background:#fff;color:#475569;cursor:pointer;user-select:none;transition:background .12s,border-color .12s,color .12s;}'
     + '.icon-btn:hover{background:#eef2ff;border-color:#94a3b8;}'
     + '.icon-btn:focus{outline:2px solid #4f8fd9;outline-offset:1px;}'
     + '.icon-btn svg{width:18px;height:18px;display:block;}'
-    + '.icon-btn.is-editing{background:#0b62c4;border-color:#0b62c4;color:#fff;}'
     + '.copy-status{transition:opacity .2s;opacity:0;}'
     + '.sqltext-copy-btn{display:inline-flex;align-items:center;cursor:pointer;margin-left:8px;vertical-align:middle;color:#475569;}'
     + '.sqltext-copy-btn:hover{color:#0b62c4;}'

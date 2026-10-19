@@ -12,7 +12,7 @@ way.
   by the `static-node` launch config) has rail tabs Overview, Details,
   Activity, Parties, Attachments. Sample data and stubs: `case-page.js`.
   Standalone export: `node build-standalone.cjs` then `--check` (the output,
-  `Case-Page-Standalone.html`, is ignored by Git; 9 stylesheets, 9 scripts).
+  `Case-Page-Standalone.html`, is ignored by Git; 9 stylesheets, 8 scripts).
 - **Every add on the page is in place** (US-INLINE-COMPOSER, C40), approved by
   the owner, and **now in the shared theme** (12 October 2026): the block
   after the action engine in `zUnionSuite.js`, its section in
@@ -110,6 +110,23 @@ The owner's brief, in order (all 10 October 2026):
   `$/_i4u_/Core/Cases/API - Workplace Members` (CaseNum and Search in;
   ContactId, ContactName, Number, Classification out; primary party left out).
 - **Popup pages:** the `Cases_*` full forms are placeholders to confirm.
+- **Parties and staff IQAs** (owner building them, 13 October 2026): the
+  primary party and lead staff are stored on the case
+  (`[vBoi4u_UT_Cases].[PrimaryContactID]`, `[LeadStaffID]`), so each list's
+  `ContactIsLead` is a custom SQL expression returning `'true'`/`'false'`.
+  An IQA cannot sort on it, so both lists carry `us-contacts-lead-first`
+  (US-LEAD-FIRST, in the theme) and sort on real columns. Party details are
+  a second IQA (live: `$/_i4u_/Core/Cases/Layouts v2/Query Template - Manage
+  Case - Party Details`, filter `ID`) through US-FIELD-GROUPS, and now load
+  only when a party is first shown. Open: the set-primary / set-lead
+  endpoints should send `ContactID` / `StaffID` to write the case's columns.
+- **Parties are in the theme** (14 October 2026): US-CASE-PARTIES (CSS and
+  JS), US-CASE-MEMBER (CSS), the `us-case-parties` preset, and the guide's
+  `#case-parties` with the template. The prototype reads that template from
+  the guide. Its actions stay in `case-actions.candidate.js`. Found on the
+  live page (owner's paste): `ContactType` returned iMIS's "Please Enter",
+  `ContactRole` was blank, the details IQA returned no row for `ID`, and
+  the editor merged the meta spans (the template now classes them).
 - **iMIS query behaviour learned:** `GET /api/query` returns columns by
   alias/column name (`FULL_NAME`, not "Full Name"); an IQA can serve both the
   page (filtered `@url:AgreementNum`, hidden) and a one-row API call (an

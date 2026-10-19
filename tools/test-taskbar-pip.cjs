@@ -27,7 +27,8 @@ const nativeFixture = fixture
   const browser=await chromium.launch({channel:'msedge',headless:true});
   const errors=[];
   try {
-    const context=await browser.newContext({viewport:{width:1100,height:650},timezoneId:'Australia/Sydney'});
+    // Biscuit shows from 1200px (US-TASKBAR-PIP), so the default page is wider than that.
+    const context=await browser.newContext({viewport:{width:1280,height:650},timezoneId:'Australia/Sydney'});
     const bodyFor=url=>url.startsWith('https://pip.example/native') ? nativeFixture : fixture;
     await context.route('**/*',route=>route.request().url().startsWith('https://pip.example/') ? route.fulfill({contentType:'text/html',body:bodyFor(route.request().url())}) : route.abort());
     async function makePage(config={}) {
@@ -155,14 +156,17 @@ const nativeFixture = fixture
     await new Promise(resolve=>setTimeout(resolve,80)); // Deliver the browser's ResizeObserver before advancing mocked RAF.
     await advance(native,250);
     assert(await onHeaderEdge(),'without a row below, he rests on the header edge as before');
-    await native.setViewportSize({width:700,height:650}); // Above the 600px hide, where a wide logo wraps the controls.
+    // The narrowest width that keeps Biscuit. The wide logo now narrows the
+    // search field (US-TASKBAR-LAYOUT) instead of wrapping the controls below him.
+    await native.setViewportSize({width:1200,height:650});
     await new Promise(resolve=>setTimeout(resolve,80));
     await advance(native,250);
     assert(await native.evaluate(()=>{
-      const button=document.querySelector('.us-taskbar__pip-button').getBoundingClientRect();
+      const row=document.getElementById('masterTopBarAuxiliary').getBoundingClientRect();
       const search=document.querySelector('.tb-search-input').getBoundingClientRect();
-      return search.top>button.top && search.top>=button.bottom-.6;
-    }),'a wrapped header stops him above the controls that fall below his slot');
+      return search.width>0 && search.top>=row.top && search.bottom<=row.bottom+.6;
+    }),'a wide logo keeps the controls on his row');
+    assert(await onHeaderEdge(),'he still rests on the header edge');
     await native.close();
     console.log('PASS: placement beside the logo and perch above the bookmarks bar');
 
@@ -172,12 +176,28 @@ const nativeFixture = fixture
     assert.equal(await phase(phone),'away','phone widths hide Biscuit instead of greeting');
     assert.equal(await phone.locator('.us-taskbar__pip').isVisible(),false);
     assert.equal(await phone.evaluate(()=>localStorage.getItem('union-suite:pip-greeting:950')),null,'a hidden Biscuit does not consume the daily greeting');
-    assert.equal(await phone.locator('#us-taskbar-search').isVisible(),true,'search keeps the full phone header');
-    await phone.setViewportSize({width:1100,height:650});
+    // Phones search from Orion's bottom bar (US-TASKBAR-LAYOUT, 767px and below).
+    assert.equal(await phone.locator('#us-taskbar-search').isVisible(),false,'the phone header has no search field');
+    await phone.evaluate(()=>{
+      const toggle=document.createElement('button');
+      toggle.type='button';toggle.id='MobileSearchToggle';toggle.dataset.toggle='dropdown';toggle.textContent='Search';
+      document.body.append(toggle);
+    });
+    await phone.locator('#MobileSearchToggle').click();
+    assert(await phone.locator('#tb-search-dropdown').isVisible(),'the bottom bar search button opens the taskbar search');
+    assert.equal(await phone.locator('#MobileSearchToggle').getAttribute('aria-expanded'),'true');
+    await phone.locator('.tb-dd-close').click();
+    assert.equal(await phone.locator('#tb-search-dropdown').isVisible(),false);
+    assert.equal(await phone.evaluate(()=>document.activeElement.id),'MobileSearchToggle','closing returns focus to the button');
+    await phone.setViewportSize({width:1199,height:650});
+    await advance(phone,6000);
+    assert.equal(await phase(phone),'away','below 1200px the header row needs his space');
+    assert.equal(await phone.evaluate(()=>localStorage.getItem('union-suite:pip-greeting:950')),null);
+    await phone.setViewportSize({width:1280,height:650});
     await advance(phone,6000);
     assert.equal(await phase(phone),'visit','a wider window still gets that day’s greeting');
     await phone.close();
-    console.log('PASS: hidden below 600px, with the daily greeting kept for a wider window');
+    console.log('PASS: hidden below 1200px, with the daily greeting kept for a wider window');
 
     const held=await makePage({context:{loggedInPartyId:'300',isAnonymous:false}});
     await held.locator('#us-taskbar-search').focus();await advance(held,5000);
@@ -189,7 +209,9 @@ const nativeFixture = fixture
     await advance(held,100);
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.getAnimations({subtree:true}).length),0);
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.style.getPropertyValue('--pip-turn')),'0deg');
-    await held.setViewportSize({width:700,height:650}); // Management shortcuts hide below 768px; Biscuit stays until 600px.
+    // Without visible management shortcuts — the bookmarks strip replaces them
+    // when installed — dismissal falls back to Full Search.
+    await held.addStyleTag({content:'#injected-taskbar .us-taskbar__quick-links{display:none}'});
     await held.locator('.us-taskbar__pip-button').focus();await held.keyboard.press('Space');await advance(held,500);
     assert(await held.locator('.us-taskbar__pip').evaluate(el=>el.classList.contains('is-waving')));
     assert.equal(await held.locator('.us-taskbar__pip').evaluate(el=>el.getAnimations({subtree:true}).length),0);
@@ -201,8 +223,8 @@ const nativeFixture = fixture
     assert.equal(await held.locator('.us-taskbar__pip-button').getAttribute('aria-label'),'Say goodbye to Biscuit','idle preview preserves click count');
     await held.keyboard.press('Space');
     assert.equal(await phase(held),'away','reduced-motion third activation hides instantly');
-    assert(await held.locator('.us-taskbar__full-search').evaluate(el=>el===document.activeElement),'small-screen dismissal restores focus to Full Search');
-    console.log('PASS: activity deferral, keyboard wave/hop/goodbye, static reduced motion and small-screen focus');
+    assert(await held.locator('.us-taskbar__full-search').evaluate(el=>el===document.activeElement),'without shortcuts, dismissal restores focus to Full Search');
+    console.log('PASS: activity deferral, keyboard wave/hop/goodbye, static reduced motion and Full Search focus fallback');
 
     const rapid=await makePage({context:{loggedInPartyId:'700',isAnonymous:false}});
     await advance(rapid,3150);
@@ -289,7 +311,7 @@ const nativeFixture = fixture
     // Real timers exercise actual concurrent tabs, including the no-Web-Locks fallback.
     for(const noLocks of [false,true]) {
       const partyId=noLocks?'600':'500';
-      const raceContext=await browser.newContext({viewport:{width:1100,height:650}});
+      const raceContext=await browser.newContext({viewport:{width:1280,height:650}});
       await raceContext.route('**/*',route=>route.request().url().startsWith('https://pip.example/') ? route.fulfill({contentType:'text/html',body:fixture}) : route.abort());
       const twins=await Promise.all([1,2].map(async()=>{
         const p=await raceContext.newPage();p.on('pageerror',error=>errors.push(error.message));

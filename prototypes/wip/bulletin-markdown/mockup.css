@@ -1,0 +1,208 @@
+/* Prototype only: page layout, the prototype toolbar and the stored-value
+   panel. The form fields, panels, bulletin cards and alerts use the shared
+   theme; the editor uses markdown-note.candidate.css. */
+
+body.mdn-page {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font-family: var(--font-body);
+}
+
+.mdn-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font: 13px/1.5 var(--font-ui);
+}
+
+.mdn-tag {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-size: 12px;
+}
+
+.mdn-toggle {
+  padding: 4px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: inherit;
+  cursor: pointer;
+}
+
+.mdn-toggle:first-of-type {
+  margin-left: auto;
+}
+
+.mdn-toggle:hover {
+  border-color: var(--brand-600);
+}
+
+.mdn-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.mdn-column {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .mdn-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Form ── */
+
+.mdn-form {
+  display: grid;
+  gap: 16px;
+}
+
+.mdn-form__dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.mdn-form__show {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mdn-form__show legend {
+  width: 100%;
+  margin-bottom: 5px;
+  color: var(--text-muted);
+  font: 600 12px/1.5 var(--font-ui);
+}
+
+.mdn-form__show label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 13px/1.5 var(--font-ui);
+}
+
+.mdn-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.mdn-form__status {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-ui);
+}
+
+.mdn-form .AsiErrorInline {
+  display: block;
+  margin-top: 4px;
+}
+
+.mdn-form .AsiErrorInline[hidden] {
+  display: none;
+}
+
+/* ── Stored value ── */
+
+.mdn-stored {
+  padding: 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  font: 13px/1.5 var(--font-ui);
+}
+
+.mdn-stored__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.mdn-stored h2 {
+  margin: 0;
+  font: 600 14px/1.4 var(--font-ui);
+  color: var(--text-strong);
+}
+
+.mdn-stored__count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mdn-stored__count.is-over {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.mdn-stored__intro {
+  margin: 4px 0 10px;
+  color: var(--text-muted);
+}
+
+.mdn-stored pre {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 12px/1.5 ui-monospace, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.mdn-stored__payload {
+  margin-top: 12px;
+}
+
+.mdn-stored__payload summary {
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: var(--text-link);
+}
+
+/* ── Surfaces ── */
+
+.mdn-surface__title {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font: 600 12px/1.5 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.mdn-surface__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-ui);
+}

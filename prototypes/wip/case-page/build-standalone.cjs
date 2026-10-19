@@ -12,6 +12,7 @@ const path = require('node:path');
 const projectRoot = path.resolve(__dirname, '../../..');
 const sourcePath = path.join(__dirname, 'index.html');
 const templatesDir = path.join(__dirname, 'templates');
+const guideTemplates = ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html'];
 const outputPath = path.join(__dirname, 'Case-Page-Standalone.html');
 const missingAssets = new Set();
 const embeddedAssets = new Set();
@@ -96,6 +97,8 @@ function templatesScript() {
   for (const name of fs.readdirSync(templatesDir).filter(file => file.endsWith('.html')).sort()) {
     templates[name] = fs.readFileSync(path.join(templatesDir, name), 'utf8');
   }
+  // Templates now in the usage guide, which the page reads from there.
+  for (const file of guideTemplates) templates[path.basename(file)] = fs.readFileSync(path.join(projectRoot, file), 'utf8');
   const json = JSON.stringify(templates).replace(/<\//g, '<\\/').replace(/<!--/g, '<\\!--');
   return { count: Object.keys(templates).length, html: `<script data-source="templates/">\nwindow.UnionSuiteCaseTemplates = ${json};\n</script>` };
 }
@@ -119,7 +122,7 @@ html = html.replace(/^<script src="([^"]+)"><\/script>\r?\n/gm, (_, href) => {
   return (scriptCount === 1 ? templates.html + '\n' : '') + `${inlineScript(href)}\n`;
 });
 
-const expected = {stylesheets: 9, scripts: 9};
+const expected = {stylesheets: 9, scripts: 8};
 if (stylesheetCount !== expected.stylesheets || scriptCount !== expected.scripts) {
   throw new Error(`Expected ${expected.stylesheets} stylesheets and ${expected.scripts} scripts; found ${stylesheetCount} and ${scriptCount}. Update build-standalone.cjs when index.html links change.`);
 }

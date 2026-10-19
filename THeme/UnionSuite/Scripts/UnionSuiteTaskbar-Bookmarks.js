@@ -1199,17 +1199,18 @@
   }
 }
 
-@media (max-width: 1060px) {
-  #injected-taskbar .us-taskbar__pip {
+/* Header-row steps live in zUnionSuite.css (US-TASKBAR-LAYOUT), Biscuit's
+   with him (US-TASKBAR-PIP). Below 1100px the taskbar's labelled buttons
+   show their icons only; aria-label and title keep their names. */
+@media (max-width: 1099px) {
+  #injected-taskbar .us-feature-button > span {
     display: none;
   }
 }
 
+/* The taskbar wraps here: bookmarks lead the first row and the tools are
+   pushed to its end, with the search field on a row of its own. */
 @media (max-width: 780px) {
-  #injected-taskbar .us-bookmarks {
-    flex: 1 0 100%;
-  }
-
   .us-taskbar-tools {
     margin-left: auto;
     padding-right: 0;

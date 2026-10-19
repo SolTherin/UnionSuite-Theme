@@ -1,0 +1,149 @@
+<!doctype html>
+<!--
+  Bulletin and alert notes in Markdown — WIP mockup. The form stands in for
+  the post form on i4u_UT_SystemAlerts; the right-hand column stands in for
+  the System Notification panel and the Staff Bulletin Query Template, drawn
+  with the shared theme. markdown-note.candidate.* is the candidate theme
+  feature; mockup.css/js are prototype-only (layout, seed posts, the
+  simulated save). Nothing is sent anywhere. See README.md.
+-->
+<html lang="en-AU" data-us-color-scheme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bulletin Markdown Notes</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="markdown-note.candidate.css">
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body class="mdn-page">
+
+<object hidden type="application/json"><param name="__ClientContext" id="__ClientContext" value='{"baseUrl":"/","isAnonymous":false,"loggedInPartyId":"104203","selectedPartyId":"104203","websiteRoot":"/"}'></object>
+
+<div class="mdn-toolbar" aria-label="Prototype controls">
+  <strong>Bulletin and alert notes</strong>
+  <span class="mdn-tag">WIP · mockup · nothing is saved</span>
+  <button type="button" class="mdn-toggle" id="mdn-example">Load an example</button>
+  <button type="button" class="mdn-toggle" id="mdn-reset">Reset posts</button>
+  <button type="button" class="mdn-toggle" id="mdn-color-scheme" aria-pressed="false">Mode: light</button>
+</div>
+
+<main class="mdn-layout">
+  <div class="mdn-column">
+
+    <!-- The post form: a panel on i4u_UT_SystemAlerts, or a custom form
+         posting the same properties through the API. -->
+    <div class="ContentItemContainer">
+      <div class="us-form">
+        <div class="panel">
+          <div class="panel-heading"><h2 class="panel-title">New post</h2></div>
+          <div class="panel-body-container"><div class="panel-body">
+            <form id="mdn-form" class="mdn-form" novalidate>
+
+              <div class="PanelField">
+                <label class="PanelFieldLabel" for="mdn-title">Title <span class="Required">(required)</span></label>
+                <div class="PanelFieldValue">
+                  <input type="text" id="mdn-title" name="Title" maxlength="100" required autocomplete="off">
+                  <span class="AsiErrorInline" id="mdn-title-error" hidden></span>
+                </div>
+              </div>
+
+              <div class="PanelField">
+                <label class="PanelFieldLabel" for="mdn-note">Note <span class="Required">(required)</span></label>
+                <div class="PanelFieldValue">
+                  <textarea id="mdn-note" name="Note" rows="6" maxlength="3000" required data-us-markdown
+                    placeholder="Write the message. Select text and use the toolbar to format it."></textarea>
+                  <span class="AsiErrorInline" id="mdn-note-error" hidden></span>
+                </div>
+              </div>
+
+              <div class="mdn-form__dates">
+                <div class="PanelField">
+                  <label class="PanelFieldLabel" for="mdn-start">Start date <span class="Required">(required)</span></label>
+                  <div class="PanelFieldValue">
+                    <input type="date" id="mdn-start" name="StartDate" required>
+                    <span class="AsiErrorInline" id="mdn-start-error" hidden></span>
+                  </div>
+                </div>
+                <div class="PanelField">
+                  <label class="PanelFieldLabel" for="mdn-end">End date <span class="Required">(required)</span></label>
+                  <div class="PanelFieldValue">
+                    <input type="date" id="mdn-end" name="EndDate" required>
+                    <span class="AsiErrorInline" id="mdn-end-error" hidden></span>
+                  </div>
+                </div>
+              </div>
+
+              <fieldset class="choice-group mdn-form__show">
+                <legend>Show it</legend>
+                <label><input type="checkbox" name="SitewideAlert" id="mdn-alert"> As a system alert</label>
+                <label><input type="checkbox" name="Bulletin" id="mdn-bulletin" checked> On the Staff Bulletin</label>
+              </fieldset>
+
+              <div class="mdn-form__actions">
+                <button type="submit" class="TextButton PrimaryButton">Save</button>
+                <button type="reset" class="TextButton us-outline-button">Clear</button>
+                <p class="mdn-form__status" id="mdn-status" role="status"></p>
+              </div>
+            </form>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="mdn-stored" aria-labelledby="mdn-stored-title">
+      <div class="mdn-stored__head">
+        <h2 id="mdn-stored-title">What is stored</h2>
+        <span class="mdn-stored__count" id="mdn-stored-count"></span>
+      </div>
+      <p class="mdn-stored__intro">The Note as it goes to the varchar column, updated as you type. This is all the
+        Query Template receives.</p>
+      <pre class="mdn-stored__value" id="mdn-stored-value"></pre>
+      <details class="mdn-stored__payload">
+        <summary>Values sent on Save</summary>
+        <pre id="mdn-payload">Nothing saved yet.</pre>
+      </details>
+    </section>
+  </div>
+
+  <div class="mdn-column">
+
+    <!-- System Notification panel: the alert task's message renders each
+         row with System alert ticked and today between its dates. -->
+    <section class="mdn-surface" aria-labelledby="mdn-alerts-title">
+      <h2 class="mdn-surface__title" id="mdn-alerts-title">System Notification panel</h2>
+      <div id="SystemAlertPanel">
+        <div class="AsiMessage AsiSystem">
+          <ul class="AlertSet" id="mdn-alerts"></ul>
+        </div>
+      </div>
+      <p class="mdn-surface__empty" id="mdn-alerts-empty" hidden>No system alerts today.</p>
+    </section>
+
+    <!-- Staff Bulletin: the Query Template Display, Display in cards
+         checked, iPart CSS class us-query-template us-staff-bulletin. -->
+    <section class="mdn-surface" aria-label="Staff Bulletin">
+      <div class="iMIS-WebPart"><div class="ContentItemContainer"><div class="us-query-template us-staff-bulletin">
+        <div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">Staff Bulletin</h2></div>
+          <div class="panel-body-container"><div class="panel-body">
+            <div class="QueryTemplateSet simplePaginateList" id="mdn-bulletin-list"></div>
+            <p class="mdn-surface__empty" id="mdn-bulletin-empty" hidden>No bulletin posts today.</p>
+          </div></div>
+        </div>
+      </div></div></div>
+    </section>
+  </div>
+</main>
+
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+<script src="markdown-note.candidate.js"></script>
+<script src="mockup.js"></script>
+</body>
+</html>

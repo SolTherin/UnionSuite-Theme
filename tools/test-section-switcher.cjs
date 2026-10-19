@@ -23,5 +23,23 @@ await p.evaluate(()=>{const n=document.querySelector('.us-tabset-member.us-tab-f
 await p.evaluate(()=>{document.querySelector('[data-us-tabs="member"]').remove()});await p.waitForTimeout(100);assert.equal(await p.locator('.us-tabset-member:visible').count(),3);
 await p.evaluate(()=>{document.body.classList.add('EasyEdit')});await p.waitForTimeout(100);assert.equal(await p.locator('.us-tabset-contact:visible').count(),2);
 assert.deepEqual(errors,[]);console.log('Passed: nested groups, values retained, manual keyboard activation, replacement, menu removal and Easy Edit fallback.');
+// One unconfigured iPart only affects its own tab; the rest of the group still switches.
+const warnings=[];p.on('console',m=>{if(m.type()==='warning')warnings.push(m.text());});
+await p.goto('https://switcher.test/home');await p.waitForTimeout(100);
+await p.evaluate(()=>{const n=document.querySelector('.us-tabset-member.us-tab-notes');n.className='';n.dataset.test='unlinked-notes';const t=document.querySelector('.us-tabset-contact.us-tab-addresses');t.classList.replace('us-tab-addresses','us-tab-adresses');t.dataset.test='typo-addresses';UnionSuiteSections.refresh();});await p.waitForTimeout(100);
+assert.equal(await tab('member','notes').isDisabled(),true,'tab with no panel is disabled');
+assert.equal(await tab('member','notes').getAttribute('aria-selected'),'false');
+assert.equal(await p.locator('[data-test="unlinked-notes"]').isVisible(),true,'unmarked content stays visible');
+assert.equal(await p.locator('.us-tabset-member:visible').count(),1,'remaining member panels still switch');
+await tab('member','finance').click();assert.equal(await p.locator('.us-tabset-member.us-tab-finance').isVisible(),true);assert.equal(await p.locator('.us-tabset-member.us-tab-overview').isVisible(),false);
+await tab('member','overview').click();assert.equal(await p.locator('[data-test="typo-addresses"]').isVisible(),true,'panel with an unknown key stays visible');
+assert.equal(await tab('contact','addresses').isDisabled(),true);assert.equal(await tab('contact','details').getAttribute('aria-selected'),'true');
+await tab('member','finance').press('ArrowRight');assert.equal(await p.evaluate(()=>document.activeElement.dataset.usTab),'overview','arrow keys skip the disabled tab');
+assert.ok(warnings.some(w=>w.includes('"notes" has no section panel')&&w.includes('us-tab-panel us-tabset-member us-tab-notes')),'missing panel is reported');
+assert.ok(warnings.some(w=>w.includes('no matching tab for us-tab-adresses')),'unknown key is reported');
+await p.evaluate(()=>{document.querySelector('[data-test="unlinked-notes"]').className='us-tab-panel us-tabset-member us-tab-notes';UnionSuiteSections.refresh();});await p.waitForTimeout(100);
+assert.equal(await tab('member','notes').isDisabled(),false,'tab re-enables once its panel is configured');assert.equal(await tab('member','notes').getAttribute('title'),null);
+await tab('member','notes').click();assert.equal(await p.locator('[data-test="unlinked-notes"]').isVisible(),true);assert.equal(await p.locator('.us-tabset-member:visible').count(),1);
+assert.deepEqual(errors,[]);console.log('Passed: a missing or misconfigured panel disables only its own tab.');
 await p.setContent(require('../THeme/UnionSuite-Guides/usage/build/section-tabs-example.cjs').documentHtml());await p.waitForTimeout(100);await p.screenshot({path:'.tmp-iqa-integration/section-switcher.png'});await p.setViewportSize({width:390,height:844});assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth),390);
 console.log('Mobile overflow passed.');}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

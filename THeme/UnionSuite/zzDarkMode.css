@@ -480,6 +480,10 @@
     border-color: var(--border);
   }
 
+  /* A CCO's own panel is a transparent shell in light mode: its tabs and
+     pages carry the surfaces. Painting it here boxed the section's cards
+     inside a square frame, with the Sections picker across its top edge.
+     :where keeps the exclusion at zero specificity. */
   :root[data-us-color-scheme="dark"] :is(
     .ContentItemContainer > .panel,
     .ContentItemContainer > div > .panel,
@@ -487,13 +491,19 @@
     .ContentBorder,
     .card,
     .NeutralShading
-  ):not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner, .us-banner *)) {
+  ):not(:where(
+    .us-report-no-styling,
+    .us-report-no-styling *,
+    .us-banner,
+    .us-banner *,
+    :has(> .panel-body-container > .panel-body > :is(.cco, .tabs-wrapper))
+  )) {
     background-color: var(--bg-surface);
     color: var(--text-base);
     border-color: var(--border);
   }
 
-  :root[data-us-color-scheme="dark"] :is(.ContentItemContainer > .panel, .ContentItemContainer > div > .panel) > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *)) {
+  :root[data-us-color-scheme="dark"] :is(.ContentItemContainer > .panel, .ContentItemContainer > div > .panel):not(:where(:has(> .panel-body-container > .panel-body > :is(.cco, .tabs-wrapper)))) > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *, .us-banner *)) {
     background-color: var(--bg-subtle);
     color: var(--text-strong);
     border-color: var(--border);
@@ -659,6 +669,22 @@
     background-color: var(--bg-surface);
     color: var(--text-base);
     border-color: var(--border);
+  }
+
+  /* IQA "where used" drawer: the brand ramp stays light, so a count uses
+     the dark selection surface. */
+  :root[data-us-color-scheme="dark"] .us-where-used__count[data-state="found"] {
+    background: var(--dm-selected);
+    color: var(--text-strong);
+  }
+
+  /* IQA finder: the taskbar quick search's dark hover, rules and icons. */
+  :root[data-us-color-scheme="dark"] .us-iqa-finder {
+    --us-finder-hover: var(--dm-accent-bg);
+    --us-finder-icon: var(--text-link);
+    --border: var(--dm-border);
+    --text-muted: var(--dm-muted);
+    box-shadow: var(--shadow-lg);
   }
 
   /* Classic RadWindow uses table cells as resize rails, not just an outer border.

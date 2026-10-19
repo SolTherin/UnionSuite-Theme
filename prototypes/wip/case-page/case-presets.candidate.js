@@ -62,18 +62,11 @@
       'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-note',
       'us-activity-detail', 'us-activity-detail-notes', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'
     ],
-    // Parties and staff are separate panels (owner, 8 October 2026):
-    // the people the case is for, and the people working it.
-    // A list and a preview (C7, owner, 8 October 2026): selectable row
-    // cards on the left third, the chosen person's card on the right.
-    'us-case-parties': [
-      'us-query-template', 'us-parties', 'us-query-search',
-      'us-action-cases-add-party'
-    ],
+    // us-case-parties is in the theme (sectionPresets, 14 October 2026).
     // The case team; Add staff opens the composer (C40).
     'us-case-staff': [
       'us-query-template', 'us-contacts-tiles', 'us-contacts-grouped',
-      'us-contacts-group-tone', 'us-action-cases-add-staff'
+      'us-contacts-group-tone', 'us-contacts-lead-first', 'us-action-cases-add-staff'
     ]
   };
 

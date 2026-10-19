@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IQA where used — mock-up</title>
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/Tabler.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="where-used.css">
+</head>
+<body>
+  <!-- Mock-up controls: not part of the design. -->
+  <div class="mock-controls" aria-label="Mock-up controls">
+    <strong>Mock-up controls</strong>
+    <label>Index
+      <select id="mock-index">
+        <option value="built">Built 2 hours ago</option>
+        <option value="none">No index yet</option>
+      </select>
+    </label>
+    <label>Rebuild
+      <select id="mock-outcome">
+        <option value="success">Succeeds</option>
+        <option value="fail">Business objects fail</option>
+      </select>
+    </label>
+    <label>IQA
+      <select id="mock-saved">
+        <option value="saved">Saved</option>
+        <option value="unsaved">Not saved yet</option>
+      </select>
+    </label>
+    <label>User
+      <select id="mock-user">
+        <option value="editor">Can edit IQAs</option>
+        <option value="viewer">Read-only</option>
+      </select>
+    </label>
+    <label>Appearance
+      <select id="mock-scheme">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+    <p class="mock-note">Results are fake. Rebuild timings follow the dev tenant probes (about 12 s, three sources at a time). Open links show a note instead of opening an editor. The designer around the drawer is an approximation.</p>
+  </div>
+
+  <!-- Approximate IQA designer. -->
+  <div class="mock-designer">
+    <div class="mock-designer__bar">
+      <h1 class="mock-designer__title">Workbench List</h1>
+      <span class="mock-designer__pill">Enhance: On</span>
+      <button type="button" class="TextButton us-outline-button"><i class="ti ti-copy" aria-hidden="true"></i> Copy Path</button>
+      <button type="button" class="TextButton us-outline-button"><i class="ti ti-copy" aria-hidden="true"></i> Copy Key</button>
+      <button type="button" class="TextButton us-outline-button" id="where-used-button" aria-expanded="false" aria-controls="where-used">
+        <i class="ti ti-sitemap" aria-hidden="true"></i> Where used
+      </button>
+      <span id="save-group">
+        <button type="button" class="TextButton PrimaryButton">Save</button>
+        <button type="button" class="TextButton">Save As</button>
+      </span>
+    </div>
+    <div class="mock-designer__tabs" aria-hidden="true">
+      <span class="mock-designer__tab">Summary</span>
+      <span class="mock-designer__tab">Sources</span>
+      <span class="mock-designer__tab">Filters</span>
+      <span class="mock-designer__tab" aria-current="page">Display</span>
+      <span class="mock-designer__tab">Sorting</span>
+      <span class="mock-designer__tab">Security</span>
+      <span class="mock-designer__tab">Run</span>
+      <span class="mock-designer__tab">Template</span>
+      <span class="mock-designer__tab">SQL</span>
+    </div>
+    <div class="mock-designer__body">
+      <table class="mock-grid">
+        <thead><tr><th>Display</th><th>Property</th><th>Alias</th><th>Order</th></tr></thead>
+        <tbody>
+          <tr><td>Yes</td><td>Workbench.Name</td><td>Name</td><td>1</td></tr>
+          <tr><td>Yes</td><td>Workbench.Owner</td><td>Owner</td><td>2</td></tr>
+          <tr><td>Yes</td><td>Workbench.Members</td><td>Members</td><td>3</td></tr>
+          <tr><td>Yes</td><td>Workbench.Updated</td><td>Updated</td><td>4</td></tr>
+          <tr><td>No</td><td>Workbench.Key</td><td></td><td>5</td></tr>
+          <tr><td>Yes</td><td>Workbench.Status</td><td>Status</td><td>6</td></tr>
+          <tr><td>Yes</td><td>Workbench.Region</td><td>Region</td><td>7</td></tr>
+          <tr><td>Yes</td><td>Workbench.Delegates</td><td>Delegates</td><td>8</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- The drawer. -->
+  <aside class="us-where-used" id="where-used" role="dialog" aria-modal="false" aria-labelledby="where-used-title" data-closed>
+    <div class="us-where-used__head">
+      <div class="us-where-used__heading">
+        <h2 class="us-where-used__title" id="where-used-title" tabindex="-1">Where used</h2>
+        <p class="us-where-used__subject">Workbench List</p>
+      </div>
+      <button type="button" class="us-where-used__close" aria-label="Close" title="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="us-where-used__status">
+      <p class="us-where-used__summary" role="status"></p>
+      <p class="us-where-used__meta"></p>
+    </div>
+    <div class="us-where-used__body"></div>
+    <div class="us-where-used__foot">
+      <div class="us-where-used__option">
+        <label><input type="checkbox" id="where-used-system"> Include ASI system content</label>
+        <button type="button" class="us-where-used__help-toggle" aria-expanded="false" aria-controls="where-used-help" aria-label="What this includes"><i class="ti ti-info-circle" aria-hidden="true"></i></button>
+      </div>
+      <p class="us-where-used__help" id="where-used-help" hidden>
+        Also shows matches in content and queries supplied by ASI: the iCore and iSamples page folders, and the Samples, Common, ContactManagement and Fundraising query folders. ASI's stock pages and queries rarely use your own IQAs, so these are hidden by default.
+      </p>
+    </div>
+  </aside>
+
+  <script src="../../../../THeme/UnionSuite/zUnionSuite.js"></script>
+  <script src="where-used.js"></script>
+</body>
+</html>

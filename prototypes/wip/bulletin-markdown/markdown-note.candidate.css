@@ -1,0 +1,265 @@
+/* US-MARKDOWN-NOTE (candidate) — the Markdown note editor and its rendered
+   display. Field look follows US-FORM-FIELDS (border, radius, hover and focus
+   colours); the editor is one field whose toolbar sits inside its border. */
+
+/* ── Editor ───────────────────────────────────────────────── */
+
+.us-md-editor {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-md-editor:hover {
+  border-color: var(--brand-600);
+}
+
+.us-md-editor:focus-within {
+  border-color: var(--field-focus-colour, var(--brand-600));
+  box-shadow: var(--field-focus-glow, var(--focus-ring));
+}
+
+.us-md-editor.is-over {
+  border-color: var(--danger);
+}
+
+.us-md-editor__toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  border-radius: 5px 5px 0 0;
+}
+
+.us-md-editor__tool {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-md-editor__tool:hover {
+  background: var(--brand-50);
+  color: var(--text-strong);
+}
+
+.us-md-editor__tool[aria-pressed="true"] {
+  background: var(--brand-100);
+  color: var(--brand-700);
+}
+
+.us-md-editor__tool:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 1px;
+}
+
+/* Touch-sized from 950px down, as the theme's other small buttons. */
+@media (max-width: 950px) {
+  .us-md-editor__tool {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* The link panel slides open under the toolbar (UnionSuiteRecordCards.fold). */
+.us-md-editor__link {
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.us-md-editor__link-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  padding: 10px 10px 0;
+}
+
+.us-md-editor__link-field {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font: 600 12px/1.5 var(--font-ui);
+  color: var(--text-muted);
+}
+
+.us-md-editor__link-field input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 5px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 400 13px/1.5 var(--font-ui);
+}
+
+.us-md-editor__link-field input:focus {
+  outline: 2px solid transparent;
+  border-color: var(--field-focus-colour, var(--brand-600));
+  box-shadow: var(--field-focus-glow, var(--focus-ring));
+}
+
+.us-md-editor__link-field input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.us-md-editor__link-error {
+  margin: 0;
+  padding: 0 10px;
+  color: var(--danger);
+  font: 400 12px/1.5 var(--font-ui);
+}
+
+.us-md-editor__link-error:not(:empty) {
+  padding-top: 6px;
+}
+
+.us-md-editor__link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.us-md-editor__area {
+  position: relative;
+  min-height: 140px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  outline: none;
+}
+
+.us-md-editor.is-empty .us-md-editor__area::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.us-md-editor__area > :first-child {
+  margin-top: 0;
+}
+
+.us-md-editor__area > :last-child {
+  margin-bottom: 0;
+}
+
+.us-md-editor__area :is(p, ul) {
+  margin: 0 0 8px;
+}
+
+.us-md-editor__area ul {
+  padding-left: 22px;
+}
+
+.us-md-editor__area a {
+  color: var(--text-link);
+  text-decoration: underline;
+  cursor: text;
+}
+
+.us-md-editor__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 4px 10px 6px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font: 400 12px/1.5 var(--font-ui);
+}
+
+.us-md-editor__count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-md-editor.is-near .us-md-editor__count {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.us-md-editor.is-over .us-md-editor__count {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-md-editor,
+  .us-md-editor__tool,
+  .us-md-editor__count {
+    transition: none;
+  }
+}
+
+/* ── Display ──────────────────────────────────────────────── */
+
+/* Before the theme renders it (or if it never does), the stored text keeps
+   its line breaks and reads as plain text. */
+.us-markdown:not([data-us-markdown-rendered]) {
+  white-space: pre-line;
+}
+
+.us-markdown > :first-child {
+  margin-top: 0;
+}
+
+.us-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.us-markdown :is(p, ul) {
+  margin: 0 0 8px;
+}
+
+.us-markdown ul {
+  padding-left: 22px;
+}
+
+.us-markdown li + li {
+  margin-top: 2px;
+}
+
+/* The link token, so links stay readable in dark mode (Orion's plain link
+   colour is too dark on the dark alert). */
+.us-markdown a {
+  color: var(--text-link);
+}
+
+/* In the one-line System Notification alert, paragraphs run on. */
+.uhubAlert .us-markdown > p {
+  display: inline;
+  margin: 0;
+}
+
+.uhubAlert .us-markdown > p + p::before {
+  content: " ";
+}
+
+.uhubAlert .us-markdown > ul {
+  margin: 4px 0 0;
+}

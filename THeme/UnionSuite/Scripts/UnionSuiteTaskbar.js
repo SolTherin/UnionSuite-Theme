@@ -575,6 +575,7 @@
       // Use '' (not 'block') so the mobile flex-column layout isn't overridden.
       dropdown.hidden = false;
       searchInput.setAttribute('aria-expanded', 'true');
+      syncMobileToggle();
       // On mobile the panel covers the nav input — move focus to the visible
       // in-panel input so the user can see what they're typing.
       if (wasHidden && isMobile() && document.activeElement !== mobileSearchInput) {
@@ -586,16 +587,56 @@
     function hideDropdown() {
       dropdown.hidden = true;
       searchInput.setAttribute('aria-expanded', 'false');
+      syncMobileToggle();
       clearTimeout(debounceTimer);
       searchRequest?.abort();
       searchVersion++;
       resultsBody.replaceChildren();
     }
 
+    // Below 768px the header has no search field: Orion's bottom bar search
+    // button (#MobileSearchToggle) opens this panel instead of the native
+    // search. The capture listener runs before Bootstrap's dropdown and the
+    // outside-click close below, and stops both. Closing the panel returns
+    // focus to the button that opened it.
+    let searchOpener = null;
+    function syncMobileToggle() {
+      document.getElementById('MobileSearchToggle')?.setAttribute('aria-expanded', String(!dropdown.hidden));
+    }
+
+    function returnFocus() {
+      if (searchOpener?.isConnected) searchOpener.focus();
+      searchOpener = null;
+    }
+
+    document.addEventListener('click', event => {
+      const toggle = event.target.closest?.('#MobileSearchToggle');
+      if (!toggle) return;
+      event.preventDefault();
+      event.stopPropagation();
+      toggle.setAttribute('aria-controls', 'tb-search-dropdown');
+      if (!dropdown.hidden) {
+        hideDropdown();
+        toggle.focus();
+        return;
+      }
+      searchOpener = toggle;
+      // Reopens on the last search's results, or on history and recents.
+      const term = searchInput.value.trim();
+      if (term.length >= settings.minimumSearchLength) {
+        activeQuery = term;
+        findRecords(term);
+      } else {
+        showHint();
+      }
+      mobileSearchInput.focus();
+    }, { capture: true, signal: lifecycle.signal });
+
     closeButton.addEventListener('click', () => {
       hideDropdown();
       searchInput.blur();
       mobileSearchInput.blur();
+      returnFocus();
     });
 
     function createStatusMessage(text) {
@@ -837,6 +878,8 @@ function appendSearchHistory(frag) {
         searchInput.focus();
         // Focusing the input can show recent items; Escape must leave it closed.
         hideDropdown();
+        // Below 768px the header field is hidden: back to the bottom bar button.
+        if (isMobile()) returnFocus();
       }
       if (!dropdown.hidden && links.length && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
         event.preventDefault();

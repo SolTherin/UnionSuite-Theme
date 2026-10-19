@@ -40,7 +40,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '1.0.1';
+  const RELEASE = '1.0.9';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
@@ -107,6 +107,26 @@
       // its own guard keeps it off every unrelated page's network.
       when: () => /\/QueryBuilder\/Design\.aspx$/i.test(location.pathname),
       ready: null // Registers no global; its window.* names are native page functions.
+    },
+    {
+      id: 'where-used',
+      path: 'Scripts/IQA-WhereUsed.js',
+      // "Where used" in the IQA designer. Uses the theme's fold and shared
+      // copy button, so it follows core. It mounts its own header button,
+      // beside the IQA enhancements' copy buttons when they are present.
+      after: ['core'],
+      when: () => /\/QueryBuilder\/Design\.aspx$/i.test(location.pathname),
+      critical: false,
+      ready: () => typeof window.UnionSuiteWhereUsed?.open === 'function'
+    },
+    {
+      id: 'iqa-finder',
+      path: 'Scripts/IQA-Finder.js',
+      // IQA browser: search every query, favourites and recent items from
+      // Quick find. IQA designer: records the open query as recently opened.
+      when: () => /\/AsiCommon\/Controls\/IQA\/Default\.aspx$|\/QueryBuilder\/Design\.aspx$/i.test(location.pathname),
+      critical: false,
+      ready: () => typeof window.UnionSuiteIqaFinder?.search === 'function'
     },
     {
       id: 'bo',
@@ -377,6 +397,9 @@
   window.UnionSuiteLoader = Object.freeze({
     version: RELEASE,
     base: base?.href || null,
+    // Every theme script, including ones gated to other pages. The IQA
+    // where-used index scans them for the IQAs the theme itself uses.
+    modules: Object.freeze(MODULES.map(module => module.path)),
     ready,    // critical modules only
     complete, // every module, including non-critical ones
     status: () => [...records.values()].map(entry => ({ ...entry }))

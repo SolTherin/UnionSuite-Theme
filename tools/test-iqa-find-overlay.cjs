@@ -10,7 +10,8 @@ owner.closest=()=>null;owner.querySelector=()=>progress;grid.querySelectorAll=()
 const button={closest:selector=>selector.includes('no-styling')?null:selector.includes('ContentPanel')?owner:grid};
 let frame,cancelled=false;
 const context=vm.createContext({document:{body,createElement:node},getComputedStyle:()=>({overflowX:'auto',overflowY:'auto'}),innerWidth:500,innerHeight:500,requestAnimationFrame:fn=>{frame=fn;return 1;},cancelAnimationFrame:()=>cancelled=true});
-const start=source.indexOf(' function showResults(button,');vm.runInContext(source.slice(start,source.indexOf(' const sortSelector',start)),context);
+// visibleBox/setBox and showResults precede the row-control helpers in US-IQA-BUSY.
+const start=source.indexOf(' // The part of an element left visible');vm.runInContext(source.slice(start,source.indexOf(' // Row expand/collapse (3.3)',start)),context);
 const handle=context.showResults(button),overlay=body.children[0];
 assert.equal(overlay.style.left,'20px');assert.equal(overlay.style.top,'110px');assert.equal(overlay.style.width,'180px');assert.equal(overlay.style.height,'80px');
 assert.equal(target.getAttribute('aria-busy'),'true');assert(progress.hasAttribute('data-us-iqa-progress-replaced'));
@@ -23,7 +24,7 @@ let click,begin,end,overlays=0,rings=0,clears=0,timer;
 const manager={add_beginRequest(fn){begin=fn;},add_endRequest(fn){end=fn;}};
 const routing=vm.createContext({window:{Sys:{WebForms:{PageRequestManager:{getInstance:()=>manager}}},addEventListener(){}},document:{addEventListener(name,fn){if(name==='click')click=fn;}},setTimeout(fn){timer=fn;},UnionSuiteBusy:{show(){rings++;return {clear(){clears++;}};}}});
 const block=source.slice(source.indexOf('/* US-IQA-BUSY:START'),source.indexOf('/* US-IQA-BUSY:END'));
-vm.runInContext(block.replace(/ function showResults\(button,row=null\)\{[\s\S]*?(?= const sortSelector)/,' function showResults(){return testOverlay();}\n'),Object.assign(routing,{testOverlay(){overlays++;return {clear(){clears++;}};}}));
+vm.runInContext(block.replace(/ function showResults\(button\)\{[\s\S]*?(?= \/\/ Row expand\/collapse)/,' function showResults(){return testOverlay();}\n'),Object.assign(routing,{testOverlay(){overlays++;return {clear(){clears++;}};}}));
 const gridA={},gridB={};
 function control(kind,grid=gridA,optOut=false){return {id:'example_ResultsGrid_control',matches(s){return (s.includes('th.rgHeader')&&kind==='sort')||(s.includes('TextButton')&&kind==='find');},closest(s){if(s.includes('no-styling'))return optOut?{}:null;if(s==='[data-gridid]')return grid;if(s.includes('th.rgHeader'))return kind==='sort'?this:null;return {};}};}
 const sort=control('sort'),find=control('find'),other=control('other');

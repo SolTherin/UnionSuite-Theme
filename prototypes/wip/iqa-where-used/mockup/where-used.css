@@ -1,0 +1,524 @@
+/* IQA "where used" drawer — mock-up candidate styles.
+   Tokens come from zUnionSuite.css and zzDarkMode.css. When promoted, this
+   moves into the IQA designer bundle; the mock-up page layout below the
+   "Mock-up page" marker stays here. */
+
+/* US-WHERE-USED:START — the drawer */
+.us-where-used {
+  --us-where-used-width: 440px;
+  --us-where-used-ease: cubic-bezier(.2, 0, 0, 1);
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(var(--us-where-used-width), 100vw - 48px);
+  border-left: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--us-dialog-shadow);
+  font-family: var(--font-body);
+  transform: translateX(0);
+  transition:
+    transform 220ms var(--us-where-used-ease),
+    visibility 0s linear 0s;
+}
+
+.us-where-used[data-closed] {
+  visibility: hidden;
+  transform: translateX(calc(100% + 24px));
+  transition:
+    transform 180ms var(--us-where-used-ease),
+    visibility 0s linear 180ms;
+}
+
+.us-where-used__head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 16px 12px 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-where-used__heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.us-where-used__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.us-where-used__title:focus {
+  outline: none;
+}
+
+.us-where-used__subject {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font: 13px/1.4 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-where-used__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.us-where-used__close:hover {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-where-used__close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-where-used__status {
+  flex: none;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.us-where-used__summary {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.us-where-used__summary[data-tone="warning"] {
+  color: var(--danger);
+}
+
+.us-where-used__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 0 12px;
+}
+
+/* One block per place the index reads. */
+.us-where-used__source {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-where-used__source:last-child {
+  border-bottom: 0;
+}
+
+.us-where-used__source-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.us-where-used__source-head > .ti {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.us-where-used__source-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The count, "None", a spinner while reading, or "Couldn't read". */
+.us-where-used__count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  color: var(--text-muted);
+  font: 500 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__count[data-state="found"] {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--brand-900);
+  font-weight: 600;
+}
+
+.us-where-used__count[data-state="failed"] {
+  color: var(--danger);
+}
+
+.us-where-used__count .us-button-spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.us-where-used__items {
+  margin: 8px 0 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.us-where-used__group-label {
+  margin: 10px 0 4px 28px;
+  color: var(--text-muted);
+  font: 600 12px/1.4 var(--font-ui);
+}
+
+.us-where-used__group-label code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.us-where-used__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0 8px 28px;
+}
+
+.us-where-used__item[hidden] {
+  display: none;
+}
+
+.us-where-used__item + .us-where-used__item {
+  border-top: 1px dashed var(--border);
+}
+
+.us-where-used__item-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.us-where-used__name {
+  color: var(--text-strong);
+  font: 600 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__path {
+  color: var(--text-muted);
+  font: 12px/1.4 var(--font-ui);
+  overflow-wrap: anywhere;
+}
+
+.us-where-used__how {
+  color: var(--text-base);
+  font: 13px/1.4 var(--font-body);
+}
+
+/* Copy path (the shared us-copy button) and Open in a new tab. */
+.us-where-used__actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin-top: -4px;
+}
+
+.us-where-used__open-tab {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 17px;
+  text-decoration: none;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.us-where-used__open-tab:hover {
+  background: var(--icon-hover-bg);
+  color: var(--icon-hover-colour);
+  text-decoration: none;
+}
+
+.us-where-used__open-tab:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.us-where-used__tag {
+  margin-left: 6px;
+}
+
+/* First use: no index yet. */
+.us-where-used__empty {
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.us-where-used__empty > .ti {
+  color: var(--text-muted);
+  font-size: 32px;
+}
+
+.us-where-used__empty-title {
+  margin: 8px 0 4px;
+  color: var(--text-strong);
+  font: 600 15px/1.4 var(--font-ui);
+}
+
+.us-where-used__empty-text {
+  margin: 0 auto 16px;
+  max-width: 32ch;
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-body);
+}
+
+.us-where-used__foot {
+  flex: none;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.us-where-used__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-base);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__option label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.us-where-used__help-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.us-where-used__help-toggle:hover,
+.us-where-used__help-toggle[aria-expanded="true"] {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-where-used__help-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-where-used__help {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font: 12px/1.5 var(--font-body);
+}
+
+/* Dark: the brand ramp stays light, so the count uses the dark selection
+   surface. On promotion this rule moves to zzDarkMode.css. */
+@media screen {
+  :root[data-us-color-scheme="dark"] .us-where-used__count[data-state="found"] {
+    background: var(--dm-selected);
+    color: var(--text-strong);
+  }
+}
+
+@media (max-width: 600px) {
+  .us-where-used {
+    width: 100vw;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-where-used,
+  .us-where-used[data-closed],
+  .us-where-used__close {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-where-used {
+    border-left-color: CanvasText;
+  }
+
+  .us-where-used__count[data-state="found"] {
+    border: 1px solid CanvasText;
+  }
+}
+/* US-WHERE-USED:END */
+
+/* Mock-up page ----------------------------------------------------------- */
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-base);
+  font: 14px/1.5 var(--font-body);
+}
+
+.mock-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.mock-controls strong {
+  color: var(--text-strong);
+}
+
+.mock-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mock-controls select {
+  padding: 3px 6px;
+  font: inherit;
+}
+
+.mock-note {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.mock-designer {
+  margin: 12px 16px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.mock-designer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mock-designer__title {
+  margin: 0 auto 0 0;
+  color: var(--text-strong);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.mock-designer__pill {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font: 600 12px/1.4 var(--font-ui);
+}
+
+.mock-designer__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.mock-designer__tab {
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.mock-designer__tab[aria-current="page"] {
+  border-bottom: 2px solid var(--accent);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.mock-designer__body {
+  padding: 16px;
+}
+
+.mock-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font: 13px/1.4 var(--font-ui);
+}
+
+.mock-grid th,
+.mock-grid td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.mock-grid th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.mock-toast {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1100;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+  font: 13px/1.4 var(--font-ui);
+}

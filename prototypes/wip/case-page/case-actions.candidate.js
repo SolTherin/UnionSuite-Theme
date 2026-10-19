@@ -368,7 +368,7 @@
   function takeLead(pane, row, section) {
     section.parentElement.querySelectorAll('.us-party[data-us-contact-lead]').forEach(other => {
       const lead = other === row;
-      const role = other.querySelector('.us-party__select > .sr-only');
+      const role = other.querySelector('.us-party__select .sr-only');
       if (role) role.textContent = lead ? ', Primary party' : ', Party';
     });
     pane.setAttribute('data-us-contact-lead', 'true');
