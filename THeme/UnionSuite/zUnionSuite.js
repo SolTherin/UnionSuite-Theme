@@ -1658,7 +1658,9 @@ SOFTWARE.
   }
   function paint(state) {
     const element = state.element, definition = state.definition, p = definition?.presentation;
-    const mode = p?.[state.placement] || p?.default || 'button';
+    // A menu holds menu items: an unconfigured command, or one without a
+    // menu presentation, would otherwise draw as an outline button there.
+    const mode = p?.[state.placement] || (state.placement === 'menu' ? 'menu-item' : p?.default || 'button');
     const label = (p?.useAuthoredLabel && state.originalLabel) || p?.label || state.original['aria-label'] || state.original.title || state.originalLabel || 'Action';
     const signature = JSON.stringify([label,p?.icon,mode,p?.tone]);
     window.UnionSuiteActionSafety.clear(element);
@@ -8615,6 +8617,72 @@ SOFTWARE.
   window.UnionSuiteBannerFacts = Object.freeze({refresh: schedule, reload, version: '1.0'});
 })();
 /* US-BANNER-FACTS:END */
+
+/* US-RECORD-TITLE:START — the record and its tab in the browser tab title.
+   Put data-us-page-title on the banner surface with the record's ID:
+     <header class="us-banner__surface …" data-us-page-title="{#query.CaseID}">
+   The title reads "C218 - Overview": the ID, then the selected tab of the
+   page's outer CCO (owner, 20 October 2026). Without a CCO tab it reads
+   "C218 - " and the page's own title. It follows tab switches, including
+   US-CCO-SWITCH's in-place ones, and titles iMIS writes on postbacks. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteRecordTitle) {
+    window.UnionSuiteRecordTitle.refresh();
+    return;
+  }
+
+  const SOURCE = '.us-banner .us-banner__surface[data-us-page-title]';
+  let pageTitle = document.title;
+  let written = '';
+  let queued = false;
+
+  const text = value => String(value || '').replace(/\s+/g, ' ').trim();
+
+  // The outer CCO's selected tab: a tab strip that is not inside another
+  // CCO's view.
+  function tabName() {
+    const selected = [...document.querySelectorAll('[class*="RadTabStrip"] .rtsLink.rtsSelected')]
+      .find(link => !link.closest('.rmpView'));
+    return selected ? text((selected.querySelector('.rtsTxt') || selected).textContent) : '';
+  }
+
+  function refresh() {
+    queued = false;
+    // A title iMIS wrote since ours becomes the page's own title.
+    if (document.title !== written) pageTitle = document.title;
+    const record = text(document.querySelector(SOURCE)?.getAttribute('data-us-page-title'));
+    // Unsubstituted placeholders mean the banner has no record yet.
+    if (!record || /^[\[{]/.test(record)) {
+      if (written && document.title === written) document.title = pageTitle;
+      written = '';
+      return;
+    }
+    const title = [record, tabName() || text(pageTitle)].filter(Boolean).join(' - ');
+    if (document.title !== title) document.title = title;
+    // Read back: the browser normalises the whitespace it stores.
+    written = document.title;
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    // Not requestAnimationFrame: it pauses in background tabs, where the
+    // title is what people see.
+    setTimeout(refresh, 0);
+  }
+
+  window.UnionSuiteRecordTitle = {refresh};
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' ||
+      record.attributeName === 'data-us-page-title' ||
+      (record.attributeName === 'class' && record.target.classList?.contains('rtsLink')))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true,
+    attributeFilter: ['class', 'data-us-page-title']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+})();
+/* US-RECORD-TITLE:END */
 
 /* US-FIELD-GROUPS:START — read-only field panel from a client-editable IQA.
    Put data-us-fields-query on a .us-field-groups element. The IQA returns one
