@@ -19,11 +19,7 @@
   if (window.UnionSuiteCasePresets) return;
 
   const presets = {
-    // The Overview's Tasks; Add task opens the composer (C40).
-    'us-case-tasks': [
-      'us-query-template', 'us-query-search', 'us-task-completed-filter',
-      'us-task-progress', 'us-list-scroll', 'us-action-cases-add-task'
-    ],
+    // us-case-tasks is in the theme (sectionPresets, 20 October 2026).
     // The Activity tab's All activity (C27): the add actions, of which the
     // heading shows the chosen type's, the Details view opt-in and its
     // section. Over the class field's 100 characters without the preset.
