@@ -10,7 +10,7 @@
 /* --------------------------------------------------------------------------
    1. Panel headers: 56px → 44px, title 15px → 14px.
    Target: :root panel header tokens (top of zUnionSuite.css) and the
-   pointer: coarse override. Shared by panels, IQA reports, list shells and
+   max-width: 950px override. Shared by panels, IQA reports, list shells and
    the Needs Attention heading.
    -------------------------------------------------------------------------- */
 :root {
@@ -20,7 +20,7 @@
   --panel-header-font-weight: 700;
 }
 
-@media (pointer: coarse) {
+@media (max-width: 950px) {
   :root {
     --panel-header-min-height: 56px;
   }
@@ -61,7 +61,7 @@
   width: 16px;
 }
 
-@media (pointer: coarse) {
+@media (max-width: 950px) {
   .us-section-tabs:not(:where(.us-report-no-styling, .us-report-no-styling *)) > [data-us-tab]:not(:where(.us-report-no-styling *)) {
     min-height: 44px;
   }
@@ -247,8 +247,8 @@
   vertical-align: calc(.5cap - 8px);
 }
 
-/* Touch only: a narrow window with a mouse keeps the compact button. */
-@media (pointer: coarse) {
+/* 950px or narrower: the 44px touch target. */
+@media (max-width: 950px) {
   .us-banner .us-banner__eyebrow:not(:where(.us-report-no-styling, .us-report-no-styling *)) > button.us-copy {
     width: 44px;
     height: 44px;
@@ -1151,7 +1151,7 @@
   text-decoration: underline;
 }
 
-@media (max-width: 950px), (pointer: coarse) {
+@media (max-width: 950px) {
   .us-banner .us-banner__alerts-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     width: 44px;
     height: 44px;
@@ -2490,6 +2490,19 @@
   text-align: center;
 }
 
+/* Loading: the theme's spinning circles before the text, as beside the IQA
+   finder's "Searching…". Not while hidden, so the fold can close it. */
+.us-activity__empty.is-loading:not([hidden]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.us-activity__empty.is-loading > .section-loader-spinning-circles {
+  --size: .42px;
+}
+
 /* Footer: honest count, Show more, full history. */
 .us-activity__footer:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: flex;
@@ -2771,9 +2784,9 @@
   }
 }
 
-/* Touch: a 44px target around the 28px badge, without changing its size
-   beside the status pill. */
-@media (pointer: coarse) {
+/* 950px or narrower: a 44px touch target around the 28px badge, without
+   changing its size beside the status pill. */
+@media (max-width: 950px) {
   .us-banner .us-banner__positions-toggle:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     position: relative;
   }

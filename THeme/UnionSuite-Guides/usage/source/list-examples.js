@@ -9,7 +9,11 @@
   }
   // Only this reference wires the generated plus to a sample message.
   // Live task creation is configured separately by the site's existing handler.
-  window.UnionSuiteActions.define('home.add-task', {
+  // The page also loads the site's definitions (for the task rows' title link
+  // and pencil), so the sample replaces the site's Add task rather than
+  // registering beside it, which would be a conflict.
+  const actions = window.UnionSuiteActions;
+  (actions.has('home.add-task') ? actions.configure : actions.define).call(actions, 'home.add-task', {
     className:'us-action-home-add-task',owner:'guide',source:'list-examples.js',
     presentation:{label:'Add task',icon:'plus',default:'button'},context:{},
     action:{type:'function',run:function () { announce('Add task — sample action. Connect your task editor in the live site.'); }}

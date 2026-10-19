@@ -13,6 +13,8 @@ It covers:
 - Stylesheet ownership across `99-Orion.css`, `zUnionSuite.css`,
   `zzDarkMode.css` and the client `Override.css`
 - Code readability and CSS formatting requirements for project-owned source
+- Touch and narrow screens — never `hover`/`pointer` media queries; touch
+  sizes and touch-visible controls follow `(max-width: 950px)`
 - The iPart wrapper contract (an iPart CSS class inserts an extra `<div>`)
 - The guide workflow — `THeme/UnionSuite-Guides/usage/` is the documentation
   source of truth; update it alongside features and rebuild with

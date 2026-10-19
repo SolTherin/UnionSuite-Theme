@@ -73,6 +73,20 @@ module.exports = {
   },
   'Tasks-Query-Footer.html':{},
   'Contacts-Query-Template.html':contacts,
+  'Case-Parties-Query-Template.html':{
+    Ordinal:required('Ordinal of the case contact row. Make primary party and Email parties send it.', '208'),
+    ContactId:required('The party’s iMIS ID. Filters the party details IQA (its ID filter), and marks who is already on the case for Add party.', '18916'),
+    ContactName:required('Display name, shown as plain text; also the avatar initials and the search.', 'Nick Abbott'),
+    ContactUrl:optional('The party’s contact profile, opened by View profile. Example path is illustrative.', '/Party.aspx?ID=18916'),
+    ContactIsLead:required('true for the primary party, otherwise false (true or 1 in any case counts). The primary party is stored on the case, so this is a custom SQL expression: CASE WHEN [vBoi4u_UT_Cases].[PrimaryContactID] = [vBoi4u_UT_Cases_Contacts].[ContactId] THEN \'true\' ELSE \'false\' END. The primary party is moved to the top, crowned and chosen first.', 'true'),
+    ContactRole:required('Primary party or Party. Read to screen readers after the name; the crown shows it on screen.', 'Primary party'),
+    ContactType:required('Member, Former member or Employer. Employer hides Make primary party. Return one of these words, not an iMIS placeholder such as Please Enter.', 'Member'),
+    MemberType:optional('The second line’s first part: the iMIS member type, or Employer for an organisation. Blank leaves it out.', 'Full member'),
+    MemberStatus:optional('The second line’s second part: the membership status. Blank (an employer) leaves it out, with its separator.', 'Financial'),
+    MemberStanding:optional('The badge text: Unfinancial, Former member or New member. Blank (a financial member, an employer) hides the badge.', 'Unfinancial'),
+    MemberStandingTone:optional('The badge colour: danger or warning. Blank gives the neutral badge.', 'danger'),
+    MemberLine:optional('The line under the name in the preview. Blank hides it.', 'Member 20544 · Full member')
+  },
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},
   'explicit-query-search':{ContactName:contacts.ContactName, ContactId:contacts.ContactId},
   'Banner-Contact-Template.html':{
@@ -103,3 +117,26 @@ module.exports = {
   'Banner-Dashboard-Template.html':{},
   'Welcome-Content.html':{}
 };
+
+// Compact and full task rows (US-TASK-ROWS 1.2, 19 October 2026).
+function compactTaskFields(noteDescription) {
+  const detail = module.exports['Tasks-Detail-Query-Template.html'];
+  return {
+    TaskTitle:detail.TaskTitle,
+    TaskUrl:required('Verified task editor URL, including the parameters identifying this task, on the pencil (us-action-home-edit-task) as data-us-task-url. Opens in the native iMIS popup; fragments are not supported. Blank disables the pencil. On the agreement or case page, replace the pencil with that page\u2019s edit action instead (agreements.edit-task or the case\u2019s, with data-ordinal).', '/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx?ID=104019&Ordinal=219'),
+    TaskNote:optional('Plain-text task note. ' + noteDescription, 'Discuss the membership options sent earlier this week.'),
+    MemberName:detail.MemberName,
+    MemberUrl:detail.MemberUrl,
+    MemberId:detail.MemberId,
+    TaskTags:optional('The task\u2019s tags from the task tag list, comma-separated. The first ends the date and member line, with a +N button that shows the rest; an opened note shows them all. Also searchable. Blank shows nothing.', 'Correspondence, Phone call'),
+    PriorityBadge:optional('High Priority, or blank. Shown as a danger badge beside the pencil; blank leaves no badge.', 'High Priority'),
+    IsCompleted:detail.IsCompleted,
+    DueState:detail.DueState,
+    TaskDateLabel:detail.TaskDateLabel,
+    DueLabel:detail.DueLabel,
+    TaskPartyId:detail.TaskPartyId,
+    TaskOrdinal:detail.TaskOrdinal
+  };
+}
+module.exports['Tasks-Compact-Query-Template.html'] = compactTaskFields('Compact: hidden until the details button beside the pencil opens it under the row; the button only shows when there is a note. Kept in the markup, so the header search still matches it. Blank leaves no note and no details button.');
+module.exports['Tasks-Full-Query-Template.html'] = compactTaskFields('Full: shown under the title, up to two lines; a longer note gets a More link that opens it in place. Kept whole in the markup, so the header search matches all of it. Blank removes the line.');

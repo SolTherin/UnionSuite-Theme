@@ -69,7 +69,7 @@ Each `theme-candidate.css` section names its target and uses the theme's own
 selectors, so it moves across unchanged.
 
 - [x] Item 1, panel header tokens: section 1 → tokens at the top of the file
-      and the `pointer: coarse` override.
+      and the `max-width: 950px` override.
 - [x] Item 2, section switcher: section 2 → `US-SECTION-TABS`.
 - [x] Items 3, 19 and 20, banner: section 3 → `US-BANNER-COMPONENT`.
 - [x] Item 4, Needs Attention cards: section 4 → `US-ATTENTION`.

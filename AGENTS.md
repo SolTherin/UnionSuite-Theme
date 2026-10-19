@@ -71,6 +71,22 @@
   files from their maintained sources rather than formatting generated output
   by hand.
 
+## Touch and narrow screens
+
+- **Never style by input device** (owner, 5 and 19 October 2026). No
+  `hover`, `any-hover`, `pointer` or `any-pointer` media queries, and no
+  script that checks them (`matchMedia`, `ontouchstart`, `maxTouchPoints`)
+  to change styling. Touchscreen laptops report `hover: none` and
+  `pointer: coarse` even with a mouse attached (Edge reports no mouse at
+  all), so those queries gave docked laptops touch sizes and always-visible
+  hover icons.
+- Tie every touch-sized or touch-visible rule to the window width instead:
+  `@media (max-width: 950px)` for touch targets (44px) and for showing
+  controls that are hover-revealed on wider screens; `(min-width: 951px)`
+  when a hover-only effect needs a guard.
+- Reading `event.pointerType` inside an event handler is fine: it describes
+  that one interaction (a tap or a click), not the device.
+
 ## Motion
 
 - **Transition every visible state change the theme makes** (owner,

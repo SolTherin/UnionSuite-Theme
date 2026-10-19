@@ -1151,11 +1151,26 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   background-color: var(--bg-surface);
   color: var(--text-base);
   font-family: var(--font-ui);
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
 }
 
-[data-gridid] :is(.FilterPanel, .FilterPanelHorizontal) :is(input[type=text], input[type=search], input[type=number], input[type=date], select, textarea):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .RadUpload *, .chosen-container *)):focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  outline: 2px solid var(--border-focus);
+/* Filter fields take the theme's field focus, as ordinary fields do: the
+   thin --field-focus-colour border and soft glow, for pointer and keyboard
+   alike. The transparent outline keeps a system focus indicator in forced
+   colours. */
+[data-gridid] :is(.FilterPanel, .FilterPanelHorizontal) :is(input[type=text], input[type=search], input[type=number], input[type=date], select, textarea):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .RadUpload *, .chosen-container *)):focus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
   outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-gridid] :is(.FilterPanel, .FilterPanelHorizontal) :is(input[type=text], input[type=search], input[type=number], input[type=date], select, textarea):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .RadUpload *, .chosen-container *)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
 }
 
 [data-gridid] :is(.FilterPanel, .FilterPanelHorizontal) :is(input, select, textarea):is(:disabled, [readonly]):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .RadUpload *, .chosen-container *)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -1296,7 +1311,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
@@ -1341,7 +1356,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0 0 18px;
@@ -1364,7 +1379,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1392,7 +1407,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
 :is(
@@ -1402,7 +1417,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   display: none;
@@ -1415,7 +1430,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1436,7 +1451,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1460,7 +1475,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description > :is(div, p):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1474,7 +1489,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
@@ -1487,7 +1502,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)) + .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
@@ -1502,7 +1517,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
 :where(
@@ -1512,7 +1527,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -2457,7 +2472,11 @@ body:has(:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-pa
   font: 400 13px/1.5 var(--iqa-font);
   vertical-align: middle;
   white-space: normal;
-  overflow-wrap: anywhere;
+  /* break-word, not anywhere: an auto-layout table sizes columns from their
+     narrowest content, and "anywhere" lets that be one letter, so a column
+     holding a Review button stacked it R-e-v-i-e-w. Whole words now set the
+     minimum; an over-long value still breaks once the column is sized. */
+  overflow-wrap: break-word;
 }
 
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .RadGrid .rgMasterTable > tbody > :is(.rgRow, .rgAltRow):hover:not(:where(.rgSelectedRow)) > td:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -4799,6 +4818,18 @@ body:has(.us-banner--enhanced):not(:where(.us-report-no-styling, .us-report-no-s
 }
 
 /* US-BANNER-COMPONENT:END */
+
+/* Theme labels (owner, 19 October 2026). The vendor sheet gives every
+   label padding-left: 7px and margin-left: -7px, which keeps native label
+   text in place but hangs the label's box 7px to the left. A theme label
+   drawn as a box (a switch, a drop zone, a checkbox row) then sticks out
+   of its container and is cut off at a popup's edge. Labels carrying a
+   theme class drop the offset; a component that sets its own padding still
+   wins, being more specific. Native labels are unchanged. */
+label:where([class^="us-"], [class*=" us-"]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-left: 0;
+  padding-left: 0;
+}
 
 /* US-FORM-FIELDS:START */
 
@@ -7390,13 +7421,45 @@ button.us-busy-hide-label > *:not(:where(.us-report-no-styling, .us-report-no-st
   display: none;
 }
 
-.us-iqa-row-overlay {
+/* Row expand/collapse: the shared spinner takes the clicked arrow's place,
+   sized to it by US-IQA-BUSY. The overlay catches a second click; the native
+   control keeps focus and handlers, with only its glyph hidden. */
+.us-iqa-row-spinner {
+  position: fixed;
+  z-index: var(--z-tooltip,100000);
   overflow: hidden;
+  cursor: progress;
   animation: us-iqa-row-fade-in 140ms ease-out;
 }
 
-.us-iqa-row-overlay > .section-loader-spinning-circles {
-  --size: .5px;
+.us-iqa-row-spinner[hidden] {
+  display: none;
+}
+
+.us-iqa-row-spinner > .section-loader-spinning-circles {
+  position: absolute;
+}
+
+.rgExpandCol [data-us-iqa-row-busy] {
+  opacity: 0 !important;
+  transition: opacity 140ms ease-out;
+}
+
+/* The new detail row slides open (or a copy of the old one closed) after the
+   native partial update; fold() animates this box, which carries the
+   cell's vertical padding meanwhile. */
+tr[data-us-iqa-detail-sliding] > td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.us-iqa-detail-slide[hidden] {
+  display: none;
+}
+
+/* Detail rows sit out of column fitting for the frame after a row update. */
+tr[data-us-iqa-detail-hold] {
+  display: none !important;
 }
 
 /* Query Template refresh retains the visible records below this overlay. */
@@ -7453,8 +7516,12 @@ button.us-busy-hide-label > *:not(:where(.us-report-no-styling, .us-report-no-st
 }
 
 @media (prefers-reduced-motion:reduce) {
-  .us-iqa-row-overlay {
+  .us-iqa-row-spinner {
     animation: none;
+  }
+
+  .rgExpandCol [data-us-iqa-row-busy] {
+    transition: none;
   }
 }
 
@@ -10148,6 +10215,89 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-FIELDS:END */
 
+/* US-CASE-MEMBER:START — a case's member card (us-case-member), on the
+   case Overview and in the Parties preview (US-CASE-PARTIES). A fixed head
+   (avatar, name as plain text, member line, View profile), then a
+   us-field-groups panel run on the person's iMIS ID, so the client picks
+   the fields and the membership warning (Alert-* columns) by editing that
+   IQA's columns. Other parties, when there are any, are named in one line
+   at the end. */
+.us-case-member__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.us-case-member__head .us-avatar {
+  flex: none;
+}
+
+.us-case-member__who {
+  min-width: 0;
+}
+
+.us-case-member__name {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.us-case-member__meta {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-member__meta:empty {
+  display: none;
+}
+
+.us-case-member__others {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-member__others:empty {
+  display: none;
+}
+
+/* View profile: both member cards (Overview, Parties preview) open the
+   person's contact profile (owner, 8 October 2026). On the Overview card
+   it is the panel's heading button (cases.view-member; owner, 9 October
+   2026); in the preview, with the header's other buttons. */
+.us-case-member__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  white-space: nowrap;
+}
+
+/* The preview header's buttons stay together: beside the name when they
+   fit, otherwise on their own line, right-aligned. */
+.us-case-member__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.us-case-member__others > span:empty,
+.us-case-member__others:has(> span:empty) {
+  display: none;
+}
+
+/* US-CASE-MEMBER:END */
+
 /* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
    that shows the native iMIS "User credentials" control. iMIS puts the class
    on a div around the whole control, so every rule starts from it.
@@ -10436,9 +10586,60 @@ html.us-taskbar-mounted #hd .search-dropdown {
 .us-credentials [id$="_UserInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: grid;
   grid-template-columns: minmax(0, calc(var(--us-credentials-label) + var(--us-credentials-field) + 16px)) minmax(260px, 340px);
+  grid-template-areas:
+    "fields reset"
+    "details .";
   justify-content: start;
   align-items: start;
   gap: 24px 48px;
+}
+
+.us-credentials [id$="_UserInfoPanel_Body"] > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: fields;
+}
+
+.us-credentials [id$="_UserInfoPanel_Body"] > [id$="_ResetPasswordPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: reset;
+}
+
+/* Locked out, Last sign in, Last active and User class: their own block
+   (US-CREDENTIALS JS moves them out of the Username field). Below the
+   fields, set apart by a rule, its values aligned with theirs; beside them
+   on a wide panel (section 8). */
+.us-credentials [id$="_UserInfoPanel_Body"] > .us-credentials__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-area: details;
+  grid-template-columns: var(--us-credentials-label) minmax(0, max-content);
+  align-items: center;
+  align-content: start;
+  gap: 12px 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bg-sunken);
+}
+
+.us-credentials .us-credentials__details > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  row-gap: 4px;
+}
+
+.us-credentials .us-credentials__details > .PanelField > :is(label, .Label):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 1;
+}
+
+.us-credentials .us-credentials__details > .PanelField > :is(.PanelFieldValue, .ValidationError):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+}
+
+/* The block's own rule replaces the divider above Locked out. */
+.us-credentials .us-credentials__details > #LockoutStatus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 /* The Username field wraps every other field: one label/value grid. */
@@ -10651,6 +10852,22 @@ html.us-taskbar-mounted #hd .search-dropdown {
   background-color: var(--bg-surface);
 }
 
+/* Copy username (US-CREDENTIALS JS): the shared copy button in the remove
+   button's box. Only the green tick confirms a copy here; the visible
+   "Copied" label is left out (the live region still announces it). */
+.us-credentials button.us-copy.us-credentials__copy-username:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  border-color: var(--border-strong);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+}
+
+.us-credentials button.us-copy.us-credentials__copy-username > .us-copy-label {
+  display: none;
+}
+
 /* ── 6. User information: Account, Roles, Security groups ──────────────── */
 
 .us-credentials [id$="_UserSecurityInfoPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -10678,18 +10895,38 @@ html.us-taskbar-mounted #hd .search-dropdown {
   height: 100%;
 }
 
+/* Each column's .panel-border is only a wrapper: the box inside it (the
+   Account body, or the Roles and Security groups grid panels) is the card,
+   with its header bar at the top. A bordered column around that box drew a
+   border within a border (owner, 14 October 2026). The wrapper chain is a
+   flex column, so the three boxes match the tallest one's height. */
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   height: 100%;
   margin: 0 !important;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-surface);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border .panel-body > [data-gridid]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  padding: 14px 16px 16px;
+  padding: 0;
+}
+
+.us-credentials [id$="_UserSecurityInfoPanel_Body"] .panel-border [id$="_GridPanel1"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 auto;
 }
 
 /* Roles and groups: one box per list. Its header bar is the native title
@@ -10767,7 +11004,8 @@ html.us-taskbar-mounted #hd .search-dropdown {
    2026). Its body is the box; its title row is the grey header bar (the
    shared GridTitlePanel rule above); the fields sit inset below it. */
 .us-credentials [id$="_AccountPanel"].panel-border > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  margin: 14px 16px 16px;
+  display: block;
+  margin: 0;
   padding: 0 0 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -10930,11 +11168,74 @@ html.us-taskbar-mounted #hd .search-dropdown {
   display: none;
 }
 
+/* A Full staff user with every area at 0 - No Access (US-CREDENTIALS JS sets
+   data-us-staff-no-access and the "No access" badge): the heading takes the
+   warning tone, as the Account box takes the danger tone when blocked. */
+.us-credentials [id$="_StaffUserPanel"]:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  transition:
+    background-color 180ms cubic-bezier(.2, 0, 0, 1),
+    border-color 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-credentials [id$="_StaffUserPanel"][data-us-staff-no-access]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--border));
+}
+
+.us-credentials [id$="_StaffUserPanel"][data-us-staff-no-access] > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-bottom-color: color-mix(in srgb, var(--warning) 30%, var(--border));
+  background: var(--warning-bg);
+}
+
+/* The badge follows the title. The title's flex growth would otherwise push
+   it to the middle of the heading; the surface fill keeps the amber badge
+   visible on the amber heading. */
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading > .panel-title:has(+ .us-credentials__staff-warning):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 0 1 auto;
+}
+
+.us-credentials [id$="_StaffUserPanel"] > .panel-heading > .us-credentials__staff-warning:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  margin-right: auto;
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+  background: var(--bg-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-credentials [id$="_StaffUserPanel"],
+  .us-credentials [id$="_StaffUserPanel"] > .panel-heading {
+    transition: none;
+  }
+}
+
 /* ── 8. Narrow panels ──────────────────────────────────────────────────── */
+
+@container us-credentials (min-width: 1300px) {
+  .us-credentials [id$="_UserInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns:
+      minmax(0, calc(var(--us-credentials-label) + var(--us-credentials-field) + 16px))
+      minmax(0, max-content)
+      minmax(260px, 340px);
+    grid-template-areas: "fields details reset";
+  }
+
+  /* Beside the fields, the block's labels take only their own width. */
+  .us-credentials [id$="_UserInfoPanel_Body"] > .us-credentials__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: max-content minmax(0, max-content);
+    padding-top: 0;
+    padding-left: 32px;
+    border-top: 0;
+    border-left: 1px solid var(--bg-sunken);
+  }
+}
 
 @container us-credentials (max-width: 760px) {
   .us-credentials [id$="_UserInfoPanel_Body"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "fields"
+      "details"
+      "reset";
   }
 }
 
@@ -10955,6 +11256,15 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
   .us-credentials [id$="_UserInfoPanel_Body"] > .PanelField > .PanelField:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     margin-top: 6px;
+  }
+
+  .us-credentials [id$="_UserInfoPanel_Body"] > .us-credentials__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 12px;
+  }
+
+  .us-credentials .us-credentials__details > .PanelField > :is(label, .Label, .PanelFieldValue, .ValidationError):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-column: 1;
   }
 }
 
@@ -11056,6 +11366,17 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 .us-credentials .us-credentials__blocked-reasons > li {
   margin: 0;
+}
+
+/* A Full staff user with no access to any area: a native warning message
+   at the top of the tab, after any can't-sign-in error (US-CREDENTIALS JS). */
+.us-credentials > .us-credentials__no-access {
+  margin: 0 0 18px;
+}
+
+.us-credentials > .us-credentials__no-access > strong {
+  display: block;
+  font-weight: 600;
 }
 
 .us-credentials .us-credentials__unlock {
@@ -12762,6 +13083,722 @@ a[data-us-comms-log-held] {
 }
 
 /* US-DIALOG:END */
+
+/* US-WHERE-USED:START — "Where used" drawer in the IQA designer (Scripts/IQA-WhereUsed.js).
+   An overlay from the right; it never moves the designer. */
+.us-where-used {
+  --us-where-used-width: 440px;
+  --us-where-used-ease: cubic-bezier(.2, 0, 0, 1);
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3100;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(var(--us-where-used-width), 100vw - 48px);
+  border-left: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--us-dialog-shadow);
+  font-family: var(--font-body);
+  transform: translateX(0);
+  transition:
+    transform 220ms var(--us-where-used-ease),
+    visibility 0s linear 0s;
+}
+
+.us-where-used[data-closed] {
+  visibility: hidden;
+  transform: translateX(calc(100% + 24px));
+  transition:
+    transform 180ms var(--us-where-used-ease),
+    visibility 0s linear 180ms;
+}
+
+.us-where-used__head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 16px 12px 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-where-used__heading {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.us-where-used__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.us-where-used__title:focus {
+  outline: none;
+}
+
+.us-where-used__subject {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font: 13px/1.4 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-where-used__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.us-where-used__close:hover {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-where-used__close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-where-used__status {
+  flex: none;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.us-where-used__summary {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.us-where-used__summary[data-tone="warning"] {
+  color: var(--danger);
+}
+
+.us-where-used__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 0 12px;
+}
+
+/* One block per place the index reads. */
+.us-where-used__source {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-where-used__source:last-child {
+  border-bottom: 0;
+}
+
+/* While a place is checked (data-checking), a short line moves along its
+   bottom border. It goes as soon as the place is done. */
+.us-where-used__source[data-checking] {
+  position: relative;
+  overflow: hidden;
+}
+
+.us-where-used__source[data-checking]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 30%;
+  height: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  animation: us-where-used-checking 1.2s linear infinite;
+}
+
+@keyframes us-where-used-checking {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(340%);
+  }
+}
+
+/* Without motion, a still line along the whole border says the same. */
+@media (prefers-reduced-motion: reduce) {
+  .us-where-used__source[data-checking]::after {
+    width: 100%;
+    opacity: .6;
+    animation: none;
+  }
+}
+
+.us-where-used__source-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.us-where-used__source-head > .ti {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.us-where-used__source-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The count, "None", a spinner while reading, or "Couldn't read". */
+.us-where-used__count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  color: var(--text-muted);
+  font: 500 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__count[data-state="found"] {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--brand-900);
+  font-weight: 600;
+}
+
+.us-where-used__count[data-state="failed"] {
+  color: var(--danger);
+}
+
+.us-where-used__count .us-button-spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.us-where-used__items {
+  margin: 8px 0 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.us-where-used__group-label {
+  margin: 10px 0 4px 28px;
+  color: var(--text-muted);
+  font: 600 12px/1.4 var(--font-ui);
+}
+
+.us-where-used__group-label code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.us-where-used__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0 8px 28px;
+}
+
+.us-where-used__item[hidden] {
+  display: none;
+}
+
+.us-where-used__item + .us-where-used__item {
+  border-top: 1px dashed var(--border);
+}
+
+.us-where-used__item-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.us-where-used__name {
+  color: var(--text-strong);
+  font: 600 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__path {
+  color: var(--text-muted);
+  font: 12px/1.4 var(--font-ui);
+  overflow-wrap: anywhere;
+}
+
+.us-where-used__how {
+  color: var(--text-base);
+  font: 13px/1.4 var(--font-body);
+}
+
+/* Copy path (the shared us-copy button) and Open in a new tab. */
+.us-where-used__actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin-top: -4px;
+}
+
+.us-where-used__open-tab {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 17px;
+  text-decoration: none;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.us-where-used__open-tab:hover {
+  background: var(--icon-hover-bg);
+  color: var(--icon-hover-colour);
+  text-decoration: none;
+}
+
+.us-where-used__open-tab:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.us-where-used__tag {
+  margin-left: 6px;
+}
+
+/* First use: no index yet. */
+.us-where-used__empty {
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.us-where-used__empty > .ti {
+  color: var(--text-muted);
+  font-size: 32px;
+}
+
+.us-where-used__empty-title {
+  margin: 8px 0 4px;
+  color: var(--text-strong);
+  font: 600 15px/1.4 var(--font-ui);
+}
+
+.us-where-used__empty-text {
+  margin: 0 auto 16px;
+  max-width: 32ch;
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-body);
+}
+
+.us-where-used__foot {
+  flex: none;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.us-where-used__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-base);
+  font: 13px/1.4 var(--font-ui);
+}
+
+.us-where-used__option label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.us-where-used__help-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.us-where-used__help-toggle:hover,
+.us-where-used__help-toggle[aria-expanded="true"] {
+  background: var(--bg-subtle);
+  color: var(--text-strong);
+}
+
+.us-where-used__help-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-where-used__help {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font: 12px/1.5 var(--font-body);
+}
+
+.us-where-used__note {
+  margin: 12px 20px 0;
+  color: var(--text-muted);
+  font: 12px/1.5 var(--font-body);
+}
+
+/* Icon only in the designer header, square like the other icon controls. */
+.us-where-used-button {
+  justify-content: center;
+  min-width: 36px;
+  padding-inline: 8px;
+}
+
+.us-where-used-button > .ti {
+  font-size: 17px;
+}
+
+@media (max-width: 600px) {
+  .us-where-used {
+    width: 100vw;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-where-used,
+  .us-where-used[data-closed],
+  .us-where-used__close {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-where-used {
+    border-left-color: CanvasText;
+  }
+
+  .us-where-used__count[data-state="found"] {
+    border: 1px solid CanvasText;
+  }
+}
+/* US-WHERE-USED:END */
+
+/* US-IQA-FINDER:START — IQA browser: search every query, favourites and
+   recent items from the native Quick find box (Scripts/IQA-Finder.js).
+   Drawn as the taskbar's contact quick search (US-TASKBAR-COMPONENT): banded
+   section headings, ruled rows and the same spinning circles while searching. */
+.us-iqa-finder-host {
+  position: relative;
+}
+
+/* The Quick find box, wide enough for its placeholder and a pasted path,
+   drawn and focused as the theme's other fields. */
+.us-iqa-finder-host input[id$="_ObjectQuickFindTextBox"] {
+  box-sizing: border-box;
+  width: 360px;
+  max-width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/1.5 var(--font-ui);
+  box-shadow: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.us-iqa-finder-host input[id$="_ObjectQuickFindTextBox"]:hover {
+  border-color: var(--brand-600);
+}
+
+.us-iqa-finder-host input[id$="_ObjectQuickFindTextBox"]:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+.us-iqa-finder {
+  --us-finder-hover: var(--accent-100);
+  --us-finder-icon: var(--brand-600);
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 3000;
+  box-sizing: border-box;
+  width: min(560px, 90vw);
+  max-height: min(70vh, 560px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-ui);
+  text-align: left;
+}
+
+.us-iqa-finder[hidden] {
+  display: none;
+}
+
+.us-iqa-finder__heading {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 34px;
+  margin: 0;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font: 700 11px/1.4 var(--font-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-iqa-finder__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.us-iqa-finder__item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 100ms;
+}
+
+.us-iqa-finder__section:last-child .us-iqa-finder__item:last-child {
+  border-bottom: 0;
+}
+
+.us-iqa-finder__item:hover {
+  background: var(--us-finder-hover);
+}
+
+.us-iqa-finder__go,
+.us-iqa-finder__search {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px 6px 10px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.us-iqa-finder__go > .ti,
+.us-iqa-finder__search > .ti {
+  grid-row: span 2;
+  color: var(--us-finder-icon);
+  font-size: 18px;
+}
+
+.us-iqa-finder__go:focus-visible,
+.us-iqa-finder__search:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.us-iqa-finder__item:has(> :is(.us-iqa-finder__go, .us-iqa-finder__search):focus-visible) {
+  background: var(--us-finder-hover);
+}
+
+.us-iqa-finder__open:focus-visible,
+.us-iqa-finder__star:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-iqa-finder__name,
+.us-iqa-finder__term {
+  overflow: hidden;
+  color: var(--text-strong);
+  font: 600 13px/1.4 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-iqa-finder__term {
+  font-weight: 400;
+}
+
+.us-iqa-finder__path {
+  margin-top: 1px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font: 11px/1.4 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-iqa-finder__open,
+.us-iqa-finder__star {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 17px;
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms,
+    opacity 120ms;
+}
+
+.us-iqa-finder__open:hover,
+.us-iqa-finder__star:hover {
+  background: var(--icon-hover-bg);
+  color: var(--icon-hover-colour);
+}
+
+.us-iqa-finder__star[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.us-iqa-finder__empty,
+.us-iqa-finder__status {
+  margin: 0;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font: 13px/1.5 var(--font-ui);
+  text-align: center;
+}
+
+.us-iqa-finder__section:last-child .us-iqa-finder__empty,
+.us-iqa-finder__body > .us-iqa-finder__status:last-child {
+  border-bottom: 0;
+}
+
+.us-iqa-finder__status--warning {
+  color: var(--danger);
+}
+
+/* "Searching…" beside the theme's spinning circles, as in the taskbar. */
+.us-iqa-finder__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.us-iqa-finder__loading > .section-loader-spinning-circles {
+  --size: .42px;
+}
+
+/* The star on a query row in the folder list: shown on a starred query, and
+   on hover, focus or selection for the others. */
+/* Held to the vertical middle of the row, clear of the query's name. */
+.us-iqa-finder__row > td {
+  position: relative;
+  padding-right: 40px;
+}
+
+.us-iqa-finder__row .us-iqa-finder__star {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  color: inherit;
+  opacity: 0;
+  transform: translateY(-50%);
+}
+
+.us-iqa-finder__row:is(:hover, :focus-within, .selected) .us-iqa-finder__star,
+.us-iqa-finder__row .us-iqa-finder__star[aria-pressed="true"],
+.us-iqa-finder__row .us-iqa-finder__star:focus-visible {
+  opacity: 1;
+}
+
+.us-iqa-finder__row:not(.selected) .us-iqa-finder__star[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-iqa-finder-host input[id$="_ObjectQuickFindTextBox"],
+  .us-iqa-finder__item,
+  .us-iqa-finder__open,
+  .us-iqa-finder__star {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-iqa-finder {
+    border-color: CanvasText;
+  }
+
+  .us-iqa-finder__star[aria-pressed="true"] {
+    color: Highlight;
+  }
+}
+/* US-IQA-FINDER:END */
 
 /* US-INLINE-COMPOSER:START — the in-place add form (UnionSuiteComposers in
    zUnionSuite.js). Theme tokens only; zzDarkMode.css keeps two details
@@ -14608,6 +15645,372 @@ a[data-us-comms-log-held] {
 
 /* US-CONTACT-TILES:END */
 
+/* US-CASE-PARTIES:START — us-parties (the us-case-parties preset): a case's
+   parties as a list and a preview (owner, 8 October 2026). Selectable row
+   cards on the left third, the chosen party's card (US-CASE-MEMBER markup)
+   on the right two-thirds. The script (US-CASE-PARTIES in zUnionSuite.js)
+   adds us-parties__layout and us-parties__columns to the panel body and
+   moves the chosen row's detail into the preview. A narrow panel stacks
+   them, the preview under the list. */
+.us-parties__layout {
+  container: us-parties / inline-size;
+}
+
+.us-parties__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  /* The list column's rows (toolbar, scope line, list, status), then a
+     flexible row that takes the preview's extra height, so the list's
+     rows keep their own heights. */
+  grid-template-rows: repeat(4, auto) 1fr;
+  gap: var(--space-2) var(--space-4);
+  align-items: start;
+}
+
+/* Fixed places: the theme puts its search status line straight after the
+   list, so anything that is not the list or the preview stays in the list
+   column, and the preview spans the rows beside them. */
+.us-parties__columns > :not(.us-parties__preview) {
+  grid-column: 1;
+}
+
+.us-parties__columns > .us-parties__preview {
+  grid-column: 2;
+  grid-row: 1 / span 5;
+}
+
+/* Stacked below 800px of panel (owner, 9 October 2026: at 620px the list
+   third was about 200px and names broke letter by letter); from 800px the
+   list keeps a usable 260px or more. */
+@container us-parties (max-width: 800px) {
+  .us-parties__columns {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .us-parties__columns > .us-parties__preview {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* Stacked, a press on a party scrolls their card into view; it stops
+   clear of the condensed banner that stays at the top. */
+.us-parties__preview {
+  scroll-margin-top: 110px;
+}
+
+.us-party__select {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-party__select:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-subtle);
+}
+
+.us-party__select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.us-party__select[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-surface));
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.us-party__select .us-avatar {
+  flex: none;
+}
+
+.us-party__copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.us-party__name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.us-party__meta {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-party__meta > span:empty {
+  display: none;
+}
+
+.us-party__meta > span + span::before {
+  content: " · ";
+}
+
+.us-party__standing {
+  flex: none;
+}
+
+.us-party__standing:empty {
+  display: none;
+}
+
+.us-parties__preview {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+
+.us-parties__preview .us-case-member__head .us-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 17px;
+}
+
+/* The name keeps room for itself; when the header's buttons do not fit
+   beside it, they move to the next line rather than squeezing it. */
+.us-parties__preview .us-case-member__who {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+/* The preview's header: the crown sits right after the name (owner,
+   9 October 2026), as on the Case team cards: the primary party's is a
+   solid amber mark; any other member's is the quiet Make primary party
+   button, which brightens on hover; an employer gets neither. View
+   profile keeps the right. */
+.us-parties__preview .us-case-member__head {
+  flex-wrap: wrap;
+}
+
+.us-parties__preview .us-case-member__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+:root .us-parties__preview .us-party__make-primary.us-icon-button {
+  width: 26px;
+  min-width: 0;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  color: var(--text-faint);
+  font-size: 16px;
+  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:root .us-parties__preview .us-party__make-primary.us-icon-button:is(:hover, :focus-visible) {
+  color: var(--warning-fill);
+}
+
+/* One crown: the header's, not the theme's badge on the avatar as well. */
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: none;
+}
+
+.us-party__crown {
+  display: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  color: var(--warning-fill);
+  font-size: 16px;
+}
+
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-party__crown {
+  display: inline-grid;
+}
+
+.us-parties__preview:is([data-us-contact-lead="true" i], [data-us-contact-lead="1"], [data-us-contact-type="employer" i]) .us-party__make-primary {
+  display: none;
+}
+
+/* The list's toolbar: the search field filling the column, the send
+   button beside it, and the line saying who it emails. The heading's funnel
+   would open an empty filter area, and the theme's own result line repeats
+   the scope line, so both step aside. */
+/* One line: the search fills it, then Select and Email parties as
+   icon buttons (owner, 8 October 2026). */
+.us-parties__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.us-parties__toolbar > .us-query-search-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-inline-end: var(--space-1);
+}
+
+.us-parties__toolbar > .us-query-search-field input[type="search"] {
+  min-height: 34px;
+  padding-block: 6px;
+}
+
+.us-parties__toolbar > .us-parties__send {
+  flex: none;
+}
+
+.us-parties__scope {
+  margin: calc(var(--space-1) * -1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.us-parties__scope:has(> span:empty) {
+  display: none;
+}
+
+.us-parties .us-iqa-report-utilities .us-iqa-filter-toggle,
+.us-parties .us-parties__columns > .us-query-search-status {
+  display: none;
+}
+
+/* The Select toggle: checkboxes on the party cards. The toolbar's Select
+   button (owner, 8 October 2026) shows a checkbox at the start of each
+   card; the card's own content slides right to make room, and the box
+   fades in. Pressed, the toggle takes the accent tint. Select all and Clear
+   sit in the line under the toolbar as text buttons. */
+.us-parties__pick {
+  flex: none;
+  font-size: 18px;
+}
+
+/* Pressed: the icon button keeps a tint and a border while Select is on. */
+.us-parties__toolbar .us-parties__pick[aria-pressed="true"] {
+  --button-bg: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
+  border-color: var(--accent);
+}
+
+.us-party {
+  position: relative;
+}
+
+.us-parties__columns .us-party__select {
+  transition:
+    padding-inline-start 200ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-parties--selecting .us-party__select {
+  padding-inline-start: 50px;
+}
+
+/* As specific as the theme's checkbox rule (input[type="checkbox"]),
+   which would otherwise hold it at 18px. */
+.us-party > input.us-party__check {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 14px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  transform: translateY(-50%);
+  animation: us-party-check-in 200ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes us-party-check-in {
+  from {
+    opacity: 0;
+    transform: translate(-6px, -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+.us-parties__scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-3);
+}
+
+.us-parties__scope-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--fw-semi);
+  cursor: pointer;
+}
+
+.us-parties__scope-action:is(:hover, :focus-visible) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-parties__columns .us-party__select {
+    transition: none;
+  }
+
+  .us-party > input.us-party__check {
+    animation: none;
+  }
+}
+
+/* A new primary party: the crown pops in where the Make primary party
+   button was (data-us-lead-arrived, set by the site's action for the
+   slide's length). */
+[data-us-lead-arrived] .us-party__crown {
+  animation: us-party-crown-in 240ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes us-party-crown-in {
+  from {
+    opacity: 0;
+    transform: scale(.6) rotate(-12deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-us-lead-arrived] .us-party__crown {
+    animation: none;
+  }
+}
+
+/* US-CASE-PARTIES:END */
+
 /* US-LIST-SCROLL:START — independent optional Query Template Display body scrolling. */
 [data-us-list-scroll-frame]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   position: relative;
@@ -15101,13 +16504,17 @@ a[data-us-comms-log-held] {
   }
 }
 
+/* 384px when there is room. It is the one control that shrinks when the
+   header row runs short (US-TASKBAR-LAYOUT), down to a 136px field beside
+   Full search. The width, not a flex-basis, sets its full size: the taskbar
+   sizes itself from its content, and a basis alone would leave it at the
+   field's natural width. */
 #injected-taskbar .tb-search-wrap {
   display: grid;
   grid-template-columns: minmax(0,1fr) 36px;
   gap: 8px;
   width: 384px;
-  max-width: 100%;
-  min-width: 0;
+  min-width: 180px;
 }
 
 :root #injected-taskbar .us-taskbar__search-shell .tb-search-input {
@@ -15123,11 +16530,13 @@ a[data-us-comms-log-held] {
   box-shadow: none;
 }
 
+/* Results keep a readable width when the field has shrunk; the controls to
+   the field's right always leave room for 320px. */
 @media (min-width: 769px) {
   #injected-taskbar .tb-search-wrap > #tb-search-dropdown {
     left: 0;
     right: auto;
-    width: calc(100% - 44px);
+    width: max(calc(100% - 44px), 320px);
     min-width: 0;
     box-sizing: border-box;
   }
@@ -15140,13 +16549,6 @@ a[data-us-comms-log-held] {
 #tb-search-dropdown .tb-dd-input:focus {
   border-color: var(--field-focus-colour);
   box-shadow: 0 0 0 4px color-mix(in srgb,var(--field-focus-colour) 20%,transparent);
-}
-
-@media (max-width: 768px) {
-  #injected-taskbar .tb-search-wrap {
-    width: 100%;
-    max-width: 384px;
-  }
 }
 
 @media (prefers-reduced-motion:reduce) {
@@ -15163,6 +16565,118 @@ a[data-us-comms-log-held] {
 }
 
 /* US-TASKBAR-SEARCH:END */
+
+/* US-TASKBAR-LAYOUT:START — the header row around the taskbar, at every
+   width. Approved taskbar design (Option C): the controls wrap on narrow
+   screens and Biscuit hides first. Steps, widest first:
+   - one row while it fits: the right-hand group takes the space beside the
+     brand, and the search field shrinks (US-TASKBAR-SEARCH) before anything
+     wraps. Its zero flex-basis is what stops the row wrapping early;
+   - Biscuit hides below 1200px (US-TASKBAR-PIP);
+   - the bookmark and Go to buttons drop their labels below 1100px (the
+     bookmarks script's styles); their names and tooltips stay;
+   - 960px and below: the cart and account menu join the brand row and the
+     taskbar takes a full row beneath it. One row needs about 930px beside
+     the collapsed tablet rail;
+   - 780px and below: the search field takes a further full row;
+   - 767px and below (Orion's bottom bar): the cart and the header search
+     hide; the bottom bar's search button opens the taskbar search. */
+html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right {
+  flex: 1 1 0%;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/* Orion's auto margin would now take the group's spare width and part the
+   account menu from the cart. */
+html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .account-menu {
+  margin-left: 0;
+}
+
+/* Only the search field shrinks; the bookmarks and Go to… keep their size. */
+#injected-taskbar > :is(.us-bookmarks, .us-taskbar-tools) {
+  flex-shrink: 0;
+}
+
+@media (max-width: 960px) {
+  html.us-taskbar-mounted #masterTopBarAuxiliary {
+    row-gap: 8px;
+  }
+
+  /* The group's children become header-row items, so the cart and account
+     menu can sit beside the brand while the taskbar wraps beneath it. */
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right {
+    display: contents;
+  }
+
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .NavigationUnorderedList {
+    margin-left: auto;
+  }
+
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > #injected-taskbar {
+    order: 1;
+    flex: 1 1 100%;
+  }
+
+  /* The field takes the row's spare width here rather than leaving a gap. */
+  #injected-taskbar .tb-search-wrap {
+    flex: 1 1 384px;
+  }
+
+  /* Nothing follows the appearance switch on this row. */
+  .navbar-right > #injected-taskbar::after {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > #injected-taskbar {
+    flex-wrap: wrap;
+  }
+
+  /* Bookmarks lead the first taskbar row; Go to…, the appearance switch and
+     the bookmarks-bar toggle end it (the bookmarks script's styles). */
+  #injected-taskbar .tb-search-wrap {
+    order: 3;
+    flex: 1 1 100%;
+  }
+}
+
+/* 767px and below, where Orion shows its bottom bar: the cart list
+   (.NavigationUnorderedList) hides, so the account menu sits on the brand
+   row; and the header search field and Full search button hide, because the
+   bottom bar's search button opens the taskbar search (UnionSuiteTaskbar.js).
+   The search wrapper stays in the page as display: contents, because the
+   full-screen results panel lives inside it. */
+@media (max-width: 767px) {
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .NavigationUnorderedList {
+    display: none;
+  }
+
+  html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .account-menu {
+    margin-left: auto;
+  }
+
+  #injected-taskbar .tb-search-wrap {
+    display: contents;
+  }
+
+  #injected-taskbar .tb-search-wrap > :is(.us-taskbar__search-shell, .us-taskbar__full-search) {
+    display: none;
+  }
+}
+
+/* A small phone caps the brand box so the account menu (its name
+   capped at 9em by Orion) stays on its row; rows wrap before items shrink,
+   so a cap is needed rather than shrinking. The logo is drawn to fit its
+   box, so it only gets smaller on the narrowest screens. */
+@media (max-width: 480px) {
+  html.us-taskbar-mounted #hd > #masterTopBarAuxiliary > .navbar-left > a.logo {
+    max-width: calc(100vw - 252px);
+  }
+}
+
+/* US-TASKBAR-LAYOUT:END */
 
 /* US-UTILITY-NAV:START — native appearance is maintained in 99-Orion.css. */
 .navbar-right > .account-menu > .batch-toggle-wrapper,
@@ -15187,7 +16701,7 @@ a[data-us-comms-log-held] {
    when iMIS omits QueryTemplateSet for no results; nested iParts are excluded. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding: var(--space-3) var(--iqa-inset,var(--space-4));
 }
@@ -15218,7 +16732,7 @@ a[data-us-comms-log-held] {
 /* No-results HTML is author supplied; trim paragraph margins within its own body. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:has(> .QueryTemplateSet)):not(:where(.us-report-no-styling, .us-report-no-styling *)) > p {
   margin: 0;
   color: var(--iqa-muted);
@@ -15236,7 +16750,7 @@ a[data-us-comms-log-held] {
   .us-list--no-shell,
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)):not(:where(.us-list *, .us-list--rows *, .us-list--timeline *, .us-list--compact *, .us-list--no-shell *))
 ) {
   --list-gap: var(--space-3);
@@ -18821,6 +20335,23 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 /* US-STAFF-BULLETIN:START
    Opt in on the Query Template Display iPart with us-staff-bulletin.
    iMIS supplies the panel/card shells; keep BulletinCard as the item content. */
+
+/* The bulletin's layout column moves below its neighbour when the row cannot
+   give it a readable width. Bootstrap's col-sm split follows the window and
+   ignores the sidebar: at 961px with the sidebar open the column was 230px
+   and card text broke mid-word. These bases keep the 2:1 split while both
+   fit (about 760px of row) and wrap otherwise; the row already wraps. */
+:where(.ContentPanel) > div > .row:has(> [class*="col-"] .us-staff-bulletin) > [class*="col-"]:not(:has(.us-staff-bulletin)) {
+  flex: 2 1 480px;
+  width: auto;
+  max-width: 100%;
+}
+
+:where(.ContentPanel) > div > .row:has(> [class*="col-"] .us-staff-bulletin) > [class*="col-"]:has(.us-staff-bulletin) {
+  flex: 1 1 280px;
+  width: auto;
+  max-width: 100%;
+}
 .us-staff-bulletin .QueryTemplateSet .card.QueryTemplateItem:has(> .card-body > .BulletinCard):not(:where(.us-report-no-styling, .us-report-no-styling *)):not(:where(.us-list--no-shell, .us-list--no-shell *, .template-list, .template-list *)) {
   border-inline-start: 3px solid var(--accent);
   isolation: isolate;
@@ -19352,6 +20883,19 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   padding: var(--space-8) var(--space-4);
   color: var(--text-muted);
   text-align: center;
+}
+
+/* Loading: the theme's spinning circles before the text, as beside the IQA
+   finder's "Searching…". Not while hidden, so the fold can close it. */
+.us-activity__empty.is-loading:not([hidden]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.us-activity__empty.is-loading > .section-loader-spinning-circles {
+  --size: .42px;
 }
 
 /* Footer: honest count, Show more, full history. */
@@ -20790,6 +22334,253 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 }
 
+/* Compact and full task rows (owner, 19 October 2026): one task row in two
+   versions, on the detail row's grid (us-task--detail), for the homepage, the
+   agreement page and the case page alike.
+   - us-task--compact (the default): title, then date, member and tags. A task
+     with a note gets a details button beside the pencil, which opens the
+     note under the row in place.
+   - us-task--full (optional): the note shows too, up to two lines, with a
+     More link when it is longer.
+   Both: the title is plain text and a pencil at the end of the row edits;
+   the badge and buttons share the title's first line, which never moves;
+   an opened note runs the full width below; tags end the meta line, the
+   first and "+2" (a button) for the rest. Templates:
+   Tasks-Compact-Query-Template.html and Tasks-Full-Query-Template.html.
+   Behaviour (More, details, tags, the slide) is US-TASK-ROWS in
+   zUnionSuite.js. Every rule names one of the two modifiers or an element
+   only they carry, so the detail row and the older row are unchanged. */
+
+/* One layout for both versions (owner, 19 October 2026): the title, badge
+   and buttons on the first line, which never moves; the note across the
+   full width below (under the buttons too), with a line for More; then the
+   date and member. The compact row simply has no note line until opened. */
+.us-task--detail:is(.us-task--full, .us-task--compact):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-template-areas:
+    "check title title aside"
+    "check note  note  note"
+    "check more  more  more"
+    "check due   meta  meta";
+}
+
+.us-task--full .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  -webkit-line-clamp: 2;
+}
+
+/* More / Less: a quiet text link at the start of its own line. The theme adds
+   it only when the note runs past two lines. */
+.us-task__more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: more;
+  justify-self: start;
+  margin: 1px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.us-task__more:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  text-decoration: underline;
+}
+
+.us-task__more:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+/* An open note shows in full. */
+.us-task--detail[data-us-task-expanded] .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* ── Compact ───────────────────────────────────────────────── */
+
+/* No note line until the details button opens it. The note stays in the
+   markup, so the list search still matches it. */
+.us-task--compact:not([data-us-task-expanded]) .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* An opened note starts clear of the pressed details button, whose fill
+   reaches about 11px below the title line (owner, 19 October 2026), and sits
+   a little apart from the meta line. */
+.us-task--compact[data-us-task-expanded] .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin: 10px 0 4px;
+}
+
+/* The details button: quiet like the pencil, and only on a task that has a
+   note. Pressed (open), it takes the link colour. */
+.us-task__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-task__details .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  font-size: 18px;
+}
+
+.us-task__details:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--bg-sunken);
+  color: var(--icon-hover-colour, var(--text-strong));
+}
+
+/* Open: the theme's one "on" state for toggles (the heading filter and
+   Show completed buttons), so it stands out on a hovered row too. */
+.us-task__details[aria-expanded="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)),
+.us-task__details[aria-expanded="true"]:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
+  background: var(--iqa-selected, var(--brand-100));
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
+  color: var(--iqa-link, var(--text-link));
+}
+
+@media (forced-colors: active) {
+  .us-task__details[aria-expanded="true"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    border: 2px solid Highlight;
+  }
+}
+
+.us-task__details:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+.us-task__details[aria-expanded="true"]:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14), var(--focus-ring);
+}
+
+.us-task--compact:has(.us-task__note:empty) .us-task__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* ── Both ──────────────────────────────────────────────────── */
+
+/* The badge and buttons sit on the title's first line (owner, 19 October
+   2026): with a long title they stay level with its start, so every pencil
+   is in the same place down the list. The title line is padded to the
+   badge's 22px, so the badge sits inside it and never meets the date line
+   (or "+2") below; only the 36px buttons' empty edges overhang the line,
+   instead of stretching it, so a short row stays tight. */
+.us-task--detail:is(.us-task--full, .us-task--compact) :is(a, span).us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding-block: 2px;
+}
+
+.us-task--detail:is(.us-task--full, .us-task--compact) > .us-task__aside:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin-block: -3px -11px;
+}
+
+/* The note runs the full width, so it is not held to the title's measure. */
+.us-task--detail:is(.us-task--full, .us-task--compact) .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  max-width: none;
+}
+
+/* The tick sits on the title's first line too, on every row (the detail
+   row's -5px, plus the title line's 2px padding). .us-task matches the
+   detail row's rule's weight, and this rule comes after it, so it wins. */
+.us-task.us-task--detail:is(.us-task--full, .us-task--compact) > .us-task__check:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  align-self: start;
+  margin-top: -3px;
+}
+
+/* Tags end the meta line, as quiet as the member: a tag icon, the first tag
+   and "+2" for the rest; all of them while the note is open. A task without
+   tags shows nothing. */
+.us-task--detail .us-task__tags:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  color: inherit;
+}
+
+.us-task--detail .us-task__tags > .ti:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  align-self: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.us-task--detail .us-task__tags-text:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* "+2" is a small button: it shows every tag in place. */
+.us-task--detail .us-task__tags-more:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline-start: 4px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  color: var(--text-strong);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-task--detail .us-task__tags-more:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--border);
+}
+
+.us-task--detail .us-task__tags-more:focus-visible:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  box-shadow: var(--focus-ring);
+}
+
+.us-task--detail .us-task__tags-text:focus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: none;
+}
+
+.us-task--detail .us-task__tags:has(> .us-task__tags-text:empty):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* A blank priority leaves no empty badge beside the pencil. */
+.us-task--detail .us-task__aside .us-badge:empty:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* ── Narrow lists ──────────────────────────────────────────── */
+@container us-tasks (max-width: 479.98px) {
+  .us-task--detail:is(.us-task--full, .us-task--compact):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    grid-template-areas:
+      "check title aside"
+      "check note  note"
+      "check more  more"
+      "check due   due"
+      "check meta  meta";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-task__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
+}
+
 /* US-TASK-ROWS:END */
 
 /* US-MILESTONES:START — us-milestones. Progress above the list (built by
@@ -21955,7 +23746,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   transform: translate(3px,-2px);
 }
 
-@media (hover:hover) and (pointer:fine) {
+@media (min-width: 951px) {
   #hd .us-taskbar__pip .us-taskbar__pip-button:not(:disabled):hover .pip-ear-left {
     transform: rotate(20deg);
   }
@@ -22363,24 +24154,14 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   }
 }
 
-/* Phone-width headers wrap their controls, leaving Biscuit no room beside the
-   logo. The disabled token also stops the script greeting on those screens, so
-   a hidden visit never consumes the daily greeting. */
-@media (max-width: 600px) {
+/* Below 1200px the header row needs Biscuit's 96px slot for its controls
+   (US-TASKBAR-LAYOUT); the approved design hides him first. The disabled
+   token also stops the script greeting on those screens, so a hidden visit
+   never consumes the daily greeting. */
+@media (max-width: 1199px) {
   #hd .us-taskbar__pip {
     --us-pip-enabled: 0;
     display: none;
-  }
-}
-
-@media (max-width:950px) {
-  #hd .us-taskbar__pip {
-    --biscuit-clip-height: 80.6px;
-    height: 44px;
-  }
-
-  #hd .us-taskbar__pip .pip-visitor {
-    transform: scale(.52);
   }
 }
 
@@ -22685,7 +24466,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
    side); pointing at the ID slides it left to the usual 10px and the icon
    slides in from the left into the space it leaves, fading up. The icon
    also shows while the button has keyboard focus, while the tick or the
-   error shows, and always where there is no hover (touch screens). The
+   error shows, and always at 950px or narrower (the touch width). The
    button still covers the whole chip, so the click target is unchanged. */
 .us-banner .us-banner__record-copy > .us-banner__record-id {
   padding-inline: 19px;
@@ -22719,7 +24500,7 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   opacity: 1;
 }
 
-@media (hover: none) {
+@media (max-width: 950px) {
   .us-banner .us-banner__record-copy > .us-banner__record-id {
     padding-inline: 10px 28px;
   }
@@ -24414,3 +26195,13 @@ html.hub-signin.hub-signin-holding * {
 }
 
 /* US-SIGNIN:END */
+
+
+/* US-GENERAL:START */
+
+/* rclean up general padding on content` */
+.main {
+	padding: 20px 15px;
+}
+
+/* US-GENERAL:END */

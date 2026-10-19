@@ -120,7 +120,7 @@ every page that uses the component; "opt-in" items need a class on the iPart.
 
 | # | Change | Before → after | Scope | Target |
 | --- | --- | --- | --- | --- |
-| 1 | Panel header tokens: min height, padding, title 15 → 14px, weight 700. Touch pointers 64 → 56px. | Header 56 → 44px | Site-wide: panels, IQA reports, list shells, Needs Attention heading | Tokens at the top of `zUnionSuite.css` and the `pointer: coarse` override |
+| 1 | Panel header tokens: min height, padding, title 15 → 14px, weight 700. 950px or narrower 64 → 56px. | Header 56 → 44px | Site-wide: panels, IQA reports, list shells, Needs Attention heading | Tokens at the top of `zUnionSuite.css` and the `max-width: 950px` override |
 | 2 | Section switcher: 30px buttons, 3px track, 72px minimum width, no separator. Touch keeps 44px. | About 54 → 38px | Site-wide: `us-section-tabs` | `US-SECTION-TABS` |
 | 3 | Banner uses v1's styling, in the one-row layout of item 20: status badges immediately left of the actions (8px, the actions' own spacing). 22px name, 48px avatar with a visible ring, uppercase fact labels, smaller member-status badge. Stacks as before below 900px. No template change (the summary becomes `display: contents`). | Banner 209 → 105px (166px wrapped); condensed 61px | Site-wide: all banners | `US-BANNER-COMPONENT` |
 | 4 | Needs Attention cards 96 → 72px, 26px numbers. Leaving out the `<header>` is the no-header mode; no class needed. | Tracker 152 → 76px | Site-wide: `us-attention` | `US-ATTENTION` |

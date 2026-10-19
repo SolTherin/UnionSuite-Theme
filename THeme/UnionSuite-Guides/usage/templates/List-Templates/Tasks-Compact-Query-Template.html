@@ -1,0 +1,31 @@
+<div class="us-task us-task--detail us-task--compact" data-us-task-completed="{#query.IsCompleted}"
+  data-us-task-due-state="{#query.DueState}" data-us-task-due-label="{#query.DueLabel}"
+  data-us-task-party-id="{#query.TaskPartyId}" data-us-task-ordinal="{#query.TaskOrdinal}"
+  data-us-search="{#query.TaskTitle} {#query.TaskNote} {#query.MemberName} {#query.TaskTags} {#query.PriorityBadge}">
+  <button type="button" class="us-task__check" data-us-task-toggle
+    role="checkbox" aria-checked="false" aria-label="Complete task: {#query.TaskTitle}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>
+  </button>
+  <div class="us-task__open">
+    <span class="us-task__copy">
+      <span class="us-task__title">{#query.TaskTitle}</span>
+      <span class="us-task__note">{#query.TaskNote}</span>
+    </span>
+    <span class="us-task__meta">
+      <span class="us-task__member">
+        <i class="ti ti-user-filled" aria-hidden="true"></i>
+        <a class="us-task__member-name" href="{#query.MemberUrl}" data-id="{#query.MemberId}">{#query.MemberName}</a>
+      </span>
+      <span class="us-task__tags" data-us-task-tags="{#query.TaskTags}">
+        <i class="ti ti-tag" aria-hidden="true"></i>
+        <span class="us-task__tags-text">{#query.TaskTags}</span>
+      </span>
+    </span>
+    <span class="us-task__date">{#query.TaskDateLabel}</span>
+  </div>
+  <span class="us-task__aside">
+    <span class="us-badge us-badge--danger">{#query.PriorityBadge}</span>
+    <button type="button" class="us-task__details" aria-expanded="false" aria-label="Show details: {#query.TaskTitle}" title="Show details"><i class="ti ti-file-description" aria-hidden="true"></i></button>
+    <button type="button" class="us-action-home-edit-task" data-us-task-url="{#query.TaskUrl}"></button>
+  </span>
+</div>

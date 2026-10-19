@@ -153,6 +153,37 @@ const detailExample = {
     {TaskTitle:'Send Alex the renewal summary',MemberName:'Alex Morgan',MemberUrl:'#example',MemberId:'',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'true',DueState:'none',TaskDateLabel:'Actioned 11 September 2026',DueLabel:'Due 9 September 2026',TaskUrl:'#example',TaskNote:'Summary emailed with the fee schedule attached.'}
   ]
 };
+// Compact and full task rows (US-TASK-ROWS 1.2, owner, 19 October 2026): one
+// row in two versions for the homepage, agreement and case pages. Compact is
+// the default; full shows the note as well. The title is plain text and the
+// pencil edits; tags end the meta line.
+const taskRowRecords = [
+  {TaskTitle:'Call Alex about renewal',MemberName:'Alex Morgan',MemberUrl:'#example',MemberId:'',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'overdue',TaskDateLabel:'Overdue 10 September 2026',DueLabel:'Overdue 10 September 2026',TaskUrl:'#example',PriorityBadge:'High Priority',TaskTags:'Membership, Renewal, Phone call',TaskNote:'Discuss the membership options sent earlier this week and confirm which tier he wants before the renewal lapses. He asked for the comparison sheet and the payroll deduction form, and wants a call back after 3pm on weekdays.'},
+  {TaskTitle:'Confirm updated workplace details',MemberName:'Jordan Lee',MemberUrl:'#example',MemberId:'',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'today',TaskDateLabel:'Due today',DueLabel:'Due today',TaskUrl:'#example',PriorityBadge:'',TaskTags:'Correspondence',TaskNote:'New site address supplied by the delegate; check it against the employer record.'},
+  {TaskTitle:'Ring back',MemberName:'Jo Ng',MemberUrl:'#example',MemberId:'',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'false',DueState:'soon',TaskDateLabel:'Due 18 September 2026',DueLabel:'Due 18 September 2026',TaskUrl:'#example',PriorityBadge:'',TaskTags:'',TaskNote:''},
+  {TaskTitle:'Send Alex the renewal summary',MemberName:'Alex Morgan',MemberUrl:'#example',MemberId:'',TaskPartyId:'',TaskOrdinal:'',IsCompleted:'true',DueState:'none',TaskDateLabel:'Actioned 11 September 2026',DueLabel:'Due 9 September 2026',TaskUrl:'#example',PriorityBadge:'',TaskTags:'Correspondence',TaskNote:'Summary emailed with the fee schedule attached.'}
+];
+const taskRowOptional = 'These aliases are suggested mappings, not verified iMIS fields. The query composes TaskDateLabel in long form, including the words Overdue, Due and Actioned (Overdue 10 September 2026, Due today), so the row never depends on colour alone. The pencil (us-action-home-edit-task) opens TaskUrl in the native popup; on the agreement or case page use that page\u2019s edit action instead. TaskTags lists the task\u2019s tags, comma-separated, from the task tag list; blank shows none. Supply TaskPartyId and TaskOrdinal to save completion, as for the detail row; this example leaves both blank, so its checkboxes stay local.';
+const compactExample = {
+  id:'task-compact', title:'Task list: compact (default)', panelTitle:'My tasks',
+  description:'Title, then the date, member and tags; the High Priority badge, a details button and the pencil on the title line. The details button opens the note under the row; +2 shows the rest of the tags.',
+  file:'Tasks-Compact-Query-Template.html', classes:'us-query-search us-task-completed-filter', rows:5,
+  cards:false, footer:'Tasks-Query-Footer.html',
+  query:'Use your tasks query, filtered to the current staff member. Return outstanding tasks and tasks completed in the last 30 days.',
+  order:'Outstanding first, then recently completed. The query owns sorting and the completion date window.',
+  fields:fields['Tasks-Compact-Query-Template.html'],
+  optional:taskRowOptional,
+  empty:'No tasks to show.',
+  records:taskRowRecords
+};
+const fullExample = {
+  ...compactExample,
+  id:'task-full', title:'Task list: full (optional)',
+  description:'The compact row with the note shown under the title, up to two lines; a longer note gets More, which opens it in place.',
+  file:'Tasks-Full-Query-Template.html',
+  fields:fields['Tasks-Full-Query-Template.html']
+};
+module.exports.push(compactExample, fullExample);
 module.exports.push(detailExample);
 module.exports.push(completionExample, {
   ...completionExample, id:'task-completed-only', title:'Completion filter only',

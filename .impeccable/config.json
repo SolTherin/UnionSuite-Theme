@@ -119,6 +119,24 @@
         ],
         "createdAt": "2026-10-06T21:29:07.424Z",
         "reason": "Claude: comparison-page chrome (toolbar, option headings, notes) shared by every *-compare.html research page; the panels under review use the theme's own type scale"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/priority-compare.html"
+        ],
+        "createdAt": "2026-10-19T06:39:05.945Z",
+        "reason": "Claude: comparison-page scaffolding (toolbar, card titles), not shipped UI; the options under review use the theme's own form type sizes"
+      },
+      {
+        "rule": "monotonous-spacing",
+        "value": "*",
+        "files": [
+          "prototypes/wip/agreement-page/popup-types.html"
+        ],
+        "createdAt": "2026-10-19T09:47:39.566Z",
+        "reason": "Claude: mock-up page scaffolding repeats the theme --space tokens; the form's own rhythm (6px label gaps, 12px groups, 20px between fields) comes from the embed's styles read at load"
       }
     ]
   }

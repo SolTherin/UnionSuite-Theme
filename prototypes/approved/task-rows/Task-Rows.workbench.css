@@ -131,6 +131,14 @@ body {
   border-color: var(--accent);
 }
 
+.wb-variant:is(.wb-variant--compact, .wb-variant--full) .wb-variant__label {
+  color: var(--text-link);
+}
+
+.wb-variant:is(.wb-variant--full, .wb-variant--compact) > .wb-stage__frame {
+  border-color: var(--text-link);
+}
+
 @media (max-width: 700px) {
   .wb-head {
     padding: 28px 16px 8px;

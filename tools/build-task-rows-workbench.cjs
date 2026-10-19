@@ -40,7 +40,10 @@ function sharedScript() {
   return [
     source.split('/* US-BANNER-BEHAVIOUR:START */')[0],
     source.match(/\/\* US-ACTION-ICONS:START \*\/[\s\S]*?\/\* US-ACTION-ICONS:END \*\//)[0],
-    source.match(/\/\* US-TASK-ROWS:START[\s\S]*?US-TASK-ROWS:END \*\//)[0]
+    source.match(/\/\* US-TASK-ROWS:START[\s\S]*?US-TASK-ROWS:END \*\//)[0],
+    // The task title is the home.open-task action (a link); without the
+    // site's definitions the theme draws it as an unconfigured button.
+    read('THeme/UnionSuite/Scripts/ActionDefinitions.js')
   ].join('\n');
 }
 

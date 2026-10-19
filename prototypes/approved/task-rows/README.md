@@ -1,7 +1,12 @@
 # Task row display
 
-**Status: accepted and implemented.** This layout is the task list format for new
-lists, on the homepage and on a dedicated tasks page.
+**Status (19 October 2026): the compact row is the task list format** for the
+homepage, the agreement page and the case page, with the full row as an option;
+both are implemented. The detail row below was the accepted format before them
+and stays supported. See [Compact and full rows](#compact-and-full-rows-19-october-2026).
+
+**Earlier status: accepted and implemented.** The detail layout was the task list
+format for new lists, on the homepage and on a dedicated tasks page.
 
 - Template: `THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html`
 - Styles: the `US-TASK-ROWS` section of `THeme/UnionSuite/zUnionSuite.css`, opted
@@ -15,6 +20,46 @@ The older two-line row stays supported for lists already using it; every rule fo
 the accepted layout carries the `us-task--detail` modifier, so nothing existing
 changed. This folder keeps the workbench that the format was designed in, and the
 record of what was decided and why.
+
+## Compact and full rows (19 October 2026)
+
+**Problem.** The homepage (My Tasks) and the agreement page showed tasks
+differently: the homepage had the detail row with a note line, a title that opened
+the task and long-form dates; the agreement page a compact row with no note, a
+pencil to edit, a High Priority badge and short dates ("9/09/2026 - Overdue").
+
+**Owner decisions (19 October 2026).**
+
+- One row in two versions for the homepage, agreement and case pages:
+  **compact** (the default, `us-task--compact`) and **full** (optional,
+  `us-task--full`, the note shown too). Both keep `us-task--detail`.
+- Long-form dates on every page ("Overdue 10 September 2026", "Due today"),
+  composed by the query.
+- "Personal Task" for the signed-in user's tasks on every page (the existing
+  `MemberId` check).
+- One edit action: the **pencil**; the title is plain text.
+- The note is read in place, not in a popup: the compact row's **details button**
+  opens it under the row; the full row shows two lines with **More**. Notes slide
+  open and shut (200ms, the theme ease; instant with reduced motion).
+- Layout: the title, badge and buttons share the first line, which never moves,
+  and stay level with a long title's first line; the title line is padded to the
+  badge's 22px so the badge never meets the line below; an opened note runs the
+  full width below, starting clear of the pressed details button.
+- **Tags** end the date and member line, muted: the first and a "+2" button that
+  shows the rest; an open note shows them all; from the separate task tag list.
+- An open details button wears the theme's one toggle "on" state.
+- One set of **column names** for every task list (the guide's), so one IQA shape
+  serves all three pages; renaming the agreement and case IQA columns is in
+  TODO.md.
+
+**Where it lives.** `US-TASK-ROWS` 1.2 in `zUnionSuite.css` and `zUnionSuite.js`;
+`home.edit-task` in `Scripts/ActionDefinitions.js`; the guide's
+`Tasks-Compact-Query-Template.html` and `Tasks-Full-Query-Template.html` with
+field definitions, the `#task-rows` section and the `#task-compact` /
+`#task-full` examples; the agreement and case pages' task templates
+(`prototypes/wip/agreement-page/templates/Agreement-Tasks-Query-Template.html`,
+`prototypes/wip/case-page/templates/Case-Tasks-Query-Template.html`). The
+workbench shows both as **Compact (default)** and **Full**.
 
 ## Problem
 

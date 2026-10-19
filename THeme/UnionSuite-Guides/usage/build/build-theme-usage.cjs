@@ -14,6 +14,7 @@ const reportIconExample = require('./report-icon-example.cjs');
 const popupActionExample = require('./popup-action-example.cjs');
 const queryTemplateRefreshExample = require('./query-template-refresh-example.cjs');
 const inlineComposerExample = require('./inline-composer-example.cjs');
+const casePartiesExample = require('./case-parties-example.cjs');
 const actionConflictExample = require('./action-conflict-example.cjs');
 const membership = require('./membership-stats-example.cjs');
 const actionBuilder = require('./build-action-builder.cjs');
@@ -50,8 +51,11 @@ const snippets = {
   'case-details': ['THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html', read('THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html')],
   'copy-button': ['THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html')],
   'contact-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html')],
+  'case-parties': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html')],
   'system-alert': ['THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html', read('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html')],
   attention: ['THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html', read('THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html')],
+  'task-compact-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Compact-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Compact-Query-Template.html')],
+  'task-full-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Full-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Full-Query-Template.html')],
   'task-detail-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Detail-Query-Template.html')],
   'task-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Completion-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Completion-Query-Template.html')],
   'task-footer': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Query-Footer.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Query-Footer.html')],
@@ -131,6 +135,8 @@ allSources.push(...require('./query-empty-example.cjs').sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/home-task-empty-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/report-icon-example.cjs');
 allSources.push(...require('./panel-title-icons-example.cjs').sources);
+allSources.push(...require('./where-used-example.cjs').sources);
+allSources.push(...require('./iqa-finder-example.cjs').sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/popup-action-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/action-conflict-example.cjs');
 allSources.push(...require('./unified-action-example.cjs').sources);
@@ -141,6 +147,7 @@ allSources.push(...require('./heading-toggle-reference.cjs').sources);
 allSources.push(...membership.sources);
 allSources.push(...actionBuilder.sources);
 allSources.push(...inlineComposerExample.sources);
+allSources.push(...casePartiesExample.sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite-Guides/usage/examples/Query-Template-Refresh.js');
 allSources.push('THeme/UnionSuite-Guides/usage/build/embedded-cco-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/iqa-expand-example.cjs','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.html','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.css','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.js');
@@ -225,6 +232,8 @@ const inserts = {
  ATTENTION_DEMO: iframe('attention-demo','Needs Attention: four IQA count cards',require('./attention-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  SYSTEM_ALERT_TEMPLATE: snippet('system-alert'),
  ATTENTION_TEMPLATE: snippet('attention'),
+ TASK_COMPACT_ROW_TEMPLATE: snippet('task-compact-row'),
+ TASK_FULL_ROW_TEMPLATE: snippet('task-full-row'),
  TASK_DETAIL_ROW_TEMPLATE: snippet('task-detail-row'),
  QUERY_TEMPLATE_REFRESH_DEMO: iframe('query-template-refresh-demo', 'Query Template refresh and restored task controls', queryTemplateRefreshExample({read, css:nativePreviewCss+theme, themeJs}), true),
  INLINE_COMPOSER_DEMO: iframe('inline-composer-demo', 'Adding a task in place: the composer, holding row and quiet insert', inlineComposerExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
@@ -233,14 +242,18 @@ const inserts = {
  HOME_TASK_EMPTY_DEMO: iframe('home-task-empty-demo','Biscuit: no outstanding tasks',require('./home-task-empty-example.cjs').documentHtml(),true),
  HOME_TASK_EMPTY_TEMPLATE: snippet('task-no-results'),
  CONTACT_ROW_TEMPLATE: snippet('contact-row'),
+ CASE_PARTIES_DEMO: iframe('case-parties-demo', 'Case parties: the list, the chosen party and their details', casePartiesExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
+ CASE_PARTIES_TEMPLATE: snippet('case-parties'),
  TASK_FOOTER_TEMPLATE: snippet('task-footer'),
  REPORT_ICON_DEMO: iframe('report-icon-demo','Generated report icon actions',reportIconExample.documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
+ IQA_FINDER_DEMO: iframe('iqa-finder-demo','IQA browser: search, favourites and recent',require('./iqa-finder-example.cjs').documentHtml({nativePreviewCss,theme,iconCss,branding:clientRoots}),true),
+ WHERE_USED_DEMO: iframe('where-used-demo','IQA designer: Show Usage drawer',require('./where-used-example.cjs').documentHtml({nativePreviewCss,theme,iconCss,branding:clientRoots}),true),
  PANEL_TITLE_ICONS_DEMO: iframe('panel-title-icons-demo','Panel titles typed with an icon token',require('./panel-title-icons-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
  POPUP_ACTION_DEMO: iframe('popup-action-demo','Native popup action example',popupActionExample.documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  ACTION_CONFLICT_DEMO: iframe('action-conflict-demo','Duplicate action detection example',actionConflictExample.documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  UNIFIED_ACTION_DEMO: iframe('unified-action-demo','Shared buttons, menus and row actions',require('./unified-action-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,branding:clientRoots}),true),
  WELCOME_DEMO: iframe('welcome-demo', 'Shared home page welcome header', `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${nativePreviewCss}\n${theme}\n${clientRoots}\nhtml{height:auto}body{margin:0;padding:20px;height:auto;min-height:0;background:var(--bg-page)}</style><body><div class="ContentItemContainer"><div class="home-welcome-message"><div class="panel"><div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList"><section><div class="QueryTemplateItem">${snippets.welcome[1]}</div></section></div></div></div></div></div></div></body></html>`, true),
- CREDENTIALS_DEMO: iframe('credentials-demo', 'Native User credentials control with us-credentials (staff login)', `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${nativePreviewCss}\n${theme}\n${clientRoots}\nhtml{height:auto}body{margin:0;padding:20px;height:auto;min-height:0;background:var(--bg-page)}</style><body><div class="ContentWizardDisplay ClearFix"><div><div class="row"><div class="col-sm-12"><div class="WebPartZone">${read('THeme/UnionSuite-Guides/usage/examples/User-Credentials-Native.html')}</div></div></div></div></div><script>${themeJs.match(/\/\* US-CREDENTIALS:START[\s\S]*?US-CREDENTIALS:END \*\//)[0]}\n/* Guide only: Bootstrap collapse, which iMIS loads. */document.addEventListener('click',event=>{const toggle=event.target.closest('[data-toggle="collapse"]');if(!toggle)return;event.preventDefault();const body=document.querySelector(toggle.getAttribute('href'));const open=!body.classList.contains('in');body.classList.toggle('in',open);document.querySelectorAll('[data-toggle="collapse"][href="'+toggle.getAttribute('href')+'"]').forEach(link=>link.classList.toggle('collapsed',!open));});document.addEventListener('click',event=>{if(event.target.closest('a[href="#"], input[type=image], input[type=button]'))event.preventDefault();});<\/script></body></html>`, true),
+ CREDENTIALS_DEMO: iframe('credentials-demo', 'Native User credentials control with us-credentials (staff login)', `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${nativePreviewCss}\n${theme}\n${clientRoots}\nhtml{height:auto}body{margin:0;padding:20px;height:auto;min-height:0;background:var(--bg-page)}</style><body><div class="ContentWizardDisplay ClearFix"><div><div class="row"><div class="col-sm-12"><div class="WebPartZone">${read('THeme/UnionSuite-Guides/usage/examples/User-Credentials-Native.html')}</div></div></div></div></div><script>${themeJs.match(/\/\* US-CREDENTIALS:START[\s\S]*?US-CREDENTIALS:END \*\//)[0]}\n${themeJs.match(/\/\* US-COPY:START[\s\S]*?US-COPY:END \*\//)[0]}\n/* Guide only: Bootstrap collapse, which iMIS loads. */document.addEventListener('click',event=>{const toggle=event.target.closest('[data-toggle="collapse"]');if(!toggle)return;event.preventDefault();const body=document.querySelector(toggle.getAttribute('href'));const open=!body.classList.contains('in');body.classList.toggle('in',open);document.querySelectorAll('[data-toggle="collapse"][href="'+toggle.getAttribute('href')+'"]').forEach(link=>link.classList.toggle('collapsed',!open));});document.addEventListener('click',event=>{if(event.target.closest('a[href="#"], input[type=image], input[type=button]'))event.preventDefault();});<\/script></body></html>`, true),
  // Guide only: a srcdoc frame has no address, so the record the send page
  // reads from AgreementID=A107 is supplied in place of location.search.
  SUBJECT_TAG_DEMO: iframe('subject-tag-demo', 'Create Communication with us-agreement-comms: the agreement tag fixed at the start of the subject', `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${nativePreviewCss}\n${theme}\n${clientRoots}\nhtml{height:auto}body{margin:0;padding:20px;height:auto;min-height:0;background:var(--bg-page)}</style><body class="us-agreement-comms-page"><div class="WebPartZone">${read('THeme/UnionSuite-Guides/usage/examples/Communication-Creator-Header-Native.html')}</div><script>${themeJs.match(/\/\* US-SUBJECT-TAG:START[\s\S]*?US-SUBJECT-TAG:END \*\//)[0].replace('location.search', "'?AgreementID=A107'")}\ndocument.addEventListener('click',event=>{if(event.target.closest('input[type=button]'))event.preventDefault();});<\/script></body></html>`, true),

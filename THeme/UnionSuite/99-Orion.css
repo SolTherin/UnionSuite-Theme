@@ -30,8 +30,13 @@
   position: static;
 }
 
+/* Clip sideways overflow whether the sidebar is open or collapsed. Layout
+   rows keep Bootstrap's negative side margins; where a full-width section
+   (such as a CCO page) reaches the window edge, that 20px overhang otherwise
+   gave the collapsed layout a horizontal scrollbar. Clip, unlike hidden,
+   creates no scroll container, so sticky descendants keep working. */
 @media only screen {
-  .sidebar-fixed .wrapper.nav-expanded {
+  .sidebar-fixed .wrapper {
     overflow-x: clip;
   }
 }
@@ -122,39 +127,30 @@ body.loaded .nav-expanded .col-secondary {
   }
 }
 
+/* Collapsed tablet sidebar: a slim full-height rail holding the expand
+   button, with the page content after it. It replaces native Orion's
+   floating 42px tab, which pinned record banners and other top-fixed
+   content slid underneath. The header already reserves the same 42px. */
 @media (min-width: 768px) and (max-width: 991px) {
   .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary {
     width: 42px;
-    height: 42px;
-    border-radius: 0px 8px 8px 0px;
+    height: 100%;
     position: fixed;
     left: 0px;
-    top: 8px;
+    top: 0px;
     z-index: 1031;
   }
-}
 
-@media (min-width: 768px) and (max-width: 991px) and (min-width: 992px) {
-  .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary {
-    top: 16px;
+  .sidebar-fixed .wrapper:not(.nav-expanded) .col-primary,
+  .sidebar-fixed .wrapper:not(.nav-expanded) .footer-main {
+    margin-left: 42px;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
-  .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary.setNavTop {
-    top: 8px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) and (min-width: 992px) {
-  .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary.setNavTop {
-    top: 16px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
+  /* 13px keeps the button where the floating tab drew it (8px + 5px). */
   .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary .primary-nav-toggle {
-    margin: 5px 0px 0px 5px;
+    margin: 13px 0px 0px 5px;
   }
 
   .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary .primary-nav-toggle:after {
@@ -163,7 +159,7 @@ body.loaded .nav-expanded .col-secondary {
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) and (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 991px) {
   .sidebar-fixed .wrapper:not(.nav-expanded) .navbar-header {
     margin-left: calc(26px + 1em);
   }
@@ -175,34 +171,33 @@ body.loaded .nav-expanded .col-secondary {
   }
 }
 
+/* Touch devices use the same slim rail at every width from 768px, because
+   the icon rail's hover flyouts need a pointer. Below 768px the collapsed
+   rail stays hidden (above), and the phone navigation bar takes over. */
 .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary {
   width: 42px;
-  height: 42px;
-  border-radius: 0px 8px 8px 0px;
+  height: 100%;
   position: fixed;
   left: 0px;
-  top: 8px;
+  top: 0px;
   z-index: 1031;
 }
 
-@media (min-width: 992px) {
-  .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary {
-    top: 16px;
-  }
-}
-
-.js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary.setNavTop {
-  top: 8px;
-}
-
-@media (min-width: 992px) {
-  .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary.setNavTop {
-    top: 16px;
+@media (min-width: 768px) {
+  .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-primary,
+  .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .footer-main {
+    margin-left: 42px;
   }
 }
 
 .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary .primary-nav-toggle {
-  margin: 5px 0px 0px 5px;
+  margin: 13px 0px 0px 5px;
+}
+
+@media (min-width: 992px) {
+  .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary .primary-nav-toggle {
+    margin-top: 21px;
+  }
 }
 
 .js-touch-device .sidebar-fixed .wrapper:not(.nav-expanded) .col-secondary .primary-nav-toggle:after {
@@ -874,6 +869,9 @@ input[type="color"],
   }
 }
 
+/* Field focus takes the theme's focus colour and glow (owner, 19 October
+   2026); these were Bootstrap's light blue (#66afe9). The same tokens are
+   used for the combo, input and Chosen focus states below. */
 select:focus,
 textarea:focus,
 input[type="text"]:focus,
@@ -892,9 +890,9 @@ input[type="tel"]:focus,
 input[type="color"]:focus,
 .uneditable-input:focus,
 .input-fake:focus {
-  border-color: #66afe9;
+  border-color: var(--field-focus-colour);
   outline: 0;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: var(--field-focus-glow);
 }
 
 select::placeholder,
@@ -920,9 +918,9 @@ input[type="color"]::placeholder,
 }
 
 .input-fake:focus-within {
-  border-color: #66afe9;
+  border-color: var(--field-focus-colour);
   outline: 0;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: var(--field-focus-glow);
 }
 
 /* Upload file button*/
@@ -999,9 +997,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:focus {
 }
 
 .RadComboBox.RadComboBox_MetroTouch .rcbFocused {
-  border-color: #66afe9;
+  border-color: var(--field-focus-colour);
   outline: 0;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: var(--field-focus-glow);
 }
 
 .RadComboBox.RadComboBox_MetroTouch .rcbInput {
@@ -1067,7 +1065,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:focus {
 .RadInput.RadInput.riSingle .riTextBox:focus,
 .RadInput.RadInput .riTextBox:focus,
 .RadInput .riTextBox:focus {
-  border-color: #66afe9;
+  border-color: var(--field-focus-colour);
 }
 
 .RadUpload.RadUpload .ruFakeInput {
@@ -1122,9 +1120,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:focus {
 }
 
 .chosen-container-active .chosen-choices {
-  border-color: #66afe9;
+  border-color: var(--field-focus-colour);
   outline: 0;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: var(--field-focus-glow);
 }
 
 input[type="radio"],
@@ -1164,10 +1162,13 @@ select[size] {
   height: auto;
 }
 
-select:focus,
-input[type="file"]:focus,
-input[type="radio"]:focus,
-input[type="checkbox"]:focus {
+/* Keyboard focus only (owner, 19 October 2026): on :focus, a mouse click
+   left the browser's ring drawn inside every themed checkbox. Checkboxes
+   and radios take the theme's own outside ring (zUnionSuite.css). */
+select:focus-visible,
+input[type="file"]:focus-visible,
+input[type="radio"]:focus-visible,
+input[type="checkbox"]:focus-visible {
   outline: thin dotted #333;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
@@ -2067,6 +2068,19 @@ fieldset.ShowFieldset legend,
    iPart class wrappers live below the zone and do not affect this match. */
 :where(.ContentPanel, .ContentWizardDisplay, .EmptyMasterContentPanel) > div > .row:where(:has(> * > .ContentItemContainer > .WebPartZone)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --bs-gutter-x: 24px;
+}
+
+/* Popups (owner, 19 October 2026). The popup layout has no padding round
+   its layout row to take the row's negative margins, so the row stuck out
+   by half a gutter each side and the popup scrolled sideways. A row of one
+   column needs no gutter: its content sits where it did, flush. A row of
+   several keeps the gaps between its columns and stays inside the popup. */
+.EmptyMasterContentPanel > div > .row:where(:has(> * > .ContentItemContainer > .WebPartZone)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-inline: 0;
+}
+
+.EmptyMasterContentPanel > div > .row:where(:has(> * > .ContentItemContainer > .WebPartZone)):not(:has(> :nth-child(2))):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  --bs-gutter-x: 0px;
 }
 
 /* US-PAGE-LAYOUT-GUTTERS:END */
@@ -4617,6 +4631,37 @@ input[type="button"].header-search-submit {
   margin-inline: 0;
   background-position: left center;
   flex-shrink: 0;
+}
+
+/* The brand box follows the sidebar, on the sidebar's own timing (.col-
+   secondary: 0.3s opening, 0.1s closing). It stays centred in both states;
+   closed, it is only as wide as the logo, so only its width and the logo's
+   background position change, and both animate. The width animates from
+   auto where interpolate-size is supported (Chromium 129+); elsewhere it
+   changes at once and only the logo's own centring slides. */
+#hd > #masterTopBarAuxiliary > .navbar-left {
+  justify-content: center;
+  interpolate-size: allow-keywords;
+}
+
+body.loaded #hd > #masterTopBarAuxiliary > .navbar-left {
+  transition: width 0.1s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+body.loaded #hd > #masterTopBarAuxiliary > .navbar-left > a.logo {
+  transition: background-position 0.1s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+body.loaded .wrapper.nav-expanded #hd > #masterTopBarAuxiliary > .navbar-left,
+body.loaded .wrapper.nav-expanded #hd > #masterTopBarAuxiliary > .navbar-left > a.logo {
+  transition-duration: 0.3s;
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+  body.loaded #hd > #masterTopBarAuxiliary > .navbar-left,
+  body.loaded #hd > #masterTopBarAuxiliary > .navbar-left > a.logo {
+    transition: none;
+  }
 }
 
 @media (min-width:768px) {

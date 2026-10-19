@@ -2919,7 +2919,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts,.us-case-parties):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -2939,7 +2939,9 @@ SOFTWARE.
     'us-agreement-milestones': ['us-query-template', 'us-milestones', 'us-milestones--bar', 'us-milestones--reorder', 'us-task-completed-filter', 'us-task-progress', 'us-action-agreements-add-milestone'],
     'us-agreement-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-agreements-add-meeting'],
     'us-agreement-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-list-scroll', 'us-action-agreements-upload-attachment'],
-    'us-agreement-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-list-scroll', 'us-action-agreements-add-note'],
+    // No us-list-scroll: Notes has the Activity tab's Notes section to itself,
+    // so the page scrolls instead of a 414px box (owner, 19 October 2026).
+    'us-agreement-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-action-agreements-add-note'],
     // Expandable rows (US-TERMS, decided 4 October 2026). Bulk remove before
     // Add term, so the primary action ends the heading.
     'us-agreement-terms': ['us-query-template', 'us-terms', 'us-query-search', 'us-list-scroll', 'us-action-agreements-remove-terms', 'us-action-agreements-add-term'],
@@ -2948,7 +2950,10 @@ SOFTWARE.
     // Coverage rules as rule groups (US-COVERAGE-RULES, decided 4 October 2026).
     'us-agreement-coverage': ['us-query-template', 'us-coverage-rules', 'us-action-agreements-edit-coverage'],
     // The contacts scripts also read this class for the agreement's search wording.
-    'us-agreement-contacts': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-facets', 'us-contacts-group-filter', 'us-contacts-group-tone', 'us-query-search', 'us-action-agreements-add-contact', 'us-action-agreements-email-contacts']
+    'us-agreement-contacts': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-facets', 'us-contacts-group-filter', 'us-contacts-group-tone', 'us-query-search', 'us-action-agreements-add-contact', 'us-action-agreements-email-contacts'],
+    // Case parties as a list and a preview (US-CASE-PARTIES, owner, 8 October
+    // 2026): the primary party first, since an IQA cannot sort on it.
+    'us-case-parties': ['us-query-template', 'us-parties', 'us-query-search', 'us-contacts-lead-first', 'us-action-cases-add-party']
   };
 
   // Idempotent: once the classes are present no further mutation is recorded,
@@ -4521,6 +4526,362 @@ SOFTWARE.
   window.UnionSuiteContactGroups = Object.freeze({refresh: schedule, version: '1.0'});
 })();
 /* US-CONTACT-GROUPS:END */
+
+/* US-LEAD-FIRST:START — us-contacts-lead-first: the lead at the top of the list.
+   On a Query Template Display whose iPart CSS class includes
+   us-contacts-lead-first, the result whose row has data-us-contact-lead
+   true (any case) or 1 moves to the top of the list; the rest keep the
+   IQA's order. The lead (a case's lead staff member or primary party) is
+   usually worked out in the IQA from a value stored on the parent record
+   ([Cases].[LeadStaffID] = the row's contact), and an IQA cannot sort on a
+   custom SQL expression (owner, 13 October 2026). It runs whenever the
+   rows or the lead change (load, refresh, quiet insert, a row patch, Make
+   lead), before the browser paints them, so the list never shows the lead
+   anywhere else. A move that already puts the lead first (the Make lead
+   slide) is left alone. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteLeadFirst) return;
+
+  const SELECTOR = '.us-contacts-lead-first .QueryTemplateSet';
+  const isLead = section => /^(true|1)$/i.test((section.querySelector('[data-us-contact-lead]')?.getAttribute('data-us-contact-lead') || '').trim());
+
+  function pin(set) {
+    const sections = [...set.children].filter(child => child.localName === 'section');
+    const lead = sections.find(isLead);
+    if (lead && lead !== sections[0]) sections[0].before(lead);
+  }
+
+  function refresh() {
+    document.querySelectorAll(SELECTOR).forEach(set => {
+      if (!set.closest('.us-report-no-styling')) pin(set);
+    });
+  }
+
+  // A lead changing, the class arriving (a section preset), or rows or a
+  // whole list arriving.
+  const relevant = record => record.type === 'attributes'
+    ? record.attributeName === 'data-us-contact-lead' || Boolean(record.target.classList?.contains('us-contacts-lead-first'))
+    : [...record.addedNodes].some(node => node.nodeType === 1 &&
+      (node.localName === 'section' || node.matches('.QueryTemplateSet, .us-contacts-lead-first') || node.querySelector('.QueryTemplateSet')));
+
+  new MutationObserver(records => {
+    if (records.some(relevant)) refresh();
+  }).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['data-us-contact-lead', 'class']
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh);
+  else refresh();
+
+  window.UnionSuiteLeadFirst = Object.freeze({refresh, version: '1.0'});
+})();
+/* US-LEAD-FIRST:END */
+
+/* US-CASE-PARTIES:START — us-parties: a case's parties as a list and a
+   preview (owner, 8 October 2026). Author class: the us-case-parties preset.
+
+   On a Query Template Display with us-parties, each row (the guide's Case
+   parties template) is a selectable card (.us-party__select) with its
+   preview hidden inside it (.us-party__detail). This script:
+   - adds the preview pane beside the list, inside the panel body, which
+     becomes the grid (us-parties__columns; its container,
+     us-parties__layout, sizes it). The list itself is not moved: the
+     theme finds a Query Template's rows directly in the panel body, and
+     its search and actions stop working if they are wrapped;
+   - shows the chosen row's detail in the pane, moving it there and back,
+     so each row's details (US-FIELD-GROUPS) load once, when first shown,
+     and stay loaded;
+   - chooses the primary party first (data-us-contact-lead), or else
+     the first row;
+   - puts a toolbar at the top of the list column (owner, 8 October 2026:
+     the search and the email act on the list, so they sit over it, not in
+     the panel heading over the preview): the theme's search field, always
+     showing (moved from its folded filter area, as US-QUERY-SEARCH-HEADER
+     does), the Email parties button (cases.email-parties), and a
+     line saying who it emails: "4 parties · Email sends to all", or
+     "1 of 4 shown · Email sends to those shown";
+   - adds a Select toggle to that toolbar (owner, 8 October 2026): while it
+     is on, each card has a checkbox, the line counts the ticked ("2 of 4
+     selected") with Select all and Clear, and Email parties sends to
+     exactly the ticked. Ticking does not change the preview; turning the
+     toggle off clears the ticks;
+   - marks the chosen card aria-pressed="true" and names the pane after the
+     person, so a screen reader hears what changed;
+   - keeps a choice the search hides until another is made, and picks again
+     when an in-place refresh replaces the rows.
+   The actions (cases.set-primary-party, cases.email-parties,
+   cases.add-party) are defined by the site, not here. Without the script
+   every row stays a plain card and the details stay hidden. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteCaseParties) return;
+
+  const SELECTOR = '.us-parties';
+  const states = new Map();
+  let queued = false;
+
+  function rows(set) {
+    return [...set.querySelectorAll(':scope > section .us-party')];
+  }
+
+  // The detail goes back into its own row, hidden, before another is shown.
+  function release(state) {
+    const shown = state.shown;
+    if (!shown) return;
+    shown.detail.hidden = true;
+    if (shown.row.isConnected) shown.row.append(shown.detail);
+    else shown.detail.remove();
+    shown.button.setAttribute('aria-pressed', 'false');
+    state.shown = null;
+  }
+
+  function choose(state, row) {
+    if (state.shown?.row === row) return;
+    release(state);
+    const button = row.querySelector('.us-party__select');
+    const detail = row.querySelector('.us-party__detail');
+    if (!button || !detail) return;
+    detail.hidden = false;
+    state.pane.replaceChildren(detail);
+    // The theme's lead crown sits on avatars inside [data-us-contact-lead].
+    // The row's lead and type travel with its detail: the theme's lead crown
+    // and avatar colour, and which of crown or Make primary party shows.
+    state.pane.setAttribute('data-us-contact-lead', row.getAttribute('data-us-contact-lead') || '');
+    state.pane.setAttribute('data-us-contact-type', row.getAttribute('data-us-contact-type') || '');
+    const name = row.querySelector('.us-party__name')?.textContent.trim();
+    state.pane.setAttribute('aria-label', name ? 'Details for ' + name : 'Party details');
+    button.setAttribute('aria-pressed', 'true');
+    state.shown = {row, button, detail};
+  }
+
+  function firstChoice(set) {
+    const list = rows(set);
+    return list.find(row => /^(true|1)$/i.test(row.getAttribute('data-us-contact-lead') || '')) || list[0];
+  }
+
+  function attach(wrapper) {
+    const body = wrapper.querySelector(':scope > .panel > .panel-body-container > .panel-body');
+    const set = body?.querySelector(':scope > .QueryTemplateSet');
+    if (!set) return;
+    let state = states.get(wrapper);
+    if (!state || !state.pane.isConnected || state.pane.parentElement !== body) {
+      const pane = document.createElement('section');
+      pane.className = 'us-parties__preview';
+      pane.setAttribute('aria-live', 'polite');
+      body.append(pane);
+      state = {body, pane, set, shown: null, selecting: false, selected: new Set()};
+      states.set(wrapper, state);
+    }
+    toolbar(state, wrapper, body, set);
+    body.classList.add('us-parties__columns');
+    body.parentElement.classList.add('us-parties__layout');
+    // Rows replaced by a refresh: the shown detail belongs to a row that
+    // is gone, so choose again.
+    state.set = set;
+    if (state.shown && !set.contains(state.shown.row)) {
+      release(state);
+      state.pane.replaceChildren();
+    }
+    if (!state.shown) {
+      const row = firstChoice(set);
+      if (row) choose(state, row);
+    }
+    state.pane.hidden = !rows(set).length;
+    syncChecks(state);
+    scope(state);
+  }
+
+  // The list's toolbar, above the rows: search, send, and who it sends to.
+  function toolbar(state, wrapper, body, set) {
+    if (!state.toolbar || !state.toolbar.isConnected) {
+      const bar = document.createElement('div');
+      bar.className = 'us-parties__toolbar';
+      const send = document.createElement('button');
+      send.type = 'button';
+      send.className = 'us-parties__send us-action-cases-email-parties';
+      const pick = document.createElement('button');
+      pick.type = 'button';
+      // An icon button, as the theme draws the toolbar's email icon.
+      pick.className = 'TextButton us-icon-button us-parties__pick';
+      pick.setAttribute('aria-pressed', 'false');
+      pick.setAttribute('aria-label', 'Select parties to email');
+      pick.title = 'Select parties to email';
+      pick.innerHTML = '<i class="ti ti-checkbox" aria-hidden="true"></i>';
+      // The line under the toolbar: its text, and, while selecting, Select
+      // all and Clear. Built once; later only its text and buttons change.
+      const note = document.createElement('p');
+      note.className = 'us-parties__scope';
+      const text = document.createElement('span');
+      text.setAttribute('aria-live', 'polite');
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'us-parties__scope-action';
+      all.dataset.usPick = 'all';
+      all.textContent = 'Select all';
+      const none = document.createElement('button');
+      none.type = 'button';
+      none.className = 'us-parties__scope-action';
+      none.dataset.usPick = 'none';
+      none.textContent = 'Clear';
+      note.append(text, all, none);
+      bar.append(pick, send);
+      state.toolbar = bar;
+      state.note = note;
+      state.noteText = text;
+      state.pick = pick;
+      state.pickAll = all;
+      state.pickNone = none;
+    }
+    if (state.toolbar.nextElementSibling !== state.note || state.note.nextElementSibling !== set) {
+      body.insertBefore(state.toolbar, set);
+      body.insertBefore(state.note, set);
+    }
+    // The theme builds its search after the rows arrive, folded behind the
+    // heading's funnel; the field comes here, before the send button.
+    const field = wrapper.querySelector(':scope > .panel > .us-query-search-controls .us-query-search-field');
+    if (field) {
+      state.toolbar.querySelectorAll(':scope > .us-query-search-field').forEach(old => old.remove());
+      state.toolbar.prepend(field);
+    }
+    // The search marks the rows it hides; follow it for the scope line.
+    if (state.watched !== set) {
+      state.watcher?.disconnect();
+      state.watcher = new MutationObserver(() => scope(state));
+      state.watcher.observe(set, {subtree: true, attributes: true, attributeFilter: ['data-us-query-search-hidden', 'hidden']});
+      state.watched = set;
+    }
+  }
+
+  const ordinalOf = row => (row.getAttribute('data-us-contact-ordinal') || '').trim();
+  const shownRows = state => rows(state.set).filter(row => {
+    const section = row.closest('section');
+    return !section.hidden && !section.hasAttribute('data-us-query-search-hidden');
+  });
+
+  function scope(state) {
+    if (!state.note) return;
+    const total = rows(state.set).length;
+    const shown = shownRows(state).length;
+    let text;
+    if (!total) text = '';
+    else if (state.selecting) {
+      const count = state.selected.size;
+      text = count ? count + ' of ' + total + ' selected' : 'Tick who to email';
+    } else if (shown === total) {
+      text = total + (total === 1 ? ' party' : ' parties') + ' · Email sends to ' + (total === 1 ? 'them' : 'all');
+    } else {
+      text = shown + ' of ' + total + ' shown · Email sends to ' + (shown === 1 ? 'the one shown' : 'those shown');
+    }
+    if (state.noteText.textContent !== text) state.noteText.textContent = text;
+    state.pickAll.hidden = !state.selecting || shownRows(state).every(row => state.selected.has(ordinalOf(row)));
+    state.pickNone.hidden = !state.selecting || !state.selected.size;
+  }
+
+  // While selecting, a checkbox on each card, ticked from the selection.
+  // Rows replaced by a refresh get theirs again; a ticked ordinal no longer
+  // on the case leaves the selection.
+  function syncChecks(state) {
+    state.body.classList.toggle('us-parties--selecting', state.selecting);
+    const present = new Set();
+    rows(state.set).forEach(row => {
+      const ordinal = ordinalOf(row);
+      present.add(ordinal);
+      let box = row.querySelector(':scope > .us-party__check');
+      if (!state.selecting) {
+        box?.remove();
+        return;
+      }
+      if (!box) {
+        box = document.createElement('input');
+        box.type = 'checkbox';
+        box.className = 'us-party__check';
+        const name = row.querySelector('.us-party__name')?.textContent.trim() || 'party';
+        box.setAttribute('aria-label', 'Select ' + name);
+        row.prepend(box);
+      }
+      box.checked = state.selected.has(ordinal);
+    });
+    state.selected.forEach(ordinal => { if (!present.has(ordinal)) state.selected.delete(ordinal); });
+  }
+
+  function setSelecting(state, on) {
+    state.selecting = on;
+    if (!on) state.selected.clear();
+    state.pick.setAttribute('aria-pressed', String(on));
+    syncChecks(state);
+    scope(state);
+  }
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(SELECTOR).forEach(wrapper => {
+      if (!wrapper.closest('.us-report-no-styling')) attach(wrapper);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(refresh);
+  }
+
+  document.addEventListener('click', event => {
+    const pick = event.target.closest('.us-parties__pick, .us-parties__scope-action');
+    const pickState = pick && states.get(pick.closest(SELECTOR));
+    if (pickState) {
+      if (pick.classList.contains('us-parties__pick')) setSelecting(pickState, !pickState.selecting);
+      else {
+        if (pick.dataset.usPick === 'all') shownRows(pickState).forEach(row => pickState.selected.add(ordinalOf(row)));
+        else pickState.selected.clear();
+        syncChecks(pickState);
+        scope(pickState);
+      }
+      return;
+    }
+    const button = event.target.closest('.us-party__select');
+    const wrapper = button?.closest(SELECTOR);
+    const state = wrapper && states.get(wrapper);
+    if (!state) return;
+    choose(state, button.closest('.us-party'));
+    // Stacked (a narrow panel), the card is under the list and may be out
+    // of sight, so a press brings it into view.
+    const pane = state.pane.getBoundingClientRect();
+    const stacked = pane.top >= state.set.getBoundingClientRect().bottom;
+    if (stacked && (pane.top < 0 || pane.top > window.innerHeight * .6)) {
+      state.pane.scrollIntoView({block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+    }
+  });
+
+  document.addEventListener('change', event => {
+    const box = event.target.closest('.us-party__check');
+    const state = box && states.get(box.closest(SELECTOR));
+    if (!state) return;
+    const ordinal = ordinalOf(box.closest('.us-party'));
+    if (box.checked) state.selected.add(ordinal);
+    else state.selected.delete(ordinal);
+    scope(state);
+  });
+
+  // Rows arrive with the page and again with an in-place refresh, and the
+  // class arrives when the section preset expands, after the rows. Changes
+  // inside the preview (the details loading) are its own and are ignored.
+  const relevant = record => record.type === 'attributes'
+    ? Boolean(record.target.classList?.contains('us-parties'))
+    : !record.target.closest?.('.us-parties__preview') && [...record.addedNodes].some(node => node.nodeType === 1);
+
+  new MutationObserver(records => {
+    if (records.some(relevant)) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['class']});
+
+  window.UnionSuiteCaseParties = Object.freeze({refresh, version: '1.0'});
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh);
+  else refresh();
+})();
+/* US-CASE-PARTIES:END */
 
 /* US-CONTACT-FACETS:START — filters over a contacts list.
    Reads data-us-contact-group, -role, -type and -name from each row (a
@@ -8527,6 +8888,9 @@ SOFTWARE.
     queued = false;
     document.querySelectorAll(SELECTOR).forEach(root => {
       if (root.closest('.us-report-no-styling')) return;
+      // A case party's details wait until the party is shown (US-CASE-PARTIES
+      // moves them into the preview, which this observer sees).
+      if (root.closest('.us-party__detail[hidden]')) return;
       const cfg = config(root);
       if (cfg) void load(root, cfg);
     });
@@ -8809,12 +9173,28 @@ SOFTWARE.
  if(window.UnionSuiteIqaBusy)return;
  let manager=null,active=null,application=null;
  function clear(){active?.clear();active=null}
- function showResults(button,row=null){
+ function loading(){active?.loading?.()}
+ // The part of an element left visible by its scrolling/clipping ancestors and the viewport.
+ function visibleBox(target){
+  const r=target.getBoundingClientRect();
+  let left=r.left,top=r.top,right=r.right,bottom=r.bottom;
+  for(let node=target.parentElement;node&&node!==document.body;node=node.parentElement){
+   const style=getComputedStyle(node),rect=node.getBoundingClientRect();
+   if(/auto|scroll|hidden|clip/.test(style.overflowX)){left=Math.max(left,rect.left);right=Math.min(right,rect.right)}
+   if(/auto|scroll|hidden|clip/.test(style.overflowY)){top=Math.max(top,rect.top);bottom=Math.min(bottom,rect.bottom)}
+  }
+  left=Math.max(0,left);top=Math.max(0,top);right=Math.min(innerWidth,right);bottom=Math.min(innerHeight,bottom);
+  return right>left&&bottom>top?{left,top,right,bottom}:null;
+ }
+ function setBox(element,box){
+  for(const [key,value] of Object.entries({left:box.left+'px',top:box.top+'px',width:(box.right-box.left)+'px',height:(box.bottom-box.top)+'px'}))if(element.style[key]!==value)element.style[key]=value;
+ }
+ // Find and sort: a veil and spinner over the results area.
+ function showResults(button){
   const content=button.closest('[id$="_ContentPanel"]'),grid=button.closest('[data-gridid]');
   if(!content||!grid||button.closest('.us-report-no-styling'))return null;
-  const rowMode=Boolean(row),rowId=row?.id;
   let target=null,busy=null,progress=null,hadMarker=false,frame=null,closed=false;
-  const overlay=document.createElement('div');overlay.className='us-iqa-find-overlay'+(rowMode?' us-iqa-row-overlay':'');overlay.setAttribute('aria-hidden','true');
+  const overlay=document.createElement('div');overlay.className='us-iqa-find-overlay';overlay.setAttribute('aria-hidden','true');
   const spinner=document.createElement('span');spinner.className='section-loader-spinning-circles';overlay.append(spinner);
   const status=document.createElement('span');status.className='us-iqa-refresh-status';status.setAttribute('role','status');
   document.body.append(overlay,status);
@@ -8824,34 +9204,190 @@ SOFTWARE.
    if(closed)return;
    const owner=(content.id&&document.getElementById(content.id))||content;
    const root=(grid.id&&document.getElementById(grid.id))||grid;
-   const bodies=!rowMode&&root.isConnected?root.querySelectorAll('.rgMasterTable > tbody'):[];
-   const replacement=rowMode&&rowId?document.getElementById(rowId):null;
-   // A partial update may replace the row node. Reconcile by its native ID,
-   // within this grid only; never dim a different row by positional index.
-   const next=rowMode?(row.isConnected&&root.contains(row)?row:replacement&&root.contains(replacement)&&replacement.matches('tr.rgRow,tr.rgAltRow')?replacement:null):bodies.length===1?bodies[0]:null;
+   const bodies=root.isConnected?root.querySelectorAll('.rgMasterTable > tbody'):[];
+   const next=bodies.length===1?bodies[0]:null;
    if(next!==target){releaseTarget();target=next;if(target){busy=target.getAttribute('aria-busy');target.setAttribute('aria-busy','true')}}
-   const r=target?.getBoundingClientRect();
-   let left=r?.left||0,top=r?.top||0,right=r?.right||0,bottom=r?.bottom||0;
-   for(let node=target?.parentElement;node&&node!==document.body;node=node.parentElement){
-    const style=getComputedStyle(node),rect=node.getBoundingClientRect();
-    if(/auto|scroll|hidden|clip/.test(style.overflowX)){left=Math.max(left,rect.left);right=Math.min(right,rect.right)}
-    if(/auto|scroll|hidden|clip/.test(style.overflowY)){top=Math.max(top,rect.top);bottom=Math.min(bottom,rect.bottom)}
-   }
-   left=Math.max(0,left);top=Math.max(0,top);right=Math.min(innerWidth,right);bottom=Math.min(innerHeight,bottom);
    const optedOut=Boolean(owner.closest('.us-report-no-styling'));
-   const visible=Boolean(target&&right>left&&bottom>top&&!optedOut);
-   if(overlay.hidden===visible)overlay.hidden=!visible;
-   const label=!optedOut&&(visible||rowMode)?rowMode?'Loading row details':'Loading results':'';if(status.textContent!==label)status.textContent=label;
-   if(visible){for(const [key,value] of Object.entries({left:left+'px',top:top+'px',width:(right-left)+'px',height:(bottom-top)+'px'}))if(overlay.style[key]!==value)overlay.style[key]=value;}
-   // Once a native row request is recognised, keep its owning report's broad
-   // indicator suppressed through scrolling/replacement until endRequest.
-   const indicator=!optedOut&&(visible||rowMode)?owner.querySelector(':scope > .ClearFix > [id$="_UpdateProgress1"]'):null;
+   const box=target&&!optedOut?visibleBox(target):null;
+   if(overlay.hidden===Boolean(box))overlay.hidden=!box;
+   const label=box?'Loading results':'';if(status.textContent!==label)status.textContent=label;
+   if(box)setBox(overlay,box);
+   const indicator=box?owner.querySelector(':scope > .ClearFix > [id$="_UpdateProgress1"]'):null;
    if(indicator!==progress){releaseProgress();progress=indicator;if(progress){hadMarker=progress.hasAttribute('data-us-iqa-progress-replaced');progress.setAttribute('data-us-iqa-progress-replaced','');}}
    frame=requestAnimationFrame(position);
   }
   position();
   return {clear(){if(closed)return;closed=true;cancelAnimationFrame(frame);releaseTarget();releaseProgress();overlay.remove();status.remove();}};
  }
+
+ // Row expand/collapse (3.3): the shared spinner takes the place of the
+ // clicked arrow for the request, sized to that control. The control keeps
+ // its focus, name, handlers and disabled state; only its glyph is hidden.
+ const rowControlSelector=':scope > td.rgExpandCol :is(input,button):is(.rgExpand,.rgCollapse)';
+ // A partial update replaces the row and its control. Reconcile by the row's
+ // native ID within the same grid only, never by position.
+ function currentRow(grid,row){
+  const root=(grid.id&&document.getElementById(grid.id))||grid;
+  if(row.isConnected&&root.contains(row))return row;
+  const next=row.id?document.getElementById(row.id):null;
+  return next&&root.contains(next)&&next.matches('tr.rgRow,tr.rgAltRow')?next:null;
+ }
+ function showRowControl(button,row){
+  const content=button.closest('[id$="_ContentPanel"]'),grid=button.closest('[data-gridid]');
+  if(!content||!grid||button.closest('.us-report-no-styling'))return null;
+  let target=null,busy=null,control=null,progress=null,hadMarker=false,frame=null,closed=false;
+  const overlay=document.createElement('div');
+  overlay.className='us-iqa-row-spinner';
+  overlay.setAttribute('aria-hidden','true');
+  const spinner=document.createElement('span');
+  spinner.className='section-loader-spinning-circles';
+  overlay.append(spinner);
+  const status=document.createElement('span');
+  status.className='us-iqa-refresh-status';
+  status.setAttribute('role','status');
+  document.body.append(overlay,status);
+  function releaseTarget(){if(target){if(busy===null)target.removeAttribute('aria-busy');else target.setAttribute('aria-busy',busy)}target=null;}
+  function releaseControl(){control?.removeAttribute('data-us-iqa-row-busy');control=null;}
+  function releaseProgress(){if(progress&&!hadMarker)progress.removeAttribute('data-us-iqa-progress-replaced');progress=null;}
+  function position(){
+   if(closed)return;
+   const owner=(content.id&&document.getElementById(content.id))||content;
+   const optedOut=Boolean(owner.closest('.us-report-no-styling'));
+   const next=optedOut?null:currentRow(grid,row);
+   if(next!==target){releaseTarget();target=next;if(target){busy=target.getAttribute('aria-busy');target.setAttribute('aria-busy','true')}}
+   const nextControl=target?.querySelector(rowControlSelector)||null;
+   if(nextControl!==control){releaseControl();control=nextControl;control?.setAttribute('data-us-iqa-row-busy','')}
+   const rect=control?.getBoundingClientRect(),box=control?visibleBox(control):null;
+   if(overlay.hidden===Boolean(box))overlay.hidden=!box;
+   if(box){
+    // The overlay is clipped with the control; the spinner stays centred on
+    // the whole control and fits the 30px expand column.
+    const size=Math.round(Math.max(12,Math.min(20,rect.width,rect.height)));
+    setBox(overlay,box);
+    const styles={'--size':size/48+'px',left:(rect.left+(rect.width-size)/2-box.left)+'px',top:(rect.top+(rect.height-size)/2-box.top)+'px'};
+    for(const [key,value] of Object.entries(styles))if(spinner.style.getPropertyValue(key)!==value)spinner.style.setProperty(key,value);
+   }
+   const label=optedOut?'':'Loading row details';if(status.textContent!==label)status.textContent=label;
+   // Keep the owning report's broad indicator suppressed through scrolling
+   // and replacement until endRequest.
+   const indicator=optedOut?null:owner.querySelector(':scope > .ClearFix > [id$="_UpdateProgress1"]');
+   if(indicator!==progress){releaseProgress();progress=indicator;if(progress){hadMarker=progress.hasAttribute('data-us-iqa-progress-replaced');progress.setAttribute('data-us-iqa-progress-replaced','');}}
+   frame=requestAnimationFrame(position);
+  }
+  position();
+  return {clear(){if(closed)return;closed=true;cancelAnimationFrame(frame);releaseTarget();releaseControl();releaseProgress();overlay.remove();status.remove();}};
+ }
+
+ // Keeping the report in place (3.3). Telerik renders detail rows on the
+ // server: iMIS leaves the grid's HierarchyLoadMode at its server default, so
+ // expand and collapse are partial postbacks that replace the whole grid.
+ // As soon as the replacement is in the document, and before it is painted,
+ // the new detail row is closed, other open detail rows are held out of
+ // column fitting, and scroll and focus are put back. The next frame slides
+ // the detail row open, or a copy of the old one closed, with the shared fold.
+ const masterRows='.rgRow,.rgAltRow,.rgGroupHeader,.rgFooter,.rgPager,.rgEditRow,.rgCommandRow,.rgNoRecords';
+ function detailRow(row){
+  const next=row?.nextElementSibling;
+  return next?.matches('tr')&&!next.matches(masterRows)&&next.querySelector(':scope > td[colspan]')&&next.getClientRects().length?next:null;
+ }
+ function wrapCells(row,open){
+  // The cells' vertical padding moves to the sliding boxes (the row's
+  // data-us-iqa-detail-sliding zeroes it on the cells), so the row closes fully.
+  const parts=Array.from(row.cells).map(cell=>{
+   const style=getComputedStyle(cell),slide=document.createElement('div');
+   slide.className='us-iqa-detail-slide';
+   slide.style.paddingTop=style.paddingTop;
+   slide.style.paddingBottom=style.paddingBottom;
+   return {cell,slide};
+  });
+  row.setAttribute('data-us-iqa-detail-sliding','');
+  for(const {cell,slide} of parts){slide.append(...cell.childNodes);slide.hidden=!open;cell.append(slide)}
+  return parts;
+ }
+ function unwrapCells(row,parts){
+  for(const {slide} of parts)slide.replaceWith(...slide.childNodes);
+  row.removeAttribute('data-us-iqa-detail-sliding');
+ }
+ // A collapse returns markup without the detail row; slide out an inert copy.
+ function ghostOf(detail){
+  const ghost=detail.cloneNode(true);
+  for(const node of [ghost,...ghost.querySelectorAll('[id],[name]')]){node.removeAttribute('id');node.removeAttribute('name')}
+  ghost.inert=true;
+  ghost.setAttribute('aria-hidden','true');
+  ghost.setAttribute('data-us-iqa-detail-ghost','');
+  return ghost;
+ }
+ function holdRow(button,row){
+  const grid=button.closest('[data-gridid]');
+  if(!grid||!row.id)return null;
+  const opening=button.matches('.rgExpand'),before=row;
+  let scroll=null,focused=false,ghost=null,settled=false,stopped=false;
+  function scrollers(){
+   const root=(grid.id&&document.getElementById(grid.id))||grid;
+   return [root,...root.querySelectorAll('.RadGrid[id],.rgDataDiv[id]')].filter(node=>node.id);
+  }
+  function record(){
+   scroll={x:scrollX,y:scrollY,nodes:scrollers().map(node=>({id:node.id,left:node.scrollLeft,top:node.scrollTop}))};
+  }
+  function restoreScroll(){
+   if(scrollX!==scroll.x||scrollY!==scroll.y)scrollTo(scroll.x,scroll.y);
+   for(const saved of scroll.nodes){
+    const node=document.getElementById(saved.id);
+    if(node&&(node.scrollLeft!==saved.left||node.scrollTop!==saved.top)){node.scrollLeft=saved.left;node.scrollTop=saved.top}
+   }
+  }
+  function snapshot(){
+   const current=currentRow(grid,before);
+   focused=Boolean(current?.contains(document.activeElement));
+   const detail=opening?null:detailRow(current);
+   ghost=detail?ghostOf(detail):null;
+  }
+  function slide(rows,parts,open){
+   const fold=window.UnionSuiteRecordCards?.fold;
+   const finish=()=>{if(open)unwrapCells(rows,parts);else rows.remove()};
+   if(!fold){finish();return}
+   Promise.all(parts.map(part=>fold(part.slide,open))).then(finish);
+  }
+  function prepare(next){
+   const detail=detailRow(next);
+   let rows=null,parts=null;
+   if(opening&&detail){rows=detail;parts=wrapCells(detail,false)}
+   else if(!opening&&!detail&&ghost){rows=ghost;next.after(ghost);parts=wrapCells(ghost,true)}
+   // Every detail row, this one included, sits out of column fitting: its
+   // cells' padding would otherwise widen the native expand column.
+   const held=Array.from(next.parentElement.children).filter(node=>node.previousElementSibling?.matches('.rgRow,.rgAltRow')&&(node===rows||detailRow(node.previousElementSibling)===node));
+   held.forEach(node=>node.setAttribute('data-us-iqa-detail-hold',''));
+   restoreScroll();
+   requestAnimationFrame(()=>{
+    // Fit columns while detail rows are out of the table, as on first load.
+    window.UnionSuiteIqaColumns?.refresh({immediate:true});
+    held.forEach(node=>node.removeAttribute('data-us-iqa-detail-hold'));
+    restoreScroll();
+    if(focused&&(!document.activeElement||document.activeElement===document.body))next.querySelector(rowControlSelector)?.focus({preventScroll:true});
+    if(rows)slide(rows,parts,opening);
+   });
+  }
+  function settle(){
+   if(settled||stopped)return;
+   const next=currentRow(grid,before);
+   if(!next||next===before)return;
+   settled=true;observer.disconnect();
+   prepare(next);
+  }
+  // Mutation records arrive as a microtask: after the update, before paint.
+  const observer=new MutationObserver(settle);
+  observer.observe(document.body,{childList:true,subtree:true});
+  record();snapshot();
+  window.addEventListener('scroll',record,true);
+  return {
+   // pageLoading precedes the replacement. Later scroll events can come from
+   // other blocks restoring native widths, so stop recording here.
+   loading(){window.removeEventListener('scroll',record,true);snapshot();},
+   // endRequest can run before the mutation microtask; settle synchronously.
+   end(){settle();stopped=true;observer.disconnect();window.removeEventListener('scroll',record,true);}
+  };
+ }
+
  const sortSelector='.rgMasterTable th.rgHeader a[onclick*="Telerik.Web.UI.Grid.Sort("],.rgMasterTable th.rgHeader a[id*="_Sort_"]';
  const rowSelector='.rgMasterTable td.rgExpandCol :is(input,button):is(.rgExpand,.rgCollapse)';
  let pendingCommand=null;
@@ -8874,16 +9410,21 @@ SOFTWARE.
   if(!button.closest('.FilterPanel,.us-report,.SearchContactsClass,[data-us-iqa-native]')&&!/_ResultsGrid_/i.test(button.id))return;
   const rowControl=!find&&button.matches(rowSelector),row=rowControl?button.closest('tr.rgRow,tr.rgAltRow'):null;
   if(rowControl&&!row)return;
-  const buttonBusy=find?UnionSuiteBusy.show(button,{mode:'center'}):null,results=showResults(button,row);
+  if(row){
+   const rowBusy=showRowControl(button,row),hold=rowBusy?holdRow(button,row):null;
+   active={loading(){hold?.loading()},clear(){hold?.end();rowBusy?.clear();}};
+   return;
+  }
+  const buttonBusy=find?UnionSuiteBusy.show(button,{mode:'center'}):null,results=showResults(button);
   active={clear(){buttonBusy?.clear();results?.clear();}};
  }
  function attach(){
   const next=window.Sys?.WebForms?.PageRequestManager?.getInstance?.();
-  if(next&&next!==manager){if(manager){manager.remove_beginRequest(begin);manager.remove_endRequest(clear)}clear();manager=next;manager.add_beginRequest(begin);manager.add_endRequest(clear)}
+  if(next&&next!==manager){if(manager){manager.remove_beginRequest(begin);manager.remove_pageLoading?.(loading);manager.remove_endRequest(clear)}clear();manager=next;manager.add_beginRequest(begin);manager.add_pageLoading?.(loading);manager.add_endRequest(clear)}
   const app=window.Sys?.Application;
   if(app&&app!==application){application?.remove_load?.(attach);application=app;app.add_load(attach)}
  }
- window.UnionSuiteIqaBusy={version:'3.2',refresh:attach,showResults};
+ window.UnionSuiteIqaBusy={version:'3.3',refresh:attach,showResults};
  attach();document.addEventListener('DOMContentLoaded',attach,{once:true});window.addEventListener('load',attach,{once:true});window.addEventListener('pagehide',clear);window.addEventListener('pageshow',clear);
 })();
 /* US-IQA-BUSY:END */
@@ -10383,6 +10924,102 @@ SOFTWARE.
   }
 
   // ---------------------------------------------------------------------------
+  // Staff access: a Full staff user with every area at 0 - No Access can sign
+  // in to the staff site and do nothing there, so the Staff access heading
+  // takes the warning tone with a "No access" badge, and a native warning
+  // message names it at the top of the tab, after any can't-sign-in error,
+  // so it is seen while Staff access is collapsed (owner, 14 October 2026).
+  // Like the Account box it follows the user class and the levels as they
+  // are edited; Save makes the change real. Writes only on a change.
+
+  // User credentials: Locked out, Last sign in, Last active and User class
+  // move out of the Username field (where iMIS nests every row) into their
+  // own block, so the first row reads credentials, details, Password Reset
+  // (owner, 14 October 2026). Only their place in the page changes; the
+  // controls, names and postbacks stay native. A postback that re-renders
+  // the rows inside the Username field again has them moved back out.
+  function groupDetails(owner) {
+    const body = owner.querySelector('[id$="_UserInfoPanel_Body"]');
+    const username = body?.querySelector(':scope > .PanelField');
+    if (!username) return;
+    const rows = ['#LockoutStatus', '#LastLogin', '#LastActive']
+      .map(selector => body.querySelector(selector))
+      .concat(body.querySelector('.PanelField:has(> .PanelFieldValue > [id$="_UserClassList"])'))
+      .filter(Boolean);
+    let details = body.querySelector(':scope > .us-credentials__details');
+    if (!rows.length || rows.every(row => row.parentElement === details)) return;
+    if (!details) {
+      details = document.createElement('div');
+      details.className = 'us-credentials__details';
+      username.after(details);
+    }
+    // Stale copies left from an earlier render give way to the new rows.
+    Array.from(details.children).forEach(child => { if (!rows.includes(child)) child.remove(); });
+    details.append(...rows);
+  }
+
+  // Username: the shared copy button (US-COPY) after the field, before the
+  // remove button. The field is disabled, so it cannot be selected to copy.
+  function addUsernameCopy(owner) {
+    const field = owner.querySelector('input[id$="_UserIDTextBox"]');
+    if (!field?.id || field.nextElementSibling?.matches('button.us-copy')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'us-copy us-credentials__copy-username';
+    button.dataset.usCopyTarget = field.id;
+    button.title = 'Copy username';
+    button.setAttribute('aria-label', 'Copy username');
+    field.after(button);
+  }
+
+  function markStaffAccess(owner, panel) {
+    const heading = panel.querySelector(':scope > .panel-heading');
+    if (!heading) return;
+    const fullStaff = Boolean(owner.querySelector('input[type="radio"][id*="_UserClassList_"][value="FullStaff"]')?.checked);
+    const levels = Array.from(panel.querySelectorAll(LEVELS));
+    const noAccess = fullStaff && levels.length > 0 && levels.every(level => level.value === '0');
+    if (panel.hasAttribute('data-us-staff-no-access') !== noAccess) panel.toggleAttribute('data-us-staff-no-access', noAccess);
+    noAccessMessage(owner, noAccess);
+    const badge = heading.querySelector(':scope > .us-credentials__staff-warning');
+    if (!noAccess) {
+      badge?.remove();
+      return;
+    }
+    if (badge) return;
+    const warning = document.createElement('span');
+    warning.className = 'us-badge us-badge--warning us-credentials__staff-warning';
+    warning.textContent = 'No access';
+    warning.title = 'A full staff user with no access to any area';
+    heading.querySelector(':scope > .panel-title')?.after(warning);
+  }
+
+  function noAccessMessage(owner, show) {
+    let message = owner.querySelector(':scope > .us-credentials__no-access');
+    if (!show) {
+      if (message && !message.hasAttribute('data-leaving')) {
+        message.setAttribute('data-leaving', '');
+        fold(message, false).then(() => message.remove());
+      }
+      return;
+    }
+    if (message && !message.hasAttribute('data-leaving')) return;
+    message?.remove();
+    message = document.createElement('div');
+    message.className = 'AsiWarning us-credentials__no-access';
+    message.setAttribute('role', 'status');
+    const heading = document.createElement('strong');
+    heading.textContent = 'This staff user can’t use any modules.';
+    const detail = document.createElement('span');
+    detail.textContent = 'Every area in Staff access is set to 0 - No Access.';
+    message.append(heading, ' ', detail);
+    message.hidden = true;
+    const blocked = owner.querySelector(':scope > .us-credentials__blocked');
+    if (blocked) blocked.after(message);
+    else owner.prepend(message);
+    void fold(message, true);
+  }
+
+  // ---------------------------------------------------------------------------
   // A login that cannot sign in, for any of its three reasons (locked out,
   // disabled, expired), is named first thing on the tab: a native error
   // message above the control's cards (owner, 8 October 2026). A lockout
@@ -10606,6 +11243,8 @@ SOFTWARE.
       if (unsaved.has(owner)) showUnsaved(owner);
       markAccount(owner);
       markBlocked(owner);
+      groupDetails(owner);
+      addUsernameCopy(owner);
       decorateRoles(owner);
 
       // Password and Confirm password set a new password for the contact:
@@ -10624,6 +11263,7 @@ SOFTWARE.
       if (!panel) return;
       expand(panel);
       addSetAll(panel);
+      markStaffAccess(owner, panel);
     });
   }
 
@@ -10640,6 +11280,12 @@ SOFTWARE.
     const panel = level.closest(PANEL);
     const control = panel?.querySelector(':scope > .panel-heading .us-credentials__set-all select');
     if (control) sync(control, Array.from(panel.querySelectorAll(LEVELS)));
+    schedule();
+  });
+
+  // The user class changed: re-check the Staff access warning.
+  document.addEventListener('change', event => {
+    if (event.target.matches?.(OWNER + ' input[type="radio"][id*="_UserClassList_"]')) schedule();
   });
 
   // Add: taken before the link's own onclick (AddRole/AddGroup) and href
@@ -14973,6 +15619,8 @@ SOFTWARE.
   });
  }
  const valid=s=>/^[a-z][a-z0-9-]*$/.test(s||'');
+ const warned=new Set();
+ function warn(message,node){if(!warned.has(message)){warned.add(message);console.warn('UnionSuite sections: '+message,node);}return false;}
  function snapshot(node,attrs){const values=attrs.map(a=>[a,node.getAttribute(a)]);return ()=>values.forEach(([a,v])=>v===null?node.removeAttribute(a):node.setAttribute(a,v));}
  function release(){restoreLayout();states.forEach(s=>s.undo.reverse().forEach(fn=>fn()));states.clear();}
  function select(s,key,notify){
@@ -14997,21 +15645,41 @@ SOFTWARE.
    const group=menu.dataset.usTabs;
    if(!valid(group)||menus.filter(n=>n.dataset.usTabs===group).length!==1||menu.closest('.us-report-no-styling'))continue;
    const buttons=[...menu.querySelectorAll('button[data-us-tab]')].filter(n=>n.closest(selector)===menu);
-   const keys=buttons.map(n=>n.dataset.usTab);
-   if(!keys.length||keys.some(k=>!valid(k))||new Set(keys).size!==keys.length||buttons.some(n=>n.disabled||n.hidden||n.getAttribute('aria-disabled')==='true'))continue;
+   const allKeys=buttons.map(n=>n.dataset.usTab);
+   if(!allKeys.length||allKeys.some(k=>!valid(k))||new Set(allKeys).size!==allKeys.length)continue;
    const list=buttons[0].parentElement;
    if(buttons.some(n=>n.parentElement!==list))continue;
+   // Each section is checked on its own, so one misconfigured iPart cannot stop
+   // the rest of the group: a panel that fails stays visible, and a tab left
+   // with no panel is disabled. Problems are reported once in the console.
    const nodes=[...document.querySelectorAll('.us-tab-panel.us-tabset-'+group)];
-   const panels=nodes.map(node=>({node,key:[...node.classList].filter(c=>c.startsWith('us-tab-')&&c!=='us-tab-panel').map(c=>c.slice(7))}));
-   if(!panels.length||panels.some(p=>p.key.length!==1||!keys.includes(p.key[0])||p.node.hidden||p.node.contains(menu)||p.node.matches('.RadMultiPage,.rmpView')||p.node.closest('.us-report-no-styling'))||keys.some(k=>!panels.some(p=>p.key[0]===k)))continue;
+   let panels=nodes.map(node=>({node,key:[...node.classList].filter(c=>c.startsWith('us-tab-')&&c!=='us-tab-panel').map(c=>c.slice(7))}));
+   panels=panels.filter(p=>{
+    const why=p.key.length!==1?'needs exactly one us-tab-{key} class':!allKeys.includes(p.key[0])?'has no matching tab for us-tab-'+p.key[0]:p.node.hidden?'is hidden':p.node.contains(menu)?'contains its own menu':p.node.matches('.RadMultiPage,.rmpView')?'is a native CCO page view':p.node.closest('.us-report-no-styling')?'is inside us-report-no-styling':'';
+    if(why)warn('A "'+group+'" section panel '+why+', so it stays visible.',p.node);
+    return !why;
+   });
    panels.forEach(p=>p.key=p.key[0]);
    // Overlapping owners cannot safely be hidden independently.
-   if(panels.some(p=>panels.some(q=>p!==q&&p.node.contains(q.node))))continue;
-   const undo=[snapshot(list,['role','aria-label'])],s={menu,group,buttons,keys,panels,undo};
+   panels=panels.filter(p=>{const overlap=panels.some(q=>p!==q&&(p.node.contains(q.node)||q.node.contains(p.node)));if(overlap)warn('A "'+group+'" section panel overlaps another panel in its group, so it stays visible.',p.node);return !overlap;});
+   const off=n=>n.disabled||n.hidden||n.getAttribute('aria-disabled')==='true';
+   const live=buttons.filter(n=>!off(n)&&panels.some(p=>p.key===n.dataset.usTab));
+   if(!live.length)continue;
+   panels=panels.filter(p=>live.some(n=>n.dataset.usTab===p.key)||warn('A "'+group+'" section panel belongs to the disabled tab "'+p.key+'", so it stays visible.',p.node));
+   const keys=live.map(n=>n.dataset.usTab);
+   const undo=[snapshot(list,['role','aria-label'])],s={menu,group,buttons:live,keys,panels,undo};
    list.setAttribute('role','tablist');if(!list.hasAttribute('aria-label'))list.setAttribute('aria-label','Page sections');
    panels.forEach(p=>{undo.push(snapshot(p.node,['id','role','aria-labelledby','tabindex','hidden','data-us-section-hidden']));if(!p.node.id)p.node.id='us-section-panel-'+(++serial);p.node.setAttribute('role','tabpanel');p.node.tabIndex=0;});
-   buttons.forEach((button,i)=>{undo.push(snapshot(button,['id','role','aria-selected','aria-controls','tabindex','aria-current']));const was=button.classList.contains('is-active');undo.push(()=>button.classList.toggle('is-active',was));if(!button.id)button.id='us-section-tab-'+(++serial);button.setAttribute('role','tab');button.removeAttribute('aria-current');button.setAttribute('aria-controls',panels.filter(p=>p.key===keys[i]).map(p=>p.node.id).join(' '));panels.filter(p=>p.key===keys[i]).forEach(p=>p.node.setAttribute('aria-labelledby',button.id));});
-   states.set(menu,s);select(s,memory.get(group)||keys[buttons.findIndex(b=>b.classList.contains('is-active'))]||keys[0],false)||select(s,keys[0],false);
+   live.forEach((button,i)=>{undo.push(snapshot(button,['id','role','aria-selected','aria-controls','tabindex','aria-current']));const was=button.classList.contains('is-active');undo.push(()=>button.classList.toggle('is-active',was));if(!button.id)button.id='us-section-tab-'+(++serial);button.setAttribute('role','tab');button.removeAttribute('aria-current');button.setAttribute('aria-controls',panels.filter(p=>p.key===keys[i]).map(p=>p.node.id).join(' '));panels.filter(p=>p.key===keys[i]).forEach(p=>p.node.setAttribute('aria-labelledby',button.id));});
+   buttons.filter(n=>!live.includes(n)).forEach(button=>{
+    undo.push(snapshot(button,['role','aria-selected','aria-current','tabindex','disabled','title']));const was=button.classList.contains('is-active');undo.push(()=>button.classList.toggle('is-active',was));
+    button.setAttribute('role','tab');button.setAttribute('aria-selected','false');button.removeAttribute('aria-current');button.classList.remove('is-active');
+    if(off(button))return;
+    const key=button.dataset.usTab;
+    warn('The "'+group+'" tab "'+key+'" has no section panel, so it is disabled. Add us-tab-panel us-tabset-'+group+' us-tab-'+key+' to its iPart CSS class field.',button);
+    button.disabled=true;button.title='No content is connected to this tab';
+   });
+   states.set(menu,s);select(s,memory.get(group)||keys[live.findIndex(b=>b.classList.contains('is-active'))]||keys[0],false)||select(s,keys[0],false);
   }
  }
  function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;refresh();});}
@@ -15665,6 +16333,197 @@ SOFTWARE.
       attributeFilter:['data-us-task-completed', 'data-id', 'value', 'class']});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+/* US-TASK-ROWS 1.2 (owner, 19 October 2026): compact and full rows read in
+   place. Compact rows (us-task--compact, the default) open the task's note
+   under the row from the details button; full rows (us-task--full) show the
+   note clamped to two lines and add a More link when it is longer. Either
+   way the row carries data-us-task-expanded while its note is open, and the
+   note slides open and shut (instant with reduced motion). Tags
+   (us-task__tags, a comma-separated data-us-task-tags) show the first tag
+   and a "+N" button for the rest, which, like an open note, shows them all.
+   Rows are rechecked when they arrive and when their list changes width, so
+   a note that only overflows at a narrow width still gets its link. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteTaskNotes) return;
+
+  const rowSelector = '.us-task--compact, .us-task--full';
+  const excluded = element => !!element.closest('.us-report-no-styling');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  let noteIds = 0;
+
+  function noteOf(row) {
+    const note = row.querySelector('.us-task__note');
+    if (note && !note.id) note.id = 'us-task-note-' + (++noteIds);
+    return note;
+  }
+
+  // Whether a row is meant to be open: during a closing slide its attribute
+  // is still set, so the attribute alone would read it as open.
+  const isOpen = row => row._usTaskOpen ?? row.hasAttribute('data-us-task-expanded');
+
+  // Height of the note in a given state, measured without a visible jump.
+  function noteHeight(row, note, open) {
+    const was = row.hasAttribute('data-us-task-expanded');
+    row.toggleAttribute('data-us-task-expanded', open);
+    const height = note.getBoundingClientRect().height;
+    row.toggleAttribute('data-us-task-expanded', was);
+    return height;
+  }
+
+  // Opening slides the note down and fades it in; closing slides it back (to
+  // nothing on a compact row, to its two lines on a full row). The attribute
+  // is set before an opening and cleared after a closing, so the note is laid
+  // out for the whole slide.
+  function animateNote(row, note, open) {
+    note._usTaskSlide?.cancel();
+    if (reducedMotion.matches || !note.animate) {
+      row.toggleAttribute('data-us-task-expanded', open);
+      return;
+    }
+    const compact = row.classList.contains('us-task--compact');
+    const from = noteHeight(row, note, !open);
+    const to = noteHeight(row, note, open);
+    row.setAttribute('data-us-task-expanded', '');
+    note.style.overflow = 'hidden';
+    const fade = compact ? [open ? 0 : 1, open ? 1 : 0] : [1, 1];
+    const slide = note.animate([
+      {height: from + 'px', opacity: fade[0]},
+      {height: to + 'px', opacity: fade[1]}
+    ], {duration: 200, easing: EASE});
+    note._usTaskSlide = slide;
+    slide.onfinish = () => {
+      note.style.overflow = '';
+      if (!open) row.removeAttribute('data-us-task-expanded');
+      note._usTaskSlide = null;
+    };
+    slide.oncancel = () => {
+      note.style.overflow = '';
+    };
+  }
+
+  // Tags: a row shows the first and a "+N" button for the rest; the button,
+  // or an open note, shows them all. Screen readers get the whole list.
+  function renderTags(row) {
+    const tags = row.querySelector('.us-task__tags');
+    const text = tags?.querySelector('.us-task__tags-text');
+    if (!tags || !text) return;
+    const list = (tags.getAttribute('data-us-task-tags') || '').split(',').map(tag => tag.trim()).filter(Boolean);
+    const all = isOpen(row) || row._usTaskTagsOpen === true;
+    const shown = all ? list.join(', ') : (list[0] || '');
+    const extra = all ? 0 : list.length - 1;
+    const key = shown + '|' + extra;
+    if (text.dataset.usTaskTagsShown === key) return;
+    text.dataset.usTaskTagsShown = key;
+    text.textContent = shown;
+    if (extra > 0) {
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'us-task__tags-more';
+      more.textContent = '+' + extra;
+      more.setAttribute('aria-label', 'Show all ' + list.length + ' tags');
+      more.title = 'Show all tags';
+      text.append(more);
+    }
+    if (list.length) tags.setAttribute('aria-label', 'Tags: ' + list.join(', '));
+    else tags.removeAttribute('aria-label');
+  }
+
+  function setOpen(row, open) {
+    row._usTaskOpen = open;
+    renderTags(row);
+    const note = noteOf(row);
+    if (note) animateNote(row, note, open);
+    else row.toggleAttribute('data-us-task-expanded', open);
+    const more = row.querySelector('.us-task__more');
+    if (more) {
+      more.textContent = open ? 'Less' : 'More';
+      more.setAttribute('aria-expanded', String(open));
+    }
+    const details = row.querySelector('.us-task__details');
+    if (details) {
+      const title = row.querySelector('.us-task__title')?.textContent.trim() || 'task';
+      details.setAttribute('aria-expanded', String(open));
+      details.setAttribute('aria-label', (open ? 'Hide details: ' : 'Show details: ') + title);
+      details.title = open ? 'Hide details' : 'Show details';
+    }
+  }
+
+  // Full rows: add or remove the More link to match whether the note is
+  // clamped. An open note keeps its link (it reads Less).
+  function syncFull(row) {
+    const note = noteOf(row);
+    if (!note || row.hasAttribute('data-us-task-expanded')) return;
+    let more = row.querySelector('.us-task__more');
+    const clamped = note.textContent.trim() !== '' && note.scrollHeight > note.clientHeight + 1;
+    if (clamped && !more) {
+      more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'us-task__more';
+      more.textContent = 'More';
+      more.setAttribute('aria-expanded', 'false');
+      more.setAttribute('aria-controls', note.id);
+      note.after(more);
+    } else if (!clamped && more) {
+      more.remove();
+    }
+  }
+
+  function syncCompact(row) {
+    const note = noteOf(row);
+    const details = row.querySelector('.us-task__details');
+    if (note && details) details.setAttribute('aria-controls', note.id);
+  }
+
+  const sizes = window.ResizeObserver ? new ResizeObserver(() => schedule()) : null;
+
+  function sync() {
+    document.querySelectorAll(rowSelector).forEach(row => {
+      if (excluded(row)) return;
+      if (row.classList.contains('us-task--full')) syncFull(row);
+      else syncCompact(row);
+      renderTags(row);
+      const list = row.closest('.QueryTemplateSet');
+      if (list && sizes) sizes.observe(list);
+    });
+  }
+
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      sync();
+    });
+  }
+
+  document.addEventListener('click', event => {
+    const tagsMore = event.target.closest?.('.us-task__tags-more');
+    const toggle = event.target.closest?.('.us-task__more, .us-task__details');
+    const row = (tagsMore || toggle)?.closest('.us-task');
+    if (!row || excluded(row)) return;
+    if (tagsMore) {
+      // "+N" shows every tag in place, whether or not the row has a note.
+      row._usTaskTagsOpen = true;
+      const text = row.querySelector('.us-task__tags-text');
+      renderTags(row);
+      // The button has gone: keep keyboard focus on the tags it opened.
+      if (text) {
+        text.tabIndex = -1;
+        text.focus({preventScroll: true});
+      }
+      return;
+    }
+    setOpen(row, !isOpen(row));
+  });
+
+  new MutationObserver(schedule).observe(document.documentElement, {childList: true, subtree: true});
+  schedule();
+
+  window.UnionSuiteTaskNotes = Object.freeze({version: '1.2', refresh: schedule});
 })();
 /* US-TASK-ROWS:END */
 
@@ -18068,11 +18927,12 @@ SOFTWARE.
 
   // Loaded rows that are certainly in their final position: no other source
   // with unloaded rows could still supply a newer row (equal times wait too).
+  // A source with more to load but no rows yet could supply any row.
   function settledRows(state) {
     const sources = relevantSources(state);
     const pending = sources.filter(source => source.more);
     return sources.flatMap(source => source.rows).sort(newestFirst).filter(row =>
-      pending.every(source => source.def === row.source || row.date.sort > lastRow(source).date.sort));
+      pending.every(source => source.def === row.source || (lastRow(source) && row.date.sort > lastRow(source).date.sort)));
   }
 
   // Type and direction words match too ("email", "inbound"), as a shortcut
@@ -18112,7 +18972,10 @@ SOFTWARE.
         if (state.query || visibleRows(state).length >= state.shown) break;
         const candidates = relevantSources(state).filter(source => source.more);
         if (!candidates.length) break;
-        const next = candidates.reduce((best, source) => lastRow(source).date.sort > lastRow(best).date.sort ? source : best);
+        // A source with nothing loaded goes first: a wider date range reopens
+        // sources that had no rows in the old one, such as a type with none.
+        const next = candidates.find(source => !source.rows.length)
+          ?? candidates.reduce((best, source) => lastRow(source).date.sort > lastRow(best).date.sort ? source : best);
         state.loadingMore = true;
         render(state);
         if (!await loadPage(state, next) || generation !== state.generation) return;
@@ -18661,10 +19524,12 @@ SOFTWARE.
 
     // Empty, loading and no-match messages sit after the groups.
     let message = '';
+    let loading = false;
     if (!rows.length) {
       const relevant = state.sources.filter(source => state.type === 'all' || source.def.type === state.type);
       message = emptyMessage(state);
-      if (firstLoad || state.loadingMore) message = 'Loading activity…';
+      loading = firstLoad || state.loadingMore;
+      if (loading) message = 'Loading activity…';
       else if (relevant.length && relevant.every(source => source.status === 'failed')) message = 'Activity couldn’t be loaded.';
       else if (state.query) message = 'No loaded activity matches “' + state.query + '”.';
     }
@@ -18672,13 +19537,29 @@ SOFTWARE.
       state.emptyNote = el('p', 'us-activity__empty');
       state.emptyNote.hidden = true;
     }
-    if (message) state.emptyNote.textContent = message;
+    if (message) setNote(state.emptyNote, message, loading);
     body.append(state.emptyNote);
     if (animate) fold(state.emptyNote, Boolean(message), 180);
     else state.emptyNote.hidden = !message;
 
     if (rows.length) state.painted = true;
     highlightMatches(state);
+  }
+
+  // While loading, the theme's spinning circles lead the message, as beside
+  // the IQA finder's "Searching…". An unchanged note is left alone, so the
+  // spinner does not restart on every render.
+  function setNote(note, message, loading) {
+    const spinning = Boolean(note.querySelector(':scope > .section-loader-spinning-circles'));
+    note.classList.toggle('is-loading', loading);
+    if (note.textContent === message && spinning === loading) return;
+    if (!loading) {
+      note.textContent = message;
+      return;
+    }
+    const spinner = el('span', 'section-loader-spinning-circles');
+    spinner.setAttribute('aria-hidden', 'true');
+    note.replaceChildren(spinner, document.createTextNode(message));
   }
 
   // A faint highlight on search matches, drawn with CSS Custom Highlights so

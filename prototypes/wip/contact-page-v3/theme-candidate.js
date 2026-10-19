@@ -2076,11 +2076,12 @@
 
   // Loaded rows that are certainly in their final position: no other source
   // with unloaded rows could still supply a newer row (equal times wait too).
+  // A source with more to load but no rows yet could supply any row.
   function settledRows(state) {
     const sources = relevantSources(state);
     const pending = sources.filter(source => source.more);
     return sources.flatMap(source => source.rows).sort(newestFirst).filter(row =>
-      pending.every(source => source.def === row.source || row.date.sort > lastRow(source).date.sort));
+      pending.every(source => source.def === row.source || (lastRow(source) && row.date.sort > lastRow(source).date.sort)));
   }
 
   // Type and direction words match too ("email", "inbound"), as a shortcut
@@ -2113,7 +2114,10 @@
         if (state.query || visibleRows(state).length >= state.shown) break;
         const candidates = relevantSources(state).filter(source => source.more);
         if (!candidates.length) break;
-        const next = candidates.reduce((best, source) => lastRow(source).date.sort > lastRow(best).date.sort ? source : best);
+        // A source with nothing loaded goes first: a wider date range reopens
+        // sources that had no rows in the old one, such as a type with none.
+        const next = candidates.find(source => !source.rows.length)
+          ?? candidates.reduce((best, source) => lastRow(source).date.sort > lastRow(best).date.sort ? source : best);
         state.loadingMore = true;
         render(state);
         if (!await loadPage(state, next) || generation !== state.generation) return;
@@ -2554,10 +2558,12 @@
 
     // Empty, loading and no-match messages sit after the groups.
     let message = '';
+    let loading = false;
     if (!rows.length) {
       const relevant = state.sources.filter(source => state.type === 'all' || source.def.type === state.type);
       message = emptyMessage(state);
-      if (firstLoad || state.loadingMore) message = 'Loading activity…';
+      loading = firstLoad || state.loadingMore;
+      if (loading) message = 'Loading activity…';
       else if (relevant.length && relevant.every(source => source.status === 'failed')) message = 'Activity couldn’t be loaded.';
       else if (state.query) message = 'No loaded activity matches “' + state.query + '”.';
     }
@@ -2565,13 +2571,29 @@
       state.emptyNote = el('p', 'us-activity__empty');
       state.emptyNote.hidden = true;
     }
-    if (message) state.emptyNote.textContent = message;
+    if (message) setNote(state.emptyNote, message, loading);
     body.append(state.emptyNote);
     if (animate) fold(state.emptyNote, Boolean(message), 180);
     else state.emptyNote.hidden = !message;
 
     if (rows.length) state.painted = true;
     highlightMatches(state);
+  }
+
+  // While loading, the theme's spinning circles lead the message, as beside
+  // the IQA finder's "Searching…". An unchanged note is left alone, so the
+  // spinner does not restart on every render.
+  function setNote(note, message, loading) {
+    const spinning = Boolean(note.querySelector(':scope > .section-loader-spinning-circles'));
+    note.classList.toggle('is-loading', loading);
+    if (note.textContent === message && spinning === loading) return;
+    if (!loading) {
+      note.textContent = message;
+      return;
+    }
+    const spinner = el('span', 'section-loader-spinning-circles');
+    spinner.setAttribute('aria-hidden', 'true');
+    note.replaceChildren(spinner, document.createTextNode(message));
   }
 
   // A faint highlight on search matches, drawn with CSS Custom Highlights so

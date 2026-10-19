@@ -113,6 +113,22 @@
       refresh: {when: 'close', targets: [{type: 'origin-report'}]}
     }
   });
+  // The pencil on a compact or full task row (US-TASK-ROWS 1.2, owner,
+  // 19 October 2026): the title is plain text there, and the pencil opens
+  // the same task popup the detail row's title link opens.
+  define('home.edit-task', {
+    presentation: {label: 'Edit task', icon: 'pencil', default: 'button', row: 'icon', menu: 'menu-item'},
+    context: {
+      taskUrl: {from: 'trigger', attribute: 'data-us-task-url', required: true}
+    },
+    action: {
+      type: 'popup',
+      recordKey: ['taskUrl'],
+      href: ({context}) => context.taskUrl,
+      popup: {title: 'Edit task', width: '70%', height: '70%', maxWidth: 800},
+      refresh: {when: 'close', targets: [{type: 'origin-report'}]}
+    }
+  });
   define('jobs.edit',{
     presentation:{label:'Edit job',icon:'pencil',default:'button',row:'icon',menu:'menu-item'},
     context:{...row,workplaceId:{from:'trigger',attribute:'data-workplace',required:true,validate:recordId}},
@@ -162,6 +178,17 @@
   const agreementId = {from: 'query', parameter: 'AgreementID', required: true, validate: value => /^[A-Za-z0-9_-]+$/.test(String(value)) || 'Invalid agreement ID.'};
   const agreementNum = {from: 'query', parameter: 'AgreementNum', required: true, validate: value => /^\d+$/.test(String(value)) || 'Invalid agreement number.'};
   const rowOrdinal = {from: 'trigger', attribute: 'data-ordinal', required: true, validate: value => /^\d+$/.test(String(value)) || 'Invalid record ordinal.'};
+  // The signed-in staff member (not the contact being viewed). Anonymous
+  // sessions resolve to null, so the required check stops the popup.
+  const userId = {
+    resolve: () => {
+      let context = {};
+      try { context = JSON.parse(document.getElementById('__ClientContext')?.value || '{}'); } catch (_) {}
+      return context.isAnonymous === true ? null : context.loggedInPartyId ?? null;
+    },
+    required: true,
+    validate: value => /^\d+$/.test(String(value).trim()) || 'Invalid signed-in user ID.'
+  };
 
   function define(key, options) {
     return actions.define(key, {
@@ -193,7 +220,7 @@
   function popup(key, label, icon, href, title, refresh, sizing) {
     define(key, {
       presentation: {label, ...(icon ? {icon} : {}), default: 'button', menu: 'menu-item'},
-      context: {agreementId, agreementNum},
+      context: {agreementId, agreementNum, userId},
       action: {type: 'popup', recordKey: ['agreementId'], href, popup: {title, width: '90%', height: '90%', ...sizing}, ...(refresh ? {refresh} : {})}
     });
   }
@@ -204,11 +231,17 @@
   // 90% of a large screen stretched their narrow fields (owner, 5 October
   // 2026). A smaller window keeps the 90%.
   const formWidth = {maxWidth: 800};
+  // Notes, tasks, milestones and attachments share the Zidebar Add Note form:
+  // Type picks the form, ID is the signed-in user, Module, ModuleID and
+  // ModuleOrdinal the agreement (owner, 14 and 19 October 2026).
+  const addNoteForm = type => ({context}) => page('/_i4u_/Core/Zidebar/Add-Note-New.aspx', {
+    Type: type, ID: context.userId, Module: 'agreement', ModuleID: context.agreementId, ModuleOrdinal: context.agreementNum
+  });
   popup('agreements.add-note', 'Add note', 'plus',
-    ({context}) => page('/Agreements_CreateNote', {AgreementID: context.agreementId}),
+    addNoteForm('note'),
     'Add note', refreshList('us-action-agreements-add-note'), formWidth);
   popup('agreements.upload-attachment', 'Upload', 'ti-upload',
-    ({context}) => page('/_i4u_/Core/Collective_Agreements/v2/Popups/Add-Attachment.aspx', {AgreementID: context.agreementId}),
+    addNoteForm('attachmentonly'),
     'Add attachment', refreshList('us-action-agreements-upload-attachment'), {maxWidth: 960});
   popup('agreements.add-contact', 'Add contact', 'plus',
     ({context}) => page('/Agreements_ManageContacts', {AgreementID: context.agreementId}),
@@ -217,10 +250,10 @@
     ({context}) => page('/Agreements_CreateMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
     'Schedule meeting', refreshList('us-action-agreements-add-meeting'), formWidth);
   popup('agreements.add-task', 'Add task', 'plus',
-    ({context}) => page('/Agreements_CreateTask', {Task: 'true', AgreementID: context.agreementId}),
+    addNoteForm('task'),
     'Add task', refreshList('us-action-agreements-add-task'), formWidth);
   popup('agreements.add-milestone', 'Add milestone', 'plus',
-    ({context}) => page('/Agreements_CreateTask', {Milestones: 'true', AgreementID: context.agreementId}),
+    addNoteForm('milestone'),
     'Add milestone', refreshList('us-action-agreements-add-milestone'), formWidth);
 
   // ── Agreement details ───────────────────────────────────────
