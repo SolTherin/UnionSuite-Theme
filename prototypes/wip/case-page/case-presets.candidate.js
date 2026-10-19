@@ -27,43 +27,20 @@
       'us-action-cases-add-note', 'us-action-cases-add-meeting', 'us-action-cases-add-attachment',
       'us-activity-details', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'
     ],
+    // us-case-meetings, us-case-meetings-detail, us-case-attachments,
+    // us-case-attachments-recent and us-case-staff are in the theme
+    // (sectionPresets, 20 October 2026).
     // The Activity tab's detailed views (C27): each is a Details view of All
     // activity (us-activity-detail-<key>), in the All activity section, and
     // starts with its filters open (C24). The 100-character class field
     // cannot hold these with the section classes, so the preset adds them.
-    // Meetings (C22): the detailed rows.
-    'us-case-meetings-detail': [
-      'us-query-template', 'us-meetings', 'us-query-search', 'us-query-search-open',
-      'us-task-completed-filter', 'us-task-progress', 'us-action-cases-add-meeting',
-      'us-activity-detail', 'us-activity-detail-meetings', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'
-    ],
-    // The Overview's Meetings; Add meeting opens the composer (C40).
-    'us-case-meetings': [
-      'us-query-template', 'us-meetings', 'us-task-completed-filter',
-      'us-task-progress', 'us-list-scroll', 'us-action-cases-add-meeting'
-    ],
-    // The Overview's newest three files (C26): no search, Upload (the
-    // composer, C40) in the heading.
-    'us-case-attachments-recent': [
-      'us-query-template', 'us-attachments', 'us-action-cases-add-attachment'
-    ],
-    // The Attachments tab: Upload opens the composer in the card (C39).
-    'us-case-attachments': [
-      'us-query-template', 'us-attachments', 'us-query-search', 'us-query-search-open',
-      'us-list-scroll', 'us-action-cases-add-attachment'
-    ],
     // Notes: the ledger, as a Details view (C27).
     'us-case-notes': [
       'us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search',
       'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-note',
       'us-activity-detail', 'us-activity-detail-notes', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'
-    ],
-    // us-case-parties is in the theme (sectionPresets, 14 October 2026).
-    // The case team; Add staff opens the composer (C40).
-    'us-case-staff': [
-      'us-query-template', 'us-contacts-tiles', 'us-contacts-grouped',
-      'us-contacts-group-tone', 'us-contacts-lead-first', 'us-action-cases-add-staff'
     ]
+    // us-case-parties is in the theme (sectionPresets, 14 October 2026).
   };
 
   // Idempotent: once the classes are present nothing changes, so the

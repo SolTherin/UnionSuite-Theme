@@ -1311,7 +1311,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   --iqa-surface: var(--bg-surface, #ffffff);
@@ -1356,7 +1356,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0 0 18px;
@@ -1379,7 +1379,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1407,7 +1407,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::before,
 :is(
@@ -1417,7 +1417,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:where(.us-report-no-styling, .us-report-no-styling *))::after {
   display: none;
@@ -1430,7 +1430,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading .panel-title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1451,7 +1451,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1475,7 +1475,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-description > :is(div, p):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -1489,7 +1489,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
@@ -1502,7 +1502,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-heading:not(:has(*)) + .panel-description:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   border-radius: calc(var(--iqa-radius) - 1px) calc(var(--iqa-radius) - 1px) 0 0;
@@ -1517,7 +1517,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container:not(:where(.us-report-no-styling, .us-report-no-styling *)),
 :where(
@@ -1527,7 +1527,7 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   [data-us-panel],
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface))
 ) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin: 0;
@@ -16810,7 +16810,7 @@ html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .account-menu {
    when iMIS omits QueryTemplateSet for no results; nested iParts are excluded. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding: var(--space-3) var(--iqa-inset,var(--space-4));
 }
@@ -16841,7 +16841,7 @@ html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .account-menu {
 /* No-results HTML is author supplied; trim paragraph margins within its own body. */
 :is(.ContentItemContainer, .ContentItemContainer > div):is(
   :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+  :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
 ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)) > .panel > .panel-body-container > .panel-body:not(:has(> .QueryTemplateSet)):not(:where(.us-report-no-styling, .us-report-no-styling *)) > p {
   margin: 0;
   color: var(--iqa-muted);
@@ -16859,7 +16859,7 @@ html.us-taskbar-mounted #masterTopBarAuxiliary > .navbar-right > .account-menu {
   .us-list--no-shell,
   :is(.ContentItemContainer, .ContentItemContainer > div):is(
     :has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),
-    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
+    :where(.us-query-template, .us-list-scroll, .us-query-search, .us-task-completed-filter, .us-home-tasks, .us-agreement-tasks, .us-agreement-milestones, .us-agreement-meetings, .us-agreement-attachments, .us-agreement-notes, .us-agreement-terms, .us-agreement-increases, .us-agreement-contacts, .us-case-parties, .us-case-tasks, .us-case-meetings, .us-case-meetings-detail, .us-case-attachments, .us-case-attachments-recent, .us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer, .panel, .cco, .RadGrid, [data-us-cco], .us-banner__surface))))
   ):not(:where(.us-banner, .us-banner *)):not(:has(.us-banner__surface)):not(:where(.us-list *, .us-list--rows *, .us-list--timeline *, .us-list--compact *, .us-list--no-shell *))
 ) {
   --list-gap: var(--space-3);

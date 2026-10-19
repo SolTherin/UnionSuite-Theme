@@ -2921,7 +2921,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts,.us-case-parties,.us-case-tasks):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts,.us-case-parties,.us-case-tasks,.us-case-meetings,.us-case-meetings-detail,.us-case-attachments,.us-case-attachments-recent,.us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -2958,7 +2958,18 @@ SOFTWARE.
     'us-case-parties': ['us-query-template', 'us-parties', 'us-query-search', 'us-contacts-lead-first', 'us-action-cases-add-party'],
     // Case tasks, as the agreement's with the case's Add task (owner, 20 October
     // 2026: the classes spelled out run to 115 characters).
-    'us-case-tasks': ['us-query-template', 'us-query-search', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-cases-add-task']
+    'us-case-tasks': ['us-query-template', 'us-query-search', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-cases-add-task'],
+    // The rest of the case page (owner, 20 October 2026), as the agreement's
+    // panels with the case actions. Meetings: past ones behind Show past meetings.
+    'us-case-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-cases-add-meeting'],
+    // The Activity tab's detailed meetings: a Details view of All activity
+    // (US-ACTIVITY-FEED), with its search open.
+    'us-case-meetings-detail': ['us-query-template', 'us-meetings', 'us-query-search', 'us-query-search-open', 'us-task-completed-filter', 'us-task-progress', 'us-action-cases-add-meeting', 'us-activity-detail', 'us-activity-detail-meetings', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
+    'us-case-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-attachment'],
+    // The Overview's newest three files: no search, Upload in the heading.
+    'us-case-attachments-recent': ['us-query-template', 'us-attachments', 'us-action-cases-add-attachment'],
+    // The case team as grouped tiles, the lead staff member first.
+    'us-case-staff': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-group-tone', 'us-contacts-lead-first', 'us-action-cases-add-staff']
   };
 
   // Idempotent: once the classes are present no further mutation is recorded,
