@@ -62,11 +62,13 @@
     return new Promise(resolve => setTimeout(() => resolve(new Response(body, {status: 200, headers: {'Content-Type': 'application/json'}})), 250));
   };
 
-  // The site defines the real actions (CloudToolz saves, the send page);
-  // these report what they would do.
+  // The theme's case actions (Scripts/ActionDefinitions.js) save through
+  // CloudToolz and open the send page; the example replaces them
+  // (configure, the registry's intentional replacement) with ones that
+  // report what they would do.
   document.addEventListener('DOMContentLoaded', () => {
     const actions = window.UnionSuiteActions;
-    const define = (key, presentation, run) => actions.define('cases.' + key, {
+    const define = (key, presentation, run) => actions.configure('cases.' + key, {
       className: 'us-action-cases-' + key, owner: 'guide', source: 'Case-Parties.js:' + key,
       presentation, action: {type: 'function', run}
     });

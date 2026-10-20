@@ -19,8 +19,8 @@ way.
   `zUnionSuite.css`, two dark details in `zzDarkMode.css`, and the usage
   guide's `#inline-composer` (live example, copyable spec, field types,
   popup contract; test `usage/tests/test-inline-composer.cjs`). The case
-  specs stay in `case-actions.candidate.js` until the case page moves to
-  `Scripts/ActionDefinitions.js`.
+  specs are in `Scripts/ActionDefinitions.js` (the Case page actions block,
+  20 October 2026; they were `case-actions.candidate.js`).
 - **Approved, not built:** `prototypes/approved/list-search-and-paging/`, the
   theme's own paging and search-everything for lists, with the found record
   kept in view in context. Read it before touching list search or paging.
@@ -40,7 +40,7 @@ The owner's brief, in order (all 10 October 2026):
    and rejected as too complex for a transition. The simple version won.
 
 **The pieces** (US-INLINE-COMPOSER in the theme; the case specs in
-`case-actions.candidate.js`):
+`Scripts/ActionDefinitions.js`):
 
 - `UnionSuiteComposers.define(key, spec)` defines two actions: `key` (the
   section's add button, a toggle; pressed again it puts the composer away
@@ -123,7 +123,7 @@ The owner's brief, in order (all 10 October 2026):
 - **Parties are in the theme** (14 October 2026): US-CASE-PARTIES (CSS and
   JS), US-CASE-MEMBER (CSS), the `us-case-parties` preset, and the guide's
   `#case-parties` with the template. The prototype reads that template from
-  the guide. Its actions stay in `case-actions.candidate.js`. Found on the
+  the guide. Its actions are in `Scripts/ActionDefinitions.js`. Found on the
   live page (owner's paste): `ContactType` returned iMIS's "Please Enter",
   `ContactRole` was blank, the details IQA returned no row for `ID`, and
   the editor merged the meta spans (the template now classes them).

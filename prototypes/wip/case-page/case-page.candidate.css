@@ -308,8 +308,8 @@
 }
 
 /* C23 Quick status change: the status menu pill and its tick are in the
-   theme (US-BANNER-COMPONENT, 20 October 2026); the action stays in
-   case-actions.candidate.js. */
+   theme (US-BANNER-COMPONENT, 20 October 2026); the action is in
+   Scripts/ActionDefinitions.js. */
 
 /* ── C25 Overview balance ───────────────────────────────────────
    The side column had grown much longer than the main one (owner, 9

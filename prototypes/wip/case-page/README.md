@@ -101,7 +101,7 @@ Overview, Details, Activity, Parties. Its Resolution and Summary
 | `index.html` | Page composition with native iMIS wrapper fixtures. The comment above each iPart gives its type, CSS class and template. |
 | `templates/` | Author Query Templates, each with its iPart settings, field list and No results HTML in the header comment: Banner, Member, Resolved, Recent Activity (Overview), Attachments (Overview, Case-Files), All Activity (Activity tab), Changes (Activity tab), Meetings Detail, Parties, Staff, Tasks, Meetings, Notes (ledger), Attachments, Field Groups (Case details and Resolution). |
 | `case-presets.candidate.js` | `us-case-*` section presets (all activity and notes; tasks, parties, meetings, attachments and staff are in the theme). Loads before `zUnionSuite.js`. Target: `sectionPresets` in `zUnionSuite.js`. |
-| `case-actions.candidate.js` | `cases.*` actions (the composer specs for every add, C40; edit, resolve case, edit resolution, reopen case, email parties, make primary party, make lead staff) and the `cases.item-status` task saver. Target: `Scripts/ActionDefinitions.js`. |
+| `restricted-attachments.candidate.js` | C33 restricted attachments (the Unlock button and its access check). Target: US-ATTACHMENTS in `zUnionSuite.js`, its CSS from `case-page.candidate.css`. The `cases.*` actions (the composer specs for every add, C40; edit, resolve case, edit resolution, reopen case, email parties, make primary party, make lead staff) and the `cases.item-status` task saver were `case-actions.candidate.js`; they are now the Case page actions block in `THeme/UnionSuite/Scripts/ActionDefinitions.js` (20 October 2026). |
 | `case-page.candidate.css` | C2 party standing badge, C3 email direction arrow, C5 case team cards one per row, C6 resolved panel hidden while open, C8 lead staff crown, C9 banner member line, C11 details updated cards, C12 search in the heading and the taller Notes list, C13 empty states, C14 narrow-screen order, C15 capped recent activity. (C4, C7 and View profile are in the theme.) Each section names its target. |
 | `case-activity.candidate.js` | C10: Load all for the activity feed; C19: a feed locked to a recent window; C24: a narrow feed's filters open; C27–C31: the Details view toggle and the case timeline cards (View email, restricted notes, task status, change lists). Target: `US-ACTIVITY-FEED` in `zUnionSuite.js`, as native options. |
 | `search-open.candidate.js` | C24: a list's filters start open (`us-query-search-open`), by seeding the theme's panel memory before it runs. Target: `US-QUERY-SEARCH` in `zUnionSuite.js`. |
@@ -181,7 +181,7 @@ Known IQAs, from the live tenant's IQA list:
 
 ## Open decisions
 
-1. **Popup pages.** Every `Cases_*` URL in `case-actions.candidate.js` is a
+1. **Popup pages.** Every `Cases_*` URL in the case actions (`ActionDefinitions.js`) is a
    placeholder that follows the agreement pattern. It needs the real case
    editor, note, task, meeting, contact, staff and attachment pages.
 2. **Member standing rules.** Which iMIS fields mark unfinancial

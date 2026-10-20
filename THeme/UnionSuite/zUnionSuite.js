@@ -4629,7 +4629,7 @@ SOFTWARE.
    - keeps a choice the search hides until another is made, and picks again
      when an in-place refresh replaces the rows.
    The actions (cases.set-primary-party, cases.email-parties,
-   cases.add-party) are defined by the site, not here. Without the script
+   cases.add-party) are in Scripts/ActionDefinitions.js, not here. Without the script
    every row stays a plain card and the details stay hidden. */
 (function () {
   'use strict';
