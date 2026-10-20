@@ -8698,6 +8698,158 @@ SOFTWARE.
 })();
 /* US-RECORD-TITLE:END */
 
+/* US-QUERY-VALUE:START — values from a one-row IQA into authored HTML.
+   Put data-us-value-query (the IQA's whole path) on any element: an iPart's
+   Footer, a heading, a Content HTML block. data-us-value-filter names the IQA
+   filter; its value is data-us-value-filter-value, or else the page URL
+   parameter of the same name. Inside, each [data-us-value-column="Column"]
+   takes that column of the first row as text (an empty name takes the first
+   column). The element is hidden until every value has arrived (author it
+   hidden too, so it never shows empty before this script runs), and stays
+   hidden for a failed or empty query, a blank value, or a 0 with
+   data-us-value-hide-zero. It reloads when its Query Template list refreshes
+   (us:query-template-refreshed), for example after an upload, and
+   UnionSuiteQueryValue.refresh(element) reloads one on demand.
+   First use: the case Overview's "View all attachments (N)" (owner,
+   20 October 2026), counted by its own IQA rather than a column on every row. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteQueryValue) {
+    window.UnionSuiteQueryValue.refresh();
+    return;
+  }
+
+  const SELECTOR = '[data-us-value-query]';
+  const SLOT = '[data-us-value-column]';
+  const loaded = new WeakMap();
+  let queued = false;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  // Columns in IQA order, from either row shape (/api/query rows are flat).
+  function columns(row) {
+    const properties = unwrap(row?.Properties)?.$values;
+    if (Array.isArray(properties)) return properties.map(item => [String(item.Name), unwrap(item.Value)]);
+    return Object.entries(row || {}).filter(([name]) => name !== '$type').map(([name, value]) => [name, unwrap(value)]);
+  }
+
+  function config(element) {
+    const query = text(element.dataset.usValueQuery);
+    const filter = text(element.dataset.usValueFilter);
+    let value = text(element.dataset.usValueFilterValue);
+    if (!value && filter) value = text(new URLSearchParams(location.search).get(filter));
+    // Unsubstituted placeholders mean the page has no record yet.
+    if (!/^\$\/.+/.test(query) || (filter && (!value || /^[\[{]/.test(value)))) return null;
+    return {query, filter, value};
+  }
+
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  async function request(cfg) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+    try {
+      const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
+      const params = new URLSearchParams({QueryName: cfg.query, limit: '1', offset: '0'});
+      if (cfg.filter) params.set(cfg.filter, cfg.value);
+      const response = await fetch(apiRoot() + 'query?' + params, {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+      });
+      if (!response.ok) throw Error('HTTP ' + response.status);
+      const data = await response.json();
+      const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+      if (!Array.isArray(rows)) throw Error('Unexpected response');
+      return rows[0] || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function show(element, row) {
+    const values = columns(row);
+    const slots = [...element.querySelectorAll(SLOT)];
+    if (element.matches(SLOT)) slots.unshift(element);
+    let ready = !!row && slots.length > 0;
+    slots.forEach(slot => {
+      const name = text(slot.dataset.usValueColumn).toLowerCase();
+      const match = name ? values.find(([column]) => column.toLowerCase() === name) : values[0];
+      const value = text(match?.[1]);
+      if (slot.textContent !== value) slot.textContent = value;
+      if (!value || (element.hasAttribute('data-us-value-hide-zero') && Number(value) === 0)) ready = false;
+    });
+    element.hidden = !ready;
+    element.setAttribute('data-us-value-state', ready ? 'ready' : 'empty');
+  }
+
+  async function load(element, force) {
+    const cfg = config(element);
+    if (!cfg) return;
+    const key = JSON.stringify(cfg);
+    if (!force && loaded.get(element) === key) return;
+    if (force && element.getAttribute('data-us-value-state') === 'loading') return;
+    // The first load hides it; a reload keeps the current values showing
+    // until the new ones arrive.
+    if (!loaded.has(element)) element.hidden = true;
+    loaded.set(element, key);
+    element.setAttribute('data-us-value-state', 'loading');
+    try {
+      const row = await request(cfg);
+      if (loaded.get(element) === key) show(element, row);
+    } catch (error) {
+      if (loaded.get(element) !== key) return;
+      element.hidden = true;
+      element.setAttribute('data-us-value-state', 'error');
+      console.warn('UnionSuite query value:', cfg.query, error.message || error);
+    }
+  }
+
+  function scan() {
+    queued = false;
+    document.querySelectorAll(SELECTOR).forEach(element => load(element, false));
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    setTimeout(scan, 0);
+  }
+
+  function refresh(target) {
+    if (target instanceof Element) {
+      const elements = target.matches(SELECTOR) ? [target] : [...target.querySelectorAll(SELECTOR)];
+      elements.forEach(element => load(element, true));
+      return;
+    }
+    schedule();
+  }
+
+  window.UnionSuiteQueryValue = {refresh};
+
+  // A refreshed list reloads the values in its own iPart.
+  document.addEventListener('us:query-template-refreshed', event => {
+    const container = event.detail?.container || event.target;
+    if (container instanceof Element) refresh(container.closest('.ContentItemContainer') || container);
+  });
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'attributes' ||
+      [...record.addedNodes].some(node => node.nodeType === 1 && (node.matches(SELECTOR) || node.querySelector(SELECTOR))))) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true,
+    attributeFilter: ['data-us-value-query', 'data-us-value-filter', 'data-us-value-filter-value']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+})();
+/* US-QUERY-VALUE:END */
+
 /* US-FIELD-GROUPS:START — read-only field panel from a client-editable IQA.
    Put data-us-fields-query on a .us-field-groups element. The IQA returns one
    row; its column names lay the panel out, so clients change the panel by

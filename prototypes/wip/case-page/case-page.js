@@ -410,7 +410,7 @@
       {set: 'cp-meetings', template: 'Case-Meetings-Query-Template.html', rows: rows.meetings, empty: emptyState('ti-calendar-plus', 'No meetings', 'Schedule one to meet the member or the employer.', 'us-action-cases-add-meeting')},
       {set: 'cp-notes', template: 'Case-Notes-Ledger-Query-Template.html', rows: rows.notes, empty: emptyState('ti-notes', 'No notes yet', 'Record calls and conversations as notes.', 'us-action-cases-add-note')},
       // The Overview's newest three (C26), each row with the case's file count.
-      {set: 'cp-attachments-recent', template: 'Case-Attachments-Recent-Query-Template.html', rows: rows.attachments.slice(0, 3).map(file => ({...file, AttachmentCount: String(rows.attachments.length)})), empty: emptyState('ti-paperclip', 'No attachments yet', 'Upload statements, letters and other documents.', 'us-action-cases-add-attachment')},
+      {set: 'cp-attachments-recent', template: 'Case-Attachments-Recent-Query-Template.html', rows: rows.attachments.slice(0, 3), empty: emptyState('ti-paperclip', 'No attachments yet', 'Upload statements, letters and other documents.', 'us-action-cases-add-attachment')},
       {set: 'cp-attachments', template: 'Case-Attachments-Query-Template.html', rows: rows.attachments, empty: emptyState('ti-paperclip', 'No attachments yet', 'Upload statements, letters and other documents.', 'us-action-cases-add-attachment')}
     ];
   }
@@ -508,6 +508,8 @@
       const name = target.searchParams.get('QueryName') || '';
       if (name.endsWith('/CloudToolzUrl')) return reply(items([{Description: cloudToolz + '/'}]));
       if (name.endsWith('/ZenFileTags')) return reply(items(tags));
+      // The Overview attachments footer's count (US-QUERY-VALUE).
+      if (name.endsWith('/API - Manage Case - Attachment Count')) return reply(items([{AttachmentCount: String(rows.attachments.length)}]));
       // The banner's second row: replaces the current page's Details block.
       if (name.endsWith('/API - Manage Case - Banner Details')) return reply(items([{
         Description: 'Priya reports repeated belittling comments from a night shift supervisor since July.',

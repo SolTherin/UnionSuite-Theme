@@ -16,6 +16,7 @@ const queryTemplateRefreshExample = require('./query-template-refresh-example.cj
 const inlineComposerExample = require('./inline-composer-example.cjs');
 const casePartiesExample = require('./case-parties-example.cjs');
 const caseBannerExample = require('./case-banner-example.cjs');
+const queryValueExample = require('./query-value-example.cjs');
 const actionConflictExample = require('./action-conflict-example.cjs');
 const membership = require('./membership-stats-example.cjs');
 const actionBuilder = require('./build-action-builder.cjs');
@@ -66,6 +67,7 @@ const snippets = {
   "client-actions": ["THeme/UnionSuite-Guides/usage/examples/Client-Actions.example.js", read("THeme/UnionSuite-Guides/usage/examples/Client-Actions.example.js")],
   master: ['THeme/UnionSuite-Guides/usage/templates/Banner-Template.html', template],
   dashboard: ['THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html')],
+  'attachments-count-footer': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Attachments-Count-Footer.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Attachments-Count-Footer.html')],
   'case-rows': ['THeme/UnionSuite-Guides/usage/templates/Banner-Case-Rows-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Banner-Case-Rows-Query-Template.html')],
   case: ['THeme/UnionSuite-Guides/usage/templates/Banner-Case-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Banner-Case-Template.html')],
   contact: ['THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html')],
@@ -151,6 +153,7 @@ allSources.push(...actionBuilder.sources);
 allSources.push(...inlineComposerExample.sources);
 allSources.push(...casePartiesExample.sources);
 allSources.push(...caseBannerExample.sources);
+allSources.push(...queryValueExample.sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite-Guides/usage/examples/Query-Template-Refresh.js');
 allSources.push('THeme/UnionSuite-Guides/usage/build/embedded-cco-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/iqa-expand-example.cjs','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.html','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.css','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.js');
@@ -249,6 +252,8 @@ const inserts = {
  CASE_PARTIES_TEMPLATE: snippet('case-parties'),
  CASE_ROWS_DEMO: iframe('case-rows-demo', 'Two-row case banner with the member line, status menu and details row', caseBannerExample.documentHtml({read, css:nativePreviewCss+theme, themeJs, fields:queryFields.definitions['Banner-Case-Rows-Query-Template.html']}), true),
  CASE_ROWS_TEMPLATE: snippet('case-rows'),
+ QUERY_VALUE_DEMO: iframe('query-value-demo', 'Attachments with a count footer from its own IQA', queryValueExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
+ QUERY_VALUE_TEMPLATE: snippet('attachments-count-footer'),
  TASK_FOOTER_TEMPLATE: snippet('task-footer'),
  REPORT_ICON_DEMO: iframe('report-icon-demo','Generated report icon actions',reportIconExample.documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
  IQA_FINDER_DEMO: iframe('iqa-finder-demo','IQA browser: search, favourites and recent',require('./iqa-finder-example.cjs').documentHtml({nativePreviewCss,theme,iconCss,branding:clientRoots}),true),

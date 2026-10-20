@@ -22298,6 +22298,11 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font: 12px/1.5 var(--font-ui);
 }
 
+/* A footer waiting on its values (US-QUERY-VALUE) stays out of the panel. */
+.us-query-footer[hidden] {
+  display: none;
+}
+
 .us-query-footer > .us-query-footer__link:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin-inline-start: auto;
   flex: none;
@@ -22327,8 +22332,8 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 .panel:has(
-  > .panel-body-container > .panel-body > .us-query-footer,
-  > .panel-body-container > .panel-body > .template-footer > .us-query-footer
+  > .panel-body-container > .panel-body > .us-query-footer:not([hidden]),
+  > .panel-body-container > .panel-body > .template-footer > .us-query-footer:not([hidden])
 ):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   padding-bottom: 0;
   overflow: hidden;
