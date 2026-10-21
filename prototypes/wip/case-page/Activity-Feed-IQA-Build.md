@@ -108,21 +108,37 @@ as agreement emails are linked in `i4u_UT_CA_Communications` (the same
 columns, with `CaseOrdinal` for `AgreementOrdinal`; owner, 21 October 2026).
 Always outgoing: the source carries `data-direction="out"`. One row per send.
 
-Base: `vBoi4u_UT_Cases_Communications` inner joined to
-`vBoCommunicationLogSummary` on `CommunicationLogKey`, with the contact
-business object left joined on `CreatedByUserKey = ContactKey` for the
-sender's name (as the agreement's Communications summary IQA,
-`prototypes/wip/agreement-page/Communications-IQA-Build.md`).
+The card is the agreement Communications panel's (owner, 21 October 2026):
+the audience, the subject without its tag, "4 recipients · 4 sent", and,
+opened, the full subject and the send's results and recipients. Start from a
+copy of the agreement's summary IQA with `vBoi4u_UT_Cases_Communications` in
+place of `vBoi4u_UT_CA_Communications`, then rename to the feed's columns:
 
-| Column | From |
-| --- | --- |
-| `ActivityKey` | the link row's `Ordinal` |
-| `ActivityDate` | `[vBoCommunicationLogSummary].[SentDate]` |
-| `Subject` | the subject without its "Case C217 – " tag (the agreement's `Title` expression) |
-| `Summary` | the agreement's `Summary` expression: "3 recipients · 3 sent" |
-| `Category` | `Sent from iMIS` |
-| `CreatedBy` | the sender's `FullName` |
-| `RecordUrl` | optional: iMIS's email preview, `/iParts/Common/InteractionLog/InteractionPreview.aspx?CommunicationLogId=…&PartyId=…&RecipientId=…` (it needs one recipient; the agreement's "view the email" item in TODO.md has the same open question). The source opens it in a popup (`data-record-popup`). |
+| Column | From | Change from the agreement IQA |
+| --- | --- | --- |
+| `ActivityKey` | `[vBoi4u_UT_Cases_Communications].[Ordinal]` | add |
+| `ActivityDate` | `[vBoCommunicationLogSummary].[SentDate]`, raw | replaces the formatted `SentDate` and `SentTime`: the feed needs the datetime and formats it itself |
+| `Subject` | the `Title` expression (the subject without "Case C217 – ") | `Title` renamed: the feed's headline is `Subject` |
+| `Summary` | the `Summary` expression ("4 recipients · 4 sent") | as is |
+| `Category` | `[vBoi4u_UT_Cases_Communications].[Audience]` | the card's tag after Email ("Parties", "Staff"), as the agreement card shows the audience; the old Category moves to the details IQA |
+| `CreatedBy` | the sender's `FullName` | `SentBy` renamed |
+| `CommunicationLogKey` | as is | the recipients block loads on it |
+| `Audience` | `[vBoi4u_UT_Cases_Communications].[Audience]` | add: a Members send shows counts only |
+| `Recipients`, `Delivered`, `NotSent` | as is | the results bar's numbers |
+
+Leave out the full `Subject`, `RecordType` and `Category` here (the details
+IQA has the first and last). Sort on the raw `SentDate` descending, then the
+link row's `Ordinal` descending.
+
+The source names the recipients IQA in `data-comms-recipients`: the
+agreement's `$/_i4u_/Core/CA/v2/API - Manage Agreement - Communications -
+Details`, which is filtered on `CommunicationLogKey` alone, so it serves cases
+as it is (one row per recipient: `Recipient`, `Address`, `Status`).
+
+Emails Sent Details (the details folder): filtered on `CaseNum` and
+`ActivityKey` (the link row's `Ordinal`), it returns `Additional-Subject`
+(the full subject as sent) and `Additional-Type` (the old `Category`
+expression: the send page's Type, blank for "None").
 
 The filters are the base rules' `CaseNum` (on `CaseOrdinal`) and
 `StartDate` (on `SentDate`).
@@ -253,7 +269,7 @@ label is the text after the prefix; blank values are left out; dates read
 | IQA | Suggested columns |
 | --- | --- |
 | Notes Details | `Additional-Staff` (staff the note is assigned to), `Additional-Members` (members it is assigned to) |
-| Emails Sent Details | the send's recipients as `Additional-To` (names, comma-separated); `Additional-Sent by` |
+| Emails Sent Details | `Additional-Subject` (the full subject), `Additional-Type` (the send page's Type); the recipients come from the source's `data-comms-recipients` IQA |
 | Emails Logged Details | `Additional-From` (`Email_From`), `Additional-To` (`Email_To`), `Additional-Cc` (`Email_CC`) |
 | Meetings Details | `Additional-Location`, `Additional-Attendees` |
 

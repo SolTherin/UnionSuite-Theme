@@ -53,8 +53,12 @@
        Emails Sent  type email, always outgoing: sent from iMIS through the
                     case send page and linked to the case in
                     i4u_UT_Cases_Communications, as agreement emails are.
-                    View email (C28) opens iMIS's email preview in a popup
-                    (data-record-popup).
+                    The card is the agreement Communications panel's
+                    (owner, 21 October 2026): the audience, the subject
+                    without its tag, "4 recipients · 4 sent", and opened,
+                    the full subject and the send's results and recipients
+                    (data-comms-recipients: the agreement's details IQA,
+                    which only needs the CommunicationLogKey).
        Emails Logged   type email: attached to the case through the Outlook
                     plugin, either direction, so each row's Direction says
                     which (from the sender's domain). View and Download open
@@ -89,7 +93,7 @@
   data-us-activity-load-all data-us-activity-filters-open>
   <ul class="us-activity__sources" hidden>
     <li data-source="notes" data-query="Notes" data-details="Notes Details" data-type="note" data-history="#notes" data-restricted="Restricted"></li>
-    <li data-source="emails-sent" data-query="Emails Sent" data-details="Emails Sent Details" data-type="email" data-direction="out" data-record-label="View email" data-record-icon="ti-eye" data-record-popup="true"></li>
+    <li data-source="emails-sent" data-query="Emails Sent" data-details="Emails Sent Details" data-type="email" data-direction="out" data-comms-recipients="$/_i4u_/Core/CA/v2/API - Manage Agreement - Communications - Details"></li>
     <li data-source="emails-logged" data-query="Emails Logged" data-details="Emails Logged Details" data-type="email" data-record-actions="agreements.view-attachment agreements.download-attachment"></li>
     <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-detail-label="Description" data-type="meeting" data-history="#meetings"></li>
     <li data-source="attachments" data-query="Attachments" data-type="attachment" data-record-actions="agreements.view-attachment agreements.download-attachment" data-label="Attachment added" data-plural="Attachments" data-section-link="case:attachments" data-section-tab="Attachments" data-section-label="View all attachments"></li>

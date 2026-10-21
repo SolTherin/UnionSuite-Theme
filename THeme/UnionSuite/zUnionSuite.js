@@ -19148,6 +19148,11 @@ SOFTWARE.
    actions' buttons in the opened card, each with data-ordinal = the
    ActivityKey, and every Data-<name> column the IQA returns (Data-us-file-
    id) is a data-<name> attribute on the card for them to read.
+   Sent emails (21 October 2026): data-comms-recipients="<IQA path>" on a
+   source shows, under the opened card's details, the send's results and
+   recipients as the agreement Communications panel does (US-COMMS-
+   RECIPIENTS), from the row's CommunicationLogKey, Audience, Recipients,
+   Delivered and NotSent columns.
    On a source <li>, data-history is the IQA page for its type: while that
    type is chosen, a "View all calls" (emails, meetings…) link to it shows
    at the end of the type filters.
@@ -19332,7 +19337,11 @@ SOFTWARE.
         sectionLabel: text(item.dataset.sectionLabel),
         // data-record-actions: theme action keys whose buttons the opened
         // card shows, each with data-ordinal set to the record's key.
-        recordActions: text(item.dataset.recordActions).split(/\s+/).filter(key => /^[a-z][\w-]*(?:\.[\w-]+)+$/i.test(key))
+        recordActions: text(item.dataset.recordActions).split(/\s+/).filter(key => /^[a-z][\w-]*(?:\.[\w-]+)+$/i.test(key)),
+        // data-comms-recipients="<IQA path>": a sent email's recipients and
+        // delivery in the opened card, as the agreement Communications
+        // panel shows them (US-COMMS-RECIPIENTS).
+        commsRecipients: /^\$\/.+/.test(text(item.dataset.commsRecipients)) ? text(item.dataset.commsRecipients) : ''
       });
     });
     if (!sources.length) return null;
@@ -19467,6 +19476,14 @@ SOFTWARE.
       caseUrl: safeUrl(field(row, 'CaseUrl')),
       recordUrl: safeUrl(field(row, 'RecordUrl')),
       data: dataAttributes(row),
+      // A send's log key, audience and counts, for its recipients block.
+      comms: source.commsRecipients ? {
+        key: text(field(row, 'CommunicationLogKey')),
+        audience: text(field(row, 'Audience')),
+        recipients: text(field(row, 'Recipients')),
+        delivered: text(field(row, 'Delivered')),
+        notSent: text(field(row, 'NotSent'))
+      } : null,
       direction: direction.startsWith('in') ? 'in' : direction.startsWith('out') ? 'out' : ''
     };
   }
@@ -20158,6 +20175,18 @@ SOFTWARE.
     const extra = el('div', 'us-record__extra');
     fillDetails(extra, state.details.get(row.id));
     detail.append(extra);
+    // A sent email's recipients (data-comms-recipients), loaded by
+    // US-COMMS-RECIPIENTS when the card first opens.
+    if (row.comms?.key) {
+      const recipients = el('div', 'us-comms-recipients');
+      recipients.dataset.usCommsQuery = row.source.commsRecipients;
+      recipients.dataset.usCommsKey = row.comms.key;
+      recipients.dataset.usCommsAudience = row.comms.audience;
+      recipients.dataset.usCommsRecipients = row.comms.recipients;
+      recipients.dataset.usCommsDelivered = row.comms.delivered;
+      recipients.dataset.usCommsNotSent = row.comms.notSent;
+      detail.append(recipients);
+    }
     // The follow-up task's notes (what needs doing), headed so they read
     // apart from the record's own note.
     if (row.followUpNotes) {

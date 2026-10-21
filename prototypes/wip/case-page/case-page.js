@@ -336,8 +336,10 @@
       })),
       // Sent from iMIS (i4u_UT_Cases_Communications): always outgoing.
       'Emails Sent': [
-        {ActivityKey: '503', ActivityDate: '2026-10-08T14:15:00', Subject: 'Meeting request – concerns raised by a member on night shift', Summary: '1 recipient · 1 sent', Category: 'Sent from iMIS', Detail: '', CreatedBy: "Mary O'Conner", RecordUrl: '#activity'},
-        {ActivityKey: '501', ActivityDate: '2026-10-07T17:20:00', Subject: 'Your complaint – next steps', Summary: '1 recipient · 1 sent', Category: 'Sent from iMIS', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: '#activity'}
+        {ActivityKey: '503', ActivityDate: '2026-10-08T14:15:00', Subject: 'Meeting request – concerns raised by a member on night shift', Summary: '2 recipients · 2 sent', Category: 'Staff', Detail: '', CreatedBy: "Mary O'Conner",
+          CommunicationLogKey: 'log-503', Audience: 'Staff', Recipients: '2', Delivered: '2', NotSent: '0'},
+        {ActivityKey: '501', ActivityDate: '2026-10-07T17:20:00', Subject: 'Your complaint – next steps', Summary: '1 recipient · 1 sent', Category: 'Parties', Detail: '', CreatedBy: 'Andrew O Newnham',
+          CommunicationLogKey: 'log-501', Audience: 'Parties', Recipients: '1', Delivered: '1', NotSent: '0'}
       ],
       // Logged through the Outlook plugin, either way; the stored email opens
       // as an attachment does (the Data-us-file-* columns).
@@ -382,8 +384,8 @@
     activityDetails = {
       'Notes Details': Object.fromEntries(rows.notes.map(note => [note.Ordinal, {'Additional-Staff': note.Staff, 'Additional-Members': note.Members}])),
       'Emails Sent Details': {
-        '503': {'Additional-To': 'Northside HR', 'Additional-Sent by': "Mary O'Conner"},
-        '501': {'Additional-To': 'Priya Natarajan', 'Additional-Sent by': 'Andrew O Newnham'}
+        '503': {'Additional-Subject': 'Case C217 – Meeting request – concerns raised by a member on night shift', 'Additional-Type': ''},
+        '501': {'Additional-Subject': 'Case C217 – Your complaint – next steps', 'Additional-Type': ''}
       },
       'Emails Logged Details': {
         '502': {'Additional-From': 'priya.n@mailinator.com', 'Additional-To': 'cases@union.example', 'Additional-Cc': ''},
@@ -558,6 +560,14 @@
       if (name.endsWith('/Case - Member Details') || name.endsWith('/Query Template - Manage Case - Party Details')) {
         const details = detailsFor(target.searchParams.get('ID'));
         return reply(items(details ? [details] : []), 200, 250);
+      }
+      // A sent email's recipients (data-comms-recipients), by its log key.
+      if (name.endsWith('/API - Manage Agreement - Communications - Details')) {
+        const recipients = {
+          'log-503': [{Recipient: 'Northside HR', Address: 'hr@northside.example', Status: 'Open'}, {Recipient: 'Dani Sundara', Address: 'dsundara@union.example', Status: 'Delivered'}],
+          'log-501': [{Recipient: 'Priya Natarajan', Address: 'priya.n@mailinator.com', Status: 'Delivered'}]
+        };
+        return reply(items(recipients[target.searchParams.get('CommunicationLogKey')] || []), 200, 300);
       }
       // A card's details (data-details): one row for its ActivityKey.
       const details = activityDetails[name.slice(name.lastIndexOf('/') + 1)];
