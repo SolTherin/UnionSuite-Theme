@@ -2962,6 +2962,10 @@ SOFTWARE.
     // The rest of the case page (owner, 20 October 2026), as the agreement's
     // panels with the case actions. Meetings: past ones behind Show past meetings.
     'us-case-meetings': ['us-query-template', 'us-meetings', 'us-task-completed-filter', 'us-task-progress', 'us-list-scroll', 'us-action-cases-add-meeting'],
+    // The Activity tab's All activity timeline (owner, 21 October 2026): the
+    // three add actions (the heading shows the chosen type's), its Details
+    // views and its place in the Activity switcher.
+    'us-case-all-activity': ['us-action-cases-add-note', 'us-action-cases-add-meeting', 'us-action-cases-add-attachment', 'us-activity-details', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
     // The Activity tab's detailed meetings: a Details view of All activity
     // (US-ACTIVITY-FEED), with its search open.
     'us-case-meetings-detail': ['us-query-template', 'us-meetings', 'us-query-search', 'us-query-search-open', 'us-task-completed-filter', 'us-task-progress', 'us-action-cases-add-meeting', 'us-activity-detail', 'us-activity-detail-meetings', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
@@ -18691,6 +18695,20 @@ SOFTWARE.
    data-us-activity-page (rows per Show more, default 10),
    data-us-activity-time-zone (default Australia/Sydney) and
    data-us-activity-today (a fixed YYYY-MM-DD for previews; leave it unset).
+   Also optional (the case page, promoted 21 October 2026):
+     data-us-activity-window="30"   a fixed window of that many days: sent
+                                    as the start date, with no date range
+                                    choice; the count reads "last 30 days"
+     data-us-activity-load-all      a Load all button beside Show more,
+                                    loading every row the chosen type and
+                                    range hold, as Show more does
+     data-us-activity-filters-open  a narrow feed starts with its filters
+                                    open under the heading's funnel
+     data-us-activity-history-label the footer link's text (default View
+                                    full history); -history-section and
+                                    -history-tab make it a section link
+                                    (data-us-section-link, data-us-cco-tab)
+   The type chosen in a section is kept when a refresh rebuilds its feed.
    On a source <li>, data-history is the IQA page for its type: while that
    type is chosen, a "View all calls" (emails, meetings…) link to it shows
    at the end of the type filters.
@@ -18735,7 +18753,11 @@ SOFTWARE.
     note: { label: 'Note', plural: 'Notes' },
     // pins: records of this type can be pinned, so the search field offers a
     // pinned-only toggle while it is chosen.
-    interaction: { label: 'Interaction', plural: 'Interactions', pins: true }
+    interaction: { label: 'Interaction', plural: 'Interactions', pins: true },
+    attachment: { label: 'Attachment', plural: 'Attachments' },
+    // changeList: a change's Detail, one "Field: old → new" per line, opens
+    // as a list with the field names leading.
+    change: { label: 'Change', plural: 'Changes', changeList: true }
   };
   const RANGES = [
     [90, 'Last 90 days'],
@@ -18859,7 +18881,16 @@ SOFTWARE.
         history: safeUrl(item.dataset.history),
         details: text(item.dataset.details),
         detailLabel: text(item.dataset.detailLabel),
-        recordPopup: /^(true|1|yes)$/i.test(text(item.dataset.recordPopup))
+        recordPopup: /^(true|1|yes)$/i.test(text(item.dataset.recordPopup)),
+        // data-history="#key": the Details view of the iPart marked
+        // us-activity-detail-key, in place of a View all link.
+        detailsView: /^#[\w-]+$/.test(text(item.dataset.history)) ? text(item.dataset.history).slice(1) : '',
+        recordLabel: text(item.dataset.recordLabel),
+        recordIcon: text(item.dataset.recordIcon).replace(/[^\w-]/g, ''),
+        restricted: text(item.dataset.restricted),
+        sectionLink: text(item.dataset.sectionLink),
+        sectionTab: text(item.dataset.sectionTab),
+        sectionLabel: text(item.dataset.sectionLabel)
       });
     });
     if (!sources.length) return null;
@@ -18870,6 +18901,7 @@ SOFTWARE.
       return Number.isSafeInteger(parsed) && parsed > 0 ? Math.min(parsed, 500) : fallback;
     };
     const days = Number.parseInt(root.dataset.usActivityDays, 10);
+    const fixedWindow = number(root.dataset.usActivityWindow, 0);
     return {
       folder,
       detailsFolder: /^\$\/.+/.test(detailsFolder) ? detailsFolder : folder,
@@ -18877,7 +18909,13 @@ SOFTWARE.
       value,
       sources,
       start: text(root.dataset.usActivityStart) || 'StartDate',
-      days: RANGES.some(([range]) => range === days) ? days : 90,
+      days: fixedWindow || (RANGES.some(([range]) => range === days) ? days : 90),
+      fixedWindow,
+      loadAll: root.hasAttribute('data-us-activity-load-all'),
+      filtersOpen: root.hasAttribute('data-us-activity-filters-open'),
+      historyLabel: text(root.dataset.usActivityHistoryLabel) || 'View full history',
+      historySection: text(root.dataset.usActivityHistorySection),
+      historyTab: text(root.dataset.usActivityHistoryTab),
       limit: number(root.dataset.usActivityLimit, 20),
       page: number(root.dataset.usActivityPage, 10),
       timeZone: text(root.dataset.usActivityTimeZone) || 'Australia/Sydney',
@@ -19227,6 +19265,29 @@ SOFTWARE.
     }
   }
 
+  // Load all (data-us-activity-load-all): every row the chosen type and
+  // date range hold, fetched as Show more fetches them. A very long history
+  // stops after LOAD_ALL_FILLS fills; pressing again carries on.
+  const LOAD_ALL_FILLS = 20;
+
+  async function loadAll(state) {
+    if (state.loadingAll) return;
+    const generation = state.generation;
+    state.loadingAll = true;
+    state.shown = Infinity;
+    render(state);
+    try {
+      for (let fills = 0; fills < LOAD_ALL_FILLS && generation === state.generation; fills++) {
+        while (state.filling && generation === state.generation) await new Promise(resolve => setTimeout(resolve, 50));
+        if (!relevantSources(state).some(source => source.more)) break;
+        await fill(state);
+      }
+    } finally {
+      state.loadingAll = false;
+      if (generation === state.generation) render(state);
+    }
+  }
+
   async function reload(state) {
     state.generation += 1;
     state.filling = false;
@@ -19405,11 +19466,13 @@ SOFTWARE.
     // enough (the heading's filter button then hides); otherwise folded away
     // behind that button, as on the home page tasks, opening above the type
     // filters. Without a panel heading they stay visible.
+    // A fixed window (data-us-activity-window) offers no date range.
     const controls = el('div', 'us-activity__controls');
     controls.id = id + '-filters';
-    controls.append(search, range);
+    controls.append(search, ...(state.cfg.fixedWindow ? [] : [range]));
     const filterToggle = headingToggle(root, controls.id);
-    controls.hidden = Boolean(filterToggle);
+    // data-us-activity-filters-open: a narrow feed starts with them open.
+    controls.hidden = Boolean(filterToggle) && !state.cfg.filtersOpen;
     bar.append(types, typeHistory, controls);
 
     const notice = el('div', 'us-activity__notice');
@@ -19426,14 +19489,25 @@ SOFTWARE.
     more.type = 'button';
     more.setAttribute('aria-controls', body.id);
     footer.append(status, more);
+    let all = null;
+    if (state.cfg.loadAll) {
+      all = el('button', 'TextButton SmallButton us-outline-button us-activity__all', 'Load all');
+      all.type = 'button';
+      all.setAttribute('aria-controls', body.id);
+      footer.append(all);
+    }
+    // The footer link: its own label, and a section link (the theme's
+    // data-us-section-link and data-us-cco-tab) when it opens a section.
     if (state.cfg.history) {
-      const history = el('a', 'us-activity__history', 'View full history');
+      const history = el('a', 'us-activity__history', state.cfg.historyLabel);
       history.href = state.cfg.history;
+      if (state.cfg.historySection) history.setAttribute('data-us-section-link', state.cfg.historySection);
+      if (state.cfg.historyTab) history.setAttribute('data-us-cco-tab', state.cfg.historyTab);
       footer.append(history);
     }
 
     root.append(bar, notice, body, footer);
-    Object.assign(state, { id, types, typeHistory, input, pinnedToggle, range, controls, filterToggle, filtersOpen: false, notice, body, status, more });
+    Object.assign(state, { id, types, typeHistory, input, pinnedToggle, range, controls, filterToggle, filtersOpen: state.cfg.filtersOpen, notice, body, status, more, all });
   }
 
   // The theme's own filter button (US-QUERY-SEARCH markup and classes) in the
@@ -19610,7 +19684,14 @@ SOFTWARE.
     side.append(actions);
 
     const head = el('div', 'us-record__head');
-    head.append(tags, el('h3', 'us-record__title', row.subject), el('p', 'us-record__text', row.summary), side);
+    // A restricted note (the source's data-restricted is the Summary its IQA
+    // returns for one): the notes screen's notice in place of the text, and
+    // US-NOTES-RESTRICTED's Show note for the ordinal in the ActivityKey.
+    const restricted = Boolean(row.source.restricted) && row.summary === row.source.restricted;
+    const summary = el('p', 'us-record__text' + (restricted ? ' us-note__body' : ''));
+    if (restricted) summary.append(el('span', 'us-restricted-note', row.summary));
+    else summary.textContent = row.summary;
+    head.append(tags, el('h3', 'us-record__title', row.subject), summary, side);
 
     // Details: the client's fields (loaded when the card opens), the note,
     // then View full details.
@@ -19630,14 +19711,17 @@ SOFTWARE.
     // note, telling it apart from the summary above; no note, no heading.
     if (row.detail && row.source.detailLabel) {
       const note = el('div', 'us-record__note');
-      note.append(el('p', 'us-record__note-label', row.source.detailLabel), el('p', 'us-record__body', row.detail));
+      note.append(el('p', 'us-record__note-label', row.source.detailLabel), detailBody(row));
       detail.append(note);
     } else if (row.detail) {
-      detail.append(el('p', 'us-record__body', row.detail));
+      detail.append(detailBody(row));
     }
     if (row.recordUrl) {
       const more = el('p', 'us-record__more');
-      const open = el('a', 'TextButton SmallButton us-outline-button', 'View full details');
+      // data-record-label (and data-record-icon, a Tabler class) on the
+      // source: emails read View email, with an eye.
+      const open = el('a', 'TextButton SmallButton us-outline-button', row.source.recordLabel || 'View full details');
+      if (row.source.recordIcon) open.insertAdjacentHTML('afterbegin', '<i class="ti ' + row.source.recordIcon + '" aria-hidden="true"></i>');
       open.href = row.recordUrl;
       if (row.source.recordPopup) {
         open.setAttribute('aria-haspopup', 'dialog');
@@ -19649,13 +19733,36 @@ SOFTWARE.
 
     const card = el('div', 'us-record__card');
     card.append(head, detail);
+    if (restricted) {
+      card.classList.add('us-note');
+      const key = el('span');
+      key.hidden = true;
+      key.dataset.ordinal = row.key.replace(/\D/g, '');
+      card.append(key);
+    }
     record.append(node, card);
     const li = el('li');
     li.append(record);
     return li;
   }
 
+  // A record's Detail: text, or for a change (changeList) one line per
+  // field, the field name leading ("Priority: Lowest → High").
+  function detailBody(row) {
+    if (!TYPES[row.source.type]?.changeList) return el('p', 'us-record__body', row.detail);
+    const list = el('ul', 'us-record__body us-record__changes');
+    row.detail.split('\n').map(line => line.trim()).filter(Boolean).forEach(line => {
+      const item = el('li');
+      const split = line.indexOf(':');
+      if (split > 0) item.append(el('span', 'us-record__change-field', line.slice(0, split)), line.slice(split + 1).trim());
+      else item.textContent = line;
+      list.append(item);
+    });
+    return list;
+  }
+
   function rangeLabel(state) {
+    if (state.cfg.fixedWindow) return 'Last ' + state.cfg.fixedWindow + ' days';
     return RANGES.find(([days]) => days === state.days)[1];
   }
 
@@ -19851,7 +19958,8 @@ SOFTWARE.
   // changed, and out when the filter returns to All.
   function showTypeHistory(state) {
     const link = state.typeHistory;
-    const source = state.type === 'all' ? null : state.cfg.sources.find(item => item.type === state.type && item.history);
+    // A Details view (data-history="#key") replaces the link.
+    const source = state.type === 'all' ? null : state.cfg.sources.find(item => item.type === state.type && item.history && !item.detailsView);
     const target = source ? source.history : '';
     if (target === (link.dataset.target || '')) return;
     link.dataset.target = target;
@@ -19875,6 +19983,118 @@ SOFTWARE.
       link.animate([{ opacity: 0, transform: 'translateX(-4px)' }, { opacity: 1, transform: 'none' }],
         { duration: 180, easing: 'cubic-bezier(.2, 0, 0, 1)' });
     }
+  }
+
+  /* Details views and heading links (owner, 9 October 2026; promoted
+     21 October 2026). On a feed whose iPart carries us-activity-details:
+     - Details view: a source's data-history="#key" names a detailed iPart
+       on the page, marked us-activity-detail-key (a list or a native IQA
+       grid). While its type is chosen, a Details view toggle leads the
+       heading's buttons; pressed, the detailed iPart shows under the type
+       filters in place of the timeline, its search and footer. Choosing
+       another type brings the timeline back.
+     - Section link: a source's data-section-link (with data-section-tab and
+       data-section-label) shows a heading link while its type is chosen,
+       through the theme's section links (View all attachments).
+     - The iPart carries data-us-activity-type, the chosen type, so CSS can
+       show the heading's add button for that type only.
+     - A feed of one type (the case's Changes) has nothing to filter: it
+       starts on that type, so its Details view toggle shows, and is marked
+       data-us-activity-single, which hides its type filters. */
+  const REVEAL = [{ opacity: 0, transform: 'translateX(-4px)' }, { opacity: 1, transform: 'none' }];
+  const stillMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const detailsHost = state => state.root.closest('.us-activity-details');
+  const detailPanel = key => key ? document.querySelector('.us-activity-detail-' + CSS.escape(key)) : null;
+
+  // The heading's button slot, created as the theme's report actions are.
+  function headingSlot(state) {
+    const heading = state.root.closest('.panel')?.querySelector(':scope > .panel-heading');
+    if (!heading) return null;
+    let actions = heading.querySelector(':scope > .us-panel-actions');
+    if (!actions) {
+      actions = el('div', 'us-iqa-report-actions us-panel-actions');
+      heading.append(actions);
+    }
+    return actions.querySelector(':scope > [data-us-panel-actions-slot]') || actions;
+  }
+
+  // Shows a heading control that was hidden, with the theme's short reveal.
+  function revealControl(control, show) {
+    if (control.hidden === !show) return;
+    control.hidden = !show;
+    if (show && !stillMotion() && control.animate) control.animate(REVEAL, { duration: 180, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+  }
+
+  function syncDetailsToggle(state) {
+    const source = state.type === 'all' ? null : state.cfg.sources.find(item => item.type === state.type && item.detailsView);
+    const key = source ? source.detailsView : '';
+    const panel = detailPanel(key);
+    let button = state.detailsToggle;
+    if (!button?.isConnected) {
+      if (!panel) return;
+      const slot = headingSlot(state);
+      if (!slot) return;
+      button = el('button', 'us-panel-action TextButton us-outline-button us-activity__details-toggle');
+      button.type = 'button';
+      button.hidden = true;
+      button.innerHTML = '<i class="ti ti-list-details" aria-hidden="true"></i>Details view';
+      button.addEventListener('click', () => showDetails(state, state.showing === button.dataset.key ? '' : button.dataset.key));
+      slot.prepend(button);
+      state.detailsToggle = button;
+    }
+    button.dataset.key = key;
+    button.setAttribute('aria-pressed', String(Boolean(key) && state.showing === key));
+    if (panel?.id) button.setAttribute('aria-controls', panel.id);
+    revealControl(button, Boolean(panel));
+  }
+
+  function showDetails(state, key) {
+    const current = state.showing || '';
+    if (current === key) return;
+    detailPanel(current)?.classList.remove('is-open');
+    state.showing = key;
+    state.detailsToggle?.setAttribute('aria-pressed', String(Boolean(key)));
+    const shown = key ? detailPanel(key) : state.body;
+    state.root.toggleAttribute('data-us-activity-showing', Boolean(key));
+    if (key) shown?.classList.add('is-open');
+    if (shown && !stillMotion() && shown.animate) {
+      shown.animate([{ opacity: 0, transform: 'translateY(-4px)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+    }
+  }
+
+  function syncSectionLink(state) {
+    const source = state.type === 'all' ? null : state.cfg.sources.find(item => item.type === state.type && item.sectionLink);
+    let link = state.sectionLink;
+    if (!source) {
+      if (link) link.hidden = true;
+      return;
+    }
+    if (!link?.isConnected) {
+      const slot = headingSlot(state);
+      if (!slot) return;
+      link = el('a', 'us-panel-action TextButton us-outline-button us-activity__section-link');
+      link.href = '#';
+      link.hidden = true;
+      slot.prepend(link);
+      state.sectionLink = link;
+    }
+    link.setAttribute('data-us-section-link', source.sectionLink);
+    if (source.sectionTab) link.setAttribute('data-us-cco-tab', source.sectionTab);
+    else link.removeAttribute('data-us-cco-tab');
+    const label = source.sectionLabel || 'View all';
+    if (link.textContent !== label) {
+      link.textContent = label;
+      link.insertAdjacentHTML('beforeend', '<i class="ti ti-arrow-right" aria-hidden="true"></i>');
+    }
+    revealControl(link, true);
+  }
+
+  function syncDetailsHost(state) {
+    const host = detailsHost(state);
+    if (!host) return;
+    if (host.getAttribute('data-us-activity-type') !== state.type) host.setAttribute('data-us-activity-type', state.type);
+    syncDetailsToggle(state);
+    syncSectionLink(state);
   }
 
   function render(state) {
@@ -19906,9 +20126,12 @@ SOFTWARE.
       state.notice.replaceChildren(el('p', '', list + ' couldn’t be loaded, so this list may be incomplete.'), again);
     }
 
+    syncDetailsHost(state);
+
     const visible = visibleRows(state);
     const rows = visible.slice(0, state.shown);
     renderBody(state, rows, firstLoad);
+    if (state.body.querySelector('.us-restricted-note')) window.UnionSuiteRestrictedNotes?.refresh?.();
 
     const pending = relevantSources(state).some(source => source.more);
     const total = totalFor(state, state.type);
@@ -19927,28 +20150,46 @@ SOFTWARE.
     state.more.hidden = firstLoad || (visible.length <= state.shown && (Boolean(state.query) || !pending));
     state.more.disabled = Boolean(state.loadingMore);
     state.more.textContent = state.loadingMore ? 'Loading…' : 'Show more';
+    // Load all shows beside Show more, and stays while it loads.
+    if (state.all) {
+      state.all.hidden = !state.loadingAll && state.more.hidden;
+      state.all.disabled = Boolean(state.loadingAll || state.loadingMore);
+      state.all.textContent = state.loadingAll ? 'Loading all…' : 'Load all';
+    }
   }
 
   /* Lifecycle */
+
+  // The type chosen in each section, kept against its ContentItemContainer,
+  // which outlives a refresh that rebuilds the feed (owner, 10 October 2026).
+  const keptTypes = new WeakMap();
+  const hostOf = root => root.closest('.ContentItemContainer') || root;
 
   function attach(root) {
     if (states.has(root)) return;
     const cfg = config(root);
     if (!cfg) return;
+    const kept = keptTypes.get(hostOf(root));
     const state = {
       root,
       cfg,
       generation: 0,
-      type: 'all',
+      type: kept && cfg.sources.some(source => source.type === kept) ? kept : 'all',
       query: '',
       pinned: false,
       days: cfg.days,
       shown: cfg.page,
       expanded: new Set(),
       details: new Map(),
+      showing: '',
       loaded: false,
       sources: cfg.sources.map(def => ({ def, rows: [], ids: new Set(), offset: 0, total: null, more: false, status: 'idle', error: '' }))
     };
+    const kinds = typeKeys(state);
+    if (root.closest('.us-activity-details') && kinds.length === 1) {
+      state.type = kinds[0];
+      root.setAttribute('data-us-activity-single', '');
+    }
     states.set(root, state);
     root.setAttribute('data-us-activity-ready', '');
     build(state);
@@ -19974,7 +20215,9 @@ SOFTWARE.
     state.types.addEventListener('click', event => {
       const button = event.target.closest('button[data-us-tab]');
       if (!button || button.dataset.usTab === state.type) return;
+      showDetails(state, '');
       state.type = button.dataset.usTab;
+      keptTypes.set(hostOf(root), state.type);
       state.pinned = false;
       state.shown = state.cfg.page;
       render(state);
@@ -20020,6 +20263,10 @@ SOFTWARE.
         fill(state);
         return;
       }
+      if (event.target.closest('.us-activity__all')) {
+        loadAll(state);
+        return;
+      }
       const record = event.target.closest('.us-record');
       if (record && event.target.closest('.us-record__extra-retry') && state.body.contains(record)) {
         ensureDetails(state, findRow(state, record.dataset.usActivityId));
@@ -20050,6 +20297,9 @@ SOFTWARE.
       // The filter button lives in the heading, outside the feed element.
       state.resizeObserver?.disconnect();
       state.filterToggle?.closest('.us-activity__utilities')?.remove();
+      state.detailsToggle?.remove();
+      state.sectionLink?.remove();
+      detailPanel(state.showing)?.classList.remove('is-open');
       states.delete(root);
     });
     document.querySelectorAll(SELECTOR).forEach(attach);

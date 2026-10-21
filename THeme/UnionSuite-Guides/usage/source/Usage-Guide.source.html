@@ -557,6 +557,35 @@ window.UnionSuiteLoader.ready.then(function () {
     <div class="snippet"><div class="snippet-bar"><span>Fold a note just saved into the feed</span><button type="button" data-copy="activity-feed-quiet-reload-call">Copy JavaScript</button></div><pre><code id="activity-feed-quiet-reload-call">const feed = document.querySelector('#ste_container_ciAllActivity .us-activity-feed');
 await UnionSuiteActivityFeed.reload(feed, { quiet: true, types: ['note'] });</code></pre></div>
 
+    <h4 id="activity-feed-options">Activity feed: window, Load all and open filters</h4>
+    <p>Optional attributes on the <code>us-activity-feed</code> element (the case page's Recent activity and All activity use them). The type chosen in a section is kept when a refresh rebuilds its feed, with no attribute needed.</p>
+    <table><thead><tr><th>Attribute</th><th>Effect</th></tr></thead><tbody>
+      <tr><td><button type="button" data-copy-text="data-us-activity-window"><code>data-us-activity-window="30"</code></button></td><td>A fixed window of that many days. The feed sends the start date to every source (the same IQAs as a full timeline, no copies filtered to the window), offers no date range, and the count reads "last 30 days". Use it in place of <code>data-us-activity-days</code>.</td></tr>
+      <tr><td><button type="button" data-copy-text="data-us-activity-load-all"><code>data-us-activity-load-all</code></button></td><td>A Load all button beside Show more, shown while Show more is. It loads every record the chosen type and date range hold, fetching as Show more does; a very long history may need a second press.</td></tr>
+      <tr><td><button type="button" data-copy-text="data-us-activity-filters-open"><code>data-us-activity-filters-open</code></button></td><td>A narrow feed, whose search and date range fold behind the heading's filter button, starts with them open. A wide feed shows them inline anyway.</td></tr>
+      <tr><td><code>data-us-activity-history-label</code>, <code>-history-section</code>, <code>-history-tab</code></td><td>The footer link (<code>data-us-activity-history</code>): its text (default View full history), and a <a href="#section-links">section link</a> to open instead of the address: the section (<code>activity:all</code>) and its CCO tab (<code>Activity</code>).</td></tr>
+    </tbody></table>
+    <div class="snippet"><div class="snippet-bar"><span>The case Overview's Recent activity · the feed element</span><button type="button" data-copy="activity-feed-options-recent">Copy HTML</button></div><pre><code id="activity-feed-options-recent">&lt;div class="us-activity-feed"
+  data-us-activity-folder="$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base"
+  data-us-activity-details-folder="$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details"
+  data-us-activity-filter="CaseNum" data-us-activity-value="{#query.Ordinal}"
+  data-us-activity-window="30" data-us-activity-limit="10" data-us-activity-page="5"
+  data-us-activity-history="#activity" data-us-activity-history-label="View all activity"
+  data-us-activity-history-section="activity:all" data-us-activity-history-tab="Activity"&gt;
+  &lt;ul class="us-activity__sources" hidden&gt;…&lt;/ul&gt;
+&lt;/div&gt;</code></pre></div>
+
+    <h4 id="activity-feed-sources">Activity feed: source options and Details views</h4>
+    <p>Optional attributes on a source <code>&lt;li&gt;</code>. The types <code>attachment</code> (indigo, a paperclip) and <code>change</code> (brown, a history icon) join call, email, meeting, sms, note and interaction.</p>
+    <table><thead><tr><th>Attribute</th><th>Effect</th></tr></thead><tbody>
+      <tr><td><code>data-record-label</code>, <code>data-record-icon</code></td><td>The card's open button text and a Tabler icon class: <code>data-record-label="View email" data-record-icon="ti-eye"</code>.</td></tr>
+      <tr><td><code>data-restricted</code></td><td>The Summary the IQA returns for a restricted note (<code>Restricted</code>). That card shows the notes screen's restricted notice and Show note (<code>US-NOTES-RESTRICTED</code>), which checks access for the note whose ordinal is the ActivityKey's digits. The IQA must return no note text for it anywhere.</td></tr>
+      <tr><td><code>data-history="#key"</code></td><td>With a <code>#</code>, a Details view in place of a View all link (below).</td></tr>
+      <tr><td><code>data-section-link</code>, <code>data-section-tab</code>, <code>data-section-label</code></td><td>While its type is chosen, a heading link through the theme's <a href="#section-links">section links</a>: <code>case:attachments</code>, <code>Attachments</code>, <code>View all attachments</code>.</td></tr>
+    </tbody></table>
+    <p>A <code>change</code> card's Detail, one <code>Field: old → new</code> per line, opens as a list with the field names leading.</p>
+    <p><strong>Details views.</strong> Add <button type="button" data-copy-text="us-activity-details"><code>us-activity-details</code></button> to the feed iPart's CSS class (the case preset <code>us-case-all-activity</code> includes it). A source's <code>data-history="#notes"</code> names a detailed iPart on the same page whose CSS class carries <code>us-activity-detail us-activity-detail-notes</code>: a list or a native IQA grid, placed right under the feed. While Notes is chosen, a Details view toggle leads the heading's buttons; pressed, the detailed iPart takes the timeline's place under the type filters, closing up into the same card, and choosing another type brings the timeline back. Detailed iParts stay hidden otherwise. The iPart also carries <code>data-us-activity-type</code>, the chosen type, so the case timeline shows only that type's add button (Add note, Add meeting, Upload). A details feed whose sources are all one type (the case's Changes) starts on that type and hides its type filters.</p>
+
     <h3 id="inline-composer">Adding in place: composers</h3>
     <p><strong>Implemented in the shared theme</strong> (<code>US-INLINE-COMPOSER</code> in <code>zUnionSuite.js</code> and <code>zUnionSuite.css</code>, with two dark mode details in <code>zzDarkMode.css</code>). A section's add button opens a small form at the top of that section. After a save, the entry slides into the list where it belongs: no report reload, no loading overlay and nothing else in the section changes. The example's save, page read and popup are stand-ins; the composer, holding row and insert are the theme's own code.</p>
     {{INLINE_COMPOSER_DEMO}}

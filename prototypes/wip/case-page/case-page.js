@@ -73,7 +73,9 @@
   // The primary party's iMIS ID; Make primary party changes it.
   let primaryId = '20544';
   let member, banner, rows, memberDetails, activity, activityDetails, lists, detailsFor, leadStaff, setLeadStaff;
-  const activityFolder = '$/_i4u_/SandBox/Cases/Case Activity/';
+  // The activity feeds' base and details IQAs (Activity-Feed-IQA-Build.md).
+  const activityFolder = '$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base/';
+  const activityDetailsFolder = '$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details/';
   // Notes and tasks saved inline (C34, C35), kept across rebuilds. A note
   // with a follow-up is also a task (owner, 9 October 2026), so it adds a
   // task row too, marked FromNote so the activity lists it once, as the note.
@@ -399,9 +401,9 @@
       // open, and iMIS writes the No results field (the C6 marker) instead.
       {set: 'cp-resolved', template: 'Case-Resolved-Query-Template.html', rows: closed ? [{CaseNum: '214'}] : [], empty: '<span class="us-case-unresolved" hidden></span>'},
       {set: 'cp-member', template: 'Case-Member-Query-Template.html', rows: rows.member},
-      {set: 'cp-recent', template: 'Case-Recent-Activity-Query-Template.html', rows: [{CaseNum: '214'}]},
-      {set: 'cp-all-activity', template: 'Case-All-Activity-Query-Template.html', rows: [{CaseNum: '214'}]},
-      {set: 'cp-changes', template: 'Case-Changes-Query-Template.html', rows: [{CaseNum: '214'}]},
+      {set: 'cp-recent', template: 'Case-Recent-Activity-Query-Template.html', rows: [{Ordinal: '214'}]},
+      {set: 'cp-all-activity', template: 'Case-All-Activity-Query-Template.html', rows: [{Ordinal: '214'}]},
+      {set: 'cp-changes', template: 'Case-Changes-Query-Template.html', rows: [{Ordinal: '214'}]},
       // The parties template is the guide's (US-CASE-PARTIES is in the theme).
       {set: 'cp-parties', template: 'Case-Parties-Query-Template.html', src: '../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html', rows: rows.parties},
       {set: 'cp-staff', template: 'Case-Staff-Query-Template.html', rows: rows.staff},
@@ -545,17 +547,14 @@
       }
       // A card's details (data-details): one row for its ActivityKey.
       const details = activityDetails[name.slice(name.lastIndexOf('/') + 1)];
-      if (name.startsWith(activityFolder) && details) {
+      if (name.startsWith(activityDetailsFolder) && details) {
         const row = target.searchParams.get('CaseNum') === '214' ? details[target.searchParams.get('ActivityKey')] : null;
         return reply(items(row ? [row] : []), 200, 250);
       }
-      // Recent activity sources, newest first, paged as /api/query pages.
+      // The base sources, newest first, paged as /api/query pages. Every
+      // feed uses them; Recent activity's 30 days is its StartDate (C19).
       if (name.startsWith(activityFolder)) {
-        // The Overview's sources sit in Last 30 Days and give only that
-        // window (C19); the Activity tab's give everything.
-        const recent = name.startsWith(activityFolder + 'Last 30 Days/');
-        const source = (activity[name.slice(name.lastIndexOf('/') + 1)] || [])
-          .filter(row => !recent || row.ActivityDate.slice(0, 10) >= '2026-09-08');
+        const source = activity[name.slice(name.lastIndexOf('/') + 1)] || [];
         // The timeframe filter: the feed sends StartDate unless All time.
         const start = target.searchParams.get('StartDate') || '';
         const list = (target.searchParams.get('CaseNum') === '214' ? source : [])

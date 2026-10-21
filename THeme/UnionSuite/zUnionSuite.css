@@ -208,6 +208,10 @@
   --activity-sms-bg: #e2f3f1;
   --activity-case: #9c2f6e;
   --activity-case-bg: #f8e8f1;
+  --activity-attachment: #3d3d9e;
+  --activity-attachment-bg: #ebebf8;
+  --activity-change: #7a4b2a;
+  --activity-change-bg: #f5ece5;
 
   /* Type, spacing, radii, shadows, layout, z-index — unchanged from the
      enumerated sheet. Not brand-dependent, so not seeded. */
@@ -19344,6 +19348,76 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z'/%3E%3Cpath d='M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2'/%3E%3Cpath d='M12 12l0 .01'/%3E%3Cpath d='M3 13a20 20 0 0 0 18 0'/%3E%3C/svg%3E");
 }
 
+/* A file added (the case page, owner 9 October 2026): indigo, a hue no
+   other type uses, with the paperclip. */
+.us-record[data-us-record-type="attachment"] {
+  --us-record-hue: var(--activity-attachment);
+  --us-record-tint: var(--activity-attachment-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5'/%3E%3C/svg%3E");
+}
+
+/* A saved change to the record (the case's Changes, owner 8 October 2026):
+   brown, so amber and red stay for the flags, with the history icon. */
+.us-record[data-us-record-type="change"] {
+  --us-record-hue: var(--activity-change);
+  --us-record-tint: var(--activity-change-bg);
+  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8l0 4l2 2'/%3E%3Cpath d='M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5'/%3E%3C/svg%3E");
+}
+
+/* The open button's icon (an activity source's data-record-icon: View
+   email's eye). */
+.us-record__more a > .ti {
+  margin-inline-end: 6px;
+  font-size: 16px;
+}
+
+/* A restricted note (an activity source's data-restricted): the notes
+   screen's notice (US-NOTES-RESTRICTED), then the unlocked note on its own
+   line under it: one line while the card is closed, all of it open. As
+   specific as the card's one-line summary rule, and later. */
+.us-record .us-note .us-record__text.us-note__body:has(> .us-restricted-note) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 2px;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.us-record .us-note .us-note__unlocked-text {
+  flex: 1 0 100%;
+}
+
+.us-record:not(.is-expanded) .us-note .us-note__unlocked-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+/* A change's fields, one per line, the field name leading. */
+.us-record__changes {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: normal;
+}
+
+.us-record__changes > li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+}
+
+.us-record__change-field {
+  min-width: 9em;
+  color: var(--text-muted);
+  font-weight: var(--fw-semi);
+}
+
 /* One record: node on the rail, then the card. */
 .us-record {
   position: relative;
@@ -21030,6 +21104,13 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   font-weight: var(--fw-semi);
 }
 
+/* The heading's filter button leads the panel's own buttons (Add note,
+   Details view), as every list's filter controls do (owner, 9 October
+   2026). */
+.us-panel-actions > .us-activity__utilities:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  order: -1;
+}
+
 @media (max-width: 600px) {
   .us-activity__types:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     flex-basis: 100%;
@@ -21037,6 +21118,149 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
   .us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
     flex: 1 1 100%;
+  }
+}
+
+/* ── Details views (the iPart carries us-activity-details; owner,
+   9 October 2026). A detailed iPart (us-activity-detail-<key>) shows only
+   while its Details view toggle is pressed, in place of the timeline, its
+   search and footer, continuing the timeline's card: the two iParts close
+   up, with one rule between the filters and the list, and the list's own
+   heading hidden. The theme's panel rules carry heavyweight selectors, so
+   the few structural overrides are !important. */
+.us-activity-detail:not(.is-open) {
+  display: none;
+}
+
+.us-activity__details-toggle,
+.us-activity__section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-activity__details-toggle[hidden],
+.us-activity__section-link[hidden] {
+  display: none !important;
+}
+
+.us-activity__details-toggle > .ti {
+  font-size: 16px;
+}
+
+.us-activity__section-link > .ti {
+  font-size: 15px;
+}
+
+/* Pressed, the toggle wears the theme's one "on" state for heading toggles
+   (the filter button's: US-QUERY-SEARCH). */
+:root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
+  background: var(--iqa-selected, var(--brand-100));
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
+  color: var(--iqa-link, var(--text-link));
+}
+
+@media (forced-colors: active) {
+  :root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
+    border: 2px solid Highlight;
+  }
+}
+
+.us-activity-feed[data-us-activity-showing] :is(.us-activity__controls, .us-activity__notice, .us-activity__body, .us-activity__footer) {
+  display: none !important;
+}
+
+.us-activity-feed[data-us-activity-showing] .us-activity__bar {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* With a Details view showing, the panel is its heading and the type
+   filters: no funnel (its search is hidden) and no section link. */
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-heading :is(.us-activity__utilities, .us-activity__section-link) {
+  display: none !important;
+}
+
+.us-activity-details .QueryTemplateSet > section:has(.us-activity-feed[data-us-activity-showing]) {
+  margin-bottom: 0 !important;
+}
+
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom-width: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-body-container > .panel-body {
+  padding-bottom: 0 !important;
+}
+
+.ContentItemContainer:has(> .us-activity-detail.is-open) {
+  margin-top: 0 !important;
+}
+
+.us-activity-detail.is-open > .panel {
+  border-top: 1px solid var(--border) !important;
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+}
+
+.us-activity-detail.is-open > .panel > .panel-heading {
+  display: none !important;
+}
+
+/* On a details feed the type filters, search and date range share one
+   line from the left edge where it fits, the search filling it and the
+   range at the right, and wrap onto their own lines where it does not. As
+   specific as the wide-feed rule, and later. */
+.us-activity-details .us-activity-feed .us-activity__bar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  justify-content: flex-start;
+}
+
+.us-activity-details .us-activity-feed .us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 360px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  order: 1;
+}
+
+.us-activity-details .us-activity-feed .us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: 1 1 220px;
+  max-width: none;
+}
+
+.us-activity-details .us-activity-feed .us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  flex: none;
+  margin-inline-start: auto;
+}
+
+/* A details feed of one type (the case's Changes): nothing to choose. */
+.us-activity-feed[data-us-activity-single] .us-activity__types {
+  display: none;
+}
+
+/* The case timeline's heading add button follows the chosen type
+   (data-us-activity-type; owner, 9 October 2026): Add note for Notes,
+   Add meeting for Meetings, Upload for Attachments; none for All and
+   Emails. While a Details view shows it adds to the open list. */
+.us-activity-details:not([data-us-activity-type="note"]) > .panel > .panel-heading .us-action-cases-add-note,
+.us-activity-details:not([data-us-activity-type="meeting"]) > .panel > .panel-heading .us-action-cases-add-meeting,
+.us-activity-details:not([data-us-activity-type="attachment"]) > .panel > .panel-heading .us-action-cases-add-attachment {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-activity__details-toggle,
+  .us-activity__section-link {
+    transition: none;
   }
 }
 

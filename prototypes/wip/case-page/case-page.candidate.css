@@ -138,30 +138,7 @@
   display: none;
 }
 
-/* ── C11 Details updated (change history) cards ────────────────
-   The case's change history (the current page's Summary tab) as its own
-   activity type in Recent activity (owner, 8 October 2026), type change,
-   labelled "Details updated" by the source. A hue family no other type
-   uses (brown; amber and red stay for the flags), with the Tabler history
-   icon. Target: the --activity-* tokens in zUnionSuite.css (:root) and
-   zzDarkMode.css, and the type rules in US-RECORD-CARDS. */
-:root {
-  --activity-change: #7a4b2a;
-  --activity-change-bg: #f5ece5;
-}
-
-@media screen {
-  :root[data-us-color-scheme="dark"] {
-    --activity-change: #e3b896;
-    --activity-change-bg: #3d2c22;
-  }
-}
-
-.us-record[data-us-record-type="change"] {
-  --us-record-hue: var(--activity-change);
-  --us-record-tint: var(--activity-change-bg);
-  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 8l0 4l2 2'/%3E%3Cpath d='M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5'/%3E%3C/svg%3E");
-}
+/* C11 Change cards (US-RECORD-CARDS, type change): in the theme (21 October 2026). */
 
 /* ── C12 Taller Notes ──────────────────────────────────────────
    The case Notes list scrolls taller than the theme's 414px, as the
@@ -250,13 +227,8 @@
   scrollbar-color: var(--border-strong) transparent;
 }
 
-/* ── C19 Recent activity, locked to a window ───────────────────
-   data-us-activity-window (case-activity.candidate.js): the source IQAs
-   give only the last 30 days, so the feed's timeframe choice, which would
-   offer more, is hidden. Target: US-ACTIVITY-FEED, a native option. */
-.us-activity-feed[data-us-activity-window] .us-activity__range {
-  display: none;
-}
+/* C19 Recent activity, locked to a window: in the theme (US-ACTIVITY-FEED,
+   data-us-activity-window, 21 October 2026). */
 
 /* ── C22 Detailed meeting rows ──────────────────────────────────
    The Activity tab's Meetings section (us-meeting--full, owner 9 October
@@ -340,23 +312,7 @@
   height: 36px;
 }
 
-:root {
-  --activity-attachment: #3d3d9e;
-  --activity-attachment-bg: #ebebf8;
-}
-
-@media screen {
-  :root[data-us-color-scheme="dark"] {
-    --activity-attachment: #b9b9f2;
-    --activity-attachment-bg: #26264a;
-  }
-}
-
-.us-record[data-us-record-type="attachment"] {
-  --us-record-hue: var(--activity-attachment);
-  --us-record-tint: var(--activity-attachment-bg);
-  --us-record-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5'/%3E%3C/svg%3E");
-}
+/* The attachment card type is in US-RECORD-CARDS (21 October 2026). */
 
 /* Recent activity fills the main column down to the side column's end (C25,
    with us-panel-fill on its iPart): its feed scrolls in whatever height
@@ -383,181 +339,30 @@
   max-height: none;
 }
 
-/* ── C27 Details view ───────────────────────────────────────────
-   All activity's toggle (case-activity.candidate.js; owner, 9 October
-   2026): the theme's View all link gives way to a Details view button in
-   the panel heading, pressed while the chosen type's detailed iPart shows
-   in place of the timeline. A detailed iPart shows only then; the
-   timeline (notice, cards, footer) and its search step aside. The type
-   filters, search and timeframe share one line where it fits, from the
-   left edge, and wrap onto their own lines where it does not.
-   Target: US-ACTIVITY-FEED (the toggle, and the search line). */
-.us-activity-detail:not(.is-open) {
-  display: none;
-}
+/* C27 Details view (US-ACTIVITY-FEED): in the theme (21 October 2026). */
 
-.us-activity-details .us-activity__type-history {
-  display: none !important;
-}
-
-.us-activity__details-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  transition:
-    background-color 150ms cubic-bezier(.2, 0, 0, 1),
-    border-color 150ms cubic-bezier(.2, 0, 0, 1),
-    color 150ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-activity__details-toggle[hidden] {
-  display: none;
-}
-
-.us-activity__details-toggle > .ti {
-  font-size: 16px;
-}
-
-/* Pressed, it wears the theme's one "on" state for heading toggles (the
-   filter button's: US-QUERY-SEARCH), not a colour of its own (owner,
-   9 October 2026). */
-:root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--iqa-link, var(--text-link)) 28%, transparent);
-  background: var(--iqa-selected, var(--brand-100));
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / .14);
-  color: var(--iqa-link, var(--text-link));
-}
-
-@media (forced-colors: active) {
-  :root .us-activity-details .panel-heading .us-activity__details-toggle.TextButton[aria-pressed="true"] {
-    border: 2px solid Highlight;
-  }
-}
-
-.us-activity-feed[data-us-activity-showing] :is(.us-activity__controls, .us-activity__notice, .us-activity__body, .us-activity__footer) {
-  display: none !important;
-}
-
-.us-activity-feed[data-us-activity-showing] .us-activity__bar {
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-/* With a detailed view showing, the panel is just its heading and the
-   filters: no funnel (its search is hidden) and no gap under the chips. */
-.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-heading .us-activity__utilities {
-  display: none;
-}
-
-.us-activity-details .QueryTemplateSet > section:has(.us-activity-feed[data-us-activity-showing]) {
-  margin-bottom: 0 !important;
-}
-
-/* All activity and the Overview's Recent activity (owner, 9 October 2026)
-   alike. After the type filters at every width (the theme puts them above on a
-   narrow feed), on their line while there is room for a usable search
-   and otherwise on the next, filling it; search and timeframe part on a
-   very narrow feed. As specific as the theme's wide-feed rule, and later. */
-:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__bar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+/* The Overview's Recent activity lays out its filters as a details feed does
+   (US-ACTIVITY-FEED, .us-activity-details): from the left edge, the search
+   filling the line. */
+.us-case-recent .us-activity-feed .us-activity__bar:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   justify-content: flex-start;
 }
 
-:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-case-recent .us-activity-feed .us-activity__controls:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   flex: 1 1 360px;
   flex-wrap: wrap;
   justify-content: flex-start;
   order: 1;
 }
 
-/* Search fills the line between the type filters and the timeframe,
-   which keeps to the right edge (owner, 9 October 2026). */
-:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+.us-case-recent .us-activity-feed .us-activity__search:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   flex: 1 1 220px;
   max-width: none;
 }
 
-:is(.us-activity-details, .us-case-recent) .us-activity-feed .us-activity__range:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  flex: none;
-  margin-inline-start: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .us-activity__details-toggle {
-    transition: none;
-  }
-}
-
-/* The heading's add button follows the chosen type (owner, 9 October
-   2026): Add note for Notes, Add meeting for Meetings, Upload for Files;
-   none for All and Emails. While a Details view shows, the button adds to
-   the open list (whose own heading is hidden: C27). */
-.us-activity-details:not([data-us-activity-type="note"]) > .panel > .panel-heading .us-action-cases-add-note,
-.us-activity-details:not([data-us-activity-type="meeting"]) > .panel > .panel-heading .us-action-cases-add-meeting,
-.us-activity-details:not([data-us-activity-type="attachment"]) > .panel > .panel-heading .us-action-cases-add-attachment {
-  display: none !important;
-}
-
-/* A details feed of one type (the Changes section): no filters to choose
-   from, so they hide. */
-.us-activity-feed[data-us-activity-single] .us-activity__types {
-  display: none;
-}
-
-/* ── C28, C29, C31 Timeline cards ─────────────────────────────────
-   C28 View email: the open button's eye. C29 a restricted note's card
-   takes the notes screen's notice (US-NOTES-RESTRICTED) in place of its
-   summary. C31 a change's fields as a list, the field name
-   leading each line. Target: US-RECORD-CARDS. */
-.us-record__more a > .ti {
-  margin-inline-end: 6px;
-  font-size: 16px;
-}
-
-/* The notice, then the unlocked note on its own line under it, as on the
-   notes screen: one line while the card is closed, all of it open. As
-   specific as the card's own one-line summary rule, and later. */
-.us-record .us-note .us-record__text.us-note__body:has(> .us-restricted-note) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
-  margin-top: 2px;
-  overflow: visible;
-  -webkit-line-clamp: unset;
-}
-
-.us-record .us-note .us-note__unlocked-text {
-  flex: 1 0 100%;
-}
-
-.us-record:not(.is-expanded) .us-note .us-note__unlocked-text {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.us-record__changes {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  white-space: normal;
-}
-
-.us-record__changes > li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 8px;
-}
-
-.us-record__change-field {
-  min-width: 9em;
-  color: var(--text-muted);
-  font-weight: var(--fw-semi);
-}
+/* The heading's add button by type, the single-type feed and the C28,
+   C29, C31 timeline cards: in the theme (US-ACTIVITY-FEED and
+   US-RECORD-CARDS, 21 October 2026). */
 
 /* The notes ledger (C29): who a note is assigned to, under it; blank
    people collapse, and the line with them. */
@@ -582,18 +387,8 @@
   display: none;
 }
 
-/* ── C32 Activity feed funnel order ────────────────────────────
-   On a narrow feed the theme's activity feed adds its funnel after the
-   heading's buttons (Add note, Details view), where every other list puts
-   its filter controls before them (Tasks: completed, funnel, Add task;
-   Notes: funnel, Add note). Seen on the Overview's Recent activity beside
-   Tasks (owner, 9 October 2026). The funnel leads, as elsewhere.
-   Target: US-ACTIVITY-FEED's headingToggle (add the utilities into the
-   heading's actions slot, before the panel's buttons, as
-   orderHeaderActions does for US-QUERY-SEARCH). */
-.us-panel-actions > .us-activity__utilities {
-  order: -1;
-}
+/* C32 Activity feed funnel order: in the theme (US-ACTIVITY-FEED CSS,
+   21 October 2026). */
 
 /* ── C33 Restricted files ───────────────────────────────────────
    A sensitive document's actions stay hidden behind Unlock, at the right
@@ -743,63 +538,10 @@
   }
 }
 
-/* ── C36 Section link in the heading ───────────────────────────
-   View all attachments, while Attachments is chosen in All activity
-   (owner, 9 October 2026): an outline heading button with a trailing
-   arrow, opening the Attachments tab. Target: US-ACTIVITY-FEED. */
-.us-activity__section-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.us-activity__section-link[hidden] {
-  display: none !important;
-}
-
-.us-activity__section-link > .ti {
-  font-size: 15px;
-}
-
-.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-heading .us-activity__section-link {
-  display: none !important;
-}
+/* C36 Section link in the heading (US-ACTIVITY-FEED): in the theme (21 October 2026). */
 
 /* C34, C35, C37, C38, C39: the composers are US-INLINE-COMPOSER now
    (US-INLINE-COMPOSER in zUnionSuite.css, C40). */
 
-/* ── C27 Details view in the same card ─────────────────────────
-   The detailed list continues the All activity card under its switcher
-   (owner, 9 October 2026: "it should sit within the same card"), rather
-   than showing as a second card: the two iParts close up, the card above
-   loses its bottom edge and the list below its heading and top edge, with
-   one rule between the switcher and the list. The heading's add button
-   (All activity's) adds to the list; the list's search stays open. The
-   theme's panel rules carry heavyweight selectors, so these few structural
-   overrides are !important. */
-.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-  border-bottom-width: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-}
-
-.us-activity-details:has(.us-activity-feed[data-us-activity-showing]) > .panel > .panel-body-container > .panel-body {
-  padding-bottom: 0 !important;
-}
-
-.ContentItemContainer:has(> .us-activity-detail.is-open) {
-  margin-top: 0 !important;
-}
-
-.us-activity-detail.is-open > .panel {
-  border-top: 1px solid var(--border) !important;
-  border-top-right-radius: 0 !important;
-  border-top-left-radius: 0 !important;
-}
-
-.us-activity-detail.is-open > .panel > .panel-heading {
-  display: none !important;
-}
+/* C27 Details view in the same card: in the theme (US-ACTIVITY-FEED,
+   21 October 2026). */

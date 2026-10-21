@@ -6,7 +6,7 @@
      the timeframe (All time first: a case is short and its whole story
      matters), Show more and Load all.
      iPart CSS class: us-case-all-activity
-       Section preset (case-presets.candidate.js), standing in for
+       Section preset (sectionPresets in zUnionSuite.js, 21 October 2026), standing in for
        us-action-cases-add-note us-action-cases-add-meeting us-action-cases-add-attachment
        us-activity-details us-tab-panel us-tabset-activity us-tab-all
        The heading's add button follows the chosen type (owner, 9 October
@@ -15,22 +15,24 @@
        (the detailed list has its own).
      Native title: [[activity]] All activity. Display in cards: unchecked.
      Rows per page: 1. Source IQA: any one-row IQA on @url:CaseID that
-     returns CaseNum (Get Case Details).
+     returns the case's Ordinal, unaliased (Get Case Details;
+     owner, 21 October 2026). The feed sends it as the CaseNum filter.
 
-     The feed runs one IQA per source in the folder below, each filtered on
-     CaseNum and on the feed's StartDate (sent unless All time), with the
-     feed's fixed columns (ActivityKey, ActivityDate, Subject or Summary;
-     optional Detail, CreatedBy, Priority, Category, RecordUrl, Direction,
-     FollowUpRequired, FollowUpDate, FollowUpActioned, FollowUpNotes).
-     data-details on a source names a second IQA in the same folder, run for
-     one record when its card opens (filtered on CaseNum and ActivityKey);
-     each Additional-* column it returns is a labelled line in the card's
-     expanded view.
+     The feed runs one IQA per source in the base folder below, each
+     filtered on CaseNum and on the feed's StartDate (sent unless All time),
+     with the feed's fixed columns (ActivityKey, ActivityDate, Subject or
+     Summary; optional Detail, CreatedBy, Priority, Category, RecordUrl,
+     Direction, FollowUpRequired, FollowUpDate, FollowUpActioned,
+     FollowUpNotes). data-details on a source names a second IQA in the
+     details folder (the client's), run for one record when its card opens
+     (filtered on CaseNum and ActivityKey); each Additional-* column it
+     returns is a labelled line in the card's expanded view. Every IQA's
+     requirements: Activity-Feed-IQA-Build.md (owner, 21 October 2026).
 
      Details view (C27; owner, 9 October 2026, comparison option 2): the
      feed's iPart carries us-activity-details. data-history="#<key>" on a
      source gives its type a Details view toggle at the end of the type
-     filters (case-activity.candidate.js), which swaps the timeline for the
+     filters (US-ACTIVITY-FEED), which swaps the timeline for the
      detailed iPart marked us-activity-detail-<key>: Notes and Meetings.
      Changes are their own section (Case-Changes-Query-Template.html;
      owner, 9 October 2026), with the History log as their Details view. Emails and files have none:
@@ -69,8 +71,9 @@
      Emails Details, Meetings, Meetings Details, Attachments, and Changes (the
      history IQA behind the current Summary tab, grouped by save). -->
 <div class="us-activity-feed"
-  data-us-activity-folder="$/_i4u_/SandBox/Cases/Case Activity"
-  data-us-activity-filter="CaseNum" data-us-activity-value="{#query.CaseNum}"
+  data-us-activity-folder="$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base"
+  data-us-activity-details-folder="$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details"
+  data-us-activity-filter="CaseNum" data-us-activity-value="{#query.Ordinal}"
   data-us-activity-days="0" data-us-activity-limit="10" data-us-activity-page="10"
   data-us-activity-load-all data-us-activity-filters-open>
   <ul class="us-activity__sources" hidden>

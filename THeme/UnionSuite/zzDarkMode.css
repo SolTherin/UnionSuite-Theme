@@ -57,6 +57,10 @@
     --activity-sms-bg: #1a3a31;
     --activity-case: #f3a8d4;
     --activity-case-bg: #45233a;
+    --activity-attachment: #b9b9f2;
+    --activity-attachment-bg: #26264a;
+    --activity-change: #e3b896;
+    --activity-change-bg: #3d2c22;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 20%);
     --shadow: 0 2px 5px rgb(0 0 0 / 24%);
     --shadow-lg: 0 12px 30px rgb(0 0 0 / 30%);

@@ -19,14 +19,8 @@
   if (window.UnionSuiteCasePresets) return;
 
   const presets = {
-    // us-case-tasks is in the theme (sectionPresets, 20 October 2026).
-    // The Activity tab's All activity (C27): the add actions, of which the
-    // heading shows the chosen type's, the Details view opt-in and its
-    // section. Over the class field's 100 characters without the preset.
-    'us-case-all-activity': [
-      'us-action-cases-add-note', 'us-action-cases-add-meeting', 'us-action-cases-add-attachment',
-      'us-activity-details', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'
-    ],
+    // us-case-tasks and us-case-all-activity are in the theme (sectionPresets,
+    // 20 and 21 October 2026).
     // us-case-meetings, us-case-meetings-detail, us-case-attachments,
     // us-case-attachments-recent and us-case-staff are in the theme
     // (sectionPresets, 20 October 2026).

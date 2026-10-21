@@ -92,7 +92,7 @@ The owner's brief, in order (all 10 October 2026):
   meeting anyway?", Save becoming "Save anyway"; changing anything withdraws it.
   Today is `UnionSuiteQueryStatesConfig.today` when set (previews pin it), else
   the local date.
-- **A refreshed feed keeps its type** (C41, `case-activity.candidate.js`): the
+- **A refreshed feed keeps its type** (C41, now native in `US-ACTIVITY-FEED`): the
   section remembers the chosen type and picks it again when the feed is rebuilt.
 - **Add party's quick add** lists the members at the primary party's workplace
   (proposed `API - Workplace Members` IQA, filtered by `CaseNum`); its More
