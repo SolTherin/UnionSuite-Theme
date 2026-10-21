@@ -10295,7 +10295,9 @@ html.us-taskbar-mounted #hd .search-dropdown {
    they stand apart from the values (14px medium); the panel title keeps
    its grey header bar and icon.
    The hairline runs from the heading text to the panel edge, tinted to
-   match. Dark mode takes the dark palette's light brand tint; its colour
+   match, and a short stub of it leads the text ("— Contact ———"), so the
+   heading reads apart from the field labels below it (owner, 21 October
+   2026). Dark mode takes the dark palette's light brand tint; its colour
    is restated there because zzDarkMode.css sets every h1–h6 to
    --text-strong (0,2,1). Target for the dark rule: zzDarkMode.css. */
 .us-field-groups {
@@ -10314,10 +10316,15 @@ html.us-taskbar-mounted #hd .search-dropdown {
   line-height: 1.4;
 }
 
+.us-field-groups__heading::before,
 .us-field-groups__heading::after {
   content: "";
   flex: 1 1 auto;
   border-top: 1px solid color-mix(in srgb, var(--us-field-groups-heading) 35%, transparent);
+}
+
+.us-field-groups__heading::before {
+  flex: 0 0 12px;
 }
 
 .us-field-groups__note {
@@ -11716,12 +11723,13 @@ html.us-taskbar-mounted #hd .search-dropdown {
    wrapper keeps the native field's classes, so it takes the width of the
    fields around it: InputXLarge, or the wider header fields of the
    agreement send pages (US-AGREEMENT-COMMS-PAGE, below).
-   Every rule sits inside .us-agreement-comms, the iPart class. */
-.us-agreement-comms .PanelFieldValue > input[data-us-subject-tag] {
+   Every rule sits inside the iPart class: .us-agreement-comms, or
+   .us-case-comms on the case send page (owner, 21 October 2026). */
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > input[data-us-subject-tag] {
   display: none;
 }
 
-.us-agreement-comms .PanelFieldValue > .us-subject-tag {
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -11737,7 +11745,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transition: border-color 150ms cubic-bezier(.2, 0, 0, 1), box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
 }
 
-.us-agreement-comms .PanelFieldValue > .us-subject-tag::before {
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag::before {
   content: attr(data-us-subject-prefix);
   flex: none;
   padding-left: 10px;
@@ -11748,20 +11756,20 @@ html.us-taskbar-mounted #hd .search-dropdown {
   user-select: none;
 }
 
-.us-agreement-comms .PanelFieldValue > .us-subject-tag:hover {
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag:hover {
   border-color: var(--brand-600);
 }
 
-.us-agreement-comms .PanelFieldValue > .us-subject-tag:focus-within {
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag:focus-within {
   border-color: var(--field-focus-colour);
   box-shadow: var(--field-focus-glow);
 }
 
 /* Native rules style every text input (99-Orion, the dark palette); the
    wrapper owns the surface, so the proxy drops them. */
-.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input,
-.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:hover,
-.us-agreement-comms .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:focus {
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input,
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:hover,
+:is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag > input.us-subject-tag__input:focus {
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -11777,7 +11785,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .us-agreement-comms .PanelFieldValue > .us-subject-tag {
+  :is(.us-agreement-comms, .us-case-comms) .PanelFieldValue > .us-subject-tag {
     transition: none;
   }
 }
@@ -11785,7 +11793,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
 /* Save and Save As leave the heading: either would store this agreement's
    tag in a template. Open stays (the script re-tags a template's subject).
    Matched on the native handler, as the labels can be translated. */
-.us-agreement-comms .panel-heading > .panel-heading-options > input:is(
+:is(.us-agreement-comms, .us-case-comms) .panel-heading > .panel-heading-options > input:is(
   [onclick*=".SaveCommunication("],
   [onclick*=".SaveAsCommunication("]
 ) {
@@ -11801,7 +11809,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    so the subject and its "Agreement A107 –" prefix have room and every
    field lines up. None passes its column. Type keeps its own width: a short
    list reads better in a short field. */
-.us-agreement-comms-page [id$="_CommunicationCreatorHeader_DivEmailHeader"] .PanelFieldValue .InputXLarge {
+:is(.us-agreement-comms-page, .us-case-comms-page) [id$="_CommunicationCreatorHeader_DivEmailHeader"] .PanelFieldValue .InputXLarge {
   box-sizing: border-box;
   width: 720px;
   max-width: 100%;
@@ -11813,7 +11821,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
    the top of the us-agreement-comms iPart after a send, directly under
    iMIS's message: logging (a spinner), done, or a warning. Its colours ease
    between the states; reduced motion changes them at once. */
-.us-agreement-comms > .us-comms-log__status {
+:is(.us-agreement-comms, .us-case-comms) > .us-comms-log__status {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -11821,7 +11829,7 @@ html.us-taskbar-mounted #hd .search-dropdown {
   transition: background-color 200ms cubic-bezier(.2, 0, 0, 1), border-color 200ms cubic-bezier(.2, 0, 0, 1), color 200ms cubic-bezier(.2, 0, 0, 1);
 }
 
-.us-agreement-comms > .us-comms-log__status[hidden] {
+:is(.us-agreement-comms, .us-case-comms) > .us-comms-log__status[hidden] {
   display: none;
 }
 
@@ -11840,7 +11848,7 @@ a[data-us-comms-log-held] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .us-agreement-comms > .us-comms-log__status,
+  :is(.us-agreement-comms, .us-case-comms) > .us-comms-log__status,
   a.back-link-control,
   .user-message-area a {
     transition: none;
@@ -13998,6 +14006,24 @@ a[data-us-comms-log-held] {
   cursor: pointer;
 }
 
+/* A field with showLabel: its label beside it, as the checkboxes' are. */
+.us-composer__labelled {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.us-composer__labelled[hidden] {
+  display: none;
+}
+
+.us-composer__caption {
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-sm) var(--font-ui);
+  white-space: nowrap;
+}
+
 .us-composer__message {
   flex: 1 1 auto;
   margin: 0;
@@ -14195,6 +14221,66 @@ a[data-us-comms-log-held] {
   display: none;
 }
 
+/* Multiselect: the picks as chips, then the input, in one box that takes
+   the field focus for its input (as the attachment tag editor's). */
+.us-composer__multi {
+  flex: 1 1 260px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 3px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  cursor: text;
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-composer__multi:focus-within {
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+.us-composer__bar .us-composer__multi > input.us-composer__field {
+  flex: 1 1 100px;
+  min-width: 80px;
+  min-height: 26px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+}
+
+:root .us-composer .us-composer__multi > input.us-composer__field:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.us-composer__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.us-composer__chip-remove {
+  display: inline-flex;
+  padding: 0 1px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-composer__multi {
+    transition: none;
+  }
+}
+
 .us-composer__options.is-above {
   top: auto;
   bottom: calc(100% + 6px);
@@ -14256,6 +14342,14 @@ a[data-us-comms-log-held] {
   color: var(--text-muted);
   font-size: var(--fs-sm);
   opacity: 1;
+}
+
+/* A search still running (the first read of a list): the shared button
+   spinner beside Loading…. */
+.us-composer__option.is-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ── The holding row: where a saved entry is on its way into the list,
@@ -14551,6 +14645,21 @@ a[data-us-comms-log-held] {
 
 [data-us-contact-type="external" i] .us-avatar {
   --us-avatar-hue: var(--warning);
+}
+
+/* A new lead: the initials circle turns to its reversed, solid colour
+   gradually rather than at once (owner, 8 October 2026). */
+.us-avatar {
+  transition:
+    background-color 240ms cubic-bezier(.2, 0, 0, 1),
+    color 240ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-avatar {
+    transition: none;
+  }
 }
 
 /* US-AVATARS:END */
@@ -15756,6 +15865,79 @@ a[data-us-comms-log-held] {
   color: color-mix(in srgb, var(--us-avatar-hue) 72%, var(--text-strong));
 }
 
+/* us-case-staff (the case team, owner, 8 October 2026). Promoted from the
+   case page candidates, 20 October 2026. One card per row: the team sits in
+   the Overview's narrow side column, where the 230px tracks would
+   overflow, and is usually one person. A crown on each card: the lead's
+   is a solid amber mark; everyone else's is the quiet Make lead staff
+   button (cases.set-lead-staff), which brightens on hover. The theme's
+   crown badge on the lead's avatar is left off, so the lead has one crown. */
+.us-case-staff.us-contacts-tiles .QueryTemplateSet {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
+  content: none;
+}
+
+.us-case-staff .us-contact-tile__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.us-case-staff__crown {
+  display: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--warning-bg);
+  color: var(--warning-fill);
+  font-size: 17px;
+}
+
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__crown {
+  display: inline-grid;
+}
+
+.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__make-lead {
+  display: none;
+}
+
+.us-case-staff .us-case-staff__make-lead {
+  color: var(--text-faint);
+  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-case-staff .us-case-staff__make-lead:is(:hover, :focus-visible) {
+  color: var(--warning-fill);
+}
+
+/* The new lead's crown pops in while the card slides to the top
+   (data-us-lead-arrived, set by cases.set-lead-staff for the slide). */
+[data-us-lead-arrived] .us-case-staff__crown {
+  animation: us-case-crown-in 240ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes us-case-crown-in {
+  from {
+    opacity: 0;
+    transform: scale(.6) rotate(-12deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-us-lead-arrived] .us-case-staff__crown {
+    animation: none;
+  }
+}
+
 /* US-CONTACT-TILES:END */
 
 /* US-CASE-PARTIES:START — us-parties (the us-case-parties preset): a case's
@@ -16352,6 +16534,41 @@ a[data-us-comms-log-held] {
 .us-placeholder:not(:where(.us-report-no-styling, .us-report-no-styling *)) p {
   margin: 0;
   color: var(--text-muted);
+}
+
+/* us-placeholder--compact (owner, 8 October 2026; promoted from the case
+   page candidates, 20 October 2026). A list's No results field holds the
+   placeholder with the list's own add button, compact so a side-column
+   list stays short. */
+.us-placeholder.us-placeholder--compact {
+  min-height: 0;
+  padding: var(--space-5) var(--space-4);
+  gap: var(--space-1);
+}
+
+.us-placeholder--compact .us-placeholder__icon {
+  margin-bottom: var(--space-2);
+}
+
+.us-placeholder--compact h3 {
+  margin: 0;
+  font-size: var(--fs-base);
+}
+
+.us-placeholder--compact p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-placeholder--compact > button {
+  margin-top: var(--space-3);
+}
+
+/* With the placeholder showing, the list's footer line ("No matching
+   results on this page") repeats it, so it steps aside. */
+.panel:has(.QueryTemplateSet > .us-placeholder--compact) :is(.us-query-footer, .us-query-search-status) {
+  display: none;
 }
 
 /* US-PLACEHOLDER:END */
@@ -17268,6 +17485,12 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   text-align: center;
 }
 
+/* It slides in and out with the rows (US-PAST-EMPTY): hidden holds its
+   state, which the display above would otherwise override. */
+.us-past-empty[hidden]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
 .us-past-empty__icon:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   margin-bottom: 4px;
   color: var(--text-faint);
@@ -17292,6 +17515,54 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 
 [data-us-past-empty] .us-query-search-status:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
+}
+
+/* us-meeting--full (owner, 9 October 2026; promoted from the case page
+   candidates, 20 October 2026). The meeting row with who attends on the
+   details line, the agenda or notes up to three lines, and the outcome once
+   held. Blank parts collapse. */
+.us-meeting--full {
+  align-items: start;
+}
+
+.us-meeting--full .us-meeting__people {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.us-meeting--full .us-meeting__people > .ti {
+  align-self: center;
+  font-size: 13px;
+}
+
+.us-meeting--full :is(.us-meeting__people, .us-meeting__outcome):has(> span:last-child:empty) {
+  display: none;
+}
+
+.us-meeting--full :is(.us-meeting__notes, .us-meeting__outcome) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  max-width: 78ch;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.us-meeting--full .us-meeting__notes:empty {
+  display: none;
+}
+
+.us-meeting--full .us-meeting__outcome {
+  color: var(--text-base);
+}
+
+.us-meeting--full .us-meeting__outcome > strong {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
 }
 
 /* US-MEETINGS:END */
@@ -17531,6 +17802,165 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 .us-attachment__error {
   color: var(--danger);
   font-size: var(--fs-xs);
+}
+
+/* Compact rows (us-case-attachments-recent, the case Overview's newest
+   files, owner, 9 October 2026; promoted 20 October 2026). */
+.us-case-attachments-recent .us-attachment {
+  align-items: center;
+}
+
+.us-case-attachments-recent .us-attachment__file {
+  width: 36px;
+  height: 36px;
+}
+
+/* Restricted attachments (US-RESTRICTED-ATTACHMENTS in zUnionSuite.js;
+   owner, 9 October 2026; promoted 20 October 2026). A sensitive document's
+   actions stay hidden behind Unlock, at the right where they sit; the
+   button wears the restricted notes' look: a quiet pill with the padlock,
+   red and shaking when refused. Unlocked, the padlock opens green and stays
+   ahead of the actions. */
+.us-attachment[data-us-attachment-access="restricted" i]:not([data-us-attachment-unlocked]) .us-attachment__actions > :not(.us-attachment__unlock, .us-attachment__unlock-message) {
+  display: none !important;
+}
+
+.us-attachment__actions:has(> .us-attachment__unlock, > .us-attachment__lock-mark) {
+  align-items: center;
+}
+
+.us-attachment__unlock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock:hover:not([aria-busy="true"]) {
+  border-color: var(--text-link);
+  background: var(--brand-50);
+  color: var(--text-link);
+}
+
+.us-attachment__unlock:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* While the access check runs, the word gives way to a spinner in its
+   place, so the button keeps its size; the padlock stays. */
+.us-attachment__unlock[aria-busy="true"] {
+  cursor: progress;
+}
+
+.us-attachment__unlock-label {
+  position: relative;
+}
+
+.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label {
+  color: transparent;
+}
+
+.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 12px;
+  height: 12px;
+  margin: auto;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-link);
+  border-radius: 50%;
+  animation: us-attachment-unlock-spin 700ms linear infinite;
+}
+
+@keyframes us-attachment-unlock-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.us-attachment__unlock.is-denied {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+  animation: us-note-reveal-shake 360ms cubic-bezier(.36, .07, .19, .97);
+}
+
+.us-attachment__lock {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: color 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__shackle {
+  transform-box: view-box;
+  transform-origin: 8px 11px;
+  transition: transform 240ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock.is-unlocked {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+:is(.us-attachment__unlock.is-unlocked, .us-attachment__lock-mark) .us-attachment__shackle {
+  transform: translateY(-2px) rotate(-30deg);
+}
+
+.us-attachment__lock-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--success);
+}
+
+/* The refusal, to the left of the button that was pressed. */
+.us-attachment__unlock-message {
+  max-width: 320px;
+  margin-inline-end: 6px;
+  color: var(--danger);
+  font: var(--fw-medium) var(--fs-xs)/1.4 var(--font-ui);
+  text-align: end;
+  animation: us-note-reveal-message-in 180ms cubic-bezier(.2, 0, 0, 1);
+  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-attachment__unlock-message[data-us-leaving] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-attachment__unlock,
+  .us-attachment__unlock-message,
+  .us-attachment__lock,
+  .us-attachment__shackle {
+    animation: none;
+    transition: none;
+  }
+
+  .us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
+    animation-duration: 1600ms;
+  }
 }
 
 /* US-ATTACHMENTS:END */
@@ -19897,6 +20327,13 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   display: flex;
   justify-content: flex-end;
   margin: 0;
+}
+
+/* A record's own actions (an activity source's data-record-actions: View
+   and Download for a file), side by side at the same edge. */
+.us-record__more--actions {
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 /* --------------------------------------------------------------------------
@@ -22807,6 +23244,45 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
 }
 
 .us-task--compact:has(.us-task__note:empty) .us-task__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+/* ── Untitled ──────────────────────────────────────────────── */
+
+/* A task with no title (legacy notes, owner 20 October 2026): the note
+   takes the title's place and look, up to two lines, on compact rows too.
+   A compact row keeps its details button only while the note is cut short
+   (data-us-task-clipped, from US-TASK-ROWS), and opening it shows the note
+   in full where it is; a full row keeps its More link. */
+.us-task--detail:is(.us-task--full, .us-task--compact):has(.us-task__title:empty) .us-task__title:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: none;
+}
+
+.us-task--detail:is(.us-task--full, .us-task--compact):has(.us-task__title:empty) .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  grid-area: title;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  max-width: 62ch;
+  margin: 0;
+  padding-block: 2px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  color: var(--text-strong);
+}
+
+.us-task--detail:is(.us-task--full, .us-task--compact)[data-us-task-expanded]:has(.us-task__title:empty) .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.us-task--detail:is(.us-task--full, .us-task--compact):is(.us-task--complete, [data-us-task-completed="true" i]):has(.us-task__title:empty) .us-task__note:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.us-task--compact:has(.us-task__title:empty):not([data-us-task-clipped], [data-us-task-expanded]) .us-task__details:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   display: none;
 }
 

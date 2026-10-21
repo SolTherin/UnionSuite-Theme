@@ -103,10 +103,20 @@ The owner's brief, in order (all 10 October 2026):
 ## Live requirements (not built)
 
 - **CloudToolz add endpoints** must return the new record's `{Ordinal}` (or
-  `{Ordinals}` for several files): `/cases/add-note`, `add-task`,
-  `add-meeting`, `add-attachment` (files as Base64 in JSON: the CloudToolz
-  helper only sends JSON), `add-staff`, `add-party`.
-- **Proposed IQAs:** `$/_i4u_/Core/Cases/API - Staff Search` and
+  `{Ordinals}` for several files): `/cases/quick-add/note`,
+  `/cases/quick-add/task`, `/cases/quick-add/meeting`,
+  `/cases/quick-add/attachment` (files as Base64 in JSON, with TagOrdinals and
+  TagNames from the Tags multiselect, read from `POST /zidebar/sharepoint/tagsprefill`,
+  whose answer is to confirm; the CloudToolz
+  helper only sends JSON), `/cases/quick-add/staff` and
+  `/cases/quick-add/contact` (the add party composer), named by the owner,
+  20 October 2026.
+- **Add staff lists** (owner, 21 October 2026): the people from CloudToolz
+  `GET /cases/quick-add/StaffList?CaseNum=` (`[{StaffID, StaffName}]`, from when Add staff is pressed,
+  read once per page and searched in the page), the Role from
+  `$/_i4u_/Core/Cases/Value Lists/Case - Form Data/Get Case Staff Member Types`
+  (value column saved, label column shown).
+- **Proposed IQA:**
   `$/_i4u_/Core/Cases/API - Workplace Members` (CaseNum and Search in;
   ContactId, ContactName, Number, Classification out; primary party left out).
 - **Popup pages:** the `Cases_*` full forms are placeholders to confirm.

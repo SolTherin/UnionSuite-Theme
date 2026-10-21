@@ -17,6 +17,7 @@ const inlineComposerExample = require('./inline-composer-example.cjs');
 const casePartiesExample = require('./case-parties-example.cjs');
 const caseBannerExample = require('./case-banner-example.cjs');
 const queryValueExample = require('./query-value-example.cjs');
+const caseListsExample = require('./case-lists-example.cjs');
 const actionConflictExample = require('./action-conflict-example.cjs');
 const membership = require('./membership-stats-example.cjs');
 const actionBuilder = require('./build-action-builder.cjs');
@@ -141,6 +142,7 @@ allSources.push('THeme/UnionSuite-Guides/usage/build/report-icon-example.cjs');
 allSources.push(...require('./panel-title-icons-example.cjs').sources);
 allSources.push(...require('./where-used-example.cjs').sources);
 allSources.push(...require('./iqa-finder-example.cjs').sources);
+allSources.push(...require('./popup-forms-example.cjs').sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/popup-action-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/action-conflict-example.cjs');
 allSources.push(...require('./unified-action-example.cjs').sources);
@@ -154,6 +156,7 @@ allSources.push(...inlineComposerExample.sources);
 allSources.push(...casePartiesExample.sources);
 allSources.push(...caseBannerExample.sources);
 allSources.push(...queryValueExample.sources);
+allSources.push(...caseListsExample.sources);
 allSources.push('THeme/UnionSuite-Guides/usage/build/query-template-refresh-example.cjs','THeme/UnionSuite-Guides/usage/examples/Query-Template-Refresh.js');
 allSources.push('THeme/UnionSuite-Guides/usage/build/embedded-cco-example.cjs');
 allSources.push('THeme/UnionSuite-Guides/usage/build/iqa-expand-example.cjs','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.html','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.css','THeme/UnionSuite-Guides/usage/source/iqa-expand-example.js');
@@ -254,8 +257,11 @@ const inserts = {
  CASE_ROWS_TEMPLATE: snippet('case-rows'),
  QUERY_VALUE_DEMO: iframe('query-value-demo', 'Attachments with a count footer from its own IQA', queryValueExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
  QUERY_VALUE_TEMPLATE: snippet('attachments-count-footer'),
+ CASE_LISTS_DEMO: iframe('case-lists-demo', 'Case page lists: the case team, a detailed meeting, a restricted file and an empty list', caseListsExample.documentHtml({css:nativePreviewCss+theme, themeJs}), true),
  TASK_FOOTER_TEMPLATE: snippet('task-footer'),
  REPORT_ICON_DEMO: iframe('report-icon-demo','Generated report icon actions',reportIconExample.documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),
+ POPUP_FORMS_ADD_DEMO: iframe('popup-forms-add-demo','Task form: adding a task to an agreement',require('./popup-forms-example.cjs').documentHtml({nativePreviewCss,theme,branding:clientRoots,variant:'add'}),true),
+ POPUP_FORMS_EDIT_DEMO: iframe('popup-forms-edit-demo','Task form: editing a case task',require('./popup-forms-example.cjs').documentHtml({nativePreviewCss,theme,branding:clientRoots,variant:'edit'}),true),
  IQA_FINDER_DEMO: iframe('iqa-finder-demo','IQA browser: search, favourites and recent',require('./iqa-finder-example.cjs').documentHtml({nativePreviewCss,theme,iconCss,branding:clientRoots}),true),
  WHERE_USED_DEMO: iframe('where-used-demo','IQA designer: Show Usage drawer',require('./where-used-example.cjs').documentHtml({nativePreviewCss,theme,iconCss,branding:clientRoots}),true),
  PANEL_TITLE_ICONS_DEMO: iframe('panel-title-icons-demo','Panel titles typed with an icon token',require('./panel-title-icons-example.cjs').documentHtml({nativePreviewCss,theme,themeJs,iconCss,branding:clientRoots}),true),

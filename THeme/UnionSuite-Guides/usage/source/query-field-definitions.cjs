@@ -132,7 +132,7 @@ module.exports = {
 function compactTaskFields(noteDescription) {
   const detail = module.exports['Tasks-Detail-Query-Template.html'];
   return {
-    TaskTitle:detail.TaskTitle,
+    TaskTitle:optional('Task subject, also used in the checkbox’s accessible label. Do not map a status code such as N or IP here. Blank (a legacy note with no subject): the note takes the title’s place, up to two lines, and names the checkbox.', 'Call Alex about renewal'),
     TaskUrl:required('Verified task editor URL, including the parameters identifying this task, on the pencil (us-action-home-edit-task) as data-us-task-url. Opens in the native iMIS popup; fragments are not supported. Blank disables the pencil. On the agreement or case page, replace the pencil with that page\u2019s edit action instead (agreements.edit-task or the case\u2019s, with data-ordinal).', '/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx?ID=104019&Ordinal=219'),
     TaskNote:optional('Plain-text task note. ' + noteDescription, 'Discuss the membership options sent earlier this week.'),
     MemberName:detail.MemberName,

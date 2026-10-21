@@ -1,0 +1,164 @@
+/* ==========================================================================
+   IQA standalone — base styles the theme normally supplies.
+
+   Maintained source for build-iqa-standalone.cjs (this folder). The build bundles
+   this file with the theme's own IQA sections, renames every theme token
+   (var(--accent) and so on) to a private --iqae-* copy, and injects the
+   result from the standalone script. Write theme token names here as the
+   theme does; the build does the renaming.
+
+   Only what the theme's button system and icon font would otherwise draw
+   lives here. Everything that can be taken from zUnionSuite.css is taken
+   from it by the build, so it stays in step with the theme.
+   ========================================================================== */
+
+/* Outline buttons (us-outline-button) on native TextButtons: Copy Path,
+   Copy Key, Branchify, the reorder dialogs, Restore starting order. The
+   theme draws these through its --button-* system, which is not here. */
+:is(a, button, input):is(.TextButton, .btn).us-outline-button:not(.us-icon-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 1px solid var(--brand-800);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  background-image: none;
+  color: var(--brand-800);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  line-height: 1.4;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:is(a, button, input):is(.TextButton, .btn).us-outline-button:not(.us-icon-button):hover:not(:disabled, [disabled], .aspNetDisabled, [aria-disabled="true"]) {
+  background: var(--brand-50);
+  color: var(--brand-800);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / .10);
+}
+
+:is(a, button, input):is(.TextButton, .btn).us-outline-button:not(.us-icon-button):active:not(:disabled, [disabled], .aspNetDisabled, [aria-disabled="true"]) {
+  background: var(--brand-100);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .18);
+}
+
+:is(a, button, input):is(.TextButton, .btn).us-outline-button:not(.us-icon-button):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+:is(a, button, input):is(.TextButton, .btn).us-outline-button:not(.us-icon-button):is(:disabled, [disabled], .aspNetDisabled, [aria-disabled="true"]) {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* Icon-only buttons (us-icon-button): the Enhance help "?" and Show Usage. */
+:is(a, button):is(.TextButton, .btn).us-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  margin: 0;
+  gap: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  background-image: none;
+  color: var(--text-link);
+  line-height: 1;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+:is(a, button):is(.TextButton, .btn).us-icon-button:is(:hover, :focus-visible):not(:disabled, [disabled], .aspNetDisabled, [aria-disabled="true"]) {
+  background: var(--icon-hover-bg);
+  color: var(--icon-hover-colour);
+}
+
+:is(a, button):is(.TextButton, .btn).us-icon-button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+:is(a, button):is(.TextButton, .btn).us-icon-button:is(:disabled, [disabled], .aspNetDisabled, [aria-disabled="true"]) {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+:is(a, button):is(.TextButton, .btn) > .ti {
+  flex: 0 0 18px;
+  width: 18px;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+  color: inherit;
+  pointer-events: none;
+}
+
+/* Touch sizes follow the window width, never the pointer type. */
+@media (max-width: 950px) {
+  :is(a, button):is(.TextButton, .btn).us-icon-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(a, button, input):is(.TextButton, .btn):is(.us-outline-button, .us-icon-button) {
+    transition: none;
+  }
+}
+
+/* Icons. The theme uses the Tabler icon font (about 800KB); this draws the
+   few icons these scripts use as masks of the same Tabler outlines, in the
+   current text colour. The build adds one rule per icon below this one. */
+.ti {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  font-style: normal;
+  line-height: 1;
+  vertical-align: -.125em;
+}
+
+.ti::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  -webkit-mask: var(--iqae-icon) center / contain no-repeat;
+  mask: var(--iqae-icon) center / contain no-repeat;
+}
+
+@media (forced-colors: active) {
+  .ti::before {
+    background: CanvasText;
+  }
+}

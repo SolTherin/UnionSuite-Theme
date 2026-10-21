@@ -4,98 +4,8 @@
 /* C9 Banner member line: in the theme (US-BANNER-COMPONENT,
    us-banner__member, 20 October 2026). */
 
-/* ── C5 Case team cards, one per row ───────────────────────────
-   The staff cards fill their container, one per row (owner, 8 October
-   2026): the team sits in the Overview's narrow side column, where the
-   tile grid's 230px tracks would overflow, and is usually one person.
-   Target: US-CONTACT-TILES, as an opt-in modifier (us-contacts-tiles--stack)
-   added to the us-case-staff preset. */
-.us-case-staff.us-contacts-tiles .QueryTemplateSet {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* ── C8 Lead staff crown ───────────────────────────────────────
-   A crown on each staff card (owner, 8 October 2026). The lead's is a
-   solid amber mark; everyone else's is the quiet Make lead staff button
-   (cases.set-lead-staff), which brightens on hover. The theme's crown badge
-   on the lead's avatar is left off here, so the lead has one crown.
-   Target: US-CONTACT-TILES, as part of the us-case-staff preset. */
-.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-avatar::after {
-  content: none;
-}
-
-.us-case-staff .us-contact-tile__actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.us-case-staff__crown {
-  display: none;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--warning-bg);
-  color: var(--warning-fill);
-  font-size: 17px;
-}
-
-.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__crown {
-  display: inline-grid;
-}
-
-.us-case-staff :is([data-us-contact-lead="true" i], [data-us-contact-lead="1"]) .us-case-staff__make-lead {
-  display: none;
-}
-
-/* A new lead (cases.set-lead-staff): the initials circle turns to its
-   reversed, solid colour gradually rather than at once (owner, 8 October
-   2026), and the card's crown pops in while the card slides to the top
-   (data-us-lead-arrived, set by the action for the slide's length).
-   Target: US-AVATARS (the transition, for every lead change) and
-   US-CONTACT-TILES (the crown). */
-.us-avatar {
-  transition:
-    background-color 240ms cubic-bezier(.2, 0, 0, 1),
-    color 240ms cubic-bezier(.2, 0, 0, 1),
-    box-shadow 240ms cubic-bezier(.2, 0, 0, 1);
-}
-
-[data-us-lead-arrived] .us-case-staff__crown {
-  animation: us-case-crown-in 240ms cubic-bezier(.2, 0, 0, 1) both;
-}
-
-@keyframes us-case-crown-in {
-  from {
-    opacity: 0;
-    transform: scale(.6) rotate(-12deg);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .us-avatar {
-    transition: none;
-  }
-
-  [data-us-lead-arrived] .us-case-staff__crown {
-    animation: none;
-  }
-}
-
-.us-case-staff .us-case-staff__make-lead {
-  color: var(--text-faint);
-  transition: color 150ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-case-staff .us-case-staff__make-lead:is(:hover, :focus-visible) {
-  color: var(--warning-fill);
-}
+/* C5 Case team cards and C8 Lead staff crown: in the theme (US-CONTACT-TILES,
+   us-case-staff; the avatar transition in US-AVATARS; 20 October 2026). */
 
 /* C7 US-CASE-PARTIES, C4 US-CASE-MEMBER and View profile are in the theme
    (14 October 2026): US-CASE-MEMBER and US-CASE-PARTIES in
@@ -149,41 +59,8 @@
   --us-list-max-height: min(75vh, 800px);
 }
 
-/* ── C13 Empty states ───────────────────────────────────────────
-   A new case has nothing recorded (owner, 8 October 2026), so each list's
-   No results field holds the theme's placeholder (US-PLACEHOLDER) with an
-   add button, compact so a side-column list stays short. The button is
-   the list's own add action. Target: US-PLACEHOLDER, a --compact modifier. */
-.us-placeholder.us-placeholder--compact {
-  min-height: 0;
-  padding: var(--space-5) var(--space-4);
-  gap: var(--space-1);
-}
-
-.us-placeholder--compact .us-placeholder__icon {
-  margin-bottom: var(--space-2);
-}
-
-.us-placeholder--compact h3 {
-  margin: 0;
-  font-size: var(--fs-base);
-}
-
-.us-placeholder--compact p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: var(--fs-sm);
-}
-
-.us-placeholder--compact > button {
-  margin-top: var(--space-3);
-}
-
-/* With the placeholder showing, the list's footer line ("No matching
-   results on this page") repeats it, so it steps aside. */
-.panel:has(.QueryTemplateSet > .us-placeholder--compact) :is(.us-query-footer, .us-query-search-status) {
-  display: none;
-}
+/* C13 Empty states: in the theme (US-PLACEHOLDER, us-placeholder--compact,
+   20 October 2026). */
 
 /* ── C14 Member card first on narrow screens ───────────────────
    Below the md breakpoint (992px) Bootstrap stacks the Overview's columns
@@ -230,54 +107,8 @@
 /* C19 Recent activity, locked to a window: in the theme (US-ACTIVITY-FEED,
    data-us-activity-window, 21 October 2026). */
 
-/* ── C22 Detailed meeting rows ──────────────────────────────────
-   The Activity tab's Meetings section (us-meeting--full, owner 9 October
-   2026): the theme's meeting row with who attends on the details line,
-   the agenda or notes up to three lines, and the outcome once held.
-   Blank parts collapse. Target: US-MEETINGS, a --full modifier. */
-.us-meeting--full {
-  align-items: start;
-}
-
-.us-meeting--full .us-meeting__people {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-}
-
-.us-meeting--full .us-meeting__people > .ti {
-  align-self: center;
-  font-size: 13px;
-}
-
-.us-meeting--full :is(.us-meeting__people, .us-meeting__outcome):has(> span:last-child:empty) {
-  display: none;
-}
-
-.us-meeting--full :is(.us-meeting__notes, .us-meeting__outcome) {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  max-width: 78ch;
-  margin-top: 4px;
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.us-meeting--full .us-meeting__notes:empty {
-  display: none;
-}
-
-.us-meeting--full .us-meeting__outcome {
-  color: var(--text-base);
-}
-
-.us-meeting--full .us-meeting__outcome > strong {
-  color: var(--text-strong);
-  font-weight: var(--fw-semi);
-}
+/* C22 Detailed meeting rows: in the theme (US-MEETINGS, us-meeting--full,
+   20 October 2026). */
 
 /* C23 Quick status change: the status menu pill and its tick are in the
    theme (US-BANNER-COMPONENT, 20 October 2026); the action is in
@@ -287,8 +118,9 @@
    The side column had grown much longer than the main one (owner, 9
    October 2026). Meetings move to the main column under Tasks (what is
    coming up, beside what is to do; index.html), and the member card's
-   fields sit two across where they fit; a link (email) or a long value
-   still takes the full row (the theme's us-fields__field--wide). Target:
+   fields sit two across where they fit; a value over 60 characters still
+   takes the full row (the theme's us-fields__field--wide), while a short
+   link (Email) sits beside Mobile (owner, 21 October 2026). Target:
    the case page layout, and US-FIELD-GROUPS (a narrower column minimum
    for side-column cards). */
 [data-us-case-member] .us-fields {
@@ -301,18 +133,9 @@
    View all attachments (N) under the last row only, opening Activity ›
    Attachments. In All activity each file added is a card of its own
    type (file): indigo, a hue no other type uses, with the paperclip icon.
-   Target: US-ATTACHMENTS (a compact use), the --activity-* tokens and the
-   type rules in US-RECORD-CARDS. */
-.us-case-attachments-recent .us-attachment {
-  align-items: center;
-}
-
-.us-case-attachments-recent .us-attachment__file {
-  width: 36px;
-  height: 36px;
-}
-
-/* The attachment card type is in US-RECORD-CARDS (21 October 2026). */
+   Target: the --activity-* tokens and the type rules in US-RECORD-CARDS. */
+/* The compact rows are in the theme (US-ATTACHMENTS, 20 October 2026); the
+   attachment card type is in US-RECORD-CARDS (21 October 2026). */
 
 /* Recent activity fills the main column down to the side column's end (C25,
    with us-panel-fill on its iPart): its feed scrolls in whatever height
@@ -390,153 +213,9 @@
 /* C32 Activity feed funnel order: in the theme (US-ACTIVITY-FEED CSS,
    21 October 2026). */
 
-/* ── C33 Restricted files ───────────────────────────────────────
-   A sensitive document's actions stay hidden behind Unlock, at the right
-   where they sit (owner, 9 October 2026); the button wears the notes'
-   restricted look (US-NOTES-RESTRICTED): a quiet pill with the padlock,
-   red and shaking when refused. Unlocked, the padlock opens green and stays
-   ahead of the actions. Target: US-ATTACHMENTS. */
-.us-attachment[data-us-attachment-access="restricted" i]:not([data-us-attachment-unlocked]) .us-attachment__actions > :not(.us-attachment__unlock, .us-attachment__unlock-message) {
-  display: none !important;
-}
-
-.us-attachment__actions:has(> .us-attachment__unlock, > .us-attachment__lock-mark) {
-  align-items: center;
-}
-
-.us-attachment__unlock {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font: var(--fw-semi) var(--fs-xs)/1.4 var(--font-ui);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color 150ms cubic-bezier(.2, 0, 0, 1),
-    border-color 150ms cubic-bezier(.2, 0, 0, 1),
-    color 150ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-attachment__unlock:hover:not([aria-busy="true"]) {
-  border-color: var(--text-link);
-  background: var(--brand-50);
-  color: var(--text-link);
-}
-
-.us-attachment__unlock:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-/* While the access check runs, the word gives way to a spinner in its
-   place, so the button keeps its size; the padlock stays. */
-.us-attachment__unlock[aria-busy="true"] {
-  cursor: progress;
-}
-
-.us-attachment__unlock-label {
-  position: relative;
-}
-
-.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label {
-  color: transparent;
-}
-
-.us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 12px;
-  height: 12px;
-  margin: auto;
-  border: 2px solid var(--border);
-  border-top-color: var(--text-link);
-  border-radius: 50%;
-  animation: us-attachment-unlock-spin 700ms linear infinite;
-}
-
-@keyframes us-attachment-unlock-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.us-attachment__unlock.is-denied {
-  border-color: var(--danger);
-  background: var(--danger-bg);
-  color: var(--danger);
-  animation: us-note-reveal-shake 360ms cubic-bezier(.36, .07, .19, .97);
-}
-
-.us-attachment__lock {
-  flex: none;
-  width: 15px;
-  height: 15px;
-  overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: color 240ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-attachment__shackle {
-  transform-box: view-box;
-  transform-origin: 8px 11px;
-  transition: transform 240ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-attachment__unlock.is-unlocked {
-  border-color: var(--success);
-  color: var(--success);
-}
-
-:is(.us-attachment__unlock.is-unlocked, .us-attachment__lock-mark) .us-attachment__shackle {
-  transform: translateY(-2px) rotate(-30deg);
-}
-
-.us-attachment__lock-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  color: var(--success);
-}
-
-/* The refusal, to the left of the button that was pressed. */
-.us-attachment__unlock-message {
-  max-width: 320px;
-  margin-inline-end: 6px;
-  color: var(--danger);
-  font: var(--fw-medium) var(--fs-xs)/1.4 var(--font-ui);
-  text-align: end;
-  animation: us-note-reveal-message-in 180ms cubic-bezier(.2, 0, 0, 1);
-  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1);
-}
-
-.us-attachment__unlock-message[data-us-leaving] {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .us-attachment__unlock,
-  .us-attachment__unlock-message,
-  .us-attachment__lock,
-  .us-attachment__shackle {
-    animation: none;
-    transition: none;
-  }
-
-  .us-attachment__unlock[aria-busy="true"] .us-attachment__unlock-label::after {
-    animation-duration: 1600ms;
-  }
-}
+/* C33 Restricted files: in the theme (US-ATTACHMENTS CSS and
+   US-RESTRICTED-ATTACHMENTS, 20 October 2026); the check is in
+   Scripts/ActionDefinitions.js. */
 
 /* C36 Section link in the heading (US-ACTIVITY-FEED): in the theme (21 October 2026). */
 

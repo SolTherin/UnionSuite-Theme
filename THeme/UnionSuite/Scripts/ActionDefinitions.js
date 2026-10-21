@@ -1,5 +1,32 @@
 /* Standard Union Suite actions. Load once AFTER zUnionSuite.js and business
    dependencies, BEFORE UnionSuite-Client/Actions.js. Do not embed in iParts. */
+
+/* The task form's pages (Forms/TaskForm.js; owner, 20 October 2026): one
+   iMIS page per module, each holding only <div data-us-form="task"
+   data-module="…">. Blank until the page exists; a blank page keeps that
+   module's task actions on the form they open today. Set each to the
+   page's path, e.g. '/_i4u_/Core/Tasks/Task-Case.aspx'.
+   UnionSuiteTaskForms.href(module, values) builds a popup address: Type=task,
+   the signed-in user's ID, and the values given (ModuleID, ModuleOrdinal,
+   and Ordinal when editing), or null while the page is blank. */
+(function () {
+  'use strict';
+  const PAGES = {personal: '', case: '', agreement: ''};
+  function href(module, values = {}) {
+    if (!PAGES[module]) return null;
+    let client = {};
+    try { client = JSON.parse(document.getElementById('__ClientContext')?.value || '{}'); } catch (_) {}
+    const url = new URL(PAGES[module], location.origin);
+    url.searchParams.set('Type', 'task');
+    if (client.loggedInPartyId) url.searchParams.set('ID', String(client.loggedInPartyId));
+    Object.entries(values).forEach(([name, value]) => {
+      if (value !== undefined && value !== null && value !== '') url.searchParams.set(name, String(value));
+    });
+    return url.href;
+  }
+  window.UnionSuiteTaskForms = Object.freeze({pages: Object.freeze({...PAGES}), href});
+})();
+
 (function () {
   'use strict';
   const actions = window.UnionSuiteActions;
@@ -90,7 +117,10 @@
       }
     },
     action:{type:'popup',recordKey:['partyId'],
+      // The personal task form once its page is set (UnionSuiteTaskForms).
       href:({context}) => {
+        const form = window.UnionSuiteTaskForms?.href('personal');
+        if (form) return form;
         const url = new URL('/i4u_Sandbox/Styling-Elements/Home-Dashboard/Add-Task.aspx',location.origin);
         url.searchParams.set('ID',context.partyId);
         return url.href;
@@ -249,8 +279,11 @@
   popup('agreements.add-meeting', 'Add meeting', 'plus',
     ({context}) => page('/Agreements_CreateMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum}),
     'Schedule meeting', refreshList('us-action-agreements-add-meeting'), formWidth);
+  // The agreement task form once its page is set (UnionSuiteTaskForms);
+  // until then the Add Note form's task type.
   popup('agreements.add-task', 'Add task', 'plus',
-    addNoteForm('task'),
+    args => window.UnionSuiteTaskForms?.href('agreement', {ModuleID: args.context.agreementId, ModuleOrdinal: args.context.agreementNum}) ||
+      addNoteForm('task')(args),
     'Add task', refreshList('us-action-agreements-add-task'), formWidth);
   popup('agreements.add-milestone', 'Add milestone', 'plus',
     addNoteForm('milestone'),
@@ -461,10 +494,16 @@
   // us-notes--reading); it was an eye. Its key stays, so the templates need
   // no change.
   rowPopup('agreements.preview-note', 'Edit note', editIcon, noteDetails(''), 'Note', formWidth);
-  rowPopup('agreements.view-task', 'Open task', openLink, noteDetails('Task'), 'Task', formWidth);
-  rowPopup('agreements.edit-task', 'Edit task', editIcon, noteDetails('Task'), 'Task', formWidth);
+  // Tasks open the agreement task form with the task's Ordinal once its
+  // page is set (UnionSuiteTaskForms); until then the note details page.
+  const taskForm = args => window.UnionSuiteTaskForms?.href('agreement', {
+    ModuleID: args.context.agreementId, ModuleOrdinal: args.context.agreementNum, Ordinal: args.context.ordinal
+  }) || noteDetails('Task')(args);
+  const taskTitle = window.UnionSuiteTaskForms?.pages.agreement ? 'Edit task' : 'Task';
+  rowPopup('agreements.view-task', 'Open task', openLink, taskForm, taskTitle, formWidth);
+  rowPopup('agreements.edit-task', 'Edit task', editIcon, taskForm, taskTitle, formWidth);
   // The earlier task template's eye button, a pencil now too.
-  rowPopup('agreements.preview-task', 'Edit task', editIcon, noteDetails('Task'), 'Task', formWidth);
+  rowPopup('agreements.preview-task', 'Edit task', editIcon, taskForm, taskTitle, formWidth);
   rowPopup('agreements.view-milestone', 'Open milestone', openLink, noteDetails('Milestones'), 'Milestone', formWidth);
   rowPopup('agreements.edit-milestone', 'Edit milestone', editIcon, noteDetails('Milestones'), 'Milestone', formWidth);
   const meetingForm = ({context}) => page('/Agreements_EditMeeting', {AgreementID: context.agreementId, AgreementOrdinal: context.agreementNum, MeetingOrdinal: context.ordinal});
@@ -664,11 +703,16 @@
   });
 
   // ── Attachments ─────────────────────────────────────────────
+  // The file is read from the nearest element that names one: an attachment
+  // row (us-attachment), or an activity timeline card whose IQA returns the
+  // Data-us-file-* columns (a logged email or an attachment added; owner,
+  // 21 October 2026).
+  const fileHolder = '[data-us-file-id]';
   const attachmentRow = {
     ordinal: rowOrdinal,
-    uniqueId: {from: 'closest', selector: '.us-attachment', attribute: 'data-us-file-id', required: true},
-    branch: {from: 'closest', selector: '.us-attachment', attribute: 'data-us-file-branch', required: true},
-    fileName: {from: 'closest', selector: '.us-attachment', attribute: 'data-us-file-name'}
+    uniqueId: {from: 'closest', selector: fileHolder, attribute: 'data-us-file-id', required: true},
+    branch: {from: 'closest', selector: fileHolder, attribute: 'data-us-file-branch', required: true},
+    fileName: {from: 'closest', selector: fileHolder, attribute: 'data-us-file-name'}
   };
 
   async function downloadFile(context) {
@@ -720,7 +764,10 @@
    agreement pattern and have not been checked against the live site, and
    the /cases/* CloudToolz endpoints are not built yet (case page README,
    open decisions 1 and 3). A missing page opens as an error in its popup; a
-   missing endpoint fails the save, which says so.
+   missing endpoint fails the save, which says so. Every composer posts to
+   the owner's /cases/quick-add/* (20 October 2026): note, task, meeting,
+   attachment, staff and contact (the add party composer). Each body starts
+   with CaseID and CaseNum, both from the page URL.
 
    Reused from the agreement actions above:
    - The CloudToolz call (UnionSuiteAgreements). Case notes and tasks live in
@@ -786,12 +833,14 @@
   // as not configured, rather than losing every other case action.
   const composers = window.UnionSuiteComposers;
 
-  // A POST through the agreement actions' CloudToolz call, defined above.
-  function post(path, body) {
+  // A call through the agreement actions' CloudToolz call, defined above.
+  function callCloudToolz(path, init) {
     const cloudToolz = window.UnionSuiteAgreements?.cloudToolz;
     if (!cloudToolz) throw new Error('The CloudToolz call (UnionSuiteAgreements) is unavailable.');
-    return cloudToolz(path, {method: 'POST', body: JSON.stringify(body)});
+    return cloudToolz(path, init);
   }
+
+  const post = (path, body) => callCloudToolz(path, {method: 'POST', body: JSON.stringify(body)});
 
   // The endpoint's answer: the new record's {Ordinal} (or {Ordinals}).
   async function send(path, body) {
@@ -799,15 +848,31 @@
     return response.json().catch(() => ({}));
   }
 
-  // A proposed search IQA, through GET /api/query (at most 8 rows unless
-  // the caller says otherwise; extra parameters go with Search).
-  async function lookup(name, term, extra = {}) {
-    const params = new URLSearchParams({QueryName: name, Search: term, limit: '8', offset: '0', ...extra});
+  // An IQA's rows through GET /api/query.
+  async function query(name, values) {
+    const params = new URLSearchParams({QueryName: name, offset: '0', ...values});
     const token = document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value;
     const response = await fetch('/api/query?' + params, {credentials: 'same-origin', headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}});
     if (!response.ok) throw new Error('HTTP ' + response.status);
     return (await response.json())?.Items?.$values || [];
   }
+
+  // A proposed search IQA (at most 8 rows unless the caller says otherwise;
+  // extra parameters go with Search).
+  const lookup = (name, term, extra = {}) => query(name, {Search: term, limit: '8', ...extra});
+
+  // A value read once for the page and shared by every composer; a failed
+  // read is tried again next time.
+  function once(load) {
+    let pending = null;
+    return () => pending ||= load().catch(error => {
+      pending = null;
+      throw error;
+    });
+  }
+
+  // A row's column by name, whatever its case ("value" or "Value").
+  const column = (row, name) => row?.[Object.keys(row || {}).find(key => key.toLowerCase() === name.toLowerCase())];
 
   // People already in the section show in the list but cannot be picked.
   const onCase = wrapper => new Set([...(wrapper?.querySelectorAll('[data-us-contact-id]') || [])].map(node => node.getAttribute('data-us-contact-id')));
@@ -835,10 +900,8 @@
     composers.define(key,{context: {caseId, caseNum}, recordKey: ['caseId'], owner: 'UnionSuite', source: 'ActionDefinitions.js:' + key, ...spec});
   }
 
-  // Placeholder lists until the Note category and case staff Role value
-  // lists are read from iMIS.
+  // A placeholder list until the Note category value list is read from iMIS.
   const CATEGORIES = ['Case', 'Employer', 'Membership', 'Intake', 'Meeting'];
-  const ROLES = ['Support', 'Assisting', 'Case manager', 'Legal advice'];
 
   // Notes (C34): a follow-up note is also a task (owner, 9 October 2026).
   composer('cases.add-note', {
@@ -854,7 +917,7 @@
         {type: 'checkbox', name: 'FollowUp', label: 'Follow up'},
         {type: 'date', name: 'FollowUpDate', label: 'Follow-up date', shownBy: 'FollowUp', required: 'Choose a follow-up date.'}
       ],
-      submit: (values, context) => send('/cases/add-note', {CaseID: context.caseId, Note: values.Note, Category: values.Category,
+      submit: (values, context) => send('/cases/quick-add/note', {CaseID: context.caseId, CaseNum: context.caseNum, Note: values.Note, Category: values.Category,
         FollowUpDate: values.FollowUp ? values.FollowUpDate : ''}),
       saved: values => values.FollowUp ? 'Note saved, with a follow-up task.' : 'Note saved.',
       failed: 'The note could not be saved. Try again.'
@@ -876,8 +939,8 @@
     composer: {
       kind: 'task', label: 'New task', save: 'Save task', keepOpen: true,
       main: {type: 'text', name: 'Task', label: 'Task', placeholder: 'What needs doing…', required: 'Write the task first.'},
-      fields: [{type: 'date', name: 'DueDate', label: 'Due date'}],
-      submit: (values, context) => send('/cases/add-task', {CaseID: context.caseId, Task: values.Task, DueDate: values.DueDate}),
+      fields: [{type: 'date', name: 'DueDate', label: 'Due Date', showLabel: true}],
+      submit: (values, context) => send('/cases/quick-add/task', {CaseID: context.caseId, CaseNum: context.caseNum, Task: values.Task, DueDate: values.DueDate}),
       saved: 'Task added.', failed: 'The task could not be added. Try again.'
     }
   });
@@ -900,15 +963,37 @@
       // are you sure"), but past meetings are recorded too, so it asks.
       confirm: values => values.Date && values.Date < today()
         ? 'That date has passed. Save the meeting anyway?' : null,
-      submit: (values, context) => send('/cases/add-meeting', {CaseID: context.caseId, Title: values.Title, Date: values.Date,
-        Time: values.Time, Location: values.Location}),
+      // DateTime is the two together for the meeting's datetime column
+      // (owner, 21 October 2026): local time with no offset, as iMIS stores
+      // it, and midnight when no start time is given.
+      submit: (values, context) => send('/cases/quick-add/meeting', {CaseID: context.caseId, CaseNum: context.caseNum, Title: values.Title, Date: values.Date,
+        Time: values.Time, DateTime: values.Date + 'T' + (values.Time || '00:00').slice(0, 5) + ':00', Location: values.Location}),
       saved: 'Meeting saved.', failed: 'The meeting could not be saved. Try again.'
     }
   });
 
-  // Attachments (C39): files dropped or chosen, and whether they are
-  // sensitive (C33); tags are More options. The files go as Base64, as
-  // CloudToolz downloads return them (its helper sends JSON).
+  // Attachments (C39): files dropped or chosen and their tags (owner, 21
+  // October 2026: tags in place of the Sensitive flag). The files go as
+  // Base64, as CloudToolz downloads return them (its helper sends JSON).
+  // The tags come from CloudToolz POST /zidebar/sharepoint/tagsprefill,
+  // read once for the page. ITS ANSWER IS TO CONFIRM: a list of tags, bare
+  // or under Items (.$values), each read from the first of TAG_VALUE and
+  // TAG_LABEL it has.
+  const TAG_VALUE = ['TagOrdinal', 'Ordinal', 'TagID', 'ID', 'Value', 'Code'];
+  const TAG_LABEL = ['TagName', 'Name', 'Label', 'Description', 'Tag'];
+  const firstColumn = (row, names) => names.map(name => column(row, name)).find(value => value != null && value !== '');
+
+  const attachmentTags = once(async () => {
+    const query = new URLSearchParams(location.search);
+    const response = await post('/zidebar/sharepoint/tagsprefill', {CaseID: query.get('CaseID') || '', CaseNum: query.get('CaseNum') || ''});
+    const data = await response.json();
+    const rows = Array.isArray(data) ? data : data?.Items?.$values || data?.Items || data?.Tags || [];
+    return rows.map(row => typeof row === 'object'
+      ? {value: String(firstColumn(row, TAG_VALUE) ?? firstColumn(row, TAG_LABEL) ?? ''), label: String(firstColumn(row, TAG_LABEL) ?? firstColumn(row, TAG_VALUE) ?? '')}
+      : {value: String(row), label: String(row)})
+      .filter(tag => tag.value && tag.label);
+  });
+
   composer('cases.add-attachment', {
     label: 'Upload', icon: 'ti-upload',
     form: {label: 'Upload attachment', href: ({context}) => page('/Cases_AddAttachment', {CaseID: context.caseId}), title: 'Add attachment', maxWidth: 960},
@@ -917,9 +1002,16 @@
     composer: {
       kind: 'attachment', label: 'New attachment', save: 'Upload',
       main: {type: 'files', name: 'Files', label: 'Files', required: 'Choose a file first.'},
-      fields: [{type: 'checkbox', name: 'Restricted', label: 'Sensitive'}],
-      submit: async (values, context) => send('/cases/add-attachment', {CaseID: context.caseId, Restricted: values.Restricted,
-        Files: await Promise.all(values.Files.map(async file => ({FileName: file.name, Base64string: await base64(file)})))}),
+      fields: [{type: 'multiselect', name: 'Tags', label: 'Tags', placeholder: 'Add tags…', options: attachmentTags,
+        empty: term => term ? 'No tags match “' + term + '”.' : 'No more tags.'}],
+      // The tags as ordinals and names, comma-separated, as the attachment
+      // editor's /ca/update-attachment takes them.
+      submit: async (values, context) => {
+        const tags = (await attachmentTags()).filter(tag => values.Tags.includes(tag.value));
+        return send('/cases/quick-add/attachment', {CaseID: context.caseId, CaseNum: context.caseNum,
+          TagOrdinals: tags.map(tag => tag.value).join(','), TagNames: tags.map(tag => tag.label).join(','),
+          Files: await Promise.all(values.Files.map(async file => ({FileName: file.name, Base64string: await base64(file)})))});
+      },
       saved: values => values.Files.length > 1 ? 'Attachments uploaded.' : 'Attachment uploaded.',
       failed: 'The upload failed. Try again.'
     }
@@ -927,8 +1019,26 @@
 
   // Staff (C38, C40): a person from the staff and delegates list, never
   // free text, and their role on the case; their type is the person's.
-  // The proposed Staff Search IQA: Search (part of a name or position) in;
-  // ContactId, ContactName, Position and Group out.
+  // The people come from CloudToolz (owner, 21 October 2026): GET
+  // /cases/quick-add/StaffList?CaseNum= answers [{StaffID, StaffName}], read
+  // once for the page from when Add staff is pressed, and searched here by
+  // part of a name. The list opens when the field is clicked or typed in.
+  // The Role list is the case staff member types value list: its value
+  // column is the code saved, its label column what shows.
+  const staffList = once(async () => {
+    const caseNum = new URLSearchParams(location.search).get('CaseNum') || '';
+    const response = await callCloudToolz('/cases/quick-add/StaffList?' + new URLSearchParams({CaseNum: caseNum}), {method: 'GET'});
+    const data = await response.json();
+    return Array.isArray(data) ? data : data?.Items?.$values || data?.Items || [];
+  });
+  const staffTypes = once(async () => (await query('$/_i4u_/Core/Cases/Value Lists/Case - Form Data/Get Case Staff Member Types', {limit: '100'}))
+    .map(row => ({value: column(row, 'value') ?? '', label: column(row, 'label') ?? ''})));
+
+  function staffMatching(people, term) {
+    const words = term.toLowerCase().split(/\s+/).filter(Boolean);
+    return people.filter(person => words.every(word => String(person.StaffName || '').toLowerCase().includes(word)));
+  }
+
   composer('cases.add-staff', {
     label: 'Add staff',
     form: {href: ({context}) => page('/Cases_ManageStaff', {CaseID: context.caseId}), title: 'Add staff'},
@@ -937,18 +1047,19 @@
     arrive: 'bottom',
     composer: {
       kind: 'staff', label: 'New staff member', save: 'Add', keepOpen: true,
-      main: {type: 'combobox', name: 'StaffID', label: 'Staff member', placeholder: 'Search staff and delegates…', avatars: true,
+      main: {type: 'combobox', name: 'StaffID', label: 'Staff member', placeholder: 'Search staff…', avatars: true,
         required: 'Choose someone from the list.',
         search: async ({term, wrapper}) => {
           const taken = onCase(wrapper);
-          return (await lookup('$/_i4u_/Core/Cases/API - Staff Search', term)).map(person => {
-            const disabled = taken.has(String(person.ContactId));
-            return {value: person.ContactId, name: person.ContactName, meta: [person.Position, disabled ? 'On the case' : ''].filter(Boolean).join(' · '), disabled};
+          return staffMatching(await staffList(), term).slice(0, 8).map(person => {
+            const disabled = taken.has(String(person.StaffID));
+            return {value: person.StaffID, name: person.StaffName, meta: disabled ? 'On the case' : '', disabled};
           });
         },
+        preload: () => staffList(),
         empty: term => term ? 'No staff match “' + term + '”.' : 'No staff to show.'},
-      fields: [{type: 'select', name: 'Role', label: 'Role on the case', options: ROLES}],
-      submit: (values, context) => send('/cases/add-staff', {CaseID: context.caseId, StaffID: values.StaffID, Role: values.Role}),
+      fields: [{type: 'select', name: 'Role', label: 'Role on the case', options: staffTypes}],
+      submit: (values, context) => send('/cases/quick-add/staff', {CaseID: context.caseId, CaseNum: context.caseNum, StaffID: values.StaffID, Role: values.Role}),
       saved: 'Staff member added.', failed: 'The staff member could not be added. Try again.'
     }
   });
@@ -981,7 +1092,7 @@
         },
         empty: term => (term ? 'No members at this workplace match “' + term + '”.' : 'No other members at this workplace.') + ' More options searches everyone.'},
       fields: [],
-      submit: (values, context) => send('/cases/add-party', {CaseID: context.caseId, ContactID: values.ContactID}),
+      submit: (values, context) => send('/cases/quick-add/contact', {CaseID: context.caseId, CaseNum: context.caseNum, ContactID: values.ContactID}),
       saved: 'Party added.', failed: 'The party could not be added. Try again.'
     }
   });
@@ -1038,11 +1149,26 @@
     }
   }
 
+  // The body carries the party's iMIS ID (ContactID) with the case party
+  // row's ordinal (owner, 21 October 2026). The Parties preview shows the
+  // chosen row's details apart from the row, so the ID comes from the row
+  // with the button's ordinal (data-us-contact-ordinal).
+  const partyId = {
+    resolve: ({trigger}) => {
+      const ordinal = trigger.getAttribute('data-ordinal') || '';
+      const row = trigger.closest('[data-us-contact-id]') ||
+        document.querySelector(`.us-party[data-us-contact-ordinal="${CSS.escape(ordinal)}"]`);
+      return row?.getAttribute('data-us-contact-id') ?? null;
+    },
+    required: true,
+    validate: value => /^[A-Za-z0-9_-]+$/.test(String(value)) || 'Invalid party ID.'
+  };
+
   define('cases.set-primary-party', {
     presentation: {label: 'Make primary party', icon: 'ti-crown', default: 'icon', row: 'icon', menu: 'menu-item'},
-    context: {caseId, caseNum, ordinal: rowOrdinal},
+    context: {caseId, caseNum, ordinal: rowOrdinal, contactId: partyId},
     action: {type: 'function', recordKey: ['caseId', 'ordinal'],
-      run: ({context}) => post('/cases/set-primary-party', {CaseID: context.caseId, PartyOrdinal: context.ordinal}),
+      run: ({context}) => post('/cases/quick-update/set-primary-party', {CaseID: context.caseId, CaseNum: context.caseNum, ContactID: context.contactId, PartyOrdinal: context.ordinal}),
       refresh: {when: 'success', run: async env => {
         const member = chosenParty(env.trigger);
         if (!await promoteParty(env.trigger)) await env.refresh.originReport();
@@ -1250,8 +1376,8 @@
   //     &ReturnUrl=<this page>
   // The send page's Communication Creator iPart carries us-case-comms: the
   // subject starts "Case C217 – " (US-SUBJECT-TAG) and the send is linked to
-  // the case afterwards (US-COMMS-LOG). Both need a us-case-comms entry in
-  // the theme; see README C17. Send page and IQA are placeholders.
+  // the case afterwards (US-COMMS-LOG; both in the theme, 21 October 2026,
+  // into i4u_UT_Cases_Communications). Send page and IQA are placeholders.
   const emailParties = {
     page: '/_i4u_/Core/Cases/Popups/Send-Email-Parties.aspx',
     query: '$/_i4u_/Core/Cases/API - Communication Recipient List - Parties',
@@ -1406,12 +1532,16 @@
   // The crown on a staff card that is not the lead (C8; owner, 8 October
   // 2026): makes that person the case's lead staff member. Their card then
   // slides to the top (above) and the banner's Lead staff fact reloads.
-  // Proposed CloudToolz endpoint, not built yet.
+  // Proposed CloudToolz endpoint, not built yet. The body carries the
+  // person's iMIS ID (StaffID, from the card's data-us-contact-id) with
+  // the case staff row's ordinal (owner, 21 October 2026).
   define('cases.set-lead-staff', {
     presentation: {label: 'Make lead staff', icon: 'ti-crown', default: 'button', row: 'icon', menu: 'menu-item'},
-    context: {caseId, caseNum, ordinal: rowOrdinal},
+    context: {caseId, caseNum, ordinal: rowOrdinal,
+      staffId: {from: 'closest', selector: '[data-us-contact-id]', attribute: 'data-us-contact-id', required: true,
+        validate: value => /^[A-Za-z0-9_-]+$/.test(String(value)) || 'Invalid staff ID.'}},
     action: {type: 'function', recordKey: ['caseId', 'ordinal'],
-      run: ({context}) => post('/cases/set-lead-staff', {CaseID: context.caseId, StaffOrdinal: context.ordinal}),
+      run: ({context}) => post('/cases/quick-update/set-lead-staff', {CaseID: context.caseId, CaseNum: context.caseNum, StaffID: context.staffId, StaffOrdinal: context.ordinal}),
       refresh: {when: 'success', run: env => {
         window.UnionSuiteBannerFacts?.reload?.();
         if (!slideLeadToTop(env.trigger)) return env.refresh.originReport();
@@ -1427,4 +1557,23 @@
     if (!save) throw new Error('The task status save (UnionSuiteAgreements) is unavailable.');
     await save(ordinal, done ? 'Complete' : 'Not Complete', root.getAttribute('data-us-task-note-type') || 'Task');
   });
+
+  // Unlock on a restricted case attachment (US-RESTRICTED-ATTACHMENTS in
+  // zUnionSuite.js; C33, owner, 9 October 2026). Granted opens it;
+  // Restricted reads as denied; any other answer reads as a failed check.
+  // Case pages only, so another record's check is not replaced. Proposed
+  // CloudToolz endpoint, not built yet.
+  if (/[?&]CaseID=/i.test(globalThis.location?.search || '')) {
+    window.UnionSuiteRestrictedAttachments?.defineCheck?.(async ({ordinal}) => {
+      const data = await send('/cases/attachment-access', {AttachmentOrdinal: ordinal});
+      const access = String(data?.Access ?? '').trim().toLowerCase();
+      if (access === 'granted') return;
+      if (access === 'restricted') {
+        const denied = new Error('Access to this attachment is restricted.');
+        denied.denied = true;
+        throw denied;
+      }
+      throw new Error('The attachment access check gave no answer (Access was "' + access + '").');
+    });
+  }
 })();

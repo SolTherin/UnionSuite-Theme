@@ -1,0 +1,372 @@
+<!doctype html>
+<!--
+  The built task form (THeme/UnionSuite/Forms), running on sample data.
+
+  Unlike task-form.html (the approved mock-up), this page loads the real
+  theme files: UnionSuiteForms.js draws the form into the placeholder below
+  and loads TaskForm.js and UnionSuiteForms.css from the theme folder. Only
+  iMIS is stubbed: __ClientContext, the request token, /api/query (sample
+  rows for the sample IQA names below), the ZenToken store, the CloudToolz
+  endpoint and the popup's GetRadWindow, so the side panel can show what the
+  form sends and how it would close the popup.
+
+  ?module=personal|case|agreement&mode=add|edit&assign=all|record
+  &tags=some|none&endpoint=on|off&styling=theme|none&scheme=light|dark
+  Changing a switch reloads the page, as opening a new popup would. Serve
+  the project root (static-node) and open this page.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Form Preview</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css" data-theme-css>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css" data-theme-css>
+  <style>
+    /* Preview page only. Fallbacks keep it readable with the theme off. */
+    body.tp-page {
+      margin: 0;
+      background: var(--bg-page, #eef0f3);
+      color: var(--text-base, #545962);
+      font: 14px/1.5 var(--font-ui, system-ui, sans-serif);
+    }
+
+    .tp-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border, #e2e5e9);
+      background: var(--bg-surface, #fff);
+    }
+
+    .tp-toolbar h1 {
+      margin: 0 12px 0 0;
+      color: var(--text-strong, #1c2024);
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: none;
+    }
+
+    .tp-segmented {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 8px;
+      background: var(--bg-sunken, #f1f3f5);
+    }
+
+    .tp-segmented button {
+      padding: 5px 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-base, #545962);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tp-segmented button[aria-pressed="true"] {
+      background: var(--bg-surface, #fff);
+      color: var(--text-strong, #1c2024);
+      box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+    }
+
+    .tp-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 800px) minmax(260px, 380px);
+      justify-content: center;
+      align-items: start;
+      gap: 24px;
+      padding: 24px 16px 32px;
+    }
+
+    @media (max-width: 1180px) {
+      .tp-stage {
+        grid-template-columns: minmax(0, 800px);
+      }
+    }
+
+    .tp-window {
+      border: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px;
+      background: var(--bg-surface, #fff);
+      box-shadow: 0 12px 40px rgb(15 23 42 / .18);
+    }
+
+    .tp-window__title {
+      margin: 0;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px 12px 0 0;
+      color: var(--text-strong, #1c2024);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .tp-notes {
+      padding: 16px 20px;
+      border: 1px solid var(--border, #e2e5e9);
+      border-radius: 12px;
+      background: var(--bg-surface, #fff);
+      font-size: 13px;
+    }
+
+    .tp-notes h2 {
+      margin: 0 0 8px;
+      color: var(--text-strong, #1c2024);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tp-notes h2:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    .tp-notes pre {
+      overflow-x: auto;
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--bg-sunken, #f1f3f5);
+      color: var(--text-strong, #1c2024);
+      font: 12px/1.45 ui-monospace, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="tp-page">
+  <!-- What iMIS puts on every page. -->
+  <input type="hidden" id="__ClientContext" value='{"loggedInPartyId":"104002","selectedPartyId":"104002","isAnonymous":false}'>
+  <input type="hidden" id="__RequestVerificationToken" value="preview-token">
+
+  <div class="tp-toolbar">
+    <h1>Task form preview</h1>
+    <div class="tp-segmented" role="group" aria-label="Module" data-control="module">
+      <button type="button" data-value="personal">Personal</button>
+      <button type="button" data-value="case">Case</button>
+      <button type="button" data-value="agreement">Agreement</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Mode" data-control="mode">
+      <button type="button" data-value="add">Add</button>
+      <button type="button" data-value="edit">Edit</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Agreement assign list" data-control="assign" data-for-module="agreement">
+      <button type="button" data-value="all">Assign: all staff</button>
+      <button type="button" data-value="record">Assign: agreement staff</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Task tags" data-control="tags">
+      <button type="button" data-value="some">Task tags set up</button>
+      <button type="button" data-value="none">No task tags</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Endpoint" data-control="endpoint">
+      <button type="button" data-value="on">Endpoint stubbed</button>
+      <button type="button" data-value="off">No endpoint yet</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Styling" data-control="styling">
+      <button type="button" data-value="theme">UnionSuite theme</button>
+      <button type="button" data-value="none">No theme</button>
+    </div>
+    <div class="tp-segmented" role="group" aria-label="Appearance" data-control="scheme" data-for-styling="theme">
+      <button type="button" data-value="light">Light</button>
+      <button type="button" data-value="dark">Dark</button>
+    </div>
+  </div>
+
+  <main class="tp-stage">
+    <section class="tp-window" aria-labelledby="tp-title">
+      <p class="tp-window__title" id="tp-title"></p>
+      <div id="tp-placeholder-slot"></div>
+    </section>
+    <aside class="tp-notes">
+      <h2>Placeholder</h2>
+      <pre data-placeholder></pre>
+      <h2>Address</h2>
+      <pre data-address></pre>
+      <h2>Requests</h2>
+      <pre data-requests></pre>
+      <h2>Last save or close</h2>
+      <pre data-result>Save, Save and add another or Cancel.</pre>
+    </aside>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── The preview's settings, from its address ────────────── */
+
+    const params = new URLSearchParams(location.search);
+    const pick = (key, values) => values.includes(params.get(key)) ? params.get(key) : values[0];
+    const state = {
+      module: pick('module', ['agreement', 'case', 'personal']),
+      mode: pick('mode', ['add', 'edit']),
+      assign: pick('assign', ['all', 'record']),
+      tags: pick('tags', ['some', 'none']),
+      endpoint: pick('endpoint', ['on', 'off']),
+      styling: pick('styling', ['theme', 'none']),
+      scheme: pick('scheme', ['light', 'dark'])
+    };
+
+    const RECORDS = {
+      personal: {},
+      case: {ModuleID: 'C217', ModuleOrdinal: '412'},
+      agreement: {ModuleID: 'A107', ModuleOrdinal: '123'}
+    };
+    const TASKS = {
+      personal: {Ordinal: '9851', Title: 'Renew my first aid certificate', Details: 'Book the refresher before the end of November.',
+        AssignToID: '104002', AssignToName: 'James Driscoll', DueDate: '2026-11-20T00:00:00', DueTime: '', HighPriority: false,
+        Completed: false, TagOrdinals: '2', SubtagOrdinals: '22', AddedBy: 'James Driscoll', AddedOn: '2026-10-02T09:12:00'},
+      case: {Ordinal: '9874', Title: 'Prepare Priya for the show cause meeting', Details: 'Go through the allegations letter with her.',
+        AssignToID: '104118', AssignToName: 'Sam Carter', DueDate: '2026-10-23T00:00:00', DueTime: '', HighPriority: true,
+        Completed: false, TagOrdinals: '3', SubtagOrdinals: '31', AddedBy: 'Sam Carter', AddedOn: '2026-10-15T14:03:00'},
+      agreement: {Ordinal: '9876', Title: 'Chase the response on casual conversion', Details: 'HR asked for our position by Wednesday.',
+        AssignToID: '104133', AssignToName: 'Morgan Lee', DueDate: '2026-10-22T00:00:00', DueTime: '10:00', HighPriority: true,
+        Completed: false, TagOrdinals: '5', SubtagOrdinals: '52', AddedBy: 'James Driscoll', AddedOn: '2026-10-14T11:40:00'}
+    };
+
+    // The placeholder, as the module's page would hold it.
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('data-us-form', 'task');
+    placeholder.setAttribute('data-module', state.module);
+    if (state.module === 'agreement') placeholder.setAttribute('data-assign', state.assign);
+    document.getElementById('tp-placeholder-slot').append(placeholder);
+    document.querySelector('[data-placeholder]').textContent = placeholder.outerHTML.replace(/" /g, '"\n     ');
+
+    // The address the popup would open with.
+    const address = new URLSearchParams({Type: 'task', ID: '104002', ...RECORDS[state.module]});
+    if (state.mode === 'edit') address.set('Ordinal', TASKS[state.module].Ordinal);
+    document.querySelector('[data-address]').textContent = '?' + address.toString().replace(/&/g, '\n &');
+    history.replaceState(null, '', location.pathname + '?' + new URLSearchParams({...state, ...Object.fromEntries(address)}));
+    document.getElementById('tp-title').textContent = state.mode === 'edit' ? 'Edit task' : 'Add task';
+
+    /* ── Sample IQAs (named for the preview only) ─────────────── */
+
+    window.UnionSuiteFormsConfig = {
+      forms: {
+        task: {
+          endpoint: state.endpoint === 'on' ? '/tasks/save' : '',
+          queries: {
+            task: '$/Preview/Task',
+            parentTags: '$/Preview/Task Tags',
+            childTags: '$/Preview/Task Subtags',
+            caseStaff: '$/Preview/Case Staff',
+            agreementStaff: '$/Preview/Agreement Staff',
+            allStaff: '$/Preview/All Staff'
+          }
+        }
+      }
+    };
+
+    const STAFF = {
+      all: [['104002', 'James Driscoll'], ['104118', 'Sam Carter'], ['104133', 'Morgan Lee'], ['104140', 'Chris Tan'],
+        ['104152', 'Alex Nguyen'], ['104167', 'Jo Whitfield']],
+      case: [['104002', 'James Driscoll'], ['104118', 'Sam Carter'], ['104140', 'Chris Tan']],
+      agreement: [['104002', 'James Driscoll'], ['104133', 'Morgan Lee'], ['104152', 'Alex Nguyen']]
+    };
+    const TAGS = [['1', 'Admin', 'personal'], ['2', 'Training', 'personal'], ['3', 'Representation', 'case'], ['4', 'Evidence', 'case'],
+      ['5', 'Bargaining', 'agreement'], ['6', 'Ballot', 'agreement'], ['7', 'Correspondence', '']];
+    const SUBTAGS = [['21', '2', 'Course booking'], ['22', '2', 'Certificate'], ['31', '3', 'Meeting prep'], ['32', '3', 'Hearing'],
+      ['51', '5', 'Log of claims'], ['52', '5', 'Offer response'], ['71', '7', 'Email'], ['72', '7', 'Letter']];
+
+    function rows(name, filters) {
+      switch (name) {
+        case '$/ZENTSO/Security/CloudToolzUrl': return [{Description: location.origin + '/preview-cloudtoolz'}];
+        case '$/Preview/Task': return [TASKS[filters.get('Module')]].filter(task => task && task.Ordinal === filters.get('Ordinal'));
+        case '$/Preview/All Staff': return STAFF.all.map(([ID, Name]) => ({ID, Name}));
+        case '$/Preview/Case Staff': return STAFF.case.map(([ID, Name]) => ({ID, Name}));
+        case '$/Preview/Agreement Staff': return STAFF.agreement.map(([ID, Name]) => ({ID, Name}));
+        case '$/Preview/Task Tags': {
+          if (state.tags === 'none') return [];
+          const module = filters.get('Module');
+          return TAGS.filter(([, , tagModule]) => !module || !tagModule || tagModule === module).map(([Ordinal, TagName]) => ({Ordinal, TagName}));
+        }
+        case '$/Preview/Task Subtags': {
+          const parents = (filters.get('ParentTag') || '').replace(/"/g, '').split(',');
+          return SUBTAGS.filter(([, parent]) => parents.includes(parent)).map(([Ordinal, ParentTagOrdinal, TagName]) => ({Ordinal, TagName, ParentTagOrdinal}));
+        }
+        default: return [];
+      }
+    }
+
+    /* ── iMIS and CloudToolz stubs ─────────────────────────────── */
+
+    const requests = [];
+    const logRequest = line => {
+      requests.push(line);
+      document.querySelector('[data-requests]').textContent = requests.join('\n');
+    };
+    const json = (body, status = 200) => new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
+    let nextOrdinal = 9901;
+    const realFetch = window.fetch.bind(window);
+
+    window.fetch = async (input, init = {}) => {
+      const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+      if (url.pathname === '/api/query') {
+        const filters = url.searchParams;
+        const name = filters.get('QueryName');
+        const extra = [...filters].filter(([key]) => !['QueryName', 'limit', 'offset'].includes(key)).map(([key, value]) => key + '=' + value);
+        logRequest('IQA ' + name + (extra.length ? ' (' + extra.join(', ') + ')' : ''));
+        await new Promise(resolve => setTimeout(resolve, 150));
+        const items = rows(name, filters);
+        return json({Items: {$values: items}, HasNext: false, TotalCount: items.length});
+      }
+      if (url.pathname === '/api/ZenTokens') return json({});
+      if (url.pathname.startsWith('/preview-cloudtoolz/')) {
+        const body = JSON.parse(init.body || '{}');
+        logRequest('CloudToolz POST ' + url.pathname.replace('/preview-cloudtoolz', ''));
+        await new Promise(resolve => setTimeout(resolve, 400));
+        const ordinal = body.Ordinal ? Number(body.Ordinal) : nextOrdinal++;
+        document.querySelector('[data-result]').textContent = 'Sent:\n' + JSON.stringify(body, null, 2) + '\n\nCloudToolz answers {"Ordinal": ' + ordinal + '}';
+        return json({Ordinal: ordinal});
+      }
+      return realFetch(input, init);
+    };
+
+    // The popup: closing shows the result instead.
+    window.GetRadWindow = () => ({
+      close: result => {
+        const shown = document.querySelector('[data-result]');
+        shown.textContent = (shown.textContent.startsWith('Sent:') ? shown.textContent + '\n\n' : '') +
+          'The popup closes with: ' + JSON.stringify(result);
+      }
+    });
+
+    /* ── Toolbar ───────────────────────────────────────────────── */
+
+    document.querySelectorAll('[data-control]').forEach(group => {
+      group.querySelectorAll('button').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.value === state[group.dataset.control]));
+      });
+      group.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button || button.dataset.value === state[group.dataset.control]) return;
+        state[group.dataset.control] = button.dataset.value;
+        location.search = '?' + new URLSearchParams(state);
+      });
+    });
+    document.querySelectorAll('[data-for-module]').forEach(group => { group.hidden = group.dataset.forModule !== state.module; });
+    document.querySelectorAll('[data-for-styling]').forEach(group => { group.hidden = group.dataset.forStyling !== state.styling; });
+    document.querySelectorAll('link[data-theme-css]').forEach(link => { link.disabled = state.styling !== 'theme'; });
+    document.documentElement.setAttribute('data-us-color-scheme', state.styling === 'theme' ? state.scheme : 'light');
+
+    /* ── The runtime, as a page would include it ───────────────── */
+
+    const runtime = document.createElement('script');
+    runtime.src = '../../../THeme/UnionSuite/Forms/UnionSuiteForms.js?v=preview';
+    document.head.append(runtime);
+  })();
+  </script>
+</body>
+</html>

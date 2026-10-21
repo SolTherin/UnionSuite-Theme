@@ -21,21 +21,23 @@
      Date-ISO (required)     yyyy-MM-dd; past meetings hide until "Show past meetings"
      Date-Month (required)   short month (Oct)
      Date-Day (required)     day of month (14)
-     MeetingType (required)  first half of the title (Employer meeting …)
-     Matter (required)       second half of the title
-     Date-Time               time text; blank hides it
+     MeetingTitle (required) the meeting's Title, or "MeetingType – Matter"
+                             when it has none: the Overview template's
+                             expression (Case-Meetings-Query-Template.html)
+     MeetingType, Matter     searched only; may be blank
+     Date-Time              time text; blank hides it
      Location                location or link text; blank hides it
      Attendees               who attends: "Priya Natarajan, Mary O'Conner,
                              HR Manager"; blank hides it
      Description             the agenda or notes, up to three lines; blank collapses
      Outcome                 what came of it, once held; blank collapses -->
-<div class="us-meeting us-meeting--full" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingType} {#query.Matter} {#query.Location} {#query.Attendees} {#query.Description} {#query.Outcome}">
+<div class="us-meeting us-meeting--full" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingTitle} {#query.MeetingType} {#query.Matter} {#query.Location} {#query.Attendees} {#query.Description} {#query.Outcome}">
   <span class="us-meeting__tile" aria-hidden="true">
     <span class="us-meeting__month">{#query.Date-Month}</span>
     <span class="us-meeting__day">{#query.Date-Day}</span>
   </span>
   <span class="us-meeting__copy">
-    <span class="us-meeting__title">{#query.MeetingType} – {#query.Matter}</span>
+    <span class="us-meeting__title">{#query.MeetingTitle}</span>
     <span class="us-meeting__meta">
       <span>{#query.Date-Time}</span>
       <span>{#query.Location}</span>

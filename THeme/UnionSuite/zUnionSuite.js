@@ -1985,10 +1985,16 @@ SOFTWARE.
    }
    field: {type, name, label, placeholder, required (its message), shownBy
    (a checkbox's name: shown, and required, only while it is ticked),
-   width ('grow'), options (select), search({term, wrapper}) and empty(term)
+   width ('grow'), showLabel (a bar text, date, time or select field: the
+   label shows beside it), options (select: labels, {value, label} pairs,
+   or function (context) resolving to either, read when the composer is
+   built), search({term, wrapper}) and empty(term), preload(context)
+   (combobox: starts reading its list as the composer opens)
    (combobox: resolves [{value, name, meta, disabled}]), avatars (combobox)}.
-   Types: textarea, text, date, time, select, checkbox, files, combobox. A
-   combobox's value is the option picked, never typed text. */
+   Types: textarea, text, date, time, select, checkbox, files, combobox,
+   multiselect. A combobox's value is the option picked, never typed text;
+   a multiselect's is the array of values picked (options as a select's,
+   read once as the composer opens; each pick a chip). */
 (function () {
   'use strict';
   if (window.UnionSuiteComposers) return;
@@ -2041,7 +2047,20 @@ SOFTWARE.
   }
 
   // ── Building ────────────────────────────────────────────────────
+  // showLabel puts the label beside a bar field, where its value alone
+  // would not say what it is (a date). The label carries shownBy, so the
+  // two show and hide together.
+  const LABELLED = ['text', 'date', 'time', 'select'];
+
   function fieldHtml(field, id, main) {
+    const control = controlHtml(field, id, main);
+    if (!field.showLabel || main || !LABELLED.includes(field.type)) return control;
+    const shown = field.shownBy ? ` data-shown-by="${escape(field.shownBy)}" hidden` : '';
+    return `<label class="us-composer__labelled" for="${id}"${shown}>` +
+      `<span class="us-composer__caption">${escape(field.label)}</span>${control}</label>`;
+  }
+
+  function controlHtml(field, id, main) {
     const classes = 'us-composer__field us-composer__field--' + field.type + (field.width === 'grow' ? ' us-composer__field--grow' : '');
     const shown = field.shownBy ? ` data-shown-by="${escape(field.shownBy)}" hidden` : '';
     const attributes = `id="${id}" data-name="${escape(field.name)}" aria-label="${escape(field.label)}"${shown}` +
@@ -2051,7 +2070,7 @@ SOFTWARE.
       case 'textarea':
         return `<textarea class="${classes + mainClass}" ${attributes} rows="3"></textarea>`;
       case 'select':
-        return `<select class="${classes + mainClass}" ${attributes}>${field.options.map(option => `<option>${escape(option)}</option>`).join('')}</select>`;
+        return `<select class="${classes + mainClass}" ${attributes}>${optionsHtml(field.options)}</select>`;
       case 'checkbox':
         return `<label class="us-composer__check"><input type="checkbox" class="${classes}" id="${id}" data-name="${escape(field.name)}"> ${escape(field.label)}</label>`;
       case 'files':
@@ -2064,8 +2083,37 @@ SOFTWARE.
         return `<span class="us-composer__combo${mainClass}">` +
           `<input type="text" class="${classes}" ${attributes} role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-list" autocomplete="off">` +
           `<ul class="us-composer__options" id="${id}-list" role="listbox" aria-label="${escape(field.label)}" hidden></ul></span>`;
+      // Several picked from a list: each pick is a chip before the input.
+      case 'multiselect':
+        return '<span class="us-composer__combo us-composer__multi">' +
+          `<input type="text" class="${classes}" ${attributes} role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-list" autocomplete="off">` +
+          `<ul class="us-composer__options" id="${id}-list" role="listbox" aria-label="${escape(field.label)}" aria-multiselectable="true" hidden></ul></span>`;
       default:
         return `<input type="${field.type}" class="${classes + mainClass}" ${attributes} autocomplete="off">`;
+    }
+  }
+
+  // A select's options: labels (each its own value), {value, label} pairs,
+  // or a function that resolves to either (a value list read from an IQA),
+  // which shows Loading… until loadOptions fills it.
+  function optionsHtml(options) {
+    if (typeof options === 'function') return '<option value="">Loading…</option>';
+    return (options || []).map(option => option && typeof option === 'object'
+      ? `<option value="${escape(option.value)}">${escape(option.label)}</option>`
+      : `<option>${escape(option)}</option>`).join('');
+  }
+
+  // The select waits, disabled, for its options. A failure says so in the
+  // select, which then saves a blank value.
+  async function loadOptions(composer, field, context) {
+    const select = fieldNamed(composer, field.name);
+    select.disabled = true;
+    try {
+      select.innerHTML = optionsHtml(await field.options(context));
+      select.disabled = false;
+    } catch (error) {
+      select.innerHTML = '<option value="">Could not load the list</option>';
+      console.warn('[US-INLINE-COMPOSER]', field.name, error?.message);
     }
   }
 
@@ -2087,6 +2135,15 @@ SOFTWARE.
       `<button type="button" class="TextButton PrimaryButton us-composer__save">${escape(config.save)}</button>` +
       '</div>';
     contexts.set(composer, context || {});
+    fieldsOf(spec).filter(field => field.type === 'select' && typeof field.options === 'function')
+      .forEach(field => loadOptions(composer, field, context || {}));
+    // A combobox's or multiselect's list starts loading as the composer
+    // opens, so it is ready by the time the field is clicked.
+    fieldsOf(spec).filter(field => field.type === 'multiselect').forEach(field => void choicesFor(fieldNamed(composer, field.name)).catch(() => {}));
+    fieldsOf(spec).filter(field => typeof field.preload === 'function').forEach(field => {
+      Promise.resolve().then(() => field.preload(context || {}))
+        .catch(error => console.warn('[US-INLINE-COMPOSER]', field.name, error?.message));
+    });
     return composer;
   }
 
@@ -2156,8 +2213,9 @@ SOFTWARE.
       else if (field.tagName === 'SELECT') field.selectedIndex = 0;
       else field.value = '';
       delete field.dataset.value;
-      if (field.dataset.shownBy) field.hidden = true;
     });
+    composer.querySelectorAll('.us-composer__chip').forEach(chip => chip.remove());
+    composer.querySelectorAll('[data-shown-by]').forEach(element => { element.hidden = true; });
     composer.querySelector('.us-composer__message').textContent = '';
     withdraw(composer);
   }
@@ -2170,6 +2228,7 @@ SOFTWARE.
       if (field.type === 'checkbox') values[name] = field.checked;
       else if (field.hidden) values[name] = '';
       else if (field.type === 'file') values[name] = [...field.files];
+      else if (field.classList.contains('us-composer__field--multiselect')) values[name] = chipsOf(field).map(chip => chip.dataset.value);
       else if (field.getAttribute('role') === 'combobox') values[name] = field.dataset.value || '';
       else values[name] = field.value.trim();
     });
@@ -2568,25 +2627,86 @@ SOFTWARE.
   // room below and more above, as a native dropdown does.
   const listOf = input => document.getElementById(input.getAttribute('aria-controls'));
   const fieldSpec = input => fieldsOf(specFor(input.closest('.us-composer'))).find(field => field.name === input.dataset.name);
+  const isMulti = input => input.classList.contains('us-composer__field--multiselect');
+  const chipsOf = input => [...input.parentElement.querySelectorAll(':scope > .us-composer__chip')];
+  const choices = new WeakMap();
+
+  // A multiselect's options, read once per composer from its options (an
+  // array, or a function of the context resolving to one): labels, or
+  // {value, label} pairs. A failed read is tried again at the next search.
+  function choicesFor(input) {
+    if (!choices.has(input)) {
+      const field = fieldSpec(input);
+      const context = contexts.get(input.closest('.us-composer')) || {};
+      const loading = Promise.resolve()
+        .then(() => typeof field.options === 'function' ? field.options(context) : field.options || [])
+        .then(list => list.map(option => option && typeof option === 'object'
+          ? {value: String(option.value), label: String(option.label)}
+          : {value: String(option), label: String(option)}));
+      loading.catch(() => choices.delete(input));
+      choices.set(input, loading);
+    }
+    return choices.get(input);
+  }
+
+  // The options not yet picked whose label holds every word typed.
+  async function multiOptions(input, term) {
+    const picked = new Set(chipsOf(input).map(chip => chip.dataset.value));
+    const words = term.toLowerCase().split(/\s+/).filter(Boolean);
+    return (await choicesFor(input))
+      .filter(option => !picked.has(option.value) && words.every(word => option.label.toLowerCase().includes(word)))
+      .map(option => ({value: option.value, name: option.label}));
+  }
+
+  function chipNode(value, label) {
+    const chip = document.createElement('span');
+    chip.className = 'us-badge us-composer__chip';
+    chip.dataset.value = value;
+    chip.append(label);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'us-composer__chip-remove';
+    remove.setAttribute('aria-label', 'Remove ' + label);
+    remove.innerHTML = '<i class="ti ti-x" aria-hidden="true"></i>';
+    chip.append(remove);
+    return chip;
+  }
 
   function searchSoon(input) {
     clearTimeout(searches.get(input));
     searches.set(input, setTimeout(() => void search(input), 150));
   }
 
+  // A search that takes a moment (the first read of a list) shows a
+  // spinner in the open list until it answers.
   async function search(input) {
     const field = fieldSpec(input);
     const term = input.value.trim();
+    const current = () => input.value.trim() === term && input.isConnected;
+    const loading = setTimeout(() => { if (current()) showLoading(input); }, 120);
     let options;
     try {
-      options = await field.search({term, wrapper: sectionOf(input)});
+      options = isMulti(input) ? await multiOptions(input, term) : await field.search({term, wrapper: sectionOf(input)});
     } catch (error) {
       console.warn('[US-INLINE-COMPOSER] Search failed:', error?.message);
-      showOptions(input, [], 'The list could not load.');
+      if (current()) showOptions(input, [], 'The list could not load.');
       return;
+    } finally {
+      clearTimeout(loading);
     }
-    if (input.value.trim() !== term || !input.isConnected) return;
+    if (!current()) return;
     showOptions(input, options || [], field.empty ? field.empty(term) : 'No matches.');
+  }
+
+  function showLoading(input) {
+    const list = listOf(input);
+    const item = document.createElement('li');
+    item.className = 'us-composer__option is-empty is-loading';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-disabled', 'true');
+    item.innerHTML = '<span class="us-button-spinner" aria-hidden="true"></span>Loading…';
+    list.replaceChildren(item);
+    reveal(input, list);
   }
 
   function showOptions(input, options, emptyText) {
@@ -2626,6 +2746,10 @@ SOFTWARE.
       item.append(name, meta);
       list.append(item);
     });
+    reveal(input, list);
+  }
+
+  function reveal(input, list) {
     list.hidden = false;
     list.classList.remove('is-above');
     const box = list.parentElement.getBoundingClientRect();
@@ -2643,11 +2767,18 @@ SOFTWARE.
     });
   }
 
+  // A multiselect pick becomes a chip, and the list stays open for the next.
   function choose(input, option) {
     if (!option || option.getAttribute('aria-disabled') === 'true') return;
+    input.closest('.us-composer').querySelector('.us-composer__message').textContent = '';
+    if (isMulti(input)) {
+      input.before(chipNode(option.dataset.value, option.dataset.name));
+      input.value = '';
+      void search(input);
+      return;
+    }
     input.value = option.dataset.name;
     input.dataset.value = option.dataset.value;
-    input.closest('.us-composer').querySelector('.us-composer__message').textContent = '';
     closeOptions(input.parentElement);
   }
 
@@ -2677,11 +2808,28 @@ SOFTWARE.
       closeOptions(input.parentElement);
       return true;
     }
+    // In a multiselect, Enter picks the highlighted option or else the first,
+    // and never saves while something is typed; Backspace in an empty field
+    // takes off the last chip.
     if (event.key === 'Enter' && shown) {
-      const active = document.getElementById(input.getAttribute('aria-activedescendant') || '');
+      const first = isMulti(input) && input.value.trim() ? listOf(input).querySelector('.us-composer__option:not([aria-disabled="true"])') : null;
+      const active = document.getElementById(input.getAttribute('aria-activedescendant') || '') || first;
       if (active) {
         event.preventDefault();
         choose(input, active);
+        return true;
+      }
+    }
+    if (event.key === 'Enter' && isMulti(input) && input.value.trim()) {
+      event.preventDefault();
+      return true;
+    }
+    if (event.key === 'Backspace' && isMulti(input) && !input.value) {
+      const last = chipsOf(input).pop();
+      if (last) {
+        event.preventDefault();
+        last.remove();
+        if (shown) void search(input);
         return true;
       }
     }
@@ -2695,6 +2843,14 @@ SOFTWARE.
   document.addEventListener('click', event => {
     const composer = event.target.closest('.us-composer');
     if (!composer) return;
+    const unchip = event.target.closest('.us-composer__chip-remove');
+    if (unchip) {
+      const input = unchip.closest('.us-composer__multi').querySelector('.us-composer__field');
+      unchip.parentElement.remove();
+      input.focus();
+      if (!listOf(input).hidden) void search(input);
+      return;
+    }
     const remove = event.target.closest('.us-composer__remove');
     if (remove) {
       const input = composer.querySelector('.us-composer__field--files');
@@ -2771,9 +2927,18 @@ SOFTWARE.
     choose(option.closest('.us-composer__combo').querySelector('input'), option);
   });
 
-  document.addEventListener('focusin', event => {
-    const input = event.target.closest?.('.us-composer__field[role="combobox"]');
-    if (input && !input.dataset.value) void search(input);
+  // The list opens when the field is clicked, typed in or arrowed down,
+  // not when the composer focuses it on opening or after a save (owner,
+  // 21 October 2026).
+  // A click anywhere in a multiselect's box (not a chip's ×) is a click in
+  // its field.
+  document.addEventListener('click', event => {
+    const multi = event.target.closest?.('.us-composer__multi');
+    const input = event.target.closest?.('.us-composer__field[role="combobox"]') ||
+      (multi && !event.target.closest('.us-composer__chip-remove') ? multi.querySelector('.us-composer__field') : null);
+    if (!input) return;
+    if (multi) input.focus();
+    if (listOf(input).hidden && !input.dataset.value) void search(input);
   });
 
   document.addEventListener('focusout', event => {
@@ -3374,11 +3539,13 @@ SOFTWARE.
       status.setAttribute('aria-atomic', 'true');
       set.after(status);
       // The panel opens or stays closed as it was last left (filter
-      // disclosure memory).
+      // disclosure memory). With no memory it starts closed, or open with
+      // us-query-search-open (owner, 9 October 2026: the case Activity tab's
+      // lists start with their filters showing).
       var remembered = readPanelMemory(entry.wrapper);
       var state = querySearchStates.get(entry.wrapper) || {
         query: '',
-        collapsed: remembered && typeof remembered.collapsed === 'boolean' ? remembered.collapsed : true,
+        collapsed: remembered && typeof remembered.collapsed === 'boolean' ? remembered.collapsed : !entry.wrapper.classList.contains('us-query-search-open'),
         showCompleted: false
       };
       if (!withSearch) state.query = '';
@@ -8877,8 +9044,10 @@ SOFTWARE.
      yet resolved; owner, 3 October 2026).
    Tone and Alert are reserved and are never group names.
    Values: blank shows an em dash; ISO dates read "1 Jan 2026"; true/false
-   Yes/No; a web address or email becomes a link. A link or a value longer
-   than 60 characters takes the full row. Values are shown as plain text.
+   Yes/No; a web address or email becomes a link. A value longer than 60
+   characters takes the full row; a shorter link sits beside the other
+   fields (Email beside Mobile; owner, 21 October 2026). Values are shown
+   as plain text.
    Layout: add us-field-groups--single for one field per line (Key dates).
    Filter: data-us-fields-filter names the IQA filter. Its value is
    data-us-fields-value, or else the page URL parameter of the same name. */
@@ -8999,7 +9168,7 @@ SOFTWARE.
   function fieldNode(field) {
     const item = document.createElement('div');
     item.className = 'us-fields__field';
-    if (field.value.href || field.value.text.length > WIDE_LENGTH) item.classList.add('us-fields__field--wide');
+    if (field.value.text.length > WIDE_LENGTH) item.classList.add('us-fields__field--wide');
     const term = document.createElement('dt');
     term.textContent = field.label;
     const definition = document.createElement('dd');
@@ -9007,7 +9176,13 @@ SOFTWARE.
     if (field.value.href) {
       const link = document.createElement('a');
       link.href = field.value.href;
-      link.textContent = field.value.text;
+      // An email beside other fields wraps after its @ rather than mid-word.
+      const at = field.value.href.startsWith('mailto:') ? field.value.text.indexOf('@') + 1 : 0;
+      if (at > 0) {
+        link.append(field.value.text.slice(0, at), document.createElement('wbr'), field.value.text.slice(at));
+      } else {
+        link.textContent = field.value.text;
+      }
       if (!field.value.href.startsWith('mailto:')) {
         link.target = '_blank';
         link.rel = 'noopener';
@@ -11647,7 +11822,9 @@ SOFTWARE.
    any click on the page reaches its button, so Send and Preview always
    post a tagged subject. With no parameter, or one that is not an ID, the
    page stays native. The CSS hides Save and Save As: a saved template would
-   carry this agreement's tag into other sends. */
+   carry this agreement's tag into other sends. The case send page does the
+   same with us-case-comms: CaseID=C217 gives "Case C217 – <subject>"
+   (owner, 21 October 2026). */
 (function () {
   'use strict';
 
@@ -11660,7 +11837,10 @@ SOFTWARE.
   // the word before its value in the tag, and the label the earlier
   // bracketed tags used (still recognised on a template's subject).
   const TAGS = {
-    'us-agreement-comms': { parameter: 'AgreementID', label: 'Agreement', bracketLabel: 'Agreement ID' }
+    'us-agreement-comms': { parameter: 'AgreementID', label: 'Agreement', bracketLabel: 'Agreement ID' },
+    // The case send page (Send-Email-Parties.aspx; owner, 21 October 2026):
+    // "Case C217 – <subject>".
+    'us-case-comms': { parameter: 'CaseID', label: 'Case', bracketLabel: 'Case ID' }
   };
   const SEPARATOR = ' – ';
   const SUBJECT = 'input[id$="_CommunicationCreatorHeader_TxtSubject"]';
@@ -11819,14 +11999,19 @@ SOFTWARE.
    2026): "Adding this email to agreement A107…" with a spinner, then
    "Added to agreement A107's communications.", or a warning that the email
    went but is not on the agreement. It slides in and its colours ease from
-   one state to the next. A scheduled send
+   one state to the next. The case send page (us-case-comms, owner
+   21 October 2026) works the same way: CaseNum in the address, a row in
+   i4u_UT_Cases_Communications with CaseOrdinal, Audience Parties (the
+   default) or Staff, and "Adding this email to case C217…". A scheduled send
    shows a different message and is left to the send hook (TODO.md). */
 (function () {
   'use strict';
 
   if (window.UnionSuiteCommsLog) return;
 
-  // One entry per page class. Values are core UnionSuite names.
+  // One entry per page class. Values are core UnionSuite names. record names
+  // the record in the status line ("case C217"), from the address's
+  // idParameter, else the ordinal.
   const PAGES = {
     'us-agreement-comms': {
       query: '$/_i4u_/Core/CA/v2/API - Agreement Email Logs',
@@ -11834,8 +12019,28 @@ SOFTWARE.
       entity: 'i4u_UT_CA_Communications',
       recordField: 'AgreementOrdinal',
       recordParameter: 'AgreementNum',
+      record: 'agreement',
+      idParameter: 'AgreementID',
       audiences: ['Staff', 'Members'],
+      defaultAudience: 'Staff',
       membersClass: 'us-agreement-comms--members',
+      types: ['Email', 'SMS'],
+      defaultType: 'Email'
+    },
+    // The case send page (owner, 21 October 2026): the same link table
+    // schema with CaseOrdinal. The email logs IQA only matches the
+    // communication log on subject, so the agreement's serves cases too.
+    'us-case-comms': {
+      query: '$/_i4u_/Core/CA/v2/API - Agreement Email Logs',
+      subjectFilter: 'Subject',
+      entity: 'i4u_UT_Cases_Communications',
+      recordField: 'CaseOrdinal',
+      recordParameter: 'CaseNum',
+      record: 'case',
+      idParameter: 'CaseID',
+      audiences: ['Parties', 'Staff'],
+      defaultAudience: 'Parties',
+      membersClass: '',
       types: ['Email', 'SMS'],
       defaultType: 'Email'
     }
@@ -11892,12 +12097,12 @@ SOFTWARE.
       } catch (_) { /* no queryparams */ }
     }
     const pick = (value, allowed) => allowed.find(option => option.toLowerCase() === String(value || '').trim().toLowerCase());
-    const members = owner.classList.contains(config.membersClass) || !!owner.closest('.' + config.membersClass);
+    const members = Boolean(config.membersClass) && (owner.classList.contains(config.membersClass) || !!owner.closest('.' + config.membersClass));
     return {
       record: String(record || '').trim(),
       subject: String(owner.querySelector(SUBJECT)?.value || '').trim(),
       sender: String(clientContext().loggedInPartyId || ''),
-      audience: page.has('Audience') ? pick(page.get('Audience'), config.audiences) : (members ? 'Members' : 'Staff'),
+      audience: page.has('Audience') ? pick(page.get('Audience'), config.audiences) : (members ? 'Members' : config.defaultAudience),
       type: page.has('CommunicationType') ? pick(page.get('CommunicationType'), config.types) : config.defaultType
     };
   }
@@ -12072,16 +12277,17 @@ SOFTWARE.
     running = true;
     const {owner, config} = entry;
     const details = sendDetails(owner, config);
-    const agreement = 'agreement ' + (new URLSearchParams(location.search).get('AgreementID') || details.record);
+    // "agreement A107", "case C217": the record the email is added to.
+    const target = config.record + ' ' + (new URLSearchParams(location.search).get(config.idParameter) || details.record);
     // Set when the spinner shows; only then does the next state wait for it.
     let busySince = 0;
     const settle = () => wait(busySince ? Math.max(0, MIN_BUSY - (Date.now() - busySince)) : 0);
     try {
-      if (!/^\d+$/.test(details.record)) throw new Error('No agreement number (' + config.recordParameter + ') in the page address.');
+      if (!/^\d+$/.test(details.record)) throw new Error('No ' + config.record + ' number (' + config.recordParameter + ') in the page address.');
       if (!details.subject) throw new Error('No subject on the page.');
       if (!details.audience || !details.type) throw new Error('Audience or CommunicationType in the address is not one of ' + config.audiences.concat(config.types).join(', ') + '.');
       holdLinks(true);
-      showStatus(owner, 'AsiInformation', 'Adding this email to ' + agreement + '…', true);
+      showStatus(owner, 'AsiInformation', 'Adding this email to ' + target + '…', true);
       busySince = Date.now();
       const key = await findLogKey(config, details);
       if (!key) throw new Error('The communication log has no row for "' + details.subject + '" from you yet.');
@@ -12094,12 +12300,12 @@ SOFTWARE.
         }
       }
       await settle();
-      showStatus(owner, 'AsiSuccess', 'Added to ' + agreement + '\'s communications.');
+      showStatus(owner, 'AsiSuccess', 'Added to ' + target + '\'s communications.');
       console.info('[UnionSuiteCommsLog] Linked ' + key + ' to ' + config.recordField + ' ' + details.record + ' (' + details.audience + ', ' + details.type + ').');
     } catch (error) {
       console.error('[UnionSuiteCommsLog]', error);
       await settle();
-      showStatus(owner, 'AsiWarning', 'The email was sent, but it could not be added to ' + agreement + '. ' + error.message);
+      showStatus(owner, 'AsiWarning', 'The email was sent, but it could not be added to ' + target + '. ' + error.message);
     } finally {
       holdLinks(false);
       running = false;
@@ -16581,7 +16787,11 @@ SOFTWARE.
    (us-task__tags, a comma-separated data-us-task-tags) show the first tag
    and a "+N" button for the rest, which, like an open note, shows them all.
    Rows are rechecked when they arrive and when their list changes width, so
-   a note that only overflows at a narrow width still gets its link. */
+   a note that only overflows at a narrow width still gets its link.
+   An untitled task (TaskTitle blank: legacy notes, owner 20 October 2026)
+   shows its note in the title's place, up to two lines (the CSS). A compact
+   one keeps its details button only while the note is cut short
+   (data-us-task-clipped), and its controls are named from the note. */
 (function () {
   'use strict';
   if (window.UnionSuiteTaskNotes) return;
@@ -16590,12 +16800,36 @@ SOFTWARE.
   const excluded = element => !!element.closest('.us-report-no-styling');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const NAME_LENGTH = 60;
   let noteIds = 0;
 
   function noteOf(row) {
     const note = row.querySelector('.us-task__note');
     if (note && !note.id) note.id = 'us-task-note-' + (++noteIds);
     return note;
+  }
+
+  // The same test as the CSS (:empty), so the two never disagree.
+  const untitled = row => row.querySelector('.us-task__title')?.matches(':empty') === true;
+
+  // What the row's controls are named after: the title, or the start of the
+  // note on an untitled task.
+  function nameOf(row) {
+    const title = row.querySelector('.us-task__title')?.textContent.trim();
+    if (title) return title;
+    const note = (row.querySelector('.us-task__note')?.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!note) return 'task';
+    return note.length > NAME_LENGTH ? note.slice(0, NAME_LENGTH).trimEnd() + '…' : note;
+  }
+
+  // The template names the tick "Complete task: {#query.TaskTitle}", which
+  // ends at the colon when the title is blank: finish it from the note.
+  function nameUntitled(row) {
+    if (!untitled(row)) return;
+    row.querySelectorAll('.us-task__check, .us-task__details').forEach(control => {
+      const label = control.getAttribute('aria-label') || '';
+      if (/:\s*$/.test(label)) control.setAttribute('aria-label', label.trim() + ' ' + nameOf(row));
+    });
   }
 
   // Whether a row is meant to be open: during a closing slide its attribute
@@ -16621,12 +16855,14 @@ SOFTWARE.
       row.toggleAttribute('data-us-task-expanded', open);
       return;
     }
-    const compact = row.classList.contains('us-task--compact');
+    // A compact note is out of sight when closed, so it fades as it slides;
+    // a full or untitled row's note stays in view, clamped.
+    const hides = row.classList.contains('us-task--compact') && !untitled(row);
     const from = noteHeight(row, note, !open);
     const to = noteHeight(row, note, open);
     row.setAttribute('data-us-task-expanded', '');
     note.style.overflow = 'hidden';
-    const fade = compact ? [open ? 0 : 1, open ? 1 : 0] : [1, 1];
+    const fade = hides ? [open ? 0 : 1, open ? 1 : 0] : [1, 1];
     const slide = note.animate([
       {height: from + 'px', opacity: fade[0]},
       {height: to + 'px', opacity: fade[1]}
@@ -16682,7 +16918,7 @@ SOFTWARE.
     }
     const details = row.querySelector('.us-task__details');
     if (details) {
-      const title = row.querySelector('.us-task__title')?.textContent.trim() || 'task';
+      const title = nameOf(row);
       details.setAttribute('aria-expanded', String(open));
       details.setAttribute('aria-label', (open ? 'Hide details: ' : 'Show details: ') + title);
       details.title = open ? 'Hide details' : 'Show details';
@@ -16713,6 +16949,11 @@ SOFTWARE.
     const note = noteOf(row);
     const details = row.querySelector('.us-task__details');
     if (note && details) details.setAttribute('aria-controls', note.id);
+    // An open note is unclamped, so it is measured only while closed; the
+    // attribute stays as it was while the note is open.
+    if (!note || isOpen(row)) return;
+    const clipped = untitled(row) && note.scrollHeight > note.clientHeight + 1;
+    row.toggleAttribute('data-us-task-clipped', clipped);
   }
 
   const sizes = window.ResizeObserver ? new ResizeObserver(() => schedule()) : null;
@@ -16722,6 +16963,7 @@ SOFTWARE.
       if (excluded(row)) return;
       if (row.classList.contains('us-task--full')) syncFull(row);
       else syncCompact(row);
+      nameUntitled(row);
       renderTags(row);
       const list = row.closest('.QueryTemplateSet');
       if (list && sizes) sizes.observe(list);
@@ -16870,10 +17112,31 @@ SOFTWARE.
    Lists opt in through the table below. The placeholder shows only while
    the toggle is off, no search text is entered and every row on the page
    is marked completed (for meetings: past). Its button presses the panel's
-   own toggle, so the theme keeps the state. */
+   own toggle, so the theme keeps the state. It slides in and out alongside
+   the rows (owner, 20 October 2026: it "just disappears"), except when a
+   list first draws, where it is simply there. */
 (function () {
   'use strict';
   if (window.UnionSuitePastEmpty) return;
+
+  // The completed rows' own slide (US-QUERY-SEARCH) takes 300ms.
+  const SLIDE = 300;
+  const drawn = new WeakSet();
+  const targets = new WeakMap();
+
+  // Folds the placeholder to the target state once: updates run on every
+  // mutation, and restarting a fold would slow it down each time.
+  function slide(empty, open, animate) {
+    if (targets.get(empty) === open) return;
+    targets.set(empty, open);
+    const fold = window.UnionSuiteRecordCards?.fold;
+    let done = Promise.resolve();
+    if (animate && fold) done = fold(empty, open, SLIDE);
+    else empty.hidden = !open;
+    done.then(() => {
+      if (!open && targets.get(empty) === false) empty.remove();
+    });
+  }
 
   const lists = [
     {
@@ -16928,16 +17191,22 @@ SOFTWARE.
     const query = wrapper.querySelector('.us-query-search-controls input')?.value.trim();
     const allPast = rows.length > 0 && rows.every(row => row.hasAttribute('data-us-task-completed-row'));
     const show = !!toggle && toggle.getAttribute('aria-pressed') !== 'true' && !query && allPast;
+    // A list seen before has changed in place; a new one (first draw, or a
+    // refresh that redrew the panel) shows its placeholder as it is.
+    const animate = !!set && drawn.has(set);
+    if (set) drawn.add(set);
 
     if (!show) {
-      empty?.remove();
+      if (empty) slide(empty, false, animate);
       wrapper.removeAttribute('data-us-past-empty');
       return;
     }
     if (!empty) {
       empty = build(config, wrapper);
+      empty.hidden = true;
       set.after(empty);
     }
+    slide(empty, true, animate);
     const text = config.hidden(rows.length);
     const line = empty.querySelector('.us-past-empty__text');
     // Write only on change: a text change would reschedule this update.
@@ -16975,7 +17244,7 @@ SOFTWARE.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
   else schedule();
 
-  window.UnionSuitePastEmpty = Object.freeze({refresh: schedule, version: '1.0'});
+  window.UnionSuitePastEmpty = Object.freeze({refresh: schedule, version: '1.1'});
 })();
 /* US-PAST-EMPTY:END */
 
@@ -18249,6 +18518,171 @@ SOFTWARE.
   window.UnionSuiteAttachments = Object.freeze({edit, version: '1.0'});
 })();
 /* US-ATTACHMENTS:END */
+
+/* US-RESTRICTED-ATTACHMENTS:START — sensitive documents (owner, 9 October
+   2026: "sometimes files are restricted as well"; promoted from the case
+   page candidates, 20 October 2026).
+   A us-attachment row whose IQA returns AccessClass "restricted"
+   (data-us-attachment-access) keeps its View, Download and Edit hidden; an
+   Unlock button with the restricted notes' padlock stands at the right in
+   their place. Pressing it asks the check whether this user may open the
+   file. Granted: the padlock opens and turns green, the button closes up
+   around it, and the padlock slides to the start of the actions while they
+   fade in after it; the open padlock stays, so the row still says the file
+   is restricted. Refused: the button shakes and the row says so for a few
+   seconds. Reduced motion swaps at once. The check is per row and per page
+   load, and is a hook, as the restricted note loader is:
+     UnionSuiteRestrictedAttachments.defineCheck(async ({ordinal, row}) => {})
+   It resolves when access is granted, or throws an error with denied: true
+   when the user lacks the permission; any other error reads as a failed
+   check. The ordinal is the row's data-ordinal. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteRestrictedAttachments) return;
+
+  const ROWS = '.us-attachment[data-us-attachment-access="restricted" i]:not([data-us-attachment-unlocked])';
+  const SVG = 'http://www.w3.org/2000/svg';
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const MESSAGE_MS = 4000;
+  const still = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let queued = false;
+  let check = null;
+
+  function padlock() {
+    const svg = document.createElementNS(SVG, 'svg');
+    svg.setAttribute('class', 'us-attachment__lock');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const shackle = document.createElementNS(SVG, 'path');
+    shackle.setAttribute('class', 'us-attachment__shackle');
+    shackle.setAttribute('d', 'M8 11V7a4 4 0 0 1 8 0v4');
+    const body = document.createElementNS(SVG, 'rect');
+    Object.entries({x: 5, y: 11, width: 14, height: 10, rx: 2}).forEach(([name, value]) => body.setAttribute(name, value));
+    svg.append(shackle, body);
+    return svg;
+  }
+
+  function enhance(row) {
+    const actions = row.querySelector('.us-attachment__actions');
+    if (!actions || actions.querySelector(':scope > .us-attachment__unlock')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'us-attachment__unlock';
+    button.title = 'Restricted attachment: check access to open it';
+    const label = document.createElement('span');
+    label.className = 'us-attachment__unlock-label';
+    label.textContent = 'Unlock';
+    button.append(padlock(), label);
+    actions.append(button);
+  }
+
+  // Refused: the button shakes (again on a repeat press) and the reason
+  // shows beside it, to its left (owner, 9 October 2026), fading out after
+  // MESSAGE_MS.
+  const timers = new WeakMap();
+  function deny(row, button, text) {
+    clearTimeout(timers.get(row));
+    button.parentElement.querySelector(':scope > .us-attachment__unlock-message')?.remove();
+    button.classList.remove('is-denied');
+    void button.offsetWidth;
+    button.classList.add('is-denied');
+    const message = document.createElement('span');
+    message.className = 'us-attachment__unlock-message';
+    message.setAttribute('role', 'status');
+    message.textContent = text;
+    button.before(message);
+    timers.set(row, setTimeout(() => {
+      message.setAttribute('data-us-leaving', '');
+      timers.set(row, setTimeout(() => {
+        message.remove();
+        button.classList.remove('is-denied');
+      }, still() ? 0 : 180));
+    }, MESSAGE_MS));
+  }
+
+  // Granted: open the padlock, then let the button close round it while it
+  // slides to the start of the actions and the actions fade in after it.
+  async function open(row, button) {
+    const lock = button.querySelector('.us-attachment__lock');
+    const label = button.querySelector('.us-attachment__unlock-label');
+    const actions = row.querySelector('.us-attachment__actions');
+    button.classList.add('is-unlocked');
+    if (!still()) {
+      await new Promise(resolve => setTimeout(resolve, 240));
+      await label.animate([{opacity: 1}, {opacity: 0}], {duration: 120, easing: EASE, fill: 'forwards'}).finished;
+    }
+    const from = lock.getBoundingClientRect();
+    // The open padlock stays, as a mark, ahead of the actions.
+    const mark = document.createElement('span');
+    mark.className = 'us-attachment__lock-mark';
+    mark.setAttribute('role', 'img');
+    mark.setAttribute('aria-label', 'Restricted attachment, unlocked');
+    mark.title = 'Restricted attachment, unlocked';
+    mark.append(lock);
+    const focused = document.activeElement === button;
+    button.replaceWith(mark);
+    actions.prepend(mark);
+    row.setAttribute('data-us-attachment-unlocked', '');
+    const shown = [...actions.children].filter(child => child !== mark && child.getClientRects().length);
+    if (focused) shown[0]?.focus({preventScroll: true});
+    if (still()) return;
+    const to = lock.getBoundingClientRect();
+    mark.animate([{transform: `translateX(${from.left - to.left}px)`}, {transform: 'none'}], {duration: 240, easing: EASE});
+    shown.forEach((child, index) => child.animate(
+      [{opacity: 0, transform: 'translateX(8px)'}, {opacity: 1, transform: 'none'}],
+      {duration: 200, delay: 80 + index * 40, easing: EASE, fill: 'backwards'}
+    ));
+  }
+
+  async function unlock(button) {
+    const row = button.closest('.us-attachment');
+    if (!row || button.getAttribute('aria-busy') === 'true') return;
+    const ordinal = (row.getAttribute('data-ordinal') || '').trim();
+    button.setAttribute('aria-busy', 'true');
+    try {
+      if (!check) throw new Error('No restricted attachment check is defined (UnionSuiteRestrictedAttachments.defineCheck).');
+      if (!/^\d+$/.test(ordinal)) throw new Error('The file has no ordinal.');
+      await check({ordinal, row});
+      button.removeAttribute('aria-busy');
+      return open(row, button);
+    } catch (error) {
+      button.removeAttribute('aria-busy');
+      if (error?.denied) return deny(row, button, 'You don’t have permission to open this attachment.');
+      console.warn('UnionSuite restricted attachments:', error?.message);
+      deny(row, button, 'The attachment could not be checked. Try again.');
+    }
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('.us-attachment .us-attachment__unlock');
+    if (button) void unlock(button);
+  });
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(ROWS).forEach(enhance);
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    setTimeout(refresh, 0);
+  }
+
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList')) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true});
+
+  window.UnionSuiteRestrictedAttachments = Object.freeze({
+    refresh,
+    defineCheck: fn => { check = typeof fn === 'function' ? fn : null; }
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh);
+  else refresh();
+})();
+/* US-RESTRICTED-ATTACHMENTS:END */
 /* US-RECORD-CARDS:START — expand and collapse record cards.
    One delegated handler for every .us-record, whether a Query Template
    rendered it or US-ACTIVITY-FEED did, so templates need no script. The
@@ -18709,6 +19143,11 @@ SOFTWARE.
                                     -history-tab make it a section link
                                     (data-us-section-link, data-us-cco-tab)
    The type chosen in a section is kept when a refresh rebuilds its feed.
+   Record actions (21 October 2026): data-record-actions="agreements.view-
+   attachment agreements.download-attachment" on a source puts those theme
+   actions' buttons in the opened card, each with data-ordinal = the
+   ActivityKey, and every Data-<name> column the IQA returns (Data-us-file-
+   id) is a data-<name> attribute on the card for them to read.
    On a source <li>, data-history is the IQA page for its type: while that
    type is chosen, a "View all calls" (emails, meetings…) link to it shows
    at the end of the type filters.
@@ -18890,7 +19329,10 @@ SOFTWARE.
         restricted: text(item.dataset.restricted),
         sectionLink: text(item.dataset.sectionLink),
         sectionTab: text(item.dataset.sectionTab),
-        sectionLabel: text(item.dataset.sectionLabel)
+        sectionLabel: text(item.dataset.sectionLabel),
+        // data-record-actions: theme action keys whose buttons the opened
+        // card shows, each with data-ordinal set to the record's key.
+        recordActions: text(item.dataset.recordActions).split(/\s+/).filter(key => /^[a-z][\w-]*(?:\.[\w-]+)+$/i.test(key))
       });
     });
     if (!sources.length) return null;
@@ -18977,6 +19419,20 @@ SOFTWARE.
     return Number((cfg.today || startDate(cfg, 0)).slice(0, 4));
   }
 
+  // Columns named Data-<name> ("Data-us-file-id") become data-<name>
+  // attributes on the card, where its record actions read them (the file to
+  // view or download). The feed's own attributes cannot be set this way.
+  const DATA_COLUMN = /^data-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  function dataAttributes(row) {
+    const properties = unwrap(row?.Properties)?.$values;
+    const entries = Array.isArray(properties)
+      ? properties.map(item => [String(item.Name), unwrap(item.Value)])
+      : Object.entries(row || {}).map(([name, value]) => [name, unwrap(value)]);
+    return entries
+      .map(([name, value]) => [name.toLowerCase(), text(value)])
+      .filter(([name, value]) => DATA_COLUMN.test(name) && value && !/^data-us-(activity|record)/.test(name));
+  }
+
   function normalize(row, source, timeZone) {
     const key = text(field(row, 'ActivityKey'));
     const date = parseDate(field(row, 'ActivityDate'), timeZone);
@@ -19010,6 +19466,7 @@ SOFTWARE.
       caseRef: text(field(row, 'CaseRef')),
       caseUrl: safeUrl(field(row, 'CaseUrl')),
       recordUrl: safeUrl(field(row, 'RecordUrl')),
+      data: dataAttributes(row),
       direction: direction.startsWith('in') ? 'in' : direction.startsWith('out') ? 'out' : ''
     };
   }
@@ -19624,6 +20081,7 @@ SOFTWARE.
     record.dataset.usRecordPriority = row.priority;
     record.dataset.usActivityId = row.id;
     if (row.direction) record.dataset.usRecordDirection = row.direction;
+    row.data.forEach(([name, value]) => record.setAttribute(name, value));
     const node = el('span', 'us-record__node');
     node.setAttribute('aria-hidden', 'true');
 
@@ -19715,6 +20173,18 @@ SOFTWARE.
       detail.append(note);
     } else if (row.detail) {
       detail.append(detailBody(row));
+    }
+    // The source's record actions (View and Download for a file), drawn by
+    // the theme's action engine from these placeholders.
+    if (row.source.recordActions.length) {
+      const actions = el('p', 'us-record__more us-record__more--actions');
+      row.source.recordActions.forEach(key => {
+        const button = el('button', 'us-action-' + key.replace(/\./g, '-'));
+        button.type = 'button';
+        button.dataset.ordinal = row.key;
+        actions.append(button);
+      });
+      detail.append(actions);
     }
     if (row.recordUrl) {
       const more = el('p', 'us-record__more');

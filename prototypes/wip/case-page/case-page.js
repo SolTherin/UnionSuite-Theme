@@ -88,7 +88,15 @@
     {ContactId: '21033', ContactName: 'Rina Patel', ContactType: 'Member', MemberType: 'Part-time member', MemberStatus: 'Financial', Number: 'Member 21033', Classification: 'Storeperson Grade 2', Plan: 'Part-time member', MemberStanding: '', MemberStandingTone: '', ContactEmail: 'rpatel@mailinator.com', ContactPhone: ''},
     {ContactId: '21108', ContactName: 'Tom Nguyen', ContactType: 'Member', MemberType: 'Full member', MemberStatus: 'Unfinancial', Number: 'Member 21108', Classification: 'Team leader', Plan: 'Full member', MemberStanding: 'Unfinancial', MemberStandingTone: 'danger', ContactEmail: '', ContactPhone: '0433 555 914'}
   ];
-  // The union's staff and delegates, for the Staff Search IQA (C38).
+  // The case staff member types value list: value is the code saved,
+  // label what shows.
+  const staffTypes = [
+    {value: 'SUP', label: 'Support'},
+    {value: 'ASSIST', label: 'Assisting'},
+    {value: 'CM', label: 'Case manager'},
+    {value: 'LEGAL', label: 'Legal advice'}
+  ];
+  // The union's staff and delegates, for CloudToolz's StaffList (C38).
   const directory = [
     {ContactId: '10179', ContactName: 'Andrew O Newnham', Position: 'Industrial officer', Group: 'Case team', Email: 'anewnham@union.example', Phone: '0400 123 450'},
     {ContactId: '10183', ContactName: "Mary O'Conner", Position: 'Industrial officer', Group: 'Case team', Email: 'moconner@mailinator.com', Phone: '(917) 653-6240'},
@@ -211,9 +219,9 @@
           CreatedIso: '2026-10-07T17:06:00', CreatedBy: 'Andrew O Newnham', CreatedText: '7 Oct 2026 by Andrew O Newnham', CompletedIso: '2026-10-08T09:10:00', CompletedBy: "Mary O'Conner", CompletedText: "8 Oct 2026 by Mary O'Conner"}
       ],
       meetings: [
-        {Ordinal: '41', 'Date-ISO': '2026-10-14', 'Date-Month': 'Oct', 'Date-Day': '14', MeetingType: 'Employer meeting', Matter: 'Bullying', 'Date-Time': '10:00 AM', Location: 'Northside Distribution, Dandenong',
+        {Ordinal: '41', 'Date-ISO': '2026-10-14', 'Date-Month': 'Oct', 'Date-Day': '14', MeetingTitle: 'Employer meeting – Bullying', MeetingType: 'Employer meeting', Matter: 'Bullying', 'Date-Time': '10:00 AM', Location: 'Northside Distribution, Dandenong',
           Attendees: "Mary O'Conner, Alex Keaton, Northside HR Manager", Description: 'Raise the pattern of comments since July and ask for the supervisor to be moved off the night shift while it is investigated. Do not name the co-workers.', Outcome: ''},
-        {Ordinal: '40', 'Date-ISO': '2026-10-07', 'Date-Month': 'Oct', 'Date-Day': '7', MeetingType: 'Member interview', Matter: 'Bullying', 'Date-Time': '04:30 PM', Location: 'Phone',
+        {Ordinal: '40', 'Date-ISO': '2026-10-07', 'Date-Month': 'Oct', 'Date-Day': '7', MeetingTitle: 'First interview with Priya', MeetingType: 'Member interview', Matter: 'Bullying', 'Date-Time': '04:30 PM', Location: 'Phone',
           Attendees: 'Priya Natarajan, Andrew O Newnham', Description: 'First account of the incidents, what Priya wants from the union, and what she is willing to have raised with the employer.', Outcome: 'Priya will keep a diary of incidents and send the messages she has kept. Agreed the union contacts the employer after her statement.'}
       ],
       notes: [
@@ -321,43 +329,50 @@
       // Restricted notes too, as "Restricted" (C29); follow-ups as the
       // theme's follow-up columns.
       'Notes': rows.notes.map(note => ({
-        ActivityKey: 'n' + note.Ordinal,
+        ActivityKey: note.Ordinal,
         ActivityDate: note.Iso,
         Subject: '', Summary: note.Note, Detail: '', CreatedBy: note.CreatedBy, Category: note.Category, Priority: note.Priority, RecordUrl: '#activity',
         FollowUpRequired: note.FollowUpRequired, FollowUpDate: note.FollowUpDate, FollowUpActioned: note.FollowUpActioned, FollowUpNotes: note.FollowUpNotes
       })),
-      'Emails Out': [
-        {ActivityKey: 'e3', ActivityDate: '2026-10-08T14:15:00', Subject: 'Meeting request – concerns raised by a member on night shift', Summary: 'To Northside Distribution', Detail: '', CreatedBy: "Mary O'Conner", RecordUrl: '#activity'},
-        {ActivityKey: 'e1', ActivityDate: '2026-10-07T17:20:00', Subject: 'Your complaint – next steps', Summary: 'To Priya Natarajan', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: '#activity'}
+      // Sent from iMIS (i4u_UT_Cases_Communications): always outgoing.
+      'Emails Sent': [
+        {ActivityKey: '503', ActivityDate: '2026-10-08T14:15:00', Subject: 'Meeting request – concerns raised by a member on night shift', Summary: '1 recipient · 1 sent', Category: 'Sent from iMIS', Detail: '', CreatedBy: "Mary O'Conner", RecordUrl: '#activity'},
+        {ActivityKey: '501', ActivityDate: '2026-10-07T17:20:00', Subject: 'Your complaint – next steps', Summary: '1 recipient · 1 sent', Category: 'Sent from iMIS', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: '#activity'}
       ],
-      'Emails In': [
-        {ActivityKey: 'e2', ActivityDate: '2026-10-07T18:48:00', Subject: 'Re: Your complaint – next steps', Summary: 'From Priya Natarajan · 2 attachments', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: '#activity'}
+      // Logged through the Outlook plugin, either way; the stored email opens
+      // as an attachment does (the Data-us-file-* columns).
+      'Emails Logged': [
+        {ActivityKey: '502', ActivityDate: '2026-10-07T18:48:00', Subject: 'Re: Your complaint – next steps', Summary: 'From priya.n@mailinator.com', Direction: 'In', Category: 'Logged from Outlook', Detail: '', CreatedBy: 'Andrew O Newnham',
+          'Data-us-file-id': '01S3AQU4EMAIL502', 'Data-us-file-branch': 'DEMO', 'Data-us-file-name': 'Re: Your complaint – next steps'},
+        {ActivityKey: '506', ActivityDate: '2026-10-08T15:02:00', Subject: 'Re: Meeting request – concerns raised by a member on night shift', Summary: 'To hr@northside.example', Direction: 'Out', Category: 'Logged from Outlook', Detail: '', CreatedBy: "Mary O'Conner",
+          'Data-us-file-id': '01S3AQU4EMAIL506', 'Data-us-file-branch': 'DEMO', 'Data-us-file-name': 'Re: Meeting request – concerns raised by a member on night shift'}
       ],
       // A card when each file was added (C26), tags as the detail line.
       'Attachments': rows.attachments.map(file => ({
-        ActivityKey: 'f' + file.Ordinal, ActivityDate: file.CreatedIso, Subject: file.FileName,
-        Summary: file.TagNames.split(',').filter(Boolean).join(' · '), Detail: '', CreatedBy: file.CreatedBy, RecordUrl: '#activity'
+        ActivityKey: file.Ordinal, ActivityDate: file.CreatedIso, Subject: file.FileName,
+        Summary: file.TagNames.split(',').filter(Boolean).join(' · '), Detail: '', CreatedBy: file.CreatedBy,
+        'Data-us-file-id': file.UniqueID, 'Data-us-file-branch': file.EntityCode, 'Data-us-file-name': file.FileName
       })),
       // The case's change history, one card per save, grouped by broad kind
       // (C31): what it touched as the summary, each field's change as a line.
       'Changes': [
-        {ActivityKey: 'c7', ActivityDate: '2026-10-08T13:48:00', Subject: 'Staff updated', Summary: "Mary O'Conner made lead staff", Detail: "Lead staff: Andrew O Newnham → Mary O'Conner", CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: 'c6', ActivityDate: '2026-10-08T11:02:00', Subject: 'Case updated', Summary: 'Priority, Incident date', Detail: 'Priority: Lowest → High\nIncident date: Empty → 22 Sep 2026', CreatedBy: "Mary O'Conner", RecordUrl: ''},
+        {ActivityKey: '7', ActivityDate: '2026-10-08T13:48:00', Subject: 'Staff updated', Summary: "Mary O'Conner made lead staff", Detail: "Lead staff: Andrew O Newnham → Mary O'Conner", CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
+        {ActivityKey: '6', ActivityDate: '2026-10-08T11:02:00', Subject: 'Case updated', Summary: 'Priority, Incident date', Detail: 'Priority: Lowest → High\nIncident date: Empty → 22 Sep 2026', CreatedBy: "Mary O'Conner", RecordUrl: ''},
         ...(larger ? [
-          {ActivityKey: 'c5', ActivityDate: '2026-10-08T10:40:00', Subject: 'Party added', Summary: 'Lee Hartley (20871)', Detail: 'Role: Party', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-          {ActivityKey: 'c4', ActivityDate: '2026-10-08T09:10:00', Subject: 'Staff added', Summary: 'Dani Sundara (Organiser)', Detail: 'Role: Support', CreatedBy: "Mary O'Conner", RecordUrl: ''}
+          {ActivityKey: '5', ActivityDate: '2026-10-08T10:40:00', Subject: 'Party added', Summary: 'Lee Hartley (20871)', Detail: 'Role: Party', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
+          {ActivityKey: '4', ActivityDate: '2026-10-08T09:10:00', Subject: 'Staff added', Summary: 'Dani Sundara (Organiser)', Detail: 'Role: Support', CreatedBy: "Mary O'Conner", RecordUrl: ''}
         ] : []),
-        {ActivityKey: 'c3', ActivityDate: '2026-10-07T17:30:00', Subject: 'Case updated', Summary: 'Status', Detail: 'Status: New → Open', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: 'c2', ActivityDate: '2026-10-07T17:06:00', Subject: 'Case updated', Summary: 'Type, Subtype, Source', Detail: 'Type: General enquiry → Bullying / Harassment\nSubtype: Empty → Supervisor conduct\nSource: Empty → Member phone call', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: 'c1', ActivityDate: '2026-10-07T17:04:00', Subject: 'Case created', Summary: 'Opened from a member phone call.', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
+        {ActivityKey: '3', ActivityDate: '2026-10-07T17:30:00', Subject: 'Case updated', Summary: 'Status', Detail: 'Status: New → Open', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
+        {ActivityKey: '2', ActivityDate: '2026-10-07T17:06:00', Subject: 'Case updated', Summary: 'Type, Subtype, Source', Detail: 'Type: General enquiry → Bullying / Harassment\nSubtype: Empty → Supervisor conduct\nSource: Empty → Member phone call', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
+        {ActivityKey: '1', ActivityDate: '2026-10-07T17:04:00', Subject: 'Case created', Summary: 'Opened from a member phone call.', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
         // Older than 90 days, so the timeframe filter has something to leave out.
-        {ActivityKey: 'c0', ActivityDate: '2026-05-02T09:15:00', Subject: 'Case linked', Summary: 'C164', Detail: 'Linked case: Empty → C164 (rostering grievance, closed May 2026)', CreatedBy: 'Hub Record', RecordUrl: ''}
+        {ActivityKey: '0', ActivityDate: '2026-05-02T09:15:00', Subject: 'Case linked', Summary: 'C164', Detail: 'Linked case: Empty → C164 (rostering grievance, closed May 2026)', CreatedBy: 'Hub Record', RecordUrl: ''}
       ],
       // Detail is the description (headed Description by the source).
       'Meetings': [
-        ...added.meetings.map(meeting => ({ActivityKey: 'm' + meeting.Ordinal, ActivityDate: meeting['Date-ISO'] + 'T' + (meeting.Time24 || '09:00') + ':00',
+        ...added.meetings.map(meeting => ({ActivityKey: meeting.Ordinal, ActivityDate: meeting['Date-ISO'] + 'T' + (meeting.Time24 || '09:00') + ':00',
           Subject: meeting.Matter, Summary: '', Detail: '', CreatedBy: meeting.CreatedBy, RecordUrl: '#overview'})),
-        {ActivityKey: 'm40', ActivityDate: '2026-10-07T16:30:00', Subject: 'Member interview', Summary: 'Phone interview with Priya about the incidents since July.',
+        {ActivityKey: '40', ActivityDate: '2026-10-07T16:30:00', Subject: 'Member interview', Summary: 'Phone interview with Priya about the incidents since July.',
           Detail: 'First account of the incidents, what Priya wants from the union, and what she is willing to have raised with the employer.', CreatedBy: 'Andrew O Newnham', RecordUrl: '#overview'}
       ]
     };
@@ -365,27 +380,30 @@
     // The details IQAs (data-details), one row per ActivityKey: each
     // Additional-* column is a line in the card's expanded view.
     activityDetails = {
-      'Notes Details': Object.fromEntries(rows.notes.map(note => ['n' + note.Ordinal, {'Additional-Staff': note.Staff, 'Additional-Members': note.Members}])),
-      'Emails Details': {
-        e3: {'Additional-From': "Mary O'Conner <moconner@union.example>", 'Additional-To': 'Northside HR <hr@northside.example>', 'Additional-Cc': 'Dani Sundara <dsundara@union.example>', 'Additional-Bcc': 'cases@union.example'},
-        e2: {'Additional-From': 'Priya Natarajan <priya.n@mailinator.com>', 'Additional-To': 'cases@union.example', 'Additional-Cc': '', 'Additional-Bcc': ''},
-        e1: {'Additional-From': 'Andrew O Newnham <anewnham@union.example>', 'Additional-To': 'Priya Natarajan <priya.n@mailinator.com>', 'Additional-Cc': '', 'Additional-Bcc': 'cases@union.example'}
+      'Notes Details': Object.fromEntries(rows.notes.map(note => [note.Ordinal, {'Additional-Staff': note.Staff, 'Additional-Members': note.Members}])),
+      'Emails Sent Details': {
+        '503': {'Additional-To': 'Northside HR', 'Additional-Sent by': "Mary O'Conner"},
+        '501': {'Additional-To': 'Priya Natarajan', 'Additional-Sent by': 'Andrew O Newnham'}
+      },
+      'Emails Logged Details': {
+        '502': {'Additional-From': 'priya.n@mailinator.com', 'Additional-To': 'cases@union.example', 'Additional-Cc': ''},
+        '506': {'Additional-From': 'moconner@union.example', 'Additional-To': 'hr@northside.example', 'Additional-Cc': 'dsundara@union.example'}
       },
       'Meetings Details': {
-        ...Object.fromEntries(added.meetings.map(meeting => ['m' + meeting.Ordinal, {'Additional-Location': meeting.Location, 'Additional-Attendees': ''}])),
-        m40: {'Additional-Location': 'Phone', 'Additional-Attendees': 'Priya Natarajan, Andrew O Newnham'}
+        ...Object.fromEntries(added.meetings.map(meeting => [meeting.Ordinal, {'Additional-Location': meeting.Location, 'Additional-Attendees': ''}])),
+        '40': {'Additional-Location': 'Phone', 'Additional-Attendees': 'Priya Natarajan, Andrew O Newnham'}
       }
     };
 
     if (older) {
       activity.Notes.push(
-        {ActivityKey: 'n901', ActivityDate: '2026-08-12T10:20:00', Subject: '', Summary: 'Employer cancelled the August meeting; asked to reschedule after the roster review.', Detail: '', CreatedBy: "Mary O'Conner", Category: 'Employer', Priority: '', RecordUrl: '#activity'},
-        {ActivityKey: 'n900', ActivityDate: '2026-07-02T09:05:00', Subject: '', Summary: 'First call from Priya about comments from the night shift supervisor.', Detail: '', CreatedBy: 'Andrew O Newnham', Category: 'Intake', Priority: '', RecordUrl: '#activity'}
+        {ActivityKey: '901', ActivityDate: '2026-08-12T10:20:00', Subject: '', Summary: 'Employer cancelled the August meeting; asked to reschedule after the roster review.', Detail: '', CreatedBy: "Mary O'Conner", Category: 'Employer', Priority: '', RecordUrl: '#activity'},
+        {ActivityKey: '900', ActivityDate: '2026-07-02T09:05:00', Subject: '', Summary: 'First call from Priya about comments from the night shift supervisor.', Detail: '', CreatedBy: 'Andrew O Newnham', Category: 'Intake', Priority: '', RecordUrl: '#activity'}
       );
     }
 
     if (fresh) {
-      activity = {Notes: [], 'Emails Out': [], 'Emails In': [], Meetings: [], Attachments: [], Changes: activity.Changes.filter(change => change.ActivityKey === 'c1')};
+      activity = {Notes: [], 'Emails Sent': [], 'Emails Logged': [], Meetings: [], Attachments: [], Changes: activity.Changes.filter(change => change.ActivityKey === '1')};
     }
 
     leadStaff = () => rows.staff.find(row => row.ContactIsLead === 'true')?.ContactName || '';
@@ -534,12 +552,8 @@
         const found = contacts.filter(contact => contact.ContactId !== primaryId && (!term || (contact.ContactName + ' ' + contact.Number).toLowerCase().includes(term)));
         return reply(items(found.slice(0, Number(target.searchParams.get('limit')) || 20)), 200, 200);
       }
-      // Staff Search (C38): part of a name or position, at most 8.
-      if (name.endsWith('/API - Staff Search')) {
-        const term = (target.searchParams.get('Search') || '').toLowerCase();
-        const found = directory.filter(person => !term || (person.ContactName + ' ' + person.Position).toLowerCase().includes(term));
-        return reply(items(found.slice(0, Number(target.searchParams.get('limit')) || 8)), 200, 200);
-      }
+      // The add staff composer's Role list (case staff member types).
+      if (name.endsWith('/Get Case Staff Member Types')) return reply(items(staffTypes), 200, 200);
       // The member card's IQA, and the parties' (the guide's template).
       if (name.endsWith('/Case - Member Details') || name.endsWith('/Query Template - Manage Case - Party Details')) {
         const details = detailsFor(target.searchParams.get('ID'));
@@ -565,7 +579,7 @@
         const page = list.slice(offset, offset + limit);
         return reply({TotalCount: list.length, Offset: offset, Limit: limit, Count: page.length, HasNext: offset + page.length < list.length, Items: {$values: page}}, 200, 200 + Math.random() * 200);
       }
-      if (name.endsWith('/Case Details')) return reply(items([{
+      if (name.endsWith('/API - Manage Case - Case Details')) return reply(items([{
         'Case-Reference': 'C217',
         'Case-Type': 'Bullying / Harassment',
         'Case-Subtype': '',
@@ -582,7 +596,7 @@
         '1-Tags': 'Night shift, Supervisor conduct',
         '2-Description': 'Priya reports repeated belittling comments from a night shift supervisor since July, about her accent and work rate. Two co-workers saw at least one incident.'
       }]), 200, 250);
-      if (name.endsWith('/Case Resolution')) return reply(items([closed ? {
+      if (name.endsWith('/API - Manage Case - Resolution')) return reply(items([closed ? {
         'Alert-Title': 'Resolved',
         'Alert-Message': "Closed 20 Nov 2026 by Mary O'Conner.",
         'Alert-Tone': 'success',
@@ -610,28 +624,37 @@
       if (target.pathname === '/ca/note-access') {
         return reply({Access: 'Granted', Note: 'Priya disclosed she is on a visa tied to this employer and is worried about raising the complaint. Do not record visa details elsewhere on the case.'}, 200, 600);
       }
+      // The add staff composer's people (C38): the whole list, searched in
+      // the page. Slow enough to show the list's spinner when clicked at once.
+      if (target.pathname === '/cases/quick-add/StaffList') {
+        return reply(directory.map(person => ({StaffID: person.ContactId, StaffName: person.ContactName})), 200, 1200);
+      }
       // Inline saves (C34, C35, proposed endpoints): the new row joins the
       // sample data, and the lists refresh from it.
-      if (target.pathname === '/cases/add-staff') {
+      if (target.pathname === '/cases/quick-add/staff') {
         const body = JSON.parse(init.body || '{}');
         const person = directory.find(entry => entry.ContactId === body.StaffID);
         if (!person) return reply({}, 400, 300);
         const delegate = person.Group === 'Delegates';
         added.staff.push({Ordinal: String(710 + added.staff.length), ContactId: person.ContactId, ContactName: person.ContactName,
-          ContactUrl: '/Party.aspx?ID=' + person.ContactId, ContactIsLead: 'false', ContactRole: body.Role || 'Support',
+          ContactUrl: '/Party.aspx?ID=' + person.ContactId, ContactIsLead: 'false',
+          ContactRole: staffTypes.find(type => type.value === body.Role)?.label || 'Support',
           ContactType: person.Position, ContactGroup: person.Group, ContactGroupOrder: delegate ? '2' : '1',
           ContactGroupTone: delegate ? 'success' : 'info', ContactEmail: person.Email, ContactPhone: person.Phone});
         build();
         return reply({Ordinal: String(709 + added.staff.length)}, 200, 500);
       }
-      if (target.pathname === '/cases/add-party') {
+      if (target.pathname === '/cases/quick-add/contact') {
         const contact = contacts.find(entry => entry.ContactId === JSON.parse(init.body || '{}').ContactID);
         if (!contact) return reply({}, 400, 300);
         added.parties.push({...contact, Ordinal: String(620 + added.parties.length)});
         build();
         return reply({Ordinal: String(619 + added.parties.length)}, 200, 500);
       }
-      if (target.pathname === '/cases/add-attachment') {
+      // The add attachment composer's tags (shape to confirm): the sample
+      // tag list, slow enough to show the list's spinner.
+      if (target.pathname === '/zidebar/sharepoint/tagsprefill') return reply(tags, 200, 900);
+      if (target.pathname === '/cases/quick-add/attachment') {
         const body = JSON.parse(init.body || '{}');
         const by = leadStaff() || "Mary O'Conner";
         const ordinals = [];
@@ -639,25 +662,25 @@
           const ordinal = String(810 + added.attachments.length);
           ordinals.push(ordinal);
           const iso = '2026-10-08T17:' + String(addedClock++).padStart(2, '0') + ':00';
-          added.attachments.unshift({Ordinal: ordinal, FileName: file.FileName.replace(/\.[^.]+$/, ''), TagNames: 'Cases', TagOrdinals: '3',
+          added.attachments.unshift({Ordinal: ordinal, FileName: file.FileName.replace(/\.[^.]+$/, ''), TagNames: body.TagNames || '', TagOrdinals: body.TagOrdinals || '',
             UniqueID: '01S3AQU4NEW' + ordinal, EntityCode: 'DEMO', CreatedBy: by, CreatedOn: '8/10/2026', CreatedIso: iso,
-            AccessClass: body.Restricted ? 'restricted' : ''});
+            AccessClass: ''});
         });
         build();
         return reply({Ordinals: ordinals}, 200, 700);
       }
-      if (target.pathname === '/cases/add-meeting') {
+      if (target.pathname === '/cases/quick-add/meeting') {
         const body = JSON.parse(init.body || '{}');
         const day = new Date((body.Date || '2026-10-08') + 'T00:00:00');
         const [hour, minute] = (body.Time || '').split(':').map(Number);
         const time = body.Time ? String(hour % 12 || 12).padStart(2, '0') + ':' + String(minute).padStart(2, '0') + (hour < 12 ? ' AM' : ' PM') : '';
         added.meetings.push({Ordinal: String(50 + added.meetings.length), 'Date-ISO': body.Date, 'Date-Month': day.toLocaleDateString('en-AU', {month: 'short'}),
-          'Date-Day': String(day.getDate()), MeetingType: 'Meeting', Matter: body.Title || '', 'Date-Time': time, Location: body.Location || '',
+          'Date-Day': String(day.getDate()), MeetingTitle: body.Title || '', MeetingType: '', Matter: '', 'Date-Time': time, Location: body.Location || '',
           Attendees: '', Description: '', Outcome: '', Time24: body.Time || '', CreatedBy: leadStaff() || "Mary O'Conner"});
         build();
         return reply({Ordinal: String(49 + added.meetings.length)}, 200, 500);
       }
-      if (target.pathname === '/cases/add-note' || target.pathname === '/cases/add-task') {
+      if (target.pathname === '/cases/quick-add/note' || target.pathname === '/cases/quick-add/task') {
         const body = JSON.parse(init.body || '{}');
         // After the sample's latest entry (8 Oct, 4:20 pm), a minute apart.
         const iso = '2026-10-08T17:' + String(addedClock++).padStart(2, '0') + ':00';
@@ -672,7 +695,7 @@
         const task = text => ({Ordinal: ordinal, Note: text, TAskCheckCSS: '', TaskStatusCSS: 'outstanding', Deadline: dueText, OverdueText: '',
           AssignedTo: by, PriorityBadge: '', Description: '', CreatedIso: iso, CreatedBy: by, CreatedText: createdOn + ' by ' + by,
           CompletedIso: '', CompletedBy: '', CompletedText: ''});
-        if (target.pathname === '/cases/add-note') {
+        if (target.pathname === '/cases/quick-add/note') {
           added.notes.push({Ordinal: ordinal, Iso: iso, CreatedOn: createdOn, CreatedTime: createdTime, CreatedBy: by, Priority: '', AccessClass: '', NoteClass: '',
             Note: body.Note || '', Category: body.Category || '', Staff: by, Members: '',
             FollowUpRequired: due ? 'true' : '', FollowUpDate: due, FollowUpActioned: '', FollowUpNotes: '',
@@ -684,13 +707,13 @@
         build();
         return reply({Ordinal: ordinal}, 200, 500);
       }
-      if (target.pathname === '/cases/set-lead-staff') setLeadStaff(JSON.parse(init.body || '{}').StaffOrdinal);
+      if (target.pathname === '/cases/quick-update/set-lead-staff') setLeadStaff(JSON.parse(init.body || '{}').StaffOrdinal);
       if (target.pathname === '/cases/reopen') {
         const next = new URL(location.href);
         next.searchParams.delete('case');
         history.replaceState(null, '', next);
       }
-      if (target.pathname === '/cases/set-primary-party') {
+      if (target.pathname === '/cases/quick-update/set-primary-party') {
         const ordinal = JSON.parse(init.body || '{}').PartyOrdinal;
         primaryId = rows.parties.find(row => row.Ordinal === ordinal)?.ContactId || primaryId;
         build();

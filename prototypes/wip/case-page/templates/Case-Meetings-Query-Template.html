@@ -12,17 +12,27 @@
      Date-ISO (required)     yyyy-MM-dd; past meetings hide until "Show past meetings"
      Date-Month (required)   short month (Oct)
      Date-Day (required)     day of month (14)
-     MeetingType (required)  first half of the title (General, Hearing …)
-     Matter (required)       second half of the title
+     MeetingTitle (required) the meeting's Title, or "MeetingType – Matter"
+                             when it has none (owner, 21 October 2026). A
+                             custom SQL expression:
+                               CASE
+                                 WHEN ISNULL([vBoi4u_UT_Cases_Meetings].[Title], '') = ''
+                                 THEN CONCAT_WS(' – ',
+                                   NULLIF([vBoi4u_UT_Cases_Meetings].[MeetingType], ''),
+                                   NULLIF([vBoi4u_UT_Cases_Meetings].[Matter], ''))
+                                 ELSE [vBoi4u_UT_Cases_Meetings].[Title]
+                               END
+     MeetingType, Matter     searched only, so a titled meeting is still
+                             found by them; may be blank
      Date-Time               time text; blank hides it
      Location                location or link text; blank hides it -->
-<div class="us-meeting" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingType} {#query.Matter} {#query.Location}">
+<div class="us-meeting" data-us-meeting-date="{#query.Date-ISO}" data-us-search="{#query.MeetingTitle} {#query.MeetingType} {#query.Matter} {#query.Location}">
   <span class="us-meeting__tile" aria-hidden="true">
     <span class="us-meeting__month">{#query.Date-Month}</span>
     <span class="us-meeting__day">{#query.Date-Day}</span>
   </span>
   <span class="us-meeting__copy">
-    <span class="us-meeting__title">{#query.MeetingType} – {#query.Matter}</span>
+    <span class="us-meeting__title">{#query.MeetingTitle}</span>
     <span class="us-meeting__meta">
       <span>{#query.Date-Time}</span>
       <span>{#query.Location}</span>

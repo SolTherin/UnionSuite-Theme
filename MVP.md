@@ -71,8 +71,6 @@ won't appear here, so check each page in iMIS too (IQA designer → Where used).
 
 | Sandbox IQA or folder | Used by |
 | --- | --- |
-| `$/_i4u_/SandBox/Cases/Case Details` | Details field groups: `Case-Field-Groups-Query-Template.html`, case `index.html` |
-| `$/_i4u_/SandBox/Cases/Case Resolution` | Resolution panel: `Case-Resolved-Query-Template.html`, `Case-Field-Groups-Query-Template.html` |
 | `$/_i4u_/SandBox/Cases/Case - Member Details` | Member card: `Case-Member-Query-Template.html` |
 | `$/_i4u_/SandBox/Cases/Case Activity` (folder, incl. `Last 30 Days`) | Activity, recent activity and changes: `case-page.js`, `Case-All-Activity-`, `Case-Recent-Activity-`, `Case-Changes-Query-Template.html` |
 

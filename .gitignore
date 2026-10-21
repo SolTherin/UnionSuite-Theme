@@ -21,6 +21,7 @@ THeme/**/*.zip
 # Generated guides and component previews; rebuild from maintained sources
 /THeme/UnionSuite-Guides/Usage-Guide.html
 /THeme/UnionSuite-Guides/Theme-Config.html
+/THeme/UnionSuite-Guides/Theme-Config-*.html
 /references/*.html
 !/references/index.html
 # Approved unimplemented designs remain directly reviewable after checkout

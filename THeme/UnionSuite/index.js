@@ -40,7 +40,7 @@
   // stable URLs, so this is what invalidates them. Bump it when a child file
   // changes; changing this loader alone does not need it, because the entry
   // URL refreshes itself. Bumping needlessly re-downloads every child.
-  const RELEASE = '1.0.9';
+  const RELEASE = '1.0.10';
   const LOAD_TIMEOUT_MS = 20000;
 
   /* Load graph.
@@ -149,8 +149,26 @@
       when: () => whenElement('body.HubWrapper-StaffSignIn, .SignIn-Container'),
       critical: false, // Nothing else waits on the sign-in design.
       ready: () => typeof window.HubSignIn?.replay === 'function'
+    },
+    {
+      id: 'forms',
+      path: 'Forms/UnionSuiteForms.js',
+      // The popup forms (the task form first; owner, 20 October 2026). A
+      // page holds only a <div data-us-form="…"> placeholder, so the gate
+      // waits for one, as the sign-in gate does. No 'after' edge: the forms
+      // work without zUnionSuite.js (a client may take a module without the
+      // theme), and the runtime loads its own form files and stylesheet
+      // from Forms/ with this release.
+      when: () => whenElement('[data-us-form]'),
+      critical: false,
+      ready: () => typeof window.UnionSuiteForms?.mount === 'function'
     }
   ];
+
+  // Files a module loads itself (the forms runtime's form files), listed
+  // so the IQA where-used scan reads them too. Keep in step with FORM_FILES
+  // in Forms/UnionSuiteForms.js.
+  const ON_DEMAND = ['Forms/TaskForm.js'];
 
   // Resolves true as soon as a matching element is in the document, or false
   // once the page has parsed without one.
@@ -397,9 +415,10 @@
   window.UnionSuiteLoader = Object.freeze({
     version: RELEASE,
     base: base?.href || null,
-    // Every theme script, including ones gated to other pages. The IQA
-    // where-used index scans them for the IQAs the theme itself uses.
-    modules: Object.freeze(MODULES.map(module => module.path)),
+    // Every theme script, including ones gated to other pages and the
+    // forms' on-demand files. The IQA where-used index scans them for the
+    // IQAs the theme itself uses.
+    modules: Object.freeze([...MODULES.map(module => module.path), ...ON_DEMAND]),
     ready,    // critical modules only
     complete, // every module, including non-critical ones
     status: () => [...records.values()].map(entry => ({ ...entry }))

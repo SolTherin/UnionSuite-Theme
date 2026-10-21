@@ -42,7 +42,7 @@
        Notes        type note. Restricted notes are included, with "Restricted"
                     as the Summary (data-restricted="Restricted"): the card
                     shows the notes screen's restricted notice and Show note
-                    (C29). ActivityKey's digits are the note ordinal (n940).
+                    (C29). ActivityKey is the note ordinal.
                     A note marked follow-up (converted to a task) returns
                     FollowUpRequired, FollowUpDate and FollowUpActioned, and
                     shows the theme's follow-up badge. Tasks are notes with a
@@ -50,14 +50,25 @@
                     no Tasks source.
        Notes Details   Additional-Staff, Additional-Members: who the note is
                     assigned to; blank lines are left out.
-       Emails Out / Emails In   type email. data-record-label: the card's
-                    open button reads View email, with an eye (C28).
-       Emails Details   Additional-From, Additional-To, Additional-Cc,
-                    Additional-Bcc.
+       Emails Sent  type email, always outgoing: sent from iMIS through the
+                    case send page and linked to the case in
+                    i4u_UT_Cases_Communications, as agreement emails are.
+                    View email (C28) opens iMIS's email preview in a popup
+                    (data-record-popup).
+       Emails Logged   type email: attached to the case through the Outlook
+                    plugin, either direction, so each row's Direction says
+                    which (from the sender's domain). View and Download open
+                    the stored email as an attachment's do
+                    (data-record-actions and the Data-us-file-* columns;
+                    owner, 21 October 2026). Duplicates of sent emails are
+                    fine.
+       Emails Sent Details, Emails Logged Details   Additional-From,
+                    Additional-To, Additional-Cc (and Additional-Bcc).
        Meetings     type meeting; Detail is the description (headed
                     Description). Meetings Details: Additional-Location,
                     Additional-Attendees.
-       Attachments  type file (C26): Subject the file name, Summary its tags.
+       Attachments  type attachment (C26): Subject the file name, Summary
+                    its tags; View and Download, as Emails Logged.
        Changes      the Changes section's (Case-Changes-Query-Template.html):
                     type change, one card per save grouped by broad kind
                     (C31), Subject the kind (Case updated, Party added,
@@ -67,9 +78,9 @@
      View all attachments (C36; owner, 9 October 2026): with Attachments
      chosen, the heading shows View all attachments beside Upload, opening
      the Attachments tab (data-section-link, -tab and -label on the source).
-     Proposed IQAs (not built): Notes, Notes Details, Emails Out, Emails In,
-     Emails Details, Meetings, Meetings Details, Attachments, and Changes (the
-     history IQA behind the current Summary tab, grouped by save). -->
+     Proposed IQAs (not built): Notes, Emails Sent, Emails Logged, Meetings,
+     Attachments and Changes (base), and Notes, Emails Sent, Emails Logged
+     and Meetings Details (details); Activity-Feed-IQA-Build.md. -->
 <div class="us-activity-feed"
   data-us-activity-folder="$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base"
   data-us-activity-details-folder="$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details"
@@ -78,9 +89,9 @@
   data-us-activity-load-all data-us-activity-filters-open>
   <ul class="us-activity__sources" hidden>
     <li data-source="notes" data-query="Notes" data-details="Notes Details" data-type="note" data-history="#notes" data-restricted="Restricted"></li>
-    <li data-source="emails-out" data-query="Emails Out" data-details="Emails Details" data-type="email" data-direction="out" data-record-label="View email" data-record-icon="ti-eye"></li>
-    <li data-source="emails-in" data-query="Emails In" data-details="Emails Details" data-type="email" data-direction="in" data-record-label="View email" data-record-icon="ti-eye"></li>
+    <li data-source="emails-sent" data-query="Emails Sent" data-details="Emails Sent Details" data-type="email" data-direction="out" data-record-label="View email" data-record-icon="ti-eye" data-record-popup="true"></li>
+    <li data-source="emails-logged" data-query="Emails Logged" data-details="Emails Logged Details" data-type="email" data-record-actions="agreements.view-attachment agreements.download-attachment"></li>
     <li data-source="meetings" data-query="Meetings" data-details="Meetings Details" data-detail-label="Description" data-type="meeting" data-history="#meetings"></li>
-    <li data-source="attachments" data-query="Attachments" data-type="attachment" data-label="Attachment added" data-plural="Attachments" data-section-link="case:attachments" data-section-tab="Attachments" data-section-label="View all attachments"></li>
+    <li data-source="attachments" data-query="Attachments" data-type="attachment" data-record-actions="agreements.view-attachment agreements.download-attachment" data-label="Attachment added" data-plural="Attachments" data-section-link="case:attachments" data-section-tab="Attachments" data-section-label="View all attachments"></li>
   </ul>
 </div>

@@ -14,8 +14,8 @@ in `case-page.js` follow it.
 
 | Folder | Holds | Who changes it |
 | --- | --- | --- |
-| `$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base` | The base IQAs: Notes, Emails Out, Emails In, Meetings, Attachments, Changes. One row per record, in the feed's fixed columns. | Fixed: the theme reads these columns by name. |
-| `$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details` | The details IQAs: Notes Details, Emails Details, Meetings Details. One row per record, read when its card first opens. | The client: add or remove `Additional-*` columns freely. |
+| `$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base` | The base IQAs: Notes, Emails Sent, Emails Logged, Meetings, Attachments, Changes. One row per record, in the feed's fixed columns. | Fixed: the theme reads these columns by name. |
+| `$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details` | The details IQAs: Notes Details, Emails Sent Details, Emails Logged Details, Meetings Details. One row per record, read when its card first opens. | The client: add or remove `Additional-*` columns freely. |
 
 The templates point at them with `data-us-activity-folder` (base) and
 `data-us-activity-details-folder` (details). Recent activity, All activity
@@ -45,7 +45,7 @@ so there is no Last 30 Days folder.
 
 | Column | Required | Holds |
 | --- | --- | --- |
-| `ActivityKey` | yes | The record, unique within its IQA: a letter for the type then the ordinal (`n940`, `e12`, `m40`, `f805`, `c6`). The details IQA is filtered on it, and the restricted-note check reads the note ordinal from its digits. |
+| `ActivityKey` | yes | The record's `Ordinal` (owner, 21 October 2026: no type prefix). It only has to be unique within its IQA: the theme keeps each source's keys apart. The details IQA is filtered on it (a prompted filter on its `Ordinal`, named `ActivityKey`), and the restricted-note check reads the note ordinal from it. |
 | `ActivityDate` | yes | Date and time of the record (server local time, as `/api/query` returns it). Sorts the timeline; the time shows on the card. |
 | `Subject` | one of the two | The card's headline. |
 | `Summary` | one of the two | The line under the headline, or the headline when there is no Subject. |
@@ -55,6 +55,7 @@ so there is no Last 30 Days folder.
 | `Priority` | no | `High` or `Urgent` shows a flag; anything else is ignored. |
 | `RecordUrl` | no | The record's own page, for the card's View button (same site only). |
 | `Direction` | no | `In` or `Out`; overrides the source's own direction. |
+| `Data-<name>` | no | A `data-<name>` attribute on the card, for its record actions to read: `Data-us-file-id`, `Data-us-file-branch`, `Data-us-file-name` for View and Download. |
 | `FollowUpRequired`, `FollowUpDate`, `FollowUpActioned`, `FollowUpNotes` | no | A note converted to a task: the follow-up badge, and its notes when the card opens. |
 
 ## The base IQAs
@@ -71,7 +72,7 @@ text the line under it.
 
 | Column | From |
 | --- | --- |
-| `ActivityKey` | `'n' + ` the note's `Ordinal` |
+| `ActivityKey` | the note's `Ordinal` |
 | `ActivityDate` | when the note was added (date and time) |
 | `Subject` | a task's FollowUpNotes (what needs doing); blank for a plain note |
 | `Summary` | the note text, **or the literal `Restricted` for a restricted note** |
@@ -99,30 +100,105 @@ offers Show note, which asks CloudToolz `/ca/note-access` with the note
 ordinal. The starting point is the existing
 `$/_i4u_/Core/Cases/Manage Case/Case Notes`.
 
-### Emails Out and Emails In
+### Emails Sent
 
-One IQA per direction, so the feed can page each (the type filter shows them
-together as Emails).
+Emails sent from iMIS through the case send page (`Send-Email-Parties.aspx`),
+linked to the case after each send in `i4u_UT_Cases_Communications`, exactly
+as agreement emails are linked in `i4u_UT_CA_Communications` (the same
+columns, with `CaseOrdinal` for `AgreementOrdinal`; owner, 21 October 2026).
+Always outgoing: the source carries `data-direction="out"`. One row per send.
 
-| Column | Emails Out | Emails In |
-| --- | --- | --- |
-| `ActivityKey` | `'e' + ` the email's key | `'e' + ` the email's key (unique across both) |
-| `ActivityDate` | when it was sent | when it was received |
-| `Subject` | the email's subject | the email's subject |
-| `Summary` | `To ` + the recipients' names | `From ` + the sender (`· 2 attachments` when it has any) |
-| `CreatedBy` | the sender (staff) | who logged it |
-| `RecordUrl` | the email preview (`InteractionPreview.aspx?…`, as the contact page's outbound emails) | the logged email |
+Base: `vBoi4u_UT_Cases_Communications` inner joined to
+`vBoCommunicationLogSummary` on `CommunicationLogKey`, with the contact
+business object left joined on `CreatedByUserKey = ContactKey` for the
+sender's name (as the agreement's Communications summary IQA,
+`prototypes/wip/agreement-page/Communications-IQA-Build.md`).
 
-Open: where case emails are stored and how they are linked to the case
-(README open decision 5). The contact page's outbound emails build
-(`prototypes/wip/contact-page-v3/Outbound-Emails-Build.md`) covers the
-sent-email side.
+| Column | From |
+| --- | --- |
+| `ActivityKey` | the link row's `Ordinal` |
+| `ActivityDate` | `[vBoCommunicationLogSummary].[SentDate]` |
+| `Subject` | the subject without its "Case C217 – " tag (the agreement's `Title` expression) |
+| `Summary` | the agreement's `Summary` expression: "3 recipients · 3 sent" |
+| `Category` | `Sent from iMIS` |
+| `CreatedBy` | the sender's `FullName` |
+| `RecordUrl` | optional: iMIS's email preview, `/iParts/Common/InteractionLog/InteractionPreview.aspx?CommunicationLogId=…&PartyId=…&RecipientId=…` (it needs one recipient; the agreement's "view the email" item in TODO.md has the same open question). The source opens it in a popup (`data-record-popup`). |
+
+The filters are the base rules' `CaseNum` (on `CaseOrdinal`) and
+`StartDate` (on `SentDate`).
+
+The send page and the link are in the theme (`us-case-comms` in
+`US-SUBJECT-TAG` and `US-COMMS-LOG`, 21 October 2026): the send page's
+Communication Creator iPart carries `us-case-comms`, and after each send the
+theme inserts `CaseOrdinal`, `CommunicationLogKey`, `Audience` (Parties or
+Staff) and `CommunicationType`. Setup: the usage guide's `#subject-tag-cases`.
+
+### Emails Logged
+
+Emails attached to the case through the Outlook plugin: generally received,
+but staff file emails they sent too, so each row says which. The owner's
+dedicated email business object (one row per logged email; the same table
+also holds emails logged against contacts). Duplicates of Emails Sent are
+fine (owner, 21 October 2026).
+
+| Column | From |
+| --- | --- |
+| `ActivityKey` | `Ordinal` |
+| `ActivityDate` | `Email_ReceivedOn` |
+| `Subject` | `Email_Subject` |
+| `Summary` | `'From ' + Email_From` when incoming, `'To ' + Email_To` when outgoing (the `Direction` expression below decides) |
+| `Direction` | the expression below: `Out` when the sender is on one of the union's domains, `In` otherwise, blank when there is no sender |
+| `Category` | `Logged from Outlook` |
+| `CreatedBy` | who logged it: the name of the contact `FirstCreatedBy` names |
+| `Data-us-file-id` | `UniqueCloudId`: the stored email, opened by View and Download as an attachment is |
+| `Data-us-file-branch` | `EntityCode` |
+| `Data-us-file-name` | `FileName` |
+
+Filter `CaseNum` on **`CaseOrdinal`** (the table mixes case and contact
+emails; `CaseOrdinal` is the case's, owner 21 October 2026), and `StartDate`
+on `Email_ReceivedOn`.
+
+The union's own domains are client values, so keep them out of the Core
+IQA's expression: a general lookup table (proposed
+`I4U_UT_STAFF_EMAIL_DOMAINS`, one domain per `CODE`, such as `zentso.com`)
+that the expression reads:
+
+```sql
+CASE
+  WHEN ISNULL(<Email_From>, '') = '' THEN ''
+  WHEN EXISTS (SELECT 1 FROM Gen_Tables g
+               WHERE g.TABLE_NAME = 'I4U_UT_STAFF_EMAIL_DOMAINS'
+                 AND <Email_From> LIKE '%@' + RTRIM(g.CODE)) THEN 'Out'
+  ELSE 'In'
+END
+```
+
+`Summary` repeats the test:
+
+```sql
+CASE
+  WHEN EXISTS (SELECT 1 FROM Gen_Tables g
+               WHERE g.TABLE_NAME = 'I4U_UT_STAFF_EMAIL_DOMAINS'
+                 AND <Email_From> LIKE '%@' + RTRIM(g.CODE))
+    THEN 'To ' + ISNULL(<Email_To>, '')
+  ELSE 'From ' + ISNULL(<Email_From>, '')
+END
+```
+
+A shared mailbox on the union's domain (`projects@…`) counts as the union's.
+The source carries `data-record-actions="agreements.view-attachment
+agreements.download-attachment"`, so the opened card shows View and Download,
+which read the `Data-us-file-*` columns and the `ActivityKey`.
+
+Open: the `Access` column (`Open` or blank in the sample). If logged emails
+can be restricted, decide how a restricted one shows (as restricted
+attachments do: hidden behind Unlock).
 
 ### Meetings
 
 | Column | From |
 | --- | --- |
-| `ActivityKey` | `'m' + ` the meeting's `Ordinal` |
+| `ActivityKey` | the meeting's `Ordinal` |
 | `ActivityDate` | the meeting's date and start time (midnight when it has no time) |
 | `Subject` | the meeting title: `Title`, or `MeetingType – Matter` when it has none (the `MeetingTitle` expression in `templates/Case-Meetings-Query-Template.html`) |
 | `Summary` | optional: one line, such as the location |
@@ -137,13 +213,17 @@ records. Starting point: `Manage Case - Meetings - All`.
 
 | Column | From |
 | --- | --- |
-| `ActivityKey` | `'f' + ` the file's `Ordinal` |
+| `ActivityKey` | the file's `Ordinal` |
 | `ActivityDate` | when it was uploaded |
 | `Subject` | the file name |
 | `Summary` | its tags, joined with ` · ` (one row per file, not per tag) |
 | `CreatedBy` | who uploaded it |
+| `Data-us-file-id` | the file's `UniqueID` (View and Download, as on the attachment rows) |
+| `Data-us-file-branch` | `EntityCode` |
+| `Data-us-file-name` | the file name |
 
-Starting point: the case's CloudFiles storage IQA with its tags.
+Starting point: the case's CloudFiles storage IQA with its tags. The source
+carries the same `data-record-actions` as Emails Logged.
 
 ### Changes
 
@@ -151,7 +231,7 @@ The Changes section's only source: one row **per save**, not per field.
 
 | Column | From |
 | --- | --- |
-| `ActivityKey` | `'c' + ` the save's key |
+| `ActivityKey` | the save's key (a number unique to the save) |
 | `ActivityDate` | when it was saved |
 | `Subject` | the broad kind: `Case created`, `Case updated`, `Party added`, `Staff added`, `Staff updated`, `Staff removed`, `Case linked` … |
 | `Summary` | what it touched: the fields (`Priority, Incident date`) or the person (`Lee Hartley (20871)`) |
@@ -164,7 +244,8 @@ field changes, or the IQA groups by user and time (README open decision 6).
 ## The details IQAs
 
 In the Client folder. Each is filtered on `CaseNum` and `ActivityKey` (both
-prompted, Equal) and returns one row. Every column whose name starts with
+prompted, Equal; `ActivityKey` is a filter on the record's `Ordinal` with its
+prompt named `ActivityKey`) and returns one row. Every column whose name starts with
 `Additional-` is a labelled line when the card opens, in column order; the
 label is the text after the prefix; blank values are left out; dates read
 "22 May 2026" and true/false Yes/No.
@@ -172,7 +253,8 @@ label is the text after the prefix; blank values are left out; dates read
 | IQA | Suggested columns |
 | --- | --- |
 | Notes Details | `Additional-Staff` (staff the note is assigned to), `Additional-Members` (members it is assigned to) |
-| Emails Details | `Additional-From`, `Additional-To`, `Additional-Cc`, `Additional-Bcc` |
+| Emails Sent Details | the send's recipients as `Additional-To` (names, comma-separated); `Additional-Sent by` |
+| Emails Logged Details | `Additional-From` (`Email_From`), `Additional-To` (`Email_To`), `Additional-Cc` (`Email_CC`) |
 | Meetings Details | `Additional-Location`, `Additional-Attendees` |
 
 A restricted note's details IQA must return nothing beyond the assignees.

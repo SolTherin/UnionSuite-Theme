@@ -66,8 +66,16 @@ if (circular.length) {
 // scripts for whole quoted $/ paths (Scripts/IQA-WhereUsed.js). A path
 // assembled from parts would be invisible to it, so none may be.
 const themeDir = path.join(root, 'THeme/UnionSuite');
-const themeScripts = ['index.js', 'zUnionSuite.js', ...fs.readdirSync(path.join(themeDir, 'Scripts'))
-  .filter(name => name.endsWith('.js')).map(name => 'Scripts/' + name)];
+const scriptsIn = folder => fs.readdirSync(path.join(themeDir, folder))
+  .filter(name => name.endsWith('.js')).map(name => folder + '/' + name);
+const themeScripts = ['index.js', 'zUnionSuite.js', ...scriptsIn('Scripts'), ...scriptsIn('Forms')];
+// The loader lists the forms' on-demand files for the where-used scan
+// (ON_DEMAND in index.js); every form file must be there.
+const loaderSource = originalRead.call(fs, path.join(themeDir, 'index.js'), 'utf8');
+const unlisted = scriptsIn('Forms').filter(file => file !== 'Forms/UnionSuiteForms.js' && !loaderSource.includes("'" + file + "'"));
+if (unlisted.length) {
+  throw new Error('List each form file in index.js ON_DEMAND, so where used scans it:\n' + unlisted.join('\n'));
+}
 const assembled = [
   /['"`]\$\/[^'"`\r\n]*['"`]\s*\+/,
   /\+\s*['"`]\$\/[^'"`\r\n]*['"`]/,
