@@ -9,12 +9,32 @@
 </head>
 <body>
   <main class="msf-page" aria-label="Membership Overview">
-    <p class="msf-concept"><strong>Mockup</strong> Click a category, type or status to filter. Sample figures only.</p>
+    <p class="msf-concept"><strong>Mockup</strong> Click a category, type, status or gender to filter. Sample figures only.</p>
 
-    <header class="us-membership-heading">
-      <h2>Membership Overview</h2>
-      <p>A monthly view of your membership, growth and financial standing.</p>
-    </header>
+    <div class="msf-head">
+      <header class="us-membership-heading">
+        <h2>Membership Overview</h2>
+        <p>A monthly view of your membership, growth and financial standing.</p>
+      </header>
+
+      <button type="button" class="msf-panel-button" data-msf-panel aria-expanded="false" aria-controls="msf-panel" aria-label="Filters" title="Filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v2.17a2 2 0 0 1-.59 1.42L15 12v7l-6 2v-8.5L4.52 7.57A2 2 0 0 1 4 6.23z"/></svg>
+        <span class="msf-panel-button__count" hidden></span>
+      </button>
+
+      <!-- Non-modal: the report stays usable and updates behind the panel. -->
+      <aside class="msf-panel" id="msf-panel" role="dialog" aria-labelledby="msf-panel-title" data-closed inert>
+        <div class="msf-panel__head">
+          <h2 class="msf-panel__title" id="msf-panel-title" tabindex="-1">Filters</h2>
+          <button type="button" class="msf-panel__close" data-msf-close aria-label="Close filters" title="Close filters">×</button>
+        </div>
+        <div class="msf-panel__body"></div>
+        <div class="msf-panel__foot">
+          <button type="button" class="msf-panel__clear" data-clear="all">Clear all</button>
+          <button type="button" class="msf-panel__done" data-msf-close></button>
+        </div>
+      </aside>
+    </div>
 
     <div class="msf-filters" id="msf-filters"></div>
     <p class="msf-sr" id="msf-announce" role="status" aria-live="polite"></p>
@@ -40,13 +60,20 @@
         <div class="us-membership__content"></div>
       </section>
 
-      <section class="us-membership" data-us-membership="groups" data-msf="groups" aria-label="Membership by member category">
-        <header class="us-membership__heading"><h2>Membership by member category</h2><span data-msf-scope="group" data-msf-default="1–23 Sept 2026"></span></header>
-        <div class="us-membership__content"></div>
-      </section>
+      <div class="msf-pair">
+        <section class="us-membership" data-us-membership="categories" data-msf="types" aria-label="Membership type">
+          <header class="us-membership__heading"><h2>Membership type</h2><span data-msf-scope="type" data-msf-default="Current members"></span></header>
+          <div class="us-membership__content"></div>
+        </section>
 
-      <section class="us-membership" data-us-membership="categories" data-msf="types" aria-label="Membership type">
-        <header class="us-membership__heading"><h2>Membership type</h2><span data-msf-scope="type" data-msf-default="Current members"></span></header>
+        <section class="us-membership" data-us-membership="gender" data-msf="gender" aria-label="Gender">
+          <header class="us-membership__heading"><h2>Gender</h2><span data-msf-scope="gender" data-msf-default="Current members"></span></header>
+          <div class="us-membership__content"></div>
+        </section>
+      </div>
+
+      <section class="us-membership msf-wide" data-us-membership="groups" data-msf="groups" aria-label="Membership by member category">
+        <header class="us-membership__heading"><h2>Membership by member category</h2><span data-msf-scope="group" data-msf-default="1–23 Sept 2026"></span></header>
         <div class="us-membership__content"></div>
       </section>
     </div>

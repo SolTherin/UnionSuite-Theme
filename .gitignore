@@ -33,6 +33,7 @@ THeme/**/*.zip
 # Single-file prototype exports; rebuild with node build-standalone.cjs
 /prototypes/wip/contact-page-v3/Contact-Page-v3-Standalone.html
 /prototypes/wip/case-page/Case-Page-Standalone.html
+/prototypes/wip/membership-stats-filters/Membership-Stats-Filters-Standalone.html
 # Live-page candidate embed; rebuild with node prototypes/wip/agreement-page/build-embed.cjs
 /prototypes/wip/agreement-page/agreement-page-embed.html
 

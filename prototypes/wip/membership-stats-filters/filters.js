@@ -74,14 +74,47 @@
   const drift = 83091 - cells.reduce((total, cell) => total + cell.members, 0);
   cells.reduce((largest, cell) => cell.members > largest.members ? cell : largest).members += drift;
 
+  // Gender is split out of each cell afterwards, so every figure above stays the same.
+  const genderNames = ['Female', 'Male', 'Non-binary', EMPTY];
+  // [Female, Male, Non-binary, not recorded]. Retired members skew male, students
+  // are more diverse, and members with no category often have no gender recorded.
+  const genderMix = cell =>
+    cell.group === 'Retired' ? [0.47, 0.51, 0.002, 0.018]
+      : cell.group === EMPTY ? [0.44, 0.35, 0.01, 0.20]
+      : cell.type === 'Student Member' ? [0.58, 0.34, 0.04, 0.04]
+      : [0.56, 0.40, 0.012, 0.028];
+  // Whole-number split that keeps the total: round each share down, then hand
+  // the remainder to the largest fractions.
+  const split = (count, mix) => {
+    const exact = mix.map(part => count * part), parts = exact.map(Math.floor);
+    const left = count - parts.reduce((total, part) => total + part, 0);
+    exact.map((value, i) => [value - parts[i], i])
+      .sort((a, b) => b[0] - a[0])
+      .slice(0, left)
+      .forEach(([, i]) => parts[i]++);
+    return parts;
+  };
+  const counts = ['members', 'joined', 'resigned', 'joinedBefore', 'resignedBefore'];
+  cells.splice(0, cells.length, ...cells.flatMap(cell => {
+    const mix = genderMix(cell), parts = {};
+    for (const field of counts) parts[field] = split(cell[field], mix);
+    const joins = cell.joins.map(count => split(count, mix)), resigns = cell.resigns.map(count => split(count, mix));
+    return genderNames.map((gender, g) => {
+      const next = {...cell, gender, joins: joins.map(month => month[g]), resigns: resigns.map(month => month[g])};
+      for (const field of counts) next[field] = parts[field][g];
+      return next;
+    });
+  }));
+
   const dimensions = {
     group: {label: 'Member category', order: ['Billing Category 1', 'Billing Category 2', 'Billing Category 3', 'Billing Category 4', 'Retired', EMPTY]},
     type: {label: 'Membership type', order: ['Regular Member', 'Regular Member - SL', 'Associate Member', 'Student Member']},
-    financial: {label: 'Financial status', order: ['Financial', 'Unfinancial', EMPTY]}
+    financial: {label: 'Financial status', order: ['Financial', 'Unfinancial', EMPTY]},
+    gender: {label: 'Gender', order: genderNames}
   };
   const swatches = {Financial: 'var(--brand-700)', Unfinancial: 'var(--teal-300)', [EMPTY]: 'var(--neutral-300)'};
 
-  const filters = {group: undefined, type: undefined, financial: undefined};
+  const filters = {group: undefined, type: undefined, financial: undefined, gender: undefined};
   const isSet = key => filters[key] !== undefined;
   const nameOf = value => value === EMPTY ? '(empty)' : value;
   const number = value => value.toLocaleString('en-AU');
@@ -138,7 +171,7 @@
   function renderFilterBar() {
     const bar = document.getElementById('msf-filters'), active = Object.keys(dimensions).filter(isSet);
     const list = el('div', 'msf-filters__chips');
-    if (!active.length) list.append(el('span', 'msf-filters__hint', 'Showing all current members. Select a member category, membership type or financial status to filter every card.'));
+    if (!active.length) list.append(el('span', 'msf-filters__hint', 'Showing all current members. Select a member category, membership type, financial status or gender to filter every card.'));
     for (const key of active) {
       const chip = el('button', 'msf-chip');
       chip.type = 'button';
@@ -257,23 +290,36 @@
       el('p', 'us-membership__note us-membership__note--inset', 'Members are current counts. Joined, resigned and net change cover ' + period.current + '.'));
   }
 
-  function renderTypes() {
-    const rows = byValue(matching('type'), 'type'), total = rows.reduce((t, r) => t + r.members, 0);
+  // Bar-list cards: membership type and gender share this layout.
+  function renderBars(key, card, note) {
+    const rows = byValue(matching(key), key), total = rows.reduce((t, r) => t + r.members, 0);
     const body = el('div', 'us-membership__body'), list = el('dl', 'us-membership__bars msf-bars');
     for (const row of rows) {
       const entry = el('div', 'msf-row'), dt = el('dt'), dd = el('dd', '', number(row.members));
-      dt.append(optionButton('type', row.value, nameOf(row.value)));
+      dt.append(optionButton(key, row.value, nameOf(row.value)));
       dd.append(el('span', '', share(row.members, total)));
       const bar = el('div', 'us-membership__bar'), fill = el('span');
       bar.setAttribute('aria-hidden', 'true');
       fill.style.width = percent(row.members, total) + '%';
       bar.append(fill);
       entry.append(dt, dd, bar);
-      rowState(entry, 'type', row.value);
+      rowState(entry, key, row.value);
       list.append(entry);
     }
-    body.append(list, el('p', 'us-membership__note', total ? number(total) + ' ' + (Object.keys(dimensions).some(key => key !== 'type' && isSet(key)) ? 'matching' : 'current') + ' members across all membership types.' : 'No members match the other filters.'));
-    document.querySelector('[data-msf="types"] .us-membership__content').replaceChildren(body);
+    body.append(list, el('p', 'us-membership__note', total ? note(rows, total) : 'No members match the other filters.'));
+    document.querySelector('[data-msf="' + card + '"] .us-membership__content').replaceChildren(body);
+  }
+
+  function renderTypes() {
+    renderBars('type', 'types', (rows, total) =>
+      number(total) + ' ' + (Object.keys(dimensions).some(key => key !== 'type' && isSet(key)) ? 'matching' : 'current') + ' members across all membership types.');
+  }
+
+  function renderGender() {
+    renderBars('gender', 'gender', rows => {
+      const unrecorded = rows.find(row => row.value === EMPTY).members;
+      return unrecorded ? number(unrecorded) + ' members have no gender recorded. They are included in the total.' : 'All selected members have a gender recorded.';
+    });
   }
 
   // History: month-end counts are worked backwards from today's members,
@@ -477,14 +523,71 @@
     document.getElementById('msf-announce').textContent = scope ? 'Filtered to ' + scope + '.' : 'Showing all current members.';
   }
 
+  // Filter panel: one radio group per dimension. It is built once and only its
+  // checked states and counts change, so keyboard focus survives every render.
+  const panel = document.getElementById('msf-panel'), panelButton = document.querySelector('[data-msf-panel]');
+  const panelBody = panel.querySelector('.msf-panel__body');
+  const radioValue = input => 'all' in input.dataset ? undefined : input.dataset.value === '' ? EMPTY : input.dataset.value;
+  for (const [key, dimension] of Object.entries(dimensions)) {
+    const group = el('fieldset', 'msf-panel__group');
+    group.append(el('legend', '', dimension.label));
+    for (const value of [undefined, ...dimension.order]) {
+      const option = el('label', 'msf-panel__option'), input = el('input');
+      input.type = 'radio';
+      input.name = 'msf-' + key;
+      input.dataset.filter = key;
+      if (value === undefined) input.dataset.all = '';
+      else input.dataset.value = value === EMPTY ? '' : value;
+      option.append(input, el('span', 'msf-panel__name', value === undefined ? 'All' : nameOf(value)), el('span', 'msf-panel__count'));
+      group.append(option);
+    }
+    panelBody.append(group);
+  }
+
+  function renderPanel() {
+    // Counts follow the cards: each group ignores its own filter.
+    for (const key of Object.keys(dimensions)) {
+      const rows = byValue(matching(key), key), total = sum(rows, 'members');
+      for (const input of panelBody.querySelectorAll('input[name="msf-' + key + '"]')) {
+        const value = radioValue(input);
+        input.checked = value === undefined ? !isSet(key) : isSet(key) && filters[key] === value;
+        input.parentElement.querySelector('.msf-panel__count').textContent =
+          number(value === undefined ? total : rows.find(row => row.value === value).members);
+      }
+    }
+    const active = Object.keys(dimensions).filter(isSet).length, badge = panelButton.querySelector('.msf-panel-button__count');
+    badge.textContent = active;
+    badge.hidden = !active;
+    panelButton.setAttribute('aria-label', active ? 'Filters, ' + active + ' applied' : 'Filters');
+    panel.querySelector('.msf-panel__clear').disabled = !active;
+    panel.querySelector('.msf-panel__done').textContent = 'Show ' + number(sum(matching(), 'members')) + ' members';
+  }
+
+  const panelOpen = () => !panel.hasAttribute('data-closed');
+  function setPanel(open) {
+    if (open === panelOpen()) return;
+    panel.toggleAttribute('data-closed', !open);
+    panel.inert = !open;
+    panelButton.setAttribute('aria-expanded', String(open));
+    (open ? panel.querySelector('.msf-panel__title') : panelButton).focus();
+  }
+
+  panelBody.addEventListener('change', event => {
+    const input = event.target;
+    filters[input.dataset.filter] = radioValue(input);
+    render();
+  });
+
   function render() {
     renderFilterBar();
     renderSummary();
     renderFinancial();
     renderGroups();
     renderTypes();
+    renderGender();
     renderTrend();
     renderHeadings();
+    renderPanel();
   }
 
   function refocus(key, value) {
@@ -494,7 +597,11 @@
 
   document.addEventListener('click', event => {
     const option = event.target.closest('.msf-option'), clear = event.target.closest('[data-clear]'), toggle = event.target.closest('[data-msf-table]');
-    if (toggle) {
+    if (event.target.closest('[data-msf-panel]')) {
+      setPanel(!panelOpen());
+    } else if (event.target.closest('[data-msf-close]')) {
+      setPanel(false);
+    } else if (toggle) {
       showTable = !showTable;
       hoverIndex = -1;
       renderTrend();
@@ -506,11 +613,16 @@
     } else if (clear) {
       for (const key of Object.keys(filters)) if (clear.dataset.clear === 'all' || clear.dataset.clear === key) filters[key] = undefined;
       render();
-      refocus();
+      // Clear all in the panel disables itself, so focus moves to the panel title.
+      if (panel.contains(clear)) panel.querySelector('.msf-panel__title').focus();
+      else refocus();
     }
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && Object.keys(dimensions).some(isSet)) {
+    // Escape closes the panel first; with it closed, Escape clears every filter.
+    if (event.key === 'Escape' && panelOpen()) {
+      setPanel(false);
+    } else if (event.key === 'Escape' && Object.keys(dimensions).some(isSet)) {
       for (const key of Object.keys(filters)) filters[key] = undefined;
       render();
     }
