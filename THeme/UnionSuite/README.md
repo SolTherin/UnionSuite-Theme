@@ -434,7 +434,8 @@ Unit tests cover clipped geometry, fallback and cleanup; live requests and brows
 appearance still require verification.
 
 IQA date ranges: native `GridFilterCalendar` controls now use aligned stacked or
-inline layouts according to field width, integrated calendar buttons, and the
+inline layouts according to field width (including search sheets that place
+filters straight into Bootstrap columns), integrated calendar buttons, and the
 approved form calendar glyph. Older ASP.NET `CalendarBehavior` popups receive
 shared `ajax__calendar` styling alongside the existing Telerik calendar styles.
 Native date conversion, popup navigation and validation remain in control. The

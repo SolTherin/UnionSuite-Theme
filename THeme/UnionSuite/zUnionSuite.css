@@ -7749,7 +7749,10 @@ tr[data-us-iqa-detail-hold] {
 /* US-STAFF-NAV:END */
 
 /* US-IQA-DATE-RANGES:START — native GridFilterCalendar markup and handlers. */
-:is(.us-report, .SearchContactsClass, [data-us-iqa-native]) :is(.FilterPanel, .FilterPanelHorizontal) .PanelField:has(.GridFilterCalendar):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+/* Search sheets (ResultsGrid Sheet0) render filters in Bootstrap columns
+   without PanelField, so the column is the width container there. */
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native]) :is(.FilterPanel, .FilterPanelHorizontal) .PanelField:has(.GridFilterCalendar):not(:where(.us-report-no-styling, .us-report-no-styling *)),
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .row > [class*="col-"]:has(.GridFilterCalendar):not(:has(.PanelField)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   container: us-iqa-date-range / inline-size;
   min-width: 0;
 }
