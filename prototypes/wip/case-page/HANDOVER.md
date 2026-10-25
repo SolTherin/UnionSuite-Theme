@@ -12,7 +12,7 @@ way.
   by the `static-node` launch config) has rail tabs Overview, Details,
   Activity, Parties, Attachments. Sample data and stubs: `case-page.js`.
   Standalone export: `node build-standalone.cjs` then `--check` (the output,
-  `Case-Page-Standalone.html`, is ignored by Git; 9 stylesheets, 8 scripts).
+  `Case-Page-Standalone.html`, is ignored by Git; 9 stylesheets, 5 scripts).
 - **Every add on the page is in place** (US-INLINE-COMPOSER, C40), approved by
   the owner, and **now in the shared theme** (12 October 2026): the block
   after the action engine in `zUnionSuite.js`, its section in
@@ -116,6 +116,22 @@ The owner's brief, in order (all 10 October 2026):
   read once per page and searched in the page), the Role from
   `$/_i4u_/Core/Cases/Value Lists/Case - Form Data/Get Case Staff Member Types`
   (value column saved, label column shown).
+- **Case workplace (C42, owner, 22 October 2026):** the member card's
+  Work label menu (in the theme since 24 October 2026: `US-CASE-WORKPLACE`,
+  guide `#case-member`) needs CloudToolz
+  `/cases/quick-update/set-workplace` (`{CaseID, CaseNum, ContactID,
+  WorkplaceID}`, writing `i4u_UT_Cases.PrimaryContactWorkplaceID`), the jobs
+  IQA `API - Manage Case - Member Workplaces` (filter `CaseNum`; with
+  `WorkplaceStatus`, `WorkplaceStart` and `WorkplaceEnd` since option G,
+  25 October 2026, current and former jobs, and the card's count), and
+  `CaseWorkplaceID` and `CaseNum` on Case - Primary Member (no
+  `WorkplaceCount`: neither card IQA joins the jobs). The card's details IQA
+  filters on `CaseNum` and joins the job on `PrimaryContactWorkplaceID`
+  only, so its Work-* columns are the case's job. `0` saves "not about a
+  workplace". `set-primary-party` should set the new
+  primary's only job or clear it; the Details tab does not reload after
+  Make primary party yet. The Create case popup's workplace field is the
+  owner's.
 - **Proposed IQA:**
   `$/_i4u_/Core/Cases/API - Workplace Members` (CaseNum and Search in;
   ContactId, ContactName, Number, Classification out; primary party left out).

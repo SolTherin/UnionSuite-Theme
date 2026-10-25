@@ -1,0 +1,11 @@
+<div class="us-case-member" data-us-case-member data-us-member-id="{#query.MemberId}" data-us-member-url="{#query.MemberUrl}" data-us-workplace-id="{#query.CaseWorkplaceID}">
+  <div class="us-case-member__head">
+    <span class="us-avatar us-avatar--md" data-us-avatar-name="{#query.MemberName}" aria-hidden="true"></span>
+    <div class="us-case-member__who">
+      <p class="us-case-member__name"><span class="us-case-member__name-text">{#query.MemberName}</span></p>
+      <p class="us-case-member__meta">{#query.MemberLine}</p>
+    </div>
+  </div>
+  <div class="us-field-groups" data-us-fields-query="$/_i4u_/SandBox/Cases/Case - Member Details" data-us-fields-filter="CaseNum" data-us-fields-value="{#query.CaseNum}"></div>
+  <p class="us-case-member__others"><span>{#query.OtherParties}</span> <a href="#" data-us-section-link="case:parties" data-us-cco-tab="Parties">See all parties</a></p>
+</div>

@@ -1,0 +1,781 @@
+<!doctype html>
+<!--
+  Member card workplace edit, seven ways and G's six status styles (C42; owner, 22 October 2026: "I
+  don't love the 2 jobs, change UI"; try edit icons and a clickable Work
+  label). Each option is the Overview member card with the live theme CSS,
+  Priya's two jobs and the same jobs menu (the term status menu's pattern).
+  Every opener works: pick a job to see the card change. The bar at the top
+  switches every card between a chosen job and none chosen, and light and
+  dark.
+
+  A  The prototype today: "2 jobs" and Change after the heading's rule.
+  B  A pencil at the end of the Work heading's rule, always shown.
+  C  The same pencil, shown on hover or focus on wide screens (always shown
+     at 950px and narrower, per AGENTS.md).
+  D  The Work label is the control: "Work" with a chevron opens the menu.
+  E  A pencil on the Workplace field's label, where the job is named.
+  F  D's clickable label, with A's "2 jobs" at the end of the rule and no
+     Change text (owner, 22 October 2026: "I like D, with the 2 jobs label
+     from A at the end").
+  G  F with current and former jobs (owner, 25 October 2026: "sometimes a
+     member may have an issue with a former workplace"). The Work group
+     opens with the job's standing: a green Current badge, or a grey
+     Former badge and the dates the member worked there. The menu lists
+     Current jobs, then Former jobs, each former one with its dates. G
+     starts on a former job; its menu has Priya's two current jobs and one
+     former one. The count splits them, "2 current · 1 former" (plain
+     "3 jobs" with none former). Last in the menu, on its own, "Not about a
+     workplace" (owner, 25 October 2026): the card then reads "This case
+     isn't about a workplace." in place of the fields.
+     Built into the theme on 25 October 2026 with G1's status lines
+     (US-CASE-WORKPLACE); the cards here stay for comparison.
+     The status six ways, G1–G6 (owner, 25 October 2026: "give me variants
+     for active vs former job status badge"): G1 both badged (green Current and
+     "Since Mar 2020", grey Former and the dates; owner's pick for the
+     former line, 25 October 2026, and the current one to match); G2 former only; G3 the badge beside the
+     Work label, dates as a field; G4 a dot and words; G5 Status and dates
+     as fields ("Started Feb 2019" for a current job); G6 a current job
+     shows nothing, a former one an amber "Former workplace" badge and "Left
+     Jan 2019". The bar's G button switches all six between the former job
+     and a current one.
+
+  One job: no option shows anything (not drawn here).
+
+  Menu (owner, 22 October 2026: the tick on the right felt busy), the
+  bar's Menu button, for every option:
+    tick    the case's job ticked on the right (the term status menu's way)
+    bar     the case's job tinted, with a bar on its leading edge, as the
+            rail tabs mark the open tab; no glyph
+    radio   a radio dot before every job, the case's filled
+    others  the case's job as a quiet "This case" heading, not a choice;
+            only the other jobs below it, under "Change to"
+
+  Serve the project root (static-node) and open
+  http://localhost:8778/prototypes/wip/case-page/workplace-compare.html
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workplace Edit Options</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="case-page.candidate.css">
+  <link rel="stylesheet" href="case-page.css">
+  <style>
+    /* Comparison page only. */
+    .wpm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+      gap: 28px 24px;
+      padding: 24px 20px 48px;
+    }
+
+    .wpm-option {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 420px;
+    }
+
+    .wpm-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font: var(--fw-bold) var(--fs-base) / 1.3 var(--font-ui);
+    }
+
+    .wpm-option > p {
+      margin: 0;
+      min-height: 4.5em;
+      color: var(--text-muted);
+      font-size: var(--fs-sm);
+    }
+
+    .wpm-option .panel {
+      margin: 0;
+    }
+
+    /* The mocked controls (each option's candidate CSS). */
+    /* B, C: a quiet pencil after the heading's rule. */
+    .wpm-icon {
+      order: 2;
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-block: -4px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background-color .12s, color .12s, opacity .15s;
+    }
+
+    .wpm-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .wpm-icon:is(:hover, [aria-expanded="true"]) {
+      background: var(--bg-sunken);
+      color: var(--text-link);
+    }
+
+    .wpm-icon:focus-visible,
+    .wpm-label:focus-visible,
+    .wpm-inline:focus-visible,
+    .wpm-link:focus-visible {
+      outline: 0;
+      box-shadow: 0 0 0 2px var(--border-focus);
+    }
+
+    /* C: shown on hover or focus where the window is wide. */
+    @media (min-width: 951px) {
+      [data-option="C"] [data-state="chosen"] .wpm-icon {
+        opacity: 0;
+      }
+
+      [data-option="C"] [data-state="chosen"]:is(:hover, :focus-within) .wpm-icon,
+      [data-option="C"] .wpm-icon[aria-expanded="true"] {
+        opacity: 1;
+      }
+    }
+
+    /* D: the label is the button; it keeps the heading's look. */
+    .wpm-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: -2px -6px;
+      padding: 2px 6px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      cursor: pointer;
+      transition: background-color .12s, color .12s;
+    }
+
+    .wpm-label .ti {
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: transform .18s cubic-bezier(.2, 0, 0, 1), color .12s;
+    }
+
+    .wpm-label:is(:hover, [aria-expanded="true"]) {
+      background: var(--bg-sunken);
+      color: var(--text-link);
+    }
+
+    .wpm-label:is(:hover, [aria-expanded="true"]) .ti {
+      color: var(--text-link);
+    }
+
+    .wpm-label[aria-expanded="true"] .ti {
+      transform: rotate(180deg);
+    }
+
+    /* E: a small pencil after the Workplace label. */
+    .wpm-inline {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin: -6px 0 -6px 2px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      vertical-align: middle;
+      cursor: pointer;
+      transition: background-color .12s, color .12s;
+    }
+
+    .wpm-inline svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .wpm-inline:is(:hover, [aria-expanded="true"]) {
+      background: var(--bg-sunken);
+      color: var(--text-link);
+    }
+
+    /* None chosen: one line in place of the fields, its link the control. */
+    .wpm-note {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: var(--fs-sm);
+    }
+
+    .wpm-link {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--text-link);
+      font: inherit;
+      font-weight: var(--fw-semi);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 950px) {
+      .wpm-icon,
+      .wpm-inline {
+        width: 44px;
+        height: 44px;
+        margin-block: -12px;
+      }
+    }
+    /* Menu styles (the bar's Menu button). The card's own menu
+       (case-page.candidate.css) is "bar"; the others undo it here. */
+    :root:not([data-wpm-menu="bar"]) .us-case-workplace-menu__item[aria-checked="true"]:not(:hover, :focus-visible) {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    :root:not([data-wpm-menu="bar"]) .us-case-workplace-menu__item[aria-checked="true"]:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--border-focus);
+    }
+
+    /* tick: Tabler "check" (MIT) beside the case's job. */
+    :root[data-wpm-menu="tick"] .us-case-workplace-menu__item {
+      grid-template-columns: minmax(0, 1fr) 14px;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    :root[data-wpm-menu="tick"] .us-case-workplace-menu__item[aria-checked="true"]::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background: var(--text-link);
+      -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5l10 -10'/></svg>") center / contain no-repeat;
+      mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5l10 -10'/></svg>") center / contain no-repeat;
+    }
+
+    /* bar: the card's own menu style, unchanged. */
+
+    /* radio: a ring before every job, filled for the case's. */
+    :root[data-wpm-menu="radio"] .us-case-workplace-menu__item {
+      grid-template-columns: 14px minmax(0, 1fr);
+    }
+
+    :root[data-wpm-menu="radio"] .us-case-workplace-menu__item::before {
+      content: "";
+      align-self: start;
+      width: 14px;
+      height: 14px;
+      margin-top: 3px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 50%;
+      box-sizing: border-box;
+      transition: border-color .12s, box-shadow .12s;
+    }
+
+    :root[data-wpm-menu="radio"] .us-case-workplace-menu__item[aria-checked="true"]::before {
+      border-color: var(--text-link);
+      box-shadow: inset 0 0 0 3px var(--bg-surface), inset 0 0 0 7px var(--text-link);
+    }
+
+    /* others: the case's job is the menu's heading, not a choice. */
+    .wpm-menu-current {
+      display: grid;
+      padding: 6px 8px 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+      font: var(--fw-medium) var(--fs-sm) / 20px var(--font-ui);
+    }
+
+    .wpm-menu-kicker {
+      color: var(--text-muted);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semi);
+      letter-spacing: .04em;
+      line-height: 16px;
+      text-transform: uppercase;
+    }
+
+    .wpm-menu-current .us-case-workplace-menu__title {
+      color: var(--text-strong);
+      font-weight: var(--fw-semi);
+    }
+
+    .wpm-menu-kicker--list {
+      padding: 2px 8px 2px;
+    }
+
+    /* G: the job's standing, first in the Work group. */
+    .wpm-tenure {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      margin: 0 0 var(--space-2);
+      color: var(--text-muted);
+      font-size: var(--fs-sm);
+    }
+
+    /* G4: a dot before the words, green for current, grey for former. */
+    .wpm-tenure--dot {
+      color: var(--text-base);
+      font-weight: var(--fw-medium);
+    }
+
+    .wpm-tenure--dot::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .wpm-tenure--dot[data-status="former"] {
+      color: var(--text-muted);
+    }
+
+    .wpm-tenure--dot[data-status="former"]::before {
+      background: var(--text-muted);
+    }
+
+    /* G3: the badge beside the Work label, before the rule. */
+    .us-field-groups__heading > .us-badge {
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    /* G6: the icon inside the badge. */
+    .wpm-tenure .us-badge .ti {
+      font-size: 13px;
+    }
+
+    /* G's variants start a new row with their own heading. */
+    .wpm-divider {
+      grid-column: 1 / -1;
+      margin: 12px 0 -8px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .wpm-divider h2 {
+      margin: 0 0 4px;
+      color: var(--text-strong);
+      font: var(--fw-bold) var(--fs-lg, 18px) / 1.3 var(--font-ui);
+    }
+
+    .wpm-divider p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: var(--fs-sm);
+    }
+
+    /* G: the menu's Current and Former groups. */
+    .wpm-menu-group {
+      display: grid;
+    }
+
+    .wpm-menu-group + .wpm-menu-group {
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .wpm-menu-group > .wpm-menu-kicker {
+      padding: 4px 8px 2px;
+    }
+
+    .wpm-menu-dates {
+      color: var(--text-muted);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-regular);
+      line-height: 16px;
+    }
+  </style>
+</head>
+<body class="cp-page">
+
+<div class="cp-toolbar" aria-label="Comparison controls">
+  <strong>Member card · workplace edit</strong>
+  <span class="cp-tag">C42 · seven options · live theme CSS · click any control</span>
+  <span class="cp-toolbar__controls">
+    <button type="button" class="cp-toggle" id="wpm-state" aria-pressed="false">Job: chosen</button>
+    <button type="button" class="cp-toggle" id="wpm-menu" aria-pressed="false">Menu: tick</button>
+    <button type="button" class="cp-toggle" id="wpm-gjob" aria-pressed="false">G: former job</button>
+    <button type="button" class="cp-toggle" id="wpm-mode" aria-pressed="false">Mode: light</button>
+  </span>
+</div>
+
+<main class="wpm-grid" id="wpm-grid"></main>
+
+<script>
+(() => {
+  'use strict';
+
+  const JOBS = [
+    {id: '4101', name: 'Dandenong DC – night shift', line: 'Northside Distribution Pty Ltd · Storeperson Grade 2',
+      employer: 'Northside Distribution Pty Ltd', workplace: 'Dandenong DC – night shift', classification: 'Storeperson Grade 2', delegate: 'Alex Keaton'},
+    {id: '4188', name: 'Frankston Hospital – catering', line: 'Bayside Health · Food services assistant',
+      employer: 'Bayside Health', workplace: 'Frankston Hospital – catering', classification: 'Food services assistant', delegate: 'Tom Becker'}
+  ];
+  // G: the same two current jobs, and one the member has left. since and
+  // left are for the variants that show a current job's start (G5) or only
+  // the leaving date (G6).
+  const JOBS_G = [
+    {...JOBS[0], status: 'current', since: 'Mar 2020'},
+    {...JOBS[1], status: 'current', since: 'Aug 2023'},
+    {id: '3907', name: 'Westgate Cold Storage – Laverton', line: 'Westgate Logistics Pty Ltd · Storeperson Grade 1',
+      employer: 'Westgate Logistics Pty Ltd', workplace: 'Westgate Cold Storage – Laverton', classification: 'Storeperson Grade 1', delegate: 'Dana Whitfield',
+      status: 'former', dates: 'Mar 2016 – Jan 2019', left: 'Jan 2019'}
+  ];
+  // Every G card (G1–G6) is option G with another status style.
+  const isG = key => key.startsWith('G');
+  const jobsFor = key => isG(key) ? JOBS_G : JOBS;
+  // G: a case can be about none of the member's jobs. Its own stored value,
+  // so it reads apart from a blank (not chosen yet).
+  const NO_WORKPLACE = {id: '0', name: 'Not about a workplace', line: 'This case isn’t about any of Priya’s jobs'};
+  const findJob = (key, id) => isG(key) && id === NO_WORKPLACE.id ? NO_WORKPLACE : jobsFor(key).find(entry => entry.id === id);
+  // G's count: current and former apart, plain "3 jobs" when none is former.
+  function jobCount(jobs) {
+    const former = jobs.filter(job => job.status === 'former').length;
+    const current = jobs.length - former;
+    if (!former) return jobs.length + ' jobs';
+    return current ? `${current} current · ${former} former` : `${former} former`;
+  }
+  const PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m16 3 5 5-13 13H3v-5L16 3z M14 5l5 5"></path></svg>';
+
+  const OPTIONS = [
+    {key: 'A', title: 'A · Today: “2 jobs” and Change',
+      text: 'The count and a Change link after the heading’s rule. None chosen: a boxed prompt with a button.'},
+    {key: 'B', title: 'B · Pencil at the end of the rule',
+      text: 'A quiet pencil where the rule ends, like the row edit icons. No count. None chosen: one line with a link.'},
+    {key: 'C', title: 'C · Pencil on hover',
+      text: 'B’s pencil, shown while the pointer is over the Work group or it has focus. Always shown at 950px and narrower, and while none is chosen.'},
+    {key: 'D', title: 'D · Clickable Work label',
+      text: 'The label itself opens the menu: “Work” with a chevron, tinted on hover. Nothing added to the line.'},
+    {key: 'E', title: 'E · Pencil on the Workplace field',
+      text: 'The edit sits on the field it changes, beside its label. None chosen: the Workplace field asks, and the other work fields wait.'},
+    {key: 'F', title: 'F · Clickable Work label and “2 jobs”',
+      text: 'D’s label opens the menu; A’s count sits at the end of the rule, with no Change text. None chosen: one line with a link.'},
+    // G: F with current and former jobs, the job's status six ways (owner,
+    // 25 October 2026: "give me variants for active vs former job status
+    // badge"). The menu is the same for all six.
+    {key: 'G1', title: 'G1 · Both badged',
+      text: 'A green Current badge and “Since Mar 2020”, or a grey Former badge and “Worked there Mar 2016 – Jan 2019”, first in the Work group.'},
+    {key: 'G2', title: 'G2 · Former only',
+      text: 'A current job is the usual case, so it shows nothing. A former job shows the grey Former badge and its dates.'},
+    {key: 'G3', title: 'G3 · In the heading',
+      text: 'The badge sits beside the Work label, so the status reads with the heading. A former job’s dates are the first field.'},
+    {key: 'G4', title: 'G4 · Dot and words',
+      text: 'No pill: a small dot and “Current job”, or “Former job · Mar 2016 – Jan 2019”, green or grey.'},
+    {key: 'G5', title: 'G5 · As fields',
+      text: 'Status and dates are two more fields at the start of the grid: “Current” and “Since Feb 2019”, or “Former” and “Mar 2016 – Jan 2019”.'},
+    {key: 'G6', title: 'G6 · Former as a caution',
+      text: 'A current job shows nothing. A former job gets an amber “Former workplace” badge with a history icon and “Left Jan 2019”, to make staff check.'}
+  ];
+
+  const state = {chosen: true, gJob: '3907', cards: {}};
+  OPTIONS.forEach(option => { state.cards[option.key] = isG(option.key) ? state.gJob : '4101'; });
+
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[char]);
+  const opener = (className, inner, label) =>
+    `<button type="button" class="${className}" data-wp-open aria-haspopup="menu" aria-expanded="false"${label ? ` aria-label="${label}" title="${label}"` : ''}>${inner}</button>`;
+  const field = (term, value) => `<div class="us-fields__field"><dt>${term}</dt><dd>${value}</dd></div>`;
+
+  // E puts its pencil on the Workplace label (term); G3 and G5 put their
+  // status fields first (lead).
+  function fields(job, term = 'Workplace', lead = '') {
+    return '<dl class="us-fields">' + lead +
+      field('Employer', escape(job.employer)) +
+      field(term, escape(job.workplace)) +
+      field('Classification', escape(job.classification)) +
+      field('Delegate', escape(job.delegate)) + '</dl>';
+  }
+
+  const note = text => `<p class="wpm-note">Priya has 2 jobs. ${opener('wpm-link', text)}</p>`;
+
+  // G1–G6: F's heading and count, then the job's status in each variant's
+  // style, then the fields.
+  function workGroupG(key, job) {
+    const former = job && job.status === 'former';
+    const badge = former ? '<span class="us-badge">Former</span>' : '<span class="us-badge us-badge--success">Current</span>';
+    const label = opener('wpm-label', 'Work <i class="ti ti-chevron-down" aria-hidden="true"></i>', 'Work: change the workplace for this case');
+    const count = `<span class="us-case-workplace__tools"><span class="us-case-workplace__count">${jobCount(JOBS_G)}</span></span>`;
+    const realJob = job && job !== NO_WORKPLACE;
+    const head = `<h3 class="us-field-groups__heading">${label}${key === 'G3' && realJob ? badge : ''}${count}</h3>`;
+    if (!job) return head + '<p class="wpm-note">Which job is this case about? ' + opener('wpm-link', 'Choose workplace') + '</p>';
+    // Not about a workplace: one plain line in place of the fields.
+    if (job === NO_WORKPLACE) return head + '<p class="wpm-note">This case isn’t about a workplace.</p>';
+    const dates = `Worked there ${escape(job.dates)}`;
+    switch (key) {
+      case 'G1':
+        // Both read the same way (owner, 25 October 2026): the badge, then
+        // when, "Since Mar 2020" or "Worked there Mar 2016 – Jan 2019".
+        return head + `<p class="wpm-tenure">${badge}<span>${former ? dates : 'Since ' + escape(job.since)}</span></p>` + fields(job);
+      case 'G2':
+        return head + (former ? `<p class="wpm-tenure">${badge}<span>${dates}</span></p>` : '') + fields(job);
+      case 'G3':
+        return head + (former ? fields(job, 'Workplace', field('Worked there', escape(job.dates))) : fields(job));
+      case 'G4':
+        return head + `<p class="wpm-tenure wpm-tenure--dot" data-status="${job.status}"><span>${former ? 'Former job · ' + escape(job.dates) : 'Current job'}</span></p>` + fields(job);
+      case 'G5':
+        return head + fields(job, 'Workplace', field('Status', badge) + field(former ? 'Worked there' : 'Started', escape(former ? job.dates : job.since)));
+      case 'G6':
+        return head + (former
+          ? `<p class="wpm-tenure"><span class="us-badge us-badge--warning"><i class="ti ti-history" aria-hidden="true"></i> Former workplace</span><span>Left ${escape(job.left)}</span></p>`
+          : '') + fields(job);
+    }
+    return '';
+  }
+
+  // Each option's Work group: heading, then the fields or the ask.
+  function workGroup(key, job) {
+    if (isG(key)) return workGroupG(key, job);
+    const chosen = Boolean(job);
+    const heading = inner => `<h3 class="us-field-groups__heading">${inner}</h3>`;
+    switch (key) {
+      case 'A':
+        return heading('Work<span class="us-case-workplace__tools"><span class="us-case-workplace__count">2 jobs</span>' +
+            (chosen ? opener('us-case-workplace__change', 'Change', 'Change the workplace for this case') : '') + '</span>') +
+          (chosen ? fields(job) : '<div class="us-case-workplace__prompt"><p>Which job is this case about?</p>' +
+            opener('TextButton SmallButton us-case-workplace__choose', 'Choose workplace') + '</div>');
+      case 'B':
+      case 'C':
+        return heading('Work' + opener('wpm-icon', PENCIL, 'Change the workplace for this case')) +
+          (chosen ? fields(job) : note('Choose the one this case is about'));
+      case 'D':
+        return heading(opener('wpm-label', 'Work <i class="ti ti-chevron-down" aria-hidden="true"></i>', 'Work: change the workplace for this case')) +
+          (chosen ? fields(job) : note('Choose the one this case is about'));
+      case 'F':
+        return heading(opener('wpm-label', 'Work <i class="ti ti-chevron-down" aria-hidden="true"></i>', 'Work: change the workplace for this case') +
+            '<span class="us-case-workplace__tools"><span class="us-case-workplace__count">2 jobs</span></span>') +
+          (chosen ? fields(job) : '<p class="wpm-note">Which job is this case about? ' + opener('wpm-link', 'Choose workplace') + '</p>');
+      case 'E':
+        return heading('Work') + (chosen
+          ? fields(job, 'Workplace' + opener('wpm-inline', PENCIL, 'Change the workplace for this case'))
+          : '<dl class="us-fields">' + field('Workplace', opener('wpm-link', 'Choose workplace')) + '</dl>' +
+            '<p class="wpm-note">Priya has 2 jobs; the case is about one.</p>');
+    }
+    return '';
+  }
+
+  function card(option) {
+    const job = state.chosen ? findJob(option.key, state.cards[option.key]) : null;
+    return `
+      <div class="ContentItemContainer"><div class="us-query-template"><div class="panel">
+        <div class="panel-heading Distinguish">
+          <h2 class="panel-title"><i class="ti ti-user us-panel-title__icon" aria-hidden="true"></i>Member</h2>
+          <div class="us-iqa-report-actions us-panel-actions"><div class="us-iqa-custom-actions">
+            <a class="us-command us-panel-action TextButton us-outline-button" data-us-command-state="ready" href="#" aria-label="View profile"><i class="ti ti-id" aria-hidden="true"></i><span>View profile</span></a>
+          </div></div>
+        </div>
+        <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet"><section><div class="QueryTemplateItem">
+          <div class="us-case-member" data-us-case-member>
+            <div class="us-case-member__head">
+              <span class="us-avatar us-avatar--md" data-us-avatar-name="Priya Natarajan" aria-hidden="true"></span>
+              <div class="us-case-member__who">
+                <p class="us-case-member__name"><span class="us-case-member__name-text">Priya Natarajan</span></p>
+                <p class="us-case-member__meta">Member 20544 · Full member</p>
+              </div>
+            </div>
+            <div class="us-field-groups" data-us-fields-state="ready">
+              <div class="us-field-groups__alert AsiError"><i class="ti ti-alert-circle us-field-groups__alert-icon" aria-hidden="true"></i><div class="us-field-groups__alert-copy"><p class="us-field-groups__alert-title">Unfinancial</p><p class="us-field-groups__alert-message">Paid to 30 Jun 2026. Check eligibility before providing assistance.</p></div></div>
+              <div class="us-field-groups__group"><h3 class="us-field-groups__heading">Contact</h3><dl class="us-fields">${field('Mobile', '0412 555 019')}${field('Email', '<a href="mailto:priya.n@mailinator.com">priya.n@<wbr>mailinator.com</a>')}</dl></div>
+              <div class="us-field-groups__group"><h3 class="us-field-groups__heading">Membership</h3><dl class="us-fields">${field('Paid to', '30 Jun 2026')}${field('Joined', '11 Feb 2019')}</dl></div>
+              <div class="us-field-groups__group" data-wp-group data-state="${job ? 'chosen' : 'unset'}">${workGroup(option.key, job)}</div>
+            </div>
+            <p class="us-case-member__others"><span>Also on this case: Josh Kemp, Lee Hartley and Northside Distribution Pty Ltd.</span> <a href="#">See all parties</a></p>
+          </div>
+        </div></section></div></div></div>
+      </div></div></div>`;
+  }
+
+  const grid = document.getElementById('wpm-grid');
+  function render() {
+    const divider = '<div class="wpm-divider" id="g"><h2>G · F with current and former jobs: the status, six ways</h2>' +
+      '<p>Each card is F with Priya’s two current jobs and one former one, “Not about a workplace” last in the menu, and the count split. ' +
+      'Only the status differs. The bar’s G button switches all six between the former job and a current one.</p></div>';
+    grid.innerHTML = OPTIONS.map(option => (option.key === 'G1' ? divider : '') +
+      `<section class="wpm-option" data-option="${option.key}"><h2>${option.title}</h2><p>${option.text}</p>${card(option)}</section>`).join('');
+  }
+
+  // Re-draws one option's Work group after a pick, fading the fields in.
+  function renderGroup(key, focusOpener) {
+    const group = grid.querySelector(`[data-option="${key}"] [data-wp-group]`);
+    const job = findJob(key, state.cards[key]);
+    group.setAttribute('data-state', 'chosen');
+    group.innerHTML = workGroup(key, job);
+    group.querySelectorAll('.wpm-tenure, .us-fields, .wpm-note').forEach(node =>
+      node.animate?.([{opacity: 0.25}, {opacity: 1}], {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'}));
+    if (focusOpener) group.querySelector('[data-wp-open]')?.focus({preventScroll: true});
+  }
+
+  // ── The jobs menu (case-workplace.candidate.js's, simplified) ──
+  let menu = null;
+  let owner = null;
+
+  function buildMenu() {
+    const node = document.createElement('div');
+    node.className = 'us-case-workplace-menu';
+    node.setAttribute('role', 'menu');
+    node.setAttribute('aria-label', 'Workplace for this case');
+    node.hidden = true;
+    node.addEventListener('click', event => {
+      const item = event.target.closest('.us-case-workplace-menu__item');
+      if (!item || !owner) return;
+      const key = owner.closest('[data-option]').getAttribute('data-option');
+      close(false);
+      state.cards[key] = item.getAttribute('data-id');
+      if (!state.chosen) {
+        // A pick from the ask chooses for this card only.
+        grid.querySelector(`[data-option="${key}"] [data-wp-group]`).setAttribute('data-state', 'chosen');
+      }
+      renderGroup(key, true);
+    });
+    node.addEventListener('keydown', event => {
+      const list = [...node.querySelectorAll('.us-case-workplace-menu__item')];
+      const index = list.indexOf(document.activeElement);
+      const moves = {ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: list.length - 1};
+      if (event.key in moves) {
+        event.preventDefault();
+        list[(moves[event.key] + list.length) % list.length].focus();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        close(true);
+      } else if (event.key === 'Tab') {
+        close(false);
+      }
+    });
+    document.body.append(node);
+    return node;
+  }
+
+  function open(button) {
+    menu ||= buildMenu();
+    if (owner === button) {
+      close(true);
+      return;
+    }
+    if (owner) close(false);
+    owner = button;
+    const key = button.closest('[data-option]').getAttribute('data-option');
+    const group = button.closest('[data-wp-group]');
+    const current = group.getAttribute('data-state') === 'chosen' ? state.cards[key] : '';
+    const jobs = jobsFor(key);
+    const choices = isG(key) ? [...jobs, NO_WORKPLACE] : jobs;
+    // A former job carries its dates as a third line (G).
+    const copy = job => `<span class="us-case-workplace-menu__copy"><span class="us-case-workplace-menu__title">${escape(job.name)}</span><span class="us-case-workplace-menu__line">${escape(job.line)}</span>` +
+      (job.dates ? `<span class="wpm-menu-dates">${escape(job.dates)}</span>` : '') + '</span>';
+    const item = job => `<button type="button" class="us-case-workplace-menu__item" role="menuitemradio" tabindex="-1" data-id="${job.id}" aria-checked="${job.id === current}">${copy(job)}</button>`;
+    // G groups the jobs: current first, then former, each under a heading.
+    const list = entries => !isG(key) ? entries.map(item).join('') : [['current', 'Current jobs'], ['former', 'Former jobs']]
+      .map(([status, label]) => [label, entries.filter(job => job.status === status)])
+      .filter(([, group]) => group.length)
+      .map(([label, group]) => `<div class="wpm-menu-group" role="group" aria-label="${label}"><span class="wpm-menu-kicker" aria-hidden="true">${label}</span>${group.map(item).join('')}</div>`)
+      .join('') +
+      // Last, on its own: the case is about none of the jobs.
+      (entries.includes(NO_WORKPLACE) ? `<div class="wpm-menu-group">${item(NO_WORKPLACE)}</div>` : '');
+    const chosenJob = findJob(key, current);
+    if (menuStyle === 'others' && chosenJob) {
+      // The case's job heads the menu; only the others are choices.
+      menu.innerHTML = `<div class="wpm-menu-current" role="presentation"><span class="wpm-menu-kicker">This case</span>${copy(chosenJob)}</div>` +
+        '<span class="wpm-menu-kicker wpm-menu-kicker--list" role="presentation">Change to</span>' +
+        list(choices.filter(job => job !== chosenJob));
+    } else {
+      menu.innerHTML = list(choices);
+    }
+    menu.hidden = false;
+    const rect = button.getBoundingClientRect();
+    const below = rect.bottom + 4;
+    const top = below + menu.offsetHeight > innerHeight - 8 ? Math.max(8, rect.top - 4 - menu.offsetHeight) : below;
+    const left = rect.left + menu.offsetWidth > innerWidth - 8 ? rect.right - menu.offsetWidth : rect.left;
+    menu.style.top = top + 'px';
+    menu.style.left = Math.max(8, left) + 'px';
+    button.setAttribute('aria-expanded', 'true');
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      menu.animate([{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}], {duration: 140, easing: 'cubic-bezier(.2, 0, 0, 1)'});
+    }
+    const items = [...menu.querySelectorAll('.us-case-workplace-menu__item')];
+    (items.find(item => item.getAttribute('aria-checked') === 'true') || items[0]).focus({preventScroll: true});
+  }
+
+  function close(returnFocus) {
+    if (!menu || !owner) return;
+    const button = owner;
+    owner = null;
+    button.setAttribute('aria-expanded', 'false');
+    if (returnFocus) button.focus({preventScroll: true});
+    menu.hidden = true;
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-wp-open]');
+    if (button) {
+      event.preventDefault();
+      open(button);
+      return;
+    }
+    if (event.target.closest('.wpm-grid a[href="#"]')) event.preventDefault();
+  });
+  document.addEventListener('pointerdown', event => {
+    if (owner && !menu.contains(event.target) && !owner.contains(event.target)) close(false);
+  }, true);
+  addEventListener('scroll', event => {
+    if (owner && !menu.contains(event.target)) close(false);
+  }, true);
+  addEventListener('resize', () => close(false));
+
+  // ── The bar ──
+  document.getElementById('wpm-state').addEventListener('click', event => {
+    close(false);
+    state.chosen = !state.chosen;
+    event.currentTarget.textContent = state.chosen ? 'Job: chosen' : 'Job: none chosen';
+    event.currentTarget.setAttribute('aria-pressed', String(!state.chosen));
+    render();
+  });
+  // Every G card to the former job, or to the night shift (current).
+  document.getElementById('wpm-gjob').addEventListener('click', event => {
+    close(false);
+    state.gJob = state.gJob === '3907' ? '4101' : '3907';
+    OPTIONS.filter(option => isG(option.key)).forEach(option => { state.cards[option.key] = state.gJob; });
+    event.currentTarget.textContent = state.gJob === '3907' ? 'G: former job' : 'G: current job';
+    event.currentTarget.setAttribute('aria-pressed', String(state.gJob !== '3907'));
+    render();
+  });
+  const MENU_STYLES = ['tick', 'bar', 'radio', 'others'];
+  let menuStyle = 'tick';
+  document.getElementById('wpm-menu').addEventListener('click', event => {
+    close(false);
+    menuStyle = MENU_STYLES[(MENU_STYLES.indexOf(menuStyle) + 1) % MENU_STYLES.length];
+    document.documentElement.setAttribute('data-wpm-menu', menuStyle);
+    event.currentTarget.textContent = 'Menu: ' + menuStyle;
+    event.currentTarget.setAttribute('aria-pressed', String(menuStyle !== 'tick'));
+  });
+  document.getElementById('wpm-mode').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    document.documentElement.setAttribute('data-us-color-scheme', dark ? 'dark' : 'light');
+    event.currentTarget.textContent = dark ? 'Mode: dark' : 'Mode: light';
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+  });
+
+  document.documentElement.setAttribute('data-us-color-scheme', 'light');
+  document.documentElement.setAttribute('data-wpm-menu', 'tick');
+  render();
+  // The cards are drawn here, after the browser looked for #g: jump now.
+  if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+})();
+</script>
+<!-- The theme draws the avatars' initials (US-AVATARS). -->
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+</body>
+</html>

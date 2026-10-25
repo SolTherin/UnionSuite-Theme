@@ -15,6 +15,7 @@ const popupActionExample = require('./popup-action-example.cjs');
 const queryTemplateRefreshExample = require('./query-template-refresh-example.cjs');
 const inlineComposerExample = require('./inline-composer-example.cjs');
 const casePartiesExample = require('./case-parties-example.cjs');
+const caseMemberExample = require('./case-member-example.cjs');
 const caseBannerExample = require('./case-banner-example.cjs');
 const queryValueExample = require('./query-value-example.cjs');
 const caseListsExample = require('./case-lists-example.cjs');
@@ -55,6 +56,7 @@ const snippets = {
   'copy-button': ['THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html', read('THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html')],
   'contact-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Contacts-Query-Template.html')],
   'case-parties': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html')],
+  'case-member': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Member-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Member-Query-Template.html')],
   'system-alert': ['THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html', read('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html')],
   attention: ['THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html', read('THeme/UnionSuite-Guides/usage/templates/Home/Needs-Attention-Content.html')],
   'task-compact-row': ['THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Compact-Query-Template.html', read('THeme/UnionSuite-Guides/usage/templates/List-Templates/Tasks-Compact-Query-Template.html')],
@@ -132,6 +134,7 @@ const allSources = ['THeme/UnionSuite-Guides/usage/build/switch-examples.cjs','T
 allSources.push('THeme/UnionSuite-Guides/usage/templates/System-Alert-Message.html');
 allSources.push('THeme/UnionSuite-Guides/usage/templates/Banner-Agreement-Facts.html', 'THeme/UnionSuite-Guides/usage/templates/Case-Details-Content.html', 'THeme/UnionSuite-Guides/usage/templates/Banner-Case-Template.html', 'THeme/UnionSuite-Guides/usage/templates/Copy-Button-Template.html');
 allSources.push(...listTemplates.sources);
+allSources.push(...caseMemberExample.sources);
 allSources.push(...require('./build-taskbar-dark-mode.cjs').sources);
 allSources.push('THeme/UnionSuite-Client/Config.js');
 allSources.push('THeme/UnionSuite/Scripts/ActionDefinitions.js','THeme/UnionSuite-Client/Actions.js');
@@ -253,6 +256,8 @@ const inserts = {
  CONTACT_ROW_TEMPLATE: snippet('contact-row'),
  CASE_PARTIES_DEMO: iframe('case-parties-demo', 'Case parties: the list, the chosen party and their details', casePartiesExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
  CASE_PARTIES_TEMPLATE: snippet('case-parties'),
+ CASE_MEMBER_DEMO: iframe('case-member-demo', 'Case member card: choosing which job the case is about', caseMemberExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),
+ CASE_MEMBER_TEMPLATE: snippet('case-member'),
  CASE_ROWS_DEMO: iframe('case-rows-demo', 'Two-row case banner with the member line, status menu and details row', caseBannerExample.documentHtml({read, css:nativePreviewCss+theme, themeJs, fields:queryFields.definitions['Banner-Case-Rows-Query-Template.html']}), true),
  CASE_ROWS_TEMPLATE: snippet('case-rows'),
  QUERY_VALUE_DEMO: iframe('query-value-demo', 'Attachments with a count footer from its own IQA', queryValueExample.documentHtml({read, css:nativePreviewCss+theme, themeJs}), true),

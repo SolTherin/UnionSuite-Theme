@@ -1,0 +1,389 @@
+<!doctype html>
+<!--
+  Case banner: where the workplace goes (owner, 25 October 2026: "build the
+  workplace into the case banner somehow"). Spun off from the case page
+  prototype's banner (templates/Case-Banner-Query-Template.html), with the
+  live theme CSS and JS and C217's sample data. The workplace is the case's
+  job from the member card's workplace selector (C42, workplace-compare.html):
+  Priya's night shift job at Dandenong DC, or a former job.
+
+  1  As is: the case ID and title, the member under the title, the second
+     row's description and facts. No workplace.
+  2  The case ID and title on their own line. Under them, from the banner's
+     left edge (under the ID badge), the member line, then a workplace line
+     in the same style: a building icon, the workplace linked to its
+     record, then the employer and classification, muted. A former job adds
+     a grey Former badge and its dates. Both lines are in the top row, so
+     they stay when the banner condenses.
+  3  As is, with the workplace as the first fact on the second row. That row
+     is filled from the Banner Details IQA (US-BANNER-FACTS), so the
+     workplace is one more column there (Additional-Workplace) and needs no
+     new markup or theme code. It folds away with the second row when the
+     banner condenses.
+
+  4  Streamlined (owner, 25 October 2026: "it's getting a bit busy"): the
+     member and the workplace on one line under the title, "Priya Natarajan
+     · Unfinancial · Dandenong DC – night shift". The member number and the
+     employer and classification move into tooltips on the names (both are
+     on the Overview member card); a former job keeps its Former badge, its
+     dates in the badge's tooltip. No description on the banner (it is on
+     the Details tab), so the second row is the facts alone.
+
+  The bar switches every option between the current job, a former job and
+  "Not about a workplace" (option 2 drops the line; option 3 drops the fact),
+  between open and folded (the banner condensed, as on scroll: the second
+  row slides away; option 2's workplace line keeps only the workplace and
+  any Former badge), and between light and dark. For narrow screens, narrow the browser itself:
+  the banner's small-screen rules follow the window's width, not the page's.
+
+  Option 2's CSS is a candidate (below, marked) for zUnionSuite.css: the
+  identity block's lines under the ID (us-banner__identity--stacked) and the
+  workplace line (us-banner__workplace), styled as us-banner__member.
+
+  Serve the project root (static-node) and open
+  http://localhost:8778/prototypes/wip/case-page/banner-compare.html
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case Banner Options</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="case-page.candidate.css">
+  <link rel="stylesheet" href="case-page.css">
+  <style>
+    /* Comparison page only. */
+    .bc-stage {
+      box-sizing: border-box;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 64px;
+    }
+
+    .bc-option {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 36px;
+    }
+
+    .bc-option > h2 {
+      margin: 0;
+      color: var(--text-strong);
+      font: var(--fw-bold) var(--fs-base) / 1.3 var(--font-ui);
+    }
+
+    .bc-option > p {
+      max-width: 760px;
+      margin: 0;
+      color: var(--text-muted);
+      font-size: var(--fs-sm);
+    }
+
+    /* ── Candidate CSS · option 2 ─────────────────────────────────
+       The identity block stacked: the ID and title on the first line,
+       then the member and workplace lines from the banner's left edge,
+       under the ID badge. */
+    .us-banner .us-banner__surface--rows .us-banner__identity--stacked {
+      row-gap: var(--space-1);
+    }
+
+    .us-banner .us-banner__identity--stacked > .us-banner__lines {
+      display: grid;
+      flex: 1 0 100%;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .us-banner .us-banner__identity--stacked .us-banner__member {
+      margin: 0;
+    }
+
+    /* The workplace line: the member line's look, with a building icon. */
+    .us-banner .us-banner__workplace {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px var(--space-2);
+      margin: 0;
+      color: var(--banner-muted);
+      font-size: var(--fs-base);
+    }
+
+    .us-banner .us-banner__workplace > .ti {
+      color: var(--banner-muted);
+      font-size: 16px;
+      font-style: normal;
+    }
+
+    .us-banner .us-banner__workplace-name {
+      color: var(--banner-text);
+      font-weight: var(--fw-semi);
+      text-decoration: none;
+    }
+
+    .us-banner .us-banner__workplace-name:is(:hover, :focus-visible) {
+      color: var(--banner-text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .us-banner .us-banner__workplace-line {
+      color: var(--banner-muted);
+      font-size: var(--fs-sm);
+    }
+
+    /* A former job: the grey badge and its dates kept together. */
+    .us-banner .us-banner__workplace-former {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+    }
+
+    /* A neutral badge that reads on the banner's dark glass (the plain
+       badge has no fill there). */
+    .us-banner .us-banner__badge.us-banner__badge--neutral {
+      border-color: transparent;
+      background: color-mix(in srgb, var(--banner-text) 16%, transparent);
+      color: var(--banner-text);
+    }
+
+    /* Folded (us-banner--compact, as on scroll): the workplace's name and
+       any Former badge, at the member line's folded size. */
+    .us-banner.us-banner--compact .us-banner__workplace {
+      font-size: var(--fs-sm);
+    }
+
+    .us-banner.us-banner--compact .us-banner__workplace .us-banner__workplace-line {
+      display: none;
+    }
+
+    .us-banner .us-banner__workplace :is(.us-banner__workplace-line, .us-banner__badge):empty,
+    .us-banner .us-banner__workplace:has(> .us-banner__workplace-name:empty) {
+      display: none;
+    }
+
+    /* ── Candidate CSS · option 4 ─────────────────────────────────
+       The workplace after the member on the member line, set off by a
+       quiet dot; tooltips carry the member number and the employer. */
+    .us-banner .us-banner__member-sep {
+      color: color-mix(in srgb, var(--banner-muted) 70%, transparent);
+    }
+
+    .us-banner .us-banner__member > .ti + .us-banner__workplace-name,
+    .us-banner .us-banner__member > .us-banner__workplace-name {
+      font-weight: var(--fw-semi);
+    }
+
+    .us-banner .us-banner__member :is(.us-banner__member-name, .us-banner__workplace-name)[title] {
+      cursor: pointer;
+    }
+
+    /* Option 3: a fact's own link, in the fact's colour. */
+    .us-banner .us-banner__fact a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+      text-underline-offset: 3px;
+    }
+
+    .us-banner .us-banner__fact a:is(:hover, :focus-visible) {
+      text-decoration-color: currentColor;
+    }
+
+    .us-banner .us-banner__fact .us-banner__badge {
+      margin-inline-start: var(--space-1);
+    }
+  </style>
+</head>
+<body class="cp-page">
+
+<div class="cp-toolbar" aria-label="Comparison controls">
+  <strong>Case banner · workplace</strong>
+  <span class="cp-tag">WIP · sample data · live theme CSS/JS</span>
+  <span class="cp-toolbar__controls">
+    <button type="button" class="cp-toggle" id="bc-job" aria-pressed="false">Workplace: current job</button>
+    <button type="button" class="cp-toggle" id="bc-fold" aria-pressed="false">Banner: open</button>
+    <button type="button" class="cp-toggle" id="bc-scheme" aria-pressed="false">Mode: light</button>
+  </span>
+</div>
+
+<main class="bc-stage">
+
+  <section class="bc-option">
+    <h2>1 · As is</h2>
+    <p>The case page's banner today. The workplace isn't in the banner; it's on the Overview member card.</p>
+    <div class="ContentItemContainer"><div class="us-banner" data-bc-option="1"></div></div>
+  </section>
+
+  <section class="bc-option">
+    <h2>2 · Member and workplace under the case</h2>
+    <p>The case ID and title keep their own line. The member line moves under them, from the banner's left edge, and the workplace line follows in the same style. Both stay in the top row, so they stay when the banner condenses on scroll.</p>
+    <div class="ContentItemContainer"><div class="us-banner" data-bc-option="2"></div></div>
+  </section>
+
+  <section class="bc-option">
+    <h2>3 · As is, with Workplace as the first fact</h2>
+    <p>The second row is filled from the Banner Details IQA, so the workplace is one more column there (Additional-Workplace), first because it's what the case is about. No new markup or theme code. It folds away with the second row when the banner condenses.</p>
+    <div class="ContentItemContainer"><div class="us-banner" data-bc-option="3"></div></div>
+  </section>
+
+  <section class="bc-option">
+    <h2>4 · Streamlined: member and workplace on one line</h2>
+    <p>The member and the workplace share the line under the title. The member number and the employer and classification are in tooltips on the names (hover them; both are on the Overview member card). No description on the banner, so the second row is the facts alone.</p>
+    <div class="ContentItemContainer"><div class="us-banner" data-bc-option="4"></div></div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  // The case's job (the member card's workplace selector, C42), current or
+  // former, or none: the case isn't about a workplace.
+  const JOBS = {
+    current: {id: '4101', name: 'Dandenong DC – night shift', line: 'Northside Distribution Pty Ltd · Storeperson Grade 2', former: ''},
+    former: {id: '3907', name: 'Westgate Cold Storage – Laverton', line: 'Westgate Logistics Pty Ltd · Storeperson Grade 1', former: 'Mar 2016 – Jan 2019'},
+    none: null
+  };
+  const ORDER = ['current', 'former', 'none'];
+  const LABELS = {current: 'current job', former: 'former job', none: 'not about a workplace'};
+  let job = 'current';
+
+  const escape = text => String(text ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;'}[c]));
+  const workplaceUrl = entry => '/Party.aspx?ID=' + entry.id;
+
+  const member =
+    '<p class="us-banner__member"><i class="ti ti-user" aria-hidden="true"></i>' +
+    '<a class="us-banner__member-name" href="/Party.aspx?ID=20544">Priya Natarajan</a>' +
+    '<span class="us-banner__member-line">Member 20544</span>' +
+    '<span class="us-banner__badge us-banner__badge--danger">Unfinancial</span></p>';
+
+  // Option 2's workplace line; empty parts collapse, as the member line's do.
+  function workplaceLine(entry) {
+    if (!entry) return '';
+    return '<p class="us-banner__workplace"><i class="ti ti-building" aria-hidden="true"></i>' +
+      '<a class="us-banner__workplace-name" href="' + workplaceUrl(entry) + '">' + escape(entry.name) + '</a>' +
+      '<span class="us-banner__workplace-line">' + escape(entry.line) + '</span>' +
+      (entry.former ? '<span class="us-banner__workplace-former"><span class="us-banner__badge us-banner__badge--neutral">Former</span><span class="us-banner__workplace-line">' + escape(entry.former) + '</span></span>' : '') +
+      '</p>';
+  }
+
+  // Option 4's line: the member, then the workplace, one line; the member
+  // number and the employer details in tooltips.
+  function memberAndWorkplace(entry) {
+    const workplace = entry
+      ? '<span class="us-banner__member-sep" aria-hidden="true">·</span><i class="ti ti-building" aria-hidden="true"></i>' +
+        '<a class="us-banner__workplace-name" href="' + workplaceUrl(entry) + '" title="' + escape(entry.line) + '">' + escape(entry.name) + '</a>' +
+        (entry.former ? '<span class="us-banner__badge us-banner__badge--neutral" title="' + escape(entry.former) + '">Former</span>' : '')
+      : '';
+    return '<p class="us-banner__member"><i class="ti ti-user" aria-hidden="true"></i>' +
+      '<a class="us-banner__member-name" href="/Party.aspx?ID=20544" title="Member 20544">Priya Natarajan</a>' +
+      '<span class="us-banner__badge us-banner__badge--danger">Unfinancial</span>' + workplace + '</p>';
+  }
+
+  // Option 3's fact: the workplace linked, a Former badge when it is one.
+  function workplaceFact(entry) {
+    if (!entry) return '';
+    return '<div class="us-banner__fact"><dt>Workplace</dt><dd>' +
+      '<a href="' + workplaceUrl(entry) + '" title="' + escape(entry.line) + '">' + escape(entry.name) + '</a>' +
+      (entry.former ? '<span class="us-banner__badge us-banner__badge--neutral">Former</span>' : '') +
+      '</dd></div>';
+  }
+
+  const facts =
+    '<div class="us-banner__fact"><dt>Opened</dt><dd>7 Oct 2026 · 1 day</dd></div>' +
+    '<div class="us-banner__fact"><dt>Type</dt><dd>Bullying / Harassment</dd></div>' +
+    '<div class="us-banner__fact"><dt>Priority</dt><dd><span class="us-banner__badge us-banner__badge--danger">High</span></dd></div>' +
+    '<div class="us-banner__fact"><dt>Lead staff</dt><dd>Mary O\'Conner</dd></div>' +
+    '<div class="us-banner__fact"><dt>Last member contact</dt><dd>Yesterday</dd></div>';
+
+  const record = n =>
+    '<span class="us-banner__record-copy"><span class="us-banner__record-id" id="bc-id-' + n + '">C217</span>' +
+    '<button type="button" class="us-copy" data-us-copy-target="bc-id-' + n + '" aria-label="Copy case ID" title="Copy case ID"></button></span>';
+  const title = '<h1 class="us-banner__title">Bullying complaint – Northside Distribution night shift</h1>';
+
+  const status =
+    '<div class="us-banner__status"><div class="us-actions us-case-status">' +
+    '<button type="button" class="us-actions__toggle us-banner__badge us-banner__badge--record-status" title="Change status">Open</button>' +
+    '<ul class="us-actions__list"><li><h6 class="us-actions__heading">Status</h6></li>' +
+    ['New', 'Open', 'In progress', 'On hold'].map(name => '<li><button type="button" class="us-actions__item"' + (name === 'Open' ? ' aria-current="true"' : '') + '>' + name + '</button></li>').join('') +
+    '</ul></div></div>';
+  const actions =
+    '<div class="us-banner__actions"><div class="us-actions">' +
+    '<button type="button" class="us-actions__toggle">Actions</button>' +
+    '<ul class="us-actions__list"><li><h6 class="us-actions__heading">Add entry</h6></li>' +
+    ['Add note', 'Add task', 'Add meeting', 'Upload attachment'].map(name => '<li><button type="button" class="us-actions__item">' + name + '</button></li>').join('') +
+    '</ul></div></div>';
+
+  function banner(option) {
+    const entry = JOBS[job];
+    let identity;
+    if (option === 2) {
+      identity = '<div class="us-banner__identity us-banner__identity--stacked">' + record(option) +
+        '<div class="us-banner__identity-text">' + title + '</div>' +
+        '<div class="us-banner__lines">' + member + workplaceLine(entry) + '</div></div>';
+    } else {
+      identity = '<div class="us-banner__identity">' + record(option) +
+        '<div class="us-banner__identity-text">' + title + (option === 4 ? memberAndWorkplace(entry) : member) + '</div></div>';
+    }
+    // Option 4 leaves the description to the Details tab.
+    const lead = option === 4 ? '' :
+      '<div class="us-banner__lead"><p class="us-banner__lead-label">Description</p>' +
+      '<p class="us-banner__description">Priya reports repeated belittling comments from a night shift supervisor since July.</p></div>';
+    const details =
+      '<div class="us-banner__details">' + lead +
+      '<dl class="us-banner__facts">' + (option === 3 ? workplaceFact(entry) : '') + facts + '</dl></div>';
+    // The second row in the theme's fold, as a collapsible banner wraps it,
+    // so folding slides it away.
+    return '<header class="us-banner__surface us-banner__surface--glass us-banner__surface--status us-banner__surface--rows" data-us-record-status="Open">' +
+      '<div class="us-banner__summary">' + identity + status + actions + '</div>' +
+      '<div class="us-banner__fold"><div class="us-banner__fold-inner">' + details + '</div></div></header>';
+  }
+
+  let folded = false;
+
+  function render() {
+    document.querySelectorAll('[data-bc-option]').forEach(host => {
+      host.innerHTML = banner(Number(host.dataset.bcOption));
+      host.classList.toggle('us-banner--compact', folded);
+    });
+    window.UnionSuiteActions?.refresh?.();
+  }
+
+  // Folded: the banner as it condenses on scroll (us-banner--compact).
+  document.getElementById('bc-fold').addEventListener('click', event => {
+    folded = !folded;
+    document.querySelectorAll('[data-bc-option]').forEach(host => host.classList.toggle('us-banner--compact', folded));
+    event.currentTarget.textContent = 'Banner: ' + (folded ? 'folded' : 'open');
+    event.currentTarget.setAttribute('aria-pressed', String(folded));
+  });
+
+  document.getElementById('bc-job').addEventListener('click', event => {
+    job = ORDER[(ORDER.indexOf(job) + 1) % ORDER.length];
+    event.currentTarget.textContent = 'Workplace: ' + LABELS[job];
+    event.currentTarget.setAttribute('aria-pressed', String(job !== 'current'));
+    render();
+  });
+
+  document.getElementById('bc-scheme').addEventListener('click', event => {
+    const dark = document.documentElement.getAttribute('data-us-color-scheme') !== 'dark';
+    if (dark) document.documentElement.setAttribute('data-us-color-scheme', 'dark');
+    else document.documentElement.removeAttribute('data-us-color-scheme');
+    event.currentTarget.textContent = 'Mode: ' + (dark ? 'dark' : 'light');
+    event.currentTarget.setAttribute('aria-pressed', String(dark));
+  });
+
+  render();
+})();
+</script>
+<script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
+</body>
+</html>

@@ -5070,6 +5070,604 @@ SOFTWARE.
 })();
 /* US-CASE-PARTIES:END */
 
+/* US-CASE-WORKPLACE:START — which of the member's jobs a case is about
+   (owner, 22 and 25 October 2026), on the case member card (US-CASE-MEMBER).
+
+   A member can hold more than one job, current or former, and a case is
+   about one of them, or about none ("sometimes a member may have an issue
+   with a former workplace"). The case records it in
+   i4u_UT_Cases.PrimaryContactWorkplaceID: a job's WorkplaceID, 0 for "not
+   about a workplace", or blank while nobody has chosen.
+
+   The jobs come from their own IQA (API - Manage Case - Member Workplaces,
+   filter CaseNum), one row per job, read as soon as the card arrives, so the
+   card's own IQAs never join the jobs and never repeat a row. They give the
+   count, the menu and the Work fields of a pick.
+   - No jobs: the card is unchanged.
+   - One or more: the Work label is the control ("Work" and a chevron, which
+     turns while the menu is open), and the count sits at the end of the
+     heading's rule: "2 jobs", or "2 current · 1 former" when any is former.
+   - The case's job opens the Work group with its status: a green Current
+     badge and "Since Mar 2020", or a grey Former badge and "Worked there
+     Mar 2016 – Jan 2019".
+   - Not about a workplace: one line, "This case isn't about a workplace.",
+     in place of the fields.
+   - None chosen: with one job, that job shows (not saved); with several,
+     the fields give way to "Which job is this case about? Choose
+     workplace", whose link opens the menu too. The fields wait for the
+     jobs, so they never show dashes first.
+   The menu lists the jobs (under Current jobs and Former jobs when any is
+   former, a former one with its dates), then "Not about a workplace" on its
+   own. The case's choice is tinted with a bar on its leading edge, as the
+   rail tabs mark the open tab. It works as the term status menu's does
+   (US-TERM-STATUS): arrow keys, Home and End move; Enter or Space picks;
+   Escape and Tab close.
+   A pick shows at once, then saves through CloudToolz
+   /cases/quick-update/set-workplace (UnionSuiteAgreements.cloudToolz, in
+   Scripts/ActionDefinitions.js). A failed save puts the previous choice
+   back and says "Not saved. Try again." A saved one reloads the page's other
+   field panels quietly, so the Details tab's Workplace follows, and fires
+   us:case-workplace-changed on the card ({workplaceId, job}; job is null for
+   not about a workplace).
+
+   Markup (the guide's Case member template), from Case - Primary Member:
+     data-us-case-member       the card
+     data-us-workplace-id      CaseWorkplaceID (blank: none chosen; 0: not
+                               about a workplace)
+     data-us-member-id         MemberId, sent as ContactID
+     data-us-workplace-group   optional: the field group to edit (Work)
+   The jobs IQA's columns: WorkplaceID, WorkplaceName (the menu's title),
+   WorkplaceLine (employer · classification), WorkplaceStatus (Current or
+   Former; blank is current), WorkplaceStart and WorkplaceEnd (dates, shown
+   as "Mar 2020"), and the same Work-* columns the details IQA returns, which
+   fill the card on a pick. CaseID and CaseNum are read from the page URL. */
+(function () {
+  'use strict';
+  if (window.UnionSuiteCaseWorkplace) return;
+
+  const JOBS_QUERY = '$/_i4u_/Client/Cases/Layouts v2/API - Manage Case - Member Workplaces';
+  const ENDPOINT = '/cases/quick-update/set-workplace';
+  const NO_WORKPLACE = '0';
+  const CARD = '[data-us-case-member]';
+  const OPENERS = '.us-case-workplace__label, .us-case-workplace__choose';
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  // Each card's jobs, read once (a refreshed card is a new element).
+  const jobsByCard = new WeakMap();
+  const failedCards = new WeakSet();
+  // The jobs once they have arrived, so a redrawn card takes them at once.
+  const loadedJobs = new WeakMap();
+  let menu = null;
+  let owner = null;
+  let queued = false;
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(value).trim();
+
+  const chosenId = card => text(card.getAttribute('data-us-workplace-id'));
+  const groupName = card => text(card.getAttribute('data-us-workplace-group')) || 'Work';
+  const pageParam = name => new URLSearchParams(location.search).get(name) || '';
+  const isFormer = job => text(job.WorkplaceStatus).toLowerCase() === 'former';
+
+  // The field label US-FIELD-GROUPS gives a column name, so a job's
+  // Work-* columns find their fields: "Employer" stays, "PaidTo" becomes
+  // "Paid to".
+  function label(name) {
+    if (!name || /\s/.test(name)) return name;
+    const words = name.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
+    return words.map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
+    }).join(' ');
+  }
+
+  // "Mar 2020" from an ISO date (2020-03-02T00:00:00) or an Australian one
+  // (2/03/2020); any other text is shown as it is.
+  function monthYear(value) {
+    const date = text(value);
+    const iso = date.match(/^(\d{4})-(\d{2})/);
+    if (iso) return MONTHS[Number(iso[2]) - 1] + ' ' + iso[1];
+    const local = date.match(/^\d{1,2}\/(\d{1,2})\/(\d{4})/);
+    if (local) return MONTHS[Number(local[1]) - 1] + ' ' + local[2];
+    return date;
+  }
+
+  // When the member worked there: "Since Mar 2020" for a current job;
+  // "Worked there Mar 2016 – Jan 2019" for a former one (or "Left Jan 2019",
+  // "Worked there from Mar 2016" when one date is missing).
+  function tenure(job) {
+    const start = monthYear(job.WorkplaceStart);
+    const end = monthYear(job.WorkplaceEnd);
+    if (!isFormer(job)) return start ? 'Since ' + start : '';
+    if (start && end) return 'Worked there ' + start + ' – ' + end;
+    if (end) return 'Left ' + end;
+    return start ? 'Worked there from ' + start : '';
+  }
+
+  // "2 jobs", "1 job", or "2 current · 1 former" when any is former.
+  function countText(jobs) {
+    const former = jobs.filter(isFormer).length;
+    const current = jobs.length - former;
+    if (!former) return jobs.length + (jobs.length === 1 ? ' job' : ' jobs');
+    return current ? current + ' current · ' + former + ' former' : former + ' former';
+  }
+
+  // ── The jobs ────────────────────────────────────────────────
+  function apiRoot() {
+    if (!window.gWebRoot) return '/api/';
+    const root = new URL(String(window.gWebRoot), window.location.origin);
+    return root.pathname.replace(/\/+$/, '') + '/api/';
+  }
+
+  async function requestJobs() {
+    const token = document.getElementById('__RequestVerificationToken')?.value;
+    const params = new URLSearchParams({QueryName: JOBS_QUERY, CaseNum: pageParam('CaseNum'), limit: '50', offset: '0'});
+    const response = await fetch(apiRoot() + 'query?' + params, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {Accept: 'application/json', ...(token ? {RequestVerificationToken: token} : {})}
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+    if (!Array.isArray(rows)) throw new Error('Unexpected response');
+    return rows.map(row => Object.fromEntries(Object.entries(row)
+      .filter(([name]) => name !== '$type')
+      .map(([name, value]) => [name, unwrap(value)])));
+  }
+
+  // A failed read is kept, so the page's changes do not ask again; the menu
+  // asks again when it opens (retry).
+  function jobsFor(card, retry = false) {
+    if (retry && failedCards.has(card)) {
+      failedCards.delete(card);
+      jobsByCard.delete(card);
+    }
+    if (!jobsByCard.has(card)) {
+      const request = requestJobs();
+      request.then(jobs => loadedJobs.set(card, jobs), error => {
+        failedCards.add(card);
+        console.warn('[UnionSuiteCaseWorkplace] The jobs could not be loaded:', error.message);
+      });
+      jobsByCard.set(card, request);
+    }
+    return jobsByCard.get(card);
+  }
+
+  // ── The card ────────────────────────────────────────────────
+  function findGroup(card) {
+    const name = groupName(card).toLowerCase();
+    return [...card.querySelectorAll('.us-field-groups__group')].find(group =>
+      group.querySelector(':scope > .us-field-groups__heading')?.firstChild?.textContent.trim().toLowerCase() === name);
+  }
+
+  function opener(className, labelText, ariaLabel) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = className;
+    button.append(labelText);
+    button.setAttribute('aria-haspopup', 'menu');
+    button.setAttribute('aria-expanded', 'false');
+    if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
+    return button;
+  }
+
+  function line(className, ...content) {
+    const node = document.createElement('p');
+    node.className = className;
+    node.hidden = true;
+    node.append(...content);
+    return node;
+  }
+
+  const parts = group => ({
+    status: group.querySelector(':scope > .us-case-workplace__status'),
+    fields: group.querySelector(':scope > .us-fields'),
+    prompt: group.querySelector(':scope > .us-case-workplace__prompt'),
+    note: group.querySelector(':scope > .us-case-workplace__note')
+  });
+
+  // Runs once per rendered Work group. What the details IQA cannot know yet
+  // (none chosen, not about a workplace) is settled before the group paints;
+  // the rest waits for the jobs.
+  function enhance(card) {
+    const groups = card.querySelector('.us-field-groups');
+    // Read the jobs while the details load.
+    void jobsFor(card).catch(() => {});
+    if (groups?.getAttribute('data-us-fields-state') !== 'ready') return;
+    const group = findGroup(card);
+    if (!group || group.hasAttribute('data-us-workplace')) return;
+    group.setAttribute('data-us-workplace', '');
+
+    const heading = group.querySelector(':scope > .us-field-groups__heading');
+    heading.after(line('us-case-workplace__status'));
+    group.append(
+      line('us-case-workplace__note', 'This case isn’t about a workplace.'),
+      line('us-case-workplace__prompt', 'Which job is this case about? ', opener('us-case-workplace__choose', 'Choose workplace'))
+    );
+    const {fields, note} = parts(group);
+    const id = chosenId(card);
+    if (id === NO_WORKPLACE) {
+      fields.hidden = true;
+      note.hidden = false;
+    } else if (!id) {
+      fields.hidden = true;
+    }
+
+    // Jobs already read (the details redrawn): settled before the group
+    // paints, with nothing moving. Otherwise as they arrive, with motion.
+    const settle = (jobs, animate) => {
+      if (!group.isConnected) return;
+      if (jobs.length) addControl(group, heading, jobs, animate);
+      show(card, group, chosenId(card), jobs, animate);
+    };
+    if (loadedJobs.has(card)) {
+      settle(loadedJobs.get(card), false);
+      return;
+    }
+    jobsFor(card).then(jobs => settle(jobs, true), () => {
+      // Without the jobs the card keeps what the details IQA gave it.
+      if (group.isConnected && !id) fields.hidden = false;
+    });
+  }
+
+  // The heading's label as the menu's button, and its count.
+  function addControl(group, heading, jobs, animate) {
+    const name = heading.firstChild.textContent.trim();
+    const button = opener('us-case-workplace__label', name, name + ': change the workplace for this case');
+    const chevron = document.createElement('i');
+    chevron.className = 'ti ti-chevron-down';
+    chevron.setAttribute('aria-hidden', 'true');
+    button.append(chevron);
+    heading.firstChild.replaceWith(button);
+
+    const tools = document.createElement('span');
+    tools.className = 'us-case-workplace__tools';
+    const count = document.createElement('span');
+    count.className = 'us-case-workplace__count';
+    count.textContent = countText(jobs);
+    const status = document.createElement('span');
+    status.className = 'sr-only';
+    status.setAttribute('role', 'status');
+    tools.append(count, status);
+    heading.append(tools);
+    if (animate && !reducedMotion() && tools.animate) {
+      tools.animate([{opacity: 0}, {opacity: 1}], {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'});
+    }
+  }
+
+  // The job the card shows: the case's, or a member's only job while none
+  // is chosen (shown, not saved).
+  function shownJob(id, jobs) {
+    if (id === NO_WORKPLACE) return null;
+    if (id) return jobs.find(job => text(job.WorkplaceID) === id) || null;
+    return jobs.length === 1 ? jobs[0] : null;
+  }
+
+  // The job's Work-* columns into the group's fields, matched by label.
+  function fill(card, group, job) {
+    const prefix = groupName(card).toLowerCase() + '-';
+    const fields = new Map([...group.querySelectorAll('.us-fields__field')].map(field =>
+      [field.querySelector('dt')?.textContent.trim().toLowerCase(), field.querySelector('dd')]));
+    Object.entries(job).forEach(([column, value]) => {
+      if (!column.toLowerCase().startsWith(prefix)) return;
+      const definition = fields.get(label(column.slice(prefix.length).trim()).toLowerCase());
+      // A blank value leaves the dd empty, which the theme shows as a dash.
+      if (definition) definition.textContent = text(value);
+    });
+  }
+
+  function fillStatus(node, job) {
+    const badge = document.createElement('span');
+    badge.className = isFormer(job) ? 'us-badge' : 'us-badge us-badge--success';
+    badge.textContent = isFormer(job) ? 'Former' : 'Current';
+    const when = document.createElement('span');
+    when.textContent = tenure(job);
+    node.replaceChildren(badge, ...(when.textContent ? [when] : []));
+  }
+
+  // The group for a choice: the status and fields for a job; the note for
+  // not about a workplace; the prompt for several jobs and none chosen.
+  function show(card, group, id, jobs, animate) {
+    const {status, fields, prompt, note} = parts(group);
+    const job = shownJob(id, jobs);
+    if (job) {
+      fill(card, group, job);
+      fillStatus(status, job);
+    }
+    const wanted = new Map([
+      [status, Boolean(job)],
+      [fields, Boolean(job) || (id !== NO_WORKPLACE && !(!id && jobs.length > 1))],
+      [prompt, !id && jobs.length > 1],
+      [note, id === NO_WORKPLACE]
+    ]);
+    // fold, not the hidden attribute, decides what moves: hidden changes only
+    // when a fold ends, and a fold under way (a failed save straight after
+    // a pick) has to turn back.
+    const fold = window.UnionSuiteRecordCards?.fold;
+    wanted.forEach((open, node) => {
+      if (animate && fold) void fold(node, open);
+      else node.hidden = !open;
+    });
+  }
+
+  // On its own line under the heading: the side column has no room
+  // beside the label and the count.
+  function report(group, message) {
+    group.querySelectorAll(':scope > .us-case-workplace__error').forEach(node => node.remove());
+    const node = document.createElement('p');
+    node.className = 'us-case-workplace__error';
+    node.setAttribute('role', 'status');
+    node.textContent = message;
+    group.querySelector(':scope > .us-field-groups__heading').after(node);
+    setTimeout(() => node.remove(), 6000);
+  }
+
+  function save(card, workplaceId) {
+    const cloudToolz = window.UnionSuiteAgreements?.cloudToolz;
+    if (!cloudToolz) throw new Error('The CloudToolz call (UnionSuiteAgreements) is unavailable.');
+    return cloudToolz(ENDPOINT, {method: 'POST', body: JSON.stringify({
+      CaseID: pageParam('CaseID'),
+      CaseNum: pageParam('CaseNum'),
+      ContactID: text(card.getAttribute('data-us-member-id')),
+      WorkplaceID: workplaceId
+    })});
+  }
+
+  // The page's other field panels (Case details) read the case's workplace.
+  function reloadOthers() {
+    document.querySelectorAll('.us-field-groups[data-us-fields-query]').forEach(root => {
+      if (root.closest(CARD) || root.closest('.us-parties')) return;
+      window.UnionSuiteFieldGroups?.reload(root);
+    });
+  }
+
+  async function choose(card, workplaceId) {
+    const group = card.querySelector('[data-us-workplace]');
+    const button = group?.querySelector('.us-case-workplace__label');
+    const previous = chosenId(card);
+    if (!group || group.getAttribute('aria-busy') === 'true') return;
+    if (workplaceId === previous) {
+      button.focus({preventScroll: true});
+      return;
+    }
+    const jobs = await jobsFor(card);
+    const job = workplaceId === NO_WORKPLACE ? null : jobs.find(entry => text(entry.WorkplaceID) === workplaceId);
+    if (workplaceId !== NO_WORKPLACE && !job) return;
+    const {status, fields} = parts(group);
+    const changing = [status, fields].filter(node => !node.hidden);
+
+    // Shown at once, as a term's status is.
+    group.setAttribute('aria-busy', 'true');
+    card.setAttribute('data-us-workplace-id', workplaceId);
+    show(card, group, workplaceId, jobs, true);
+    if (job && !reducedMotion()) {
+      // A job for a job: the status and fields stay, and their new text fades in.
+      changing.filter(node => !node.hidden).forEach(node => node.animate?.([{opacity: 0.25}, {opacity: 1}], {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'}));
+    }
+    button.focus({preventScroll: true});
+
+    let saved = true;
+    try {
+      await save(card, workplaceId);
+    } catch (error) {
+      saved = false;
+      console.warn('[UnionSuiteCaseWorkplace]', error.message);
+    }
+    group.removeAttribute('aria-busy');
+    if (!saved) {
+      card.setAttribute('data-us-workplace-id', previous);
+      show(card, group, previous, jobs, true);
+      report(group, 'Not saved. Try again.');
+      if (!previous && jobs.length > 1) group.querySelector('.us-case-workplace__choose')?.focus({preventScroll: true});
+      return;
+    }
+    group.querySelector('.us-case-workplace__tools > [role="status"].sr-only').textContent = job
+      ? 'Workplace for this case: ' + text(job.WorkplaceName) + '.'
+      : 'This case isn’t about a workplace.';
+    reloadOthers();
+    card.dispatchEvent(new CustomEvent('us:case-workplace-changed', {bubbles: true, detail: {workplaceId, job}}));
+  }
+
+  // ── The menu ────────────────────────────────────────────────
+  function buildMenu() {
+    const node = document.createElement('div');
+    node.className = 'us-case-workplace-menu';
+    node.setAttribute('role', 'menu');
+    node.setAttribute('aria-label', 'Workplace for this case');
+    node.hidden = true;
+    node.addEventListener('click', event => {
+      const item = event.target.closest('.us-case-workplace-menu__item');
+      if (!item || !owner) return;
+      const card = owner.closest(CARD);
+      close(false);
+      void choose(card, item.getAttribute('data-us-workplace-id'));
+    });
+    node.addEventListener('keydown', onMenuKey);
+    document.body.append(node);
+    return node;
+  }
+
+  function items() {
+    return [...menu.querySelectorAll('.us-case-workplace-menu__item')];
+  }
+
+  function menuItem(id, title, lines, current) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'us-case-workplace-menu__item';
+    item.setAttribute('role', 'menuitemradio');
+    item.setAttribute('tabindex', '-1');
+    item.setAttribute('data-us-workplace-id', id);
+    item.setAttribute('aria-checked', String(id === current));
+    const copy = document.createElement('span');
+    copy.className = 'us-case-workplace-menu__copy';
+    const heading = document.createElement('span');
+    heading.className = 'us-case-workplace-menu__title';
+    heading.textContent = title;
+    copy.append(heading);
+    lines.filter(([, value]) => value).forEach(([className, value]) => {
+      const node = document.createElement('span');
+      node.className = className;
+      node.textContent = value;
+      copy.append(node);
+    });
+    item.append(copy);
+    return item;
+  }
+
+  function menuGroup(labelText, children) {
+    const group = document.createElement('div');
+    group.className = 'us-case-workplace-menu__group';
+    group.setAttribute('role', 'group');
+    if (labelText) {
+      group.setAttribute('aria-label', labelText);
+      const heading = document.createElement('span');
+      heading.className = 'us-case-workplace-menu__heading';
+      heading.setAttribute('aria-hidden', 'true');
+      heading.textContent = labelText;
+      group.append(heading);
+    }
+    group.append(...children);
+    return group;
+  }
+
+  // The jobs (under Current jobs and Former jobs when any is former), then
+  // not about a workplace on its own.
+  function renderItems(jobs, current) {
+    const item = job => menuItem(text(job.WorkplaceID), text(job.WorkplaceName) || 'Workplace ' + text(job.WorkplaceID), [
+      ['us-case-workplace-menu__line', text(job.WorkplaceLine)],
+      ['us-case-workplace-menu__dates', isFormer(job) ? tenure(job).replace(/^Worked there /, '') : '']
+    ], current);
+    const former = jobs.filter(isFormer);
+    const groups = former.length
+      ? [['Current jobs', jobs.filter(job => !isFormer(job))], ['Former jobs', former]]
+        .filter(([, list]) => list.length)
+        .map(([labelText, list]) => menuGroup(labelText, list.map(item)))
+      : [menuGroup('', jobs.map(item))];
+    const none = menuItem(NO_WORKPLACE, 'Not about a workplace', [
+      ['us-case-workplace-menu__line', 'This case isn’t about any of the member’s jobs']
+    ], current);
+    menu.replaceChildren(...groups, menuGroup('', [none]));
+  }
+
+  // Under the button, or above it when the window has no room below; its
+  // right edge on the button's when it would run off the window.
+  function place(button) {
+    const rect = button.getBoundingClientRect();
+    const height = menu.offsetHeight;
+    const below = rect.bottom + 4;
+    const top = below + height > window.innerHeight - 8 ? Math.max(8, rect.top - 4 - height) : below;
+    const left = rect.left + menu.offsetWidth > window.innerWidth - 8 ? rect.right - menu.offsetWidth : rect.left;
+    menu.style.top = top + 'px';
+    menu.style.left = Math.max(8, left) + 'px';
+  }
+
+  async function open(button) {
+    menu ||= buildMenu();
+    if (owner === button) {
+      close(true);
+      return;
+    }
+    if (owner) close(false);
+    const card = button.closest(CARD);
+    const group = card?.querySelector('[data-us-workplace]');
+    if (!group || button.getAttribute('aria-busy') === 'true') return;
+    // The jobs are read when the card arrives, so they are usually here.
+    button.setAttribute('aria-busy', 'true');
+    let jobs;
+    try {
+      jobs = await jobsFor(card, true);
+    } catch (error) {
+      report(group, 'The jobs could not be loaded. Try again.');
+      return;
+    } finally {
+      button.removeAttribute('aria-busy');
+    }
+    if (!button.isConnected || !jobs.length) return;
+    owner = button;
+    renderItems(jobs, chosenId(card));
+    menu.hidden = false;
+    place(button);
+    button.setAttribute('aria-expanded', 'true');
+    if (!reducedMotion() && menu.animate) {
+      menu.animate([{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}], {duration: 140, easing: 'cubic-bezier(.2, 0, 0, 1)'});
+    }
+    (items().find(item => item.getAttribute('aria-checked') === 'true') || items()[0]).focus({preventScroll: true});
+  }
+
+  function close(returnFocus) {
+    if (!menu || !owner) return;
+    const button = owner;
+    owner = null;
+    button.setAttribute('aria-expanded', 'false');
+    if (returnFocus) button.focus({preventScroll: true});
+    if (reducedMotion() || !menu.animate) {
+      menu.hidden = true;
+      return;
+    }
+    menu.animate([{opacity: 1}, {opacity: 0}], {duration: 100, easing: 'ease-out'}).finished.then(() => {
+      if (!owner) menu.hidden = true;
+    }, () => {});
+  }
+
+  function onMenuKey(event) {
+    const list = items();
+    const index = list.indexOf(document.activeElement);
+    const moves = {ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: list.length - 1};
+    if (event.key in moves) {
+      event.preventDefault();
+      list[(moves[event.key] + list.length) % list.length].focus();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      close(true);
+    } else if (event.key === 'Tab') {
+      close(false);
+    }
+  }
+
+  // ── Wiring ──────────────────────────────────────────────────
+  document.addEventListener('click', event => {
+    const button = event.target.closest(OPENERS);
+    if (!button || !button.closest(CARD)) return;
+    event.preventDefault();
+    void open(button);
+  });
+
+  // A press anywhere else, a scroll or a resize closes the menu.
+  document.addEventListener('pointerdown', event => {
+    if (owner && !menu.contains(event.target) && !owner.contains(event.target)) close(false);
+  }, true);
+  addEventListener('scroll', event => {
+    if (owner && !menu.contains(event.target)) close(false);
+  }, true);
+  addEventListener('resize', () => close(false));
+
+  function refresh() {
+    queued = false;
+    document.querySelectorAll(CARD).forEach(enhance);
+  }
+
+  // A microtask, not a timer: the card's details are settled before the
+  // browser paints them, so a none chosen card never shows dashes first.
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    queueMicrotask(refresh);
+  }
+
+  // The card's details render after it arrives (US-FIELD-GROUPS), and again
+  // when the card refreshes, so look again whenever either changes.
+  new MutationObserver(records => {
+    if (records.some(record => record.type === 'childList' || record.attributeName === 'data-us-fields-state')) schedule();
+  }).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['data-us-fields-state']});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
+  else schedule();
+
+  window.UnionSuiteCaseWorkplace = Object.freeze({refresh: schedule, version: '1.1'});
+})();
+/* US-CASE-WORKPLACE:END */
+
 /* US-CONTACT-FACETS:START — filters over a contacts list.
    Reads data-us-contact-group, -role, -type and -name from each row (a
    roster row or a tile), so the filters follow whatever the client

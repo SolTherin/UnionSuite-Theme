@@ -10418,6 +10418,258 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-CASE-MEMBER:END */
 
+/* US-CASE-WORKPLACE:START — which of the member's jobs a case is about, on
+   the case member card (owner, 22 and 25 October 2026). With one or more
+   jobs the card's Work label opens a menu of the jobs and "Not about a
+   workplace", and the count ("2 jobs", "2 current · 1 former") sits at the
+   end of the heading's rule. The case's job opens the group with its
+   status (Current and "Since Mar 2020", or Former and "Worked there Mar
+   2016 – Jan 2019"). The menu groups current and former jobs and tints the
+   case's choice with a leading bar, as the rail tabs mark the open tab.
+   With none chosen, one line asks in place of the fields; not about a
+   workplace, one line says so. No jobs leaves the card as it is. The script
+   is US-CASE-WORKPLACE in zUnionSuite.js. */
+
+/* The label is the button; it keeps the heading's look. */
+.us-case-workplace__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: -2px -6px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color .12s,
+    color .12s;
+}
+
+.us-case-workplace__label .ti {
+  color: var(--text-muted);
+  font-size: 14px;
+  transition:
+    transform .18s cubic-bezier(.2, 0, 0, 1),
+    color .12s;
+}
+
+.us-case-workplace__label:is(:hover, [aria-expanded="true"]),
+.us-case-workplace__label:is(:hover, [aria-expanded="true"]) .ti {
+  color: var(--text-link);
+}
+
+.us-case-workplace__label:is(:hover, [aria-expanded="true"]) {
+  background: var(--bg-sunken);
+}
+
+.us-case-workplace__label[aria-expanded="true"] .ti {
+  transform: rotate(180deg);
+}
+
+.us-case-workplace__label:focus-visible,
+.us-case-workplace__choose:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+.us-case-workplace__label[aria-busy="true"] {
+  cursor: progress;
+}
+
+/* The count after the heading's rule, at its right end. */
+.us-case-workplace__tools {
+  order: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.us-case-workplace__error {
+  margin: 0 0 var(--space-1);
+  color: var(--danger);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+/* The case's job, first in the group: its badge, then when the member
+   worked there. In a narrow side column the dates wrap beside the badge,
+   not under it. */
+.us-case-workplace__status {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-workplace__status > .us-badge {
+  flex: none;
+}
+
+.us-case-workplace__status > :not(.us-badge) {
+  min-width: 0;
+}
+
+/* Several jobs, none chosen yet: one line, its link the menu's other
+   opener. Not about a workplace: one line in place of the fields. */
+.us-case-workplace__prompt,
+.us-case-workplace__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.us-case-workplace__status[hidden],
+.us-case-workplace__prompt[hidden],
+.us-case-workplace__note[hidden] {
+  display: none;
+}
+
+.us-case-workplace__choose {
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  font-weight: var(--fw-semi);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* Fixed to the page so the side column cannot clip it; it fades and drops
+   in, as the term status menu does. */
+.us-case-workplace-menu {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  display: grid;
+  width: max-content;
+  min-width: 220px;
+  max-width: min(380px, calc(100vw - 16px));
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  box-shadow: 0 5px 14px rgb(0 0 0 / .10);
+  font-family: var(--font-ui);
+}
+
+.us-case-workplace-menu[hidden] {
+  display: none;
+}
+
+.us-case-workplace-menu__item {
+  display: grid;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-base);
+  font: var(--fw-medium) var(--fs-sm)/20px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color .12s,
+    box-shadow .12s;
+}
+
+.us-case-workplace-menu__copy {
+  display: grid;
+  min-width: 0;
+}
+
+.us-case-workplace-menu__line,
+.us-case-workplace-menu__dates {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  line-height: 16px;
+}
+
+/* Current jobs, Former jobs, then Not about a workplace, each group ruled
+   off from the one before. */
+.us-case-workplace-menu__group {
+  display: grid;
+}
+
+.us-case-workplace-menu__group + .us-case-workplace-menu__group {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.us-case-workplace-menu__heading {
+  padding: 4px 8px 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  letter-spacing: .04em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.us-case-workplace-menu__item:is(:hover, :focus-visible) {
+  outline: 0;
+  background: var(--bg-sunken);
+}
+
+.us-case-workplace-menu__item:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--border-focus);
+}
+
+/* The case's job: tinted, with a leading bar; hover stays grey, so the
+   two read differently. */
+.us-case-workplace-menu__item[aria-checked="true"] {
+  background: color-mix(in srgb, var(--text-link) 9%, transparent);
+  box-shadow: inset 3px 0 0 var(--text-link);
+}
+
+.us-case-workplace-menu__item[aria-checked="true"] .us-case-workplace-menu__title {
+  color: var(--text-strong);
+  font-weight: var(--fw-semi);
+}
+
+.us-case-workplace-menu__item[aria-checked="true"]:focus-visible {
+  box-shadow:
+    inset 3px 0 0 var(--text-link),
+    inset 0 0 0 2px var(--border-focus);
+}
+
+/* 950px or narrower: 44px touch targets. The label and the Choose
+   workplace link pull their larger hit areas back with negative margins,
+   so the heading and the prompt's line keep their heights. */
+@media (max-width: 950px) {
+  .us-case-workplace__label {
+    min-height: 44px;
+    margin-block: -12px;
+  }
+
+  .us-case-workplace__choose {
+    min-height: 44px;
+    padding-block: 12px;
+    margin-block: -12px;
+  }
+
+  .us-case-workplace-menu__item {
+    min-height: 44px;
+  }
+}
+
+/* US-CASE-WORKPLACE:END */
+
 /* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
    that shows the native iMIS "User credentials" control. iMIS puts the class
    on a div around the whole control, so every rule starts from it.

@@ -87,6 +87,15 @@ module.exports = {
     MemberStandingTone:optional('The badge colour: danger or warning. Blank gives the neutral badge.', 'danger'),
     MemberLine:optional('The line under the name in the preview. Blank hides it.', 'Member 20544 · Full member')
   },
+  'Case-Member-Query-Template.html':{
+    CaseNum:required('The case number. Filters the member details IQA (its CaseNum filter), so the Work fields can be the case’s job.', '214'),
+    MemberId:required('The primary party’s iMIS ID. Sent as ContactID when the case’s job changes.', '20544'),
+    MemberName:required('The primary party’s display name, shown as plain text; also the avatar initials.', 'Priya Natarajan'),
+    MemberUrl:optional('The primary party’s contact profile, opened by View profile (cases.view-member) from the panel heading. Example path is illustrative.', '/Party.aspx?ID=20544'),
+    MemberLine:optional('The line under the name, such as the member number and type. Blank hides it.', 'Member 20544 · Full member'),
+    CaseWorkplaceID:optional('The case’s PrimaryContactWorkplaceID: the job the case is about, matching the jobs IQA’s WorkplaceID values. 0 means the case is not about a workplace: the Work fields give way to “This case isn’t about a workplace.” Blank means nobody has chosen: a member with one job shows it (not saved); with several, the Work fields give way to “Which job is this case about? Choose workplace”. The count comes from the jobs IQA, so this IQA never joins the jobs.', '4101'),
+    OtherParties:optional('The case’s other parties, as one sentence: “Also on this case: Josh Kemp and Northside Distribution Pty Ltd.” Blank (the usual single-member case) hides the line and its See all parties link.', 'Also on this case: Josh Kemp and Northside Distribution Pty Ltd.')
+  },
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},
   'explicit-query-search':{ContactName:contacts.ContactName, ContactId:contacts.ContactId},
   'Banner-Case-Rows-Query-Template.html':{
