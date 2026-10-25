@@ -3136,8 +3136,10 @@ SOFTWARE.
     'us-case-meetings-detail': ['us-query-template', 'us-meetings', 'us-query-search', 'us-query-search-open', 'us-task-completed-filter', 'us-task-progress', 'us-action-cases-add-meeting', 'us-activity-detail', 'us-activity-detail-meetings', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
     // The Activity tab's notes ledger: All activity's Notes Details view
     // (owner, 25 October 2026; promoted from the case page's
-    // case-presets.candidate.js), its search open and the list scrolling.
-    'us-case-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-note', 'us-activity-detail', 'us-activity-detail-notes', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
+    // case-presets.candidate.js), its search open. No us-list-scroll: the
+    // ledger runs to its last note and the page scrolls, as the agreement's
+    // notes do (owner, 25 October 2026: "it cuts off early").
+    'us-case-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-query-search-open', 'us-action-cases-add-note', 'us-activity-detail', 'us-activity-detail-notes', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
     'us-case-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-attachment'],
     // The Overview's newest three files: no search, Upload in the heading.
     'us-case-attachments-recent': ['us-query-template', 'us-attachments', 'us-action-cases-add-attachment'],

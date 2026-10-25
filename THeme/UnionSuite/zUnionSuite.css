@@ -22587,8 +22587,11 @@ body:not(.EasyEdit) .ContentItemContainer:has(> .us-activity-detail:not(.is-open
   display: none !important;
 }
 
+/* The type filters keep their space below (owner, 25 October 2026: with the
+   containers closed up they sat on the detailed iPart); the detailed
+   iPart's top border is the rule, so the bar's own goes. */
 .us-activity-feed[data-us-activity-showing] .us-activity__bar {
-  padding-bottom: 0;
+  padding-bottom: var(--space-3);
   border-bottom: 0;
 }
 
@@ -22616,6 +22619,17 @@ body:not(.EasyEdit) .ContentItemContainer:has(> .us-activity-detail:not(.is-open
 
 .ContentItemContainer:has(> .us-activity-detail.is-open) {
   margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* The containers close up on both sides of the join: iMIS pads every
+   ContentItemContainer, and the list's own padding opened a band between
+   its heading and the open detailed iPart (live case page, owner,
+   25 October 2026). Also for a list's Details view (US-DETAILS-VIEW). */
+.ContentItemContainer:has(> .us-activity-details .us-activity-feed[data-us-activity-showing]),
+.ContentItemContainer:has(> [data-us-details-showing]) {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .us-activity-detail.is-open > .panel {
