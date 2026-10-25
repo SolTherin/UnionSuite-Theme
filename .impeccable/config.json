@@ -137,6 +137,24 @@
         ],
         "createdAt": "2026-10-19T09:47:39.566Z",
         "reason": "Claude: mock-up page scaffolding repeats the theme --space tokens; the form's own rhythm (6px label gaps, 12px groups, 20px between fields) comes from the embed's styles read at load"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "files": [
+          "prototypes/wip/email-composer/templates/Case-Email-Template.html"
+        ],
+        "createdAt": "2026-10-23T23:40:11.086Z",
+        "reason": "Claude: HTML email body; Arial is the email-safe font stack (clients drop web fonts and <style>)"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "prototypes/wip/case-page/workplace-compare.html"
+        ],
+        "createdAt": "2026-10-25T05:27:04.933Z",
+        "reason": "Claude: WIP comparison mockup; its option headings and notes are review chrome around cards drawn by the live theme CSS, which owns the real type scale"
       }
     ]
   }
