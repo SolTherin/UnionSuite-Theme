@@ -1475,11 +1475,17 @@ console.log(UnionSuiteActions.getActionStatus('jobs.edit'));
     <h4 id="change-history-iqa">The change history IQA: one row per save</h4>
     <p>Source <code>i4u_UT_Logging</code>. The expressions use the IQA's alias for it, <code>[vBoi4u_UT_Logging]</code>, and read the panel's table, <code>i4u_UT_Logging</code>, for the save's other rows. Filters: <code>ID</code> Equal <code>@url:CaseID</code> (an agreement: <code>@url:AgreementID</code>, as its flows log it), and <code>ChangeRank</code> Equal <code>1</code>, which keeps each save's first row. Sort on the raw <code>ChangeDate</code> descending, then <code>Ordinal</code> descending; if the Sorting tab offers only displayed columns, add <code>ChangeDate</code> as an extra column (the template ignores it).</p>
     <p>Columns: <code>ChangeKey</code> is <code>SourceRef</code> and <code>Action</code> is <code>Reason</code>, both aliased. <code>ChangeDay</code> and <code>ChangeTime</code> format <code>ChangeDate</code> as the Communications cards do: <code>FORMAT([vBoi4u_UT_Logging].[ChangeDate], 'd MMM yyyy', 'en-AU')</code> and <code>LOWER(FORMAT([vBoi4u_UT_Logging].[ChangeDate], 'h:mm tt', 'en-AU'))</code>. The rest are SQL expressions:</p>
-    <div class="snippet"><div class="snippet-bar"><span>Event — what happened, from Table and Reason (add a line per table the record's flows log)</span><button type="button" data-copy="change-history-event">Copy SQL</button></div><pre><code id="change-history-event">CASE [vBoi4u_UT_Logging].[Table]
+    <div class="snippet"><div class="snippet-bar"><span>Event — what happened, from Table and Reason (add a line per table the record's flows log; notes and tasks share a table, and a task logs Category Task)</span><button type="button" data-copy="change-history-event">Copy SQL</button></div><pre><code id="change-history-event">CASE [vBoi4u_UT_Logging].[Table]
   WHEN 'i4u_UT_Cases' THEN 'Case'
   WHEN 'i4u_UT_Cases_Meetings' THEN 'Meeting'
   WHEN 'i4u_UT_Cases_Contacts' THEN 'Party'
   WHEN 'i4u_UT_Cases_Staff' THEN 'Staff'
+  WHEN 'Zen_CloudFiles_Notes' THEN
+    CASE WHEN EXISTS (SELECT 1 FROM i4u_UT_Logging l
+                      WHERE l.ID = [vBoi4u_UT_Logging].[ID]
+                        AND l.SourceRef = [vBoi4u_UT_Logging].[SourceRef]
+                        AND l.Field = 'Category' AND l.New = 'Task')
+         THEN 'Task' ELSE 'Note' END
   ELSE REPLACE(REPLACE([vBoi4u_UT_Logging].[Table], 'i4u_UT_Cases_', ''), 'i4u_UT_', '')
 END + ' ' +
 CASE [vBoi4u_UT_Logging].[Reason]
@@ -1488,11 +1494,11 @@ CASE [vBoi4u_UT_Logging].[Reason]
   WHEN 'Delete' THEN 'removed'
   ELSE LOWER([vBoi4u_UT_Logging].[Reason])
 END</code></pre></div>
-    <div class="snippet"><div class="snippet-bar"><span>Summary — the record's name, otherwise how many fields changed</span><button type="button" data-copy="change-history-summary">Copy SQL</button></div><pre><code id="change-history-summary">COALESCE(
+    <div class="snippet"><div class="snippet-bar"><span>Summary — the record's name (a meeting's title, a note's or task's text), otherwise how many fields changed</span><button type="button" data-copy="change-history-summary">Copy SQL</button></div><pre><code id="change-history-summary">COALESCE(
   (SELECT TOP 1 NULLIF(l.New, '') FROM i4u_UT_Logging l
    WHERE l.ID = [vBoi4u_UT_Logging].[ID]
      AND l.SourceRef = [vBoi4u_UT_Logging].[SourceRef]
-     AND l.Field IN ('Title', 'Name', 'Subject')
+     AND l.Field IN ('Title', 'Name', 'Subject', 'Note', 'ActionedNotes')
    ORDER BY l.Ordinal),
   (SELECT CASE COUNT(*) WHEN 0 THEN NULL WHEN 1 THEN '1 field'
           ELSE CAST(COUNT(*) AS varchar(10)) + ' fields' END
