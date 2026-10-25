@@ -3086,7 +3086,7 @@ SOFTWARE.
   // Mark the immediate panel owner so action classes and header slots stay local.
   // Explicit query helpers also identify initial no-results output without a list.
   // Exclude containing CCOs/grids/nested iParts from that empty-output fallback.
-  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts,.us-case-parties,.us-case-tasks,.us-case-meetings,.us-case-meetings-detail,.us-case-attachments,.us-case-attachments-recent,.us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
+  var queryDisplaySelector = ':is(.ContentItemContainer, .ContentItemContainer > div):is(:has(> .panel > .panel-body-container > .panel-body > .QueryTemplateSet),:where(.us-query-template,.us-list-scroll,.us-query-search,.us-task-completed-filter,.us-home-tasks,.us-agreement-tasks,.us-agreement-milestones,.us-agreement-meetings,.us-agreement-attachments,.us-agreement-notes,.us-agreement-terms,.us-agreement-increases,.us-agreement-coverage,.us-agreement-contacts,.us-case-parties,.us-case-tasks,.us-case-meetings,.us-case-meetings-detail,.us-case-notes,.us-case-attachments,.us-case-attachments-recent,.us-case-staff):has(> .panel > .panel-body-container > .panel-body):not(:where(:has(> .panel > .panel-body-container > .panel-body :is(.ContentItemContainer,.panel,.cco,.RadGrid,[data-us-cco],.us-banner__surface))))):not(:where(.us-banner,.us-banner *)):not(:has(.us-banner__surface))';
 
   // Section presets: one authored class stands in for the feature classes it
   // bundles. The iMIS iPart CSS class field truncates at 100 characters, and a
@@ -3134,9 +3134,17 @@ SOFTWARE.
     // The Activity tab's detailed meetings: a Details view of All activity
     // (US-ACTIVITY-FEED), with its search open.
     'us-case-meetings-detail': ['us-query-template', 'us-meetings', 'us-query-search', 'us-query-search-open', 'us-task-completed-filter', 'us-task-progress', 'us-action-cases-add-meeting', 'us-activity-detail', 'us-activity-detail-meetings', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
+    // The Activity tab's notes ledger: All activity's Notes Details view
+    // (owner, 25 October 2026; promoted from the case page's
+    // case-presets.candidate.js), its search open and the list scrolling.
+    'us-case-notes': ['us-query-template', 'us-notes', 'us-notes--ledger', 'us-query-search', 'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-note', 'us-activity-detail', 'us-activity-detail-notes', 'us-tab-panel', 'us-tabset-activity', 'us-tab-all'],
     'us-case-attachments': ['us-query-template', 'us-attachments', 'us-query-search', 'us-query-search-open', 'us-list-scroll', 'us-action-cases-add-attachment'],
     // The Overview's newest three files: no search, Upload in the heading.
     'us-case-attachments-recent': ['us-query-template', 'us-attachments', 'us-action-cases-add-attachment'],
+    // The Activity tab's Changes (owner, 25 October 2026): the change history
+    // (US-CHANGE-FIELDS) in the Activity switcher, with the History log as
+    // its Details view (US-DETAILS-VIEW). Spelled out, 115 characters.
+    'us-case-changes': ['us-tab-panel', 'us-tabset-activity', 'us-tab-changes', 'us-query-template', 'us-records', 'us-query-search', 'us-details-view-history'],
     // The case team as grouped tiles, the lead staff member first.
     'us-case-staff': ['us-query-template', 'us-contacts-tiles', 'us-contacts-grouped', 'us-contacts-group-tone', 'us-contacts-lead-first', 'us-action-cases-add-staff']
   };
@@ -22762,6 +22770,109 @@ SOFTWARE.
   else refresh();
 })();
 /* US-ACTIVITY-FEED:END */
+
+/* US-DETAILS-VIEW:START — a Details view for a list iPart, such as a Query
+   Template Display (owner, 25 October 2026; first, the case's Changes): its
+   CSS class carries us-details-view-<key>, naming a detailed iPart on the
+   same page, placed right under it and marked us-activity-detail
+   us-activity-detail-<key> (the activity feed's Details view contract;
+   usually a native IQA report, for its Export). A Details view toggle joins
+   the list's heading buttons; pressed, the detailed iPart takes the list's
+   place, continuing its card: the list, its search and its footer step
+   aside, and the detailed iPart's own heading is hidden (the feed's
+   us-activity-detail styles). Pressed again, the list returns. A list
+   whose detailed iPart is missing gets no toggle. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteDetailsView) return;
+
+  const PREFIX = 'us-details-view-';
+  const REVEAL = [{opacity: 0, transform: 'translateY(-4px)'}, {opacity: 1, transform: 'none'}];
+  const states = new WeakMap();
+
+  const stillMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  const keyOf = host => [...host.classList].find(name => name.startsWith(PREFIX))?.slice(PREFIX.length) || '';
+  const detailPanel = key => key ? document.querySelector('.us-activity-detail-' + CSS.escape(key)) : null;
+
+  // The heading's button slot, as the theme's list actions make it; made
+  // here when the list has no actions yet, and taken over when it does.
+  function headingSlot(host) {
+    const heading = host.querySelector(':scope > .panel > .panel-heading');
+    if (!heading) return null;
+    let actions = heading.querySelector(':scope > .us-panel-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'us-iqa-report-actions us-panel-actions';
+      heading.append(actions);
+    }
+    return actions.querySelector(':scope > [data-us-panel-actions-slot]') || actions;
+  }
+
+  function toggleButton(host) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'us-panel-action TextButton us-outline-button us-activity__details-toggle';
+    button.innerHTML = '<i class="ti ti-list-details" aria-hidden="true"></i>Details view';
+    button.addEventListener('click', () => show(host, !states.get(host).open));
+    return button;
+  }
+
+  function sync(host) {
+    if (host.closest('.us-report-no-styling') || !host.querySelector(':scope > .panel')) return;
+    const panel = detailPanel(keyOf(host));
+    let state = states.get(host);
+    if (!panel) {
+      state?.button?.remove();
+      host.removeAttribute('data-us-details-host');
+      host.removeAttribute('data-us-details-showing');
+      return;
+    }
+    if (!state) {
+      state = {open: false, button: null};
+      states.set(host, state);
+    }
+    const slot = headingSlot(host);
+    if (!slot) return;
+    state.button ||= toggleButton(host);
+    // Only into the slot: the theme orders the heading's buttons itself
+    // (orderHeaderActions), so insisting on a place would fight it.
+    if (state.button.parentElement !== slot) slot.prepend(state.button);
+    const controls = panel.closest('.ContentItemContainer') || panel;
+    if (controls.id) state.button.setAttribute('aria-controls', controls.id);
+    state.button.setAttribute('aria-pressed', String(state.open));
+    host.setAttribute('data-us-details-host', '');
+    host.toggleAttribute('data-us-details-showing', state.open);
+    panel.classList.toggle('is-open', state.open);
+  }
+
+  function show(host, open) {
+    const state = states.get(host);
+    const panel = detailPanel(keyOf(host));
+    if (!state || !panel || state.open === open) return;
+    state.open = open;
+    sync(host);
+    const shown = open ? panel : host.querySelector(':scope > .panel > .panel-body-container');
+    if (shown && !stillMotion() && shown.animate) shown.animate(REVEAL, {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'});
+  }
+
+  function syncAll() {
+    document.querySelectorAll('[class*="' + PREFIX + '"]').forEach(host => {
+      if (keyOf(host)) sync(host);
+    });
+  }
+
+  // The list's heading actions are rebuilt by the theme (us:panel-actions-
+  // ready) and by refreshes, so the toggle is put back each time.
+  document.addEventListener('us:panel-actions-ready', syncAll);
+  document.addEventListener('us:query-template-refreshed', syncAll);
+  document.addEventListener('us:cco-tab-shown', syncAll);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncAll);
+  else syncAll();
+
+  window.UnionSuiteDetailsView = {refresh: syncAll, show};
+})();
+/* US-DETAILS-VIEW:END */
 /* US-ADJUSTMENTS:START — Active and upcoming adjustments list.
    Translated from the supplied Union Innovation Hub design
    (supplied/Adjustments-3a.dc.html), which ran on the x-dc `DCLogic`

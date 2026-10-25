@@ -227,13 +227,35 @@
 
         <!-- Changes section · Query Template Display on the case's change
              history IQA (one row per save, filtered on @url:CaseID) · CSS class:
-             us-tab-panel us-tabset-activity us-tab-changes us-query-template us-records us-query-search ·
-             the guide's Change-History-Query-Template.html (owner, 25 October
-             2026: the change history standard, apart from the timeline). Each
-             card loads its fields when it first opens (US-CHANGE-FIELDS). -->
-        <div class="ContentItemContainer" id="ste_container_ciChanges"><div class="us-tab-panel us-tabset-activity us-tab-changes us-query-template us-records us-query-search"><div class="panel">
+             us-case-changes (preset: the Activity switcher classes,
+             us-query-template us-records us-query-search and
+             us-details-view-history) · the guide's
+             Change-History-Query-Template.html (owner, 25 October 2026: the
+             change history standard, apart from the timeline). Each card
+             loads its fields when it first opens (US-CHANGE-FIELDS). -->
+        <div class="ContentItemContainer" id="ste_container_ciChanges"><div class="us-case-changes"><div class="panel">
           <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] Changes</h2></div>
           <div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet simplePaginateList" id="cp-changes"></div></div></div>
+        </div></div></div>
+
+        <!-- Query Menu on the change log, one row per field (filtered on
+             @url:CaseID), with the native Export · CSS class:
+             us-activity-detail us-activity-detail-history us-tab-panel us-tabset-activity us-tab-changes.
+             The Changes section's Details view (US-DETAILS-VIEW; owner,
+             25 October 2026). -->
+        <div class="ContentItemContainer" id="ste_container_ciHistory"><div class="us-activity-detail us-activity-detail-history us-tab-panel us-tabset-activity us-tab-changes"><div class="panel">
+          <div class="panel-heading Distinguish"><h2 class="panel-title">[[history]] History</h2></div>
+          <div class="panel-body-container"><div class="panel-body"><div id="cp-history_ContentPanel"><div id="cp-history_ListerPanel"><div data-gridid="cp-history"><div class="RadGrid RadGrid_MetroTouch"><table class="rgMasterTable">
+            <thead><tr><th class="rgHeader" scope="col">Changed on</th><th class="rgHeader" scope="col">Change</th><th class="rgHeader" scope="col">Field</th><th class="rgHeader" scope="col">Old</th><th class="rgHeader" scope="col">New</th><th class="rgHeader" scope="col">Changed by</th></tr></thead>
+            <tbody>
+              <tr class="rgRow"><td>8/10/2026 3:10 PM</td><td>Meeting added</td><td>Title</td><td></td><td>Hearing preparation</td><td>Mary O'Conner</td></tr>
+              <tr class="rgAltRow"><td>8/10/2026 3:10 PM</td><td>Meeting added</td><td>MeetingDate</td><td></td><td>10/14/2026 9:30:00 AM</td><td>Mary O'Conner</td></tr>
+              <tr class="rgRow"><td>8/10/2026 3:10 PM</td><td>Meeting added</td><td>MeetingType</td><td></td><td>General</td><td>Mary O'Conner</td></tr>
+              <tr class="rgAltRow"><td>8/10/2026 1:48 PM</td><td>Staff updated</td><td>LeadStaff</td><td>Andrew O Newnham</td><td>Mary O'Conner</td><td>Andrew O Newnham</td></tr>
+              <tr class="rgRow"><td>8/10/2026 11:02 AM</td><td>Case updated</td><td>Priority</td><td>Lowest</td><td>High</td><td>Mary O'Conner</td></tr>
+              <tr class="rgAltRow"><td>8/10/2026 11:02 AM</td><td>Case updated</td><td>IncidentDate</td><td></td><td>9/22/2026 12:00:00 AM</td><td>Mary O'Conner</td></tr>
+            </tbody>
+          </table></div></div></div></div></div></div>
         </div></div></div>
 
       </div>
@@ -277,10 +299,9 @@
 
 <p class="cp-toast" id="cp-toast" role="status" aria-live="polite"></p>
 
-<!-- Offline fixture first: page URL, sample rows and fetch stubs. Presets
-     before the theme, so it sees the expanded classes. -->
+<!-- Offline fixture first: page URL, sample rows and fetch stubs. The
+     case presets are all in the theme (us-case-notes since 25 October 2026). -->
 <script src="case-page.js"></script>
-<script src="case-presets.candidate.js"></script>
 <script src="../../../THeme/UnionSuite/zUnionSuite.js"></script>
 <script src="../../../THeme/UnionSuite/Scripts/ActionDefinitions.js"></script>
 <script src="../../../THeme/UnionSuite-Client/Actions.js"></script>

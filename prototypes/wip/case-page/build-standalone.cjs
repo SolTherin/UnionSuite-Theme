@@ -126,7 +126,7 @@ html = html.replace(/^<script src="([^"]+)"><\/script>\r?\n/gm, (_, href) => {
   return (scriptCount === 1 ? templates.html + '\n' : '') + `${inlineScript(href)}\n`;
 });
 
-const expected = {stylesheets: 9, scripts: 5};
+const expected = {stylesheets: 9, scripts: 4};
 if (stylesheetCount !== expected.stylesheets || scriptCount !== expected.scripts) {
   throw new Error(`Expected ${expected.stylesheets} stylesheets and ${expected.scripts} scripts; found ${stylesheetCount} and ${scriptCount}. Update build-standalone.cjs when index.html links change.`);
 }

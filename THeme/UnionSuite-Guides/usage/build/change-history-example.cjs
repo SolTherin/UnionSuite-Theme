@@ -1,7 +1,8 @@
-// Supported offline simulation of the change history (US-CHANGE-FIELDS).
-// The cards are the copyable template filled with sample saves; opening
-// one runs the theme's own code, with /api/query answered from sample
-// field rows after a short delay.
+// Supported offline simulation of the change history (US-CHANGE-FIELDS)
+// and its Details view (US-DETAILS-VIEW). The cards are the copyable
+// template filled with sample saves; opening one runs the theme's own code,
+// with /api/query answered from sample field rows after a short delay. The
+// Details view is a native Query Menu grid of the same rows.
 const sources = [
   'THeme/UnionSuite-Guides/usage/build/change-history-example.cjs',
   'THeme/UnionSuite-Guides/usage/templates/List-Templates/Change-History-Query-Template.html'
@@ -46,14 +47,28 @@ function documentHtml({read, css, themeJs}) {
   const answer = 'window.fetch=async url=>{const key=new URLSearchParams(String(url).split("?")[1]||"").get("ChangeKey");' +
     'await new Promise(r=>setTimeout(r,400));' +
     'return new Response(JSON.stringify({Items:{$values:(' + JSON.stringify(fields) + ')[key]||[]}}),{status:200});};';
+  // The Details view (US-DETAILS-VIEW): the same log as a native Query Menu
+  // grid, one row per field.
+  const history = saves.flatMap(save => (fields[save.ChangeKey] || [{Field: '', OldValue: '', NewValue: ''}]).map(row =>
+    [save.ChangeDay + ' ' + save.ChangeTime, save.Event, row.Field, row.OldValue, row.NewValue, save.ChangedBy]));
+  const grid = '<table class="rgMasterTable"><thead><tr>' +
+    ['Changed on', 'Change', 'Field', 'Old', 'New', 'Changed by'].map(name => '<th class="rgHeader" scope="col">' + name + '</th>').join('') +
+    '</tr></thead><tbody>' +
+    history.map((cells, index) => '<tr class="' + (index % 2 ? 'rgAltRow' : 'rgRow') + '">' + cells.map(cell => '<td>' + esc(cell) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table>';
   return '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + css +
     'html{height:auto}body{margin:0;padding:20px;height:auto;min-height:420px;background:var(--bg-page)}</style><body><div class="WebPartZone">' +
-    '<div class="ContentItemContainer"><div class="us-query-template us-records"><div class="panel">' +
+    '<div class="ContentItemContainer"><div class="us-query-template us-records us-details-view-history"><div class="panel">' +
     '<div class="panel-heading Distinguish"><h2 class="panel-title">Change history</h2></div>' +
     '<div class="panel-body-container"><div class="panel-body"><div class="QueryTemplateSet">' + items + '</div></div></div>' +
+    '</div></div></div>' +
+    '<div class="ContentItemContainer" id="ste_container_ciHistory"><div class="us-activity-detail us-activity-detail-history"><div class="panel">' +
+    '<div class="panel-heading Distinguish"><h2 class="panel-title">History</h2></div>' +
+    '<div class="panel-body-container"><div class="panel-body"><div class="RadGrid RadGrid_MetroTouch">' + grid + '</div></div></div>' +
     '</div></div></div></div><script>' + answer + '\n' +
     themeJs.match(/\/\* US-RECORD-CARDS:START[\s\S]*?US-RECORD-CARDS:END \*\//)[0] + '\n' +
-    themeJs.match(/\/\* US-CHANGE-FIELDS:START[\s\S]*?US-CHANGE-FIELDS:END \*\//)[0] + '<\/script></body></html>';
+    themeJs.match(/\/\* US-CHANGE-FIELDS:START[\s\S]*?US-CHANGE-FIELDS:END \*\//)[0] + '\n' +
+    themeJs.match(/\/\* US-DETAILS-VIEW:START[\s\S]*?US-DETAILS-VIEW:END \*\//)[0] + '<\/script></body></html>';
 }
 
 module.exports = {sources, documentHtml};
