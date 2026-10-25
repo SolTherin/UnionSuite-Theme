@@ -9805,14 +9805,15 @@ SOFTWARE.
     return node;
   }
 
-  function render(root, row) {
-    const single = root.classList.contains('us-field-groups--single');
+  // The panel's contents for one row: the alert, then each group. level is
+  // the group headings' level (h3 in a panel; h4 inside a record card).
+  function nodesFor(row, single, level = 3) {
     const layout = layoutOf(row);
     const nodes = layout.groups.map(group => {
       const section = document.createElement('div');
       section.className = 'us-field-groups__group';
       if (group.heading) {
-        const heading = document.createElement('h3');
+        const heading = document.createElement('h' + level);
         heading.className = 'us-field-groups__heading';
         heading.textContent = group.heading;
         section.append(heading);
@@ -9827,6 +9828,11 @@ SOFTWARE.
       if (/^(true|1|yes)$/i.test(layout.alert.only || '')) nodes.length = 0;
       nodes.unshift(alertNode(layout.alert));
     }
+    return nodes;
+  }
+
+  function render(root, row) {
+    const nodes = nodesFor(row, root.classList.contains('us-field-groups--single'));
     root.replaceChildren(...(nodes.length ? nodes : [note('No details recorded.')]));
     root.setAttribute('data-us-fields-state', nodes.length ? 'ready' : 'empty');
   }
@@ -9926,7 +9932,20 @@ SOFTWARE.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
   else schedule();
 
-  window.UnionSuiteFieldGroups = Object.freeze({refresh: schedule, reload, version: '1.0'});
+  // build(row, {level}) lays out a row another component has already read
+  // (the activity feed's card details): a .us-field-groups element, or null
+  // when the row has nothing to show. It is not a query panel, so the
+  // observer above leaves it alone.
+  function build(row, options = {}) {
+    const nodes = nodesFor(row, false, options.level);
+    if (!nodes.length) return null;
+    const root = document.createElement('div');
+    root.className = 'us-field-groups';
+    root.append(...nodes);
+    return root;
+  }
+
+  window.UnionSuiteFieldGroups = Object.freeze({refresh: schedule, reload, build, version: '1.1'});
 })();
 /* US-FIELD-GROUPS:END */
 
@@ -20823,11 +20842,16 @@ SOFTWARE.
    or outcome, belongs in its details.
    Client details: data-details on a source names a second IQA, run for one
    record when its card first opens and filtered on the record filter and
-   ActivityKey. Every Additional-* column it returns (Additional-Deadline,
-   Additional-Handled by) is shown in the details, labelled with the text
-   after the prefix, in the IQA's column order; blank values are left out.
-   Dates show as "22 May 2026", true/false as Yes/No. The core IQAs stay
-   fixed; clients add or remove details columns in the details IQAs only.
+   ActivityKey. Everything it returns is shown, laid out as a field group
+   panel (US-FIELD-GROUPS, 22 October 2026): Group-Label columns
+   (FollowUp-Task status) under a heading per group, in the IQA's column
+   order, with Tone-* badges and Alert-* columns. A blank value is left out
+   (and a group left empty) unless the column name ends "(show blank)",
+   which shows a dash; the panels themselves keep their dashes.
+   Left out: Ordinal, ActivityKey and the record filter's column. An
+   Additional-* column (the first convention) reads as its label alone,
+   with no heading. The core IQAs stay fixed; clients add or remove details
+   columns in the details IQAs only.
    data-us-activity-details-folder puts those IQAs in another folder (default:
    data-us-activity-folder). data-detail-label on a source heads its Detail
    note when the card opens ("Additional notes" on calls, whose Summary is
@@ -21237,25 +21261,25 @@ SOFTWARE.
     }
   }
 
-  // Client details: the Additional-* columns of a source's details IQA, read
-  // for one record when its card first opens and kept for the feed's life.
-  const DETAIL_PREFIX = /^additional[-_]/i;
+  // Client details (owner, 22 October 2026): everything a source's details
+  // IQA returns is the record's additional data, laid out as a field group
+  // panel lays out its IQA (US-FIELD-GROUPS: "FollowUp-Task status" under a
+  // FollowUp heading, a number group ("1-Outcome") starting a block with no
+  // heading, Tone-* badges, Alert-* columns). Read for one record when its
+  // card first opens and kept for the feed's life. The record's keys
+  // (Ordinal, ActivityKey and the feed's record filter) are left out.
+  // "Additional-Handled by", the first convention, reads as "Handled by"
+  // with no heading, so existing details IQAs look as before.
+  // A blank value is left out, and a group left with nothing goes too,
+  // unless its column name ends "(show blank)" (owner, 22 October 2026):
+  // "FollowUp-Actioned notes (show blank)" shows Actioned notes with a dash
+  // when blank. The panels keep their dashes; this is the cards' rule only.
+  const DETAIL_KEYS = /^(ordinal|activitykey)$/i;
+  const ADDITIONAL = /^additional[-_]/i;
+  const SHOW_BLANK = /\s*\(show blank\)\s*$/i;
 
-  // "Additional-Handled by" keeps the author's wording; a name without
-  // spaces, such as "Additional-HandledBy", is split into "Handled by".
-  // Acronyms (ID, EBA) keep their capitals.
-  function detailLabel(name) {
-    const rest = name.replace(DETAIL_PREFIX, '').trim();
-    if (!rest || /\s/.test(rest)) return rest;
-    const words = rest.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(' ');
-    return words.map((word, index) => {
-      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1);
-      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.toLowerCase();
-    }).join(' ');
-  }
-
-  // Values are shown as text. Dates read as "22 May 2026" (with the time
-  // when it is not midnight); true and false read as Yes and No.
+  // Search reads values as shown. Dates read as "22 May 2026" (with the
+  // time when it is not midnight); true and false read as Yes and No.
   function detailValue(value, cfg) {
     const raw = text(value);
     if (/^(true|false)$/i.test(raw)) return /^true$/i.test(raw) ? 'Yes' : 'No';
@@ -21265,15 +21289,21 @@ SOFTWARE.
     return date.hour || date.minute ? day + ', ' + timeText(date) : day;
   }
 
-  function detailFields(row, cfg) {
+  // The details row as US-FIELD-GROUPS reads it, and its values for search.
+  function detailsOf(row, cfg) {
     const properties = unwrap(row?.Properties)?.$values;
     const entries = Array.isArray(properties)
       ? properties.map(item => [String(item.Name), unwrap(item.Value)])
-      : Object.entries(row || {}).map(([name, value]) => [name, unwrap(value)]);
-    return entries
-      .filter(([name]) => DETAIL_PREFIX.test(name))
-      .map(([name, value]) => ({ label: detailLabel(name), value: detailValue(value, cfg) }))
-      .filter(detailField => detailField.label && detailField.value);
+      : Object.entries(row || {}).filter(([name]) => name !== '$type').map(([name, value]) => [name, unwrap(value)]);
+    const filter = String(cfg.filter || '').toLowerCase();
+    const columns = entries
+      .filter(([name]) => !DETAIL_KEYS.test(name) && name.toLowerCase() !== filter)
+      .filter(([name, value]) => text(value) !== '' || SHOW_BLANK.test(name))
+      .map(([name, value]) => [name.replace(SHOW_BLANK, '').replace(ADDITIONAL, ''), value]);
+    return {
+      row: Object.fromEntries(columns),
+      values: columns.map(([, value]) => detailValue(value, cfg)).filter(Boolean)
+    };
   }
 
   function findRow(state, id) {
@@ -21290,7 +21320,7 @@ SOFTWARE.
     if (!row?.source.details) return;
     const current = state.details.get(row.id);
     if (current && current.status !== 'failed') return;
-    const entry = { status: 'loading', fields: [] };
+    const entry = { status: 'loading', row: null, values: [] };
     state.details.set(row.id, entry);
     paintDetails(state, row);
     const { cfg } = state;
@@ -21303,7 +21333,7 @@ SOFTWARE.
     params.set('ActivityKey', row.key);
     query(params).then(page => {
       entry.status = 'ready';
-      entry.fields = page.rows.length ? detailFields(page.rows[0], cfg) : [];
+      if (page.rows.length) Object.assign(entry, detailsOf(page.rows[0], cfg));
     }, error => {
       entry.status = 'failed';
       console.warn('[US-ACTIVITY-FEED] Details did not load:', row.source.details, row.key, error);
@@ -21331,10 +21361,10 @@ SOFTWARE.
       again.type = 'button';
       status.append(again);
       slot.append(status);
-    } else if (entry?.fields.length) {
-      const facts = el('dl', 'us-record__facts');
-      entry.fields.forEach(detailField => fact(facts, detailField.label, detailField.value));
-      slot.append(facts);
+    } else if (entry?.row) {
+      // The card's title is an h3, so its groups are headed one level down.
+      const groups = window.UnionSuiteFieldGroups?.build?.(entry.row, { level: 4 });
+      if (groups) slot.append(groups);
     }
     slot.hidden = !slot.childElementCount;
   }
@@ -21395,7 +21425,7 @@ SOFTWARE.
     if (!query) return true;
     const info = typeInfo(row.source);
     const direction = row.direction === 'in' ? info.inward : row.direction === 'out' ? info.outward : '';
-    const extra = details?.status === 'ready' ? details.fields.map(detailField => detailField.value) : [];
+    const extra = details?.status === 'ready' ? details.values : [];
     const flags = [row.task ? 'follow-up task' : '', row.pinned ? 'pinned' : '', row.doNotCall ? 'do not call' : ''];
     return [row.subject, row.summary, row.detail, row.followUpNotes, row.createdBy, row.caseRef, row.category, info.label, info.plural, direction, ...flags, ...extra]
       .some(value => value.toLowerCase().includes(query));
@@ -21768,13 +21798,6 @@ SOFTWARE.
     if (window.UnionSuiteRecordCards) return window.UnionSuiteRecordCards.fold(element, open, duration);
     element.hidden = !open;
     return Promise.resolve();
-  }
-
-  function fact(list, label, value) {
-    if (!value) return;
-    const group = el('div');
-    group.append(el('dt', '', label), el('dd', '', value));
-    list.append(group);
   }
 
   // A follow-up turns the record into a task: open until actioned, overdue

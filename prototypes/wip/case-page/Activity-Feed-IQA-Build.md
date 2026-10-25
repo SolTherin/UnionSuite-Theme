@@ -261,10 +261,20 @@ field changes, or the IQA groups by user and time (README open decision 6).
 
 In the Client folder. Each is filtered on `CaseNum` and `ActivityKey` (both
 prompted, Equal; `ActivityKey` is a filter on the record's `Ordinal` with its
-prompt named `ActivityKey`) and returns one row. Every column whose name starts with
-`Additional-` is a labelled line when the card opens, in column order; the
-label is the text after the prefix; blank values are left out; dates read
-"22 May 2026" and true/false Yes/No.
+prompt named `ActivityKey`) and returns one row. Everything it returns is the
+record's additional data (owner, 22 October 2026), laid out when the card
+opens as the field group panels lay out their IQAs (Case details,
+Resolution): `Group-Label` columns (`FollowUp-Task status`) under a heading
+per group, in column order; a number group (`1-Outcome`) starts a block with
+no heading; `Tone-*` badges and `Alert-*` columns work as in the panels;
+dates read "22 May 2026" and true/false Yes/No. **A blank value is hidden**,
+and a group left empty goes too, **unless the column name ends
+`(show blank)`** (owner, 22 October 2026): `FollowUp-Actioned notes (show
+blank)` shows Actioned notes with a dash when blank; the marker is not shown.
+The panels are unchanged (blanks there are always a dash).
+Left out: `Ordinal`, `ActivityKey` and `CaseNum` (the keys). Untick any other
+key you select for a join, such as `CaseOrdinal`, or it shows too. An
+`Additional-*` column, the first convention, reads as its label alone.
 
 | IQA | Suggested columns |
 | --- | --- |

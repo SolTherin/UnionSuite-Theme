@@ -1,4 +1,4 @@
-// US-ACTIVITY-FEED core columns and client details: details load once per record on first open, Additional-* columns only, formatted, with Retry.
+// US-ACTIVITY-FEED core columns and client details: details load once per record on first open, every column but the keys, laid out as field groups (22 October 2026), with Retry.
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 const read=p=>fs.readFileSync(p,'utf8');
@@ -26,7 +26,7 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
      {ActivityKey:'I-00',ActivityDate:'2026-02-01T10:00:00',Summary:'Task without a deadline.',FollowUpRequired:'true',FollowUpDate:null}],
     Meetings:[{ActivityKey:'M-1',ActivityDate:'2026-05-06T17:30:00',Subject:'Branch meeting',Summary:'Claims endorsed.',Detail:'',CreatedBy:'A. Smith',Category:'',Priority:'Normal',FollowUpDate:'2026-05-14T00:00:00'}]
    };
-   const details={'I-2':{ActivityKey:'I-2','Additional-Handled by':'Retention team','Additional-WorkbenchID':'RES','Additional-Deadline':'2026-05-22T00:00:00','Additional-Due':'2026-05-12T17:00:00','Additional-Follow up':'','Additional_Booked':false,Helper:'not shown'}};
+   const details={'I-2':{ActivityKey:'I-2','Additional-Handled by':'Retention team','Additional-WorkbenchID':'RES','Additional-Deadline':'2026-05-22T00:00:00','Additional-Due':'2026-05-12T17:00:00','Additional-Follow up':'','Additional_Booked':false,Helper:'Shown too','Outcome-Result':'Withdrawn','Outcome-Reason (show blank)':null,'Empty-Note':'',ID:'004821',Ordinal:2}};
    window.detailCalls=[];window.failDetails=false;
    window.fetch=async input=>{
     const url=new URL(input,location.href),name=url.searchParams.get('QueryName').slice(folder.length+1);
@@ -111,12 +111,15 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   assert.equal(await card.locator('.us-record__more a').getAttribute('href'),'/record/2');
   await page.evaluate(()=>{failDetails=false;});
   await card.locator('.us-record__extra-retry').click();
-  await card.locator('.us-record__extra dl').waitFor();
+  await card.locator('.us-record__extra .us-field-groups').waitFor();
   assert.equal(await card.locator('.us-record__toggle').getAttribute('aria-expanded'),'true','Retry does not close the card');
   assert.deepEqual(await page.evaluate(()=>detailCalls),[['Interactions Details','004821','I-2','1'],['Interactions Details','004821','I-2','1']]);
 
   const facts=await card.locator('.us-record__extra dl > div').evaluateAll(groups=>groups.map(g=>g.querySelector('dt').textContent+' = '+g.querySelector('dd').textContent));
-  assert.deepEqual(facts,['Handled by = Retention team','Workbench ID = RES','Deadline = 22 May 2026','Due = 12 May 2026, 5:00 pm','Booked = No']);
+  assert.deepEqual(facts,['Handled by = Retention team','Workbench ID = RES','Deadline = 22 May 2026','Due = 12 May 2026','Booked = No','Helper = Shown too','Result = Withdrawn','Reason = '],'every column but the keys; a blank is left out unless (show blank)');
+  assert.equal(await card.locator('.us-record__extra dd:empty').evaluate(node=>getComputedStyle(node,'::before').content),'"—"','a (show blank) column shows a dash');
+  assert.deepEqual(await card.locator('.us-record__extra .us-field-groups__heading').allTextContents(),['Outcome'],'Group-Label columns are grouped; Additional-* has no heading; a group of blanks goes');
+  assert.equal(await card.locator('.us-record__extra .us-field-groups__heading').evaluate(node=>node.tagName),'H4','headed under the card title');
 
   // Reopening uses the loaded details.
   await card.locator('.us-record__toggle').click();
@@ -175,6 +178,6 @@ const html=`<form><input type="hidden" id="__RequestVerificationToken" value="fi
   assert.equal(await card.count(),1);
 
   assert.deepEqual(errors,[]);
-  console.log('PASS activity core columns (category, follow-up badge and notes gated by FollowUpRequired, pinned icon, do-not-call alert, no status), slimline search, pinned-only toggle on Interactions, note in every card (labelled when the source asks, unlabelled and absent when blank) and searchable while collapsed, details on first open (ID + ActivityKey, once), Additional-* labels and formatting, blank and unprefixed columns hidden, Retry, no-details source and search over loaded details.');
+  console.log('PASS activity core columns (category, follow-up badge and notes gated by FollowUpRequired, pinned icon, do-not-call alert, no status), slimline search, pinned-only toggle on Interactions, note in every card (labelled when the source asks, unlabelled and absent when blank) and searchable while collapsed, details on first open (ID + ActivityKey, once), every details column but the keys, laid out as field groups (Group-Label headings, Additional-* unheaded, blanks hidden unless (show blank)), Retry, no-details source and search over loaded details.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

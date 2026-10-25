@@ -87,9 +87,16 @@ Its template is the feed element, so iMIS fills in the record value:
 
 Each source names two IQAs (1 October 2026): `data-query`, the fixed core
 IQA the list is built from, and `data-details`, a client-editable IQA read
-for one record when its card first opens. Its `Additional-*` columns become
-the labelled fields in the opened card. The full column, filter and client
-configuration rules are in
+for one record when its card first opens. Everything it returns is shown in
+the opened card, laid out as a field group panel (22 October 2026):
+`Group-Label` columns under a heading per group, `Tone-*` badges, `Alert-*`
+columns. A blank value is left out (and a group left empty goes too) unless
+the column name ends `(show blank)`, which shows the field with a dash and
+drops the marker from its label (22 October 2026; cards only, the panels
+keep their dashes). `Ordinal`, `ActivityKey` and the record
+filter's column are left out; an `Additional-*` column reads as its label
+alone, with no heading. The full column, filter and client configuration
+rules are in
 [Activity-IQA-Specs.md](prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
 
 A source `<li>` can also carry `data-history`: the IQA page for its type,
@@ -134,7 +141,7 @@ named start-date filter, and returns only the columns its type has data for
 | `Direction` | no | `In` or `Out`; overrides the source's `data-direction` |
 
 Everything else (a status or outcome, with whom, duration, attachments, workbench…)
-belongs in the type's details IQA as `Additional-*` columns.
+belongs in the type's details IQA, as any column (`Group-Label` to group it).
 
 Values render as text, never HTML. Links must be same-site `http(s)` URLs.
 Type and direction come from the source definition, so Inbound and Outbound
