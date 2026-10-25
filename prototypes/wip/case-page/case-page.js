@@ -80,7 +80,7 @@
   let primaryId = '20544';
   // The case's PrimaryContactWorkplaceID (C42): blank while none is chosen.
   let caseWorkplaceId = '';
-  let member, banner, rows, memberDetails, activity, activityDetails, lists, detailsFor, caseJob, caseMemberDetails, leadStaff, setLeadStaff;
+  let member, banner, rows, memberDetails, activity, activityDetails, changes, changeFields, lists, detailsFor, caseJob, caseMemberDetails, leadStaff, setLeadStaff;
   // The activity feeds' base and details IQAs (Activity-Feed-IQA-Build.md).
   const activityFolder = '$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base/';
   const activityDetailsFolder = '$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details/';
@@ -416,21 +416,6 @@
         Summary: file.TagNames.split(',').filter(Boolean).join(' · '), Detail: '', CreatedBy: file.CreatedBy,
         'Data-us-file-id': file.UniqueID, 'Data-us-file-branch': file.EntityCode, 'Data-us-file-name': file.FileName
       })),
-      // The case's change history, one card per save, grouped by broad kind
-      // (C31): what it touched as the summary, each field's change as a line.
-      'Changes': [
-        {ActivityKey: '7', ActivityDate: '2026-10-08T13:48:00', Subject: 'Staff updated', Summary: "Mary O'Conner made lead staff", Detail: "Lead staff: Andrew O Newnham → Mary O'Conner", CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: '6', ActivityDate: '2026-10-08T11:02:00', Subject: 'Case updated', Summary: 'Priority, Incident date', Detail: 'Priority: Lowest → High\nIncident date: Empty → 22 Sep 2026', CreatedBy: "Mary O'Conner", RecordUrl: ''},
-        ...(larger ? [
-          {ActivityKey: '5', ActivityDate: '2026-10-08T10:40:00', Subject: 'Party added', Summary: 'Lee Hartley (20871)', Detail: 'Role: Party', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-          {ActivityKey: '4', ActivityDate: '2026-10-08T09:10:00', Subject: 'Staff added', Summary: 'Dani Sundara (Organiser)', Detail: 'Role: Support', CreatedBy: "Mary O'Conner", RecordUrl: ''}
-        ] : []),
-        {ActivityKey: '3', ActivityDate: '2026-10-07T17:30:00', Subject: 'Case updated', Summary: 'Status', Detail: 'Status: New → Open', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: '2', ActivityDate: '2026-10-07T17:06:00', Subject: 'Case updated', Summary: 'Type, Subtype, Source', Detail: 'Type: General enquiry → Bullying / Harassment\nSubtype: Empty → Supervisor conduct\nSource: Empty → Member phone call', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        {ActivityKey: '1', ActivityDate: '2026-10-07T17:04:00', Subject: 'Case created', Summary: 'Opened from a member phone call.', Detail: '', CreatedBy: 'Andrew O Newnham', RecordUrl: ''},
-        // Older than 90 days, so the timeframe filter has something to leave out.
-        {ActivityKey: '0', ActivityDate: '2026-05-02T09:15:00', Subject: 'Case linked', Summary: 'C164', Detail: 'Linked case: Empty → C164 (rostering grievance, closed May 2026)', CreatedBy: 'Hub Record', RecordUrl: ''}
-      ],
       // Detail is the description (headed Description by the source).
       'Meetings': [
         ...added.meetings.map(meeting => ({ActivityKey: meeting.Ordinal, ActivityDate: meeting['Date-ISO'] + 'T' + (meeting.Time24 || '09:00') + ':00',
@@ -465,9 +450,50 @@
       );
     }
 
-    if (fresh) {
-      activity = {Notes: [], 'Emails Sent': [], 'Emails Logged': [], Meetings: [], Attachments: [], Changes: activity.Changes.filter(change => change.ActivityKey === '1')};
-    }
+    // The change history (the guide's Change-History-Query-Template.html):
+    // one row per save, newest first, as the case's change history IQA
+    // returns it from the change log.
+    changes = [
+      {ChangeKey: 'save-8', Action: 'Add', Event: 'Meeting added', Summary: 'Hearing preparation', ChangedBy: "Mary O'Conner", ChangeDay: '8 Oct 2026', ChangeTime: '3:10 pm'},
+      {ChangeKey: 'save-7', Action: 'Edit', Event: 'Staff updated', Summary: '1 field', ChangedBy: 'Andrew O Newnham', ChangeDay: '8 Oct 2026', ChangeTime: '1:48 pm'},
+      {ChangeKey: 'save-6', Action: 'Edit', Event: 'Case updated', Summary: '2 fields', ChangedBy: "Mary O'Conner", ChangeDay: '8 Oct 2026', ChangeTime: '11:02 am'},
+      ...(larger ? [
+        {ChangeKey: 'save-5', Action: 'Add', Event: 'Party added', Summary: 'Lee Hartley (20871)', ChangedBy: 'Andrew O Newnham', ChangeDay: '8 Oct 2026', ChangeTime: '10:40 am'},
+        {ChangeKey: 'save-4', Action: 'Delete', Event: 'Staff removed', Summary: 'Dani Sundara (10233)', ChangedBy: "Mary O'Conner", ChangeDay: '8 Oct 2026', ChangeTime: '9:10 am'}
+      ] : []),
+      {ChangeKey: 'save-3', Action: 'Edit', Event: 'Case updated', Summary: '1 field', ChangedBy: 'Andrew O Newnham', ChangeDay: '7 Oct 2026', ChangeTime: '5:30 pm'},
+      {ChangeKey: 'save-2', Action: 'Edit', Event: 'Case updated', Summary: '3 fields', ChangedBy: 'Andrew O Newnham', ChangeDay: '7 Oct 2026', ChangeTime: '5:06 pm'},
+      {ChangeKey: 'save-1', Action: 'Add', Event: 'Case created', Summary: 'Bullying complaint', ChangedBy: 'Andrew O Newnham', ChangeDay: '7 Oct 2026', ChangeTime: '5:04 pm'}
+    ];
+    if (fresh) changes = changes.filter(change => change.ChangeKey === 'save-1');
+
+    // The fields IQA's rows for each save, as the change log stores them:
+    // the logged field names and the logging flow's US date text.
+    changeFields = {
+      'save-8': [
+        {Field: 'Title', OldValue: '', NewValue: 'Hearing preparation'},
+        {Field: 'Location', OldValue: '', NewValue: ''},
+        {Field: 'MeetingDate', OldValue: '', NewValue: '10/14/2026 9:30:00 AM'},
+        {Field: 'MeetingType', OldValue: '', NewValue: 'General'}
+      ],
+      'save-7': [{Field: 'LeadStaff', OldValue: 'Andrew O Newnham', NewValue: "Mary O'Conner"}],
+      'save-6': [
+        {Field: 'Priority', OldValue: 'Lowest', NewValue: 'High'},
+        {Field: 'IncidentDate', OldValue: '', NewValue: '9/22/2026 12:00:00 AM'}
+      ],
+      'save-5': [{Field: 'Name', OldValue: '', NewValue: 'Lee Hartley (20871)'}, {Field: 'Role', OldValue: '', NewValue: 'Party'}],
+      'save-3': [{Field: 'Status', OldValue: 'New', NewValue: 'Open'}],
+      'save-2': [
+        {Field: 'Type', OldValue: 'General enquiry', NewValue: 'Bullying / Harassment'},
+        {Field: 'Subtype', OldValue: '', NewValue: 'Supervisor conduct'},
+        {Field: 'Source', OldValue: '', NewValue: 'Member phone call'}
+      ],
+      'save-1': [
+        {Field: 'Title', OldValue: '', NewValue: 'Bullying complaint'},
+        {Field: 'Type', OldValue: '', NewValue: 'General enquiry'},
+        {Field: 'Priority', OldValue: '', NewValue: 'Lowest'}
+      ]
+    };
 
     leadStaff = () => rows.staff.find(row => row.ContactIsLead === 'true')?.ContactName || '';
     setLeadStaff = ordinal => {
@@ -485,7 +511,9 @@
       {set: 'cp-member', template: 'Case-Member-Query-Template.html', src: '../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Member-Query-Template.html', rows: rows.member},
       {set: 'cp-recent', template: 'Case-Recent-Activity-Query-Template.html', rows: [{Ordinal: '214'}]},
       {set: 'cp-all-activity', template: 'Case-All-Activity-Query-Template.html', rows: [{Ordinal: '214'}]},
-      {set: 'cp-changes', template: 'Case-Changes-Query-Template.html', rows: [{Ordinal: '214'}]},
+      // The change history template is the guide's (US-CHANGE-FIELDS is in the theme).
+      {set: 'cp-changes', template: 'Change-History-Query-Template.html', src: '../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Change-History-Query-Template.html', rows: changes,
+        empty: '<p>No changes recorded yet.</p>'},
       // The parties template is the guide's (US-CASE-PARTIES is in the theme).
       {set: 'cp-parties', template: 'Case-Parties-Query-Template.html', src: '../../../THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html', rows: rows.parties},
       {set: 'cp-staff', template: 'Case-Staff-Query-Template.html', rows: rows.staff},
@@ -644,6 +672,8 @@
         };
         return reply(items(recipients[target.searchParams.get('CommunicationLogKey')] || []), 200, 300);
       }
+      // A change history card's fields (US-CHANGE-FIELDS), by the save's key.
+      if (name.endsWith('/API - Change Fields')) return reply(items(changeFields[target.searchParams.get('ChangeKey')] || []), 200, 300);
       // A card's details (data-details): one row for its ActivityKey.
       const details = activityDetails[name.slice(name.lastIndexOf('/') + 1)];
       if (name.startsWith(activityDetailsFolder) && details) {

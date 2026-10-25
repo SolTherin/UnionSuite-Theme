@@ -1,0 +1,32 @@
+<!-- Change history: one record card per save, its fields loaded when the
+     card first opens (US-CHANGE-FIELDS; owner, 25 October 2026). The
+     standard for cases and agreements. Query Template Display on the
+     record's change history IQA (one row per save from i4u_UT_Logging,
+     filtered on the record's @url ID), Display in cards and Display in
+     columns unchecked. iPart CSS class: us-query-template us-records
+     us-query-search, after any tab classes.
+     Change data-us-change-query to your fields IQA. -->
+<article class="us-record" data-us-record-type="change" data-us-search="{#query.Event} {#query.Summary} {#query.ChangedBy}">
+  <span class="us-record__node" aria-hidden="true"></span>
+  <div class="us-record__card">
+    <div class="us-record__head">
+      <p class="us-record__tags">
+        <span class="us-record__by">{#query.ChangedBy}</span>
+      </p>
+      <h3 class="us-record__title">{#query.Event}</h3>
+      <p class="us-record__text">{#query.Summary}</p>
+      <div class="us-record__side">
+        <span class="us-record__date">{#query.ChangeDay}</span>
+        <span class="us-record__time">{#query.ChangeTime}</span>
+        <span class="us-record__actions">
+          <button type="button" class="us-record__toggle" aria-expanded="false" aria-label="Show what changed"></button>
+        </span>
+      </div>
+    </div>
+    <div class="us-record__detail" hidden>
+      <div class="us-change-fields"
+        data-us-change-query="$/_i4u_/Core/Logging/API - Change Fields"
+        data-us-change-key="{#query.ChangeKey}" data-us-change-action="{#query.Action}"></div>
+    </div>
+  </div>
+</article>

@@ -96,6 +96,15 @@ module.exports = {
     CaseWorkplaceID:optional('The case’s PrimaryContactWorkplaceID: the job the case is about, matching the jobs IQA’s WorkplaceID values. 0 means the case is not about a workplace: the Work fields give way to “This case isn’t about a workplace.” Blank means nobody has chosen: a member with one job shows it (not saved); with several, the Work fields give way to “Which job is this case about? Choose workplace”. The count comes from the jobs IQA, so this IQA never joins the jobs.', '4101'),
     OtherParties:optional('The case’s other parties, as one sentence: “Also on this case: Josh Kemp and Northside Distribution Pty Ltd.” Blank (the usual single-member case) hides the line and its See all parties link.', 'Also on this case: Josh Kemp and Northside Distribution Pty Ltd.')
   },
+  'Change-History-Query-Template.html':{
+    ChangeKey:required('The save’s key: the change log’s SourceRef. Filters the fields IQA (its ChangeKey filter) when the card opens.', '4d86c5270f51469bb6fd3ac0ba1209b2'),
+    Action:required('The change log’s Reason: Add, Edit or Delete. Add lists the values given; Edit shows old → new; Delete has no fields, so its card has no open button.', 'Add'),
+    Event:required('What happened, the card’s headline: a custom SQL expression on Table and Reason.', 'Meeting added'),
+    Summary:optional('The line under the headline: the record’s name for an add or a remove, otherwise how many fields changed. Blank hides it.', 'Hearing preparation'),
+    ChangedBy:optional('Who saved it: the full name for UpdatedById. Blank hides it.', 'Mary O’Conner'),
+    ChangeDay:required('The save’s date for the card: FORMAT(ChangeDate, \'d MMM yyyy\', \'en-AU\'). Sort on the raw ChangeDate, not this alias.', '25 Oct 2026'),
+    ChangeTime:optional('The save’s time under the date: LOWER(FORMAT(ChangeDate, \'h:mm tt\', \'en-AU\')).', '8:13 pm')
+  },
   'query-search-template':{TaskTitle:taskTitle, MemberName:memberName},
   'explicit-query-search':{ContactName:contacts.ContactName, ContactId:contacts.ContactId},
   'Banner-Case-Rows-Query-Template.html':{

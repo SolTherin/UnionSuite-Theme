@@ -590,7 +590,18 @@ guide (templates, field definitions and component sections).
     - **Folder and names.** `$/_i4u_/Core/CA/v2/Communications` and the
       IQA names are placeholders.
     The contact page's Recent activity gets the same treatment (TODO.md).
-14. **Change history on the Activity tab** — decided: option 8, the
+14. **Change history on the Activity tab** — superseded 25 October 2026
+    by the theme's change history standard, for cases and agreements
+    (owner: "this will become the standard design for agreements as
+    well"): one record card per save from the change log
+    (`i4u_UT_Logging`, written by each form's Flowz through the shared
+    `LogChangesToIMIS` flow, the agreement's `AgreementID` as each row's
+    ID), each card loading its fields when opened (`US-CHANGE-FIELDS`,
+    the usage guide's `#change-history`). This answers the open
+    questions on the log itself and how it is written. The option 8
+    design below, its `changelog.candidate.*` files and
+    `changelog-compare.html` are history: not to be promoted.
+    Earlier: decided option 8, the
     rail led by what happened (owner, 4 October 2026; `us-changelog
     us-changelog--rail us-changelog--events` on
     `templates/Agreement-Changelog-Query-Template.html`). Still to do

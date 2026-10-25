@@ -13168,6 +13168,20 @@ a[data-us-comms-log-held] {
 }
 
 /* US-RECORD-RECIPIENTS:END */
+
+/* US-CHANGE-FIELDS:START — the change history's cards (zUnionSuite.js
+   US-CHANGE-FIELDS). A removed record logs no fields, so its card has no
+   open button; the script keeps a click on its head from opening it. */
+.us-record:has(.us-change-fields:is(
+  [data-us-change-action="Delete" i],
+  [data-us-change-action="Deleted" i],
+  [data-us-change-action="Remove" i],
+  [data-us-change-action="Removed" i]
+)) .us-record__toggle {
+  display: none;
+}
+
+/* US-CHANGE-FIELDS:END */
 [data-us-panel-action="edit"] {
   --us-panel-glyph: "\eb04";
 }

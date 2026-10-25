@@ -1,8 +1,8 @@
 # Case activity feed: IQA build notes
 
 Build notes for the IQAs behind the case page's activity timelines (owner,
-21 October 2026): the Overview's Recent activity, the Activity tab's All
-activity and its Changes section. All three are the theme's activity feed
+21 October 2026): the Overview's Recent activity and the Activity tab's All
+activity. Both are the theme's activity feed
 (`US-ACTIVITY-FEED`): a one-row Query Template that names a folder of source
 IQAs, each read through `GET /api/query`, merged newest first.
 
@@ -14,12 +14,12 @@ in `case-page.js` follow it.
 
 | Folder | Holds | Who changes it |
 | --- | --- | --- |
-| `$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base` | The base IQAs: Notes, Emails Sent, Emails Logged, Meetings, Attachments, Changes. One row per record, in the feed's fixed columns. | Fixed: the theme reads these columns by name. |
+| `$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base` | The base IQAs: Notes, Emails Sent, Emails Logged, Meetings, Attachments. One row per record, in the feed's fixed columns. | Fixed: the theme reads these columns by name. |
 | `$/_i4u_/Client/Cases - UnionSuite/Layouts/Activity Feed - Details` | The details IQAs: Notes Details, Emails Sent Details, Emails Logged Details, Meetings Details. One row per record, read when its card first opens. | The client: add or remove `Additional-*` columns freely. |
 
 The templates point at them with `data-us-activity-folder` (base) and
-`data-us-activity-details-folder` (details). Recent activity, All activity
-and Changes all use the same base IQAs: Recent activity's 30 days is the
+`data-us-activity-details-folder` (details). Recent activity and All
+activity use the same base IQAs: Recent activity's 30 days is the
 theme's fixed window (`data-us-activity-window="30"`), sent as `StartDate`,
 so there is no Last 30 Days folder.
 
@@ -241,21 +241,13 @@ records. Starting point: `Manage Case - Meetings - All`.
 Starting point: the case's CloudFiles storage IQA with its tags. The source
 carries the same `data-record-actions` as Emails Logged.
 
-### Changes
+### Changes: not a feed source
 
-The Changes section's only source: one row **per save**, not per field.
-
-| Column | From |
-| --- | --- |
-| `ActivityKey` | the save's key (a number unique to the save) |
-| `ActivityDate` | when it was saved |
-| `Subject` | the broad kind: `Case created`, `Case updated`, `Party added`, `Staff added`, `Staff updated`, `Staff removed`, `Case linked` … |
-| `Summary` | what it touched: the fields (`Priority, Incident date`) or the person (`Lee Hartley (20871)`) |
-| `Detail` | one `Field: old → new` per line, lines separated by `CHAR(10)`; `Empty` for a blank old or new value |
-| `CreatedBy` | who saved it |
-
-Open: whether the history table records a save key that groups a save's
-field changes, or the IQA groups by user and time (README open decision 6).
+The case's change history is its own section, apart from the timeline
+(owner, 25 October 2026): a Query Template Display of one card per save,
+each loading its fields when opened. Its two IQAs, template and fields are
+the theme's change history standard, documented in the usage guide
+(`#change-history`), for cases and agreements alike.
 
 ## The details IQAs
 

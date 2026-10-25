@@ -34,8 +34,9 @@
      source gives its type a Details view toggle at the end of the type
      filters (US-ACTIVITY-FEED), which swaps the timeline for the
      detailed iPart marked us-activity-detail-<key>: Notes and Meetings.
-     Changes are their own section (Case-Changes-Query-Template.html;
-     owner, 9 October 2026), with the History log as their Details view. Emails and files have none:
+     Changes are their own section, apart from the timeline (owner,
+     9 and 25 October 2026): the guide's change history (#change-history),
+     not a feed. Emails and files have none:
      the email's card holds everything, and files have their own section.
 
      Sources:
@@ -73,17 +74,11 @@
                     Additional-Attendees.
        Attachments  type attachment (C26): Subject the file name, Summary
                     its tags; View and Download, as Emails Logged.
-       Changes      the Changes section's (Case-Changes-Query-Template.html):
-                    type change, one card per save grouped by broad kind
-                    (C31), Subject the kind (Case updated, Party added,
-                    Staff removed, Staff updated), Summary what it touched,
-                    Detail one "Field: old → new" per line, CreatedBy who
-                    saved it.
      View all attachments (C36; owner, 9 October 2026): with Attachments
      chosen, the heading shows View all attachments beside Upload, opening
      the Attachments tab (data-section-link, -tab and -label on the source).
-     Proposed IQAs (not built): Notes, Emails Sent, Emails Logged, Meetings,
-     Attachments and Changes (base), and Notes, Emails Sent, Emails Logged
+     Proposed IQAs (not built): Notes, Emails Sent, Emails Logged, Meetings
+     and Attachments (base), and Notes, Emails Sent, Emails Logged
      and Meetings Details (details); Activity-Feed-IQA-Build.md. -->
 <div class="us-activity-feed"
   data-us-activity-folder="$/_i4u_/Core/Cases/Layouts v2/Activity Feed - Base"

@@ -14647,6 +14647,198 @@ SOFTWARE.
 })();
 /* US-COMMS-RECIPIENTS:END */
 
+/* US-CHANGE-FIELDS:START — what one save changed, inside an opened record
+   card from a Query Template: the change history of a case or an agreement
+   (owner, 25 October 2026; the usage guide's #change-history). The change
+   log (i4u_UT_Logging) holds one row per field; the history's Query
+   Template shows one card per save, and the card's details hold
+     <div class="us-change-fields" data-us-change-query="<fields IQA>"
+       data-us-change-key="{#query.ChangeKey}"
+       data-us-change-action="{#query.Action}"></div>
+   which the card's first opening fills: the fields IQA runs through
+   /api/query with the ChangeKey filter (the save's SourceRef), one row per
+   field in the IQA's order, each shown as a line with the field leading,
+   as the activity feed's change cards are.
+   - Field (required): the logged name. A Label column, when the IQA
+     returns one, replaces it; otherwise the name reads as words
+     (MeetingDate is Meeting date; a BeyondForm's trailing [] goes).
+   - OldValue, NewValue: text. An Add lists the values given, leaving out
+     blank ones; anything else reads "old → new", Empty for a blank side.
+     A date, as the log's US text (10/28/2026 12:00:00 AM) or ISO
+     (2026-10-28T09:30:00), reads 28 Oct 2026, with its time unless
+     midnight.
+   - A Delete records no fields: its card has no open button (CSS,
+     US-CHANGE-FIELDS in zUnionSuite.css) and does not open.
+   Loading and Retry work as US-COMMS-RECIPIENTS does. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteChangeFields) return;
+
+  const LIMIT = 200;
+  const DURATION = 220;
+  const EASE = 'cubic-bezier(.2, 0, 0, 1)';
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const ADDS = ['add', 'added', 'create', 'created'];
+  const DELETES = ['delete', 'deleted', 'remove', 'removed'];
+  const entries = new WeakMap();
+
+  const unwrap = value => value && typeof value === 'object' && '$value' in value ? value.$value : value;
+  const text = value => value == null ? '' : String(unwrap(value)).trim();
+  const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  const actionOf = block => text(block.dataset.usChangeAction).toLowerCase();
+
+  function el(tag, className, content) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (content !== undefined) node.textContent = content;
+    return node;
+  }
+
+  function field(row, ...names) {
+    const wanted = names.map(name => name.toLowerCase());
+    const key = Object.keys(row || {}).find(item => wanted.includes(item.toLowerCase()));
+    return key ? unwrap(row[key]) : undefined;
+  }
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  // "MeetingDate" reads "Meeting date", "PrimaryJob[]" "Primary job"; an
+  // acronym such as ID keeps its capitals.
+  function words(name) {
+    const spaced = name.replace(/\[\]$/, '').replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2').trim();
+    const joined = spaced.split(/\s+/).map((word, index) => index && /^[A-Z][a-z]/.test(word) ? word.toLowerCase() : word).join(' ');
+    return joined.charAt(0).toUpperCase() + joined.slice(1);
+  }
+
+  // A date as the log stores it, US text from the logging flow or ISO,
+  // reads "28 Oct 2026" (", 9:30 am" unless midnight). Anything else is
+  // returned as it is.
+  function valueText(value) {
+    let parts = null;
+    let match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}) (\d{1,2}):(\d{2}):\d{2} ([AP]M)$/i);
+    if (match) {
+      const hour = Number(match[4]) % 12 + (/^p/i.test(match[6]) ? 12 : 0);
+      parts = {year: +match[3], month: +match[1], day: +match[2], hour, minute: +match[5]};
+    } else if ((match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/))) {
+      parts = {year: +match[1], month: +match[2], day: +match[3], hour: +(match[4] || 0), minute: +(match[5] || 0)};
+    }
+    if (!parts || parts.month < 1 || parts.month > 12 || parts.day < 1 || parts.day > 31) return value;
+    const date = parts.day + ' ' + MONTHS[parts.month - 1] + ' ' + parts.year;
+    if (!parts.hour && !parts.minute) return date;
+    return date + ', ' + (parts.hour % 12 || 12) + ':' + String(parts.minute).padStart(2, '0') + ' ' + (parts.hour < 12 ? 'am' : 'pm');
+  }
+
+  async function loadRows(block) {
+    const params = new URLSearchParams({QueryName: text(block.dataset.usChangeQuery), limit: String(LIMIT), offset: '0'});
+    params.set('ChangeKey', text(block.dataset.usChangeKey));
+    const response = await fetch('/api/query?' + params, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {Accept: 'application/json', RequestVerificationToken: token()}
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
+    if (!Array.isArray(rows)) throw new Error('Unexpected response');
+    return rows.map(row => ({
+      label: text(field(row, 'Label')) || words(text(field(row, 'Field'))),
+      before: valueText(text(field(row, 'OldValue', 'Old'))),
+      after: valueText(text(field(row, 'NewValue', 'New')))
+    })).filter(change => change.label);
+  }
+
+  function list(entry, add) {
+    const changes = add ? entry.rows.filter(change => change.after) : entry.rows;
+    if (!changes.length) return el('p', 'us-record__extra-status', 'No field changes were recorded.');
+    const node = el('ul', 'us-record__body us-record__changes');
+    changes.forEach(change => {
+      const item = el('li');
+      item.append(el('span', 'us-record__change-field', change.label),
+        add ? change.after : (change.before || 'Empty') + ' → ' + (change.after || 'Empty'));
+      node.append(item);
+    });
+    return node;
+  }
+
+  function render(block) {
+    const entry = entries.get(block);
+    let content;
+    if (entry.status === 'loading') {
+      content = el('p', 'us-record__extra-status', 'Loading changes…');
+      content.setAttribute('role', 'status');
+    } else if (entry.status === 'failed') {
+      content = el('p', 'us-record__extra-status', 'Changes could not be loaded. ');
+      content.setAttribute('role', 'status');
+      const again = el('button', 'TextButton SmallButton us-change-fields__retry', 'Retry');
+      again.type = 'button';
+      content.append(again);
+    } else {
+      content = list(entry, ADDS.includes(actionOf(block)));
+    }
+    resize(block, () => block.replaceChildren(content));
+  }
+
+  // Swaps the block's content and eases its height from old to new, so the
+  // opened card grows rather than jumps.
+  function resize(block, change) {
+    const before = block.getBoundingClientRect().height;
+    change();
+    if (reducedMotion() || !block.animate || !before) return;
+    const after = block.getBoundingClientRect().height;
+    if (Math.abs(after - before) < 1) return;
+    block.style.overflow = 'hidden';
+    const animation = block.animate([{height: before + 'px'}, {height: after + 'px'}], {duration: DURATION, easing: EASE});
+    animation.finished.then(() => { block.style.overflow = ''; }, () => { block.style.overflow = ''; });
+  }
+
+  function load(block) {
+    const current = entries.get(block);
+    if (current && current.status !== 'failed') return;
+    const entry = {status: 'loading', rows: []};
+    entries.set(block, entry);
+    render(block);
+    loadRows(block).then(rows => {
+      entry.status = 'ready';
+      entry.rows = rows;
+    }, error => {
+      entry.status = 'failed';
+      console.warn('[US-CHANGE-FIELDS] Did not load:', block.dataset.usChangeQuery, block.dataset.usChangeKey, error);
+    }).then(() => {
+      if (entries.get(block) === entry) render(block);
+    });
+  }
+
+  // Capture phase: before US-RECORD-CARDS opens the card, so the loading
+  // line is part of the height it folds open to. A deleted record has no
+  // fields: the CSS hides its open button, and a click on its head stops
+  // here, so the card never opens, however late its row arrived.
+  document.addEventListener('click', event => {
+    const record = event.target.closest('.us-record');
+    const block = record?.querySelector('.us-change-fields[data-us-change-key]');
+    if (!block || block.closest('.us-report-no-styling')) return;
+    if (event.target.closest('.us-change-fields__retry')) {
+      load(block);
+      return;
+    }
+    const onToggle = event.target.closest('.us-record__toggle') ||
+      (event.target.closest('.us-record__head') && !event.target.closest('a, button, input, select, textarea'));
+    if (!onToggle) return;
+    if (DELETES.includes(actionOf(block))) {
+      event.stopPropagation();
+      return;
+    }
+    if (record.querySelector('.us-record__toggle')?.getAttribute('aria-expanded') === 'true') return;
+    load(block);
+  }, true);
+
+  window.UnionSuiteChangeFields = {load};
+})();
+/* US-CHANGE-FIELDS:END */
+
 /* US-COMMS-FACETS:START — Audience quick filters on the agreement's
    Communications panel (owner, 6 October 2026): a Members and a Staff chip,
    with counts, above the search in the theme's filter disclosure

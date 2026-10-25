@@ -14,7 +14,8 @@ const sourcePath = path.join(__dirname, 'index.html');
 const templatesDir = path.join(__dirname, 'templates');
 const guideTemplates = [
   'THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Parties-Query-Template.html',
-  'THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Member-Query-Template.html'
+  'THeme/UnionSuite-Guides/usage/templates/List-Templates/Case-Member-Query-Template.html',
+  'THeme/UnionSuite-Guides/usage/templates/List-Templates/Change-History-Query-Template.html'
 ];
 const outputPath = path.join(__dirname, 'Case-Page-Standalone.html');
 const missingAssets = new Set();
