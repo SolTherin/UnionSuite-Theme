@@ -22534,6 +22534,15 @@ a.us-meeting__tile:is(:hover, :focus-visible) {
   display: none;
 }
 
+/* A closed detailed iPart takes its iMIS container with it, so the
+   container's spacing cannot open a gap when it sits between the timeline
+   and the detailed iPart that is showing (the case page has Meetings
+   between All activity and Notes; owner, 25 October 2026). The page editor
+   keeps the container, so the iPart can still be edited. */
+body:not(.EasyEdit) .ContentItemContainer:has(> .us-activity-detail:not(.is-open)) {
+  display: none;
+}
+
 .us-activity__details-toggle,
 .us-activity__section-link {
   display: inline-flex;

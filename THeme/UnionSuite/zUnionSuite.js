@@ -17998,7 +17998,11 @@ SOFTWARE.
   const active=s.buttons[s.keys.indexOf(key)];
   s.panels.forEach(({node,key:k})=>{const hide=k!==key;if(hide&&node.contains(document.activeElement))active.focus({preventScroll:true});node.hidden=hide;node.toggleAttribute('data-us-section-hidden',hide);});
   s.buttons.forEach((button,i)=>{const on=s.keys[i]===key;button.classList.toggle('is-active',on);button.setAttribute('aria-selected',String(on));button.tabIndex=on?0:-1;});
-  s.key=key;memory.set(s.group,key);
+  // Only the viewer's choice is remembered (a press, or open()). A refresh's
+  // own pick is not: a tab whose panels are not ready yet (its iParts' preset
+  // classes still to expand) falls back to another tab, and remembering that
+  // fallback would keep it over the author's is-active default afterwards.
+  s.key=key;if(notify)memory.set(s.group,key);
   collapseLayout();
   scheduleIndicators(notify?active.parentElement:null);
   if(notify)s.menu.dispatchEvent(new CustomEvent('us:sectionchange',{bubbles:true,detail:{group:s.group,key,panels:s.panels.filter(p=>p.key===key).map(p=>p.node)}}));
@@ -22421,7 +22425,8 @@ SOFTWARE.
        grid). While its type is chosen, a Details view toggle leads the
        heading's buttons; pressed, the detailed iPart shows under the type
        filters in place of the timeline, its search and footer. Choosing
-       another type brings the timeline back.
+       another type brings the timeline back. Each Details view is
+       remembered as the viewer last left it (below).
      - Section link: a source's data-section-link (with data-section-tab and
        data-section-label) shows a heading link while its type is chosen,
        through the theme's section links (View all attachments).
@@ -22434,6 +22439,24 @@ SOFTWARE.
   const stillMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const detailsHost = state => state.root.closest('.us-activity-details');
   const detailPanel = key => key ? document.querySelector('.us-activity-detail-' + CSS.escape(key)) : null;
+
+  // Each Details view is remembered as the viewer last left it, per page and
+  // detailed iPart, in this browser (owner, 25 October 2026: "should remember
+  // the user's preference"). Only the toggle changes it: choosing another
+  // type closes the view without forgetting it, so choosing Notes again opens
+  // the ledger. US-DETAILS-VIEW reads and writes the same keys.
+  const detailsMemoryKey = key => 'UnionSuite.detailsView.v1:' + location.pathname + ':' + key;
+  function rememberedDetails(key) {
+    try { return window.localStorage.getItem(detailsMemoryKey(key)) === 'open'; } catch (_) { return false; }
+  }
+  function rememberDetails(key, open) {
+    try {
+      if (open) window.localStorage.setItem(detailsMemoryKey(key), 'open');
+      else window.localStorage.removeItem(detailsMemoryKey(key));
+    } catch (_) {
+      // Without storage the Details view works; it starts closed each time.
+    }
+  }
 
   // The heading's button slot, created as the theme's report actions are.
   function headingSlot(state) {
@@ -22467,7 +22490,11 @@ SOFTWARE.
       button.type = 'button';
       button.hidden = true;
       button.innerHTML = '<i class="ti ti-list-details" aria-hidden="true"></i>Details view';
-      button.addEventListener('click', () => showDetails(state, state.showing === button.dataset.key ? '' : button.dataset.key));
+      button.addEventListener('click', () => {
+        const open = state.showing !== button.dataset.key;
+        rememberDetails(button.dataset.key, open);
+        showDetails(state, open ? button.dataset.key : '');
+      });
       slot.prepend(button);
       state.detailsToggle = button;
     }
@@ -22475,6 +22502,8 @@ SOFTWARE.
     button.setAttribute('aria-pressed', String(Boolean(key) && state.showing === key));
     if (panel?.id) button.setAttribute('aria-controls', panel.id);
     revealControl(button, Boolean(panel));
+    // The type's Details view, as the viewer last left it.
+    if (key && panel && state.showing !== key && rememberedDetails(key)) showDetails(state, key);
   }
 
   function showDetails(state, key) {
@@ -22780,8 +22809,9 @@ SOFTWARE.
    the list's heading buttons; pressed, the detailed iPart takes the list's
    place, continuing its card: the list, its search and its footer step
    aside, and the detailed iPart's own heading is hidden (the feed's
-   us-activity-detail styles). Pressed again, the list returns. A list
-   whose detailed iPart is missing gets no toggle. */
+   us-activity-detail styles). Pressed again, the list returns. The choice
+   is remembered per page in this browser, as the feed's is. A list whose
+   detailed iPart is missing gets no toggle. */
 (function () {
   'use strict';
 
@@ -22793,6 +22823,21 @@ SOFTWARE.
 
   const stillMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   const keyOf = host => [...host.classList].find(name => name.startsWith(PREFIX))?.slice(PREFIX.length) || '';
+
+  // As the viewer last left it, per page and key, in this browser: the
+  // activity feed's Details view memory, with the same keys.
+  const memoryKey = key => 'UnionSuite.detailsView.v1:' + location.pathname + ':' + key;
+  function remembered(key) {
+    try { return window.localStorage.getItem(memoryKey(key)) === 'open'; } catch (_) { return false; }
+  }
+  function remember(key, open) {
+    try {
+      if (open) window.localStorage.setItem(memoryKey(key), 'open');
+      else window.localStorage.removeItem(memoryKey(key));
+    } catch (_) {
+      // Without storage the Details view works; it starts closed each time.
+    }
+  }
   const detailPanel = key => key ? document.querySelector('.us-activity-detail-' + CSS.escape(key)) : null;
 
   // The heading's button slot, as the theme's list actions make it; made
@@ -22814,7 +22859,11 @@ SOFTWARE.
     button.type = 'button';
     button.className = 'us-panel-action TextButton us-outline-button us-activity__details-toggle';
     button.innerHTML = '<i class="ti ti-list-details" aria-hidden="true"></i>Details view';
-    button.addEventListener('click', () => show(host, !states.get(host).open));
+    button.addEventListener('click', () => {
+      const open = !states.get(host).open;
+      remember(keyOf(host), open);
+      show(host, open);
+    });
     return button;
   }
 
@@ -22829,7 +22878,7 @@ SOFTWARE.
       return;
     }
     if (!state) {
-      state = {open: false, button: null};
+      state = {open: remembered(keyOf(host)), button: null};
       states.set(host, state);
     }
     const slot = headingSlot(host);
