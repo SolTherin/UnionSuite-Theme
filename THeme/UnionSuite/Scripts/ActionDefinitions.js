@@ -340,9 +340,10 @@
   // in an Equals prompt). With a group, role or search filter on, Ordinal
   // carries the rows still shown; with nothing filtered it is blank, so the
   // whole agreement is emailed, including rows past the first page. The
-  // hidden filter's value goes in queryparams as "@url:AgreementNum", as a
-  // Query Menu's own Email button sends it: the Communication Creator runs
-  // the query on the server, not from this page's address.
+  // agreement goes in queryparams under the IQA's prompt name,
+  // AgreementOrdinal: the Communication Creator runs the query on the
+  // server, not from this page's address, and ignored "@url:AgreementNum"
+  // (24 October 2026).
   // AgreementID goes too: the send page (us-agreement-comms on its
   // Communication Creator iPart) puts "Agreement A107 –" at the start
   // of the subject, where staff cannot remove it (US-SUBJECT-TAG). So do
@@ -357,7 +358,10 @@
     page: '/_i4u_/Core/Collective_Agreements/v2/Popups/Send-Email-Contacts.aspx',
     query: '$/_i4u_/Core/CA/v2/API - Communication Recipient List - Contacts',
     ordinalFilter: 'Ordinal',
-    agreementFilter: '@url:AgreementNum'
+    // The IQA's own prompt name. "@url:AgreementNum" passed /api/query but
+    // the send ignored it and counted every agreement's contacts (151
+    // against 1; iMIS's confirmation, dev tenant, 24 October 2026).
+    agreementFilter: 'AgreementOrdinal'
   };
   // The tiles' ordinals, all of them and those the filters leave shown.
   // A tile without its ordinal (a template from before data-us-contact-
@@ -918,7 +922,7 @@
         {type: 'date', name: 'FollowUpDate', label: 'Follow-up date', shownBy: 'FollowUp', required: 'Choose a follow-up date.'}
       ],
       submit: (values, context) => send('/cases/quick-add/note', {CaseID: context.caseId, CaseNum: context.caseNum, Note: values.Note, Category: values.Category,
-        FollowUpDate: values.FollowUp ? values.FollowUpDate : ''}),
+        FollowUp: values.FollowUp, FollowUpDate: values.FollowUp ? values.FollowUpDate : ''}),
       saved: values => values.FollowUp ? 'Note saved, with a follow-up task.' : 'Note saved.',
       failed: 'The note could not be saved. Try again.'
     }
@@ -1371,18 +1375,27 @@
   // iPart) with the recipients query, so the send is tracked:
   //   <website>/<send page>?query=<IQA path>
   //     &queryparams=[{"Item1":"Ordinal","Item2":"\"611\",\"612\""},
-  //                   {"Item1":"@url:CaseNum","Item2":"214"}]
+  //                   {"Item1":"CaseOrdinal","Item2":"214"}]
   //     &CaseID=C217&CaseNum=214&Audience=Parties&CommunicationType=Email
-  //     &ReturnUrl=<this page>
+  //     &ReturnUrl=<this page>&CommunicationId=<the default template>
   // The send page's Communication Creator iPart carries us-case-comms: the
   // subject starts "Case C217 – " (US-SUBJECT-TAG) and the send is linked to
   // the case afterwards (US-COMMS-LOG; both in the theme, 21 October 2026,
-  // into i4u_UT_Cases_Communications). Send page and IQA are placeholders.
+  // into i4u_UT_Cases_Communications). The send page and the recipients IQA
+  // are set up (owner, 24 October 2026). The page opens with the default
+  // case template, "Generic Case Email" in
+  // $/Common/Communications/Templates/i4u/Cases (its DocumentVersionId as
+  // CommunicationId; TODO.md: make it configurable). Open lists that
+  // folder (US-COMMS-TEMPLATES).
   const emailParties = {
-    page: '/_i4u_/Core/Cases/Popups/Send-Email-Parties.aspx',
-    query: '$/_i4u_/Core/Cases/API - Communication Recipient List - Parties',
+    page: '/_i4u_/Core/Cases/Layouts-v2/Popups/Send-Email-Parties.aspx',
+    communicationId: '9ae4a05c-4f8a-4103-bd23-db28a3faf8fc',
+    query: '$/_i4u_/Core/Cases/Layouts v2/API - Communication Recipient List - Parties',
     ordinalFilter: 'Ordinal',
-    caseFilter: '@url:CaseNum'
+    // The IQA's own prompt name. "@url:CaseNum" passed /api/query but the
+    // send ignored it and counted every case's parties (224 against 7;
+    // iMIS's confirmation, owner's dev tenant, 24 October 2026).
+    caseFilter: 'CaseOrdinal'
   };
 
   function clientRoot() {
@@ -1442,6 +1455,7 @@
           {Item1: emailParties.caseFilter, Item2: String(context.caseNum)}
         ]));
         url.searchParams.set('ReturnUrl', location.pathname + location.search);
+        url.searchParams.set('CommunicationId', emailParties.communicationId);
         // The case page prototype runs offline and answers the navigation
         // itself (UnionSuiteCasePreview); a live page navigates.
         (window.UnionSuiteCasePreview?.navigate || (href => location.assign(href)))(url.href);

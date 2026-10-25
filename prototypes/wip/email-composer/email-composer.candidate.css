@@ -1,0 +1,657 @@
+/* Email composer candidate (owner, 24 October 2026): a basic mode for the
+   Communication Creator on record send pages, and a review step before the
+   send. Mockup styling only; when approved it moves into zUnionSuite.css
+   (and dark-specific rules into zzDarkMode.css) under the iPart class.
+
+   Basic mode (us-comms-basic on the iPart's class wrapper): one section with
+   the template's presets read-only (From, To, Type), the subject and the
+   body. Advanced mode drops the class and shows the native tabs. */
+
+/* ── Heading: the Advanced switch ─────────────────────────────── */
+.us-comms-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: 600 13px/36px var(--font-ui);
+  cursor: pointer;
+}
+
+.us-comms-mode__track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background-color 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-mode__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-mode[aria-checked="true"] {
+  color: var(--text-base);
+}
+
+.us-comms-mode[aria-checked="true"] .us-comms-mode__track {
+  background: var(--brand-600);
+}
+
+.us-comms-mode[aria-checked="true"] .us-comms-mode__track::after {
+  transform: translateX(14px);
+}
+
+.us-comms-mode:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Basic mode: the compose section ──────────────────────────── */
+.us-comms-basic__section {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+/* The template's presets: read-only lines, quieter than the fields. */
+.us-comms-basic__presets {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  font-size: 13px;
+}
+
+.us-comms-basic__presets dl {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.us-comms-basic__presets dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.us-comms-basic__presets dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-base);
+}
+
+.us-comms-basic__presets .us-comms-basic__hint {
+  color: var(--text-muted);
+}
+
+.us-comms-basic__template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.us-comms-basic__template strong {
+  color: var(--text-base);
+}
+
+.us-comms-basic__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.us-comms-basic__field {
+  display: grid;
+  gap: 6px;
+}
+
+.us-comms-basic__label {
+  color: var(--text-strong);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ── Body editor: a trimmed toolbar over the template ─────────── */
+.us-comms-editor {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  transition: border-color 150ms cubic-bezier(.2, 0, 0, 1), box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-editor:focus-within {
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+.us-comms-editor__toolbar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.us-comms-editor__tool {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-base);
+  font: 600 13px var(--font-ui);
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-editor__tool:hover,
+.us-comms-editor__tool[aria-expanded="true"] {
+  background: var(--bg-sunken);
+}
+
+.us-comms-editor__tool:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.us-comms-editor__tool .ti {
+  font-size: 18px;
+}
+
+.us-comms-editor__tool--insert {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.us-comms-editor__divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--border);
+}
+
+.us-comms-editor__menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  min-width: 220px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+}
+
+.us-comms-editor__menu[hidden] {
+  display: none;
+}
+
+.us-comms-editor__menu-note {
+  padding: 6px 10px 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-editor__menu button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-base);
+  font: 13px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+.us-comms-editor__menu button:hover,
+.us-comms-editor__menu button:focus-visible {
+  background: var(--bg-sunken);
+  outline: 0;
+}
+
+.us-comms-editor__menu button span {
+  color: var(--text-muted);
+}
+
+/* The email as the template frames it. The header and footer come from
+   the template and cannot be edited here; the middle is the message. */
+.us-comms-email {
+  padding: 16px;
+  background: var(--bg-sunken);
+}
+
+.us-comms-email__sheet {
+  max-width: 640px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #1f2937;
+  font: 14px/1.6 Arial, Helvetica, sans-serif;
+}
+
+.us-comms-email__locked {
+  position: relative;
+  user-select: none;
+}
+
+.us-comms-email__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: #14213d;
+  color: #fff;
+}
+
+.us-comms-email__brand {
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.us-comms-email__case {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.us-comms-email__message {
+  min-height: 160px;
+  padding: 18px 20px;
+  outline: 0;
+}
+
+.us-comms-email__message p {
+  margin: 0 0 12px;
+}
+
+.us-comms-email__footer {
+  padding: 14px 20px 18px;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.us-comms-email__footer p {
+  margin: 0 0 6px;
+}
+
+.us-comms-email__footer .us-comms-email__sign {
+  color: #1f2937;
+  font-size: 14px;
+}
+
+/* In the editor the locked parts say so, quietly. */
+.us-comms-editor .us-comms-email__locked::after {
+  content: attr(data-us-locked-label);
+  position: absolute;
+  top: -9px;
+  right: 12px;
+  padding: 0 6px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-pill);
+  background: #f3f4f6;
+  color: #6b7280;
+  font: 600 10px/16px var(--font-ui);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.us-comms-basic .us-comms-basic__field .us-subject-tag {
+  width: 100%;
+}
+
+/* A merge field in the editor: a chip with its friendly name. */
+.us-merge-field {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: #e0ecff;
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+/* ── Actions under the composer ───────────────────────────────── */
+.us-comms-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  max-width: 760px;
+  margin-top: 16px;
+}
+
+.us-comms-actions__note {
+  margin-right: auto;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Review step ──────────────────────────────────────────────── */
+.us-comms-review {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.us-comms-review__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.us-comms-review__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 16px/1.4 var(--font-ui);
+}
+
+.us-comms-review__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.us-comms-review__who select {
+  max-width: 260px;
+}
+
+.us-comms-review__step {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  cursor: pointer;
+}
+
+.us-comms-review__step:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.us-comms-review__envelope {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font-size: 13px;
+}
+
+.us-comms-review__envelope dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.us-comms-review__envelope dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.us-comms-review .us-comms-email {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ── Swapping compose and review: slide and fade ──────────────── */
+.us-comms-view {
+  transition: opacity 220ms cubic-bezier(.2, 0, 0, 1), transform 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-view[data-us-leaving] {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.us-comms-view[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-comms-mode__track,
+  .us-comms-mode__track::after,
+  .us-comms-editor,
+  .us-comms-editor__tool,
+  .us-comms-view {
+    transition: none;
+  }
+}
+
+/* ── Narrow screens: touch sizes, stacked presets ─────────────── */
+@media (max-width: 950px) {
+  .us-comms-editor__tool,
+  .us-comms-review__step {
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  .us-comms-basic__presets dl,
+  .us-comms-review__envelope {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .us-comms-basic__presets dl dd,
+  .us-comms-review__envelope dd {
+    margin-bottom: 8px;
+  }
+
+  .us-comms-email {
+    padding: 8px;
+  }
+
+  .us-comms-email__header,
+  .us-comms-email__message,
+  .us-comms-email__footer {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+}
+
+/* ── Open in basic mode: the case templates picker ────────────── */
+.us-comms-templates {
+  box-sizing: border-box;
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 32px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  box-shadow: var(--shadow-lg);
+  font: 14px/1.5 var(--font-ui);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms cubic-bezier(.2, 0, 0, 1), transform 200ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-templates[open][data-us-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+.us-comms-templates::backdrop {
+  background: rgb(15 23 42 / 40%);
+}
+
+.us-comms-templates form {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.us-comms-templates__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.us-comms-templates__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 16px/1.4 var(--font-ui);
+}
+
+.us-comms-templates__close {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.us-comms-templates__close:hover {
+  background: var(--bg-sunken);
+}
+
+.us-comms-templates__folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates__folder code {
+  overflow-wrap: anywhere;
+}
+
+/* Beats the normalize rule that gives search inputs content-box sizing. */
+.us-comms-templates input.us-comms-templates__search {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.us-comms-templates__list {
+  display: grid;
+  gap: 2px;
+  max-height: 300px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.us-comms-templates__option {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-base);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1), border-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-templates__option:hover,
+.us-comms-templates__option:focus-visible {
+  background: var(--bg-sunken);
+  outline: 0;
+}
+
+.us-comms-templates__option[aria-selected="true"] {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+}
+
+.us-comms-templates__option strong {
+  color: var(--text-strong);
+}
+
+.us-comms-templates__option span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates__empty,
+.us-comms-templates__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates__empty {
+  padding: 12px;
+}
+
+@media (max-width: 950px) {
+  .us-comms-templates__close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .us-comms-templates__option {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-comms-templates,
+  .us-comms-templates__option {
+    transition: none;
+  }
+}

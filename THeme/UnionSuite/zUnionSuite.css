@@ -12259,6 +12259,688 @@ a[data-us-comms-log-held] {
 
 /* US-SEND-RECIPIENTS:END */
 
+/* US-COMMS-TEMPLATES:START — Open's template picker on a record send page
+   (zUnionSuite.js US-COMMS-TEMPLATES). The theme dialog's frame, title and
+   close (US-DIALOG), holding the folder's templates and a search. */
+.us-dialog.us-comms-templates {
+  --us-dialog-width: 480px;
+}
+
+.us-comms-templates .us-comms-templates__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  overflow-y: auto;
+}
+
+.us-comms-templates .us-comms-templates__folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates .us-comms-templates__folder code {
+  overflow-wrap: anywhere;
+  background: none;
+  color: inherit;
+}
+
+/* Beats native input sizing, which leaves search fields content-box. */
+.us-comms-templates input.us-comms-templates__search {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.us-comms-templates .us-comms-templates__status {
+  margin: 0;
+  padding: 8px 2px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.us-comms-templates .us-comms-templates__status[hidden] {
+  display: none;
+}
+
+.us-comms-templates .us-comms-templates__status--warning {
+  color: var(--danger);
+}
+
+.us-comms-templates .us-comms-templates__list {
+  display: grid;
+  gap: 2px;
+  max-height: 320px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.us-comms-templates .us-comms-templates__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-base);
+  font: 13px/1.4 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 150ms cubic-bezier(.2, 0, 0, 1),
+    border-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-templates .us-comms-templates__option .ti {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.us-comms-templates .us-comms-templates__option:hover,
+.us-comms-templates .us-comms-templates__option:focus-visible {
+  background: var(--bg-sunken);
+  outline: 0;
+}
+
+.us-comms-templates .us-comms-templates__option:focus-visible {
+  border-color: var(--border-focus);
+}
+
+.us-comms-templates .us-comms-templates__option[aria-current="true"] {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+}
+
+.us-comms-templates .us-comms-templates__option:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+
+.us-comms-templates .us-comms-templates__current {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates .us-comms-templates__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-templates .us-comms-templates__browse {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 950px) {
+  .us-comms-templates .us-comms-templates__option {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-comms-templates .us-comms-templates__option {
+    transition: none;
+  }
+}
+
+/* US-COMMS-TEMPLATES:END */
+
+/* US-COMMS-BASIC:START — basic mode on a record send page (zUnionSuite.js
+   US-COMMS-BASIC). The script puts us-comms-basic on the iPart's class
+   wrapper (us-case-comms) unless the Advanced switch is on, marks the
+   editor tools basic mode keeps (data-us-basic-keep) and the toolbar groups
+   left empty (data-us-basic-empty), and adds the presets box, the Message
+   label, the Insert field menu and the switch. Advanced shows iMIS's own
+   page. */
+
+/* ── The Advanced switch, first in the heading's options ─────── */
+.us-comms-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: 600 13px/36px var(--font-ui);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.us-comms-mode__track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background-color 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-mode__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 180ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-mode[aria-checked="true"] {
+  color: var(--text-base);
+}
+
+.us-comms-mode[aria-checked="true"] .us-comms-mode__track {
+  background: var(--brand-600);
+}
+
+.us-comms-mode[aria-checked="true"] .us-comms-mode__track::after {
+  transform: translateX(14px);
+}
+
+.us-comms-mode:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── What only basic mode shows ────────────────────────────────── */
+.us-comms-basic__presets,
+.us-comms-basic__label,
+.us-comms-basic__fields-group {
+  display: none;
+}
+
+.us-comms-basic .us-comms-basic__presets {
+  display: block;
+  box-sizing: border-box;
+  max-width: 720px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  font-size: 13px;
+}
+
+.us-comms-basic .us-comms-basic__presets dl {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.us-comms-basic .us-comms-basic__presets dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.us-comms-basic .us-comms-basic__presets dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-base);
+}
+
+.us-comms-basic .us-comms-basic__template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.us-comms-basic .us-comms-basic__template strong {
+  color: var(--text-base);
+}
+
+.us-comms-basic .us-comms-basic__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-link);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.us-comms-basic .us-comms-basic__label {
+  display: block;
+  margin: 16px 0 6px;
+  color: var(--text-strong);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ── One section: Header and Body together, no tabs ─────────── */
+.us-comms-basic .RadTabStrip {
+  display: none;
+}
+
+.us-comms-basic .RadMultiPage > .rmpView:is([id$="HeaderPageView"], [id$="BodyPageView"]) {
+  display: block !important;
+}
+
+.us-comms-basic .RadMultiPage > .rmpView:is([id$="RecipeintsPageView"], [id$="DataSourcesPageView"]) {
+  display: none !important;
+}
+
+/* The template sets these; Advanced edits them. */
+.us-comms-basic [id$="_CommunicationCreatorHeader_DivEmailHeader"] > .PanelField:is(
+  [id$="_TemplateNameWrapper"],
+  [id$="_CcInputDiv"],
+  [id$="_BccInputDiv"],
+  [id$="_CcAndBccLinkLine"],
+  :has(> .PanelFieldValue > input[id$="_TxtFrom"]),
+  :has(> .PanelFieldValue > input[id$="_TxtTo"]),
+  :has(> .PanelFieldValue > select[id$="_CommunicationTypeList"])
+) {
+  display: none;
+}
+
+.us-comms-basic [id$="BodyPageView"] .card:has(input[type="checkbox"]) {
+  display: none;
+}
+
+/* The subject, the one header field left: its label above the field, as
+   the Message label sits above the editor, not in iMIS's label column. */
+.us-comms-basic [id$="_CommunicationCreatorHeader_DivEmailHeader"] > .PanelField:has(input[id$="_TxtSubject"]) {
+  float: none;
+  width: auto;
+  padding-top: 0;
+}
+
+/* Native label and value are inline-block, which adds line spacing between
+   them once stacked. */
+.us-comms-basic [id$="_CommunicationCreatorHeader_DivEmailHeader"] > .PanelField:has(input[id$="_TxtSubject"]) > .PanelFieldLabel {
+  display: block;
+  float: none;
+  width: auto;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+.us-comms-basic [id$="_CommunicationCreatorHeader_DivEmailHeader"] > .PanelField:has(input[id$="_TxtSubject"]) > .PanelFieldLabel label {
+  float: none;
+  margin: 0;
+  padding: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.us-comms-basic [id$="_CommunicationCreatorHeader_DivEmailHeader"] > .PanelField:has(input[id$="_TxtSubject"]) > .PanelFieldValue {
+  display: block;
+  float: none;
+  width: auto;
+}
+
+/* ── The editor's toolbar: the tools basic mode keeps ────────── */
+.us-comms-basic .RadEditor ul.reToolBar:not(.us-comms-basic__fields-group) > li:not([data-us-basic-keep]),
+.us-comms-basic .RadEditor ul.reToolBar[data-us-basic-empty] {
+  display: none;
+}
+
+.us-comms-basic .RadEditor ul.us-comms-basic__fields-group {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  list-style: none;
+  vertical-align: top;
+}
+
+.us-comms-basic .us-comms-basic__insert {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-base);
+  font: 600 12px var(--font-ui);
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-basic .us-comms-basic__insert:hover,
+.us-comms-basic .us-comms-basic__insert[aria-expanded="true"] {
+  background: var(--bg-sunken);
+}
+
+.us-comms-basic .us-comms-basic__insert:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.us-comms-basic .us-comms-basic__insert .ti {
+  font-size: 15px;
+}
+
+.us-comms-basic .us-comms-basic__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 200px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+}
+
+.us-comms-basic .us-comms-basic__menu[hidden] {
+  display: none;
+}
+
+/* One field per row: the menu sits inside the editor's toolbar, whose
+   item rules would otherwise lay its items side by side. */
+.us-comms-basic .RadEditor .us-comms-basic__menu > li {
+  display: block;
+  float: none;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.us-comms-basic .us-comms-basic__menu-note {
+  padding: 6px 10px 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.us-comms-basic .us-comms-basic__menu button {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-base);
+  font: 13px var(--font-ui);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.us-comms-basic .us-comms-basic__menu button:hover,
+.us-comms-basic .us-comms-basic__menu button:focus-visible {
+  background: var(--bg-sunken);
+  outline: 0;
+}
+
+/* ── Notes: under the editor (locked parts) and over the send row ── */
+.us-comms-basic__note {
+  max-width: 720px;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  color: var(--text-base);
+  font-size: 13px;
+}
+
+.us-comms-basic__note--warning {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+}
+
+.us-comms-basic__note[hidden] {
+  display: none;
+}
+
+/* Under the subject: lines up with the field above it. */
+.us-comms-basic__note[data-us-note="subject"] {
+  margin-top: 6px;
+}
+
+/* Over the send row: on the right, beside the button it is about. */
+.us-comms-basic__note[data-us-note="actions"] {
+  margin: 12px 0 0 auto;
+}
+
+/* The editor's Design / HTML / Preview bar: basic mode stays in Design. */
+.us-comms-basic .RadEditor [data-us-basic-modes] {
+  display: none;
+}
+
+/* After a send: the follow-up on iMIS's confirmation, at the top. */
+.us-case-comms > .us-comms-basic__status {
+  margin: 0 0 12px;
+}
+
+/* ── Review and send replaces Send Now in basic mode ─────────── */
+.us-comms-basic__review {
+  display: none;
+}
+
+.us-comms-basic .us-comms-basic__review {
+  display: inline-block;
+}
+
+.us-comms-basic [id$="_ButtonPanelRight"] > [id$="_ButtonConfirm"] {
+  display: none !important;
+}
+
+/* While reviewing, the review takes the composer's place. */
+.us-comms-review[hidden],
+.us-comms-reviewing [id$="CommunicationCreatorWrapper"] {
+  display: none;
+}
+
+/* Centred in the panel: the review reads as one sheet, not a column. */
+.us-comms-review {
+  display: grid;
+  gap: 14px;
+  max-width: 860px;
+  margin: 0 auto;
+  outline: 0;
+}
+
+.us-comms-reviewing .us-comms-review {
+  animation: us-comms-review-in 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@keyframes us-comms-review-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.us-comms-review__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.us-comms-review__title {
+  margin: 0;
+  color: var(--text-strong);
+  font: 600 16px/1.4 var(--font-ui);
+}
+
+.us-comms-review__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.us-comms-review__as {
+  max-width: 320px;
+}
+
+.us-comms-review__step {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-base);
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.us-comms-review__step:hover:not(:disabled) {
+  background: var(--bg-sunken);
+}
+
+.us-comms-review__step:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.us-comms-review__step:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.us-comms-review__envelope {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  font-size: 13px;
+}
+
+.us-comms-review__envelope dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.us-comms-review__envelope dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-base);
+}
+
+.us-comms-review__warning {
+  margin: 0;
+}
+
+.us-comms-review__warning[hidden] {
+  display: none;
+}
+
+/* The email as sent: always on white, as mail clients show it. */
+.us-comms-review__frame {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 420px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.us-comms-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+
+.us-comms-review__summary {
+  margin-right: auto;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 950px) {
+  .us-comms-basic .us-comms-basic__insert,
+  .us-comms-basic .us-comms-basic__menu button {
+    min-height: 44px;
+  }
+
+  .us-comms-review__step {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  .us-comms-review__envelope {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .us-comms-review__envelope dd {
+    margin-bottom: 8px;
+  }
+
+  .us-comms-review__as {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .us-comms-basic .us-comms-basic__presets dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .us-comms-basic .us-comms-basic__presets dd {
+    margin-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .us-comms-mode__track,
+  .us-comms-mode__track::after,
+  .us-comms-basic .us-comms-basic__insert,
+  .us-comms-review__step {
+    transition: none;
+  }
+
+  .us-comms-reviewing .us-comms-review {
+    animation: none;
+  }
+}
+
+/* US-COMMS-BASIC:END */
+
 /* US-RECORD-RECIPIENTS:START — how a sent email went, inside an opened record
    card (README decision 13). Filled by US-COMMS-RECIPIENTS (a Query Template
    card's .us-comms-recipients) or US-ACTIVITY-RECIPIENTS (the activity

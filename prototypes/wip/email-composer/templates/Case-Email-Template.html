@@ -1,0 +1,80 @@
+<!--
+  Case email template: header, message and footer (owner, 24 October 2026).
+  Generic for every case: the case number and the greeting are merge fields.
+
+  Where it goes: the Body of the default "Case email" communication template
+  in the case templates folder. On the Communication Creator's Body tab,
+  switch the editor to HTML view, paste everything below this comment, then
+  set the template's From, Type and Subject, and save it as a template.
+
+  Email clients ignore <style> blocks and most layout CSS, so every style is
+  inline and the layout is tables, 600px wide. Keep it that way when
+  editing.
+
+  Merge fields (each must be a column of the recipients query, or the send
+  fails):
+  - {#party.FirstName}: the party's first name, read through the iMIS ID
+    (the query's ID column, as To's {#party.Email} is).
+  - {#recipient.CaseID}: the case number, e.g. C218. Add a CaseID column to
+    the Parties IQA before using this template, or replace the field with
+    plain text.
+
+  Replace before use: HUB UNION (or an <img> logo with an absolute https
+  address), the sender line, and the address and phone in the footer.
+  Colours: header #14213d, accent #f59e0b, text #1f2937, muted #6b7280.
+
+  Staff write between the MESSAGE START and MESSAGE END comments; the rest is
+  the template's header and footer. Keep both comments, around whole rows of
+  the inner table: the theme's basic mode (US-COMMS-BASIC) lets staff edit
+  only those rows, and finds them by the comments.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #f3f4f6;">
+  <tr>
+    <td align="center" style="padding: 24px 12px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px;">
+
+        <!-- HEADER -->
+        <tr>
+          <td style="padding: 18px 24px; background-color: #14213d; border-radius: 6px 6px 0 0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; letter-spacing: 1px; color: #ffffff;">
+                  HUB UNION
+                </td>
+                <td align="right" style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #cbd5e1;">
+                  Case {#recipient.CaseID}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="height: 4px; line-height: 4px; font-size: 4px; background-color: #f59e0b;">&nbsp;</td>
+        </tr>
+
+        <!-- MESSAGE START -->
+        <tr>
+          <td style="padding: 24px 24px 8px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 24px; color: #1f2937;">
+            <p style="margin: 0 0 16px;">Dear {#party.FirstName},</p>
+            <p style="margin: 0 0 16px;">Write your message here.</p>
+          </td>
+        </tr>
+        <!-- MESSAGE END -->
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="padding: 8px 24px 24px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 24px; color: #1f2937;">
+            <p style="margin: 0;">Kind regards,<br>Case Management Team</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 16px 24px 20px; border-top: 1px solid #e5e7eb; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 18px; color: #6b7280;">
+            <p style="margin: 0 0 6px;">Hub Union &middot; Level 4, 100 Example Street, Melbourne VIC 3000 &middot; 03 9000 0000</p>
+            <p style="margin: 0;">You're receiving this email as a party to case {#recipient.CaseID}. Please reply to this email or quote the case number when you contact us.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>

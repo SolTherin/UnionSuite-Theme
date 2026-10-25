@@ -12471,7 +12471,6 @@ SOFTWARE.
     const field = document.createElement('span');
     field.className = subject.className + ' us-subject-tag';
     field.setAttribute('data-us-subject-prefix', tag + SEPARATOR.trimEnd());
-    field.title = 'Every email from this page is sent with this prefix';
 
     // The prefix is generated content, which screen readers may skip, so
     // the proxy is also described in words.
@@ -12486,6 +12485,14 @@ SOFTWARE.
     proxy.className = 'us-subject-tag__input';
     proxy.autocomplete = 'off';
     proxy.setAttribute('aria-describedby', note.id);
+    // On the input, not the wrapper: a password manager's fill icon lands
+    // inside the wrapper and showed this text (Keeper, 24 October 2026).
+    proxy.title = 'Every email from this page is sent with this prefix';
+    // A subject line, never a password: the managers' own opt-outs
+    // (LastPass, 1Password, Bitwarden; Keeper documents none).
+    proxy.setAttribute('data-lpignore', 'true');
+    proxy.setAttribute('data-1p-ignore', '');
+    proxy.setAttribute('data-bwignore', '');
     field.append(proxy);
     // A click on the prefix puts the cursor in the field.
     field.addEventListener('mousedown', event => {
@@ -12626,10 +12633,12 @@ SOFTWARE.
       defaultType: 'Email'
     },
     // The case send page (owner, 21 October 2026): the same link table
-    // schema with CaseOrdinal. The email logs IQA only matches the
-    // communication log on subject, so the agreement's serves cases too.
+    // schema with CaseOrdinal. Its own email logs IQA (owner, 24 October
+    // 2026): the agreement's only returns subjects with the agreement
+    // prefix, so a case email was never found. Same columns and Subject
+    // filter, for "Case …" subjects.
     'us-case-comms': {
-      query: '$/_i4u_/Core/CA/v2/API - Agreement Email Logs',
+      query: '$/_i4u_/Core/Cases/Layouts v2/API - Case Email Logs',
       subjectFilter: 'Subject',
       entity: 'i4u_UT_Cases_Communications',
       recordField: 'CaseOrdinal',
@@ -13038,6 +13047,28 @@ SOFTWARE.
     return {rows, total: Math.max(total ?? 0, rows.length)};
   }
 
+  // One read of the address's recipients per page, shared with the review
+  // step (US-COMMS-BASIC) through UnionSuiteSendRecipients.rows().
+  let loaded = null;
+  function shared(params) {
+    if (!loaded) {
+      loaded = loadRows(params);
+      loaded.catch(() => { loaded = null; });
+    }
+    return loaded;
+  }
+
+  // The recipients, as {rows, total}; null when the address names none.
+  function rows() {
+    let params;
+    try {
+      params = requestFromAddress();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    return params ? shared(params) : Promise.resolve(null);
+  }
+
   // The optional link: {Name} filled from the page address. Null when a
   // parameter is missing or the address leaves this site.
   function recordLink(host) {
@@ -13088,7 +13119,7 @@ SOFTWARE.
     const summary = host.classList.contains(SUMMARY);
     const link = recordLink(host);
 
-    loadRows(params)
+    shared(params)
       .then(render)
       .catch(error => warn('The recipient list could not be loaded (' + error.message + '). Check the Recipients tab before sending.'));
 
@@ -13201,12 +13232,1090 @@ SOFTWARE.
     });
   }
 
-  window.UnionSuiteSendRecipients = {refresh};
+  window.UnionSuiteSendRecipients = {refresh, rows, field};
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh);
   else refresh();
 })();
 /* US-SEND-RECIPIENTS:END */
+
+/* US-COMMS-TEMPLATES:START — Open on a record send page lists that record's
+   template folder (owner, 24 October 2026). The Communication Creator's Open
+   button normally opens iMIS's Document Browser at no folder in particular.
+   On the case send page (us-case-comms) it opens a theme dialog instead,
+   listing the communications (COM documents) published in the case
+   templates folder, with a search. Choosing one does what iMIS's own Open
+   does: reloads the page with &CommunicationId=<the template's version id>,
+   keeping the rest of the address (the recipients query, CaseID, CaseNum).
+   That replaces the subject and message, and the dialog says so.
+   "Browse all folders" in the dialog runs the native Open.
+   The folder is read with Document/_execute: FindByPath (folder → id), then
+   FindDocumentsInFolder (published COM only). A failed read says so and
+   offers Browse all folders. Pages without an entry below keep the native
+   Open. The folder is hard-coded for now (TODO.md: make it configurable). */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCommsTemplates) return;
+
+  // One entry per page class: the folder Open lists.
+  const PAGES = {
+    'us-case-comms': {
+      folder: '$/Common/Communications/Templates/i4u/Cases',
+      title: 'Open a case template'
+    }
+  };
+  const OPEN = '.panel-heading-options > input[onclick*=".LoadCommunication("]';
+  const CLOSE_FALLBACK_MS = 200;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const lists = new Map();
+  let native = false;
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  function execute(operation, values, types) {
+    return fetch('/api/Document/_execute', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json', Accept: 'application/json', RequestVerificationToken: token()},
+      body: JSON.stringify({
+        $type: 'Asi.Soa.Core.DataContracts.GenericExecuteRequest, Asi.Contracts',
+        OperationName: operation,
+        EntityTypeName: 'Document',
+        Parameters: {$type: 'System.Collections.ObjectModel.Collection`1[[System.Object, mscorlib]], mscorlib', $values: values},
+        ParameterTypeName: {$type: 'System.Collections.ObjectModel.Collection`1[[System.String, mscorlib]], mscorlib', $values: types}
+      })
+    }).then(response => {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    });
+  }
+
+  // The folder's published communications, by name. Read once per page.
+  function templates(folder) {
+    if (!lists.has(folder)) {
+      const read = execute('FindByPath', [folder], ['System.String'])
+        .then(found => {
+          const id = found?.Result?.DocumentId;
+          if (!id) throw new Error('folder not found');
+          return execute('FindDocumentsInFolder',
+            [id, {$type: 'System.String[], mscorlib', $values: ['COM']}, true],
+            ['System.String', 'System.String[]', 'System.Boolean']);
+        })
+        .then(found => (found?.Result?.$values || [])
+          .map(item => ({id: String(item.DocumentVersionId || ''), name: String(item.Name || '').trim()}))
+          .filter(item => item.id && item.name)
+          .sort((a, b) => a.name.localeCompare(b.name)));
+      // A failed read is tried again on the next Open.
+      read.catch(() => lists.delete(folder));
+      lists.set(folder, read);
+    }
+    return lists.get(folder);
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // The theme dialog's shell (US-DIALOG's classes), holding a list rather
+  // than a page.
+  function openPicker(page, button) {
+    const dialog = el('dialog', 'us-dialog us-comms-templates');
+    dialog.setAttribute('aria-labelledby', 'us-comms-templates-title');
+    const head = el('div', 'us-dialog__head');
+    const title = el('h2', 'us-dialog__title', page.title);
+    title.id = 'us-comms-templates-title';
+    const close = el('button', 'us-dialog__close');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close');
+    close.title = 'Close';
+    head.append(title, close);
+
+    const body = el('div', 'us-comms-templates__body');
+    const folder = el('p', 'us-comms-templates__folder');
+    const icon = el('i', 'ti ti-folder');
+    icon.setAttribute('aria-hidden', 'true');
+    folder.append(icon, el('code', '', page.folder));
+    const search = el('input', 'us-comms-templates__search');
+    search.type = 'search';
+    search.placeholder = 'Search templates';
+    search.autocomplete = 'off';
+    search.setAttribute('aria-label', 'Search templates');
+    const status = el('p', 'us-comms-templates__status', 'Loading templates…');
+    status.setAttribute('role', 'status');
+    const list = el('ul', 'us-comms-templates__list');
+    list.setAttribute('aria-label', 'Templates');
+    const foot = el('p', 'us-comms-templates__note', 'Opening a template replaces the subject and message. ');
+    const browse = el('button', 'us-comms-templates__browse', 'Browse all folders');
+    browse.type = 'button';
+    foot.append(browse);
+    body.append(folder, search, status, list, foot);
+    dialog.append(head, body);
+
+    const current = new URLSearchParams(location.search).get('CommunicationId') || '';
+    let items = [];
+
+    function render() {
+      const term = search.value.trim().toLowerCase();
+      const shown = items.filter(item => !term || item.name.toLowerCase().includes(term));
+      list.replaceChildren(...shown.map(item => {
+        const row = el('li');
+        const choose = el('button', 'us-comms-templates__option');
+        choose.type = 'button';
+        choose.dataset.usCommunicationId = item.id;
+        if (item.id.toLowerCase() === current.toLowerCase()) choose.setAttribute('aria-current', 'true');
+        const icon = el('i', 'ti ti-mail');
+        icon.setAttribute('aria-hidden', 'true');
+        choose.append(icon, el('span', '', item.name));
+        if (choose.hasAttribute('aria-current')) choose.append(el('span', 'us-comms-templates__current', 'Open now'));
+        row.append(choose);
+        return row;
+      }));
+      status.hidden = !!shown.length;
+      if (!shown.length) status.textContent = items.length ? 'No templates match.' : 'This folder has no templates.';
+    }
+
+    let closing = false;
+    function finish() {
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      if (button.isConnected) button.focus({preventScroll: true});
+    }
+    function shut(then) {
+      if (closing) return;
+      closing = true;
+      const done = () => {
+        finish();
+        if (then) then();
+      };
+      if (reduceMotion.matches) return done();
+      dialog.setAttribute('data-us-closing', '');
+      const timer = setTimeout(done, CLOSE_FALLBACK_MS);
+      dialog.addEventListener('animationend', function ended(event) {
+        if (event.target !== dialog) return;
+        dialog.removeEventListener('animationend', ended);
+        clearTimeout(timer);
+        done();
+      });
+    }
+
+    list.addEventListener('click', event => {
+      const choose = event.target.closest('[data-us-communication-id]');
+      if (!choose) return;
+      // As iMIS's own Open: the same address with this template.
+      const next = new URL(location.href);
+      next.searchParams.set('CommunicationId', choose.dataset.usCommunicationId);
+      list.querySelectorAll('button').forEach(option => { option.disabled = true; });
+      status.hidden = false;
+      status.textContent = 'Opening ' + choose.textContent.replace('Open now', '').trim() + '…';
+      location.assign(next.href);
+    });
+    search.addEventListener('input', render);
+    close.addEventListener('click', () => shut());
+    browse.addEventListener('click', () => shut(() => {
+      native = true;
+      try { button.click(); } finally { native = false; }
+    }));
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      shut();
+    });
+    // A press that starts and ends on the backdrop closes.
+    let pressedOutside = false;
+    const outside = event => {
+      if (event.target !== dialog) return false;
+      const box = dialog.getBoundingClientRect();
+      return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+    };
+    dialog.addEventListener('pointerdown', event => { pressedOutside = outside(event); });
+    dialog.addEventListener('click', event => {
+      if (pressedOutside && outside(event)) shut();
+      pressedOutside = false;
+    });
+
+    document.body.append(dialog);
+    dialog.showModal();
+    search.focus();
+
+    templates(page.folder)
+      .then(found => {
+        items = found;
+        render();
+      })
+      .catch(error => {
+        status.textContent = 'The templates could not be loaded (' + error.message + '). Use Browse all folders instead.';
+        status.classList.add('us-comms-templates__status--warning');
+      });
+  }
+
+  // Taken in the capture phase, before the button's own onclick runs.
+  function intercept(event) {
+    if (native) return;
+    const button = event.target.closest?.(OPEN);
+    if (!button) return;
+    const owner = Object.keys(PAGES).find(name => button.closest('.' + name));
+    if (!owner || button.closest('.us-report-no-styling') || document.body.classList.contains('TemplateAreaEasyEditOn')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openPicker(PAGES[owner], button);
+  }
+
+  document.addEventListener('click', intercept, true);
+
+  window.UnionSuiteCommsTemplates = {templates};
+})();
+/* US-COMMS-TEMPLATES:END */
+
+/* US-COMMS-BASIC:START — a basic mode for the Communication Creator on a
+   record send page (owner, 24 October 2026; mockup in
+   prototypes/wip/email-composer). The template (opened by CommunicationId)
+   sets the sender, the recipients' address and the type, so staff only
+   write the subject and the message:
+   - the tab strip goes, and Header and Body show as one section;
+   - From, To and Type become read-only lines over the subject, with the
+     template's name; Template name, Cc, Bcc, the unsubscribe page and the
+     Recipients and Data sources tabs are hidden;
+   - the editor keeps bold, italic, underline, lists, link, undo and redo,
+     and its Insert field offers a short list of friendly names (only those
+     iMIS's own Insert field lists, so each matches a data source column);
+   - the template's header and footer cannot be edited: only the rows
+     between its MESSAGE START and MESSAGE END comments take edits;
+   - "Review and send" replaces Send Now: the email as each recipient will
+     get it, then a send that answers iMIS's confirmation only when its
+     recipient count matches the review.
+   An Advanced switch in the heading brings back iMIS's own page, every
+   field editable. The choice is remembered for each person in this browser
+   (localStorage), basic by default. Pages without an entry below keep the
+   native page. */
+(function () {
+  'use strict';
+
+  if (window.UnionSuiteCommsBasic) return;
+
+  // One entry per iPart class: the merge fields basic mode offers, as
+  // [field, label]. A field iMIS does not list for the page is left out.
+  const PAGES = {
+    'us-case-comms': {
+      fields: [
+        ['party.FirstName', 'First name'],
+        ['recipient.Name', 'Full name'],
+        ['recipient.Role', 'Role on the case'],
+        ['recipient.CaseID', 'Case number'],
+        ['recipient.Email', 'Email'],
+        ['recipient.Phone', 'Phone']
+      ]
+    }
+  };
+  const BASIC = 'us-comms-basic';
+  const STORE = 'us-comms-advanced';
+  const KEEP_TOOLS = ['reBold', 'reItalic', 'reUnderline', 'reInsertOrderedList', 'reInsertUnorderedList', 'reLinkManager', 'reUnlink', 'reUndo', 'reRedo'];
+  const owners = new Set();
+  let queued = false;
+
+  function advanced() {
+    try { return localStorage.getItem(STORE) === '1'; } catch (_) { return false; }
+  }
+
+  function remember(on) {
+    try { localStorage.setItem(STORE, on ? '1' : ''); } catch (_) { /* this browser only */ }
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  const field = (owner, suffix) => owner.querySelector('[id$="_CommunicationCreatorHeader_' + suffix + '"]');
+  const editorOf = owner => {
+    const node = owner.querySelector('[id$="BodyPageView"] .RadEditor');
+    return node && window.$find ? window.$find(node.id) : null;
+  };
+
+  // Telerik draws the editor's content area at the size it had when shown;
+  // shown in a new place, it needs telling.
+  function repaint(owner) {
+    requestAnimationFrame(() => {
+      try { editorOf(owner)?.repaint(); } catch (_) { /* the editor redraws on its next change */ }
+    });
+  }
+
+  // ── Read-only presets: From, To, Type and the template ──────────
+  function toLabel(value) {
+    const address = String(value || '').replace(/;\s*$/, '').trim();
+    if (/^\{#(recipient|party)\.Email\}$/i.test(address)) return 'Each recipient\'s own email';
+    return address || 'Not set';
+  }
+
+  function presets(owner) {
+    const header = owner.querySelector('[id$="_CommunicationCreatorHeader_DivEmailHeader"]');
+    if (!header) return;
+    let box = owner.querySelector('.us-comms-basic__presets');
+    if (!box) {
+      box = el('div', 'us-comms-basic__presets');
+      const list = el('dl');
+      const template = el('p', 'us-comms-basic__template');
+      const change = el('button', 'us-comms-basic__link', 'Change in Advanced');
+      change.type = 'button';
+      change.addEventListener('click', () => setMode(owner, true));
+      template.append(el('span'), change);
+      box.append(list, template);
+      header.before(box);
+    }
+    const type = field(owner, 'CommunicationTypeList');
+    const rows = [
+      ['From', field(owner, 'TxtFrom')?.value.replace(/;\s*$/, '').trim() || 'Not set'],
+      ['To', toLabel(field(owner, 'TxtTo')?.value)],
+      ['Type', type?.selectedOptions?.[0]?.text || 'Not set']
+    ];
+    const name = field(owner, 'TxtTemplateName')?.value.trim();
+    // Rewritten only when a value changed: the iPart's observer sees these
+    // nodes too.
+    const signature = JSON.stringify([rows, name]);
+    if (box.dataset.usSignature === signature) return;
+    box.dataset.usSignature = signature;
+    box.querySelector('dl').replaceChildren(...rows.flatMap(([term, value]) => [el('dt', '', term), el('dd', '', value)]));
+    const line = box.querySelector('.us-comms-basic__template > span');
+    line.replaceChildren();
+    if (name) line.append('Template ', el('strong', '', name), ' · sets the sender, the recipients\' address and the type.');
+    else line.append('No template is open. Open one, or set the sender and type in Advanced.');
+  }
+
+  // The Message label over the editor, as the subject has one.
+  function messageLabel(owner) {
+    const body = owner.querySelector('[id$="BodyPageView"]');
+    if (!body || body.querySelector('.us-comms-basic__label')) return;
+    body.prepend(el('p', 'us-comms-basic__label', 'Message'));
+  }
+
+  // ── The editor: fewer tools, friendly merge fields ──────────────
+  function trimTools(owner) {
+    const editor = owner.querySelector('[id$="BodyPageView"] .RadEditor');
+    if (!editor) return;
+    editor.querySelectorAll('ul.reToolBar').forEach(group => {
+      let kept = 0;
+      group.querySelectorAll(':scope > li').forEach(item => {
+        const keep = KEEP_TOOLS.some(name => item.querySelector(':scope > a.' + name));
+        item.toggleAttribute('data-us-basic-keep', keep);
+        if (keep) kept += 1;
+      });
+      group.toggleAttribute('data-us-basic-empty', !kept && !group.classList.contains('us-comms-basic__fields-group'));
+    });
+    // The Design / HTML / Preview bar under the editor: HTML would edit
+    // the template's header and footer as code, round the lock. Found by
+    // the mode links' classes (reMode_design…), or by their words.
+    const modes = new Set();
+    editor.querySelectorAll('a[class*="reMode_"]').forEach(link => modes.add(link.closest('ul') || link.parentElement));
+    if (!modes.size) {
+      editor.querySelectorAll('ul').forEach(list => {
+        const words = [...list.querySelectorAll('a')].map(link => link.textContent.trim().toLowerCase());
+        if (words.includes('design') && words.includes('html')) modes.add(list);
+      });
+    }
+    modes.forEach(bar => bar?.setAttribute('data-us-basic-modes', ''));
+  }
+
+  // Basic mode edits in Design view only (the mode bar is hidden).
+  function designView(owner) {
+    const instance = editorOf(owner);
+    const design = window.Telerik?.Web?.UI?.EditModes?.Design ?? 1;
+    try {
+      if (instance && instance.get_mode() !== design) instance.set_mode(design);
+    } catch (_) {
+      // Left in its mode; the lock still applies in Design view.
+    }
+  }
+
+  function insertField(owner, page) {
+    const editor = owner.querySelector('[id$="BodyPageView"] .RadEditor');
+    const instance = editorOf(owner);
+    if (!editor || !instance || editor.querySelector('.us-comms-basic__fields-group')) return;
+    // iMIS's own Insert field lists the page's data source columns.
+    let listed = [];
+    try {
+      const tool = instance.get_toolAdapter().get_tools().find(entry => /InsertField$/.test(entry.get_name()));
+      listed = (tool?.get_items() || []).map(item => String(item[1] || '').toLowerCase());
+    } catch (_) {
+      return;
+    }
+    const offered = page.fields.filter(([name]) => listed.includes(name.toLowerCase()));
+    const toolbar = editor.querySelector('ul.reToolBar')?.parentElement;
+    if (!offered.length || !toolbar) return;
+
+    // The native group classes, so it sits on the toolbar like the others.
+    const group = el('ul', 'reToolBar RadEditor_Default us-comms-basic__fields-group');
+    const item = el('li');
+    const button = el('button', 'us-comms-basic__insert');
+    button.type = 'button';
+    button.setAttribute('aria-haspopup', 'true');
+    button.setAttribute('aria-expanded', 'false');
+    const icon = el('i', 'ti ti-braces');
+    icon.setAttribute('aria-hidden', 'true');
+    const chevron = el('i', 'ti ti-chevron-down');
+    chevron.setAttribute('aria-hidden', 'true');
+    button.append(icon, 'Insert field', chevron);
+    const menu = el('ul', 'us-comms-basic__menu');
+    menu.hidden = true;
+    menu.id = 'us-comms-basic-fields-' + Math.random().toString(36).slice(2, 8);
+    button.setAttribute('aria-controls', menu.id);
+    menu.append(el('li', 'us-comms-basic__menu-note', 'Filled in for each recipient'));
+    offered.forEach(([name, label]) => {
+      const entry = el('li');
+      const choose = el('button', '', label);
+      choose.type = 'button';
+      choose.dataset.usMergeField = '{#' + name + '}';
+      entry.append(choose);
+      menu.append(entry);
+    });
+    item.append(button, menu);
+    group.append(item);
+    toolbar.append(group);
+
+    const close = () => {
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    };
+    // The editor keeps its own selection while focus is out here.
+    button.addEventListener('mousedown', event => event.preventDefault());
+    button.addEventListener('click', () => {
+      const open = menu.hidden;
+      menu.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+      if (open) menu.querySelector('button')?.focus();
+    });
+    menu.addEventListener('mousedown', event => event.preventDefault());
+    menu.addEventListener('click', event => {
+      const choose = event.target.closest('[data-us-merge-field]');
+      if (!choose) return;
+      close();
+      const doc = instance.get_document?.();
+      if (doc && !editable(doc, selection(doc))) {
+        note(owner, 'locked', LOCKED_TEXT);
+        return;
+      }
+      try {
+        instance.setFocus?.();
+        instance.pasteHtml(choose.dataset.usMergeField);
+      } catch (error) {
+        console.error('[UnionSuiteCommsBasic] Insert field failed', error);
+      }
+    });
+    menu.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      close();
+      button.focus();
+    });
+    document.addEventListener('click', event => {
+      if (!menu.hidden && !item.contains(event.target)) close();
+    });
+  }
+
+  // ── Short notes: under the editor, and by the send button ───────
+  // One element per place, slid open and shut (US-RECORD-CARDS' fold;
+  // instant without it). A note with a timeout closes itself.
+  const LOCKED_TEXT = 'The header and footer come from the template. Write between them, or change them in Advanced.';
+
+  function fold(node, open) {
+    if (window.UnionSuiteRecordCards?.fold) window.UnionSuiteRecordCards.fold(node, open);
+    else node.hidden = !open;
+  }
+
+  function note(owner, place, text, options = {}) {
+    let node = owner.querySelector('.us-comms-basic__note[data-us-note="' + place + '"]');
+    if (!node) {
+      // Where it is about: under the editor (locked parts), under the
+      // subject, or over the send button's row.
+      const anchors = {
+        locked: () => owner.querySelector('[id$="BodyPageView"] .RadEditor'),
+        subject: () => field(owner, 'TxtSubject')?.closest('.PanelField'),
+        actions: () => owner.querySelector('[id$="_ButtonPanelRight"]')?.parentElement
+      };
+      const anchor = anchors[place]?.();
+      if (!anchor) return;
+      node = el('p', 'us-comms-basic__note');
+      node.dataset.usNote = place;
+      node.setAttribute('role', 'status');
+      node.hidden = true;
+      if (place === 'actions') anchor.before(node);
+      else anchor.after(node);
+    }
+    node.classList.toggle('us-comms-basic__note--warning', !!options.warning);
+    node.textContent = text;
+    if (node.hidden) fold(node, true);
+    clearTimeout(node.usTimer);
+    if (options.timeout !== 0) node.usTimer = setTimeout(() => fold(node, false), options.timeout || 5000);
+  }
+
+  // ── The template's header and footer stay as they are ───────────
+  // In basic mode only the rows between the template's
+  // <!-- MESSAGE START --> and <!-- MESSAGE END --> comments take edits
+  // (templates/Case-Email-Template.html has them; the editor keeps
+  // comments). The editor runs in designMode, which ignores
+  // contenteditable="false", so edits elsewhere are cancelled instead:
+  // typing, pasting, dropping and deleting (beforeinput) and the editor's
+  // own commands. Nothing is added to the content, so the email's HTML
+  // stays as the template wrote it. A template without the comments is not
+  // locked.
+  const MESSAGE_START = /^\s*MESSAGE START\s*$/i;
+  const MESSAGE_END = /^\s*MESSAGE END\s*$/i;
+
+  function messageParts(doc) {
+    if (!doc?.body) return null;
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
+    let start = null;
+    while (walker.nextNode()) {
+      const comment = walker.currentNode;
+      if (!start && MESSAGE_START.test(comment.nodeValue)) {
+        start = comment;
+      } else if (start && MESSAGE_END.test(comment.nodeValue) && comment.parentNode === start.parentNode) {
+        const parts = [];
+        for (let node = start.nextSibling; node && node !== comment; node = node.nextSibling) {
+          if (node.nodeType === Node.ELEMENT_NODE) parts.push(node);
+        }
+        return parts;
+      }
+    }
+    return null;
+  }
+
+  // Every range inside the message; always true without the comments.
+  function editable(doc, ranges) {
+    const parts = messageParts(doc);
+    if (!parts) return true;
+    const inside = node => parts.some(part => part === node || part.contains(node));
+    return ranges.length > 0 && ranges.every(range => inside(range.startContainer) && inside(range.endContainer));
+  }
+
+  function selection(doc) {
+    const chosen = doc.getSelection?.();
+    return chosen && chosen.rangeCount ? [chosen.getRangeAt(0)] : [];
+  }
+
+  // Once per editor document: the editor can replace it.
+  const lockedDocs = new WeakSet();
+  const lockedEditors = new WeakSet();
+
+  function lock(owner) {
+    const instance = editorOf(owner);
+    const doc = instance?.get_document?.();
+    if (!instance || !doc) return;
+    const basic = () => owner.classList.contains(BASIC);
+    if (!lockedDocs.has(doc)) {
+      lockedDocs.add(doc);
+      doc.addEventListener('beforeinput', event => {
+        if (!basic()) return;
+        const targets = event.getTargetRanges?.() || [];
+        if (editable(doc, targets.length ? targets : selection(doc))) return;
+        event.preventDefault();
+        note(owner, 'locked', LOCKED_TEXT);
+      }, true);
+      // The editor handles some keys itself, with no beforeinput (Delete
+      // after select all cleared the whole email): editing keys, cut,
+      // paste and drop are stopped first when the selection reaches past
+      // the message. Arrows, Home, End and copy still work.
+      const block = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        note(owner, 'locked', LOCKED_TEXT);
+      };
+      doc.addEventListener('keydown', event => {
+        if (!basic() || editable(doc, selection(doc))) return;
+        const shortcut = event.ctrlKey || event.metaKey;
+        const editing = ['Backspace', 'Delete', 'Enter', 'Tab'].includes(event.key) ||
+          (!shortcut && !event.altKey && event.key.length === 1) ||
+          (shortcut && ['x', 'v'].includes(event.key.toLowerCase()));
+        if (editing) block(event);
+      }, true);
+      ['cut', 'paste', 'drop'].forEach(type => doc.addEventListener(type, event => {
+        if (!basic()) return;
+        // A drop lands where it is let go, not at the selection.
+        const at = type === 'drop' ? doc.caretRangeFromPoint?.(event.clientX, event.clientY) : null;
+        if (!editable(doc, at ? [at] : selection(doc))) block(event);
+      }, true));
+      // The editor's table resize handles (rrHandle) change the template's
+      // layout without an input event: hidden in basic mode, and a press
+      // on one is cancelled.
+      doc.addEventListener('mousedown', event => {
+        if (!basic() || !event.target.closest?.('.rrHandle')) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+    }
+    // In the editor's head and on its <html>: neither is part of the email.
+    if (doc.head && !doc.getElementById('us-comms-basic-style')) {
+      const style = doc.createElement('style');
+      style.id = 'us-comms-basic-style';
+      style.textContent = 'html.us-comms-locked .rrHandle { display: none !important; }';
+      doc.head.append(style);
+    }
+    doc.documentElement.classList.toggle('us-comms-locked', basic() && !!messageParts(doc));
+    if (!lockedEditors.has(instance)) {
+      lockedEditors.add(instance);
+      instance.add_commandExecuting((sender, args) => {
+        if (!basic() || /^(Undo|Redo)$/i.test(args.get_commandName?.() || '')) return;
+        const current = sender.get_document();
+        if (editable(current, selection(current))) return;
+        args.set_cancel(true);
+        note(owner, 'locked', LOCKED_TEXT);
+      });
+    }
+  }
+
+  // ── Review and send ─────────────────────────────────────────────
+  // In basic mode "Review and send" takes Send Now's place. It shows the
+  // email as each recipient will get it: the editor's HTML with
+  // {#recipient.X} filled from the recipients query (US-SEND-RECIPIENTS'
+  // rows) and {#party.X} from the recipient's party record (/api/Party).
+  // iMIS's own Preview cannot stand in: on a send page with a recipients
+  // query it reports "no previews to display" (probed 24 October 2026).
+  // "Send to 7 recipients" then presses iMIS's Send Now. iMIS posts the page
+  // back and opens its confirmation, "… to N recipient(s)". After the
+  // reload the theme reads N: when it matches the review it presses
+  // Yes, Send Now; otherwise it leaves the confirmation open with a
+  // warning, so staff decide. (The probe that found queryparams iMIS
+  // ignored counted 224 recipients against 7.)
+  // sessionStorage us-comms-send-dry = 1 checks a page without sending:
+  // the theme reports what it would press and presses nothing.
+  const SEND_KEY = 'us-comms-send';
+  const DRY_KEY = 'us-comms-send-dry';
+  const SEND_WINDOW_MS = 120000;
+  const CONFIRM_WAIT_MS = 15000;
+  const partyRecords = new Map();
+
+  const escapeHtml = text => String(text ?? '').replace(/[&<>"']/g, character => (
+    {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;'}[character]));
+  const recipientField = (row, name) => window.UnionSuiteSendRecipients?.field?.(row, name);
+
+  function token() {
+    return document.querySelector('input[name="__RequestVerificationToken"], input#__RequestVerificationToken')?.value || '';
+  }
+
+  function partyRecord(id) {
+    if (!id) return Promise.resolve(null);
+    if (!partyRecords.has(id)) {
+      partyRecords.set(id, fetch('/api/Party/' + encodeURIComponent(id), {
+        credentials: 'same-origin',
+        headers: {Accept: 'application/json', RequestVerificationToken: token()}
+      }).then(response => (response.ok ? response.json() : null)).catch(() => null));
+    }
+    return partyRecords.get(id);
+  }
+
+  // The party fields the preview can fill. Any other shows as written;
+  // iMIS fills it in when it sends.
+  function partyValue(record, name) {
+    if (!record) return undefined;
+    const person = record.PersonName || {};
+    const emails = record.Emails?.$values || [];
+    const email = emails.find(entry => entry.IsPrimary) || emails[0];
+    const values = {
+      firstname: person.FirstName,
+      lastname: person.LastName,
+      informal: person.InformalName,
+      fullname: person.FullName || record.Name,
+      name: record.Name,
+      email: email?.Address,
+      company: record.PrimaryOrganization?.Name,
+      partyid: record.PartyId || record.Id,
+      id: record.Id
+    };
+    const value = values[name.toLowerCase()];
+    return value === undefined || value === null || value === '' ? undefined : value;
+  }
+
+  // Fills {#recipient.X} and {#party.X}. Returns the text and the fields
+  // it could not fill: recipient fields the query lacks (iMIS will not send
+  // with them), party fields left to iMIS, and recipient fields that are
+  // blank for this recipient (the email shows nothing there).
+  function merge(text, row, record, asHtml) {
+    const absent = new Set();
+    const later = new Set();
+    const blank = new Set();
+    const out = String(text || '').replace(/\{#(recipient|party)\.([A-Za-z0-9_]+)\}/gi, (whole, source, name) => {
+      const fromRecipient = source.toLowerCase() === 'recipient';
+      const value = fromRecipient ? recipientField(row, name) : partyValue(record, name);
+      if (value === undefined) {
+        (fromRecipient ? absent : later).add(source + '.' + name);
+        return asHtml ? '<span style="padding:0 3px;border-radius:3px;background:#fef3c7;color:#92400e">' + escapeHtml(whole) + '</span>' : whole;
+      }
+      if (value === '') blank.add(source + '.' + name);
+      return asHtml ? escapeHtml(value) : String(value);
+    });
+    return {out, absent, later, blank};
+  }
+
+  function reviewButton(owner) {
+    const send = owner.querySelector('[id$="_ButtonConfirm"]');
+    if (!send || send.parentElement.querySelector('.us-comms-basic__review')) return;
+    const review = el('input', 'PrimaryButton TextButton us-comms-basic__review');
+    review.type = 'button';
+    review.value = 'Review and send';
+    review.addEventListener('click', () => openReview(owner));
+    send.before(review);
+  }
+
+  function reviewPanel(owner) {
+    let panel = owner.querySelector('.us-comms-review');
+    if (panel) return panel;
+    const wrapper = owner.querySelector('[id$="CommunicationCreatorWrapper"]');
+    if (!wrapper) return null;
+    panel = el('section', 'us-comms-review');
+    panel.tabIndex = -1;
+    panel.hidden = true;
+    const titleId = 'us-comms-review-title-' + Math.random().toString(36).slice(2, 8);
+    panel.setAttribute('aria-labelledby', titleId);
+
+    const bar = el('div', 'us-comms-review__bar');
+    const title = el('h3', 'us-comms-review__title', 'Review the email');
+    title.id = titleId;
+    const who = el('div', 'us-comms-review__who');
+    const previous = el('button', 'us-comms-review__step');
+    previous.type = 'button';
+    previous.setAttribute('aria-label', 'Previous recipient');
+    previous.innerHTML = '<i class="ti ti-chevron-left" aria-hidden="true"></i>';
+    const choose = el('select', 'us-comms-review__as');
+    choose.setAttribute('aria-label', 'Previewing as');
+    const next = el('button', 'us-comms-review__step');
+    next.type = 'button';
+    next.setAttribute('aria-label', 'Next recipient');
+    next.innerHTML = '<i class="ti ti-chevron-right" aria-hidden="true"></i>';
+    who.append(previous, choose, next);
+    bar.append(title, who);
+
+    const envelope = el('dl', 'us-comms-review__envelope');
+    const warning = el('p', 'AsiWarning us-comms-review__warning');
+    warning.hidden = true;
+    const frame = el('iframe', 'us-comms-review__frame');
+    frame.title = 'Email preview';
+    frame.setAttribute('sandbox', 'allow-same-origin');
+    // Fits the email, so the page scrolls rather than the frame; the
+    // frame's border counts in its height.
+    frame.addEventListener('load', () => {
+      try {
+        const edges = frame.offsetHeight - frame.clientHeight;
+        frame.style.height = Math.max(200, frame.contentDocument.documentElement.scrollHeight) + edges + 'px';
+      } catch (_) { /* keeps its height */ }
+    });
+
+    const actions = el('div', 'us-comms-review__actions');
+    const summary = el('span', 'us-comms-review__summary');
+    const back = el('input', 'TextButton us-comms-review__back');
+    back.type = 'button';
+    back.value = 'Back to editing';
+    const send = el('input', 'PrimaryButton TextButton us-comms-review__send');
+    send.type = 'button';
+    actions.append(summary, back, send);
+    panel.append(bar, envelope, warning, frame, actions);
+    wrapper.before(panel);
+
+    previous.addEventListener('click', () => show(owner, panel.usState.index - 1));
+    next.addEventListener('click', () => show(owner, panel.usState.index + 1));
+    choose.addEventListener('change', () => show(owner, Number(choose.value)));
+    back.addEventListener('click', () => closeReview(owner, true));
+    send.addEventListener('click', () => sendNow(owner));
+    panel.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !event.defaultPrevented) closeReview(owner, true);
+    });
+    return panel;
+  }
+
+  async function openReview(owner) {
+    const subject = field(owner, 'TxtSubject');
+    const typed = owner.querySelector('.us-subject-tag__input');
+    if (!(typed ? typed.value.trim() : subject?.value.trim())) {
+      note(owner, 'subject', 'Add a subject before sending.', {warning: true});
+      (typed || subject)?.focus();
+      return;
+    }
+    if (!field(owner, 'TxtFrom')?.value.trim()) {
+      note(owner, 'actions', 'This email has no sender. Open a template, or set From in Advanced.', {warning: true});
+      return;
+    }
+    const panel = reviewPanel(owner);
+    const instance = editorOf(owner);
+    if (!panel || !instance) return;
+    let data;
+    try {
+      data = await window.UnionSuiteSendRecipients?.rows?.();
+    } catch (error) {
+      note(owner, 'actions', 'The recipients could not be loaded (' + error.message + '). Try again, or send from Advanced.', {warning: true});
+      return;
+    }
+    if (!data?.rows?.length) {
+      note(owner, 'actions', 'This email has no recipients.', {warning: true});
+      return;
+    }
+    const reachable = data.rows.filter(row => recipientField(row, 'Email') !== '').length;
+    panel.usState = {
+      rows: data.rows.slice(0, 500),
+      total: data.total,
+      reachable,
+      index: 0,
+      html: instance.get_html(true),
+      subject: subject?.value || '',
+      from: field(owner, 'TxtFrom').value.replace(/;\s*$/, '').trim(),
+      to: field(owner, 'TxtTo')?.value || ''
+    };
+    const choose = panel.querySelector('.us-comms-review__as');
+    choose.replaceChildren(...panel.usState.rows.map((row, index) => new Option(
+      'Previewing as ' + (recipientField(row, 'Name') || 'recipient ' + (index + 1)) + ' (' + (index + 1) + ' of ' + data.total.toLocaleString() + ')',
+      String(index))));
+    const send = panel.querySelector('.us-comms-review__send');
+    send.value = 'Send to ' + data.total.toLocaleString() + ' recipient' + (data.total === 1 ? '' : 's');
+    send.disabled = false;
+    panel.querySelector('.us-comms-review__back').disabled = false;
+    const unreachable = data.total - reachable;
+    panel.querySelector('.us-comms-review__summary').textContent = unreachable > 0
+      ? unreachable.toLocaleString() + ' have no email and will not receive it.'
+      : 'Each recipient gets their own copy.';
+
+    owner.classList.add('us-comms-reviewing');
+    panel.hidden = false;
+    show(owner, 0);
+    panel.focus({preventScroll: true});
+    panel.scrollIntoView({block: 'nearest'});
+  }
+
+  function show(owner, index) {
+    const panel = owner.querySelector('.us-comms-review');
+    const state = panel?.usState;
+    if (!state) return;
+    state.index = Math.max(0, Math.min(state.rows.length - 1, index));
+    const row = state.rows[state.index];
+    const choose = panel.querySelector('.us-comms-review__as');
+    choose.value = String(state.index);
+    const [previous, next] = panel.querySelectorAll('.us-comms-review__step');
+    previous.disabled = state.index === 0;
+    next.disabled = state.index === state.rows.length - 1;
+    const shown = state.index;
+
+    partyRecord(recipientField(row, 'ID')).then(record => {
+      if (state.index !== shown || !panel.isConnected) return;
+      const body = merge(state.html, row, record, true);
+      const subject = merge(state.subject, row, record, false);
+      const to = merge(state.to, row, record, false).out.replace(/;\s*$/, '').trim();
+      const name = recipientField(row, 'Name') || partyValue(record, 'fullname') || '';
+      panel.querySelector('.us-comms-review__envelope').replaceChildren(
+        el('dt', '', 'From'), el('dd', '', state.from),
+        el('dt', '', 'To'), el('dd', '', (name ? name + ' ' : '') + (to ? '<' + to + '>' : '(no email)')),
+        el('dt', '', 'Subject'), el('dd', '', subject.out));
+      panel.querySelector('.us-comms-review__frame').srcdoc =
+        '<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;padding:16px;background:#fff}</style></head><body>' + body.out + '</body></html>';
+
+      const absent = new Set([...body.absent, ...subject.absent]);
+      const later = new Set([...body.later, ...subject.later]);
+      const blank = new Set([...body.blank, ...subject.blank]);
+      const warning = panel.querySelector('.us-comms-review__warning');
+      const send = panel.querySelector('.us-comms-review__send');
+      const list = set => [...set].join(', ');
+      if (absent.size) {
+        warning.className = 'AsiError us-comms-review__warning';
+        warning.textContent = 'iMIS will not send this email: the recipients list has no ' + list(absent) + '. Remove ' + (absent.size === 1 ? 'it' : 'them') + ' from the message, or add the column to the recipients query.';
+        send.disabled = true;
+      } else if (blank.size) {
+        warning.className = 'AsiWarning us-comms-review__warning';
+        warning.textContent = list(blank) + (blank.size === 1 ? ' is' : ' are') + ' blank for ' + (name || 'this recipient') + ', so the email shows nothing there.' + (later.size ? ' Highlighted fields are filled in by iMIS when it sends.' : '');
+        send.disabled = false;
+      } else if (later.size) {
+        warning.className = 'AsiInformation us-comms-review__warning';
+        warning.textContent = 'Highlighted fields (' + list(later) + ') are filled in by iMIS when it sends.';
+        send.disabled = false;
+      } else {
+        send.disabled = false;
+      }
+      warning.hidden = !absent.size && !blank.size && !later.size;
+    });
+  }
+
+  function closeReview(owner, returnFocus) {
+    const panel = owner.querySelector('.us-comms-review');
+    if (!panel || panel.hidden) return;
+    panel.hidden = true;
+    owner.classList.remove('us-comms-reviewing');
+    repaint(owner);
+    if (returnFocus) owner.querySelector('.us-comms-basic__review')?.focus({preventScroll: true});
+  }
+
+  function sendNow(owner) {
+    const panel = owner.querySelector('.us-comms-review');
+    const state = panel?.usState;
+    const native = owner.querySelector('[id$="_ButtonConfirm"]');
+    if (!state || !native) return;
+    const counts = [...new Set([state.total, state.reachable])];
+    try {
+      sessionStorage.setItem(SEND_KEY, JSON.stringify({path: location.pathname, counts, at: Date.now()}));
+    } catch (_) {
+      // Without the note the confirmation simply stays for staff to answer.
+    }
+    const send = panel.querySelector('.us-comms-review__send');
+    send.disabled = true;
+    panel.querySelector('.us-comms-review__back').disabled = true;
+    send.value = 'Sending…';
+    native.click();
+    // A field iMIS's validation stops keeps the page here.
+    setTimeout(() => {
+      if (window.Page_IsValid !== false) return;
+      try { sessionStorage.removeItem(SEND_KEY); } catch (_) { /* nothing to clear */ }
+      closeReview(owner, false);
+      note(owner, 'actions', 'iMIS stopped the send: a field needs attention. Check the fields in Advanced.', {warning: true, timeout: 0});
+    }, 300);
+  }
+
+  // After Send Now's postback: answer iMIS's confirmation when its count
+  // matches the review.
+  function followSend() {
+    let pending = null;
+    try { pending = JSON.parse(sessionStorage.getItem(SEND_KEY) || 'null'); } catch (_) { return; }
+    if (!pending) return;
+    const clear = () => {
+      try { sessionStorage.removeItem(SEND_KEY); } catch (_) { /* nothing to clear */ }
+    };
+    if (pending.path !== location.pathname || Date.now() - pending.at > SEND_WINDOW_MS) return clear();
+    let dry = false;
+    try { dry = sessionStorage.getItem(DRY_KEY) === '1'; } catch (_) { /* sends for real */ }
+    const started = Date.now();
+    const owner = () => Object.keys(PAGES).map(name => document.querySelector('.' + name)).find(Boolean);
+    const status = (text, kind) => {
+      const host = owner();
+      if (!host) return;
+      let line = host.querySelector(':scope > .us-comms-basic__status');
+      if (!line) {
+        line = el('div', 'us-comms-basic__status');
+        line.setAttribute('role', 'status');
+        host.prepend(line);
+      }
+      line.className = (kind === 'warning' ? 'AsiWarning' : 'AsiInformation') + ' us-comms-basic__status';
+      line.textContent = text;
+    };
+
+    const timer = setInterval(() => {
+      const frame = [...document.querySelectorAll('.RadWindow iframe')]
+        .find(candidate => /CommunicationConfirm\.aspx/i.test(candidate.src) && candidate.closest('.RadWindow')?.offsetParent);
+      let doc = null;
+      try { doc = frame?.contentDocument; } catch (_) { /* not readable */ }
+      const text = doc?.body?.innerText || '';
+      const counted = text.match(/\bto\s+([\d,]+)\s+recipient/i);
+      const yes = doc && [...doc.querySelectorAll('input, button')].find(button => /ButtonSend$/.test(button.id || ''));
+      if (counted && yes) {
+        clearInterval(timer);
+        clear();
+        const count = Number(counted[1].replace(/,/g, ''));
+        if (pending.counts.includes(count)) {
+          if (dry) {
+            console.info('[UnionSuiteCommsBasic] Dry run: the counts match (' + count + '); Yes, Send Now not pressed.');
+            status('Dry run: iMIS counts ' + count.toLocaleString() + ' recipients, as reviewed. Yes, Send Now was not pressed.');
+            return;
+          }
+          status('Sending to ' + count.toLocaleString() + ' recipient' + (count === 1 ? '' : 's') + '…');
+          yes.click();
+          return;
+        }
+        const reviewed = pending.counts[0];
+        const message = 'iMIS would send this email to ' + count.toLocaleString() + ' recipients, not the ' +
+          reviewed.toLocaleString() + ' you reviewed. Check the recipients before pressing Yes, Send Now.';
+        status(message, 'warning');
+        const banner = doc.createElement('p');
+        banner.textContent = message;
+        banner.setAttribute('style', 'margin:0 0 12px;padding:8px 10px;border:1px solid #f59e0b;border-radius:6px;background:#fffbeb;color:#92400e;font-weight:600');
+        doc.body.prepend(banner);
+        return;
+      }
+      if (Date.now() - started > CONFIRM_WAIT_MS) {
+        clearInterval(timer);
+        clear();
+        status('The email was not sent: iMIS did not ask to confirm it. Check the fields in Advanced, then send again.', 'warning');
+      }
+    }, 250);
+  }
+
+  // ── The Advanced switch in the heading ──────────────────────────
+  function modeSwitch(owner) {
+    const options = owner.querySelector('.panel-heading > .panel-heading-options');
+    if (!options || options.querySelector('.us-comms-mode')) return;
+    const toggle = el('button', 'us-comms-mode');
+    toggle.type = 'button';
+    toggle.setAttribute('role', 'switch');
+    const track = el('span', 'us-comms-mode__track');
+    track.setAttribute('aria-hidden', 'true');
+    toggle.append(track, 'Advanced');
+    toggle.addEventListener('click', () => setMode(owner, toggle.getAttribute('aria-checked') !== 'true'));
+    options.prepend(toggle);
+  }
+
+  function setMode(owner, on) {
+    remember(on);
+    apply(owner, on);
+    repaint(owner);
+  }
+
+  function apply(owner, on) {
+    // Advanced is iMIS's own page, with its own Send Now.
+    if (on) closeReview(owner, false);
+    owner.classList.toggle(BASIC, !on);
+    owner.querySelector('.us-comms-mode')?.setAttribute('aria-checked', String(on));
+    if (!on) designView(owner);
+    const doc = editorOf(owner)?.get_document?.();
+    doc?.documentElement?.classList.toggle('us-comms-locked', !on && !!messageParts(doc));
+  }
+
+  function ensure(owner, page) {
+    modeSwitch(owner);
+    presets(owner);
+    messageLabel(owner);
+    trimTools(owner);
+    insertField(owner, page);
+    lock(owner);
+    reviewButton(owner);
+    apply(owner, advanced());
+  }
+
+  function refresh() {
+    queued = false;
+    if (document.body.classList.contains('TemplateAreaEasyEditOn')) return;
+    Object.entries(PAGES).forEach(([name, page]) => {
+      document.querySelectorAll('.' + name).forEach(owner => {
+        if (owner.closest('.us-report-no-styling') || !owner.querySelector('[id$="BodyPageView"]')) return;
+        const first = !owners.has(owner);
+        owners.add(owner);
+        ensure(owner, page);
+        if (first) {
+          repaint(owner);
+          // Header values change (Type, a template) and partial updates
+          // redraw parts of the iPart: keep the presets current.
+          owner.addEventListener('change', () => presets(owner));
+          new MutationObserver(schedule).observe(owner, {childList: true, subtree: true});
+        }
+      });
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(refresh);
+  }
+
+  // The editor is created after DOMContentLoaded; Sys.Application's load
+  // fires once it is ready (and after each partial update).
+  function start() {
+    schedule();
+    followSend();
+    window.Sys?.Application?.add_load?.(schedule);
+    window.addEventListener('load', schedule);
+  }
+
+  window.UnionSuiteCommsBasic = {refresh: schedule};
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+/* US-COMMS-BASIC:END */
 
 /* US-COMMS-RECIPIENTS:START — how a send went, inside an opened record card
    from a Query Template (README decision 13; owner, 5 October 2026;

@@ -1,0 +1,303 @@
+<!doctype html>
+<!--
+  Email composer mockup (owner, 24 October 2026): the case send page
+  (Send-Email-Parties.aspx) with a basic mode and a review step.
+  - Basic (default): the case email template presets From, To, Type and
+    the email's header and footer. Staff edit only the subject (after the
+    fixed "Case C218 –") and the message. One section, no tabs.
+  - Advanced (the switch in the heading): every field editable, in iMIS's
+    own tabs (Header, Body, Recipients, Data sources), as the page is today.
+  - Review and send, in both modes: the email as one recipient will get
+    it, with the merge fields filled; step through the parties, then send.
+  Proposed styling: email-composer.candidate.css; behaviour:
+  email-composer.candidate.js. Native classes and theme CSS are real.
+  Serve the project root (static-node) and open
+  /prototypes/wip/email-composer/. Sample data only; nothing is sent.
+-->
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Composer Mockup</title>
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/Tabler/tabler-icons.min.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <link rel="stylesheet" href="email-composer.candidate.css">
+  <style>
+    /* Mockup page layout only. */
+    body.ec-page {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--text-base);
+      font: 14px/1.5 var(--font-ui);
+    }
+
+    .ec-toolbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
+      font-size: 13px;
+    }
+
+    .ec-toolbar strong {
+      margin-right: auto;
+    }
+
+    .ec-toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ec-stage {
+      box-sizing: border-box;
+      max-width: var(--ec-width, 1100px);
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .ec-back {
+      display: inline-block;
+      margin: 16px 0 4px;
+    }
+  </style>
+</head>
+<body class="ec-page us-case-comms-page">
+  <div class="ec-toolbar">
+    <strong>Email composer mockup · case send page</strong>
+    <label>Width
+      <select id="ec-width">
+        <option value="1100px">Desktop</option>
+        <option value="760px">Tablet</option>
+        <option value="390px">Phone</option>
+      </select>
+    </label>
+    <button type="button" class="TextButton" id="ec-scheme" aria-pressed="false">Mode: light</button>
+    <button type="button" class="TextButton" id="ec-reset">Reset</button>
+  </div>
+
+  <main class="ec-stage">
+    <!-- Content HTML iPart: the recipients box (US-SEND-RECIPIENTS), as the
+         theme fills it. -->
+    <div class="ContentItemContainer">
+      <div class="us-send-recipients" data-us-send-recipients>
+        <div class="AsiInformation us-send-recipients__alert" role="status">
+          <p class="us-send-recipients__line">
+            <span class="us-send-recipients__count">7 recipients</span>
+            <button type="button" class="us-send-recipients__toggle" aria-expanded="false" aria-controls="ec-recipients">Show recipients</button>
+          </p>
+          <div class="us-send-recipients__scroll" id="ec-recipients" role="region" aria-label="Recipients" tabindex="0" hidden>
+            <table class="us-send-recipients__table">
+              <thead><tr><th scope="col">Name</th><th scope="col">Role</th><th scope="col">Email</th><th scope="col">Status</th></tr></thead>
+              <tbody id="ec-recipient-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a class="ec-back" href="#">« Back</a>
+
+    <!-- Communication Creator iPart, CSS class "us-case-comms". Basic mode
+         adds us-comms-basic beside it (the theme, from the switch). -->
+    <div class="ContentItemContainer">
+      <div class="us-case-comms us-comms-basic" id="ec-composer">
+        <div class="panel">
+          <div class="panel-heading Distinguish">
+            <h2 class="panel-title">Email parties – Case C218</h2>
+            <div class="panel-heading-options">
+              <button type="button" class="us-comms-mode" role="switch" aria-checked="false" id="ec-mode">
+                <span class="us-comms-mode__track" aria-hidden="true"></span>Advanced
+              </button>
+              <!-- Basic: the case templates folder. Advanced: iMIS's own
+                   Document Browser, any folder. -->
+              <input type="button" value="Open" title="Open a case template" class="TextButton" id="ec-open" aria-haspopup="dialog">
+            </div>
+          </div>
+
+          <div class="panel-body-container"><div class="panel-body">
+
+            <!-- ── Compose ─────────────────────────────────────── -->
+            <div class="us-comms-view" id="ec-compose">
+
+              <!-- Basic: one section. -->
+              <div class="us-comms-basic__section" data-ec-basic-only>
+                <div class="us-comms-basic__presets">
+                  <dl>
+                    <dt>From</dt>
+                    <dd>Case Management &lt;cases@hubunion.example&gt;</dd>
+                    <dt>To</dt>
+                    <dd>Each party's own email <span class="us-comms-basic__hint">· 7 emails, one per party</span></dd>
+                    <dt>Type</dt>
+                    <dd>Case correspondence</dd>
+                  </dl>
+                  <p class="us-comms-basic__template">
+                    <span>Template <strong id="ec-template-name">Case email</strong> · sets the sender, the type, and the email's header and footer.</span>
+                    <button type="button" class="us-comms-basic__link" data-ec-show-advanced>Change in Advanced</button>
+                  </p>
+                </div>
+
+                <div class="us-comms-basic__field">
+                  <label class="us-comms-basic__label" for="ec-subject">Subject</label>
+                  <div class="PanelFieldValue">
+                    <span class="us-subject-tag InputXLarge" data-us-subject-prefix="Case C218 –">
+                      <input type="text" class="us-subject-tag__input" id="ec-subject" value="Update on your case">
+                    </span>
+                  </div>
+                </div>
+
+                <div class="us-comms-basic__field">
+                  <span class="us-comms-basic__label" id="ec-message-label">Message</span>
+                  <div class="us-comms-editor">
+                    <div class="us-comms-editor__toolbar" role="toolbar" aria-label="Formatting">
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="bold" title="Bold" aria-label="Bold"><i class="ti ti-bold" aria-hidden="true"></i></button>
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="italic" title="Italic" aria-label="Italic"><i class="ti ti-italic" aria-hidden="true"></i></button>
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="underline" title="Underline" aria-label="Underline"><i class="ti ti-underline" aria-hidden="true"></i></button>
+                      <span class="us-comms-editor__divider" aria-hidden="true"></span>
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><i class="ti ti-list" aria-hidden="true"></i></button>
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="insertOrderedList" title="Numbered list" aria-label="Numbered list"><i class="ti ti-list-numbers" aria-hidden="true"></i></button>
+                      <button type="button" class="us-comms-editor__tool" data-ec-command="createLink" title="Link" aria-label="Link"><i class="ti ti-link" aria-hidden="true"></i></button>
+                      <span class="us-comms-editor__divider" aria-hidden="true"></span>
+                      <button type="button" class="us-comms-editor__tool us-comms-editor__tool--insert" aria-haspopup="true" aria-expanded="false" aria-controls="ec-fields" id="ec-insert">
+                        <i class="ti ti-braces" aria-hidden="true"></i>Insert field<i class="ti ti-chevron-down" aria-hidden="true"></i>
+                      </button>
+                      <ul class="us-comms-editor__menu" id="ec-fields" hidden>
+                        <li class="us-comms-editor__menu-note">Filled in for each party</li>
+                      </ul>
+                    </div>
+                    <div class="us-comms-email">
+                      <div class="us-comms-email__sheet">
+                        <div class="us-comms-email__header us-comms-email__locked" data-us-locked-label="Template">
+                          <span class="us-comms-email__brand">HUB UNION</span>
+                          <span class="us-comms-email__case">Case C218</span>
+                        </div>
+                        <div class="us-comms-email__message" id="ec-message" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="ec-message-label">
+                          <p>Dear <span class="us-merge-field" contenteditable="false" data-ec-field="FirstName">First name</span>,</p>
+                          <p>We're writing with an update on case C218. The hearing has been moved to Thursday 6 November at 10am. Please let us know by Monday if you can no longer attend.</p>
+                        </div>
+                        <div class="us-comms-email__footer us-comms-email__locked" data-us-locked-label="Template">
+                          <p class="us-comms-email__sign">Kind regards,<br>Case Management Team</p>
+                          <p>Hub Union · Level 4, 100 Example Street, Melbourne VIC 3000 · 03 9000 0000</p>
+                          <p>You're receiving this email as a party to case C218.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Advanced: iMIS's own tabs, every field editable. -->
+              <div data-ec-advanced-only hidden>
+                <div class="RadTabStrip RadTabStrip_Orion RadTabStripTop_Orion RadTabStripTop">
+                  <div class="rtsLevel rtsLevel1">
+                    <ul class="rtsUL" role="tablist">
+                      <li class="rtsLI rtsFirst"><a class="rtsLink rtsSelected" href="#" role="tab" aria-selected="true" data-ec-tab="header"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Header</span></span></span></a></li>
+                      <li class="rtsLI"><a class="rtsLink" href="#" role="tab" aria-selected="false" data-ec-tab="body"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Body</span></span></span></a></li>
+                      <li class="rtsLI"><a class="rtsLink" href="#" role="tab" aria-selected="false" data-ec-tab="recipients"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Recipients</span></span></span></a></li>
+                      <li class="rtsLI rtsLast"><a class="rtsLink" href="#" role="tab" aria-selected="false" data-ec-tab="sources"><span class="rtsOut"><span class="rtsIn"><span class="rtsTxt">Data sources</span></span></span></a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="RadMultiPage">
+                  <div data-ec-page="header">
+                    <fieldset>
+                      <div id="ec_CommunicationCreatorHeader_DivEmailHeader" class="ClearFix">
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-from">From</label></div><div class="PanelFieldValue"><input type="text" id="ec-from" class="InputXLarge" value="Case Management &lt;cases@hubunion.example&gt;"></div></div>
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-to">To</label></div><div class="PanelFieldValue"><input type="text" id="ec-to" class="InputXLarge" value="{#party.Email};"></div></div>
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-cc">Cc</label></div><div class="PanelFieldValue"><input type="text" id="ec-cc" class="InputXLarge"></div></div>
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-bcc">Bcc</label></div><div class="PanelFieldValue"><input type="text" id="ec-bcc" class="InputXLarge"></div></div>
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-subject-adv">Subject</label></div><div class="PanelFieldValue">
+                          <span class="us-subject-tag InputXLarge" data-us-subject-prefix="Case C218 –"><input type="text" class="us-subject-tag__input" id="ec-subject-adv" value="Update on your case"></span>
+                        </div></div>
+                        <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-type">Type</label></div><div class="PanelFieldValue">
+                          <select id="ec-type"><option>(None)</option><option selected>Case correspondence</option><option>Industrial News</option><option>Newsletter</option></select>
+                        </div></div>
+                      </div>
+                    </fieldset>
+                  </div>
+                  <div data-ec-page="body" hidden>
+                    <p class="us-comms-actions__note">iMIS's full editor (every toolbar tool, Insert field and Insert link), with the template's header and footer editable.</p>
+                  </div>
+                  <div data-ec-page="recipients" hidden>
+                    <div class="PanelField Left"><div class="PanelFieldLabel"><label for="ec-query">Query</label></div><div class="PanelFieldValue">
+                      <input type="text" id="ec-query" class="InputXLarge" value="$/_i4u_/Core/Cases/Layouts v2/API - Communication Recipient List - Parties"> <a href="#">Select</a>
+                    </div></div>
+                    <p>Viewing and selecting recipients is not available because the current query contains filters. You can verify the recipients by returning to the composer.</p>
+                  </div>
+                  <div data-ec-page="sources" hidden>
+                    <table class="us-send-recipients__table">
+                      <thead><tr><th scope="col">Query</th><th scope="col">Alias</th></tr></thead>
+                      <tbody><tr><td><a href="#">Default</a></td><td>party</td></tr></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="us-comms-actions">
+                <span class="us-comms-actions__note">Next, you'll see the email as a party will get it.</span>
+                <input type="button" class="PrimaryButton TextButton" value="Review and send" id="ec-review">
+              </div>
+            </div>
+
+            <!-- ── Review ──────────────────────────────────────── -->
+            <div class="us-comms-view us-comms-review" id="ec-review-view" hidden tabindex="-1" aria-labelledby="ec-review-title">
+              <div class="us-comms-review__bar">
+                <h3 class="us-comms-review__title" id="ec-review-title">Review the email</h3>
+                <div class="us-comms-review__who">
+                  <button type="button" class="us-comms-review__step" id="ec-prev" aria-label="Previous party"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+                  <label class="sr-only" for="ec-as">Previewing as</label>
+                  <select id="ec-as"></select>
+                  <button type="button" class="us-comms-review__step" id="ec-next" aria-label="Next party"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+                </div>
+              </div>
+              <dl class="us-comms-review__envelope">
+                <dt>From</dt><dd id="ec-r-from"></dd>
+                <dt>To</dt><dd id="ec-r-to"></dd>
+                <dt>Subject</dt><dd id="ec-r-subject"></dd>
+              </dl>
+              <div class="us-comms-email">
+                <div class="us-comms-email__sheet" id="ec-r-sheet"></div>
+              </div>
+              <div class="us-comms-actions">
+                <span class="us-comms-actions__note" id="ec-r-note"></span>
+                <input type="button" class="TextButton" value="Back to editing" id="ec-edit">
+                <input type="button" class="PrimaryButton TextButton" value="Send to 7 parties" id="ec-send">
+              </div>
+            </div>
+
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Open in basic mode: the case templates folder only. -->
+  <dialog class="us-comms-templates" id="ec-templates" aria-labelledby="ec-templates-title">
+    <form method="dialog">
+      <div class="us-comms-templates__head">
+        <h3 class="us-comms-templates__title" id="ec-templates-title">Open a case template</h3>
+        <button type="submit" class="us-comms-templates__close" value="cancel" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <p class="us-comms-templates__folder"><i class="ti ti-folder" aria-hidden="true"></i><code>$/_i4u_/Core/Cases/Email Templates</code></p>
+      <label class="sr-only" for="ec-template-search">Search templates</label>
+      <input type="search" class="us-comms-templates__search" id="ec-template-search" placeholder="Search case templates" autocomplete="off">
+      <ul class="us-comms-templates__list" id="ec-template-list" role="listbox" aria-label="Case templates"></ul>
+      <p class="us-comms-templates__note">Opening a template replaces the subject and message.
+        <button type="button" class="us-comms-basic__link" id="ec-browse-all" hidden>Browse all folders</button></p>
+    </form>
+  </dialog>
+
+  <script src="email-composer.candidate.js"></script>
+</body>
+</html>
