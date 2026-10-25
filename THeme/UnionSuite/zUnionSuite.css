@@ -1876,6 +1876,26 @@ button.us-iqa-find-busy > *:not(:where(.us-report-no-styling, .us-report-no-styl
   color: var(--iqa-text);
   font: 13px/1.5 var(--iqa-font);
   box-shadow: none;
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
+}
+
+/* The theme's field focus again, after the rule above: it matches the
+   filter focus rule's specificity and comes later, so its border and
+   box-shadow were wiping the focus out (owner, 25 October 2026: "input not
+   getting focus styling"). */
+:is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .FilterPanel .PanelFieldValue :is(input[type="text"], select):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .chosen-container *)):focus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.us-report, .SearchContactsClass, [data-us-iqa-native], [data-us-panel]) .FilterPanel .PanelFieldValue :is(input[type="text"], select):not(:where(.RadComboBox *, .RadInput *, .RadPicker *, .chosen-container *)):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
 }
 
 /* Chosen renders the multi-select after page load. Only its chip tray scrolls;
@@ -7818,6 +7838,10 @@ tr[data-us-iqa-detail-hold] {
 }
 
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .PanelFieldLabelFont:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  /* Both halves of the native label rule's hanging indent (padding-left
+     7px, margin-left -7px): resetting only the padding left "and" pulled
+     7px towards the first date (owner, 25 October 2026). */
+  margin: 0 !important;
   padding: 0 !important;
   font: inherit;
   color: inherit;
@@ -7834,11 +7858,25 @@ tr[data-us-iqa-detail-hold] {
   border: 1px solid var(--iqa-input-border);
   border-radius: 6px;
   background: var(--iqa-surface);
+  transition:
+    border-color 150ms cubic-bezier(.2, 0, 0, 1),
+    box-shadow 150ms cubic-bezier(.2, 0, 0, 1);
 }
 
+/* The theme's field focus on the whole date field, as the other filters
+   take it (owner, 25 October 2026: the navy outline read as a band). The
+   transparent outline keeps a system indicator in forced colours. */
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput:focus-within:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  outline: 2px solid var(--iqa-link);
+  outline: 2px solid transparent;
   outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+    transition: none;
+  }
 }
 
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput > input[type="text"]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
@@ -7874,10 +7912,6 @@ tr[data-us-iqa-detail-hold] {
   cursor: pointer;
 }
 
-:is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput > input[type="image"]:hover:not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
-  background: var(--iqa-selected);
-}
-
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput > input[type="image"]:active:not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   box-shadow: inset 0 2px 4px rgb(0 0 0 / .2);
 }
@@ -7901,6 +7935,9 @@ tr[data-us-iqa-detail-hold] {
   background: var(--neutral-200) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23003a4c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='5' width='16' height='16' rx='2'/%3E%3Cpath d='M16 3v4M8 3v4M4 11h16M8 15h2M14 15h2'/%3E%3C/svg%3E") center/20px no-repeat;
 }
 
+/* Hover changes the colour only: a background shorthand here, or in an
+   earlier rule, drops the glyph (owner, 25 October 2026: "the calendar icon
+   hover looks broken"). */
 :is(.us-report, .SearchContactsClass, [data-us-iqa-native]) .GridFilterCalendar .CalendarInput > input[type="image"]:hover:not(:disabled):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
   background-color: var(--brand-100);
 }
