@@ -216,7 +216,22 @@ Known IQAs, from the live tenant's IQA list:
    In progress are amber; Closed is neutral.
 9. **Access.** The live page has a "No Access to Case" layout
    (`Case Layout - No Access to Case`). The prototype doesn't show the
-   no-access state yet.
+   no-access state yet. On load, the manage case page asks CloudToolz
+   `POST /cases/case-access` with `{"CaseOrdinal"}` (the CaseNum; owner,
+   27 October 2026: the "Cases: Case Access Check" Flowz), checked as
+   `/ca/note-access` is, answering `{"Access": "Granted" |
+   "Restricted", "MemberID"}` (MemberID is the case's
+   `PrimaryContactID`). Restricted replaces the page with
+   `/UTNewTheme/Cases_NoAccess?CaseID=&CaseNum=&ID=<MemberID>`
+   (`noAccessPage` in `ActionDefinitions.js`; its placeholder content is
+   `templates/Case-No-Access-Content-HTML.html`, whose Back to member
+   button is `cases.back-to-member`, opening `/UTNewTheme/Party.aspx?ID=`). A failed
+   check or any other answer stays on the page and logs a warning. While
+   the check runs, `US-CASE-ACCESS` (`zUnionSuite.css`) hides the page's
+   `.main` (page CSS class `us-case-page`) from first paint; granted or
+   failed fades it in, and with no answer at all it shows after 15
+   seconds. The redirect only hides the page: the case's IQAs and
+   endpoints must still refuse a user without access.
 10. **Expenses.** Left out while it is dev only.
 11. **Case details fields.** The Details tab's columns (case, workplace,
     dates, tags, description) are a starting point; which fields does the

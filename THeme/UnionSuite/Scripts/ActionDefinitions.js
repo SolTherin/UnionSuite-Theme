@@ -1241,6 +1241,15 @@
     action: {type: 'navigate', href: ({context}) => context.memberUrl}
   });
 
+  // Back to member on the case no-access page (owner, 27 October 2026). The
+  // access check sends the case's member there as ID on the address.
+  define('cases.back-to-member', {
+    presentation: {label: 'Back to member', icon: 'ti-arrow-left', default: 'button'},
+    context: {memberId: {from: 'query', parameter: 'ID', required: true,
+      validate: value => /^[A-Za-z0-9_-]+$/.test(String(value)) || 'Invalid member ID.'}},
+    action: {type: 'navigate', href: ({context}) => page('/UTNewTheme/Party.aspx', {ID: context.memberId})}
+  });
+
   popup('cases.edit', 'Update case details', 'pencil',
     ({context}) => page('/Cases_EditCase', {CaseID: context.caseId, Section: 'Details'}),
     'Edit case details', reload, editorWidth);
@@ -1588,6 +1597,53 @@
         throw denied;
       }
       throw new Error('The attachment access check gave no answer (Access was "' + access + '").');
+    });
+  }
+
+  // Case access on page load (owner, 27 October 2026). CloudToolz
+  // POST /cases/case-access takes {CaseOrdinal} (the CaseNum), checks the
+  // signed-in user as /ca/note-access does and answers
+  // {Access: 'Granted' | 'Restricted', MemberID}. Restricted replaces the page with
+  // the no-access page, so Back does not return to the case. A failed check
+  // or any other answer stays on the page and logs: only an explicit
+  // Restricted redirects. The manage case page only (its path, or the
+  // us-case-page page class), not its popups. The no-access page is the
+  // UTNewTheme site's (owner, 27 October 2026).
+  // US-CASE-ACCESS in zUnionSuite.css keeps the page hidden until the root
+  // carries data-us-case-access: granted or failed shows it, restricted
+  // keeps it hidden while the browser leaves.
+  const noAccessPage = '/UTNewTheme/Cases_NoAccess';
+
+  function markCaseAccess(state) {
+    document.documentElement.setAttribute('data-us-case-access', state);
+  }
+
+  async function checkCaseAccess() {
+    const query = new URLSearchParams(location.search);
+    const values = {CaseID: query.get('CaseID') || '', CaseNum: query.get('CaseNum') || ''};
+    const response = await post('/cases/case-access', {CaseOrdinal: values.CaseNum});
+    const data = await response.json().catch(() => ({}));
+    const access = String(data?.Access ?? '').trim().toLowerCase();
+    if (access === 'granted') {
+      markCaseAccess('granted');
+      return;
+    }
+    if (access === 'restricted') {
+      // The case's member (MemberID, the case's PrimaryContactID) goes on
+      // as ID for the no-access page's Back to member.
+      const memberId = String(data?.MemberID ?? '').trim();
+      markCaseAccess('restricted');
+      location.replace(page(noAccessPage, memberId ? {...values, ID: memberId} : values));
+      return;
+    }
+    throw new Error('The case access check gave no answer (Access was "' + access + '").');
+  }
+
+  const manageCasePath = /\/Cases_ManageCase(\.aspx)?$/i.test(globalThis.location?.pathname || '');
+  if (manageCasePath || globalThis.document?.querySelector?.('.us-case-page')) {
+    checkCaseAccess().catch(error => {
+      markCaseAccess('failed');
+      console.warn('[cases.case-access]', error);
     });
   }
 })();

@@ -1,0 +1,21 @@
+<!-- Case no access · Content HTML iPart on the no-access page (placeholder,
+     owner, 27 October 2026). The case page sends a user here when CloudToolz
+     POST /cases/case-access answers Restricted (ActionDefinitions.js,
+     noAccessPage), with the case's CaseID and CaseNum on the address, and
+     its member as ID when the flow returns MemberID.
+     Page: /UTNewTheme/Cases_NoAccess (noAccessPage).
+     iPart Title: [[lock]] No access. No iPart CSS class is needed.
+     Back to member is the cases.back-to-member action: the theme fills the
+     empty button's label and opens /UTNewTheme/Party.aspx?ID=<ID from the address>.
+     Requires zUnionSuite.js and ActionDefinitions.js (the theme loader).
+     The redirect replaces the case page in the history, so the browser's
+     Back returns to the page before the case. -->
+<div class="us-placeholder">
+  <span class="us-placeholder__icon" aria-hidden="true"><i class="ti ti-lock"></i></span>
+  <h3>You don't have access to this case</h3>
+  <p>Its access is limited to the staff working on it. Ask the lead staff member or a manager to add you if you need it.</p>
+  <p>
+    <button type="button" class="us-action-cases-back-to-member"></button>
+    <a class="TextButton" href="/">Back to home</a>
+  </p>
+</div>

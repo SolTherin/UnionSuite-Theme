@@ -10710,6 +10710,45 @@ html.us-taskbar-mounted #hd .search-dropdown {
 
 /* US-CASE-WORKPLACE:END */
 
+/* US-CASE-ACCESS:START — the manage case page stays hidden while its access
+   check runs (owner, 27 October 2026). us-case-page is the page's CSS class,
+   on the body (hiding .main) or on .main itself. ActionDefinitions.js asks
+   CloudToolz /cases/case-access and marks the root data-us-case-access:
+   granted or failed shows the page, restricted keeps it hidden while the
+   browser moves to the no-access page. The stylesheet hides it from first
+   paint, before the script loads; if no answer comes at all (the script
+   failed to load), the page shows after 15 seconds. */
+html:not([data-us-case-access="granted"], [data-us-case-access="failed"])
+  :is(body.us-case-page .main, .us-case-page:not(body)) {
+  visibility: hidden;
+  opacity: 0;
+  animation: us-case-access-fallback 0s 15s forwards;
+}
+
+html[data-us-case-access="restricted"]
+  :is(body.us-case-page .main, .us-case-page:not(body)) {
+  animation: none;
+}
+
+:is(body.us-case-page .main, .us-case-page:not(body)) {
+  transition: opacity 220ms cubic-bezier(.2, 0, 0, 1);
+}
+
+@keyframes us-case-access-fallback {
+  to {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  :is(body.us-case-page .main, .us-case-page:not(body)) {
+    transition: none;
+  }
+}
+
+/* US-CASE-ACCESS:END */
+
 /* US-CREDENTIALS:START — us-credentials on the Content Web User Control iPart
    that shows the native iMIS "User credentials" control. iMIS puts the class
    on a div around the whole control, so every rule starts from it.
