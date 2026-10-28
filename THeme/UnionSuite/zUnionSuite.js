@@ -5195,63 +5195,73 @@ SOFTWARE.
 /* US-CASE-WORKPLACE:START — which of the member's jobs a case is about
    (owner, 22 and 25 October 2026), on the case member card (US-CASE-MEMBER).
 
-   A member can hold more than one job, current or former, and a case is
-   about one of them, or about none ("sometimes a member may have an issue
-   with a former workplace"). The case records it in
-   i4u_UT_Cases.PrimaryContactWorkplaceID: a job's WorkplaceID, 0 for "not
-   about a workplace", or blank while nobody has chosen.
+   A member can hold more than one job, current, not started or finished,
+   and a case is about one of them, or about none ("sometimes a member may
+   have an issue with a former workplace"). The case records it in
+   i4u_UT_Cases.PrimaryWorkplaceID (a varchar): a job's workplace ID, or
+   blank for "not about a workplace" (owner, 28 October 2026). The case
+   create form sets it to the primary contact's primary workplace, so blank
+   is a choice, not a gap.
 
-   The jobs come from their own IQA (API - Manage Case - Member Workplaces,
-   filter CaseNum), one row per job, read as soon as the card arrives, so the
-   card's own IQAs never join the jobs and never repeat a row. They give the
-   count, the menu and the Work fields of a pick.
+   The jobs come from their own IQA (API - Manage Case - Primary Contacts
+   Workplaces, CaseNum required), one row per job, read as soon as the card
+   arrives, so the card's own IQAs never join the jobs and never repeat a
+   row. They give the count and the menu.
    - No jobs: the card is unchanged.
    - One or more: the Work label is the control ("Work" and a chevron, which
      turns while the menu is open), and the count sits at the end of the
-     heading's rule: "2 jobs", or "2 current · 1 former" when any is former.
+     heading's rule: "2 jobs", or "1 current · 1 not started · 1 former"
+     when they differ.
    - The case's job opens the Work group with its status: a green Current
-     badge and "Since Mar 2020", or a grey Former badge and "Worked there
-     Mar 2016 – Jan 2019".
+     badge and "Since Mar 2020", a grey Not started badge and "Starts Mar
+     2027", or a grey Former badge and "Worked there Mar 2016 – Jan 2019".
    - Not about a workplace: one line, "This case isn't about a workplace.",
      in place of the fields.
-   - None chosen: with one job, that job shows (not saved); with several,
-     the fields give way to "Which job is this case about? Choose
-     workplace", whose link opens the menu too. The fields wait for the
-     jobs, so they never show dashes first.
-   The menu lists the jobs (under Current jobs and Former jobs when any is
-   former, a former one with its dates), then "Not about a workplace" on its
-   own. The case's choice is tinted with a bar on its leading edge, as the
-   rail tabs mark the open tab. It works as the term status menu's does
-   (US-TERM-STATUS): arrow keys, Home and End move; Enter or Space picks;
-   Escape and Tab close.
+   The menu lists the jobs (under Current jobs, Not started and Former jobs
+   when they differ, a not started or former one with its dates), then "Not
+   about a workplace" on its own. The case's choice is tinted with a bar on
+   its leading edge, as the rail tabs mark the open tab. It works as the
+   term status menu's does (US-TERM-STATUS): arrow keys, Home and End move;
+   Enter or Space picks; Escape and Tab close.
    A pick shows at once, then saves through CloudToolz
-   /cases/quick-update/set-workplace (UnionSuiteAgreements.cloudToolz, in
-   Scripts/ActionDefinitions.js). A failed save puts the previous choice
+   /cases/quick-update/set-primary-workplace (UnionSuiteAgreements.cloudToolz,
+   in Scripts/ActionDefinitions.js). A failed save puts the previous choice
    back and says "Not saved. Try again." A saved one reloads the page's other
-   field panels quietly, so the Details tab's Workplace follows, and fires
-   us:case-workplace-changed on the card ({workplaceId, job}; job is null for
-   not about a workplace).
+   field panels quietly, so the Details tab's Workplace follows, and the
+   card's own details too when the job has no Work-* columns of its own (so
+   its Work fields follow the case's job), and fires us:case-workplace-changed
+   on the card ({workplaceId, job}; job is null for not about a workplace).
 
-   Markup (the guide's Case member template), from Case - Primary Member:
+   Markup (the guide's Case member template), from the case's primary party:
      data-us-case-member       the card
-     data-us-workplace-id      CaseWorkplaceID (blank: none chosen; 0: not
-                               about a workplace)
+     data-us-workplace-id      PrimaryWorkplaceID (blank: not about a
+                               workplace)
      data-us-member-id         MemberId, sent as ContactID
      data-us-workplace-group   optional: the field group to edit (Work)
-   The jobs IQA's columns: WorkplaceID, WorkplaceName (the menu's title),
-   WorkplaceLine (employer · classification), WorkplaceStatus (Current or
-   Former; blank is current), WorkplaceStart and WorkplaceEnd (dates, shown
-   as "Mar 2020"), and the same Work-* columns the details IQA returns, which
-   fill the card on a pick. CaseID and CaseNum are read from the page URL. */
+   The jobs IQA's columns, matched whatever their case, spaces or
+   underscores: Workplace ID (or WorkplaceID, or ID: the value saved),
+   Workplace Name (the menu's title), Workplace Type (the line under it),
+   Member Job Status (Active, Not Started or Finished), Job Start Date and
+   Job End Date (shown as "Mar 2020"). The earlier names (WorkplaceName,
+   WorkplaceLine, WorkplaceStatus Current or Former, WorkplaceStart,
+   WorkplaceEnd) are read too. Work-* columns, when a job has them, fill the
+   card's Work fields on a pick. CaseID and CaseNum are read from the page
+   URL. */
 (function () {
   'use strict';
   if (window.UnionSuiteCaseWorkplace) return;
 
-  const JOBS_QUERY = '$/_i4u_/Client/Cases/Layouts v2/API - Manage Case - Member Workplaces';
-  const ENDPOINT = '/cases/quick-update/set-workplace';
-  const NO_WORKPLACE = '0';
+  const JOBS_QUERY = '$/_i4u_/Core/Cases/Layouts v2/API - Manage Case - Primary Contacts Workplaces';
+  const ENDPOINT = '/cases/quick-update/set-primary-workplace';
+  const NO_WORKPLACE = '';
   const CARD = '[data-us-case-member]';
-  const OPENERS = '.us-case-workplace__label, .us-case-workplace__choose';
+  const OPENERS = '.us-case-workplace__label';
+  // A job's state, in the order the menu lists them.
+  const STATES = [
+    {state: 'current', heading: 'Current jobs', count: 'current', badge: 'Current', badgeClass: 'us-badge us-badge--success'},
+    {state: 'future', heading: 'Not started', count: 'not started', badge: 'Not started', badgeClass: 'us-badge'},
+    {state: 'former', heading: 'Former jobs', count: 'former', badge: 'Former', badgeClass: 'us-badge'}
+  ];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const reducedMotion = () => Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   // Each card's jobs, read once (a refreshed card is a new element).
@@ -5259,6 +5269,8 @@ SOFTWARE.
   const failedCards = new WeakSet();
   // The jobs once they have arrived, so a redrawn card takes them at once.
   const loadedJobs = new WeakMap();
+  // A saved pick's announcement, for the group its details reload redraws.
+  const announcements = new WeakMap();
   let menu = null;
   let owner = null;
   let queued = false;
@@ -5269,7 +5281,37 @@ SOFTWARE.
   const chosenId = card => text(card.getAttribute('data-us-workplace-id'));
   const groupName = card => text(card.getAttribute('data-us-workplace-group')) || 'Work';
   const pageParam = name => new URLSearchParams(location.search).get(name) || '';
-  const isFormer = job => text(job.WorkplaceStatus).toLowerCase() === 'former';
+  const stateInfo = job => STATES.find(entry => entry.state === job.state) || STATES[0];
+
+  // A row's column by any of its names, whatever their case, spaces or
+  // underscores ("Workplace Name", "WorkplaceName" or "WORKPLACE_NAME").
+  const columnKey = name => String(name).replace(/[\s_]/g, '').toLowerCase();
+  function column(row, ...names) {
+    const wanted = names.map(columnKey);
+    const found = Object.keys(row).find(name => wanted.includes(columnKey(name)));
+    return found === undefined ? undefined : row[found];
+  }
+
+  // Member Job Status: Active, Not Started or Finished (or the earlier
+  // WorkplaceStatus: Current or Former). Blank is current.
+  function stateOf(status) {
+    const value = text(status).toLowerCase().replace(/[\s_-]/g, '');
+    if (['finished', 'former', 'ended'].includes(value)) return 'former';
+    if (['notstarted', 'future'].includes(value)) return 'future';
+    return 'current';
+  }
+
+  // A jobs row in the names the card uses; its own columns (Work-* among
+  // them) come along.
+  const toJob = row => ({
+    ...row,
+    WorkplaceID: text(column(row, 'Workplace ID', 'WorkplaceID', 'ID')),
+    WorkplaceName: text(column(row, 'Workplace Name', 'WorkplaceName')),
+    WorkplaceLine: text(column(row, 'Workplace Type', 'WorkplaceLine')),
+    WorkplaceStart: text(column(row, 'Job Start Date', 'WorkplaceStart')),
+    WorkplaceEnd: text(column(row, 'Job End Date', 'WorkplaceEnd')),
+    state: stateOf(column(row, 'Member Job Status', 'WorkplaceStatus'))
+  });
 
   // The field label US-FIELD-GROUPS gives a column name, so a job's
   // Work-* columns find their fields: "Employer" stays, "PaidTo" becomes
@@ -5295,23 +5337,26 @@ SOFTWARE.
   }
 
   // When the member worked there: "Since Mar 2020" for a current job;
-  // "Worked there Mar 2016 – Jan 2019" for a former one (or "Left Jan 2019",
-  // "Worked there from Mar 2016" when one date is missing).
+  // "Starts Mar 2027" for one not started; "Worked there Mar 2016 – Jan
+  // 2019" for a former one (or "Left Jan 2019", "Worked there from Mar 2016"
+  // when one date is missing).
   function tenure(job) {
     const start = monthYear(job.WorkplaceStart);
     const end = monthYear(job.WorkplaceEnd);
-    if (!isFormer(job)) return start ? 'Since ' + start : '';
+    if (job.state === 'current') return start ? 'Since ' + start : '';
+    if (job.state === 'future') return start ? 'Starts ' + start : '';
     if (start && end) return 'Worked there ' + start + ' – ' + end;
     if (end) return 'Left ' + end;
     return start ? 'Worked there from ' + start : '';
   }
 
-  // "2 jobs", "1 job", or "2 current · 1 former" when any is former.
+  // "2 jobs", "1 job", or "2 current · 1 former" when they differ.
   function countText(jobs) {
-    const former = jobs.filter(isFormer).length;
-    const current = jobs.length - former;
-    if (!former) return jobs.length + (jobs.length === 1 ? ' job' : ' jobs');
-    return current ? current + ' current · ' + former + ' former' : former + ' former';
+    if (jobs.every(job => job.state === 'current')) return jobs.length + (jobs.length === 1 ? ' job' : ' jobs');
+    return STATES.map(entry => [jobs.filter(job => job.state === entry.state).length, entry.count])
+      .filter(([count]) => count)
+      .map(([count, word]) => count + ' ' + word)
+      .join(' · ');
   }
 
   // ── The jobs ────────────────────────────────────────────────
@@ -5333,9 +5378,13 @@ SOFTWARE.
     const data = await response.json();
     const rows = unwrap(data.Items)?.$values ?? unwrap(data.Items);
     if (!Array.isArray(rows)) throw new Error('Unexpected response');
-    return rows.map(row => Object.fromEntries(Object.entries(row)
+    const jobs = rows.map(row => toJob(Object.fromEntries(Object.entries(row)
       .filter(([name]) => name !== '$type')
-      .map(([name, value]) => [name, unwrap(value)])));
+      .map(([name, value]) => [name, unwrap(value)]))));
+    // A job without its workplace ID cannot be chosen.
+    const usable = jobs.filter(job => job.WorkplaceID);
+    if (usable.length < jobs.length) console.warn('[UnionSuiteCaseWorkplace] ' + (jobs.length - usable.length) + ' job(s) without a Workplace ID column were left out.');
+    return usable;
   }
 
   // A failed read is kept, so the page's changes do not ask again; the menu
@@ -5385,13 +5434,11 @@ SOFTWARE.
   const parts = group => ({
     status: group.querySelector(':scope > .us-case-workplace__status'),
     fields: group.querySelector(':scope > .us-fields'),
-    prompt: group.querySelector(':scope > .us-case-workplace__prompt'),
     note: group.querySelector(':scope > .us-case-workplace__note')
   });
 
-  // Runs once per rendered Work group. What the details IQA cannot know yet
-  // (none chosen, not about a workplace) is settled before the group paints;
-  // the rest waits for the jobs.
+  // Runs once per rendered Work group. Not about a workplace is settled
+  // before the group paints; the rest waits for the jobs.
   function enhance(card) {
     const groups = card.querySelector('.us-field-groups');
     // Read the jobs while the details load.
@@ -5403,21 +5450,16 @@ SOFTWARE.
 
     const heading = group.querySelector(':scope > .us-field-groups__heading');
     heading.after(line('us-case-workplace__status'));
-    group.append(
-      line('us-case-workplace__note', 'This case isn’t about a workplace.'),
-      line('us-case-workplace__prompt', 'Which job is this case about? ', opener('us-case-workplace__choose', 'Choose workplace'))
-    );
+    group.append(line('us-case-workplace__note', 'This case isn’t about a workplace.'));
     const {fields, note} = parts(group);
-    const id = chosenId(card);
-    if (id === NO_WORKPLACE) {
+    if (chosenId(card) === NO_WORKPLACE) {
       fields.hidden = true;
       note.hidden = false;
-    } else if (!id) {
-      fields.hidden = true;
     }
 
     // Jobs already read (the details redrawn): settled before the group
     // paints, with nothing moving. Otherwise as they arrive, with motion.
+    // Without the jobs the card keeps what the details IQA gave it.
     const settle = (jobs, animate) => {
       if (!group.isConnected) return;
       if (jobs.length) addControl(group, heading, jobs, animate);
@@ -5427,10 +5469,7 @@ SOFTWARE.
       settle(loadedJobs.get(card), false);
       return;
     }
-    jobsFor(card).then(jobs => settle(jobs, true), () => {
-      // Without the jobs the card keeps what the details IQA gave it.
-      if (group.isConnected && !id) fields.hidden = false;
-    });
+    jobsFor(card).then(jobs => settle(jobs, true), () => {});
   }
 
   // The heading's label as the menu's button, and its count.
@@ -5452,19 +5491,30 @@ SOFTWARE.
     status.className = 'sr-only';
     status.setAttribute('role', 'status');
     tools.append(count, status);
+    // Set once the region is in the page, so it is read out.
+    const card = group.closest(CARD);
+    if (announcements.has(card)) {
+      const message = announcements.get(card);
+      announcements.delete(card);
+      setTimeout(() => { status.textContent = message; }, 100);
+    }
     heading.append(tools);
     if (animate && !reducedMotion() && tools.animate) {
       tools.animate([{opacity: 0}, {opacity: 1}], {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'});
     }
   }
 
-  // The job the card shows: the case's, or a member's only job while none
-  // is chosen (shown, not saved).
+  // The job the card shows: the case's.
   function shownJob(id, jobs) {
     if (id === NO_WORKPLACE) return null;
-    if (id) return jobs.find(job => text(job.WorkplaceID) === id) || null;
-    return jobs.length === 1 ? jobs[0] : null;
+    return jobs.find(job => text(job.WorkplaceID) === id) || null;
   }
+
+  // Whether a job brings its own Work-* columns for the card's fields.
+  const hasWorkColumns = (card, job) => {
+    const prefix = groupName(card).toLowerCase() + '-';
+    return Object.keys(job).some(name => name.toLowerCase().startsWith(prefix));
+  };
 
   // The job's Work-* columns into the group's fields, matched by label.
   function fill(card, group, job) {
@@ -5481,17 +5531,18 @@ SOFTWARE.
 
   function fillStatus(node, job) {
     const badge = document.createElement('span');
-    badge.className = isFormer(job) ? 'us-badge' : 'us-badge us-badge--success';
-    badge.textContent = isFormer(job) ? 'Former' : 'Current';
+    badge.className = stateInfo(job).badgeClass;
+    badge.textContent = stateInfo(job).badge;
     const when = document.createElement('span');
     when.textContent = tenure(job);
     node.replaceChildren(badge, ...(when.textContent ? [when] : []));
   }
 
-  // The group for a choice: the status and fields for a job; the note for
-  // not about a workplace; the prompt for several jobs and none chosen.
+  // The group for a choice: the status and fields for a job (the fields
+  // alone for a workplace not among the jobs); the note for not about a
+  // workplace.
   function show(card, group, id, jobs, animate) {
-    const {status, fields, prompt, note} = parts(group);
+    const {status, fields, note} = parts(group);
     const job = shownJob(id, jobs);
     if (job) {
       fill(card, group, job);
@@ -5499,8 +5550,7 @@ SOFTWARE.
     }
     const wanted = new Map([
       [status, Boolean(job)],
-      [fields, Boolean(job) || (id !== NO_WORKPLACE && !(!id && jobs.length > 1))],
-      [prompt, !id && jobs.length > 1],
+      [fields, id !== NO_WORKPLACE],
       [note, id === NO_WORKPLACE]
     ]);
     // fold, not the hidden attribute, decides what moves: hidden changes only
@@ -5557,12 +5607,16 @@ SOFTWARE.
     const job = workplaceId === NO_WORKPLACE ? null : jobs.find(entry => text(entry.WorkplaceID) === workplaceId);
     if (workplaceId !== NO_WORKPLACE && !job) return;
     const {status, fields} = parts(group);
-    const changing = [status, fields].filter(node => !node.hidden);
+    // A job without Work-* columns cannot fill the card's fields: they keep
+    // the previous job's, dimmed, until the saved choice's details arrive.
+    const stale = Boolean(job) && !hasWorkColumns(card, job);
+    const changing = [status, ...(stale ? [] : [fields])].filter(node => !node.hidden);
 
     // Shown at once, as a term's status is.
     group.setAttribute('aria-busy', 'true');
     card.setAttribute('data-us-workplace-id', workplaceId);
     show(card, group, workplaceId, jobs, true);
+    if (stale) fields.setAttribute('data-us-workplace-pending', '');
     if (job && !reducedMotion()) {
       // A job for a job: the status and fields stay, and their new text fades in.
       changing.filter(node => !node.hidden).forEach(node => node.animate?.([{opacity: 0.25}, {opacity: 1}], {duration: 200, easing: 'cubic-bezier(.2, 0, 0, 1)'}));
@@ -5578,16 +5632,23 @@ SOFTWARE.
     }
     group.removeAttribute('aria-busy');
     if (!saved) {
+      fields.removeAttribute('data-us-workplace-pending');
       card.setAttribute('data-us-workplace-id', previous);
       show(card, group, previous, jobs, true);
       report(group, 'Not saved. Try again.');
-      if (!previous && jobs.length > 1) group.querySelector('.us-case-workplace__choose')?.focus({preventScroll: true});
       return;
     }
-    group.querySelector('.us-case-workplace__tools > [role="status"].sr-only').textContent = job
-      ? 'Workplace for this case: ' + text(job.WorkplaceName) + '.'
-      : 'This case isn’t about a workplace.';
+    const message = job ? 'Workplace for this case: ' + text(job.WorkplaceName) + '.' : 'This case isn’t about a workplace.';
+    group.querySelector('.us-case-workplace__tools > [role="status"].sr-only').textContent = message;
     reloadOthers();
+    // The card's details are read again, so its fields follow the case's
+    // job; the redrawn group repeats the announcement. Should they not
+    // arrive, the dimming lifts after a while.
+    if (stale) {
+      setTimeout(() => fields.removeAttribute('data-us-workplace-pending'), 6000);
+      announcements.set(card, message);
+      window.UnionSuiteFieldGroups?.reload(card.querySelector('.us-field-groups[data-us-fields-query]'));
+    }
     card.dispatchEvent(new CustomEvent('us:case-workplace-changed', {bubbles: true, detail: {workplaceId, job}}));
   }
 
@@ -5654,19 +5715,18 @@ SOFTWARE.
     return group;
   }
 
-  // The jobs (under Current jobs and Former jobs when any is former), then
-  // not about a workplace on its own.
+  // The jobs (under Current jobs, Not started and Former jobs when they
+  // differ), then not about a workplace on its own.
   function renderItems(jobs, current) {
     const item = job => menuItem(text(job.WorkplaceID), text(job.WorkplaceName) || 'Workplace ' + text(job.WorkplaceID), [
       ['us-case-workplace-menu__line', text(job.WorkplaceLine)],
-      ['us-case-workplace-menu__dates', isFormer(job) ? tenure(job).replace(/^Worked there /, '') : '']
+      ['us-case-workplace-menu__dates', job.state === 'current' ? '' : tenure(job).replace(/^Worked there /, '')]
     ], current);
-    const former = jobs.filter(isFormer);
-    const groups = former.length
-      ? [['Current jobs', jobs.filter(job => !isFormer(job))], ['Former jobs', former]]
+    const groups = jobs.every(job => job.state === 'current')
+      ? [menuGroup('', jobs.map(item))]
+      : STATES.map(entry => [entry.heading, jobs.filter(job => job.state === entry.state)])
         .filter(([, list]) => list.length)
-        .map(([labelText, list]) => menuGroup(labelText, list.map(item)))
-      : [menuGroup('', jobs.map(item))];
+        .map(([labelText, list]) => menuGroup(labelText, list.map(item)));
     const none = menuItem(NO_WORKPLACE, 'Not about a workplace', [
       ['us-case-workplace-menu__line', 'This case isn’t about any of the member’s jobs']
     ], current);
@@ -5786,7 +5846,7 @@ SOFTWARE.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once: true});
   else schedule();
 
-  window.UnionSuiteCaseWorkplace = Object.freeze({refresh: schedule, version: '1.1'});
+  window.UnionSuiteCaseWorkplace = Object.freeze({refresh: schedule, version: '1.2'});
 })();
 /* US-CASE-WORKPLACE:END */
 

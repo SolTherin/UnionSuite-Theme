@@ -1,0 +1,906 @@
+{
+  "hierarchies": [
+    {
+      "id": 1885,
+      "coreOrgId": null,
+      "parentId": 1857,
+      "isFolder": false,
+      "excludeFromWorkflowInstancesDisplay": false,
+      "definitionId": "65499872854b4fc08e20e540fcbecefe",
+      "displayName": "Cases: Quick Update - Set Primary Workplace",
+      "version": 1,
+      "isPublished": true,
+      "createdAt": "2026-10-28T11:28:13.0147438+00:00",
+      "lastExecutedAt": null,
+      "avgRuntime": null,
+      "latestInstanceStatus": null,
+      "protected": false,
+      "cronSetting": null,
+      "endpointPath": "/cases/quick-update/set-primary-workplace",
+      "inMaintenanceWindow": false,
+      "securedEndpoint": "green",
+      "createdBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "updatedBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "hasChildRecords": false
+    }
+  ],
+  "flowz": [
+    {
+      "definitionId": "65499872854b4fc08e20e540fcbecefe",
+      "versionId": "8fa9e6bba07f49f89327f6d5a74cdd97",
+      "tenantId": null,
+      "name": "Cases: Quick Update - Set Primary Workplace",
+      "displayName": "Cases: Quick Update - Set Primary Workplace",
+      "description": null,
+      "channel": null,
+      "version": 1,
+      "variables": {
+        "data": {}
+      },
+      "customAttributes": {
+        "data": {}
+      },
+      "contextOptions": null,
+      "isSingleton": false,
+      "persistenceBehavior": "WorkflowBurst",
+      "deleteCompletedInstances": false,
+      "isPublished": true,
+      "isLatest": true,
+      "tag": null,
+      "activities": [
+        {
+          "activityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "type": "HttpEndpoint",
+          "name": "EndpointData",
+          "displayName": "HTTP Endpoint",
+          "description": null,
+          "x": 40,
+          "y": 40,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Path",
+              "syntax": null,
+              "expressions": {
+                "Literal": "/cases/quick-update/set-primary-workplace"
+              }
+            },
+            {
+              "name": "Methods",
+              "syntax": null,
+              "expressions": {
+                "Json": "[\"POST\"]"
+              }
+            },
+            {
+              "name": "ReadContent",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "TargetType",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Schema",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": ""
+              }
+            },
+            {
+              "name": "ValidateCallerUrl",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateImisRequest",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "ImisRequestVerificationRole",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Authorize",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Policy",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "AuthorizeWithCustomHeader",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderName",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderValue",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateOutlookPluginToken",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RequiredOutlookPluginUsername",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "OutlookPluginMailboxEmail",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response",
+          "description": null,
+          "x": 40,
+          "y": 2322,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify({ WorkplaceID: String(activities.EndpointData.Output().Body.WorkplaceID ?? '') })"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "OK"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "a6cc0a55-a6e6-4eae-9443-7ff33d33f249",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - General Error",
+          "description": null,
+          "x": 510,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "An unexpected error occurred. Please contact a system adminstrator."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "55727115-9880-478e-8fc9-b971c2bd205d",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Case Not Valid",
+          "description": null,
+          "x": 510,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Case not valid"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "93482b9f-6aa6-458b-b481-050d04b31377",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Insert",
+          "displayName": "SQL: CT Update - i4u_UT_Cases",
+          "description": null,
+          "x": 40,
+          "y": 1542,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "ConnectionId",
+              "syntax": null,
+              "expressions": {
+                "Literal": "default"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "UPDATE [Cases].[i4u_UT_Cases]\r\nSET PrimaryWorkplaceID = @PrimaryWorkplace,\r\n\tLastUpdatedBy = @LoggedInUser,\r\n\tLastUpdateOn = @LocalTimestamp\r\nWHERE Ordinal = @CaseOrdinal\r\n\tAND CaseID = @CaseID\r\n"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Grid": "[{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseOrdinal\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseNum\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseID\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseID\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@PrimaryWorkplace\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.WorkplaceID\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@LoggedInUser\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Headers.loggedinpartyid\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@LocalTimestamp\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"activities.SQL_Validation.ResultSet()[0].Timestamp\",\"JavaScript\":\"activities.SQL_Validation.ResultSet()[0].Timestamp\"}}}]",
+                "JavaScript": "JSON.stringify([{\"Name\":\"@CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"@CaseID\",\"Value\":String((activities.EndpointData.Output().Body.CaseID) ?? \"\")},{\"Name\":\"@PrimaryWorkplace\",\"Value\":String((activities.EndpointData.Output().Body.WorkplaceID) ?? \"\")},{\"Name\":\"@LoggedInUser\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")},{\"Name\":\"@LocalTimestamp\",\"Value\":String((activities.SQL_Validation.ResultSet()[0].Timestamp) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e9accf6e-d920-4a6f-9e1e-b1b058331eda",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - CT insert failure",
+          "description": null,
+          "x": 510,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Insert.Exception()"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Validation",
+          "displayName": "SQL - Validation and Timestamp",
+          "description": null,
+          "x": 40,
+          "y": 320,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "ConnectionId",
+              "syntax": null,
+              "expressions": {
+                "Literal": "default"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "DECLARE @EntityCode AS varchar(20) = COALESCE(\r\n  (SELECT OrgCode FROM [Cases].[i4u_UT_Cases] WHERE Ordinal = @CaseOrdinal), -- this would be @ImisID\r\n  (SELECT EntityCode FROM [ZenCrm].[Individuals] WHERE ImisId = @LoggedInUser),  -- this would be @LoggedInUserID\r\n  (SELECT OrgCode FROM UnionTemplate.Entities WHERE IsDefault = 1) -- Final fallback, default org code\r\n);\r\nDECLARE @localTimestamp datetime = COALESCE([UnionTemplate].fn_GetDateTimeWithTimeZone(@EntityCode), GETUTCDATE());\r\n\r\n\r\nDECLARE @valid int = 1\r\nDECLARE @message varchar(4000) = ''\r\nSET @message = ''\r\n\r\n-- check if case exists\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND Ordinal = @CaseOrdinal\r\n)\r\n    SET @message =+ 'Case is not valid. | '\r\n\r\n-- check if users entity matches case\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases C\r\n\tINNER JOIN UnionTemplate.EntityAccess A\r\n\t\tON C.OrgCode = A.EntityCode\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND C.Ordinal = @CaseOrdinal\r\n\t\tAND A.StaffimisID = @loggedInUser\r\n)\r\n    SET @message =+ 'Unauthorised entity | '\r\n\r\nIF @message <> ''\r\n\tSET @valid = 0\r\n\r\nSELECT \r\n\t@valid AS [Valid],\r\n\t@message AS [Message],\r\n\tCONVERT(varchar(23), @localTimestamp, 126) AS [Timestamp],\r\n\t(SELECT TOP 1 CAST(PrimaryWorkplaceID AS varchar(50)) FROM Cases.i4u_UT_Cases\r\n\t\tWHERE Ordinal = @CaseOrdinal AND CaseID = @CaseID) AS [OldPrimaryWorkplaceID];\r\n"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Grid": "[{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseOrdinal\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"activity\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseNum\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseID\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseID\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@loggedInUser\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Headers.loggedinpartyid\"}}}]",
+                "JavaScript": "JSON.stringify([{\"Name\":\"@CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"@CaseID\",\"Value\":String((activities.EndpointData.Output().Body.CaseID) ?? \"\")},{\"Name\":\"@loggedInUser\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Case Valid",
+          "description": null,
+          "x": 40,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Validation.ResultSet()[0].Valid == 1"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "39fea485-b68f-4497-b29d-5f6b0566d005",
+          "type": "UpdateSingleInstanceDataSource",
+          "name": "iMIS_Update",
+          "displayName": "Update iMIS - i4u_UT_Cases",
+          "description": null,
+          "x": 40,
+          "y": 1318,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "NameOfDataSource",
+              "syntax": null,
+              "expressions": {
+                "Literal": "i4u_UT_Cases"
+              }
+            },
+            {
+              "name": "DataMapping",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Grid": "[{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"PrimaryWorkplaceID\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"activities.EndpointData.Output().Body.StaffID\",\"JavaScript\":\"activities.EndpointData.Output().Body.WorkplaceID\"}}}]",
+                "JavaScript": "JSON.stringify([{\"Name\":\"PrimaryWorkplaceID\",\"Value\":String((activities.EndpointData.Output().Body.WorkplaceID) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "PartyId",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Literal": "activities.EndpointData.Output().Body.CaseNum",
+                "JavaScript": "activities.EndpointData.Output().Body.CaseNum"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "4c2db0b3-6d4c-4d5b-8750-b673753b6c0e",
+          "type": "RunJavaScript",
+          "name": "CreateLogContext",
+          "displayName": "JS: Create Log Context",
+          "description": null,
+          "x": 40,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "// UPDATE LOG CONTEXT HERE\r\nvar endpoint = activities.EndpointData.Output();\r\nvar body = endpoint.Body;\r\n\r\nvar logContext = {\r\n    \"Note\": \"Case \" + body.CaseID + \": Set Primary Workplace\", // UPDATE HERE\r\n    \"Table\": \"i4u_UT_Cases\", // UPDATE HERE\r\n    \"UpdateReason\": \"Edit\", // UPDATE HERE\r\n    \"workflowDefinitionId\": workflowDefinitionId, // DON'T UPDATE, VARIABLE IS PROVIDED BY CLOUDTOOLZ\r\n    \"sourceOrdinal\": String(body.CaseNum) // the case's ordinal\r\n}\r\n// UPDATE FIELDS YOU WANT TO COMPARE HERE - names must match the keys in logBody below\r\nvar fieldsToCompare = [\"PrimaryWorkplaceID\"];\r\n\r\n// The case's workplace ID, new and as it was (SQL_Validation reads it\r\n// before the update); blank is not about a workplace.\r\nvar logBody = {\r\n    \"PrimaryWorkplaceID\": String(body.WorkplaceID ?? \"\"),\r\n    \"OldValue\": JSON.stringify({ \"PrimaryWorkplaceID\": String(activities.SQL_Validation.ResultSet()[0].OldPrimaryWorkplaceID ?? \"\") })\r\n}\r\n\r\n// compile all variables into one object\r\nvar logChanges = {\r\n    \"logContext\": logContext, // DON'T CHANGE\r\n    \"fieldsToCompare\": fieldsToCompare, // DON'T CHANGE\r\n    \"body\": logBody,\r\n    \"profileID\": String(body.CaseID), // the case the change belongs to\r\n    \"updatedByID\": endpoint.Headers.loggedinpartyid\r\n}\r\nsetVariable('logChanges', logChanges);"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "f56b6b39-0f18-407e-8824-4114f293cc7d",
+          "type": "RunWorkflow",
+          "name": "LogChangesToIMIS",
+          "displayName": "Log Changes To IMIS",
+          "description": null,
+          "x": 40,
+          "y": 2071,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "WorkflowDefinitionId",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getWorkflowDefinitionIdByName('LogChangesToIMIS')"
+              }
+            },
+            {
+              "name": "Input",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('logChanges')"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Mode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "FireAndForget"
+              }
+            },
+            {
+              "name": "TenantId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CorrelationId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ContextId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomAttributes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RetryFailedActivities",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "58993105-505d-4f82-959c-3e40341c88ac",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - iMIS update failure",
+          "description": null,
+          "x": 510,
+          "y": 1569,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.iMIS_Update.Exception() + ' ' + \r\nactivities.iMIS_Update.InnerException()"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "426ea1a2-8169-4c41-b1f1-3cf196ef01c0",
+          "type": "IntelligentQueryArchitectData",
+          "name": "MemberJobs",
+          "displayName": "IQA: Primary Contacts Workplaces",
+          "description": null,
+          "x": 40,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/Core/Cases/Layouts v2/API - Manage Case - Primary Contacts Workplaces"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "'&parameter=' + activities.EndpointData.Output().Body.CaseNum"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {
+                "Literal": "100"
+              }
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "9083eae6-c07b-4d32-ac83-17e295e1ba94",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Workplace Allowed",
+          "description": null,
+          "x": 40,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "// Blank is \"not about a workplace\". Anything else must be the workplace ID\r\n// of one of the primary contact's jobs (Workplace ID, WorkplaceID or ID,\r\n// matched whatever its case, spaces or underscores).\r\n(() => {\r\n  const id = String(activities.EndpointData.Output().Body.WorkplaceID ?? '').trim();\r\n  if (id === '') return true;\r\n  const key = name => String(name).replace(/[\\s_]/g, '').toLowerCase();\r\n  const get = (row, ...names) => { const column = Object.keys(row).find(name => names.map(key).includes(key(name))); return column === undefined ? undefined : row[column]; };\r\n  return activities.MemberJobs.ResultSet().some(row => String(get(row, 'Workplace ID', 'WorkplaceID', 'ID') ?? '').trim() === id);\r\n})()"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "5b007100-f0c9-4c38-ade3-c951868aeee7",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Workplace Not Allowed",
+          "description": null,
+          "x": 510,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Choose one of the member's jobs, or Not about a workplace."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "859f6d67-b521-4fee-85ac-47b73fbd649a",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Jobs Failure",
+          "description": null,
+          "x": 510,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The member's jobs could not be read. Please try again."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        }
+      ],
+      "connections": [
+        {
+          "sourceActivityId": "93482b9f-6aa6-458b-b481-050d04b31377",
+          "targetActivityId": "e9accf6e-d920-4a6f-9e1e-b1b058331eda",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "targetActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "targetActivityId": "55727115-9880-478e-8fc9-b971c2bd205d",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "targetActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "targetActivityId": "a6cc0a55-a6e6-4eae-9443-7ff33d33f249",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "targetActivityId": "426ea1a2-8169-4c41-b1f1-3cf196ef01c0",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "39fea485-b68f-4497-b29d-5f6b0566d005",
+          "targetActivityId": "93482b9f-6aa6-458b-b481-050d04b31377",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "93482b9f-6aa6-458b-b481-050d04b31377",
+          "targetActivityId": "4c2db0b3-6d4c-4d5b-8750-b673753b6c0e",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "4c2db0b3-6d4c-4d5b-8750-b673753b6c0e",
+          "targetActivityId": "f56b6b39-0f18-407e-8824-4114f293cc7d",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "f56b6b39-0f18-407e-8824-4114f293cc7d",
+          "targetActivityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "f56b6b39-0f18-407e-8824-4114f293cc7d",
+          "targetActivityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "outcome": "Not Found"
+        },
+        {
+          "sourceActivityId": "39fea485-b68f-4497-b29d-5f6b0566d005",
+          "targetActivityId": "58993105-505d-4f82-959c-3e40341c88ac",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "426ea1a2-8169-4c41-b1f1-3cf196ef01c0",
+          "targetActivityId": "9083eae6-c07b-4d32-ac83-17e295e1ba94",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "426ea1a2-8169-4c41-b1f1-3cf196ef01c0",
+          "targetActivityId": "859f6d67-b521-4fee-85ac-47b73fbd649a",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "9083eae6-c07b-4d32-ac83-17e295e1ba94",
+          "targetActivityId": "39fea485-b68f-4497-b29d-5f6b0566d005",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "9083eae6-c07b-4d32-ac83-17e295e1ba94",
+          "targetActivityId": "5b007100-f0c9-4c38-ade3-c951868aeee7",
+          "outcome": "False"
+        }
+      ]
+    }
+  ]
+}

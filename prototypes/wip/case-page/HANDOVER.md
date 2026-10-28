@@ -182,25 +182,38 @@ was run.
   20 rows; returns `ID`, `Full Name`, `Member Type` and `Member Category`,
   which `cases.add-party` reads (28 October 2026). More options is the full
   popup, "a comprehensive search function for the entire db".
-- **Case workplace (C42, owner, 22 October 2026):** the member card's Work
-  label menu (in the theme since 24 October 2026: `US-CASE-WORKPLACE`, guide
-  `#case-member`) needs:
-  - `/cases/quick-update/set-workplace` (`{CaseID, CaseNum, ContactID,
-    WorkplaceID}`, writing `i4u_UT_Cases.PrimaryContactWorkplaceID`; `0` saves
-    "not about a workplace"). No flow writes that column yet.
-  - The jobs IQA. The theme reads `$/_i4u_/Client/Cases/Layouts v2/API -
-    Manage Case - Member Workplaces` (filter `CaseNum`; with
-    `WorkplaceStatus`, `WorkplaceStart` and `WorkplaceEnd` since option G,
-    25 October 2026: current and former jobs, and the card's count). It is
-    not in the export.
-  - `CaseWorkplaceID` and `CaseNum` on `Query Template - Manage Case - Primary
-    Party` (not there yet; no `WorkplaceCount`: neither card IQA joins the
-    jobs). The card's details IQA filters on `CaseNum` and joins the job on
-    `PrimaryContactWorkplaceID` only, so its Work-* columns are the case's job.
-  - `set-primary-party` should set the new primary's only job or clear it; it
-    does not touch the workplace yet. The Details tab does not reload after
-    Make primary party.
-  - The Create case popup's workplace field is the owner's.
+- **Case workplace (C42; owner, 22 and 28 October 2026):** the member
+  card's Work label menu (`US-CASE-WORKPLACE`, guide `#case-member`) now
+  reads the live jobs IQA, `$/_i4u_/Core/Cases/Layouts v2/API - Manage Case
+  - Primary Contacts Workplaces` (CaseNum required; Workplace Name,
+  Workplace Type, Member Job Status Active / Not Started / Finished, Job
+  Start Date, Job End Date), and saves through the owner's
+  `/cases/quick-update/set-primary-workplace` (`{CaseID, CaseNum,
+  ContactID, WorkplaceID}`), which writes `i4u_UT_Cases.PrimaryWorkplaceID`
+  (a varchar). Blank means not about a workplace: the create form sets the
+  primary contact's primary workplace, so a blank is a choice (an older case
+  never set reads the same until a job is picked). Not started jobs have
+  their own menu group and badge. Its corrected flow is
+  `flows/Cases-Quick-Update-Set-Primary-Workplace.flow.json`, to import over
+  it (same definition): the log read the primary contact as the old value,
+  its note said Set Primary Party, the response returned `{}`, and any
+  workplace was accepted; it now refuses one that is not the primary
+  contact's job. Still to do on the site:
+  - The jobs IQA must also return the workplace's ID (`Workplace ID`,
+    `WorkplaceID` or `ID`): the card leaves out a job without one.
+  - `PrimaryWorkplaceID` on `Query Template - Manage Case - Primary Party`,
+    and `data-us-workplace-id="{#query.PrimaryWorkplaceID}"` (with
+    `data-us-member-id="{#query.MemberId}"`) on its `us-case-member` div, as
+    the guide's Case member template has them.
+  - The card's details need a field group named Work for the control to
+    attach, and for its fields to follow a pick its details IQA must join
+    the case's job on `PrimaryWorkplaceID` (the live card reads Party
+    Details by `ID`, the member's own details). The jobs IQA has no Work-*
+    columns, so after a save the card reads its details again, the previous
+    job's fields dimmed until they arrive.
+  - `set-primary-party` should set the new primary's primary workplace or
+    clear it; it does not touch the workplace yet. The Details tab does not
+    reload after Make primary party.
 - **Record popups on the live timeline:** add `data-record-popup="true"` to
   the notes and meetings sources of the live `Query Template - Manage Case -
   Activity Feed` (done in this folder's templates, 28 October 2026).
@@ -241,8 +254,9 @@ was run.
 
 1. **Owner, to finish the live page:** import the corrected set-status flow
    and Add party's contact flow (both in `flows/`); the workplace save
-   (the flow, the jobs IQA path and the Primary Party columns); the record
-   popups on the live feed template.
+   (import its corrected flow, the jobs IQA's ID column and the Primary
+   Party template's `PrimaryWorkplaceID`); the record popups on the live
+   feed template.
 2. **List search and paging** (`prototypes/approved/list-search-and-paging/`).
    The quick insert must work with the new pager: today a paged list that
    grows past its page is refreshed in full instead.

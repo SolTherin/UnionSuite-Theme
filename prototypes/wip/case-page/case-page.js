@@ -68,17 +68,19 @@
   //   ?age=older                         opened in July, no member contact for 21 days
   //   ?lead=none                         no lead staff member
   //   ?case=closed                       closed, with a resolution
-  //   ?jobs=former | none | unset | single
-  //                                      Priya's three jobs (two current, one
-  //                                      former) with the case on the former
-  //                                      one, not about a workplace or none
-  //                                      chosen; or one job (default: the
-  //                                      night shift, a current job)
+  //   ?jobs=former | future | none | single
+  //                                      Priya's four jobs (two current, one
+  //                                      not started, one former) with the
+  //                                      case on the former or the not started
+  //                                      one, or not about a workplace; or one
+  //                                      job (default: the night shift, a
+  //                                      current job)
   // A toolbar press rebuilds the sample data and re-renders in place.
   let standing, size, larger, fresh, older, noLead, closed, jobs;
   // The primary party's iMIS ID; Make primary party changes it.
   let primaryId = '20544';
-  // The case's PrimaryContactWorkplaceID (C42): blank while none is chosen.
+  // The case's PrimaryWorkplaceID (C42): a job's workplace ID, or blank for
+  // not about a workplace (owner, 28 October 2026).
   let caseWorkplaceId = '';
   let member, banner, rows, memberDetails, activity, activityDetails, changes, changeFields, lists, detailsFor, caseJob, caseMemberDetails, leadStaff, setLeadStaff;
   // The activity feeds' base and details IQAs (Activity-Feed-IQA-Build.md).
@@ -131,36 +133,42 @@
     {ContactId: '20460', ContactName: 'Tom Becker', Position: 'Delegate', Group: 'Delegates', Email: 'tbecker@mailinator.com', Phone: '0433 555 911'}
   ];
   let addedClock = 0;
-  // Each member's jobs (C42), as the proposed API - Manage Case - Member
-  // Workplaces IQA returns them: the menu's name and line, whether the job
-  // is current or former and its dates (G, 25 October 2026), then the Work
-  // columns the member card shows for the case's job.
+  // Each member's jobs (C42): the workplace, its type, whether the job is
+  // current (Active), not started or finished, its dates, then the Work
+  // columns the member card's details IQA shows for the case's job. The
+  // jobs IQA (API - Manage Case - Primary Contacts Workplaces, owner,
+  // 28 October 2026) returns the first part only, under its own column
+  // names; see the /api/query answer below.
   const memberJobs = {
     '20544': [
-      {WorkplaceID: '4101', WorkplaceName: 'Dandenong DC – night shift', WorkplaceLine: 'Northside Distribution Pty Ltd · Storeperson Grade 2',
+      {WorkplaceID: '4101', WorkplaceName: 'Dandenong DC – night shift', WorkplaceType: 'Distribution centre', WorkplaceLine: 'Northside Distribution Pty Ltd · Storeperson Grade 2',
         WorkplaceStatus: 'Current', WorkplaceStart: '2020-03-02T00:00:00', WorkplaceEnd: '',
         'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Dandenong DC – night shift', 'Work-Classification': 'Storeperson Grade 2', 'Work-Delegate': 'Alex Keaton'},
-      {WorkplaceID: '4188', WorkplaceName: 'Frankston Hospital – catering', WorkplaceLine: 'Bayside Health · Food services assistant',
+      {WorkplaceID: '4188', WorkplaceName: 'Frankston Hospital – catering', WorkplaceType: 'Hospital', WorkplaceLine: 'Bayside Health · Food services assistant',
         WorkplaceStatus: 'Current', WorkplaceStart: '2023-08-14T00:00:00', WorkplaceEnd: '',
         'Work-Employer': 'Bayside Health', 'Work-Workplace': 'Frankston Hospital – catering', 'Work-Classification': 'Food services assistant', 'Work-Delegate': 'Tom Becker'},
+      // A job Priya has not started yet (owner, 28 October 2026).
+      {WorkplaceID: '4210', WorkplaceName: 'Clayton DC – day shift', WorkplaceType: 'Distribution centre', WorkplaceLine: 'Northside Distribution Pty Ltd · Team leader',
+        WorkplaceStatus: 'Not Started', WorkplaceStart: '2026-12-07T00:00:00', WorkplaceEnd: '',
+        'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Clayton DC – day shift', 'Work-Classification': 'Team leader', 'Work-Delegate': ''},
       // A workplace Priya has left: a case can be about it (G).
-      {WorkplaceID: '3907', WorkplaceName: 'Westgate Cold Storage – Laverton', WorkplaceLine: 'Westgate Logistics Pty Ltd · Storeperson Grade 1',
+      {WorkplaceID: '3907', WorkplaceName: 'Westgate Cold Storage – Laverton', WorkplaceType: 'Cold storage', WorkplaceLine: 'Westgate Logistics Pty Ltd · Storeperson Grade 1',
         WorkplaceStatus: 'Former', WorkplaceStart: '2016-03-07T00:00:00', WorkplaceEnd: '2019-01-25T00:00:00',
         'Work-Employer': 'Westgate Logistics Pty Ltd', 'Work-Workplace': 'Westgate Cold Storage – Laverton', 'Work-Classification': 'Storeperson Grade 1', 'Work-Delegate': 'Dana Whitfield'}
     ],
     '20903': [
-      {WorkplaceID: '4102', WorkplaceName: 'Dandenong DC – night shift', WorkplaceLine: 'Northside Distribution Pty Ltd · Storeperson Grade 1',
+      {WorkplaceID: '4102', WorkplaceName: 'Dandenong DC – night shift', WorkplaceType: 'Distribution centre', WorkplaceLine: 'Northside Distribution Pty Ltd · Storeperson Grade 1',
         WorkplaceStatus: 'Current', WorkplaceStart: '2026-09-03T00:00:00', WorkplaceEnd: '',
         'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Dandenong DC – night shift', 'Work-Classification': 'Storeperson Grade 1', 'Work-Delegate': 'Alex Keaton'}
     ],
     '20871': [
-      {WorkplaceID: '4103', WorkplaceName: 'Dandenong DC – day shift', WorkplaceLine: 'Northside Distribution Pty Ltd · Forklift driver',
+      {WorkplaceID: '4103', WorkplaceName: 'Dandenong DC – day shift', WorkplaceType: 'Distribution centre', WorkplaceLine: 'Northside Distribution Pty Ltd · Forklift driver',
         WorkplaceStatus: 'Current', WorkplaceStart: '2021-05-03T00:00:00', WorkplaceEnd: '',
         'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Dandenong DC – day shift', 'Work-Classification': 'Forklift driver', 'Work-Delegate': 'Alex Keaton'}
     ]
   };
   // The case details' Workbench, which the case's workplace decides.
-  const workbenches = {'3907': 'Logistics', '4101': 'Logistics', '4102': 'Logistics', '4103': 'Logistics', '4188': 'Health'};
+  const workbenches = {'3907': 'Logistics', '4101': 'Logistics', '4210': 'Logistics', '4102': 'Logistics', '4103': 'Logistics', '4188': 'Health'};
   const jobsOf = id => id === '20544' && jobs === 'single' ? memberJobs[id].slice(0, 1) : memberJobs[id] || [];
   // A member with one job needs no choice: the case takes it (the create
   // and set-primary-party endpoints' rule, C42).
@@ -177,11 +185,11 @@
     older = params.get('age') === 'older';
     noLead = params.get('lead') === 'none';
     closed = params.get('case') === 'closed';
-    jobs = ['former', 'none', 'unset', 'single'].includes(params.get('jobs')) ? params.get('jobs') : 'chosen';
-    // The case's PrimaryContactWorkplaceID: a job, 0 (not about a
-    // workplace) or blank (not chosen).
+    jobs = ['former', 'future', 'none', 'single'].includes(params.get('jobs')) ? params.get('jobs') : 'chosen';
+    // The case's PrimaryWorkplaceID: a job, or blank (not about a
+    // workplace).
     caseWorkplaceId = primaryId !== '20544' || jobs === 'single' ? onlyJob(primaryId)
-      : {chosen: '4101', former: '3907', none: '0', unset: ''}[jobs];
+      : {chosen: '4101', former: '3907', future: '4210', none: ''}[jobs];
   }
 
   // The member's standing as each IQA states it: the banner fact, the card's
@@ -243,7 +251,7 @@
         MemberId: primary.ContactId,
         MemberName: primary.ContactName,
         // C42: which job the case is about (the jobs IQA gives the count).
-        CaseWorkplaceID: caseWorkplaceId,
+        PrimaryWorkplaceID: caseWorkplaceId,
         MemberUrl: url(primary),
         MemberLine: line(primary),
         OtherParties: others.length
@@ -386,11 +394,11 @@
         'Organisation-ABN': '51 824 753 556', 'Organisation-Site': 'Dandenong DC, 14 Frankston Road, Dandenong VIC 3175', 'Organisation-Members on site': '42'}
     };
     detailsFor = id => id === '20544' ? memberDetails : otherDetails[id];
-    // The case's workplace (C42): the job PrimaryContactWorkplaceID names.
+    // The case's workplace (C42): the job PrimaryWorkplaceID names.
     caseJob = () => jobsOf(primary.ContactId).find(job => job.WorkplaceID === caseWorkplaceId) || null;
     // The member card's IQA is the case's (filter CaseNum, C42): the
     // primary party's details with the Work fields from the case's job,
-    // blank while a member with several jobs has none chosen.
+    // blank when the case is not about a workplace.
     caseMemberDetails = () => {
       const details = {...(detailsFor(primary.ContactId) || {})};
       const job = caseJob();
@@ -675,10 +683,16 @@
         const known = target.searchParams.get('CaseNum') === '214';
         return reply(items(known ? [caseMemberDetails()] : []), 200, 250);
       }
-      // The primary party's jobs (C42), current and former.
-      if (name.endsWith('/API - Manage Case - Member Workplaces')) {
+      // The primary party's jobs (C42), current, not started and finished,
+      // under the live IQA's column names (owner, 28 October 2026). No Work-*
+      // columns: the card reads its details again after a pick.
+      if (name.endsWith('/API - Manage Case - Primary Contacts Workplaces')) {
         const list = target.searchParams.get('CaseNum') === '214' ? jobsOf(rows.member[0].MemberId) : [];
-        return reply(items(list), 200, 250);
+        return reply(items(list.map(job => ({
+          'Workplace ID': job.WorkplaceID, 'Workplace Name': job.WorkplaceName, 'Workplace Type': job.WorkplaceType,
+          'Member Job Status': {Current: 'Active', 'Not Started': 'Not Started', Former: 'Finished'}[job.WorkplaceStatus],
+          'Job Start Date': job.WorkplaceStart, 'Job End Date': job.WorkplaceEnd
+        }))), 200, 250);
       }
       // A party's details (the guide's template).
       if (name.endsWith('/Query Template - Manage Case - Party Details')) {
@@ -866,11 +880,11 @@
         caseWorkplaceId = onlyJob(primaryId);
         build();
       }
-      // The case's workplace (C42): one of the primary party's jobs, or 0
-      // for not about a workplace.
-      if (target.pathname === '/cases/quick-update/set-workplace') {
+      // The case's workplace (C42): one of the primary party's jobs, or
+      // blank for not about a workplace, as the flow checks it.
+      if (target.pathname === '/cases/quick-update/set-primary-workplace') {
         const body = JSON.parse(init.body || '{}');
-        const known = body.WorkplaceID === '0' || jobsOf(primaryId).some(job => job.WorkplaceID === body.WorkplaceID);
+        const known = body.WorkplaceID === '' || jobsOf(primaryId).some(job => job.WorkplaceID === body.WorkplaceID);
         if (!known || body.ContactID !== primaryId) return reply({}, 400, 300);
         caseWorkplaceId = body.WorkplaceID;
         build();
@@ -941,7 +955,7 @@
   ];
   const standingOrder = ['unfinancial', 'financial', 'new', 'former'];
   const sizeOrder = ['larger', 'new', 'typical'];
-  const jobsOrder = ['chosen', 'former', 'none', 'unset', 'single'];
+  const jobsOrder = ['chosen', 'former', 'future', 'none', 'single'];
 
   function showVariants() {
     const params = new URL(location.href).searchParams;
@@ -959,7 +973,7 @@
     }
     const jobsButton = document.getElementById('cp-variant-jobs');
     if (jobsButton) {
-      jobsButton.textContent = {chosen: 'Jobs: current job', former: 'Jobs: former job', none: 'Jobs: no workplace', unset: 'Jobs: not chosen', single: 'Jobs: 1'}[jobs];
+      jobsButton.textContent = {chosen: 'Jobs: current job', former: 'Jobs: former job', future: 'Jobs: not started', none: 'Jobs: no workplace', single: 'Jobs: 1'}[jobs];
       jobsButton.setAttribute('aria-pressed', String(jobs !== 'chosen'));
     }
     const sizeButton = document.getElementById('cp-variant-size');

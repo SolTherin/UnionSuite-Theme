@@ -15,7 +15,7 @@ function documentHtml({read, css, themeJs}) {
     '#demo-status{margin:0 0 12px;font-size:13px;color:var(--text-muted)}' +
     '#member-demo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;align-items:start}' +
     '.demo-label{margin:0 0 6px;font-size:12px;font-weight:600;color:var(--text-muted)}</style><body>' +
-    '<p id="demo-status" role="status">Three cases for a member with two current jobs and a former one. Press Work, or Choose workplace, to change which job the case is about.</p>' +
+    '<p id="demo-status" role="status">Three cases for a member with two current jobs, one not started and a former one. Press Work to change which job the case is about.</p>' +
     '<div id="member-demo"></div>' +
     '<script>window.caseMemberTemplate=' + JSON.stringify(template).replace(/<\//g, '<\/') + ';<\/script>' +
     '<script>' + read('THeme/UnionSuite-Guides/usage/examples/Case-Member.js') + '<\/script>' +

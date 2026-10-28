@@ -7,42 +7,46 @@
 (function () {
   'use strict';
 
-  // Case - Primary Member: one row per card, the same member on three
-  // cases: one about a current job, one about a former job, one with none
-  // chosen yet.
+  // The case's primary party: one row per card, the same member on three
+  // cases: one about a current job, one about a former job, one not about a
+  // workplace (a blank PrimaryWorkplaceID).
   const member = {MemberId: '20544', MemberName: 'Priya Natarajan', MemberUrl: '#party-20544', MemberLine: 'Member 20544 · Full member', OtherParties: ''};
   const cards = [
-    {label: 'A current job', row: {...member, CaseNum: '214', CaseWorkplaceID: '4101', OtherParties: 'Also on this case: Josh Kemp.'}},
-    {label: 'A former job', row: {...member, CaseNum: '216', CaseWorkplaceID: '3907'}},
-    {label: 'None chosen yet', row: {...member, CaseNum: '215', CaseWorkplaceID: ''}}
+    {label: 'A current job', row: {...member, CaseNum: '214', PrimaryWorkplaceID: '4101', OtherParties: 'Also on this case: Josh Kemp.'}},
+    {label: 'A former job', row: {...member, CaseNum: '216', PrimaryWorkplaceID: '3907'}},
+    {label: 'Not about a workplace', row: {...member, CaseNum: '215', PrimaryWorkplaceID: ''}}
   ];
 
-  // API - Manage Case - Member Workplaces: the member's jobs, current and
-  // former, with their dates and the Work-* columns that fill the card on
-  // a pick.
+  // API - Manage Case - Primary Contacts Workplaces: the member's jobs,
+  // current, not started and finished, with their dates. These rows also
+  // carry the optional Work-* columns, which fill the card at once on a pick
+  // (without them, the card reads its details again after the save).
   const jobs = [
-    {WorkplaceID: '4101', WorkplaceName: 'Dandenong DC – night shift', WorkplaceLine: 'Northside Distribution Pty Ltd · Storeperson Grade 2',
-      WorkplaceStatus: 'Current', WorkplaceStart: '2020-03-02T00:00:00', WorkplaceEnd: '',
+    {'Workplace ID': '4101', 'Workplace Name': 'Dandenong DC – night shift', 'Workplace Type': 'Distribution centre',
+      'Member Job Status': 'Active', 'Job Start Date': '2020-03-02T00:00:00', 'Job End Date': '',
       'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Dandenong DC – night shift', 'Work-Classification': 'Storeperson Grade 2', 'Work-Delegate': 'Alex Keaton'},
-    {WorkplaceID: '4188', WorkplaceName: 'Frankston Hospital – catering', WorkplaceLine: 'Bayside Health · Food services assistant',
-      WorkplaceStatus: 'Current', WorkplaceStart: '2023-08-14T00:00:00', WorkplaceEnd: '',
+    {'Workplace ID': '4188', 'Workplace Name': 'Frankston Hospital – catering', 'Workplace Type': 'Hospital',
+      'Member Job Status': 'Active', 'Job Start Date': '2023-08-14T00:00:00', 'Job End Date': '',
       'Work-Employer': 'Bayside Health', 'Work-Workplace': 'Frankston Hospital – catering', 'Work-Classification': 'Food services assistant', 'Work-Delegate': 'Tom Becker'},
-    {WorkplaceID: '3907', WorkplaceName: 'Westgate Cold Storage – Laverton', WorkplaceLine: 'Westgate Logistics Pty Ltd · Storeperson Grade 1',
-      WorkplaceStatus: 'Former', WorkplaceStart: '2016-03-07T00:00:00', WorkplaceEnd: '2019-01-25T00:00:00',
+    {'Workplace ID': '4210', 'Workplace Name': 'Clayton DC – day shift', 'Workplace Type': 'Distribution centre',
+      'Member Job Status': 'Not Started', 'Job Start Date': '2026-12-07T00:00:00', 'Job End Date': '',
+      'Work-Employer': 'Northside Distribution Pty Ltd', 'Work-Workplace': 'Clayton DC – day shift', 'Work-Classification': 'Team leader', 'Work-Delegate': ''},
+    {'Workplace ID': '3907', 'Workplace Name': 'Westgate Cold Storage – Laverton', 'Workplace Type': 'Cold storage',
+      'Member Job Status': 'Finished', 'Job Start Date': '2016-03-07T00:00:00', 'Job End Date': '2019-01-25T00:00:00',
       'Work-Employer': 'Westgate Logistics Pty Ltd', 'Work-Workplace': 'Westgate Cold Storage – Laverton', 'Work-Classification': 'Storeperson Grade 1', 'Work-Delegate': 'Dana Whitfield'}
   ];
 
   // Case - Member Details, filtered on CaseNum: the case's job in the
-  // Work-* columns (joined on PrimaryContactWorkplaceID), blank while none
-  // is chosen.
+  // Work-* columns (joined on PrimaryWorkplaceID), blank when the case is
+  // not about a workplace.
   const details = {'Alert-Title': 'Unfinancial', 'Alert-Message': 'Paid to 30 Jun 2026. Check eligibility before providing assistance.', 'Alert-Tone': 'danger',
     'Contact-Mobile': '0412 555 019', 'Contact-Email': 'priya.n@example.com', 'Membership-Paid to': '2026-06-30T00:00:00', 'Membership-Joined': '2019-02-11T00:00:00'};
   const blankWork = {'Work-Employer': '', 'Work-Workplace': '', 'Work-Classification': '', 'Work-Delegate': ''};
   const workOf = id => {
-    const job = jobs.find(entry => entry.WorkplaceID === id);
+    const job = jobs.find(entry => entry['Workplace ID'] === id);
     return job ? Object.fromEntries(Object.entries(job).filter(([name]) => name.startsWith('Work-'))) : blankWork;
   };
-  const chosen = Object.fromEntries(cards.map(({row}) => [row.CaseNum, row.CaseWorkplaceID]));
+  const chosen = Object.fromEntries(cards.map(({row}) => [row.CaseNum, row.PrimaryWorkplaceID]));
   // Only the details read follows the case: the page's CaseNum, which the
   // jobs read and the save send, is blank in an example frame.
 
@@ -69,7 +73,7 @@
     const url = new URL(String(input?.url || input), 'https://guide.example/');
     if (!url.pathname.endsWith('/api/query')) return nativeFetch(input, init);
     const query = url.searchParams.get('QueryName') || '';
-    if (query.endsWith('/API - Manage Case - Member Workplaces')) return reply(jobs, 250);
+    if (query.endsWith('/API - Manage Case - Primary Contacts Workplaces')) return reply(jobs, 250);
     const caseNum = url.searchParams.get('CaseNum');
     return reply(caseNum in chosen ? [{...details, ...workOf(chosen[caseNum])}] : [], 250);
   };
