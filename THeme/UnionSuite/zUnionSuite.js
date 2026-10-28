@@ -1511,6 +1511,8 @@ SOFTWARE.
     return parsed;
   }
   function object(value, name) { if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(name + ' must be an object.'); }
+  // An icon: plus, pencil, trash (drawn) or one Tabler glyph class.
+  const ICON = /^(plus|pencil|trash|ti-[a-z0-9]+(?:-[a-z0-9]+)*)$/;
   function validate(key, value) {
     if (!/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/.test(key)) throw new TypeError('Use a namespaced action key.');
     object(value,'Definition'); window.UnionSuiteActionSafety.metadata(value,true);
@@ -1519,7 +1521,7 @@ SOFTWARE.
     object(p,'presentation'); object(a,'action'); object(context,'context');
     if (typeof p.label !== 'string' || !p.label.trim()) throw new TypeError('presentation.label is required.');
     if (p.useAuthoredLabel != null && typeof p.useAuthoredLabel !== 'boolean') throw new TypeError('presentation.useAuthoredLabel must be boolean.');
-    if (p.icon != null && !/^(plus|pencil|trash|ti-[a-z0-9]+(?:-[a-z0-9]+)*)$/.test(p.icon)) throw new TypeError('Use plus, pencil, trash or one Tabler glyph class.');
+    if (p.icon != null && !ICON.test(p.icon)) throw new TypeError('Use plus, pencil, trash or one Tabler glyph class.');
     for (const name of ['default','header','row','menu']) if (p[name] != null && !['button','icon','link','menu-item'].includes(p[name])) throw new TypeError('Invalid presentation mode: ' + name);
     if (p.tone != null && !['default','danger'].includes(p.tone)) throw new TypeError('presentation.tone must be default or danger.');
     if (p.order != null && !Number.isFinite(p.order)) throw new TypeError('presentation.order must be numeric.');
@@ -1700,7 +1702,12 @@ SOFTWARE.
     // menu presentation, would otherwise draw as an outline button there.
     const mode = p?.[state.placement] || (state.placement === 'menu' ? 'menu-item' : p?.default || 'button');
     const label = (p?.useAuthoredLabel && state.originalLabel) || p?.label || state.original['aria-label'] || state.original.title || state.originalLabel || 'Action';
-    const signature = JSON.stringify([label,p?.icon,mode,p?.tone]);
+    // An authored data-us-action-icon (an icon as presentation.icon takes)
+    // sets this control's icon in place of the definition's, so one
+    // placement can match its surroundings: a banner menu's section icons.
+    const authoredIcon = element.getAttribute('data-us-action-icon');
+    const icon = authoredIcon && ICON.test(authoredIcon) ? authoredIcon : p?.icon;
+    const signature = JSON.stringify([label,icon,mode,p?.tone]);
     window.UnionSuiteActionSafety.clear(element);
     if (signature !== state.paintSignature) {
       runtimeClasses.forEach(name => { if (!state.originalClasses.has(name)) element.classList.remove(name); });
@@ -1708,10 +1715,10 @@ SOFTWARE.
       if (state.placement === 'header') element.classList.add('us-panel-action');
       if (mode === 'menu-item') element.classList.add('us-actions__item');
       else if (mode === 'link') element.classList.add('us-panel-action--text');
-      else element.classList.add('TextButton',mode === 'icon' && p?.icon ? 'us-icon-button' : 'us-outline-button');
+      else element.classList.add('TextButton',mode === 'icon' && icon ? 'us-icon-button' : 'us-outline-button');
       if (p?.tone === 'danger') element.classList.add(mode === 'menu-item' ? 'us-actions__item--danger' : 'DangerButton');
-      const nodes = []; if (p?.icon) nodes.push(glyph(p.icon));
-      if (mode !== 'icon' || !p?.icon) { const text = document.createElement('span'); text.textContent = label; nodes.push(text); }
+      const nodes = []; if (icon) nodes.push(glyph(icon));
+      if (mode !== 'icon' || !icon) { const text = document.createElement('span'); text.textContent = label; nodes.push(text); }
       element.replaceChildren(...nodes); state.paintSignature = signature;
     }
     const conflict = state.status === 'conflict';
