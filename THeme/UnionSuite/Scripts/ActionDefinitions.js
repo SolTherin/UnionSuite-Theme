@@ -1293,10 +1293,30 @@
   // access, so the state check is an access check with denied: 'hide'.
   // Resolving and reopening change the status, the banner, the Overview
   // and which actions show, so the page reloads after either.
-  const CLOSED = /^(closed|resolved)$/i;
+  // Open or closed is the case Status value list's Closed Status (owner,
+  // 28 October 2026), read once for the page. Until it arrives, or if it
+  // cannot be read, the status's name decides ("Complete" is what Resolve
+  // case saves).
+  const CASE_STATUSES = '$/_i4u_/Core/Cases/Layouts v2/API - Value List - Case Status';
+  const CLOSED = /^(closed|resolved|complete|completed)$/i;
+  let caseStatuses = null;
+  const flag = value => /^(true|1|yes|y)$/i.test(String(value ?? '').trim());
+  const loadCaseStatuses = once(async () => {
+    caseStatuses = (await query(CASE_STATUSES, {limit: '100'}))
+      .map(row => ({code: String(column(row, 'Code') ?? '').trim(), label: String(column(row, 'Description') ?? '').trim(), closed: flag(column(row, 'Closed Status'))}))
+      .filter(status => status.code)
+      .map(status => ({...status, label: status.label || status.code}));
+    return caseStatuses;
+  });
+  // A status by its code or its description, whatever the case.
+  const statusEntry = value => {
+    const key = String(value ?? '').trim().toLowerCase();
+    return key ? caseStatuses?.find(status => status.code.toLowerCase() === key || status.label.toLowerCase() === key) : undefined;
+  };
   const caseStatus = () => document.querySelector('.us-banner__surface[data-us-record-status]')?.getAttribute('data-us-record-status') || '';
-  const whenOpen = {check: () => !CLOSED.test(caseStatus()) || 'This case is already closed.', denied: 'hide'};
-  const whenClosed = {check: () => CLOSED.test(caseStatus()) || 'This case is open.', denied: 'hide'};
+  const isClosed = () => statusEntry(caseStatus())?.closed ?? CLOSED.test(caseStatus());
+  const whenOpen = {check: () => !isClosed() || 'This case is already closed.', denied: 'hide'};
+  const whenClosed = {check: () => isClosed() || 'This case is open.', denied: 'hide'};
   const reloadPage = {when: 'close', run: () => location.reload()};
 
   // Outstanding tasks on the page (the Overview's Tasks list). A tab that
@@ -1342,31 +1362,71 @@
   // ── Quick status change (C23) ───────────────────────────────
   // The banner's status pill opens a menu of the open statuses (owner,
   // 9 October 2026: "click the status in the banner to quick update").
-  // Choosing one shows it at once (the pill's text, and the banner's tone
-  // and rail, which follow data-us-record-status), saves it, and puts the
-  // old status back if the save fails, when the action notice says so.
-  // Closing is not a status here: the menu's Resolve case records the
-  // resolution and closes (C16), and a closed case offers Edit resolution
-  // and Reopen case instead of the statuses. Proposed CloudToolz endpoint.
+  // They are the case Status value list's open rows, in its order (owner,
+  // 28 October 2026), each showing its Description and saving its Code, which
+  // the case stores; the pill shows the description too. The template's own
+  // items stay until the list arrives, and if it cannot be read. Choosing
+  // one shows it at once (the pill's text, and the banner's tone and rail,
+  // which follow data-us-record-status), saves it through
+  // /cases/quick-update/set-status, and puts the old status back if the save
+  // fails, when the action notice says so. Closing is not a status here: the
+  // menu's Resolve case records the resolution and closes (C16), and a
+  // closed case offers Edit resolution and Reopen case instead.
   const statusSurface = () => document.querySelector('.us-banner__surface[data-us-record-status]');
 
-  function showStatus(status) {
+  function showStatus(code) {
     const surface = statusSurface();
     if (!surface) return;
-    surface.setAttribute('data-us-record-status', status);
+    surface.setAttribute('data-us-record-status', code);
     const pill = surface.querySelector('.us-case-status > .us-actions__toggle');
-    if (pill) pill.textContent = status;
+    if (pill) pill.textContent = statusEntry(code)?.label || code;
     markCurrentStatus();
   }
 
-  // The current status is ticked in the menu.
+  // The current status is ticked in the menu, by code or description.
   function markCurrentStatus() {
-    const current = (statusSurface()?.getAttribute('data-us-record-status') || '').toLowerCase();
+    const stored = statusSurface()?.getAttribute('data-us-record-status') || '';
+    const current = (statusEntry(stored)?.code || stored).toLowerCase();
     document.querySelectorAll('.us-case-status [data-us-case-status]').forEach(item => {
-      const on = item.getAttribute('data-us-case-status').toLowerCase() === current;
+      const on = (statusEntry(item.getAttribute('data-us-case-status'))?.code || item.getAttribute('data-us-case-status')).toLowerCase() === current;
       if (on) item.setAttribute('aria-current', 'true');
       else item.removeAttribute('aria-current');
     });
+  }
+
+  // The value list's open statuses in place of the template's, once per
+  // menu, and the pill's description. Nothing changes without the list.
+  function fillStatusMenus() {
+    const open = caseStatuses?.filter(status => !status.closed) || [];
+    if (!open.length) return markCurrentStatus();
+    let added = false;
+    document.querySelectorAll('.us-case-status > .us-actions__list:not([data-us-case-statuses])').forEach(list => {
+      const authored = [...list.querySelectorAll('[data-us-case-status]')].map(item => item.closest('li') || item);
+      const items = open.map(status => {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'us-actions__item us-action-cases-set-status';
+        button.setAttribute('data-us-case-status', status.code);
+        button.textContent = status.label;
+        item.append(button);
+        return item;
+      });
+      const heading = list.querySelector('.us-actions__heading')?.closest('li');
+      if (authored.length) authored[0].before(...items);
+      else if (heading) heading.after(...items);
+      else list.prepend(...items);
+      authored.forEach(node => node.remove());
+      list.setAttribute('data-us-case-statuses', '');
+      added = true;
+    });
+    const surface = statusSurface();
+    const pill = surface?.querySelector('.us-case-status > .us-actions__toggle');
+    const entry = statusEntry(surface?.getAttribute('data-us-record-status'));
+    if (pill && entry) pill.textContent = entry.label;
+    markCurrentStatus();
+    // The new items are actions, and closed or open may have changed.
+    if (added || entry) window.UnionSuiteActions?.refresh();
   }
 
   define('cases.set-status', {
@@ -1375,27 +1435,29 @@
     action: {type: 'function', recordKey: ['caseId', 'status'], access: whenOpen,
       run: async ({context}) => {
         const previous = statusSurface()?.getAttribute('data-us-record-status') || '';
-        if (previous.toLowerCase() === context.status.toLowerCase()) return {unchanged: true};
-        showStatus(context.status);
+        const code = statusEntry(context.status)?.code || context.status;
+        if ((statusEntry(previous)?.code || previous).toLowerCase() === code.toLowerCase()) return {unchanged: true};
+        showStatus(code);
         try {
-          await post('/cases/set-status', {CaseID: context.caseId, Status: context.status});
+          await post('/cases/quick-update/set-status', {CaseID: context.caseId, CaseNum: context.caseNum, Status: code});
         } catch (error) {
           showStatus(previous);
           throw error;
         }
-        return {status: context.status};
+        return {status: code};
       },
       successMessage: 'Status updated.'}
   });
 
   // The banner arrives with the page, or later in the offline prototype.
   // This file loads on every page, so only a case page (CaseID in its
-  // address) watches for it. (globalThis: builds load this file without a
-  // page.)
+  // address) reads the statuses and watches for it. (globalThis: builds
+  // load this file without a page.)
   if (/[?&]CaseID=/i.test(globalThis.location?.search || '')) {
     markCurrentStatus();
+    loadCaseStatuses().then(fillStatusMenus, error => console.warn('[cases.set-status] The case statuses could not be read; the menu keeps its own.', error));
     new MutationObserver(records => {
-      if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 && (node.matches('.us-case-status, .us-banner__surface') || node.querySelector?.('.us-case-status'))))) markCurrentStatus();
+      if (records.some(record => [...record.addedNodes].some(node => node.nodeType === 1 && (node.matches('.us-case-status, .us-banner__surface') || node.querySelector?.('.us-case-status'))))) fillStatusMenus();
     }).observe(document.documentElement, {subtree: true, childList: true});
   }
 

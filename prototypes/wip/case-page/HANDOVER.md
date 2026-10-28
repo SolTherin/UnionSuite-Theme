@@ -156,8 +156,18 @@ was run.
 
 **Still open (owner):**
 
-- **`/cases/set-status`:** no flow yet. The banner's status menu
-  (`cases.set-status`) posts `{CaseID, Status}` to it.
+- **Status changes:** the owner built `/cases/quick-update/set-status`
+  (28 October 2026). Its corrected version is
+  `flows/Cases-Quick-Update-Set-Status.flow.json`, to import over it (same
+  definition): the copied Set Lead Staff log recorded a lead staff change
+  instead of the status, the response returned `{}`, and any status was
+  accepted, closed ones too. It now logs Status (old and new), returns
+  `{Status}`, and refuses a status that is not an open row of
+  `$/_i4u_/Core/Cases/Layouts v2/API - Value List - Case Status` (`Code`,
+  `Description`, `Closed Status`). The banner's menu is filled from that
+  list (its open statuses, Description shown, Code saved), and open or
+  closed follows Closed Status: before, a resolved case's `Complete` read
+  as open.
 - **Add party's quick add:** `/cases/quick-add/contact` is a stub on the
   site (the endpoint and an empty OK: no insert, no Ordinal). Its
   replacement is drafted in `flows/Cases-Quick-Add-Contact.flow.json`
@@ -229,8 +239,8 @@ was run.
 
 ## Next steps, in order
 
-1. **Owner, to finish the live page:** `/cases/set-status`; Add party's quick
-   add (the contact flow; its list IQA is built); the workplace save
+1. **Owner, to finish the live page:** import the corrected set-status flow
+   and Add party's contact flow (both in `flows/`); the workplace save
    (the flow, the jobs IQA path and the Primary Party columns); the record
    popups on the live feed template.
 2. **List search and paging** (`prototypes/approved/list-search-and-paging/`).

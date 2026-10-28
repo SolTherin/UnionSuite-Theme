@@ -110,7 +110,7 @@ module.exports = {
   'Banner-Case-Rows-Query-Template.html':{
     CaseID:required('Case reference in the ID chip, copied by its copy button, and the start of the browser tab title (data-us-page-title): C217 - Overview.', 'C217'),
     CaseTitle:required('Case title, the banner heading.', 'Bullying complaint – Northside Distribution night shift'),
-    Status:required('Status text, as the case Status value list holds it. Fills the status pill and data-us-record-status, which colours the pill and left rail: New, Open and In progress amber; Active, Approved and Completed green; Expired, Terminated and Overdue red; any other status neutral. Match the status menu items’ data-us-case-status values to these words.', 'Open'),
+    Status:required('The case’s status Code, as the case Status value list holds it (the column the case stores). Fills the status pill (until the theme shows the list’s Description) and data-us-record-status, which colours the pill and left rail: New, Open and In progress amber; Active, Approved and Completed green; Expired, Terminated and Overdue red; any other status neutral. The fallback menu items’ data-us-case-status values are Codes too.', 'Open'),
     MemberName:required('The primary party’s display name, under the title. It stays when the banner condenses.', 'Priya Natarajan'),
     MemberUrl:optional('The primary party’s contact profile. Blank leaves the name as plain text. Example path is illustrative.', '/Party.aspx?ID=20544'),
     MemberLine:optional('Muted text after the name, such as the member type and number. Blank hides it.', 'Member 20544'),

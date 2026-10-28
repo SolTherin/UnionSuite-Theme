@@ -96,6 +96,20 @@
     {ContactId: '21033', ContactName: 'Rina Patel', ContactType: 'Member', MemberType: 'Part-time member', MemberStatus: 'Financial', Number: 'Member 21033', Classification: 'Storeperson Grade 2', Plan: 'Part-time member', MemberStanding: '', MemberStandingTone: '', ContactEmail: 'rpatel@mailinator.com', ContactPhone: ''},
     {ContactId: '21108', ContactName: 'Tom Nguyen', ContactType: 'Member', MemberType: 'Full member', MemberStatus: 'Unfinancial', Number: 'Member 21108', Classification: 'Team leader', Plan: 'Full member', MemberStanding: 'Unfinancial', MemberStandingTone: 'danger', ContactEmail: '', ContactPhone: '0433 555 914'}
   ];
+  // The case Status value list (owner, 28 October 2026): Code is what the
+  // case stores, Description what shows, Closed Status whether the row
+  // closes the case. "Hold" shows as "On hold", so the menu's mapping
+  // shows; Complete is what Resolve case saves.
+  const caseStatuses = [
+    {Code: 'New', Description: 'New', 'Closed Status': 'false'},
+    {Code: 'Open', Description: 'Open', 'Closed Status': 'false'},
+    {Code: 'In progress', Description: 'In progress', 'Closed Status': 'false'},
+    {Code: 'Hold', Description: 'On hold', 'Closed Status': 'false'},
+    {Code: 'Complete', Description: 'Complete', 'Closed Status': 'true'},
+    {Code: 'Withdrawn', Description: 'Withdrawn', 'Closed Status': 'true'}
+  ];
+  // The open case's status, as the quick status change saves it.
+  let openStatus = 'Open';
   // The case staff member types value list: value is the code saved,
   // label what shows.
   const staffTypes = [
@@ -212,7 +226,7 @@
     banner = {
       CaseID: 'C217',
       CaseTitle: 'Bullying complaint – Northside Distribution night shift',
-      Status: closed ? 'Closed' : 'Open',
+      Status: closed ? 'Complete' : openStatus,
       // The primary party, in the top row (owner, 8 October 2026: one
       // of the most important things on the page).
       MemberName: primary.ContactName,
@@ -654,6 +668,8 @@
       }
       // The add staff composer's Role list (case staff member types).
       if (name.endsWith('/Get Case Staff Member Types')) return reply(items(staffTypes), 200, 200);
+      // The banner's status menu (C23).
+      if (name.endsWith('/API - Value List - Case Status')) return reply(items(caseStatuses), 200, 200);
       // The member card's IQA (the case's primary party, C42).
       if (name.endsWith('/Case - Member Details')) {
         const known = target.searchParams.get('CaseNum') === '214';
@@ -828,6 +844,15 @@
         return reply({Ordinal: ordinal}, 200, 500);
       }
       if (target.pathname === '/cases/quick-update/set-lead-staff') setLeadStaff(JSON.parse(init.body || '{}').StaffOrdinal);
+      // The quick status change (C23): a known open status, as the flow
+      // checks it; a closed one is Resolve case's.
+      if (target.pathname === '/cases/quick-update/set-status') {
+        const code = JSON.parse(init.body || '{}').Status;
+        const status = caseStatuses.find(row => row.Code === code);
+        if (!status || status['Closed Status'] === 'true') return reply('Choose an open status.', 400, 400);
+        openStatus = code;
+        return reply({Status: code}, 200, 700);
+      }
       if (target.pathname === '/cases/reopen') {
         const next = new URL(location.href);
         next.searchParams.delete('case');
