@@ -70,6 +70,7 @@ in the standalone script.
     Code or Ordinal) the objects share; existing matches are flagged.
   - Relations as a **join tree** from the first object, with each join type
     and delete beside it; separate groups and suspicious joins are flagged.
+    An object joined to two others on one path gets a line from each.
     **List** in the Relations heading restores the standard view.
   - **Branchify**: limits results to entities the signed-in user can access by
     adding `i4u_UT_EntityAccess` and the filter Contact Key = `"@LoggedInUser"`,

@@ -2447,28 +2447,51 @@ function createRelationshipWorkspace() {
   // Trees walked outward from the first source, then from the first source of
   // each group it does not reach, in source order. Each node's joins are taken
   // in source order too, not the order iMIS added them, so the tree reads like
-  // the Sources table. Each node keeps the relationship that reached it; one
-  // between two sources already placed is an "also joined" note on whichever
-  // was placed later.
+  // the Sources table. Each node keeps the relationship that reached it.
+  // A source joined to two sources on one path is a merge: it moves under the
+  // deeper one, and the join from the source it was first reached from (an
+  // ancestor of its new parent) becomes its merge, drawn as a second line into
+  // it. Only joins merge, never Exists or Not Exist filters. Any other
+  // relationship between two sources already placed is an "also joined" note
+  // on whichever was placed later.
   function joinForest(count, edges) {
     const placed = new Map(), trees = [];
     for (let start = 0; start < count; start++) {
       if (placed.has(start)) continue;
-      const root = { index: start, edge: null, parent: null, children: [], also: [], order: placed.size };
+      const root = { index: start, edge: null, parent: null, children: [], also: [], merge: null, order: placed.size };
       placed.set(start, root); trees.push(root);
       for (const queue = [root]; queue.length;) {
         const node = queue.shift();
         edges.map(edge => ({ edge, other: edge.left === node.index ? edge.right : edge.right === node.index ? edge.left : -1 }))
           .filter(item => item.other >= 0).sort((a, b) => a.other - b.other).forEach(({ edge, other }) => {
             if (placed.has(other)) return;
-            const child = { index: other, edge, parent: node, children: [], also: [], order: placed.size };
+            const child = { index: other, edge, parent: node, children: [], also: [], merge: null, order: placed.size };
             placed.set(other, child); node.children.push(child); queue.push(child);
           });
       }
     }
-    edges.forEach(edge => {
+    const isJoin = edge => !/Exist\|/.test(edge.type);
+    const above = (upper, node) => { for (let step = node.parent; step; step = step.parent) if (step === upper) return true; return false; };
+    const extra = edge => {
       const a = placed.get(edge.left), b = placed.get(edge.right);
-      if (!a || !b || a.edge === edge || b.edge === edge) return;
+      return a && b && a.edge !== edge && b.edge !== edge && a.merge?.edge !== edge && b.merge?.edge !== edge ? [a, b] : null;
+    };
+    edges.forEach(edge => {
+      const ends = extra(edge);
+      if (!ends || !isJoin(edge)) return;
+      // The end that moves is the one whose parent is above the other end
+      // (and that the other end is not beneath); the later placed if both are.
+      const [node, host] = [[ends[0], ends[1]], [ends[1], ends[0]]].sort(([a], [b]) => b.order - a.order)
+        .find(([node, host]) => !node.merge && node.edge && isJoin(node.edge) && above(node.parent, host) && !above(node, host)) || [];
+      if (!node) return;
+      node.merge = { edge: node.edge, other: node.parent.index };
+      node.parent.children.splice(node.parent.children.indexOf(node), 1);
+      node.edge = edge; node.parent = host;
+      host.children.push(node); host.children.sort((a, b) => a.index - b.index);
+    });
+    edges.forEach(edge => {
+      const [a, b] = extra(edge) || [];
+      if (!a) return;
       const [earlier, later] = a.order < b.order ? [a, b] : [b, a];
       later.also.push({ edge, other: earlier.index });
     });
@@ -3064,12 +3087,12 @@ function createRelationshipWorkspace() {
         listen(button, 'click', () => joinFrom(sourceRows[index].slot));
         return button;
       }
-      const lineBySource = new Map();
+      const lineBySource = new Map(), wrapBySource = new Map(), merges = [];
       function branch(node, groupRoot) {
         const source = sourceRows[node.index];
         const wrap = el('div', null, node.edge ? 'iqa-join-branch' + kindOf(node.edge) : 'iqa-join-root');
         const line = el('div', null, 'iqa-join-node');
-        lineBySource.set(node.index, line);
+        lineBySource.set(node.index, line); wrapBySource.set(node.index, wrap);
         // A filter adds no columns, so its name is muted; Not Exist also gets ⊘.
         const filterName = !node.edge ? '' : /^NotExist\|/.test(node.edge.type) ? ' is-excluded' : /^Exist\|/.test(node.edge.type) ? ' is-filtered' : '';
         line.append(el('span', source.alias, 'iqa-join-name' + filterName));
@@ -3091,6 +3114,19 @@ function createRelationshipWorkspace() {
         if (requiresOptionalParent(node)) {
           addWarning(wrap, line, 'Equals under a left join: ' + sourceRows[groupRoot.index].alias + ' rows with no '
             + sourceRows[node.parent.index].alias + ' are dropped.');
+        }
+        // A merge's own row, under the line it joins into; drawMerges draws
+        // its line from the source above.
+        if (node.merge) {
+          const { edge, other } = node.merge, fields = fieldsOf(edge, other);
+          const row = el('div', null, 'iqa-join-note iqa-join-merge'), slots = relationControls(edge.id, kindOf(edge), edge);
+          row.append('Also joined to ' + sourceRows[other].alias);
+          if (fields) row.append(el('span', fields, 'iqa-join-fields'));
+          if (edge.name) row.append(predefinedTag(edge));
+          row.append(slots.typeSlot, slots.removeSlot);
+          wrap.appendChild(row);
+          merges.push({ node, row });
+          if (checkEdge(edge)) addWarning(wrap, row, checkText(edge, other));
         }
         node.also.forEach(also => {
           const note = el('div', null, 'iqa-join-note'), fields = fieldsOf(also.edge, node.index);
@@ -3140,6 +3176,46 @@ function createRelationshipWorkspace() {
       const head = el('div', null, 'iqa-join-tree-head');
       head.append(summary, ...(legend.children.length ? [legend] : []));
       treePanel.append(head, ...trees);
+      // A merge's line can't be a border: it leaves the merge's source, runs
+      // down past other branches and comes up into a deeper one. It is drawn
+      // over the tree, measured from the branches: down the source's line from
+      // the elbow of its branch on the way here (that branch's own border
+      // already draws it unless it is the last), right under the merge row,
+      // then up into the elbow of this source's line, where a dot marks the
+      // join. Redrawn whenever the tree changes size.
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const overlay = document.createElementNS(SVG_NS, 'svg');
+      overlay.setAttribute('class', 'iqa-join-merges'); overlay.setAttribute('aria-hidden', 'true');
+      function drawMerges() {
+        overlay.replaceChildren();
+        if (!merges.length || treePanel.hidden || treePanel.classList.contains('is-list') || !treePanel.offsetWidth) return;
+        const panelBox = treePanel.getBoundingClientRect();
+        const x0 = panelBox.left + treePanel.clientLeft, y0 = panelBox.top + treePanel.clientTop;
+        // Elbows sit 15px down a branch; its line runs through the middle of its 1.5px border.
+        const ELBOW = 15.25, LINE = 0.75, INSET = 8;
+        merges.forEach(({ node, row }) => {
+          let step = node;
+          while (step.parent && step.parent.index !== node.merge.other) step = step.parent;
+          const first = wrapBySource.get(step.index).getBoundingClientRect(), own = wrapBySource.get(node.index).getBoundingClientRect();
+          const rowBox = row.getBoundingClientRect();
+          const spine = first.left - x0 + LINE, rowY = rowBox.top - y0 + rowBox.height / 2;
+          const joinX = own.left - x0 + INSET, joinY = own.top - y0 + ELBOW;
+          const down = wrapBySource.get(step.index).nextElementSibling ? 'M' + spine + ' ' + rowY : 'M' + spine + ' ' + (first.top - y0 + ELBOW) + 'V' + rowY;
+          const path = document.createElementNS(SVG_NS, 'path');
+          path.setAttribute('d', down + 'H' + joinX + 'V' + joinY);
+          const dot = document.createElementNS(SVG_NS, 'circle');
+          dot.setAttribute('cx', joinX); dot.setAttribute('cy', joinY); dot.setAttribute('r', 3);
+          [path, dot].forEach(shape => shape.setAttribute('class', kindOf(node.merge.edge).trim()));
+          overlay.append(path, dot);
+        });
+      }
+      if (merges.length) {
+        treePanel.appendChild(overlay);
+        if (typeof ResizeObserver !== 'undefined') {
+          const resized = new ResizeObserver(drawMerges); resized.observe(treePanel);
+          undo.push(() => resized.disconnect());
+        }
+      }
       const apart = forest.slice(1).reduce(function count(total, node) { return node.children.reduce(count, total + 1); }, 0);
       summary.append(sourceRows.length + ' business objects · ' + (apart ? apart + ' not joined to ' + rootAlias : 'all joined'));
       if (warnings) {
@@ -3246,6 +3322,7 @@ function createRelationshipWorkspace() {
         table.classList.toggle('iqa-relations-tree', tree);
         treePanel.hidden = !tree && Boolean(host);
         viewButtons.forEach(button => button.setAttribute('aria-pressed', String((button.dataset.view === 'tree') === tree)));
+        drawMerges();
       }
       let view = 'tree';
       try { if (localStorage.getItem(VIEW_KEY) === 'list') view = 'list'; } catch (_) {}
@@ -3352,6 +3429,11 @@ function createRelationshipWorkspace() {
     .iqa-join-name.is-excluded{color:var(--text-muted,#545962)}
     .iqa-join-name.is-excluded::before{content:"\\2298";margin-right:4px;color:var(--danger,#d03528)}
     .iqa-join-note{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;padding:0 0 4px;font-size:12px;color:var(--text-muted,#545962)}
+    .iqa-join-merge{padding:2px 0 6px}
+    .iqa-join-merges{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+    .iqa-join-merges path{fill:none;stroke:var(--border-strong,#94a3b8);stroke-width:1.5}
+    .iqa-join-merges path.is-optional{stroke-dasharray:4 3}
+    .iqa-join-merges circle{fill:var(--border-strong,#94a3b8)}
     .iqa-join-warning{position:relative;padding:1px 0 4px 24px;font-size:12px;line-height:1.5;color:var(--text-strong,#1c2024)}
     .iqa-join-warning::before{content:"!";position:absolute;left:2px;top:2px;display:flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--warning,#b45309);color:#fff;font-size:11px;font-weight:700}
     .iqa-join-detached{margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--warning-bg,#fdf3e1)}
