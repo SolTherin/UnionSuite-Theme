@@ -6,7 +6,7 @@ changing things are in [AGENTS.md](AGENTS.md); read it before editing theme
 CSS, iPart markup, Query Templates or the guide.** Keep this index current when
 a folder is added, moved or retired.
 
-Repo: `SolTherin/UnionSuite-Theme` on GitHub, branch `main` (commit straight to
+Repo: `Union-Innovation-Hub/UnionSuite-Theme` on GitHub, branch `main` (commit straight to
 `main`; no feature branches). The working copy is in OneDrive; see
 [Working in this checkout](#working-in-this-checkout).
 
