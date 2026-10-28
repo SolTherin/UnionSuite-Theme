@@ -11,7 +11,7 @@ Load `zUnionSuite.js`, required business helpers, `Scripts/ActionDefinitions.js`
 | `member.email` | `us-action-member-email` | Existing `EmailMemberPopupFn()`; selected-member ID required |
 | `member.sms` | `us-action-member-sms` | Existing `SMSMemberPopupFn()`; selected-member ID required |
 | `member.add-note` | `us-action-member-add-note` | Existing `AddNotePopupFn()`; selected-member ID required |
-| `member.create-case` | `us-action-member-create-case` | Existing `CreateCasePopupFn()`; selected-member ID required |
+| `member.create-case` | `us-action-member-create-case` | "Create case": navigates to `/_i4u_/Core/Cases/Create-Case-Staff.aspx?ID=` with the selected member's ID, in the same window. No `CreateCasePopupFn()` dependency. Used on the contact page's Cases report. |
 | `member.create-quick-case` | `us-action-member-create-quick-case` | Existing `CreateQuickCasePopupFn()`; selected-member ID required |
 | `member.resolve-duplicate` | `us-action-member-resolve-duplicate` | Existing `ResolveDuplicatePopupFn()`; selected-member ID required |
 | `member.assign-workbench` | `us-action-member-assign-workbench` | Existing `AssignWorkbenchToStaffFn()`; selected-member ID required |

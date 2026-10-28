@@ -2849,6 +2849,16 @@ SOFTWARE.
 
 /* US-PANEL-FILL:END */
 
+/* An iPart with nothing to show (the case page's Resolution on an open
+   case) still renders an empty .ContentItemContainer. Its native 0.9em
+   bottom margin collapses through the empty box and through the zone, so
+   the whole column starts 14px below its neighbours (owner, 27 October
+   2026). The page editor keeps the container, so the iPart can still be
+   edited. */
+body:not(.EasyEdit) .WebPartZone > .ContentItemContainer:empty {
+  display: none;
+}
+
 /* US-HOME-WELCOME:START — authored Content HTML, independent of the iPart shell. */
 
 /* iPart CSS class: iMIS creates this owner immediately around the panel.
@@ -7185,6 +7195,152 @@ select[id*="_AddressEdit_"]:not([multiple]):not(:where(.us-report-no-styling, .u
 /* US-PANEL-EDITOR:END */
 
 /* US-NATIVE-FORMS:END */
+
+/* US-BEYOND-FORMS:START — BeyondForms, CloudToolz's form builder. Each form
+   renders [data-beyondformid] > .rendered-form > .form-group > .form-control
+   with CloudToolz's own Bootstrap sheet (.rendered-form
+   .formbuilder-embedded-bootstrap .form-control). Its fields take the native
+   field look from US-NATIVE-FORMS: these selectors outrank that sheet
+   without raising the native rules (owner, 27 October 2026). The input
+   exclusions sit in :where(), so the field rules stay at 0,3,1: above
+   CloudToolz's 0,3,0, and below the date and textarea rules that follow.
+   The browser's date picker and Select2's dropdown are left as they are. */
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/20px var(--font-ui);
+  box-shadow: none;
+}
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+):hover:not(:disabled):not([readonly]):not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--brand-600);
+}
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+):focus:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+):disabled:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--neutral-300);
+  color: var(--text-strong);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+)[readonly]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  background: var(--neutral-200);
+  color: var(--text-strong);
+}
+
+[data-beyondformid] .rendered-form .form-group > :is(
+  input:where(:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=hidden], [type=image])),
+  select,
+  textarea
+)[aria-invalid=true]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--danger);
+}
+
+/* Room for the native date icon, which 99-Orion.css pins to the right. */
+[data-beyondformid] .rendered-form .form-group > input[type=date]:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  position: relative;
+  padding-right: 44px;
+}
+
+[data-beyondformid] .rendered-form .form-group > textarea:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  height: auto;
+  min-height: 100px;
+  padding: 7px 10px;
+  resize: vertical;
+}
+
+/* Field labels take the us-form label (US-FORM-FIELDS), without the vendor
+   sheet's 7px hanging offset. Checkbox and radio option labels sit deeper
+   and keep their own look. */
+[data-beyondformid] .rendered-form .form-group > label:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  display: block;
+  margin: 0 0 5px;
+  padding: 0;
+  font: 600 12px/1.5 var(--font-ui);
+  color: var(--text-muted);
+}
+
+[data-beyondformid] .rendered-form .form-group > label .formbuilder-required:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  margin-left: 2px;
+  color: var(--danger);
+}
+
+/* A list CloudToolz enhances with Select2 hides the select and draws its
+   own box. The box takes the field look; Select2 keeps its dropdown, tags
+   and search. */
+[data-beyondformid] .form-group > .select2-container--default .select2-selection:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  box-sizing: border-box;
+  min-height: 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-base);
+  font: 13px/20px var(--font-ui);
+}
+
+[data-beyondformid] .form-group > .select2-container--default:not(.select2-container--disabled) .select2-selection:hover:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  border-color: var(--brand-600);
+}
+
+[data-beyondformid] .form-group > .select2-container--default:is(.select2-container--focus, .select2-container--open) .select2-selection:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--field-focus-colour);
+  box-shadow: var(--field-focus-glow);
+}
+
+[data-beyondformid] .form-group > .select2-container--default .select2-selection--single .select2-selection__rendered:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 0 34px 0 10px;
+  color: var(--text-base);
+  line-height: 34px;
+}
+
+[data-beyondformid] .form-group > .select2-container--default .select2-selection--single .select2-selection__arrow:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  top: 0;
+  right: 6px;
+  height: 34px;
+}
+
+[data-beyondformid] .form-group > .select2-container--default .select2-selection--multiple:not(:where(.us-report-no-styling, .us-report-no-styling *)) {
+  padding: 3px 6px;
+}
+
+/* US-BEYOND-FORMS:END */
 
 /* US-NATIVE-VALIDATION:START — native visibility remains authoritative. */
 .PanelFieldValue .ValidationError:not(:where(.us-report-no-styling, .us-report-no-styling *)) {

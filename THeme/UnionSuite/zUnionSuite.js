@@ -372,15 +372,24 @@ SOFTWARE.
     const container = root.closest('.ContentItemContainer');
     return [root, ...root.querySelectorAll(gridSelector)].filter(node => node.matches(gridSelector) && node.closest('.ContentItemContainer') === container);
   }
+  // A Query Template Display with no results has no QueryTemplateSet: iMIS
+  // puts its No results HTML straight into the panel body, beside the
+  // pager script that still names the set (owner, 27 October 2026: a quick
+  // add on the case page's empty Meetings neither confirmed nor refreshed).
+  // Its parts then have set null, and body is where its rows will go.
+  const pagerScript = script => !script.src && /\.simplePaginate\s*\(/.test(script.textContent);
+  const anchorOf = parts => parts.set || parts.body;
   function templateParts(container) {
     if (!container?.matches('.ContentItemContainer')) throw new Error('Query Template refresh requires its ContentItemContainer.');
     const sets = [...container.querySelectorAll('.QueryTemplateSet')].filter(set => set.closest('.ContentItemContainer') === container);
-    if (sets.length !== 1) throw new Error('Expected one Query Template Display in the refresh target.');
-    const set = sets[0], panel = set.closest('.panel');
+    const bodies = sets.length ? [] : [...container.querySelectorAll('.panel > .panel-body-container > .panel-body')]
+      .filter(body => body.closest('.ContentItemContainer') === container && [...body.children].some(child => child.matches('script') && pagerScript(child)));
+    if (sets.length !== 1 && bodies.length !== 1) throw new Error('Expected one Query Template Display in the refresh target.');
+    const set = sets[0] || null, body = set ? set.parentElement : bodies[0], panel = body.closest('.panel');
     const owner = panel && panel.closest('.ContentItemContainer') === container ? panel.parentElement : container;
     if (owner !== container && owner.parentElement !== container) throw new Error('Unsupported Query Template wrapper structure.');
     if (owner.querySelector('.ContentItemContainer')) throw new Error('Nested iParts require their own refresh target.');
-    return {container, owner, set};
+    return {container, owner, set, body};
   }
   function capture(trigger, owner) {
     const container = (owner || trigger)?.closest('.ContentItemContainer');
@@ -480,8 +489,8 @@ SOFTWARE.
   // Read only the known native pagination settings. Do not replay arbitrary
   // fetched scripts, reload libraries, or raise a page-wide ASP.NET load event.
   function pagination(parts) {
-    const scripts = [...parts.owner.querySelectorAll('script')].filter(script => !script.src && /\.simplePaginate\s*\(/.test(script.textContent));
-    if (!scripts.length) return null;
+    const scripts = [...parts.owner.querySelectorAll('script')].filter(pagerScript);
+    if (!scripts.length || !parts.set) return null;
     if (scripts.length !== 1) throw new Error('Ambiguous Query Template pagination initialiser.');
     const source = scripts[0].textContent;
     function variable(name) {
@@ -600,7 +609,7 @@ SOFTWARE.
     if (!Number.isFinite(timeout) || timeout <= 0) throw new TypeError('timeout must be a positive number.');
     if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
     const live = templateParts(current(ref));
-    const row = typeof options.row === 'string' ? rowOf(live.set, options.row) : null;
+    const row = typeof options.row === 'string' && live.set ? rowOf(live.set, options.row) : null;
     if (!row) return reloadTemplate(ref, {...options, row: null}, requestedPage);
     const url = freshUrl(options);
     const request = deadline(timeout, signal);
@@ -609,8 +618,9 @@ SOFTWARE.
       const fresh = await freshTemplate(url, live.container.id, request.signal);
       if (request.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
       if (location.href !== requestedPage || !row.isConnected) throw new Error('The Query Template changed while its refresh was pending.');
-      const replacement = rowOf(fresh.set, options.row);
+      const replacement = fresh.set ? rowOf(fresh.set, options.row) : null;
       if (replacement) row.replaceWith(document.importNode(replacement, true));
+      else if (!fresh.set) showNoResults(live, fresh);
       else row.remove();
       refreshTemplateTheme();
       live.container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container:live.container, row:options.row}}));
@@ -631,7 +641,7 @@ SOFTWARE.
     if (!live.container.id || uniqueId(live.container.id) !== live.container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
     const url = freshUrl(options);
     const request = deadline(timeout, signal);
-    const {container, owner, set} = live;
+    const {container, owner} = live;
     const focus = focusIdentity(owner), busy = container.getAttribute('aria-busy');
     const position = container.style.getPropertyValue('position'), priority = container.style.getPropertyPriority('position');
     const inertNodes = [];
@@ -658,7 +668,7 @@ SOFTWARE.
       const fresh = await freshTemplate(url, container.id, request.signal), settings = pagination(fresh);
       if ((owner === container) !== (fresh.owner === fresh.container)) throw new Error('The Query Template wrapper changed; reload the page.');
       if (request.signal.aborted) throw new Error('Query Template refresh was cancelled or timed out.');
-      if (location.href !== requestedPage || current(ref) !== container || !owner.isConnected || !set.isConnected || templateParts(container).set !== set) {
+      if (location.href !== requestedPage || current(ref) !== container || !owner.isConnected || !anchorOf(live).isConnected || anchorOf(templateParts(container)) !== anchorOf(live)) {
         throw new Error('The Query Template changed while its refresh was pending.');
       }
       // Keep the immediate panel owner: search/disclosure state is keyed to it.
@@ -705,6 +715,25 @@ SOFTWARE.
   // matched by data-us-holding-id against the row's ordinal, the rest in
   // order. A paged list that grows past its page is refreshed in full.
   const rowsOf = set => [...set.children].filter(child => child.matches('section'));
+  // What iMIS rendered in a list's panel body, without a composer the theme
+  // opened there (US-INLINE-COMPOSER), which stays put and stays open.
+  const rendered = body => [...body.childNodes].filter(node => !(node.nodeType === 1 && node.matches('.us-composer')));
+  // A list with no results gains its first rows: the page's panel body
+  // takes the place of the No results content, its result set empty, with
+  // the holding rows moved in. The rows then arrive as in any other list.
+  function adoptResults(live, fresh, holding) {
+    rendered(live.body).filter(node => !holding.includes(node)).forEach(node => node.remove());
+    live.body.append(...[...fresh.body.childNodes].filter(node => !(node.nodeType === 1 && node.matches('script')))
+      .map(node => document.importNode(node, node !== fresh.set)));
+    const set = templateParts(live.container).set;
+    set.append(...holding);
+    return set;
+  }
+  // A list whose last row has gone shows the page's No results content.
+  function showNoResults(live, fresh) {
+    rendered(live.body).forEach(node => node.remove());
+    live.body.append(...[...fresh.body.childNodes].map(node => document.importNode(node, true)));
+  }
   function rowKey(row) {
     const marked = row.querySelector('[data-us-task-ordinal], [data-us-contact-ordinal], [data-ordinal]');
     return marked?.getAttribute('data-us-task-ordinal') || marked?.getAttribute('data-us-contact-ordinal') ||
@@ -756,8 +785,9 @@ SOFTWARE.
     if (location.href !== requestedPage) throw new Error('The page changed before Query Template refresh.');
     const live = templateParts(current(ref));
     if (!live.container.id || uniqueId(live.container.id) !== live.container) throw new Error('Query Template refresh requires a unique, stable iPart ID.');
-    const {container, set} = live;
-    const holding = (Array.isArray(options.holding) ? options.holding : []).filter(row => row.parentElement === set);
+    const {container} = live;
+    let {set} = live;
+    const holding = (Array.isArray(options.holding) ? options.holding : []).filter(row => row.parentElement === anchorOf(live));
     const url = freshUrl(options);
     const request = deadline(timeout, signal);
     let fresh;
@@ -773,9 +803,17 @@ SOFTWARE.
     } finally {
       request.done();
     }
-    if (location.href !== requestedPage || current(ref) !== container || !set.isConnected || templateParts(container).set !== set) {
+    if (location.href !== requestedPage || current(ref) !== container || !anchorOf(live).isConnected || anchorOf(templateParts(container)) !== anchorOf(live)) {
       throw new Error('The Query Template changed while its refresh was pending.');
     }
+    if (!fresh.set) {
+      const removed = set ? rowsOf(set).length : 0;
+      showNoResults(live, fresh);
+      refreshTemplateTheme();
+      container.dispatchEvent(new CustomEvent('us:query-template-refreshed', {bubbles:true, detail:{container, inserted:0}}));
+      return {status:'inserted', controlId:container.id, inserted:0, removed};
+    }
+    if (!set) set = adoptResults(live, fresh, holding);
     const incoming = rowsOf(fresh.set);
     const settings = pagination(fresh);
     if (settings && incoming.length > settings.elementsPerPage) {
@@ -1979,6 +2017,9 @@ SOFTWARE.
                                  anyway"; changing anything withdraws it
        submit(values, context)   resolves once saved, with the new record's
                                  {Ordinal} (or {Ordinals}); throws on failure
+       eachFile                  a files main field: submit once per file,
+                                 Save counting them ("Uploading 2 of 3…");
+                                 files that fail stay chosen to try again
        saved(values) or text     announced after a save
        failed                    shown when the save fails
      }
@@ -2289,7 +2330,7 @@ SOFTWARE.
     const button = composer.querySelector('.us-composer__save');
     if (button.getAttribute('aria-busy') === 'true') return;
     message.textContent = '';
-    const values = valuesOf(composer);
+    let values = valuesOf(composer);
     const problem = problemIn(composer, values);
     if (problem) {
       message.textContent = problem.message;
@@ -2308,21 +2349,31 @@ SOFTWARE.
     withdraw(composer);
     busy(button, true);
     let result;
-    try {
-      result = await config.submit(values, contexts.get(composer));
-    } catch (error) {
-      busy(button, false);
-      message.textContent = config.failed || 'This could not be saved. Try again.';
-      console.warn('[US-INLINE-COMPOSER]', error?.message);
-      return;
+    let left = [];
+    if (config.eachFile) {
+      ({result, values, left} = await saveEachFile(composer, values));
+      if (!result) return;
+    } else {
+      try {
+        result = await config.submit(values, contexts.get(composer));
+      } catch (error) {
+        busy(button, false);
+        message.textContent = config.failed || 'This could not be saved. Try again.';
+        console.warn('[US-INLINE-COMPOSER]', error?.message);
+        return;
+      }
     }
-    announce(typeof config.saved === 'function' ? config.saved(values) : config.saved);
+    if (left.length) announce(message.textContent);
+    else announce(typeof config.saved === 'function' ? config.saved(values) : config.saved);
     // Saved: the holding rows open in the list as the composer clears (or
     // folds away), so something always shows the entry is on its way.
     const container = sectionOf(composer)?.parentElement;
     const holds = hold(container, spec, holdTitles(composer, values), idsOf(result), values);
     busy(button, false);
-    if (config.keepOpen) {
+    if (left.length) {
+      // Some files did not upload: they stay chosen, with the message, for
+      // another try; the ones that did go on into the lists.
+    } else if (config.keepOpen) {
       clear(composer);
       focusMain(composer, true);
     } else {
@@ -2336,11 +2387,67 @@ SOFTWARE.
   // ── The new entry ───────────────────────────────────────────────
   const setOf = container => container?.querySelector(':scope > div > .panel > .panel-body-container > .panel-body > .QueryTemplateSet');
   const rowsOf = set => [...(set?.children || [])].filter(child => child.matches('section'));
-  const queryTemplateOf = container => container?.id && !container.querySelector('.us-activity-feed') ? setOf(container) : null;
+  // A list with no results has no set: iMIS renders its No results HTML in
+  // the panel body, beside the pager script (US-ACTION-REFRESH). The holding
+  // rows then wait in the body, and the refresh brings the first rows in.
+  const emptyListOf = container => {
+    const body = container?.querySelector(':scope > div > .panel > .panel-body-container > .panel-body');
+    return body && !body.querySelector('.QueryTemplateSet, [data-gridid]') &&
+      [...body.children].some(child => child.matches('script') && /\.simplePaginate\s*\(/.test(child.textContent)) ? body : null;
+  };
+  const queryTemplateOf = container => container?.id && !container.querySelector('.us-activity-feed') ? setOf(container) || emptyListOf(container) : null;
   // A feed's newest cards (US-ACTIVITY-FEED): the first month's list, where
   // a record just added lands.
   const feedOf = container => container?.querySelector('.us-activity-feed');
   const feedListOf = container => feedOf(container)?.querySelector('.us-records__items');
+
+  // A files composer with eachFile saves one file at a time, so a long
+  // upload shows how far it has got (owner, 26 October 2026): Save reads
+  // "Uploading 2 of 3…". The files that fail stay chosen for another try;
+  // the saved values (the files that uploaded) and their record IDs come
+  // back for the holding rows, or no result when none uploaded.
+  async function saveEachFile(composer, values) {
+    const config = specFor(composer).composer;
+    const name = config.main.name;
+    const files = values[name];
+    const button = composer.querySelector('.us-composer__save');
+    const message = composer.querySelector('.us-composer__message');
+    const done = [], failed = [], ids = [];
+    for (const [index, file] of files.entries()) {
+      if (files.length > 1) relabel(button, 'Uploading ' + (index + 1) + ' of ' + files.length + '…');
+      try {
+        const answer = await config.submit({...values, [name]: [file]}, contexts.get(composer));
+        done.push(file);
+        ids.push(idsOf(answer)[0] || '');
+      } catch (error) {
+        failed.push(file);
+        console.warn('[US-INLINE-COMPOSER]', file.name, error?.message);
+      }
+    }
+    relabel(button, config.save);
+    if (!done.length) {
+      busy(button, false);
+      message.textContent = config.failed || 'This could not be saved. Try again.';
+      return {};
+    }
+    if (failed.length) {
+      // What is chosen now, less what uploaded: a file removed while the
+      // others uploaded stays removed.
+      const input = fieldNamed(composer, name);
+      setFiles(input, [...input.files].filter(file => !done.includes(file)));
+      message.textContent = done.length + ' of ' + files.length + ' uploaded. ' +
+        (failed.length === 1 ? failed[0].name + ' did not upload.' : failed.length + ' files did not upload.') +
+        ' Press ' + config.save + ' to try again.';
+    }
+    return {result: {Ordinals: ids}, values: {...values, [name]: done}, left: failed};
+  }
+
+  // Save's text, keeping its spinner.
+  function relabel(button, text) {
+    const spinner = button.querySelector('.us-button-spinner');
+    button.textContent = text;
+    if (spinner) button.prepend(spinner);
+  }
 
   // The save's answer: the new record's ID (Ordinal), or several (Ordinals).
   function idsOf(result) {
@@ -2387,6 +2494,11 @@ SOFTWARE.
     if (feedList) {
       // A feed is newest first: the card waits at the top.
       feedList.prepend(...holds);
+    } else if (!set.matches('.QueryTemplateSet')) {
+      // A list with no results: its No results content gives way to the
+      // first entry, below the composer if it stays open.
+      [...set.children].filter(child => !child.matches('script, .us-composer, .us-composer-holding')).forEach(child => child.remove());
+      set.append(...holds);
     } else {
       // An empty list's No results content gives way to the first entry.
       if (!rowsOf(set).length) set.replaceChildren();
@@ -20247,10 +20359,14 @@ SOFTWARE.
     // The theme's button spinner while the save is in flight (owner,
     // 5 October 2026); cleared on either outcome.
     const busy = window.UnionSuiteBusy?.show(saveButton);
+    // The page's record, for its change history: a case's CaseID or an
+    // agreement's AgreementID, as their flows log them.
+    const params = new URLSearchParams(location.search);
     try {
       await window.UnionSuiteAgreements.cloudToolz('/ca/update-attachment', {
         method: 'POST',
         body: JSON.stringify({
+          RecordID: params.get('CaseID') || params.get('AgreementID') || '',
           FileOrdinal: row.dataset.ordinal,
           FileName: name,
           NewTagOrdinals: tagOrdinals.join(','),

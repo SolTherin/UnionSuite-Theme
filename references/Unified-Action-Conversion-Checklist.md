@@ -23,7 +23,7 @@ All new classes below are implemented by Scripts/ActionDefinitions.js. This work
 | data-us-action=member.email | us-action-member-email | member.email; EmailMemberPopupFn |
 | member.sms | us-action-member-sms | member.sms; SMSMemberPopupFn |
 | member.add-note | us-action-member-add-note | member.add-note; AddNotePopupFn |
-| member.create-case | us-action-member-create-case | member.create-case; CreateCasePopupFn |
+| member.create-case | us-action-member-create-case | member.create-case; native navigate to Create-Case-Staff.aspx |
 | member.create-quick-case | us-action-member-create-quick-case | member.create-quick-case; CreateQuickCasePopupFn |
 | member.resolve-duplicate | us-action-member-resolve-duplicate | member.resolve-duplicate; ResolveDuplicatePopupFn |
 | member.assign-workbench | us-action-member-assign-workbench | member.assign-workbench; AssignWorkbenchToStaffFn |

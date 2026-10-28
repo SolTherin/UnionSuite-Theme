@@ -56,13 +56,12 @@
     if (env.origin.report || env.origin.ambiguous) return env.refresh.originReport();
     return env.refresh.iqa(selector,{scope:'page',match:'one'});
   }
-  // These seven integrations retain their existing site-owned implementations.
+  // These six integrations retain their existing site-owned implementations.
   // Their popup/save/refresh behaviour remains in those helpers until ported.
   const legacy = [
     ['member.email','Email member','ti-mail','EmailMemberPopupFn'],
     ['member.sms','SMS member','ti-message','SMSMemberPopupFn'],
     ['member.add-note','Add note','plus','AddNotePopupFn'],
-    ['member.create-case','Create case','plus','CreateCasePopupFn'],
     ['member.create-quick-case','Quick case','plus','CreateQuickCasePopupFn'],
     ['member.resolve-duplicate','Resolve duplicate','ti-users','ResolveDuplicatePopupFn'],
     ['member.assign-workbench','Assign workbench','ti-user-plus','AssignWorkbenchToStaffFn']
@@ -72,6 +71,20 @@
     context:{partyId:party},
     action:{type:'function',requires:[helper],recordKey:['partyId'],run:() => window[helper]()}
   }));
+  // The staff Create Case page for the selected member, in the same window,
+  // as the retired CreateCasePopupFn did. The contact page's Cases report
+  // carries it in its heading (owner, 27 October 2026).
+  define('member.create-case',{
+    presentation:{label:'Create case',icon:'plus',default:'button',menu:'menu-item'},
+    context:{partyId:{...party,validate:recordId}},
+    action:{type:'navigate',
+      href:({context}) => {
+        const url = new URL('/_i4u_/Core/Cases/Create-Case-Staff.aspx',location.origin);
+        url.searchParams.set('ID',context.partyId);
+        return url.href;
+      }
+    }
+  });
   define('member.add-job',{
     presentation:{label:'Add job',icon:'plus',default:'button',menu:'menu-item'},
     context:{partyId:{...party,validate:recordId}},
@@ -998,13 +1011,19 @@
       .filter(tag => tag.value && tag.label);
   });
 
+  // More options is the Zidebar Add Note form's attachment type (owner, 26
+  // October 2026): ID the case's member, from the member card
+  // (Case-Member-Query-Template.html), ModuleID the case.
   composer('cases.add-attachment', {
     label: 'Upload', icon: 'ti-upload',
-    form: {label: 'Upload attachment', href: ({context}) => page('/Cases_AddAttachment', {CaseID: context.caseId}), title: 'Add attachment', maxWidth: 960},
+    form: {label: 'Upload attachment', href: ({context}) => page('/_i4u_/Core/Zidebar/Add-Note-New.aspx', {
+      Type: 'attachmentonly', ID: document.querySelector('[data-us-case-member]')?.getAttribute('data-us-member-id') || '',
+      Module: 'case', ModuleID: context.caseId
+    }), title: 'Add attachment', maxWidth: 960},
     lists: () => ['us-action-cases-add-attachment'],
     arrive: 'top',
     composer: {
-      kind: 'attachment', label: 'New attachment', save: 'Upload',
+      kind: 'attachment', label: 'New attachment', save: 'Upload', eachFile: true,
       main: {type: 'files', name: 'Files', label: 'Files', required: 'Choose a file first.'},
       fields: [{type: 'multiselect', name: 'Tags', label: 'Tags', placeholder: 'Add tags…', options: attachmentTags,
         empty: term => term ? 'No tags match “' + term + '”.' : 'No more tags.'}],
