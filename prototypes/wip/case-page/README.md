@@ -1,7 +1,10 @@
 # Case page (Manage Case)
 
-Status: WIP, started 8 October 2026. Not yet approved. Adding in place
-(US-INLINE-COMPOSER, C40) is approved and awaits promotion into the theme.
+Status: WIP, started 8 October 2026. Not yet approved as a whole. Adding in
+place (US-INLINE-COMPOSER, C40) is approved and in the shared theme, with
+most of the page since. The live page is on the dev tenant
+(`@/_i4u_/Core/Cases/Layouts-v2/Manage Case`); what it still needs is in
+HANDOVER.md (status updated 28 October 2026).
 **New session? Start with [HANDOVER.md](HANDOVER.md).** List search and paging
 is specified in `prototypes/approved/list-search-and-paging/`.
 
@@ -192,12 +195,17 @@ Known IQAs, from the live tenant's IQA list:
 2. **Member standing rules.** Which iMIS fields mark unfinancial
    (paid-through date?), no longer a member (status?) and joined (join date).
    If a member matches two (new and unfinancial), the most serious shows.
-3. **Proposed endpoints and pages.** `/cases/quick-update/set-primary-party` (C42: it also sets the case's workplace to the new primary's only job, or clears it),
-   `/cases/quick-update/set-workplace` (C42: `{CaseID, CaseNum, ContactID, WorkplaceID}`, writes `PrimaryContactWorkplaceID`; `0` is "not about a workplace", so no real WorkplaceID may be 0),
-   `/cases/quick-update/set-lead-staff`, `/cases/set-status`, `/cases/quick-add/note`, `/cases/quick-add/task`, `/cases/quick-add/meeting`, `/cases/quick-add/attachment`, `/cases/quick-add/staff`, `/cases/quick-add/contact` (the composers' quick-add paths, named by the owner, 20 October 2026), `/cases/attachment-access` and `/cases/reopen` (CloudToolz), the Resolve
-   case form (`/Cases_ResolveCase`), and the parties send page and its
-   recipients IQA are not built. Can an employer be
-   the primary party? The prototype says no.
+3. **Endpoints and pages still to build** (owner's exports, 28 October
+   2026; the built ones are listed in HANDOVER.md → Live build).
+   `/cases/set-status`; `/cases/quick-add/contact` (a stub today) and its
+   theme pointed at its built list IQA; `/cases/quick-update/set-workplace` (C42:
+   `{CaseID, CaseNum, ContactID, WorkplaceID}`, writes
+   `PrimaryContactWorkplaceID`; `0` is "not about a workplace", so no real
+   WorkplaceID may be 0), and `set-primary-party` setting the new primary's
+   only job or clearing it (C42); `/cases/attachment-access` and
+   `/cases/reopen` (CloudToolz). `/cases/resolve-case` exists but has not
+   run; the Resolve case form (`/Cases_ResolveCase`) is to confirm. Can an
+   employer be the primary party? The prototype says no.
 4. **Member card fields.** The suggested details (mobile, email, paid to,
    joined, employer, workplace, classification, delegate) are a starting
    point; the IQA's columns decide them.

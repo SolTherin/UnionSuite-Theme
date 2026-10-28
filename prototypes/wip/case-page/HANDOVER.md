@@ -1,4 +1,4 @@
-# Case page: handover (12 October 2026)
+# Case page: handover (12 October 2026; status updated 28 October 2026)
 
 Start here, then read `README.md` (candidates C1–C41, files, data sources, open
 decisions). This file keeps what the README does not: the decisions and their
@@ -21,6 +21,16 @@ way.
   popup contract; test `usage/tests/test-inline-composer.cjs`). The case
   specs are in `Scripts/ActionDefinitions.js` (the Case page actions block,
   20 October 2026; they were `case-actions.candidate.js`).
+- **Since then, also in the theme:** the case actions
+  (`Scripts/ActionDefinitions.js`), parties (US-CASE-PARTIES), the member
+  card and its workplace choice (US-CASE-MEMBER, US-CASE-WORKPLACE), the
+  activity timeline, the change history and its Details views, the case
+  email composer, the access check on page load, Create case opening its
+  staff page, quick adds into empty lists and one-at-a-time uploads.
+- **The live page** is on the dev tenant at
+  `@/_i4u_/Core/Cases/Layouts-v2/Manage Case`, with its five tabs. What its
+  flows and IQAs already do, and what they still need, is under
+  [Live build](#live-build-from-the-owners-exports-28-october-2026).
 - **Approved, not built:** `prototypes/approved/list-search-and-paging/`, the
   theme's own paging and search-everything for lists, with the found record
   kept in view in context. Read it before touching list search or paging.
@@ -100,59 +110,111 @@ The owner's brief, in order (all 10 October 2026):
   db". People already on the case show but cannot be picked
   (`data-us-contact-id` in the section).
 
-## Live requirements (not built)
+## Live build (from the owner's exports, 28 October 2026)
 
-- **CloudToolz add endpoints** must return the new record's `{Ordinal}` (or
-  `{Ordinals}` for several files): `/cases/quick-add/note`,
-  `/cases/quick-add/task`, `/cases/quick-add/meeting`,
-  `/cases/quick-add/attachment` (files as Base64 in JSON, with TagOrdinals and
-  TagNames from the Tags multiselect, read from `POST /zidebar/sharepoint/tagsprefill`,
-  whose answer is to confirm; the CloudToolz
-  helper only sends JSON), `/cases/quick-add/staff` and
-  `/cases/quick-add/contact` (the add party composer), named by the owner,
-  20 October 2026.
-- **Add staff lists** (owner, 21 October 2026): the people from CloudToolz
-  `GET /cases/quick-add/StaffList?CaseNum=` (`[{StaffID, StaffName}]`, from when Add staff is pressed,
-  read once per page and searched in the page), the Role from
-  `$/_i4u_/Core/Cases/Value Lists/Case - Form Data/Get Case Staff Member Types`
-  (value column saved, label column shown).
-- **Case workplace (C42, owner, 22 October 2026):** the member card's
-  Work label menu (in the theme since 24 October 2026: `US-CASE-WORKPLACE`,
-  guide `#case-member`) needs CloudToolz
-  `/cases/quick-update/set-workplace` (`{CaseID, CaseNum, ContactID,
-  WorkplaceID}`, writing `i4u_UT_Cases.PrimaryContactWorkplaceID`), the jobs
-  IQA `API - Manage Case - Member Workplaces` (filter `CaseNum`; with
-  `WorkplaceStatus`, `WorkplaceStart` and `WorkplaceEnd` since option G,
-  25 October 2026, current and former jobs, and the card's count), and
-  `CaseWorkplaceID` and `CaseNum` on Case - Primary Member (no
-  `WorkplaceCount`: neither card IQA joins the jobs). The card's details IQA
-  filters on `CaseNum` and joins the job on `PrimaryContactWorkplaceID`
-  only, so its Work-* columns are the case's job. `0` saves "not about a
-  workplace". `set-primary-party` should set the new
-  primary's only job or clear it; the Details tab does not reload after
-  Make primary party yet. The Create case popup's workplace field is the
-  owner's.
-- **Proposed IQA:**
-  `$/_i4u_/Core/Cases/API - Workplace Members` (CaseNum and Search in;
-  ContactId, ContactName, Number, Classification out; primary party left out).
-- **Popup pages:** the `Cases_*` full forms are placeholders to confirm.
-- **Parties and staff IQAs** (owner building them, 13 October 2026): the
-  primary party and lead staff are stored on the case
-  (`[vBoi4u_UT_Cases].[PrimaryContactID]`, `[LeadStaffID]`), so each list's
+Checked against three exports from the dev tenant: the Flowz Cases folder (47
+flows), the `$/_i4u_/Core/Cases/Layouts v2` IQA folder (27 IQAs) and the
+`@/_i4u_/Core/Cases/Layouts-v2` pages. Read from the exports only; nothing
+was run.
+
+**Built:**
+
+- **Quick adds** (`/cases/quick-add/note`, `task`, `meeting`, `staff`): each
+  checks the case and the user's entity, writes iMIS and CloudToolz, logs the
+  change and returns `{"Ordinal": n}`. Their bodies match the specs in
+  `Scripts/ActionDefinitions.js` (staff's `Role` is saved as `StaffType`).
+- **Attachments** (`/cases/quick-add/attachment`): stages each file in Redis
+  and runs the Fileupload and tagging flow, adding tag 3 as the drag and drop
+  flow does. It returns `{Status: 'S', Files: n}`, not Ordinals, so the
+  holding rows are matched in order. `flows/` holds an export of it and of
+  `CA-Update-Attachment`.
+- **Staff list** (`GET /cases/quick-add/StaffList?CaseNum=`): `API - Case
+  Staff List`, with the role from `UnionTemplate.Configuration` (Cases,
+  CaseStaff) for the user's entity.
+- **Make primary party and Make lead staff**
+  (`/cases/quick-update/set-primary-party`, `set-lead-staff`): write the
+  case's `PrimaryContactID` and `StaffLeadID` and return the row's Ordinal.
+  The CloudToolz side writes `PrimaryContctID`, the spelling the case flows
+  use throughout.
+- **Case access:** `/cases/case-access`, `API - Access Check - Case Staff`,
+  `API - User Roles` and the `No-Access` page.
+- **Change history:** `Query Template - Manage Case - Changelog` (`ChangeRank`,
+  `ChangeKey`, Event, Summary, ChangeDay, ChangeTime), its details IQA
+  `API - Manage Case - Changelog Details` (in Layouts v2, not the
+  `$/_i4u_/Core/Logging/API - Change Fields` first proposed) and the History
+  Query Menu, on the Activity tab (`us-case-changes`,
+  `us-activity-detail-history`).
+- **Activity IQAs:** Notes returns `RecordUrl`, Meetings `RecordURL` (the feed
+  reads field names in any case).
+- **Lists:** Parties, Primary Party and Case Staff filter on `@url:CaseNum`;
+  Case Tasks is on the shared task columns and the compact row.
+- **Email:** `API - Case Email Logs`, `API - Communication Recipient List -
+  Parties`, and the `Send-Email-Parties` and `Send-SMS-Parties` popups.
+- **Pages:** `Manage Case` (Banner Top, with the status menu) and the tabs
+  1.Overview, 2.Details (its IQAs are in `$/_i4u_/Client/Cases -
+  UnionSuite/Layouts/`), 3.Activity, 4.Parties and Attachments.
+
+**Still open (owner):**
+
+- **`/cases/set-status`:** no flow yet. The banner's status menu
+  (`cases.set-status`) posts `{CaseID, Status}` to it.
+- **Add party's quick add:** `/cases/quick-add/contact` is a stub (the
+  endpoint and an empty OK: no insert, no Ordinal). Its quick list is built
+  (owner, 28 October 2026): `$/_i4u_/Core/Cases/Layouts v2/API - Manage
+  Case - Contact List - Primary Workplace`, the active members currently
+  working at the case's workplace (`i4u_UT_Cases.PrimaryWorkplaceID`).
+  Required `CaseNum`, optional `Search` (the taskbar quick search's string:
+  name, email and phone joined); at most 20 rows; returns `ID`, `Full Name`,
+  `Member Type` and `Member Category`. The theme still reads the proposed
+  `$/_i4u_/Core/Cases/API - Workplace Members` (ContactId, ContactName,
+  Number, Classification). More options is the full popup, "a comprehensive
+  search function for the entire db".
+- **Case workplace (C42, owner, 22 October 2026):** the member card's Work
+  label menu (in the theme since 24 October 2026: `US-CASE-WORKPLACE`, guide
+  `#case-member`) needs:
+  - `/cases/quick-update/set-workplace` (`{CaseID, CaseNum, ContactID,
+    WorkplaceID}`, writing `i4u_UT_Cases.PrimaryContactWorkplaceID`; `0` saves
+    "not about a workplace"). No flow writes that column yet.
+  - The jobs IQA. The theme reads `$/_i4u_/Client/Cases/Layouts v2/API -
+    Manage Case - Member Workplaces` (filter `CaseNum`; with
+    `WorkplaceStatus`, `WorkplaceStart` and `WorkplaceEnd` since option G,
+    25 October 2026: current and former jobs, and the card's count). It is
+    not in the export.
+  - `CaseWorkplaceID` and `CaseNum` on `Query Template - Manage Case - Primary
+    Party` (not there yet; no `WorkplaceCount`: neither card IQA joins the
+    jobs). The card's details IQA filters on `CaseNum` and joins the job on
+    `PrimaryContactWorkplaceID` only, so its Work-* columns are the case's job.
+  - `set-primary-party` should set the new primary's only job or clear it; it
+    does not touch the workplace yet. The Details tab does not reload after
+    Make primary party.
+  - The Create case popup's workplace field is the owner's.
+- **Record popups on the live timeline:** add `data-record-popup="true"` to
+  the notes and meetings sources of the live `Query Template - Manage Case -
+  Activity Feed` (done in this folder's templates, 28 October 2026).
+- **Case contacts' `ContactType` is "Please Enter"** (TODO.md, Cases): its
+  source is not visible in the export.
+- **Popup pages:** the `Cases_*` full forms, `Cases_EditMeeting` among them,
+  are placeholders to confirm.
+- **`Cases: Prefill Cases`** (`/cases/preload-edit`) is at v100, unpublished,
+  last run 27 October: check the edit prefill runs the intended version.
+
+**How the parties and staff data fit:**
+
+- The primary party and lead staff are stored on the case
+  (`[vBoi4u_UT_Cases].[PrimaryContactID]`, `[StaffLeadID]`), so each list's
   `ContactIsLead` is a custom SQL expression returning `'true'`/`'false'`.
   An IQA cannot sort on it, so both lists carry `us-contacts-lead-first`
-  (US-LEAD-FIRST, in the theme) and sort on real columns. Party details are
-  a second IQA (live: `$/_i4u_/Core/Cases/Layouts v2/Query Template - Manage
-  Case - Party Details`, filter `ID`) through US-FIELD-GROUPS, and now load
-  only when a party is first shown. Open: the set-primary / set-lead
-  endpoints should send `ContactID` / `StaffID` to write the case's columns.
-- **Parties are in the theme** (14 October 2026): US-CASE-PARTIES (CSS and
-  JS), US-CASE-MEMBER (CSS), the `us-case-parties` preset, and the guide's
+  (US-LEAD-FIRST, in the theme) and sort on real columns.
+- Party details are a second IQA (`$/_i4u_/Core/Cases/Layouts v2/Query
+  Template - Manage Case - Party Details`, filter `ID`) through
+  US-FIELD-GROUPS, loaded only when a party is first shown.
+- Parties are in the theme (14 October 2026): US-CASE-PARTIES (CSS and JS),
+  US-CASE-MEMBER (CSS), the `us-case-parties` preset, and the guide's
   `#case-parties` with the template. The prototype reads that template from
-  the guide. Its actions are in `Scripts/ActionDefinitions.js`. Found on the
-  live page (owner's paste): `ContactType` returned iMIS's "Please Enter",
-  `ContactRole` was blank, the details IQA returned no row for `ID`, and
-  the editor merged the meta spans (the template now classes them).
+  the guide. Found on the live page then (owner's paste): `ContactType`
+  returned iMIS's "Please Enter", `ContactRole` was blank, the details IQA
+  returned no row for `ID`, and the editor merged the meta spans (the
+  template now classes them).
 - **iMIS query behaviour learned:** `GET /api/query` returns columns by
   alias/column name (`FULL_NAME`, not "Full Name"); an IQA can serve both the
   page (filtered `@url:AgreementNum`, hidden) and a one-row API call (an
@@ -164,18 +226,22 @@ The owner's brief, in order (all 10 October 2026):
 
 ## Next steps, in order
 
-1. **List search and paging** (`prototypes/approved/list-search-and-paging/`).
+1. **Owner, to finish the live page:** `/cases/set-status`; Add party's quick
+   add (the contact flow; its list IQA is built); the workplace save
+   (the flow, the jobs IQA path and the Primary Party columns); the record
+   popups on the live feed template.
+2. **List search and paging** (`prototypes/approved/list-search-and-paging/`).
    The quick insert must work with the new pager: today a paged list that
    grows past its page is refreshed in full instead.
-2. **BeyondFormz fill:** needs a real BeyondFormz form's markup (field
+3. **BeyondFormz fill:** needs a real BeyondFormz form's markup (field
    names, when it has drawn, whether its upload takes files from a script) to
    write each spec's `form.fill`; the guide's checklist covers setting one up.
-3. **Live checks** once uploaded: a composer save on the dev tenant, that the
-   theme loads inside iMIS popups (the draft hand-off needs it), and a
-   BeyondFormz close value.
-4. Smaller, open: the holding row's text starts slightly left of task titles
+4. **Live checks** on the dev tenant: a quick add of each kind now their
+   endpoints exist, that the theme loads inside iMIS popups (the draft
+   hand-off needs it), and a BeyondFormz close value.
+5. Smaller, open: the holding row's text starts slightly left of task titles
    (cosmetic; it does not know each list's columns).
-5. Carried over: agreement banner match; agreement Members and Organisations
+6. Carried over: agreement banner match; agreement Members and Organisations
    report columns.
 
 ## Traps found this session
@@ -205,34 +271,11 @@ The owner's brief, in order (all 10 October 2026):
 - **A guide example frame's `location.origin` reads `"null"`** (srcdoc),
   so a page read there must use `url: 'about:blank'` (also `null`) and a
   stubbed fetch, as the refresh and composer examples do.
-- **`String.replace` with theme code as the replacement** turns the ` `data-us-task-completed` comes
-  from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
-  completed filter and counts are the theme's (US-QUERY-SEARCH).
-
-## Owner preferences seen this session
-
-- UX first; smooth, honest feedback; no flashes or double animations.
-- Asks to talk plans through before code ("talk me through the plan for this
-  before writing anything"); give options with a clear recommendation, then
-  build when told.
-- Prefers the simple version when the complex one is mostly mechanism.
-- Terminology: parties (not complainants), attachments (not files).
-` in
-  `' `data-us-task-completed` comes
-  from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
-  completed filter and counts are the theme's (US-QUERY-SEARCH).
-
-## Owner preferences seen this session
-
-- UX first; smooth, honest feedback; no flashes or double animations.
-- Asks to talk plans through before code ("talk me through the plan for this
-  before writing anything"); give options with a clear recommendation, then
-  build when told.
-- Prefers the simple version when the complex one is mostly mechanism.
-- Terminology: parties (not complainants), attachments (not files).
- + value` into the rest of the page: pass a function. It breaks the
-  guide's CCO sticky example today (flagged as its own task), which is why
-  `test-query-template-refresh.cjs` fails only its final no-errors check.
+- **`String.replace` with theme code as the replacement** turns the `$'` in
+  `'$' + value` into the rest of the page: pass a function. It broke the
+  guide's CCO sticky example, and once this file: its own end was repeated
+  three times until 28 October 2026. (`test-query-template-refresh.cjs`, which
+  it failed, passes again.)
 - **Theme state is derived in the browser:** `data-us-task-completed` comes
   from `TaskCheckCSS` (US-QUERY-STATES), past meetings from the date; the
   completed filter and counts are the theme's (US-QUERY-SEARCH).
