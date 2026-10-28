@@ -1,4 +1,5 @@
 // Verify the generated, self-contained guide and its real shared-search example.
+const {guidePath}=require('../build/guide-output.cjs');
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const {chromium}=require('../../../../.tmp-iqa-integration/node_modules/playwright');
 (async()=>{
@@ -7,7 +8,7 @@ const {chromium}=require('../../../../.tmp-iqa-integration/node_modules/playwrig
     const page=await browser.newPage({viewport:{width:1440,height:1000}});
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.route('**/*',route=>route.abort());
-    await page.setContent(fs.readFileSync('THeme/UnionSuite-Guides/Usage-Guide.html','utf8'),{waitUntil:'domcontentloaded',timeout:60000});
+    await page.setContent(fs.readFileSync(guidePath('Usage-Guide.html'),'utf8'),{waitUntil:'domcontentloaded',timeout:60000});
     const copy=page.locator('#content-lists [data-copy-text="us-query-search"]').first();
     assert.equal(await copy.innerText(),'us-query-search');
     const frame=page.frameLocator('#list-demo');

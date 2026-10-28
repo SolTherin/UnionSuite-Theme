@@ -1,4 +1,5 @@
 const fs=require('node:fs'), assert=require('node:assert/strict');
+const {guidePath}=require('../THeme/UnionSuite-Guides/usage/build/guide-output.cjs');
 const {chromium}=require('../.tmp-iqa-integration/node_modules/playwright');
 const read=f=>fs.readFileSync(f,'utf8');
 const themeJs=read('THeme/UnionSuite/zUnionSuite.js');
@@ -111,7 +112,7 @@ const ids=[1,2,3,4,5].map(i=>'00000000-0000-4000-8000-'+String(i).padStart(12,'0
   const guide=await browser.newPage({viewport:{width:1100,height:900}});
   const guideErrors=[];guide.on('pageerror',e=>guideErrors.push(e.message));
   await guide.route('**/*',route=>route.abort());
-  await guide.setContent(read('THeme/UnionSuite-Guides/Usage-Guide.html'),{waitUntil:'domcontentloaded'});
+  await guide.setContent(read(guidePath('Usage-Guide.html')),{waitUntil:'domcontentloaded'});
   const frame=guide.frameLocator('#attention-demo');
   await frame.locator('.us-attention__card').first().waitFor();
   assert.equal(await frame.locator('.us-attention__card').count(),4);

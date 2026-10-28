@@ -38,8 +38,11 @@ node tools/check-usage-sources.cjs
 
 The commands under `tools/` are compatibility entry points. Edit implementations
 here under `build/`, not those wrappers. The normal guide build also produces the
-branding workspace and its companion references. The guide remains available at
-`THeme/UnionSuite-Guides/Usage-Guide.html` until the chapter/index migration is implemented.
+branding workspace and its companion references. The guide (`Usage-Guide.html`)
+and the branding workspace (`Theme-Config.html`) are written outside the repo
+and OneDrive, to `C:\Dev\UHUB\Theme\Usage-Guide` (25 October 2026), set in
+`build/guide-output.cjs` and overridable with `UNIONSUITE_GUIDE_DIR`. Their
+links to repo documents are rewritten as `file:///` links so they still open.
 
 Generated HTML is a deliverable, but maintained inputs are what Git tracks.
 Rebuild locally or in a release build; distribute generated files as artifacts.

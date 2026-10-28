@@ -23,6 +23,15 @@ function relativeFile(file) {
   return relative;
 }
 
+// The guide and its config page are built outside the repository on
+// purpose (guide-output.cjs); every other output must stay inside it.
+const guideOutput = require('./guide-output.cjs');
+function outputFile(file) {
+  const absolute = path.resolve(file instanceof URL ? fileURLToPath(file) : String(file));
+  if (path.dirname(absolute) === path.resolve(guideOutput.guideDir)) return 'guide-output/' + path.basename(absolute);
+  return relativeFile(file);
+}
+
 try {
   fs.readFileSync = function (file, ...args) {
     const relative = relativeFile(file);
@@ -34,7 +43,7 @@ try {
     return originalRead.call(fs, file, ...args);
   };
   fs.writeFileSync = function (file) {
-    outputs.add(relativeFile(file));
+    outputs.add(outputFile(file));
   };
   console.log = () => {};
   const guide = require('./build-theme-usage.cjs');

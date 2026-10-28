@@ -1,7 +1,8 @@
 // Dependency-free source/packaging checks; browser checks live in test-theme-config.cjs.
+const {guidePath}=require('../build/guide-output.cjs');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../../../..');
-const html=fs.readFileSync(path.join(root,'THeme/UnionSuite-Guides/Theme-Config.html'),'utf8');
+const html=fs.readFileSync(guidePath('Theme-Config.html'),'utf8');
 const decode=value=>value.replace(/&(amp|lt|gt|quot);/g,(_,key)=>({amp:'&',lt:'<',gt:'>',quot:'"'}[key]));
 const data=JSON.parse(html.match(/<script type="application\/json" id="config-data">([\s\S]*?)<\/script>/)[1]);
 assert.equal(new Set(data.tokens.map(token=>token.name)).size,data.tokens.length,'Unique token names');

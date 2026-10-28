@@ -1,4 +1,5 @@
 // Verify the embedded authoring workflow in the portable guide, not a fetched copy.
+const {guidePath}=require('../build/guide-output.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -16,7 +17,7 @@ const {chromium} = require('../../../../.tmp-iqa-integration/node_modules/playwr
     });
     await page.route(/^https?:/, route => route.abort());
     await page.emulateMedia({reducedMotion: 'reduce'});
-    const url = pathToFileURL(path.resolve('THeme/UnionSuite-Guides/Usage-Guide.html')).href;
+    const url = pathToFileURL(guidePath('Usage-Guide.html')).href;
     await page.goto(url + '#action-builder', {waitUntil: 'load', timeout: 60000});
     const builder = page.frameLocator('#action-builder-frame');
     const live = builder.frameLocator('#action-preview');

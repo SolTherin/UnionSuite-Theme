@@ -1,4 +1,5 @@
 // Browser checks use fictional local responses. No iMIS requests are made.
+const {guidePath}=require('../THeme/UnionSuite-Guides/usage/build/guide-output.cjs');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const { chromium } = require('../.tmp-iqa-integration/node_modules/playwright');
@@ -98,7 +99,7 @@ const fixture = `<div id="hd"><div class="searchfieldplus-dropdown"><div class="
     assert.equal(await page.locator('#injected-taskbar').count(),0,'Missing authentication context does not replace native search');
     // Inspect the generated offline guide's actual interactive taskbar frame.
     await page.setViewportSize({width:1280,height:900});
-    await page.setContent(fs.readFileSync('THeme/UnionSuite-Guides/Usage-Guide.html','utf8'));
+    await page.setContent(fs.readFileSync(guidePath('Usage-Guide.html'),'utf8'));
     await page.locator('#taskbar-colours-demo').evaluate(frame => frame.scrollIntoView());
     const demo = page.frameLocator('#taskbar-colours-demo');
     await demo.locator('#us-taskbar-search').fill('Morgan');

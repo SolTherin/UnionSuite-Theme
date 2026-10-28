@@ -75,11 +75,12 @@ function build(shared, check = false) {
     if (!(key in values)) throw Error('Unknown config placeholder: '+key);
     return values[key];
   });
-  const output=path.join(root,'THeme/UnionSuite-Guides/Theme-Config.html');
+  const guideOutput=require('./guide-output.cjs');
+  const output=guideOutput.guidePath('Theme-Config.html');
   if (check) {
     if (!fs.existsSync(output)||fs.readFileSync(output,'utf8')!==html) {console.error('Theme-Config.html is stale. Run node THeme/UnionSuite-Guides/usage/build/build-theme-usage.cjs.');process.exitCode=1;}
     else console.log('Theme config is current ('+tokens.length+' editable tokens).');
-  } else {fs.writeFileSync(output,html);console.log('Built THeme/UnionSuite-Guides/Theme-Config.html ('+tokens.length+' editable tokens).');}
+  } else {guideOutput.writeGuideFile('Theme-Config.html',html);console.log('Built '+output+' ('+tokens.length+' editable tokens).');}
 }
 module.exports = {build};
 if (require.main === module) build(require('./build-theme-usage.cjs'),process.argv.includes('--check'));

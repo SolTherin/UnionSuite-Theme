@@ -1,11 +1,12 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),{chromium}=require('../../../../.tmp-iqa-integration/node_modules/playwright');
+const {guidePath}=require('../build/guide-output.cjs');
 (async()=>{
  const browser=await chromium.launch({channel:'msedge',headless:true});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1050}});
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.route('**/*',route=>route.abort());
-  await page.setContent(fs.readFileSync('THeme/UnionSuite-Guides/Usage-Guide.html','utf8'),{waitUntil:'domcontentloaded',timeout:60000});
+  await page.setContent(fs.readFileSync(guidePath('Usage-Guide.html'),'utf8'),{waitUntil:'domcontentloaded',timeout:60000});
   await page.locator('#membership-stats').evaluate(n=>n.scrollIntoView({block:'start',behavior:'instant'}));
   const frame=page.frameLocator('#membership-stats-demo');
   await page.waitForFunction(()=>document.querySelector('#membership-stats-demo').contentDocument.querySelector('[data-us-membership="summary"]').dataset.usMembershipState==='ready');

@@ -141,8 +141,15 @@ independent sources of truth and do not need to be committed.
   `templates/` owns copyable author templates; `examples/` owns supported offline
   documentation fixtures and simulations; `build/` owns generators; `tests/` owns
   guide checks; `vendor/` contains required native reference assets.
-- The current generated deliverable is `THeme/UnionSuite-Guides/Usage-Guide.html`.
-  Edit `THeme/UnionSuite-Guides/usage/source/Usage-Guide.source.html` and its
+- The current generated deliverable is `Usage-Guide.html`, with its companion
+  `Theme-Config.html`, built **outside the repo and OneDrive** in
+  `C:\Dev\UHUB\Theme\Usage-Guide` (owner, 25 October 2026: OneDrive stalled
+  re-uploading the 180 MB guide after every build). The folder is set in
+  `THeme/UnionSuite-Guides/usage/build/guide-output.cjs` (override with
+  `UNIONSUITE_GUIDE_DIR`); the build, `--check` and the guide tests all read
+  it from there, and the guide's links to repo documents become `file:///`
+  links. Rebuild sparingly while OneDrive is syncing: every build still
+  rewrites the companion pages under `references/`. Edit `THeme/UnionSuite-Guides/usage/source/Usage-Guide.source.html` and its
   neighbouring CSS/JS, never the generated HTML. Some small recipes live directly
   in the source HTML; do not assume every example has a separate template file.
 - The approved direction for the next publication change is a small guide index

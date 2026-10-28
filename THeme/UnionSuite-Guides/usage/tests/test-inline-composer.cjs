@@ -1,4 +1,5 @@
 // US-INLINE-COMPOSER through the generated guide's offline example: the
+const {guidePath}=require('../build/guide-output.cjs');
 // composer, its checks, the holding row and quiet insert, and the full
 // form's draft hand-off and close values. Save, page read and popup are the
 // example's stand-ins (examples/Inline-Composer.js).
@@ -17,7 +18,7 @@ const {chromium} = require(path.join(root, '.tmp-iqa-integration/node_modules/pl
     page.on('console', message => {
       if (message.type() === 'error' && /US-INLINE-COMPOSER|UnionSuite/.test(message.text())) errors.push(message.text());
     });
-    await page.goto(pathToFileURL(path.join(root, 'THeme/UnionSuite-Guides/Usage-Guide.html')).href + '#inline-composer');
+    await page.goto(pathToFileURL(guidePath('Usage-Guide.html')).href + '#inline-composer');
     const demo = page.frameLocator('#inline-composer-demo');
     const toggle = demo.locator('.panel-heading .us-composer-toggle');
     const composer = demo.locator('.us-composer:not([data-closing])');

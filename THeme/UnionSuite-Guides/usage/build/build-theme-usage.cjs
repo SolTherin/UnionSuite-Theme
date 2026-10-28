@@ -7,6 +7,7 @@ const root = path.resolve(__dirname, '../../../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
 const esc = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const uncomment = css => css.replace(/\/\*[\s\S]*?\*\//g, '');
+const guideOutput = require('./guide-output.cjs');
 const gallery = require('./theme-gallery.cjs');
 const listTemplates = require('./list-template-examples.cjs');
 const queryFields = require('./query-template-fields.cjs');
@@ -365,7 +366,9 @@ html = html.replace(/<table id="class-table">[\s\S]*?<\/table>/,table=>table
     const target=/us-action-/.test(label)?'unified-action-route':/home-welcome/.test(label)?'welcome-header':/us-task-completed-filter/.test(label)?'task-completed-filter':/us-list|us-staff-bulletin|us-bulletin__|us-query-search/.test(label)?'content-lists':/Nav-Icon/.test(label)?'navigation-icons':/us-icon-button|ti ti-/.test(label)?'action-icons':/us-banner|is-active/.test(label)?'banners':/us-report|us-filters|us-panel|SearchContactsClass/.test(label)?'reports':'buttons';
     return row.replace('</tr>',`<td><a href="#${target}">View example</a></td></tr>`);
   }));
-const output = path.join(root, 'THeme/UnionSuite-Guides/Usage-Guide.html');
+// Built outside the repo (guide-output.cjs), with its repo links made absolute.
+html = guideOutput.repoLinks(html);
+const output = guideOutput.guidePath('Usage-Guide.html');
 // Share the canonical sources and fixtures with the dedicated config page.
 module.exports = {build, inserts, rootTokens, declarations, tokenCategory, colourName,
   theme, themeJs, tokenCss, nativePreviewCss, clientRoots, bannerDefaults, iqaDefaults, iqaSelector, demoBanner};
@@ -375,8 +378,8 @@ function build(check = false) {
       console.error('Usage-Guide.html is stale. Run node THeme/UnionSuite-Guides/usage/build/build-theme-usage.cjs.'); process.exitCode = 1;
     } else console.log('Usage guide is current: ' + fingerprint);
   } else {
-    fs.writeFileSync(output, html);
-    console.log('Built THeme/UnionSuite-Guides/Usage-Guide.html (' + rootTokens.size + ' tokens; source ' + fingerprint + ').');
+    guideOutput.writeGuideFile('Usage-Guide.html', html);
+    console.log('Built ' + output + ' (' + rootTokens.size + ' tokens; source ' + fingerprint + ').');
   }
   require('./build-theme-config.cjs').build(module.exports, check);
   listTemplates.build(module.exports, check);

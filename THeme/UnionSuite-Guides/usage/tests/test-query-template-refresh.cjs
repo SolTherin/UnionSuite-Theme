@@ -1,4 +1,5 @@
 // Server-rendered Query Template fixtures; no live iMIS writes or script replay.
+const {guidePath}=require('../build/guide-output.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -213,7 +214,7 @@ function fixture(revision = 0, shape = 'wrapped', id = 'ste_container_ciTasks') 
     });
     await assert.rejects(refresh(), /Nested iParts/);
     // Exercise the generated, offline guide's live simulation as delivered.
-    await page.goto(pathToFileURL(path.join(root, 'THeme/UnionSuite-Guides/Usage-Guide.html')).href);
+    await page.goto(pathToFileURL(guidePath('Usage-Guide.html')).href);
     const demo = page.frameLocator('#query-template-refresh-demo');
     await demo.locator('button.us-action-home-add-task').waitFor();
     await demo.locator('.us-task__member-name').filter({hasText:'Personal Task'}).waitFor();

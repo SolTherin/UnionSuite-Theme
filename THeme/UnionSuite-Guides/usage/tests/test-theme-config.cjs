@@ -1,4 +1,5 @@
 // Integration checks in a disposable headless Edge process, using native CDP.
+const {guidePath}=require('../build/guide-output.cjs');
 // No npm packages or browser profile from the user are required.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {spawn}=require('node:child_process');
@@ -26,7 +27,7 @@ async function main(){
   const evaluate=async expression=>{const result=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(result.exceptionDetails)throw Error(result.exceptionDetails.exception?.description||result.exceptionDetails.text);return result.result.value;};
   await send('Page.enable');await send('Runtime.enable');await send('Network.enable');
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
-  const file=pathToFileURL(path.join(root,'THeme/UnionSuite-Guides/Theme-Config.html')).href;
+  const file=pathToFileURL(guidePath('Theme-Config.html')).href;
   await send('Page.navigate',{url:file});
   console.log('Opened config in headless browser.');
   for(let i=0;i<200;i++){if(await evaluate('!!document.getElementById("seed-primary-hex")'))break;await delay(100);}
@@ -113,7 +114,7 @@ async function main(){
   for(let i=0;i<100;i++){reopened=await evaluate('document.getElementById("seed-primary-hex")?.value ? document.getElementById("css-code").textContent : ""');if(reopened)break;await delay(100);}
   if(reopened!=='/* Using theme defaults. */')throw Error('Reload did not restore defaults: '+reopened);
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
-  await send('Page.navigate',{url:pathToFileURL(path.join(root,'THeme/UnionSuite-Guides/Usage-Guide.html')).href+'#custom-config'});await delay(500);
+  await send('Page.navigate',{url:pathToFileURL(guidePath('Usage-Guide.html')).href+'#custom-config'});await delay(500);
   const guide=await evaluate('!!document.getElementById("custom-config")&&!!document.querySelector("a[href=\\"Theme-Config.html\\"]")');
   if(!guide)throw Error('Guide config link missing');
   await send('Page.captureScreenshot',{format:'png'}).then(result=>fs.writeFileSync(path.join(root,'.preview/theme-config-guide.png'),Buffer.from(result.data,'base64')));

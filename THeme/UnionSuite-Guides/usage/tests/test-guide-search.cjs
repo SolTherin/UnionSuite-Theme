@@ -1,4 +1,5 @@
 // Exercise offline handbook search against the complete generated deliverable.
+const {guidePath}=require('../build/guide-output.cjs');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const {pathToFileURL} = require('node:url');
@@ -16,7 +17,7 @@ const {chromium} = require('../../../../.tmp-iqa-integration/node_modules/playwr
       return route.abort();
     });
     await page.emulateMedia({reducedMotion: 'reduce'});
-    await page.goto(pathToFileURL(path.resolve('THeme/UnionSuite-Guides/Usage-Guide.html')).href, {waitUntil: 'load', timeout: 60000});
+    await page.goto(pathToFileURL(guidePath('Usage-Guide.html')).href, {waitUntil: 'load', timeout: 60000});
     const input = page.locator('#guide-search-input');
     const links = page.locator('#guide-search-results a');
     const dialog = page.locator('#guide-search-dialog');
