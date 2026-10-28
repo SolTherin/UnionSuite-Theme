@@ -1,6 +1,6 @@
 // One-time promotion of the approved v1 drawing; maintained theme CSS owns it now.
 const fs = require('node:fs');
-const source = fs.readFileSync('Mascot/pip-koala.source.html', 'utf8');
+const source = fs.readFileSync('experiments/Mascot/pip-koala.source.html', 'utf8');
 const start = source.indexOf('    #pip-mascot-demo .pip-character {');
 const end = source.indexOf('    #pip-mascot-demo[data-shape="blob"]');
 const keys = source.slice(source.indexOf('    @keyframes pip-land'), source.indexOf('    @media (max-width:440px)'));

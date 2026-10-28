@@ -1,9 +1,9 @@
 # Element inventory — what the native CSS actually styles
 
-Extracted from `Native CSS/Orion-99.css` (1,030 rule blocks, 563 classes) and
+Extracted from `legacy/Native CSS/Orion-99.css` (1,030 rule blocks, 563 classes) and
 `THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css` (3,831 blocks, 2,678 classes) by
 parsing selectors and weighting each class by how many declarations target it.
-Presence checked against the captured `Orion page.html`.
+Presence checked against the captured `legacy/Orion page.html`.
 
 Companion to [THEME-FINDINGS.md](THEME-FINDINGS.md) — read §3 and §6 there
 before styling anything on this list.
@@ -14,11 +14,11 @@ iPart; optional modifiers are `us-filters-collapsible`, `us-filters-collapsed`
 and `us-report-expandable`. `SearchContactsClass` remains a supported alias.
 Use the [standalone Theme Usage Guide](THeme/UnionSuite-Guides/Usage-Guide.html) for
 author-facing classes, tokens, templates and feature status, and the
-[theme README](THeme/UnionSuite/README.md) for integration details.
-The [current condensed CSV](CRM-Member-Profile-Component-Types-Updated.csv) and
-[detailed mapping CSV](CRM-Member-Profile-iPart-Mapping-Theme.csv) include the
+[theme README](../THeme/UnionSuite/README.md) for integration details.
+The [current condensed CSV](crm-member-profile/CRM-Member-Profile-Component-Types-Updated.csv) and
+[detailed mapping CSV](crm-member-profile/CRM-Member-Profile-iPart-Mapping-Theme.csv) include the
 report classes and distinguish implemented utilities from planned business actions.
-See the [CSV version note](THeme/UnionSuite/README.md#mapping-csvs) for the locked originals.
+See the [CSV version note](../THeme/UnionSuite/README.md#mapping-csvs) for the locked originals.
 
 ---
 
@@ -40,7 +40,7 @@ it does not imply every native screen or state has been verified live.
 | Calendar | Approved styling promoted, including navigation/pressed states, month/Today controls and picker actions | Latest single-focus-frame and centred-chevron corrections await live confirmation; Telerik owns behavior |
 | Theme Upload / XML Import | Scoped compact file row, secondary Select/Remove states, drop highlight and native upload busy adapters implemented | Owner reports upload forms look good; retain native XML/ZIP validation and verify untested error paths. No blanket RadUpload restyle |
 | IQA / reports | Approved authored report component and native baseline implemented | Latest uniform rows and horizontal query-selector layout and unboxed divider treatment need live verification; preserve native three-column filters |
-| IQA designer: Where used | Implemented 12 October 2026: `Scripts/IQA-WhereUsed.js` (loader module `where-used`, designer only), `US-WHERE-USED` in zUnionSuite.css and its dark rule, shared index in `i4u_UT_Configuration.Payload`, guide `#iqa-where-used`, tests `tools/test-where-used.cjs` | Live verification on dev pending ([build plan](prototypes/wip/iqa-where-used/BUILD-PLAN.md#live-checks-on-dev)); Flowz usage needs a CloudToolz flow (TODO.md) |
+| IQA designer: Where used | Implemented 12 October 2026: `Scripts/IQA-WhereUsed.js` (loader module `where-used`, designer only), `US-WHERE-USED` in zUnionSuite.css and its dark rule, shared index in `i4u_UT_Configuration.Payload`, guide `#iqa-where-used`, tests `tools/test-where-used.cjs` | Live verification on dev pending ([build plan](../prototypes/wip/iqa-where-used/BUILD-PLAN.md#live-checks-on-dev)); Flowz usage needs a CloudToolz flow (TODO.md) |
 | IQA browser: search, favourites and recent | Implemented 12 October 2026: `Scripts/IQA-Finder.js` (loader module `iqa-finder`, IQA browser and designer), `US-IQA-FINDER` in zUnionSuite.css, search through `$/_i4u_/Core/Admin/Query Search - IQA Document Tree Taskbar`, favourites in `i4u_UT_UserSettings` (SettingsKey `IQA-Favourites`), guide `#iqa-finder`, tests `tools/test-iqa-finder.cjs` | Live verification on dev pending: Quick find panel placement, go-to-folder selection, designer opening, favourites saving |
 | Messages / alerts | Approved styling and native validation presentation implemented | Verify remaining message types and partial-update contexts |
 | Panels / cards | Report and banner containers implemented | General native panel/card variants still need a dedicated review |
@@ -57,13 +57,13 @@ it does not imply every native screen or state has been verified live.
 | Biscuit taskbar greeting | Approved in theme: five-minute daily visit, 15-second scratch/tilt idles, wave/hop/goodbye clicks. Hidden below 1200px, as the approved design specifies (previously 600px; the 1060px rule had stopped matching) | Client Config.js on/off switch; header divider perch; normal timed exit; reduced motion; preview controls stay offline. Upload updated theme/client archives and retain script load order |
 | Banner tab switching | Presentation exists; behavior deferred by owner | Do not enable template tabs until zone-switching integration is implemented |
 
-Production truth: [shared CSS](THeme/UnionSuite/zUnionSuite.css),
-[shared JS](THeme/UnionSuite/zUnionSuite.js) and the
+Production truth: [shared CSS](../THeme/UnionSuite/zUnionSuite.css),
+[shared JS](../THeme/UnionSuite/zUnionSuite.js) and the
 [usage guide](THeme/UnionSuite-Guides/Usage-Guide.html).
 Visual references: [native forms](references/Native-Form-Integration.html),
 [choices/dropdowns](references/Choice-Dropdown-Comparison.html),
 [calendar](references/Calendar-Comparison.html) and
-[all references](references/index.html).
+[all references](../references/index.html).
 
 ---
 
@@ -306,7 +306,7 @@ surface includes:
 Treat the complete report as a component composed of panels, forms, buttons
 and a grid; check those styles together against this fixture. This extends
 the existing RadGrid inventory, rather than adding a separate grid engine.
-See `IMIS-CMS-STRUCTURE.md` §15 for configuration-to-DOM mappings and §18 for
+See `docs/IMIS-CMS-STRUCTURE.md` §15 for configuration-to-DOM mappings and §18 for
 the implemented class contract. The shared component includes native title and
 description, single-query/query-folder presentation, filter disclosure, whole-cell
 sorting with right-aligned icons, native Export in the header, pagination and
@@ -385,7 +385,7 @@ Initial scope is a bounded recent-activity view with a full-history link.
 Complete-history search, totals and combined paging require a separate
 data-loading component. See [THEME-ACTIVITY-FEED.md](THEME-ACTIVITY-FEED.md) for
 the metadata contract, source limits, title ownership and refresh/fallback plan.
-T15 is included in the [updated component-type CSV](CRM-Member-Profile-Component-Types-Updated.csv).
+T15 is included in the [updated component-type CSV](crm-member-profile/CRM-Member-Profile-Component-Types-Updated.csv).
 
 ### 10. Icons — *third*
 
@@ -422,9 +422,9 @@ gutters. All styling is now in `THeme/UnionSuite/zUnionSuite.css`, with page-lay
 and component rules kept separate. Interaction still uses the existing banner
 script; the legacy-named embed is now behaviour only. The native profile-banner
 selectors above are a different component family. See the
-[banner usage guide](THeme/UnionSuite-Guides/usage/examples/Banner-README.md).
+[banner usage guide](../THeme/UnionSuite-Guides/usage/examples/Banner-README.md).
 
-The [complete template](THeme/UnionSuite-Guides/usage/templates/Banner-Template.html) includes an optional
+The [complete template](../THeme/UnionSuite-Guides/usage/templates/Banner-Template.html) includes an optional
 Actions disclosure inside the summary and tabs after the details. Delete either
 whole div to omit it. Both remain visible when compact. Dropdown behaviour is
 implemented; sample commands are disabled until connected to verified handlers.
@@ -432,8 +432,8 @@ Tabs supply presentation only. Direct zone switching is the preferred planned
 adapter for lightweight dashboards, with multiple zones per tab and shared zones
 remaining visible. CCO integration remains a separate option. Zone titles and
 grid space must follow visibility; hiding a zone does not defer its initial IQA.
-Separate [dashboard](THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html) and
-[Contact](THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html) templates provide simpler
+Separate [dashboard](../THeme/UnionSuite-Guides/usage/templates/Banner-Dashboard-Template.html) and
+[Contact](../THeme/UnionSuite-Guides/usage/templates/Banner-Contact-Template.html) templates provide simpler
 starting points. The standalone guide embeds these maintained sources rather
 than carrying independently edited copies.
 
@@ -513,7 +513,7 @@ Live iMIS popup/postback/permission testing remains required.
 
 ### Deferred: CCO navigation on grey backgrounds
 
-The owner will revisit how vertical CCO navigation relates to white panel cards on a grey page when there is no shared content container. An optional standalone secondary navigation treatment is a design candidate, not an approved or implemented variant. Use the existing [CCO menu comparison](references/CCO-Tabs-Comparison.html) for the next review; see [parked work](TODO.md#parked-by-owner). Retain approved V5/H2 and current mobile behaviour. This decision is separate from banner tab-to-zone switching.
+The owner will revisit how vertical CCO navigation relates to white panel cards on a grey page when there is no shared content container. An optional standalone secondary navigation treatment is a design candidate, not an approved or implemented variant. Use the existing [CCO menu comparison](references/CCO-Tabs-Comparison.html) for the next review; see [parked work](../TODO.md#parked-by-owner). Retain approved V5/H2 and current mobile behaviour. This decision is separate from banner tab-to-zone switching.
 
 ### Dialog chrome (implemented; live verification pending)
 

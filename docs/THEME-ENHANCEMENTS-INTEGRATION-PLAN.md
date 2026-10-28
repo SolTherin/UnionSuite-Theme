@@ -14,9 +14,9 @@ Reviewed inputs:
 
 - [Implementation plan](<../iMIS Enhanced/IMPLEMENTATION-PLAN.md>) and [feature plan](<../iMIS Enhanced/ENHANCEMENTS-PLAN.md>), updated 19 September.
 - [Current IQA output](<../iMIS Enhanced/upload/IQA-Theme/IQA-Enhancements.js>), 216,748 bytes at review. This is the current integration input; the older 55 KB baseline is incomplete by comparison.
-- Existing [theme core](THeme/UnionSuite/zUnionSuite.js), [taskbar](THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js), action registrations, client settings and stylesheet ownership.
+- Existing [theme core](../THeme/UnionSuite/zUnionSuite.js), [taskbar](../THeme/UnionSuite/Scripts/UnionSuiteTaskbar.js), action registrations, client settings and stylesheet ownership.
 - RiSE/metadata/source-overlay probes, the reviewed route catalogue and existing IQA module sources, available locally.
-- Approved [Option C taskbar reference](references/Taskbar-Workshop.html), [Recents reference](references/Recents-Workshop.html), their maintained `prototypes/` sources and shared `prototypes/approved/taskbar/Popup-Shell.css`. The design contract below supersedes earlier Pencil/Done and alternative-layout requirements for these features.
+- Approved [Option C taskbar reference](../references/Taskbar-Workshop.html), [Recents reference](../references/Recents-Workshop.html), their maintained `prototypes/` sources and shared `prototypes/approved/taskbar/Popup-Shell.css`. The design contract below supersedes earlier Pencil/Done and alternative-layout requirements for these features.
 
 ## Recommendation
 

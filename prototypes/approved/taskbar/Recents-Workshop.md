@@ -2,7 +2,7 @@
 
 The scope switcher places Mine first (left) and Sitewide second (right), with equal-width options. Mine remains selected initially. This arrangement is shared with the taskbar preview.
 
-Approved Recents reference for Option C, locked on 20 September 2026 and recorded in `THEME-ENHANCEMENTS-INTEGRATION-PLAN.md` at the project root. The popup remains available separately for inspection; production data integration is planned.
+Approved Recents reference for Option C, locked on 20 September 2026 and recorded in `docs/THEME-ENHANCEMENTS-INTEGRATION-PLAN.md` at the project root. The popup remains available separately for inspection; production data integration is planned.
 
 - Offline deliverable: `references/Recents-Workshop.html`.
 - Maintained markup: `prototypes/approved/taskbar/Recents-Workshop.source.html`.

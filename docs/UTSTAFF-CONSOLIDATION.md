@@ -9,8 +9,8 @@ Companion to [THEME-FINDINGS.md](THEME-FINDINGS.md),
 
 Current adoption: Query Menu / IQA report presentation and utilities have moved
 into `THeme/UnionSuite/zUnionSuite.css` and `zUnionSuite.js`, activated by
-`us-report` on an iPart. See [setup and modifiers](THeme/UnionSuite/README.md).
-The [banner component](THeme/UnionSuite-Guides/usage/examples/Banner-README.md) now provides the reusable
+`us-report` on an iPart. See [setup and modifiers](../THeme/UnionSuite/README.md).
+The [banner component](../THeme/UnionSuite-Guides/usage/examples/Banner-README.md) now provides the reusable
 `us-banner` component, including token-driven styling, native-gutter page layout,
 sticky/condensing modes and optional Actions/tabs markup. All banner CSS has moved
 into separate sections of `zUnionSuite.css`; the existing behaviour script remains

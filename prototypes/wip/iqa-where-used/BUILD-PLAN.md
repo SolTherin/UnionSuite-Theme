@@ -22,7 +22,7 @@ index.
 | `THeme/UnionSuite/zzDarkMode.css` | The dark count badge. |
 | `THeme/UnionSuite-Guides/usage/build/check-usage-sources.cjs` | Fail when a theme script assembles a `$/` path from parts, so the theme scan stays complete. |
 | `tools/test-where-used.cjs` | **New.** Node tests of the extraction and lookup against fixtures shaped like the probe results. |
-| Usage guide source, `THEME-INVENTORY.md`, `TODO.md`, this folder's README | Documentation, status and a visual example. |
+| Usage guide source, `docs/THEME-INVENTORY.md`, `TODO.md`, this folder's README | Documentation, status and a visual example. |
 
 **Why a new file:** the integration plan keeps the designer in one deployment
 file, but the builder is a separate concern that the content deployment

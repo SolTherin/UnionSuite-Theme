@@ -13,7 +13,7 @@ starter, rare enough that it never becomes furniture.
 `index.html` for the contact sheet, or go straight to `01-error-pages.html`,
 `02-search-magic-words.html`, `03-tenure-marker.html`, `04-empty-states.html`,
 `05-idle-logo.html`, `06-task-age-celebration.html`, `07-do-not-click.html`.
-They use the real tokens from `tokens/tokens.css`. Four are interactive (02, 05,
+They use the real tokens from `experiments/tokens/tokens.css`. Four are interactive (02, 05,
 06, 07). Nothing is wired into the product.
 
 **Contents**

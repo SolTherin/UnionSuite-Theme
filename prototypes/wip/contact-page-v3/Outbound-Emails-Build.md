@@ -430,7 +430,7 @@ the history or a `Resend` category on an original send are reported as failures.
 
 Done: `Activity-IQA-Specs.md` sections 4.4, 4.6, 5 and 7; the contact-page prototype
 (resend as its own card, history without `Resent`, the second source, the popup attribute);
-`THEME-ACTIVITY-FEED.md` (`data-record-popup`); the research findings.
+`docs/THEME-ACTIVITY-FEED.md` (`data-record-popup`); the research findings.
 
 Still to do when the history feature moves into the theme: the usage-guide sources and
 `query-field-definitions.cjs` (the usage guide does not cover the activity feed today).

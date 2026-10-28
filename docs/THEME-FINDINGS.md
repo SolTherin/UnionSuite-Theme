@@ -12,7 +12,7 @@ Current local implementation: `THeme/UnionSuite/zUnionSuite.css` contains the
 seeded tokens and approved IQA report CSS; `zUnionSuite.js` contains the shared
 behavior. `zzClientSpecific.css` is the client override layer. The old filenames
 and reset status below describe the earlier attempt. Current installation and
-iPart classes are in [the theme README](THeme/UnionSuite/README.md). This local
+iPart classes are in [the theme README](../THeme/UnionSuite/README.md). This local
 integration has not itself published the assets or modified a live page.
 
 For current author instructions use the
@@ -21,7 +21,7 @@ now lives in `zUnionSuite.css`, in separate page-layout and component sections.
 The existing separate script supplies sticky/condensing modes and Actions
 disclosure; its compatibility embed now contains no CSS. Tab switching remains
 deferred. See the
-[banner implementation guide](THeme/UnionSuite-Guides/usage/examples/Banner-README.md). The measured findings
+[banner implementation guide](../THeme/UnionSuite-Guides/usage/examples/Banner-README.md). The measured findings
 below remain historical evidence, not a list of today's implemented features.
 
 ---
@@ -323,7 +323,7 @@ colour freely, restructure only with a named context and a measurement.
 
 ## 7. The harness
 
-`.preview/` renders a real captured iMIS page against the full five-layer
+`../.preview/` renders a real captured iMIS page against the full five-layer
 cascade with no deploy. `node .preview/build.js`, then start the
 `crm-theme-preview` launch config (port 4599).
 
@@ -366,9 +366,9 @@ page. See IMIS-CMS-STRUCTURE.md §13.
   abandoned theme, no longer matching the server.
 - `UTStaff.css` — edited (nav icons remapped to Tabler) but never uploaded, and
   now scheduled for deprecation anyway.
-- `Native CSS/` — `10-UltraWaveResponsive.css`, `Orion-99.css`. Still current
+- `legacy/Native CSS/` — `10-UltraWaveResponsive.css`, `Orion-99.css`. Still current
   and still the authority.
-- `.preview/` — the harness. Still works; rebuild with `node .preview/build.js`.
+- `../.preview/` — the harness. Still works; rebuild with `node .preview/build.js`.
 - Backups: `.preview/UTStaff.pre-tabler.backup.css`,
   `.preview/zUnionStyling.deployed.backup.css`,
   `.preview/FontAwesome.6.7.2.orphan.backup.css`.

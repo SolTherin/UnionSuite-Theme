@@ -128,7 +128,7 @@ Visibility is not access control; retain the existing page/iPart permissions.
 For a page that intentionally uses CCO, let the Content Collection Organizer own content loading, native
 selection, tab availability and page access. Keep its native tab strip intact
 until the banner adapter is successfully connected. This follows the documented
-[nested CCO structure](../../../IMIS-CMS-STRUCTURE.md#5-containers-nest).
+[nested CCO structure](../../../docs/IMIS-CMS-STRUCTURE.md#5-containers-nest).
 
 Proposed CCO iPart CSS classes:
 

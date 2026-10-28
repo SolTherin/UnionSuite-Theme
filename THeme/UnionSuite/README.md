@@ -124,7 +124,7 @@ alongside the affected shared assets.
    report pages and on any popup documents that should use these enhancements.
 4. Remove the entire old standalone IQA style/script embed from test pages once
    the shared assets are included. The approved legacy reference is now
-   [Query Menu Display Styling.html](../../prototypes/Query%20Menu%20Display%20Styling.html)
+   [Query Menu Display Styling.html](../../prototypes/legacy/Query%20Menu%20Display%20Styling.html)
    in `prototypes/` (previously named `Contact-Search-IQA-Style.html`).
    Do not load both implementations: the old singleton
    could initialize first and prevent the shared version from taking ownership.
@@ -166,7 +166,7 @@ native generated classes and handlers. `AccentButton`, `LinkButton`, `DangerButt
 the corresponding tokens. Native size and group classes retain their layout.
 Report Find/filled actions follow the accent; Export keeps its neutral styling.
 
-See [THEME-BUTTONS.md](../../THEME-BUTTONS.md) for the complete native inventory,
+See [THEME-BUTTONS.md](../../docs/THEME-BUTTONS.md) for the complete native inventory,
 token mapping, wrapper placement, specialised controls and verification scope.
 No new button class family is introduced. Dedicated secondary/warning variants
 are not present in the captured native sheets and are not implemented aliases.
@@ -179,7 +179,7 @@ icon-only actions, add `us-icon-button` to that same control and give it an
 `aria-label`, e.g. `Edit Alex Morgan`. An inner `ti ti-pencil` with
 `aria-hidden="true"` supplies the glyph. `DangerButton` keeps delete actions
 semantic. Shared JS supplies hover/focus tooltips. Preserve native handlers;
-no action is inferred or injected from its label. See [THEME-BUTTONS.md](../../THEME-BUTTONS.md).
+no action is inferred or injected from its label. See [THEME-BUTTONS.md](../../docs/THEME-BUTTONS.md).
 
 The guide has prominent **Buttons & usage**, **Action icons & usage** and
 **IQA reports** sections. Each implemented element has a visual example,
@@ -279,10 +279,10 @@ Load `zUnionSuite.js`, `Scripts/ActionDefinitions.js`, then client
 context and action. Repeated controls have unique IDs; required missing context
 disables them. See [the complete API and execution route](../UnionSuite-Guides/Usage-Guide.html#unified-action-route).
 
-See [panel actions and report behavior](../../THEME-PANEL-ACTIONS.md),
-[the element inventory](../../THEME-INVENTORY.md),
-[iMIS CMS structure](../../IMIS-CMS-STRUCTURE.md), and
-[the activity-feed plan](../../THEME-ACTIVITY-FEED.md).
+See [panel actions and report behavior](../../docs/THEME-PANEL-ACTIONS.md),
+[the element inventory](../../docs/THEME-INVENTORY.md),
+[iMIS CMS structure](../../docs/IMIS-CMS-STRUCTURE.md), and
+[the activity-feed plan](../../docs/THEME-ACTIVITY-FEED.md).
 
 ## Banner classes — shared theme CSS and JavaScript
 
@@ -330,9 +330,9 @@ these sources and the current tokens when rebuilding the portable HTML.
 
 ## Mapping CSVs
 
-- [Current condensed component inventory](../../CRM-Member-Profile-Component-Types-Updated.csv), including the planned combined activity feed.
-- [Earlier condensed inventory, updated for the theme](../../CRM-Member-Profile-Component-Types-Theme.csv).
-- [Detailed prototype-to-iPart mapping, updated for the theme](../../CRM-Member-Profile-iPart-Mapping-Theme.csv).
+- [Current condensed component inventory](../../docs/crm-member-profile/CRM-Member-Profile-Component-Types-Updated.csv), including the planned combined activity feed.
+- [Earlier condensed inventory, updated for the theme](../../docs/crm-member-profile/CRM-Member-Profile-Component-Types-Theme.csv).
+- [Detailed prototype-to-iPart mapping, updated for the theme](../../docs/crm-member-profile/CRM-Member-Profile-iPart-Mapping-Theme.csv).
 
 The two `-Theme.csv` copies replace the corresponding original CSVs for this
 update: those originals were locked by another process and could not be saved.
@@ -454,7 +454,7 @@ Native IQA rows now have one surface colour with dividers and separate hover/sel
 
 Calendar first-open focus decoration is drawn only on the date link, and the month chevron is centred with inline flex. These latest IQA/calendar refinements have local checks and await live confirmation.
 
-Use [the inventory](../../THEME-INVENTORY.md) for feature status and [TODO](../../TODO.md) for outstanding checks, review candidates and parked work.
+Use [the inventory](../../docs/THEME-INVENTORY.md) for feature status and [TODO](../../TODO.md) for outstanding checks, review candidates and parked work.
 
 Staff sidebar presentation (US-STAFF-NAV): brand-800 menu, a 6% white blend for submenus, subtle hover and stronger selected tint with an accent bar. Native sprite/font icon hover uses accent. Scope is SideBarPanel / RadTreeView_Orion; no author class or new JS. Indentation, flyout geometry and native navigation remain unchanged. Custom raster icons are not recoloured. Verify expanded/collapsed, nested, selected and keyboard states live.
 

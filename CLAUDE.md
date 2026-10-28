@@ -3,6 +3,9 @@
 Project instructions live in [`AGENTS.md`](AGENTS.md). **Read it before making
 any change** to theme CSS, iPart markup, Query Templates or the usage guide.
 
+For the repo map (what lives where, what reads what, build and test commands,
+OneDrive pitfalls), start with [`INDEX.md`](INDEX.md).
+
 It covers:
 
 - Working agreements — confirm before committing; no `Co-Authored-By` trailer

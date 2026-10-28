@@ -6,12 +6,12 @@ const dir = path.join(__dirname, '..');
 // stops at 99-Orion so you can see what the theme is actually doing.
 const NATIVE = [
   ['10-UltraWaveResponsive.css', 'THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css'],
-  ['UT_Staff.css',              'UTStaff.css'],
-  ['Orion-99.css',              'Native CSS/Orion-99.css'],
+  ['UT_Staff.css',              'legacy/UTStaff.css'],
+  ['Orion-99.css',              'legacy/Native CSS/Orion-99.css'],
 ];
 const THEME = [
-  ['zAdditionalStyling.css', 'UT-theme.css'],      // the theme deploys as this
-  ['zUnionStyling.css',      'zUnionStyling.css'], // per-client, empty here
+  ['zAdditionalStyling.css', 'legacy/UT-theme.css'],      // the theme deploys as this
+  ['zUnionStyling.css',      'legacy/zUnionStyling.css'], // per-client, empty here
 ];
 
 for (const [dest, src] of [...NATIVE, ...THEME]) {
@@ -26,7 +26,7 @@ fs.copyFileSync(path.join(T, 'Tabler', 'tabler-icons.min.css'), path.join(__dirn
 fs.copyFileSync(path.join(T, 'Tabler', 'fonts', 'tabler-icons.woff2'), path.join(__dirname, 'Tabler', 'fonts', 'tabler-icons.woff2'));
 
 const link = n => `<link rel="stylesheet" href="${n}">`;
-let h = fs.readFileSync(path.join(dir, 'Orion page.html'), 'utf8')
+let h = fs.readFileSync(path.join(dir, 'legacy', 'Orion page.html'), 'utf8')
   .replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, '')
   .replace(/<link[^>]*type=["']text\/css["'][^>]*>/gi, '')
   .replace(/<script[^>]*src=[^>]*><\/script>/gi, '')

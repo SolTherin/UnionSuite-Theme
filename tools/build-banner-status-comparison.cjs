@@ -69,7 +69,7 @@ const html = `<!doctype html>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Member banner · Status comparison</title>
   ${shell.styles}
-  <link rel="stylesheet" href="../prototypes/banner-status-comparison.css">
+  <link rel="stylesheet" href="../prototypes/legacy/banner-status-comparison.css">
 </head>
 <body class="banner-comparison">
   <main>
@@ -101,7 +101,7 @@ const html = `<!doctype html>
     </aside>
   </main>
   <script src="../THeme/UnionSuite/zUnionSuite.js"></script>
-  <script src="../prototypes/banner-status-comparison.js"></script>
+  <script src="../prototypes/legacy/banner-status-comparison.js"></script>
 </body>
 </html>`;
 

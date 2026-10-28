@@ -1,6 +1,6 @@
 # Taskbar design workshop
 
-Status: Option C approved and locked on 20 September 2026. Its design and acceptance criteria are recorded in `THEME-ENHANCEMENTS-INTEGRATION-PLAN.md` at the project root. Production integration remains planned.
+Status: Option C approved and locked on 20 September 2026. Its design and acceptance criteria are recorded in `docs/THEME-ENHANCEMENTS-INTEGRATION-PLAN.md` at the project root. Production integration remains planned.
 
 Open `references/Taskbar-Workshop.html` directly in a browser. It is one offline HTML file with embedded CSS, JavaScript, icons and fictional data. It opens with approved Option C selected; A and B remain historical comparisons:
 

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const {pathToFileURL} = require('node:url');
 const {chromium} = require('../.tmp-iqa-integration/node_modules/playwright');
-const source = fs.readFileSync('Mascot/pip-koala.source.html', 'utf8');
+const source = fs.readFileSync('experiments/Mascot/pip-koala.source.html', 'utf8');
 const oldSource = fs.readFileSync('.preview/pip-v1-before.source.html', 'utf8');
 const wrap = source => '<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:24px}</style>' + source;
 
@@ -100,7 +100,7 @@ const wrap = source => '<!doctype html><meta name="viewport" content="width=devi
       const preview = await browser.newPage(options);
       preview.on('pageerror', error => errors.push(error.message));
       await preview.route('https://**/*', route => route.abort());
-      await preview.goto(pathToFileURL(require('node:path').resolve('Mascot/pip-koala.html')).href);
+      await preview.goto(pathToFileURL(require('node:path').resolve('experiments/Mascot/pip-koala.html')).href);
       const frame = preview.frames().find(frame => frame !== preview.mainFrame());
       await frame.locator('.pip-replay').click();
       await preview.waitForTimeout(3300);

@@ -3,10 +3,10 @@
 The unified registry is implemented. Its current contract replaces the earlier business-action proposal in this file.
 
 - [Usage guide: full template, options, visuals and execution route](THeme/UnionSuite-Guides/Usage-Guide.html#unified-action-route)
-- [Execution contract](references/Unified-Action-Execution-Contract.md)
-- [Conversion checklist and exact old-to-new mappings](references/Unified-Action-Conversion-Checklist.md)
-- [Current function inventory](references/Theme-Button-Function-Inventory.md)
-- [Legacy helper cleanup status](references/Helper-Cleanup-Status.md)
+- [Execution contract](../references/Unified-Action-Execution-Contract.md)
+- [Conversion checklist and exact old-to-new mappings](../references/Unified-Action-Conversion-Checklist.md)
+- [Current function inventory](../references/Theme-Button-Function-Inventory.md)
+- [Legacy helper cleanup status](../references/Helper-Cleanup-Status.md)
 - [Interactive comparison](references/Unified-Action-Comparison.html)
 
 Shared runtime lives in zUnionSuite.js. Standard definitions live in Scripts/ActionDefinitions.js; site definitions belong in UnionSuite-Client/Actions.js. Load once in order. The iPart CSS class field creates an inner wrapper around the native panel. A registered us-action-AREA-COMMAND class on that wrapper requests its heading action; the same class can be used on an authored button/link, menu item or row control.

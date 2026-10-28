@@ -1,7 +1,7 @@
 # Activity feed IQAs
 
 Status: draft, 1 October 2026. Specification for step 1 of the
-[feed plan](../../../THEME-ACTIVITY-FEED.md#7-implementation-and-acceptance):
+[feed plan](../../../docs/THEME-ACTIVITY-FEED.md#7-implementation-and-acceptance):
 the IQAs behind the Recent activity feed (item 32 in this folder's
 [README](README.md#activity-feed)). Nothing here is built in iMIS yet.
 

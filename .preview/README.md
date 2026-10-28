@@ -1,6 +1,6 @@
 # Theme preview harness
 
-Renders `Orion page.html` — a real captured iMIS staff page — against the full
+Renders `legacy/Orion page.html` — a real captured iMIS staff page — against the full
 stylesheet cascade, so theme changes can be checked without a deploy.
 
     themed.html   layers 1–5 (the real thing)
@@ -12,10 +12,10 @@ The cascade, in load order:
 | # | Served as | Source in this folder |
 |---|---|---|
 | 1 | `10-UltraWaveResponsive.css` | `THeme/UnionSuite/guides/usage/vendor/10-UltraWaveResponsive.css` |
-| 2 | `UT_Staff.css` | `UTStaff.css` |
-| 3 | `99-Orion.css` | `Native CSS/Orion-99.css` |
-| 4 | `zAdditionalStyling.css` | `UT-theme.css` |
-| 5 | `zUnionStyling.css` | `zUnionStyling.css` (empty here) |
+| 2 | `UT_Staff.css` | `legacy/UTStaff.css` |
+| 3 | `99-Orion.css` | `legacy/Native CSS/Orion-99.css` |
+| 4 | `zAdditionalStyling.css` | `legacy/UT-theme.css` |
+| 5 | `zUnionStyling.css` | `legacy/zUnionStyling.css` (empty here) |
 
 Rebuild after editing any source file:
 

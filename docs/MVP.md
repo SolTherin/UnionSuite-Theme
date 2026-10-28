@@ -1,7 +1,7 @@
 # MVP task list
 
 The work left before the theme's MVP. Set by the owner on 14 October 2026.
-Day-to-day tasks and live checks stay in [TODO.md](TODO.md); tick items off
+Day-to-day tasks and live checks stay in [TODO.md](../TODO.md); tick items off
 here as each one is finished.
 
 ## Taskbar
@@ -26,7 +26,7 @@ here as each one is finished.
 - [ ] Participation tab: tidy it up to match the mockup.
 - [ ] History / changelog tab: finish it.
 
-Handover and decisions: [contact page v3](prototypes/wip/contact-page-v3/README.md).
+Handover and decisions: [contact page v3](../prototypes/wip/contact-page-v3/README.md).
 
 ## Cases layout
 
@@ -38,15 +38,15 @@ Handover and decisions: [contact page v3](prototypes/wip/contact-page-v3/README.
 - [ ] Composer actions
 - [ ] Create case form
 
-Handover: [case page](prototypes/wip/case-page/HANDOVER.md). Open data
+Handover: [case page](../prototypes/wip/case-page/HANDOVER.md). Open data
 issues (CaseID not reaching the case contacts IQA, ContactType 'Please
-Enter') are under Cases in [TODO.md](TODO.md#cases).
+Enter') are under Cases in [TODO.md](../TODO.md#cases).
 
 ## Agreements layout
 
 - [ ] Review all popups.
 
-Background: [agreement page](prototypes/wip/agreement-page/README.md).
+Background: [agreement page](../prototypes/wip/agreement-page/README.md).
 
 ## IQAs still in the sandbox
 
@@ -64,7 +64,7 @@ won't appear here, so check each page in iMIS too (IQA designer → Where used).
 | `$/_i4u_/SandBox/CRM Layouts/Contact_Page/Active Positions` | Banner positions: same files |
 | `$/_i4u_/SandBox/CRM Layouts/Contact_Page/Tab Counts` | Banner tab counts: same files |
 | `$/_i4u_/SandBox/CRM Layouts/Contact_Page/Trackers` | Contact trackers: v3 `index.html`, v3 `README.md` |
-| `$/_i4u_/SandBox/CRM Layouts/Contact Profile/Activity` (folder) | Activity timeline sources (Interactions, Outbound Emails, Outbound Email Resends, Outbound Emails History …): v3 `index.html`, `contact-page.js`, `THEME-ACTIVITY-FEED.md`, `Activity-IQA-Specs.md` |
+| `$/_i4u_/SandBox/CRM Layouts/Contact Profile/Activity` (folder) | Activity timeline sources (Interactions, Outbound Emails, Outbound Email Resends, Outbound Emails History …): v3 `index.html`, `contact-page.js`, `docs/THEME-ACTIVITY-FEED.md`, `Activity-IQA-Specs.md` |
 | `$/_i4u_/SandBox/CRM Layouts/Contact Profile/Client Activities` (folder) | Timeline details IQAs (client-editable): `Activity-IQA-Specs.md`, `Outbound-Emails-Build.md` |
 
 ### Cases

@@ -3,7 +3,7 @@ const image=n=>'data:image/png;base64,'+fs.readFileSync(path.join(root,'THeme/Un
 const native=(read('THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css')+'\n'+read('THeme/UnionSuite/99-Orion.css')).replace(/@import\s+[^;]+;/g,'').replace(/@font-face\s*\{[^}]*\}/g,'').replace(/url\([^)]*\)/g,u=>{const n=u.match(/(Asi(?:Success|Error|Warning|Information|Validation))\.png/);return n?'url("'+image(n[1])+'")':'none'});
 const tokens=read('THeme/UnionSuite/zUnionSuite.css').split('/* US-NATIVE-BUTTONS:START */')[0];
 const proposal=read('THeme/UnionSuite/zUnionSuite.css').split('/* US-MESSAGES:START */')[1].split('/* US-MESSAGES:END */')[0];
-fs.writeFileSync(path.join(root,'prototypes/Message-Styles.preview.css'),'/* Generated from zUnionSuite.css. */'+proposal);
+fs.writeFileSync(path.join(root,'prototypes/legacy/Message-Styles.preview.css'),'/* Generated from zUnionSuite.css. */'+proposal);
 const page=(kind,text)=>'<div class="user-message-area" style="display:block"><div class="AsiMessage"><ul><li role="alert" class="Asi'+kind+'"><img class="iMISUserMessageIcon" src="'+image('Asi'+kind)+'" alt="'+kind+' icon"><div class="AsiMessageText" translate="yes">'+text+'</div></li></ul></div></div>';
 const samples=[
 ['Publish notification with native background icon','<div class="ContentRecordPublishPanel AsiWarning AsiWarningIcon"><span class="Label pt-1 pr-4">This page has unpublished changes.</span> <input type="button" class="PrimaryButton TextButton" value="Publish Page"></div>','The combined warning and icon classes reserve a 48px left gutter for the 24px native background icon. Native publishing handlers and hidden actions are untouched.'],

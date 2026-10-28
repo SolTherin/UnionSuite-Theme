@@ -33,7 +33,7 @@ const status=`
 })();
 `;
 write(jsPath,read(jsPath).replace('/* US-BANNER-BEHAVIOUR:END */',status+'\n/* US-BANNER-BEHAVIOUR:END */'));
-let css=read('prototypes/banner-status-final.css');
+let css=read('prototypes/legacy/banner-status-final.css');
 const glass=css.slice(css.indexOf('/* Glass treatment:'),css.indexOf('.status-final .rail.compact'));
 const tabs=css.slice(css.indexOf('/* Quiet selected'));
 const transform=s=>s.replaceAll(':root .status-final .us-banner .us-banner__surface',':root .us-banner .us-banner__surface.us-banner__surface--member:not(:where(.us-report-no-styling *))').replaceAll('.status-final .us-banner .us-banner__surface','.us-banner .us-banner__surface.us-banner__surface--member:not(:where(.us-report-no-styling *))').replaceAll('var(--status)','var(--member-status-colour)');

@@ -6,7 +6,7 @@ handover, findings and decisions. Keep this folder for its v1 → v2 mapping.
 
 ## Problem
 
-`prototypes/crm-contact-Prototype.html` (v1) is a standalone mock-up with its own
+`prototypes/legacy/crm-contact-Prototype.html` (v1) is a standalone mock-up with its own
 palette, cards, sidebar, stat tiles and sub-tab pills. None of it maps to what
 iMIS renders or to the UnionSuite theme. v2 re-expresses the same member record
 with the theme's existing components so that the page could be built from iPart

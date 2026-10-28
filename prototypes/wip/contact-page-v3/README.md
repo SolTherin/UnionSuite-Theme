@@ -31,7 +31,7 @@ Items 33 (adjustments) and 34 (active positions in the banner) were added on
 
 | Version | Location | What it is |
 | --- | --- | --- |
-| v1 | `prototypes/crm-contact-Prototype.html` | Original standalone mock-up with its own palette, sidebar, stat tiles and sub-tab pills. Owner likes its density, notes layout, header contrast, expandable failed payments, banner layout and sidebar menu. |
+| v1 | `prototypes/legacy/crm-contact-Prototype.html` | Original standalone mock-up with its own palette, sidebar, stat tiles and sub-tab pills. Owner likes its density, notes layout, header contrast, expandable failed payments, banner layout and sidebar menu. |
 | v2 | `prototypes/wip/contact-page-v2/` | v1 rebuilt from existing theme components (contact banner, native CCO, section switcher, Needs Attention, native panels and reports, list shells). Correct but too loose. Its README holds the v1 → v2 component mapping. |
 | v3 | this folder | v2 plus proposed theme changes (`theme-candidate*.css` / `.js`) that restore v1's density and add new components. |
 | v4 | `archive/contact-page-v4 (rejected banner toggle)` (ignored) | Rejected: collapse toggle and collapsed Sections picker in the banner. |
@@ -451,7 +451,7 @@ optional fields collapse. Both templates are kept for now: see the root
 ### Activity feed
 
 Item 32, proposed 25 September 2026. The direction and reasons are in the
-root [feed plan](../../../THEME-ACTIVITY-FEED.md): one API-driven module
+root [feed plan](../../../docs/THEME-ACTIVITY-FEED.md): one API-driven module
 (`US-ACTIVITY-FEED` in `theme-candidate.js`) instead of five Query Template
 Displays merged in the browser.
 

@@ -122,7 +122,7 @@
   partial replacement when behaviour is involved.
 - Author-facing HTML is the inner Content HTML or one repeating Query Template
   result. Keep generated outer wrappers out of copyable author templates.
-- See `IMIS-CMS-STRUCTURE.md` §4 and the usage guide's `#ipart-class-wrapper`
+- See `docs/IMIS-CMS-STRUCTURE.md` §4 and the usage guide's `#ipart-class-wrapper`
   section for examples and the repeated shell/header-action failure mode.
 
 ## Guide workflow
@@ -229,8 +229,9 @@ independent sources of truth and do not need to be committed.
   research into repository-root `archive/`, which is ignored by Git. Archive only
   after confirming useful content has been retained and maintained builds/tests
   no longer depend on those files. Archive the research, not the only approved spec.
-- Existing legacy prototype locations stay tracked pending explicit classification.
-  Names such as `Example` or `Comparison` do not prove a file is disposable.
+- Unclassified legacy prototypes are gathered in `prototypes/legacy/` and stay
+  tracked pending explicit classification; many are inputs to `tools/build-*.cjs`
+  generators. Names such as `Example` or `Comparison` do not prove a file is disposable.
   Required guide examples stay tracked even when they began as research.
 - `.preview/` is local output/capture space. Existing `.cjs`, `.js` and `.py` helper scripts remain
   tracked until classified or migrated; do not add new canonical guide logic there.

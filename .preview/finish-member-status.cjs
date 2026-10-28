@@ -4,13 +4,13 @@ s=s.replace("html=html.replace('<aside>'",`html=html.replaceAll('us-banner trial
 html=html.replace('<aside>'`);
 s=s.replace('Refinement preview · sample actions only · not yet promoted to the production theme','Shared member profile banner · sample actions only');
 w(p,s);
-w('prototypes/banner-status-final.css',`/* Preview layout only; member appearance lives in zUnionSuite.css. */
+w('prototypes/legacy/banner-status-final.css',`/* Preview layout only; member appearance lives in zUnionSuite.css. */
 .status-final #action-feedback{margin-top:24px;min-height:24px;font-size:14px}
 .status-final .trial .us-banner__surface{overflow:visible}
 .status-final .compact .us-banner__nav{margin-top:8px}
 .status-final .us-banner__nav[hidden]{display:none}
 `);
-p='prototypes/banner-status-comparison.js';s=r(p).replace("colour.value=source;","document.querySelectorAll('.us-banner__surface--member').forEach(n=>n.setAttribute('data-us-status-colour',source));\n  window.UnionSuiteMemberStatus?.refresh();\n  colour.value=source;");w(p,s);
+p='prototypes/legacy/banner-status-comparison.js';s=r(p).replace("colour.value=source;","document.querySelectorAll('.us-banner__surface--member').forEach(n=>n.setAttribute('data-us-status-colour',source));\n  window.UnionSuiteMemberStatus?.refresh();\n  colour.value=source;");w(p,s);
 p='THeme/UnionSuite/guides/usage/source/Usage-Guide.source.html';s=r(p);
 const start=s.indexOf('<p class="note">Design trial:');const end=s.indexOf('</p>',start);
 if(start>=0)s=s.slice(0,start)+'<p class="note"><strong>Implemented:</strong> the <a href="../../references/Banner-Status-Final.html">member profile banner</a> uses a status rail, matching pill and glass Actions button. <a href="../../references/Banner-Status-Comparison.html">Earlier comparisons</a> remain available for reference.</p>'+s.slice(end+4);

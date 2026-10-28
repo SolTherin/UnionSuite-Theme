@@ -1,10 +1,10 @@
 # Project TODO
 
 Reconciled 8 September 2026. Implementation status is maintained in
-[THEME-INVENTORY.md](THEME-INVENTORY.md); author recipes and installation are in
+[THEME-INVENTORY.md](docs/THEME-INVENTORY.md); author recipes and installation are in
 [Usage-Guide.html](THeme/UnionSuite-Guides/Usage-Guide.html).
 Local implementation is distinct from live deployment verification.
-The MVP task list is in [MVP.md](MVP.md).
+The MVP task list is in [MVP.md](docs/MVP.md).
 
 ## Latest live checks
 
@@ -110,9 +110,9 @@ Recommendations and proposed fixes for review: [theme consistency](prototypes/wi
 
 - [ ] Consolidate Biscuit's shared palette and create a usage index. Share fur, ear, muzzle, collar and tag colour tokens across the taskbar and hammock task-empty state, while keeping each pose's drawing and animation separate. Index production uses, maintained source files and generated previews; distinguish historical mockups from maintained assets. Keep the index in the canonical usage guide, update affected examples and verify both poses in light/dark mode and reduced motion. Consider extracting reusable facial features only as more poses justify it.
 - [ ] When editing a panel, automatically call its refresh in the background and show a message that the data has been updated since the page loaded.
-- [ ] Named panel action injection and verified handlers: [action plan](THEME-PANEL-ACTIONS.md). Shared report action slots/styles already exist.
+- [ ] Named panel action injection and verified handlers: [action plan](docs/THEME-PANEL-ACTIONS.md). Shared report action slots/styles already exist.
 - [ ] Reusable filter toggle: one shared theme component that hides a block's filters behind a heading filter button, for any Query Template Display or Content HTML block. `US-QUERY-SEARCH` (home page tasks) and the activity feed each build it today, and IQA reports hide their filters behind a similar toggle; unify them (owner note, 25 September 2026).
-- [ ] Combined activity feed: [feed plan](THEME-ACTIVITY-FEED.md). API-driven candidate built in contact page v3 (item 32, 25 September 2026); rows now render the shared record card from `prototypes/wip/activity-cards/` (26 September 2026), which notes, cases and meetings lists can use too; next, build the five source IQAs and confirm REST access, filter names and paging cost in iMIS.
+- [ ] Combined activity feed: [feed plan](docs/THEME-ACTIVITY-FEED.md). API-driven candidate built in contact page v3 (item 32, 25 September 2026); rows now render the shared record card from `prototypes/wip/activity-cards/` (26 September 2026), which notes, cases and meetings lists can use too; next, build the five source IQAs and confirm REST access, filter names and paging cost in iMIS.
 - [ ] Agreement notes, restricted note access: the Show note check works (owner, 6 October 2026). CloudToolz `POST /ca/note-access` (Flowz) takes `{"NoteOrdinal"}`, checks the signed-in user against the note's access (Open; Individual: assigned staff, SysAdmin, Manager; Team: Agreements Team, SysAdmin, Manager) and answers 200 with `{"Access": "Granted", "Note"}` or `{"Access": "Restricted"}`; the loader is `noteAccess` in `THeme/UnionSuite/Scripts/ActionDefinitions.js`. Still open: confirm staff cannot read a restricted note's text another way (the notes table through `/api/`, other IQAs, the note details page).
 - [ ] Agreement notes, check what Individual means in `/ca/note-access` (owner, 19 October 2026). Individual is the staff assigned to the **agreement or case record**, not the staff the note is assigned to (Team is the record's team); the Flowz may currently check the note's assignees. Confirm, and fix the flow if so. Same rules for the new record-access check the Add note form will call (`accessCheck()` placeholder in `prototypes/wip/agreement-page/templates/Add-Note-Form-Content-HTML.html`: `{Module, ModuleID}` in, `{"Team": true|false, "Individual": true|false}` out, saying whether the signed-in user keeps access at each level, managers and system administrators always true; the author does not keep access by being the author).
 - [ ] Agreement notes, audit access to restricted notes (owner, 8 October 2026): log every attempt to read a restricted note's details: who (signed-in party), which note (NoteOrdinal and its agreement), when, the result (Granted | Restricted) and the route (Show note, the note details page). Write it on the server, in the `/ca/note-access` Flowz, so the browser cannot skip it. Decide where the log lives (proposed: a new `i4u_UT_CA_NoteAccessLog` table), who can review it and how (an IQA or a panel on the note), whether the note details page logs too, and retention.

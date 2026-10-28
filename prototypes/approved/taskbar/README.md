@@ -6,7 +6,7 @@ promotion are complete.
 
 - [Taskbar decisions and source details](Taskbar-Workshop.md)
 - [Recents decisions and source details](Recents-Workshop.md)
-- [Integration and loader plan](../../../THEME-ENHANCEMENTS-INTEGRATION-PLAN.md)
+- [Integration and loader plan](../../../docs/THEME-ENHANCEMENTS-INTEGRATION-PLAN.md)
 - [Taskbar preview](../../../references/Taskbar-Workshop.html)
 - [Recents preview](../../../references/Recents-Workshop.html)
 

@@ -45,7 +45,7 @@ The current preview follows the full homepage screenshot supplied on 13 Septembe
   `#needs-attention` section for REST access, ordering, lifecycle and field rules.
 - `home-layout.css`: prototype page geometry and proposed attention/task layouts.
 - `home-preview.js`: local-only demo interactions; data is inserted by the builder.
-- `../../tools/build-home-preview.cjs`: illustrative records and offline generator.
+- `../../../tools/build-home-preview.cjs`: illustrative records and offline generator.
 
 From the project root:
 

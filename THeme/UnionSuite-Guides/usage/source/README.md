@@ -22,7 +22,7 @@ the native output. Fixtures must put the configured classes on that div, not
 on ContentItemContainer. Cover direct panels, configured/empty wrappers, nested
 iParts and opt-outs when changing component detection. Do not seed runtime
 markers to hide a detection failure. Keep native wrappers out of copyable
-author templates. See [CMS structure §4](../../../../IMIS-CMS-STRUCTURE.md#4-ipart-classes-insert-an-extra-div--this-matters)
+author templates. See [CMS structure §4](../../../../docs/IMIS-CMS-STRUCTURE.md#4-ipart-classes-insert-an-extra-div--this-matters)
 and [the author guide](../../Usage-Guide.html#ipart-class-wrapper).
 
 ## Sources and rebuild

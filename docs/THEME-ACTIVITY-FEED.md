@@ -2,7 +2,7 @@
 
 Status: direction changed 2026-09-25 from merging Query Template Displays to one
 API-driven module. A working candidate (`US-ACTIVITY-FEED`, item 32) is in the
-[contact page v3 prototype](prototypes/wip/contact-page-v3/README.md#activity-feed)
+[contact page v3 prototype](../prototypes/wip/contact-page-v3/README.md#activity-feed)
 with offline fixtures. **Not in the theme, not approved and not deployed.** The
 card layout is being decided in the activity cards workbench
 (`prototypes/wip/activity-cards/`).
@@ -97,7 +97,7 @@ keep their dashes). `Ordinal`, `ActivityKey` and the record
 filter's column are left out; an `Additional-*` column reads as its label
 alone, with no heading. The full column, filter and client configuration
 rules are in
-[Activity-IQA-Specs.md](prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
+[Activity-IQA-Specs.md](../prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
 
 A source `<li>` can also carry `data-history`: the IQA page for its type,
 shown as "View all calls" (emails, meetings…) while that type is chosen.
@@ -192,7 +192,7 @@ a performance improvement.
 1. Build the six IQAs to the field contract and confirm REST access for staff,
    the start-date filter names (`GET /api/QueryParameterDefinition?QueryPath=…`)
    and plain-text email bodies. Specification:
-   [Activity-IQA-Specs.md](prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
+   [Activity-IQA-Specs.md](../prototypes/wip/contact-page-v3/Activity-IQA-Specs.md).
 2. Settle the card layout in the activity cards workbench.
 3. Measure paging cost on large histories against the UNION query.
 4. Promote `US-ACTIVITY-FEED` and its CSS, then document it in the usage guide.
@@ -208,4 +208,4 @@ a performance improvement.
 | Keyboard, mobile and long card content | Readable cards, reachable controls, no horizontal scroll |
 | Large histories | Measured query/page timings and bounded payloads |
 
-This feature is T15 in the [updated condensed component inventory](CRM-Member-Profile-Component-Types-Updated.csv).
+This feature is T15 in the [updated condensed component inventory](crm-member-profile/CRM-Member-Profile-Component-Types-Updated.csv).

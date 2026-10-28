@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const { chromium } = require('../.tmp-iqa-integration/node_modules/playwright');
-const source = fs.readFileSync('prototypes/CCO-Retained-Tabs-Trial.js','utf8');
+const source = fs.readFileSync('prototypes/legacy/CCO-Retained-Tabs-Trial.js','utf8');
 const names = ['People search','Overview','About','Finance','Notes and Interactions','Worksite Search'];
 const shell = '<div id="ste_container_ciDirectory"><div class="panel"><div class="cco tabs-wrapper tabs-horizontal"><div class="RadTabStrip"><div class="rtsLevel"><ul class="rtsUL">' + names.map((n,i)=>'<li class="rtsLI"><a href="#" class="rtsLink '+(!i?'rtsSelected':'')+'"><span class="rtsTxt">'+n+'</span></a></li>').join('')+'</ul></div></div><div class="RadMultiPage">Original content</div></div></div></div>';
 (async()=>{
