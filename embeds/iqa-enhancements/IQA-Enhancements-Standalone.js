@@ -68,7 +68,7 @@
   }
   if (window.UnionSuiteIqaStandalone) return;
   if (!/\/QueryBuilder\/Design\.aspx$|\/AsiCommon\/Controls\/IQA\/Default\.aspx$/i.test(location.pathname)) return;
-  window.UnionSuiteIqaStandalone = Object.freeze({ version: "e8e8dc0726" });
+  window.UnionSuiteIqaStandalone = Object.freeze({ version: "ca25ce9d83" });
 
   const style = document.createElement('style');
   style.id = 'iqa-standalone-css';
