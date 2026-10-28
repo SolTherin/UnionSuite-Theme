@@ -1,0 +1,1031 @@
+{
+  "hierarchies": [
+    {
+      "id": 1861,
+      "coreOrgId": null,
+      "parentId": 1857,
+      "isFolder": false,
+      "excludeFromWorkflowInstancesDisplay": false,
+      "definitionId": "b748c85d486c4f8db1d10c0848bc911f",
+      "displayName": "Cases: Quick Add Contact",
+      "version": 1,
+      "isPublished": true,
+      "createdAt": "2026-10-20T10:10:09.5064213+00:00",
+      "lastExecutedAt": null,
+      "avgRuntime": null,
+      "latestInstanceStatus": null,
+      "protected": false,
+      "cronSetting": null,
+      "endpointPath": "/cases/quick-add/contact",
+      "inMaintenanceWindow": false,
+      "securedEndpoint": "green",
+      "createdBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "updatedBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "hasChildRecords": false
+    }
+  ],
+  "flowz": [
+    {
+      "definitionId": "b748c85d486c4f8db1d10c0848bc911f",
+      "versionId": "9eda1f16e3004c0a9d914977a82e40e9",
+      "tenantId": null,
+      "name": "Cases: Quick Add Contact",
+      "displayName": "Cases: Quick Add Contact",
+      "description": null,
+      "channel": null,
+      "version": 1,
+      "variables": {
+        "data": {}
+      },
+      "customAttributes": {
+        "data": {}
+      },
+      "contextOptions": null,
+      "isSingleton": false,
+      "persistenceBehavior": "WorkflowBurst",
+      "deleteCompletedInstances": false,
+      "isPublished": true,
+      "isLatest": true,
+      "tag": null,
+      "activities": [
+        {
+          "activityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "type": "HttpEndpoint",
+          "name": "EndpointData",
+          "displayName": "HTTP Endpoint",
+          "description": null,
+          "x": 275,
+          "y": 40,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Path",
+              "syntax": null,
+              "expressions": {
+                "Literal": "/cases/quick-add/contact"
+              }
+            },
+            {
+              "name": "Methods",
+              "syntax": null,
+              "expressions": {
+                "Json": "[\"POST\"]"
+              }
+            },
+            {
+              "name": "ReadContent",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "TargetType",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Schema",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": ""
+              }
+            },
+            {
+              "name": "ValidateCallerUrl",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateImisRequest",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "ImisRequestVerificationRole",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Authorize",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Policy",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "AuthorizeWithCustomHeader",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderName",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderValue",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateOutlookPluginToken",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RequiredOutlookPluginUsername",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "OutlookPluginMailboxEmail",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "f6f2751f-c874-4435-ad33-cdc7d5d3c534",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Validation",
+          "displayName": "SQL - Validation and Timestamp",
+          "description": null,
+          "x": 275,
+          "y": 314,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "ConnectionId",
+              "syntax": null,
+              "expressions": {
+                "Literal": "default"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "DECLARE @EntityCode AS varchar(20) = COALESCE(\r\n  (SELECT OrgCode FROM [Cases].[i4u_UT_Cases] WHERE Ordinal = @CaseOrdinal), -- this would be @ImisID\r\n  (SELECT EntityCode FROM [ZenCrm].[Individuals] WHERE ImisId = @LoggedInUser),  -- this would be @LoggedInUserID\r\n  (SELECT OrgCode FROM UnionTemplate.Entities WHERE IsDefault = 1) -- Final fallback, default org code\r\n);\r\nDECLARE @localTimestamp datetime = COALESCE([UnionTemplate].fn_GetDateTimeWithTimeZone(@EntityCode), GETUTCDATE());\r\n\r\n\r\nDECLARE @valid int = 1\r\nDECLARE @message varchar(4000) = ''\r\nSET @message = ''\r\n\r\n-- check if case exists\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND Ordinal = @CaseOrdinal\r\n)\r\n    SET @message =+ 'Case is not valid. | '\r\n\r\n-- check if users entity matches case\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases C\r\n\tINNER JOIN UnionTemplate.EntityAccess A\r\n\t\tON C.OrgCode = A.EntityCode\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND C.Ordinal = @CaseOrdinal\r\n\t\tAND A.StaffimisID = @loggedInUser\r\n)\r\n    SET @message =+ 'Unauthorised entity | '\r\n\r\nIF @message <> ''\r\n\tSET @valid = 0\r\n\r\nSELECT \r\n\t@valid AS [Valid],\r\n\t@message AS [Message],\r\n\tCONVERT(varchar(23), @localTimestamp, 126) AS [Timestamp];\r\n"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Grid": "[{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseOrdinal\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"activity\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseNum\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseID\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseID\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@loggedInUser\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Headers.loggedinpartyid\"}}}]",
+                "JavaScript": "JSON.stringify([{\"Name\":\"@CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"@CaseID\",\"Value\":String((activities.EndpointData.Output().Body.CaseID) ?? \"\")},{\"Name\":\"@loggedInUser\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "37e47a45-78c4-41d9-a3ad-98f410656f61",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - General Error",
+          "description": null,
+          "x": 510,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "An unexpected error occurred. Please contact a system adminstrator."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "f4be3806-77fd-46ca-b79a-2faa3555b6eb",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Case Valid",
+          "description": null,
+          "x": 40,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Validation.ResultSet()[0].Valid == 1"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8afd3cd8-9344-4676-be17-21984a494cf1",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Case Not Valid",
+          "description": null,
+          "x": 510,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Case not valid"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "7cfdbb7a-266a-4516-b030-e95ae5b98d32",
+          "type": "IntelligentQueryArchitectData",
+          "name": "CheckOnCase",
+          "displayName": "IQA: Contact Already On Case",
+          "description": null,
+          "x": 40,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/Core/Cases/Value Lists/Case - Form Data/Get Workplace Contact Via CaseID and ID"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "'&parameter=' + activities.EndpointData.Output().Body.ContactID + '&parameter=' + activities.EndpointData.Output().Body.CaseNum"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {
+                "Literal": "0"
+              }
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "04b22cfc-a850-4ae0-8f97-1f05f00920a5",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Lookup Failure",
+          "description": null,
+          "x": 510,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The contact could not be checked. Please try again."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "123d9ec0-92c3-4514-8bc6-74dc16137614",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Not On The Case",
+          "description": null,
+          "x": 40,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.CheckOnCase.ResultSet().length == 0"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "0faf534e-9aa6-4168-8b97-452633b8417c",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Already On Case",
+          "description": null,
+          "x": 510,
+          "y": 1318,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "This contact is already on the case."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "a7e60ed5-72cd-470e-8611-55c1f7909449",
+          "type": "IntelligentQueryArchitectData",
+          "name": "ContactInfo",
+          "displayName": "IQA: Get Contact Info",
+          "description": null,
+          "x": 40,
+          "y": 1318,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/Core/Cases/Value Lists/Case - Form Data/GetContactInfo"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "'&parameter=' + activities.EndpointData.Output().Body.ContactID"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "05bfad06-69f4-465f-8c72-38ee599b53d6",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Contact Found",
+          "description": null,
+          "x": 40,
+          "y": 1569,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.ContactInfo.ResultSet().length > 0"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "86b5dd3b-74a6-4c38-9995-28922970c881",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Contact Not Found",
+          "description": null,
+          "x": 510,
+          "y": 1569,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The contact could not be found."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "d1b7b26b-86e6-4b1c-81e8-1575bf074e60",
+          "type": "InsertIntoDataSource",
+          "name": "iMIS_Insert",
+          "displayName": "iMIS Insert - i4u_UT_Cases_Contacts",
+          "description": null,
+          "x": 40,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "NameOfDataSource",
+              "syntax": null,
+              "expressions": {
+                "Literal": "i4u_UT_Cases_Contacts"
+              }
+            },
+            {
+              "name": "DataMapping",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{\"Name\":\"CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"ContactId\",\"Value\":String((activities.EndpointData.Output().Body.ContactID) ?? \"\")},{\"Name\":\"ContactName\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Name) ?? \"\")},{\"Name\":\"ContactType\",\"Value\":String(('Member') ?? \"\")},{\"Name\":\"ContactPhone\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Mobile) ?? \"\")},{\"Name\":\"ContactEmail\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Email) ?? \"\")},{\"Name\":\"FirstCreatedBy\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")},{\"Name\":\"FirstCreatedOn\",\"Value\":String((activities.SQL_Validation.ResultSet()[0].Timestamp) ?? \"\")},{\"Name\":\"LastUpdatedBy\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")},{\"Name\":\"LastUpdatedOn\",\"Value\":String((activities.SQL_Validation.ResultSet()[0].Timestamp) ?? \"\")}])"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "b2cffb17-a46c-4691-bef0-f368ccc7b34b",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - iMIS insert failure",
+          "description": null,
+          "x": 510,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.iMIS_Insert.Exception() + ' ' + \r\nactivities.iMIS_Insert.InnerException()"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "1fd64dcd-af6f-4927-9852-5ec6e17f8781",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Insert",
+          "displayName": "SQL: CT Insert - i4u_UT_Cases_Contacts",
+          "description": null,
+          "x": 40,
+          "y": 2070,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "ConnectionId",
+              "syntax": null,
+              "expressions": {
+                "Literal": "default"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "INSERT INTO [Cases].[i4u_UT_Cases_Contacts] (\n\tOrdinal,\n\tCaseOrdinal,\n\n\tContactId,\n\tContactName,\n\tContactType,\n\tContactPhone,\n\tContactEmail,\n\tContactRole,\n\tContactIsExternal,\n\t[Action],\n\n\tFirstCreatedBy,\n\tFirstCreatedOn,\n\tLastUpdatedBy,\n\tLastUpdatedOn\n) VALUES (\n\t@imisOrdinal,\n\tCAST(@CaseOrdinal AS int),\n\n\t@ContactID,\n\t@ContactName,\n\t'Member',\n\t@ContactPhone,\n\t@ContactEmail,\n\t'',\n\t0,\n\t'INSERT',\n\n\t@LoggedInUser,\n\t@LocalTimestamp,\n\t@LoggedInUser,\n\t@LocalTimestamp\n)"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{\"Name\":\"@imisOrdinal\",\"Value\":String((activities.iMIS_Insert.ImisOrdinal()) ?? \"\")},{\"Name\":\"@CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"@ContactID\",\"Value\":String((activities.EndpointData.Output().Body.ContactID) ?? \"\")},{\"Name\":\"@ContactName\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Name) ?? \"\")},{\"Name\":\"@ContactPhone\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Mobile) ?? \"\")},{\"Name\":\"@ContactEmail\",\"Value\":String((activities.ContactInfo.ResultSet()[0].Email) ?? \"\")},{\"Name\":\"@LoggedInUser\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")},{\"Name\":\"@LocalTimestamp\",\"Value\":String((activities.SQL_Validation.ResultSet()[0].Timestamp) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e9bf962e-7662-442f-a6e2-a88573b9a5e6",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - CT insert failure",
+          "description": null,
+          "x": 510,
+          "y": 2070,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Insert.Exception()"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "2a3100b8-4df9-4a35-b001-867241513658",
+          "type": "RunJavaScript",
+          "name": "CreateLogContext",
+          "displayName": "JS: Create Log Context",
+          "description": null,
+          "x": 275,
+          "y": 2070,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "// UPDATE LOG CONTEXT HERE\nvar endpoint = activities.EndpointData.Output();\nvar body = endpoint.Body;\nvar contact = activities.ContactInfo.ResultSet()[0];\n\nvar logContext = {\n    \"Note\": \"Case \" + body.CaseID + \": Quick Add Contact\", // UPDATE HERE\n    \"Table\": \"i4u_UT_Cases_Contacts\", // UPDATE HERE\n    \"UpdateReason\": \"Add\", // UPDATE HERE\n    \"workflowDefinitionId\": workflowDefinitionId, // DON'T UPDATE, VARIABLE IS PROVIDED BY CLOUDTOOLZ\n    \"sourceOrdinal\": activities.iMIS_Insert.ImisOrdinal() // the new case contact's ordinal\n}\n// UPDATE FIELDS YOU WANT TO COMPARE HERE - names must match the keys in logBody below\nvar fieldsToCompare = [\"ContactId\", \"ContactName\", \"ContactType\"];\n\n// The values as written to i4u_UT_Cases_Contacts, under its column names.\n// No OldValue: an Add.\nvar logBody = {\n    \"ContactId\": String(body.ContactID ?? \"\"),\n    \"ContactName\": String(contact.Name ?? \"\"),\n    \"ContactType\": \"Member\"\n}\n// An Add logs only the values given: the logging flow writes a row for every\n// field listed, blank or not.\nfieldsToCompare = fieldsToCompare.filter(field => logBody[field] !== \"\");\n\n// compile all variables into one object\nvar logChanges = {\n    \"logContext\": logContext, // DON'T CHANGE\n    \"fieldsToCompare\": fieldsToCompare, // DON'T CHANGE\n    \"body\": logBody,\n    \"profileID\": String(body.CaseID), // the case the change belongs to\n    \"updatedByID\": endpoint.Headers.loggedinpartyid\n}\nsetVariable('logChanges', logChanges);"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "026c8b23-6b50-4749-b229-d10be1d71019",
+          "type": "RunWorkflow",
+          "name": "LogChangesToIMIS",
+          "displayName": "Log Changes To IMIS",
+          "description": null,
+          "x": 275,
+          "y": 2320,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "WorkflowDefinitionId",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getWorkflowDefinitionIdByName('LogChangesToIMIS')"
+              }
+            },
+            {
+              "name": "Input",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('logChanges')"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Mode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "FireAndForget"
+              }
+            },
+            {
+              "name": "TenantId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CorrelationId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ContextId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomAttributes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RetryFailedActivities",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response",
+          "description": null,
+          "x": 40,
+          "y": 2320,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "\r\n'{ \"Ordinal\": '+activities.iMIS_Insert.ImisOrdinal()+' }'",
+                "Literal": "TaskOrdinal: ${TaskOrdinal}"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "OK"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        }
+      ],
+      "connections": [
+        {
+          "sourceActivityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "targetActivityId": "f6f2751f-c874-4435-ad33-cdc7d5d3c534",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "f6f2751f-c874-4435-ad33-cdc7d5d3c534",
+          "targetActivityId": "f4be3806-77fd-46ca-b79a-2faa3555b6eb",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "f6f2751f-c874-4435-ad33-cdc7d5d3c534",
+          "targetActivityId": "37e47a45-78c4-41d9-a3ad-98f410656f61",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "f4be3806-77fd-46ca-b79a-2faa3555b6eb",
+          "targetActivityId": "7cfdbb7a-266a-4516-b030-e95ae5b98d32",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "f4be3806-77fd-46ca-b79a-2faa3555b6eb",
+          "targetActivityId": "8afd3cd8-9344-4676-be17-21984a494cf1",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "7cfdbb7a-266a-4516-b030-e95ae5b98d32",
+          "targetActivityId": "123d9ec0-92c3-4514-8bc6-74dc16137614",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "7cfdbb7a-266a-4516-b030-e95ae5b98d32",
+          "targetActivityId": "04b22cfc-a850-4ae0-8f97-1f05f00920a5",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "123d9ec0-92c3-4514-8bc6-74dc16137614",
+          "targetActivityId": "a7e60ed5-72cd-470e-8611-55c1f7909449",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "123d9ec0-92c3-4514-8bc6-74dc16137614",
+          "targetActivityId": "0faf534e-9aa6-4168-8b97-452633b8417c",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "a7e60ed5-72cd-470e-8611-55c1f7909449",
+          "targetActivityId": "05bfad06-69f4-465f-8c72-38ee599b53d6",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "a7e60ed5-72cd-470e-8611-55c1f7909449",
+          "targetActivityId": "04b22cfc-a850-4ae0-8f97-1f05f00920a5",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "05bfad06-69f4-465f-8c72-38ee599b53d6",
+          "targetActivityId": "d1b7b26b-86e6-4b1c-81e8-1575bf074e60",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "05bfad06-69f4-465f-8c72-38ee599b53d6",
+          "targetActivityId": "86b5dd3b-74a6-4c38-9995-28922970c881",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "d1b7b26b-86e6-4b1c-81e8-1575bf074e60",
+          "targetActivityId": "1fd64dcd-af6f-4927-9852-5ec6e17f8781",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "d1b7b26b-86e6-4b1c-81e8-1575bf074e60",
+          "targetActivityId": "b2cffb17-a46c-4691-bef0-f368ccc7b34b",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "1fd64dcd-af6f-4927-9852-5ec6e17f8781",
+          "targetActivityId": "2a3100b8-4df9-4a35-b001-867241513658",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "1fd64dcd-af6f-4927-9852-5ec6e17f8781",
+          "targetActivityId": "e9bf962e-7662-442f-a6e2-a88573b9a5e6",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "2a3100b8-4df9-4a35-b001-867241513658",
+          "targetActivityId": "026c8b23-6b50-4749-b229-d10be1d71019",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "026c8b23-6b50-4749-b229-d10be1d71019",
+          "targetActivityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "026c8b23-6b50-4749-b229-d10be1d71019",
+          "targetActivityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "outcome": "Not Found"
+        }
+      ]
+    }
+  ]
+}

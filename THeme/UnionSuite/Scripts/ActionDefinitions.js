@@ -888,8 +888,10 @@
     });
   }
 
-  // A row's column by name, whatever its case ("value" or "Value").
-  const column = (row, name) => row?.[Object.keys(row || {}).find(key => key.toLowerCase() === name.toLowerCase())];
+  // A row's column by name, whatever its case, spaces or underscores
+  // ("value" or "Value"; "Full Name", "FullName" or "FULL_NAME").
+  const columnKey = name => String(name).replace(/[\s_]/g, '').toLowerCase();
+  const column = (row, name) => row?.[Object.keys(row || {}).find(key => columnKey(key) === columnKey(name))];
 
   // People already in the section show in the list but cannot be picked.
   const onCase = wrapper => new Set([...(wrapper?.querySelectorAll('[data-us-contact-id]') || [])].map(node => node.getAttribute('data-us-contact-id')));
@@ -1089,12 +1091,15 @@
 
   // Parties (C40): usually one member, sometimes several, sometimes an
   // employer (owner, 8 October 2026). The quick add lists the members at
-  // the primary party's workplace, the usual co-complainants; More options
-  // is the full form, which searches every contact (owner, 10 October
-  // 2026). The proposed Workplace Members IQA: CaseNum (the case's primary
-  // party gives the workplace) and Search (part of a name or number) in;
-  // ContactId, ContactName, Number and Classification out, the primary
-  // party left out, at most 20.
+  // the case's workplace, the usual co-complainants; More options is the
+  // full form, which searches every contact (owner, 10 October 2026).
+  // The list IQA (owner, 28 October 2026) returns the active members
+  // currently working at i4u_UT_Cases.PrimaryWorkplaceID: CaseNum
+  // (required) and Search (optional, the taskbar quick search's string of
+  // name, email and phone) in; ID, Full Name, Member Type and Member
+  // Category out, at most 20. Its aliases are read by column(), so
+  // "Full Name", "FullName" and "FULL_NAME" all match.
+  const WORKPLACE_MEMBERS = '$/_i4u_/Core/Cases/Layouts v2/API - Manage Case - Contact List - Primary Workplace';
   composer('cases.add-party', {
     label: 'Add party',
     form: {href: ({context}) => page('/Cases_ManageContacts', {CaseID: context.caseId}), title: 'Add party'},
@@ -1102,15 +1107,16 @@
     arrive: 'bottom',
     composer: {
       kind: 'party', label: 'New party', save: 'Add', keepOpen: true,
-      main: {type: 'combobox', name: 'ContactID', label: 'Member at the workplace', placeholder: 'Members at the primary party’s workplace…', avatars: true,
+      main: {type: 'combobox', name: 'ContactID', label: 'Member at the workplace', placeholder: 'Members at the case’s workplace…', avatars: true,
         required: 'Choose a member from the list, or use More options to search everyone.',
         search: async ({term, wrapper}) => {
           const taken = onCase(wrapper);
           const caseNum = new URLSearchParams(location.search).get('CaseNum') || '';
-          return (await lookup('$/_i4u_/Core/Cases/API - Workplace Members', term, {CaseNum: caseNum, limit: '20'})).map(contact => {
-            const disabled = taken.has(String(contact.ContactId));
-            return {value: contact.ContactId, name: contact.ContactName,
-              meta: [contact.Number, contact.Classification, disabled ? 'On the case' : ''].filter(Boolean).join(' · '), disabled};
+          return (await lookup(WORKPLACE_MEMBERS, term, {CaseNum: caseNum, limit: '20'})).map(row => {
+            const id = String(column(row, 'ID') ?? '');
+            const disabled = taken.has(id);
+            return {value: id, name: column(row, 'Full Name') ?? '',
+              meta: [column(row, 'Member Type'), column(row, 'Member Category'), disabled ? 'On the case' : ''].filter(Boolean).join(' · '), disabled};
           });
         },
         empty: term => (term ? 'No members at this workplace match “' + term + '”.' : 'No other members at this workplace.') + ' More options searches everyone.'},

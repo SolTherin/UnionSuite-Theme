@@ -88,8 +88,8 @@
   // with a follow-up is also a task (owner, 9 October 2026), so it adds a
   // task row too, marked FromNote so the activity lists it once, as the note.
   const added = {notes: [], tasks: [], meetings: [], staff: [], attachments: [], parties: []};
-  // The members at the primary party's workplace, for the Workplace
-  // Members IQA (C40); Josh is already on the larger case.
+  // The members at the case's workplace, for Add party's list IQA
+  // (C40); Josh is already on the larger case.
   const contacts = [
     {ContactId: '20903', ContactName: 'Josh Kemp', ContactType: 'Member', MemberType: 'Full member', MemberStatus: 'Financial', Number: 'Member 20903', Classification: 'Storeperson Grade 1', Plan: 'Full member', MemberStanding: 'New member', MemberStandingTone: 'warning', ContactEmail: 'joshkemp@mailinator.com', ContactPhone: ''},
     {ContactId: '20977', ContactName: 'Sam Okafor', ContactType: 'Member', MemberType: 'Full member', MemberStatus: 'Financial', Number: 'Member 20977', Classification: 'Forklift driver', Plan: 'Full member', MemberStanding: '', MemberStandingTone: '', ContactEmail: 'sokafor@mailinator.com', ContactPhone: '0412 555 230'},
@@ -640,12 +640,17 @@
         'Additional-Last member contact': closed ? '' : older ? '21 days ago' : fresh ? 'Not yet' : 'Yesterday',
         'Tone-Last member contact': closed ? '' : older ? 'warning' : ''
       }]), 200, 300);
-      // Workplace Members (C40): the primary party's workplace, part of a
-      // name or number, at most 20.
-      if (name.endsWith('/API - Workplace Members')) {
+      // Add party's list (C40; the live IQA, owner, 28 October 2026): the
+      // active members at the case's workplace, Search matching the taskbar
+      // quick search's string, at most 20, with the live IQA's aliases. The
+      // primary party is listed too; the composer marks who is on the case.
+      if (name.endsWith('/API - Manage Case - Contact List - Primary Workplace')) {
         const term = (target.searchParams.get('Search') || '').toLowerCase();
-        const found = contacts.filter(contact => contact.ContactId !== primaryId && (!term || (contact.ContactName + ' ' + contact.Number).toLowerCase().includes(term)));
-        return reply(items(found.slice(0, Number(target.searchParams.get('limit')) || 20)), 200, 200);
+        const found = contacts.filter(contact => !term || (contact.ContactName + ' ' + contact.Number).toLowerCase().includes(term));
+        return reply(items(found.slice(0, Number(target.searchParams.get('limit')) || 20).map(contact => ({
+          ID: contact.ContactId, 'Full Name': contact.ContactName,
+          'Member Type': contact.MemberType, 'Member Category': contact.MemberStatus
+        }))), 200, 200);
       }
       // The add staff composer's Role list (case staff member types).
       if (name.endsWith('/Get Case Staff Member Types')) return reply(items(staffTypes), 200, 200);

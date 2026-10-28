@@ -105,7 +105,7 @@ The owner's brief, in order (all 10 October 2026):
 - **A refreshed feed keeps its type** (C41, now native in `US-ACTIVITY-FEED`): the
   section remembers the chosen type and picks it again when the feed is rebuilt.
 - **Add party's quick add** lists the members at the primary party's workplace
-  (proposed `API - Workplace Members` IQA, filtered by `CaseNum`); its More
+  (`API - Manage Case - Contact List - Primary Workplace`, filtered by `CaseNum`); its More
   options is the full popup, "a comprehensive search function for the entire
   db". People already on the case show but cannot be picked
   (`data-us-contact-id` in the section).
@@ -158,17 +158,20 @@ was run.
 
 - **`/cases/set-status`:** no flow yet. The banner's status menu
   (`cases.set-status`) posts `{CaseID, Status}` to it.
-- **Add party's quick add:** `/cases/quick-add/contact` is a stub (the
-  endpoint and an empty OK: no insert, no Ordinal). Its quick list is built
-  (owner, 28 October 2026): `$/_i4u_/Core/Cases/Layouts v2/API - Manage
-  Case - Contact List - Primary Workplace`, the active members currently
-  working at the case's workplace (`i4u_UT_Cases.PrimaryWorkplaceID`).
-  Required `CaseNum`, optional `Search` (the taskbar quick search's string:
-  name, email and phone joined); at most 20 rows; returns `ID`, `Full Name`,
-  `Member Type` and `Member Category`. The theme still reads the proposed
-  `$/_i4u_/Core/Cases/API - Workplace Members` (ContactId, ContactName,
-  Number, Classification). More options is the full popup, "a comprehensive
-  search function for the entire db".
+- **Add party's quick add:** `/cases/quick-add/contact` is a stub on the
+  site (the endpoint and an empty OK: no insert, no Ordinal). Its
+  replacement is drafted in `flows/Cases-Quick-Add-Contact.flow.json`
+  (28 October 2026), to import over the stub: it validates the case, refuses
+  a contact already on it, reads the contact, adds the case contact
+  (`ContactType` "Member") in iMIS and CloudToolz, logs it and returns
+  `{"Ordinal": n}`. Its quick list is built (owner, 28 October 2026):
+  `$/_i4u_/Core/Cases/Layouts v2/API - Manage Case - Contact List - Primary
+  Workplace`, the active members currently working at the case's workplace
+  (`i4u_UT_Cases.PrimaryWorkplaceID`). Required `CaseNum`, optional `Search`
+  (the taskbar quick search's string: name, email and phone joined); at most
+  20 rows; returns `ID`, `Full Name`, `Member Type` and `Member Category`,
+  which `cases.add-party` reads (28 October 2026). More options is the full
+  popup, "a comprehensive search function for the entire db".
 - **Case workplace (C42, owner, 22 October 2026):** the member card's Work
   label menu (in the theme since 24 October 2026: `US-CASE-WORKPLACE`, guide
   `#case-member`) needs:
