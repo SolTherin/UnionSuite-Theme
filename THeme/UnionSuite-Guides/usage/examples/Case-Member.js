@@ -36,7 +36,7 @@
       'Work-Employer': 'Westgate Logistics Pty Ltd', 'Work-Workplace': 'Westgate Cold Storage – Laverton', 'Work-Classification': 'Storeperson Grade 1', 'Work-Delegate': 'Dana Whitfield'}
   ];
 
-  // Case - Member Details, filtered on CaseNum: the case's job in the
+  // API - Manage Case - Primary Party Details, filtered on CaseNum: the case's job in the
   // Work-* columns (joined on PrimaryWorkplaceID), blank when the case is
   // not about a workplace.
   const details = {'Alert-Title': 'Unfinancial', 'Alert-Message': 'Paid to 30 Jun 2026. Check eligibility before providing assistance.', 'Alert-Tone': 'danger',

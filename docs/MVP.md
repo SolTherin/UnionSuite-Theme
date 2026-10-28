@@ -71,11 +71,13 @@ won't appear here, so check each page in iMIS too (IQA designer → Where used).
 
 | Sandbox IQA or folder | Used by |
 | --- | --- |
-| `$/_i4u_/SandBox/Cases/Case - Member Details` | Member card: `Case-Member-Query-Template.html` |
 | `$/_i4u_/SandBox/Cases/Case Activity` (folder, incl. `Last 30 Days`) | Activity, recent activity and changes: `case-page.js`, `Case-All-Activity-`, `Case-Recent-Activity-`, `Case-Changes-Query-Template.html` |
 
 The banner, staff, notes ledger and parties IQAs are already under
-`$/_i4u_/Core/Cases/`.
+`$/_i4u_/Core/Cases/`. The member card's and the parties' details are
+client IQAs (28 October 2026): `$/_i4u_/Client/Cases - UnionSuite/Layouts/`
+`API - Manage Case - Primary Party Details` and `API - Manage Case - Party
+Details`.
 
 ### Agreements
 

@@ -369,8 +369,9 @@
       ...rows.tasks.filter(task => task.TAskCheckCSS === 'done')];
     rows.notes = [...rows.notes, ...added.notes, ...rows.tasks.filter(task => !task.FromNote).map(taskNote)].sort((a, b) => b.Iso.localeCompare(a.Iso));
 
-    // The member card's details (Case - Member Details, filtered on the
-    // member's ID): the warning, then grouped fields, all from column names.
+    // The member card's details (the client's API - Manage Case - Primary
+    // Party Details, filtered on CaseNum; the Parties tab's are API - Manage
+    // Case - Party Details, filtered on the party's ID): the warning, then grouped fields, all from column names.
     memberDetails = {
       ...(member.alert ? {'Alert-Title': member.alert.title, 'Alert-Message': member.alert.message, 'Alert-Tone': member.tone} : {}),
       'Contact-Mobile': '0412 555 019',
@@ -679,7 +680,7 @@
       // The banner's status menu (C23).
       if (name.endsWith('/API - Value List - Case Status')) return reply(items(caseStatuses), 200, 200);
       // The member card's IQA (the case's primary party, C42).
-      if (name.endsWith('/Case - Member Details')) {
+      if (name.endsWith('/API - Manage Case - Primary Party Details')) {
         const known = target.searchParams.get('CaseNum') === '214';
         return reply(items(known ? [caseMemberDetails()] : []), 200, 250);
       }
@@ -695,7 +696,7 @@
         }))), 200, 250);
       }
       // A party's details (the guide's template).
-      if (name.endsWith('/Query Template - Manage Case - Party Details')) {
+      if (name.endsWith('/API - Manage Case - Party Details')) {
         const details = detailsFor(target.searchParams.get('ID'));
         return reply(items(details ? [details] : []), 200, 250);
       }

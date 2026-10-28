@@ -206,11 +206,13 @@ was run.
     `data-us-member-id="{#query.MemberId}"`) on its `us-case-member` div, as
     the guide's Case member template has them.
   - The card's details need a field group named Work for the control to
-    attach, and for its fields to follow a pick its details IQA must join
-    the case's job on `PrimaryWorkplaceID` (the live card reads Party
-    Details by `ID`, the member's own details). The jobs IQA has no Work-*
-    columns, so after a save the card reads its details again, the previous
-    job's fields dimmed until they arrive.
+    attach. They now come from the client's `API - Manage Case - Primary
+    Party Details` (filter `CaseNum`, joining the case's job on
+    `PrimaryWorkplaceID`; owner, 28 October 2026), so the Primary Party
+    template's details div points there with `CaseNum`, and the IQA selects
+    `CaseNum`. The jobs IQA has no Work-* columns, so after a save the card
+    reads its details again, the previous job's fields dimmed until they
+    arrive.
   - `set-primary-party` should set the new primary's primary workplace or
     clear it; it does not touch the workplace yet. The Details tab does not
     reload after Make primary party.
@@ -231,9 +233,13 @@ was run.
   `ContactIsLead` is a custom SQL expression returning `'true'`/`'false'`.
   An IQA cannot sort on it, so both lists carry `us-contacts-lead-first`
   (US-LEAD-FIRST, in the theme) and sort on real columns.
-- Party details are a second IQA (`$/_i4u_/Core/Cases/Layouts v2/Query
-  Template - Manage Case - Party Details`, filter `ID`) through
-  US-FIELD-GROUPS, loaded only when a party is first shown.
+- Party details are a second IQA through US-FIELD-GROUPS, loaded only when
+  a party is first shown: the client's `$/_i4u_/Client/Cases -
+  UnionSuite/Layouts/API - Manage Case - Party Details` (filter `ID`, owner,
+  28 October 2026, so each client chooses its details). The member card has
+  its own, `…/API - Manage Case - Primary Party Details` (filter `CaseNum`;
+  the member from the case's `PrimaryContactID`, the Work group from its
+  `PrimaryWorkplaceID`).
 - Parties are in the theme (14 October 2026): US-CASE-PARTIES (CSS and JS),
   US-CASE-MEMBER (CSS), the `us-case-parties` preset, and the guide's
   `#case-parties` with the template. The prototype reads that template from

@@ -98,7 +98,7 @@ Recommendations and proposed fixes for review: [theme consistency](prototypes/wi
   - Attachment file tags: `$/_i4u_/SandBox/CA/ZenFileTags` (`US-ATTACHMENTS` in `zUnionSuite.js`, the Add note form, `prototypes/wip/agreement-page/theme-candidate.js`).
   - Taskbar bookmarks: `$/_i4u_/SandBox/CRM Layouts/Jobs List` (`Scripts/UnionSuiteTaskbar-Bookmarks.js`).
   - Agreement page: `$/_i4u_/SandBox/CA/Agreement Details`, `Agreement Key Dates`, `Agreement Resolution`, `Agreement Summary`, `Increases/Agreement Increases` and `Increases/Agreement Increases Summary` (templates and `index*.html` in `prototypes/wip/agreement-page/`).
-  - Case page: `$/_i4u_/SandBox/Cases/` (Case Details, Case Resolution, Case - Member Details, the Case Activity folder and its Last 30 Days folder; templates and `case-page.js` in `prototypes/wip/case-page/`).
+  - Case page: `$/_i4u_/SandBox/Cases/` (Case Details, Case Resolution, the Case Activity folder and its Last 30 Days folder; templates and `case-page.js` in `prototypes/wip/case-page/`).
   - Outbound Emails IQAs, including the `Client Activities` details folder (their `Build.md`).
 
 ## Planned functionality
