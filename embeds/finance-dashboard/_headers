@@ -1,0 +1,19 @@
+# Cloudflare Pages — response headers for the Finance Dashboard
+#
+# Asset filenames are NOT content-hashed, so the iMIS iParts always point at the
+# same URLs (fd-core.js, fd-styles.css, …). `no-cache` forces revalidation so a
+# new deploy is picked up immediately instead of serving stale JS/CSS from the
+# edge or browser cache. The files are small, so the conditional 304 round-trip
+# is negligible.
+#
+# Do NOT add immutable caching here without content-hashing the filenames first —
+# a stale script against a fresh entry HTML is the classic failure mode, and it
+# surfaces as a corrupted-content / CORS error rather than as anything obvious.
+#
+# Access-Control-Allow-Origin is defensive: the iParts load these via
+# <script src> / <link>, which need no CORS, but a wildcard keeps any future
+# fetch() use working when loaded cross-origin from the iMIS domain.
+
+/*
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *

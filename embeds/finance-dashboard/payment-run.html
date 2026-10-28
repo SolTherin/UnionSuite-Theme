@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard — payment run</title>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SURFACE 2 of 2 — ONE payment run, in full.
+     Which run is named by the query string: ?BatchID=<run id> (FDConfig.runParam).
+     Embedded, that parameter sits on the HOST iMIS page's URL, because the app
+     is inlined into it — which is exactly why a real navigation works and the
+     browser Back button comes for free.
+     "Back to dashboard" lives in the header so it survives every re-render of
+     #detail-content; fd-run.js fills #header-back-slot.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="fd-root" id="fd-root">
+
+  <header>
+    <div class="header-inner">
+      <span class="header-logo">Finance Dashboard</span>
+      <div class="header-sep"></div>
+      <span class="header-sub" id="header-context">Payment run detail</span>
+      <div class="header-spacer"></div>
+      <span id="header-back-slot"></span>
+    </div>
+  </header>
+
+  <div class="main-scroll" id="main-scroll">
+
+    <div class="page" id="view-detail">
+      <div id="detail-back-slot"></div>
+      <div id="detail-content"></div>
+    </div>
+
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+</div><!-- /.fd-root -->
+
+<script>window.FD_SURFACE = "run";</script>
+
+<!-- ── Asset loader — see the note in index.html; keep the two in step. ───── -->
+<script>
+(function () {
+  var CDN   = "https://hubfinancedashboard.pages.dev/";
+  var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === "file:";
+  var base  = local ? "" : CDN;
+
+  // See the note in index.html — keep the two loaders in step.
+  // Union Suite theme (16 Oct 2026): fd-theme-unionsuite.css is an override
+  // layer, appended after fd-styles.css so it wins on source order. The ready
+  // promise waits for both sheets.
+  window.__fdCssReady = Promise.all(["fd-styles.css", "fd-theme-unionsuite.css"].map(function (file) {
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = base + file;
+    document.head.appendChild(css);
+    return new Promise(function (resolve) {
+      css.onload = css.onerror = resolve;
+      setTimeout(resolve, 4000);
+    });
+  }));
+
+  var font = document.createElement("link");
+  font.rel = "stylesheet";
+  font.href = "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Red+Hat+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap";
+  document.head.appendChild(font);
+
+  if (!document.getElementById("__RequestVerificationToken") && !document.getElementById("__ClientContext")) {
+    var fa = document.createElement("link");
+    fa.rel = "stylesheet";
+    fa.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css";
+    document.head.appendChild(fa);
+  }
+
+  /* fd-dashboard.js is NOT loaded here: this surface renders no run list, no
+     charts and no declines area, so its ~15 KB and its render passes are dead
+     weight on a page that only ever shows one run. */
+  ["fd-config.js", "fd-core.js", "fd-data.js", "fd-run.js", "fd-theme-series.js", "fd-boot.js"]
+    .forEach(function (file) {
+      var s = document.createElement("script");
+      s.src = base + file;
+      s.async = false;
+      s.onerror = function () { console.error("Finance Dashboard: failed to load " + file); };
+      document.head.appendChild(s);
+    });
+})();
+</script>
+
+</body>
+</html>

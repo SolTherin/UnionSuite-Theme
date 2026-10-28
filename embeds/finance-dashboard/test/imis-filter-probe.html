@@ -1,0 +1,171 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     iMIS HTML attribute filter — BINDING PROBE
+     ───────────────────────────────────────────────────────────────────────────
+     Paste this whole block into an iMIS RiSE content record (HTML/Source view),
+     SAVE, then open the published page. It reports what survived, in the page.
+
+     Purpose: the Zentso PDF established that on* ATTRIBUTES in markup are
+     stripped. This probe answers the questions that raises for real app code:
+
+       · Do on* patterns inside <script> TEXT get stripped too?
+       · Is it the attribute form (onclick=) or the identifier (onclick)?
+       · Does `el.onclick = fn` survive?  ← property assignment, has "onclick ="
+       · Does jQuery .click(fn) / .on("click", fn) survive?
+       · Does addEventListener survive?
+       · Does setAttribute("onclick", …) survive?
+       · Do string-split / concatenated forms survive?
+
+     Each test is designed so that if the code survived, clicking the button
+     works and the row goes GREEN. If the filter removed the binding, the row
+     stays RED. A row that reads "SOURCE ALTERED" means the filter changed the
+     script text itself — check the rendered source to see exactly how.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<div id="fdprobe" style="font-family:system-ui,Arial,sans-serif;font-size:14px;border:2px solid #1a4b8c;padding:14px;margin:10px 0;background:#fff">
+  <h3 style="margin:0 0 4px">iMIS attribute-filter probe</h3>
+  <p style="margin:0 0 12px;color:#555">Click every button, then read the table. Green = the binding survived.</p>
+
+  <table style="border-collapse:collapse;width:100%">
+    <thead>
+      <tr style="background:#eef2f7;text-align:left">
+        <th style="padding:6px;border:1px solid #ccd">#</th>
+        <th style="padding:6px;border:1px solid #ccd">Binding technique</th>
+        <th style="padding:6px;border:1px solid #ccd">Try it</th>
+        <th style="padding:6px;border:1px solid #ccd">Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px;border:1px solid #ccd">1</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>onclick=</code> attribute in static markup <em>(control — expected to fail)</em></td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" id="t1" onclick="fdProbe.pass(1)">Test 1</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r1">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">2</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>addEventListener</code> in a script</td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" id="t2">Test 2</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r2">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">3</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>el.onclick = fn</code> — property assignment</td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" id="t3">Test 3</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r3">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">4</td>
+          <td style="padding:6px;border:1px solid #ccd">jQuery <code>.click(fn)</code></td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" id="t4">Test 4</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r4">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">5</td>
+          <td style="padding:6px;border:1px solid #ccd">jQuery <code>.on("click", fn)</code> — delegated</td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" id="t5">Test 5</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r5">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">6</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>innerHTML</code> with <code>onclick=</code> built at RUNTIME</td>
+          <td style="padding:6px;border:1px solid #ccd"><span id="t6slot">building…</span></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r6">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">7</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>setAttribute("onclick", …)</code> at runtime</td>
+          <td style="padding:6px;border:1px solid #ccd"><span id="t7slot">building…</span></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r7">not clicked</td></tr>
+
+      <tr><td style="padding:6px;border:1px solid #ccd">8</td>
+          <td style="padding:6px;border:1px solid #ccd"><code>data-*</code> + delegated listener <em>(what the app now uses)</em></td>
+          <td style="padding:6px;border:1px solid #ccd"><button type="button" data-fdprobe="8">Test 8</button></td>
+          <td style="padding:6px;border:1px solid #ccd" id="r8">not clicked</td></tr>
+    </tbody>
+  </table>
+
+  <h4 style="margin:14px 0 4px">Script-text integrity</h4>
+  <p style="margin:0 0 6px;color:#555">Did the filter alter the JS source itself? These compare a literal against what the parser actually received.</p>
+  <pre id="fdprobe-src" style="background:#f6f8fa;border:1px solid #ddd;padding:10px;white-space:pre-wrap;margin:0">running…</pre>
+</div>
+
+<script>
+window.fdProbe = (function () {
+  "use strict";
+  var results = {};
+
+  function mark(n, ok, note) {
+    results[n] = ok;
+    var cell = document.getElementById("r" + n);
+    if (!cell) return;
+    cell.textContent = (ok ? "SURVIVED" : "STRIPPED") + (note ? " — " + note : "");
+    cell.style.background = ok ? "#e6f7ec" : "#fdecec";
+    cell.style.color      = ok ? "#0a7a3d" : "#b3261e";
+    cell.style.fontWeight = "700";
+  }
+  function pass(n) { mark(n, true); }
+
+  /* ── 2. addEventListener ───────────────────────────────────────────────── */
+  var t2 = document.getElementById("t2");
+  if (t2) t2.addEventListener("click", function () { pass(2); });
+
+  /* ── 3. property assignment. NOTE the text "onclick =" appears here, which
+         is exactly the pattern a whitespace-tolerant attribute filter matches.
+         If this line is removed, the button below simply does nothing.      */
+  var t3 = document.getElementById("t3");
+  if (t3) t3.onclick = function () { pass(3); };
+
+  /* ── 4 & 5. jQuery — iMIS ships jQuery on every RiSE page. ─────────────── */
+  var jq = window.jQuery || window.$;
+  if (jq) {
+    jq("#t4").click(function () { pass(4); });
+    jq("#fdprobe").on("click", "#t5", function () { pass(5); });
+  } else {
+    mark(4, false, "jQuery not present on this page");
+    mark(5, false, "jQuery not present on this page");
+  }
+
+  /* ── 6. runtime innerHTML carrying an onclick attribute. This is what the
+         app's render functions do. The browser builds this AFTER iMIS has
+         served the page, so the save-time filter never sees it.            */
+  var slot6 = document.getElementById("t6slot");
+  if (slot6) slot6.innerHTML = '<button type="button" onclick="fdProbe.pass(6)">Test 6</button>';
+
+  /* ── 7. setAttribute at runtime ────────────────────────────────────────── */
+  var slot7 = document.getElementById("t7slot");
+  if (slot7) {
+    var b7 = document.createElement("button");
+    b7.type = "button";
+    b7.textContent = "Test 7";
+    b7.setAttribute("onclick", "fdProbe.pass(7)");
+    slot7.innerHTML = "";
+    slot7.appendChild(b7);
+  }
+
+  /* ── 8. data-* + delegation — the pattern the dashboard shells now use. ── */
+  var rootEl = document.getElementById("fdprobe");
+  if (rootEl) rootEl.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-fdprobe]");
+    if (el) pass(el.getAttribute("data-fdprobe"));
+  });
+
+  /* ── Script-text integrity ─────────────────────────────────────────────
+     Each probe string is written here as a literal. If the filter edited the
+     script text, the value at runtime will differ from what was typed.    */
+  var probes = [
+    ["attribute form in a string",      'x onclick="y"',        'x onclick="y"'],
+    ["attribute form, single quotes",   "x onclick='y'",        "x onclick='y'"],
+    ["identifier only, no equals",      "onclick",              "onclick"],
+    ["property assignment text",        "el.onclick = fn",      "el.onclick = fn"],
+    ["oninput attribute form",          'a oninput="b"',        'a oninput="b"'],
+    ["href javascript scheme",          'h href="javascript:1"','h href="javascript:1"'],
+    ["style with js url",               'd style="background:url(javascript:1)"', 'd style="background:url(javascript:1)"'],
+    ["benign style",                    'd style="color:red"',  'd style="color:red"']
+  ];
+  var out = probes.map(function (p) {
+    var same = p[1] === p[2];
+    return (same ? "  intact  " : "  ALTERED ") + " | " + p[0].padEnd(32) + " | got: " + JSON.stringify(p[1]);
+  });
+  out.unshift("jQuery present: " + (jq ? ("yes, v" + (jq.fn && jq.fn.jquery)) : "NO"));
+  out.unshift("Compare this against the page's View Source to see what the filter did.");
+  var pre = document.getElementById("fdprobe-src");
+  if (pre) pre.textContent = out.join("\n");
+
+  /* Anything never clicked stays "not clicked"; mark the two controls that
+     cannot self-report until clicked. */
+  return { pass: pass, mark: mark, results: results };
+})();
+</script>

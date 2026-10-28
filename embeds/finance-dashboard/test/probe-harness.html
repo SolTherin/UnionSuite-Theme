@@ -1,0 +1,9 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>probe harness</title>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script></head><body>
+<div id="host"></div>
+<script>
+fetch("imis-filter-probe.html").then(r=>r.text()).then(h=>{
+  const d=document.getElementById("host"); d.innerHTML=h;
+  d.querySelectorAll("script").forEach(o=>{const s=document.createElement("script");s.textContent=o.textContent;document.body.appendChild(s);o.remove();});
+});
+</script></body></html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Embed harness</title>
+<style>body{margin:0;font-family:Arial;background:#eee}
+.host-chrome{padding:10px 16px;background:#333;color:#fff}
+.page-div{border:3px dashed #c00;margin:12px}</style></head>
+<body>
+<div class="host-chrome">Simulated iMIS host page chrome — should keep its own styling</div>
+<h2 style="padding:0 16px">A host heading outside the app</h2>
+<table style="margin:0 16px"><thead><tr><th>Host TH</th></tr></thead><tbody><tr><td>Host TD</td></tr></tbody></table>
+<div class="page-div" id="imis-page-div"></div>
+<script>
+fetch("dist/dashboard-embed.html").then(r=>r.text()).then(html=>{
+  const div=document.getElementById("imis-page-div");
+  div.innerHTML=html;
+  // innerHTML does not execute <script>; re-inject them the way a CMS would.
+  div.querySelectorAll("script").forEach(old=>{
+    const s=document.createElement("script");
+    s.textContent=old.textContent; document.body.appendChild(s); old.remove();
+  });
+});
+</script>
+</body></html>

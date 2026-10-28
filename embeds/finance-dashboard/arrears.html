@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard — arrears</title>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SURFACE 3 of 3 — DECLINES / ARREARS.   ** v2 — not deployed in v1 **
+
+     Split out of index.html on 3 Sep 2026. It was a hidden #view-declines div
+     inside the dashboard; giving it its own page means the v1 dashboard bundle
+     does not ship this code at all, rather than shipping it hidden behind an
+     unlinked KPI card.
+
+     Self-contained: its own range control, its own data load. Arriving here is
+     a real navigation and re-fetches — there is no shared cache with the
+     dashboard, by choice.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="fd-root" id="fd-root">
+
+  <header>
+    <div class="header-inner">
+      <span class="header-logo">Finance Dashboard</span>
+      <div class="header-sep"></div>
+      <span class="header-sub" id="header-context">Declines &amp; arrears</span>
+      <div class="header-spacer"></div>
+      <select class="header-select" id="range-select" data-fd-action="arrears-range" aria-label="Date range">
+        <option value="30" selected>Last 30 days</option>
+        <option value="7">Last 7 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+      <span id="header-back-slot"></span>
+    </div>
+  </header>
+
+  <div class="main-scroll" id="main-scroll">
+
+    <div class="page" id="view-arrears">
+      <div id="arrears-content"></div>
+    </div>
+
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+</div><!-- /.fd-root -->
+
+<script>window.FD_SURFACE = "arrears";</script>
+
+<!-- ── Asset loader — see the note in index.html; keep the three in step. ──── -->
+<script>
+(function () {
+  var CDN   = "https://hubfinancedashboard.pages.dev/";
+  var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === "file:";
+  var base  = local ? "" : CDN;
+
+  // See the note in index.html — keep the three loaders in step.
+  // Union Suite theme (16 Oct 2026): fd-theme-unionsuite.css is an override
+  // layer, appended after fd-styles.css so it wins on source order. The ready
+  // promise waits for both sheets.
+  window.__fdCssReady = Promise.all(["fd-styles.css", "fd-theme-unionsuite.css"].map(function (file) {
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = base + file;
+    document.head.appendChild(css);
+    return new Promise(function (resolve) {
+      css.onload = css.onerror = resolve;
+      setTimeout(resolve, 4000);
+    });
+  }));
+
+  var font = document.createElement("link");
+  font.rel = "stylesheet";
+  font.href = "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Red+Hat+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap";
+  document.head.appendChild(font);
+
+  if (!document.getElementById("__RequestVerificationToken") && !document.getElementById("__ClientContext")) {
+    var fa = document.createElement("link");
+    fa.rel = "stylesheet";
+    fa.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css";
+    document.head.appendChild(fa);
+  }
+
+  /* Neither fd-dashboard.js nor fd-run.js is loaded here: this surface renders
+     no run list, no charts and no run detail. */
+  ["fd-config.js", "fd-core.js", "fd-data.js", "fd-arrears.js", "fd-theme-series.js", "fd-boot.js"]
+    .forEach(function (file) {
+      var s = document.createElement("script");
+      s.src = base + file;
+      s.async = false;
+      s.onerror = function () { console.error("Finance Dashboard: failed to load " + file); };
+      document.head.appendChild(s);
+    });
+})();
+</script>
+
+</body>
+</html>

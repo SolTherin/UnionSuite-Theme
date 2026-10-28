@@ -1,0 +1,128 @@
+/*
+ * fd-theme-unionsuite.css — Union Suite skin for the Finance Dashboard.
+ *
+ * OVERRIDE LAYER — the live theme since 16 Oct 2026 (every shell and
+ * build-embed.js load it by default; `--plain` builds without it). Load AFTER
+ * fd-styles.css. Nothing here changes layout, spacing rhythm or behaviour —
+ * only colour, accent, shape and type. Values are taken verbatim from the
+ * theme's ramps in CRM Layouts/THeme/UnionSuite/zUnionSuite.css.
+ *
+ * Two things are worth knowing if this is ever merged into fd-styles.css:
+ *  1. Union Suite's accent (#ff9947) is a LIGHT orange — its own token says
+ *     --text-on-accent: var(--brand-900), i.e. dark ink. The dashboard
+ *     currently puts white on accent in a few places; those are fixed below.
+ *  2. The theme's blue IS the brand teal. There is no separate "info blue",
+ *     so "processing" reads as brand-coloured rather than as a fourth hue.
+ */
+
+/* ═════════ 1. Token swap — the whole palette in one block ═════════ */
+.fd-root {
+  /* Union Suite ramps (verbatim) */
+  --us-teal-900: #002632;  --us-teal-800: #003a4c;  --us-teal-700: #00506a;
+  --us-teal-600: #006f94;  --us-teal-500: #007ea8;  --us-teal-400: #3fb5d9;
+  --us-teal-300: #5acbf8;  --us-teal-100: #d0e4ea;  --us-teal-50:  #eef6f9;
+  --us-accent-700: #e07a1f; --us-accent-600: #ff9947;
+  --us-accent-500: #ff734f; --us-accent-100: #ffe8d6;
+  --us-n-900: #1c2024; --us-n-800: #2b3036; --us-n-700: #3d434b;
+  --us-n-600: #545962; --us-n-500: #6b7580; --us-n-400: #9aa1aa;
+  --us-n-300: #c8ccd2; --us-n-200: #e2e5e9; --us-n-100: #f1f3f5;
+  --us-n-50:  #f8f9fa; --us-page: #eeeeef;
+  --us-purple: #413d6b; --us-purple-bg: #e6e5ef;
+
+  /* ── remap the dashboard's own tokens ── */
+  --uih-brand:        var(--us-teal-700);   /* header, table head        */
+  --uih-brand-light:  var(--us-teal-600);   /* links, active chip, focus */
+  --uih-brand-pale:   var(--us-teal-50);
+  --uih-accent:       var(--us-accent-600);
+  --uih-surface:      #ffffff;
+  --uih-bg:           var(--us-page);
+  --uih-border:       var(--us-n-200);
+  --uih-text:         var(--us-n-900);
+  --uih-text-muted:   var(--us-n-600);
+
+  --uih-danger:       #d03528;  --uih-danger-bg:  #fbe4e2;
+  --uih-success:      #3f7a2a;  --uih-success-bg: #e8f4e2;
+  --uih-success-border: #c3e2b4;
+  --uih-warning:      #a35a00;  --uih-warning-bg: #fdefe0;
+  --uih-warning-border: #f3d8b4;
+
+  /* HUB platform layer → Union Suite equivalents */
+  --uih-hub-ink:         var(--us-n-900);
+  --uih-hub-sub:         var(--us-n-600);
+  --uih-hub-label:       var(--us-n-500);
+  --uih-hub-border-soft: var(--us-n-100);
+  --uih-hub-green:       #3f7a2a;  --uih-hub-green-bg: #e8f4e2;
+  --uih-hub-amber:       #a35a00;  --uih-hub-amber-bg: #fdefe0;
+  --uih-hub-red:         #d03528;  --uih-hub-red-bg:   #fbe4e2;
+  --uih-hub-blue:        var(--us-teal-600);
+
+  /* ── type ── */
+  --uih-font-sans:    "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --uih-font-display: "Red Hat Display", "Open Sans", Helvetica, Arial, sans-serif;
+  --uih-font-ui:      "Inter", system-ui, -apple-system, sans-serif;
+
+  /* ── shape & depth ── */
+  --uih-radius:       8px;    /* was 6 — theme's --radius              */
+  --uih-radius-lg:    12px;   /* unchanged — theme's --radius-lg       */
+  --uih-shadow:       0 2px 4px rgba(0,27,35,.11);
+  --uih-shadow-lg:    0 8px 20px rgba(0,27,35,.16);
+  --uih-shadow-card:  0 1px 2px rgba(0,27,35,.07);
+  --uih-shadow-header:0 2px 8px rgba(0,27,35,.22);
+
+  /* local aliases the dashboard reads directly */
+  --danger-pale: var(--uih-danger-bg);
+  --warn-pale:   var(--uih-warning-bg);
+}
+
+/* ═════════ 2. The hardcoded hexes fd-styles.css still carries ═════════ */
+.fd-root .badge.declined,
+.fd-root .status-pill.errors,
+.fd-root .filter-chip.review        { border-color: #f0c4bf; }
+.fd-root .badge.pending,
+.fd-root .status-pill.generated     { background: var(--us-n-100); color: var(--us-n-600); border-color: var(--us-n-200); }
+.fd-root .badge.processing,
+.fd-root .status-pill.processing    { background: #e4f0f4; color: var(--us-teal-600); border-color: var(--us-teal-100); }
+.fd-root .badge.awaiting,
+.fd-root .status-pill.awaiting      { background: var(--uih-warning-bg); color: var(--uih-warning); border-color: #f3d8b4; }
+.fd-root .badge.reconciled,
+.fd-root .status-pill.reconciled    { background: var(--us-purple-bg); color: var(--us-purple); border-color: #cfcde0; }
+.fd-root .run-card.status-processing { border-left-color: var(--us-teal-400); }
+.fd-root .filter-notice,
+.fd-root .filter-notice button      { border-color: #f3d8b4; }
+.fd-root .detail-action.danger:hover { background: #a92a20; border-color: #a92a20; }
+
+/* ═════════ 3. Accent needs DARK ink, per --text-on-accent ═════════ */
+.fd-root .btn-accent,
+.fd-root .detail-action.accent      { background: var(--uih-accent); color: var(--us-teal-900); border-color: var(--uih-accent); }
+.fd-root .btn-accent:hover,
+.fd-root .detail-action.accent:hover { background: var(--us-accent-700); border-color: var(--us-accent-700); color: var(--us-teal-900); }
+
+/* ═════════ 4. Shape: the theme's cards are softer than 6px ═════════ */
+.fd-root .card,
+.fd-root .kpi-card,
+.fd-root .run-card,
+.fd-root .run-card-5c,
+.fd-root .chart-card               { border-radius: var(--uih-radius-lg); }
+.fd-root table.runs-table          { border-radius: var(--uih-radius-lg); overflow: hidden; }
+
+/* ═════════ 5. Display face on the figures the theme sets in Red Hat ═════════ */
+.fd-root .kpi-value,
+.fd-root .stat-value,
+.fd-root .header-logo              { font-family: var(--uih-font-display); letter-spacing: -.01em; }
+
+/* ═════════ 6. Chart marks hardcoded in fd-dashboard.js ═════════
+   The daily-volume SVG writes its colours as presentation attributes. CSS
+   `fill`/`stroke` beat a presentation attribute, so this retints them without
+   touching the JS — but in a real merge, change the three literals in
+   fd-dashboard.js (~line 390) instead and delete this block. */
+.fd-root svg [fill="#2563c4"]   { fill: var(--us-teal-600); }
+.fd-root svg [fill="#dc2626"]   { fill: #d03528; }
+.fd-root svg [stroke="#d0d7e3"] { stroke: var(--us-n-200); }
+
+/* ═════════ 7. Type-chip contrast ═════════
+   fd-core.js → typeChip() writes ONE colour inline for both the bar fill and
+   the chip text. Accent orange is vivid enough as a bar but fails AA as 11px
+   text on its own pale tint. Real fix is a one-liner in fd-core.js — give
+   PAY_TYPES an `ink` and render `pt.ink || pt.color`. Until then: */
+.fd-root .type-chip[style*="#e07a1f"] { color: #a35a00 !important; }
+.fd-root .type-chip[style*="#3fb5d9"] { color: #00506a !important; }

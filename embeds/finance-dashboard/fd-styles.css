@@ -1,0 +1,1101 @@
+/*
+ * fd-styles.css — Finance Dashboard (payment runs)
+ * © Union Innovation Hub. Licensed for use on approved iMIS instances only.
+ *
+ * EVERY selector is scoped under .fd-root, and the design tokens live on
+ * .fd-root rather than :root. The app is INLINED into a live iMIS RiSE page,
+ * so an unscoped `body`, `*` or `header` rule would restyle the host page.
+ * Keyframes are prefixed `fd-` for the same reason (`slideIn` in particular is
+ * a name iMIS's own stylesheets already use).
+ *
+ * One knob the embed sets on .fd-root:
+ *   --fd-height   pane height. Default 90dvh, and fd-boot.js sets the same from
+ *                 FDConfig.embedHeight inside iMIS. `dvh` not `vh`: the app is
+ *                 only part of the RiSE page, so 100vh overflows past the page
+ *                 chrome, and vh ignores collapsing mobile browser toolbars.
+ *                 Set a px value in FDConfig for a page that needs a fixed pane.
+ *
+ * Fonts: "Source Sans 3" is loaded by the HTML shell (Google Fonts), with a
+ * system stack behind it in --uih-font-display, so a blocked CDN degrades to
+ * Segoe UI rather than to a broken layout.
+ * Icons: FontAwesome 6 classes. iMIS already ships FA on every RiSE page, so
+ * the shell only pulls it from a CDN when running outside iMIS.
+ */
+
+.fd-root, .fd-root *, .fd-root *::before, .fd-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — Union Innovation Hub Design System
+   (tokens/colors.css, typography.css, spacing.css, effects.css,
+    platform.css — values used verbatim). Local semantic aliases
+    below map the dashboard's rules onto the --uih-* tokens.
+   ═══════════════════════════════════════════════════════════ */
+.fd-root {
+  /* ── UIH tokens ───────────────────────────────────────── */
+  --uih-brand:        #1a4b8c;
+  --uih-brand-light:  #2563c4;
+  --uih-brand-pale:   #e8f0fb;
+  --uih-accent:       #e8720c;
+  --uih-surface:      #ffffff;
+  --uih-bg:           #f4f6fa;
+  --uih-border:       #d0d7e3;
+  --uih-text:         #1a1f2e;
+  --uih-text-muted:   #6b7280;
+  --uih-danger:       #dc2626;
+  --uih-success:      #16a34a;
+  --uih-success-bg:   #f0fdf4;
+  --uih-success-border:#bbf7d0;
+  --uih-warning:      #92400e;
+  --uih-warning-bg:   #fef3c7;
+  --uih-warning-border:#fcd34d;
+  --uih-danger-bg:    #fee2e2;
+
+  /* platform (HUB record-page language — stat tiles, status pills) */
+  --uih-hub-ink:         #22303f;
+  --uih-hub-sub:         #5c6a79;
+  --uih-hub-label:       #8893a2;
+  --uih-hub-border-soft: #edf1f6;
+  --uih-hub-green:       #2e9d62;
+  --uih-hub-green-bg:    #e7f5ee;
+  --uih-hub-amber:       #9a6510;
+  --uih-hub-amber-bg:    #fdf4dc;
+  --uih-hub-red:         #df3b3b;
+  --uih-hub-red-bg:      #fcebea;
+  --uih-hub-blue:        #1f63c9;
+
+  /* fonts */
+  --uih-font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --uih-font-display: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* effects */
+  --uih-radius:       6px;
+  --uih-radius-lg:    12px;
+  --uih-shadow:       0 1px 4px rgba(0,0,0,.10);
+  --uih-shadow-lg:    0 4px 20px rgba(0,0,0,.12);
+  --uih-shadow-header:0 2px 8px rgba(0,0,0,.2);
+  --uih-shadow-card:  0 1px 2px rgba(20,40,63,.05);
+
+  /* ── Local aliases (keep the dashboard's existing rules working) ── */
+  --brand:       var(--uih-brand);
+  --brand-light: var(--uih-brand-light);
+  --brand-pale:  var(--uih-brand-pale);
+  --accent:      var(--uih-accent);
+  --surface:     var(--uih-surface);
+  --bg:          var(--uih-bg);
+  --border:      var(--uih-border);
+  --text:        var(--uih-text);
+  --text-muted:  var(--uih-text-muted);
+  --danger:      var(--uih-danger);
+  --danger-pale: #fef2f2;
+  --success:     var(--uih-success);
+  --success-pale:var(--uih-success-bg);
+  --warn:        var(--uih-warning);
+  --warn-pale:   #fffbeb;
+  --radius:      var(--uih-radius);
+  --shadow:      var(--uih-shadow);
+  --shadow-lg:   var(--uih-shadow-lg);
+}
+
+.fd-root {
+  /* Layout breakpoints key off the APP's width, not the viewport: embedded,
+     the iMIS page chrome takes a side column, so a wide window can still
+     leave the app narrow. */
+  container: fd / inline-size;
+  font-family: var(--uih-font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  height: var(--fd-height, 90dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+/* The blue band spans the full width; .header-inner holds its contents to the
+   same column as .page, so the title and range control line up with the data
+   on wide screens. The header reserves the same scrollbar gutter as
+   .main-scroll (scrollbar-gutter only applies to an overflow box, hence the
+   overflow: hidden) — without it the two would centre on different widths and
+   the right edges would be off by the scrollbar. */
+.fd-root header {
+  background: var(--brand);
+  color: #fff;
+  height: 52px;
+  flex-shrink: 0;
+  overflow: hidden;
+  scrollbar-gutter: stable;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  z-index: 10;
+}
+.fd-root .header-inner {
+  max-width: 1240px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fd-root .header-logo { font-size: 16px; font-weight: 700; letter-spacing: .2px; white-space: nowrap; }
+.fd-root .header-sep { width: 1px; height: 20px; background: rgba(255,255,255,.25); flex-shrink: 0; }
+.fd-root .header-sub { font-size: 12px; color: rgba(255,255,255,.75); white-space: nowrap; }
+.fd-root .header-spacer { flex: 1; }
+.fd-root .header-btn {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fd-root .header-btn:hover { background: rgba(255,255,255,.22); }
+.fd-root .header-select {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fd-root .header-select option { color: var(--text); }
+
+/* Custom-range picker — shown only when the select is on "Custom range".
+   `[hidden]` needs the explicit rule because the flex display below would
+   otherwise win over the attribute's default. */
+.fd-root .header-daterange { display: flex; align-items: center; gap: 6px; }
+.fd-root .header-daterange[hidden] { display: none; }
+.fd-root .header-daterange-sep { font-size: 11px; color: rgba(255,255,255,.75); }
+.fd-root .header-daterange input[type="date"] {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+/* The native picker icon is near-black on the dark header, so invert it. */
+.fd-root .header-daterange input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: .8;
+  cursor: pointer;
+}
+.fd-root .header-daterange input[type="date"]:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* ── Main scroll area ────────────────────────────────────── */
+.fd-root .main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+.fd-root .page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 24px 48px;
+}
+
+/* ── Section headings ────────────────────────────────────── */
+.fd-root .section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-muted);
+  margin: 22px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fd-root .section-title:first-child { margin-top: 0; }
+.fd-root .section-title .count-badge { text-transform: none; letter-spacing: 0; }
+
+/* ── KPI cards ───────────────────────────────────────────── */
+.fd-root .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(172px, 1fr));
+  gap: 12px;
+}
+.fd-root .kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--uih-hub-border-soft);
+  border-radius: var(--uih-radius-lg);
+  box-shadow: var(--uih-shadow-card);
+  padding: 14px 18px;
+  min-width: 0;
+  font-family: var(--uih-font-display);
+}
+.fd-root .kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--uih-hub-label);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fd-root .kpi-value { font-size: 22px; font-weight: 700; margin-top: 4px; line-height: 1.2; letter-spacing: -.4px; color: var(--uih-hub-ink); white-space: nowrap; }
+.fd-root .kpi-card.clickable { cursor: pointer; transition: box-shadow .12s, border-color .12s, transform .12s; }
+.fd-root .kpi-card.clickable:hover { border-color: var(--danger); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.fd-root .kpi-card.clickable:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+.fd-root .kpi-hint { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--danger); text-transform: none; letter-spacing: 0; }
+.fd-root .kpi-value.pos { color: var(--success); }
+.fd-root .kpi-value.neg { color: var(--danger); }
+.fd-root .kpi-value.brand { color: var(--brand-light); }
+.fd-root .kpi-sub { font-size: 12px; font-weight: 600; color: var(--uih-hub-sub); margin-top: 1px; white-space: normal; overflow-wrap: anywhere; }
+.fd-root .kpi-sub .up { color: var(--success); font-weight: 700; }
+.fd-root .kpi-sub .down { color: var(--danger);  font-weight: 700; }
+
+/* ── Panels / cards ──────────────────────────────────────── */
+.fd-root .panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  min-width: 0;
+}
+/* `.panel` and `.panel-title` are host class names too — see the badge block
+   below for the same trap. The host rule is:
+
+     .panel-title { flex-grow: 2; margin-top: 0; margin-bottom: 0;
+                    border-bottom: none; white-space: pre-wrap; }
+
+   `flex-grow: 2` is the damaging one. Inside .detail-panels the panel is a
+   COLUMN flex container, so a growing title absorbs the card's free space —
+   measured 49px tall against 18px of text — and `align-items: center` below
+   then centres the text inside that inflated box. The visible symptom is the
+   title and the table both sitting low in a short card, which reads as broken
+   alignment rather than as a stretched heading.
+
+   flex: 0 0 auto pins it to its content height. `white-space` is pinned for
+   the same reason as the badge properties: the host supplies pre-wrap
+   otherwise, which would preserve incidental whitespace from the template. */
+.fd-root .panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+  white-space: normal;
+}
+.fd-root .panel-title .hint { font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
+.fd-root .metric-toggle { display: inline-flex; margin-left: auto; flex-shrink: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 2px; gap: 2px; }
+.fd-root .metric-toggle button {
+  font-family: var(--uih-font-sans);
+  font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+  padding: 3px 11px; border: none; background: none; color: var(--text-muted);
+  border-radius: 99px; cursor: pointer; transition: background .12s, color .12s;
+}
+.fd-root .metric-toggle button:hover:not(.active) { color: var(--text); }
+.fd-root .metric-toggle button.active { background: var(--surface); color: var(--brand-light); box-shadow: 0 1px 2px rgba(0,0,0,.10); }
+.fd-root .metric-toggle button:focus-visible { outline: 2px solid var(--brand-light); outline-offset: 1px; }
+
+.fd-root .charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 980px) { .fd-root .charts-row { grid-template-columns: 1fr; } }
+
+/* Sparkline / trend chart */
+.fd-root .trend-chart { display: flex; align-items: stretch; gap: 7px; }
+.fd-root .trend-yaxis { display: flex; flex-direction: column; justify-content: space-between; height: 130px; padding: 12px 0 1px; font-size: 9.5px; font-weight: 600; color: var(--text-muted); text-align: right; white-space: nowrap; flex-shrink: 0; }
+.fd-root .trend-svg { flex: 1; width: 100%; height: 130px; display: block; }
+.fd-root .trend-xaxis { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text-muted); margin-top: 5px; }
+.fd-root .trend-xaxis span:first-child { text-align: left; }
+.fd-root .trend-xaxis span:last-child { text-align: right; }
+.fd-root .trend-legend { display: flex; gap: 14px; font-size: 11px; color: var(--text-muted); margin-top: 6px; flex-wrap: wrap; }
+.fd-root .trend-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* Horizontal breakdown bars */
+.fd-root .hbar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.fd-root .hbar-row:last-child { margin-bottom: 0; }
+.fd-root .hbar-label { width: 108px; flex-shrink: 0; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-root .hbar-track { flex: 1; height: 16px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.fd-root .hbar-fill { height: 100%; border-radius: 99px; min-width: 3px; transition: width .38s cubic-bezier(.4,0,.2,1), background .2s; }
+.fd-root #type-bars { display: flex; flex-direction: column; gap: 8px; }
+.fd-root #type-bars .hbar-row { margin-bottom: 0; transition: transform .38s cubic-bezier(.4,0,.2,1); }
+.fd-root .hbar-val.swap { animation: fd-metric-fade .34s ease; }
+.fd-root .trend-svg rect { transition: y .4s cubic-bezier(.4,0,.2,1), height .4s cubic-bezier(.4,0,.2,1), opacity .2s; }
+.fd-root .trend-yaxis.swap span, .fd-root .trend-legend.swap span { animation: fd-metric-fade .34s ease; }
+@keyframes fd-metric-fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .fd-root .hbar-fill, .fd-root #type-bars .hbar-row, .fd-root .trend-svg rect { transition: none; }
+  .fd-root .hbar-val.swap, .fd-root .trend-yaxis.swap span, .fd-root .trend-legend.swap span { animation: none; }
+}
+.fd-root .hbar-val { width: 118px; flex-shrink: 0; font-size: 11px; color: var(--text-muted); text-align: right; white-space: nowrap; }
+.fd-root .hbar-val .m { transition: color .2s, font-weight .2s; }
+.fd-root .hbar-val .m.on { color: var(--uih-hub-ink); font-weight: 700; }
+
+/* ── Status + type badges ────────────────────────────────── */
+/* THE COLLISION RULE, and why every property below is spelled out.
+   `.badge` and `.success` are both class names the iMIS host theme already
+   owns. Scoping to .fd-root wins on specificity, but ONLY for properties
+   declared here — anything the host sets that this block leaves unmentioned
+   still applies, silently. Two host rules hit these badges:
+
+     .badge, .PlusLink::after, .PlusFeature label::after, .QSLink::after {
+       ... text-shadow: 1px 1px 1px rgba(0,0,0,0.6); line-height: 1;
+           text-align: center; vertical-align: baseline; }
+
+     .info, .success, .warning, .validation {
+       margin: 5px 0; padding: 5px; text-align: center;
+       width: 100%; display: block; }
+
+   The shadow is for white text on a solid chip and reads as a smudge on these
+   pale backgrounds. The `width: 100%` is worse: it hits ONLY `.badge.success`,
+   so the Cleared badge stretched to its cell while every other status stayed
+   snug — measured 4 Sep 2026.
+
+   So: reset text-shadow, and pin width/margin/text-align/line-height even
+   though they look redundant. They are not — they are the properties the host
+   would otherwise supply. Any new badge modifier that reuses a host class name
+   (`warning`, `info`, `validation`) inherits the same trap. */
+.fd-root .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  width: auto;
+  margin: 0;
+  text-shadow: none;
+  line-height: 1.4;
+  text-align: left;
+  vertical-align: middle;
+}
+.fd-root .badge.success { background: var(--uih-success-bg); color: var(--success); border-color: var(--uih-success-border); }
+.fd-root .badge.declined { background: var(--danger-pale);  color: var(--danger);  border-color: #fecaca; }
+.fd-root .badge.pending { background: #eef1f5; color: #5c6a79; border-color: #dfe5ec; }
+.fd-root .badge.processing { background: #e7effb; color: var(--uih-hub-blue); border-color: #c7dbf5; }
+.fd-root .badge.awaiting { background: #fdf3e0; color: #9a6510; border-color: #f3e0b8; }
+.fd-root .badge.reconciled { background: #f1eafd; color: #7c3aed; border-color: #ddccf8; }
+
+/* Stacked settlement bar */
+.fd-root .stack-bar { display: flex; width: 110px; height: 8px; border-radius: 99px; overflow: hidden; background: var(--uih-hub-border-soft); }
+.fd-root .stack-bar span { height: 100%; }
+
+/* Status pill (HUB record-page treatment): leading dot, display font */
+.fd-root .status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 99px;
+  font-family: var(--uih-font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: 3px 10px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.fd-root .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.fd-root .status-pill.completed { background: var(--uih-hub-green-bg); color: var(--uih-hub-green); border-color: var(--uih-success-border); }
+.fd-root .status-pill.generated { background: #eef1f5;                 color: #5c6a79; border-color: #dfe5ec; }
+/* v2 — the per-run Retry button on the runs list. Unused in v1. */
+.fd-root .retry-btn {
+  font-family: var(--uih-font-display);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid #fecaca;
+  background: var(--danger-pale);
+  color: var(--danger);
+  border-radius: 99px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, border-color .12s;
+}
+.fd-root .retry-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.fd-root .retry-btn:hover:not(:disabled) { background: var(--uih-danger-bg); border-color: var(--danger); }
+.fd-root .retry-btn:disabled { color: var(--text-muted); background: var(--bg); border-color: var(--border); cursor: default; opacity: .7; }
+.fd-root .filter-notice { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--uih-hub-amber); background: var(--uih-hub-amber-bg); border: 1px solid #f3e0b8; border-radius: var(--radius); padding: 8px 12px; margin-bottom: 10px; }
+.fd-root .filter-notice strong { font-weight: 700; }
+.fd-root .filter-notice button { margin-left: auto; border: 1px solid #f3e0b8; background: #fff; color: var(--uih-hub-amber); border-radius: 99px; padding: 3px 11px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.fd-root .filter-notice button:hover { background: var(--uih-hub-amber-bg); }
+.fd-root .status-pill.errors { background: var(--danger-pale);      color: var(--danger); border-color: #fecaca; }
+.fd-root .status-pill.processing { background: #e7effb;                 color: var(--uih-hub-blue); border-color: #c7dbf5; }
+.fd-root .status-pill.awaiting { background: #fdf3e0;                 color: #9a6510; border-color: #f3e0b8; }
+.fd-root .status-pill.reconciled { background: #f1eafd;                 color: #7c3aed; border-color: #ddccf8; }
+
+.fd-root .type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.fd-root .count-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--brand-pale);
+  color: var(--brand-light);
+  border: 1px solid var(--brand-light);
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+/* ── Attention strip ─────────────────────────────────────── */
+.fd-root .attention-strip {
+  background: var(--warn-pale);
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--warn);
+  margin-top: 14px;
+}
+.fd-root .attention-strip strong { font-weight: 700; }
+.fd-root .attention-strip .spacer { flex: 1; }
+.fd-root .attention-strip button {
+  border: 1px solid #fde68a;
+  background: #fff;
+  color: var(--warn);
+  border-radius: var(--radius);
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fd-root .attention-strip button:hover { background: var(--warn-pale); }
+
+/* ── Run list (grouped by date) ──────────────────────────── */
+.fd-root .runs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+/* A set of filter chips that toggle among themselves (batch detail: payment
+   type, status). Groups wrap as units, so a chip never strands on its own line. */
+.fd-root .chip-group { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fd-root .chip-group + .chip-group { padding-left: 10px; border-left: 1px solid var(--border); }
+.fd-root .runs-search {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 12px;
+  background: var(--surface);
+  width: 230px;
+}
+.fd-root .runs-search:focus { outline: none; border-color: var(--brand-light); }
+@keyframes fd-run-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fd-runs-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fd-root .runs-anim .run-card-5c, .fd-root .runs-anim .runs-empty { animation: fd-run-enter .3s cubic-bezier(.4,0,.2,1) both; }
+.fd-root #runs-list.runs-anim { animation: fd-runs-fade-in .18s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .fd-root .runs-anim .run-card-5c, .fd-root .runs-anim .runs-empty, .fd-root #runs-list.runs-anim { animation: none; }
+}
+.fd-root .filter-chip.review { color: var(--danger); border-color: #fecaca; }
+.fd-root .filter-chip.review:hover:not(.active) { background: var(--danger-pale); }
+.fd-root .filter-chip.review.active { background: var(--danger); border-color: var(--danger); color: #fff; }
+.fd-root .filter-chip .chip-count { font-weight: 700; margin-left: 3px; opacity: .8; }
+.fd-root .filter-chip {
+  font-size: 11px;
+  padding: 3px 11px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.fd-root .filter-chip:hover { background: var(--brand-pale); border-color: var(--brand-light); color: var(--brand-light); }
+.fd-root .filter-chip.active { background: var(--brand-light); border-color: var(--brand-light); color: #fff; }
+
+.fd-root .date-group { padding-bottom: 18px; }
+.fd-root .date-group-hd {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 2px 7px;
+  border-bottom: 2px solid var(--brand);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.fd-root .date-group-hd h3 { font-size: 14px; font-weight: 700; color: var(--brand); font-family: var(--uih-font-display); letter-spacing: -.2px; }
+.fd-root .date-group-meta { font-size: 11px; color: var(--text-muted); }
+.fd-root .date-group-meta strong { color: var(--text); }
+
+.fd-root .run-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 11px 14px;
+  margin-bottom: 7px;
+  display: grid;
+  grid-template-columns: minmax(210px, 1.4fr) minmax(110px, .8fr) minmax(190px, 1fr) minmax(110px, .7fr) 120px 22px;
+  gap: 8px 14px;
+  align-items: center;
+  cursor: pointer;
+  border-left: 4px solid var(--brand-light);
+  transition: border-color .12s, background .12s, box-shadow .12s;
+}
+.fd-root .run-card:hover { background: var(--brand-pale); border-color: var(--brand-light); box-shadow: var(--shadow-lg); }
+.fd-root .run-card.status-errors { border-left-color: var(--accent); }
+.fd-root .run-card.status-processing { border-left-color: #94a3b8; }
+
+.fd-root .run-card-5c {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 11px 14px;
+  margin-bottom: 7px;
+  display: grid;
+  grid-template-columns: minmax(200px, 1.5fr) 130px 110px 90px 90px 100px 90px 100px 18px;
+  gap: 8px 14px;
+  align-items: center;
+  cursor: pointer;
+  border-left: 4px solid var(--brand-light);
+  transition: border-color .12s, background .12s, box-shadow .12s;
+}
+.fd-root .run-card-5c:hover { background: var(--brand-pale); border-color: var(--brand-light); box-shadow: var(--shadow-lg); }
+.fd-root .run-cols-hd {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.5fr) 130px 110px 90px 90px 100px 90px 100px 18px;
+  gap: 8px 14px;
+  padding: 6px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  border-left: 4px solid transparent;
+  box-sizing: border-box;
+}
+
+/* Compact run cards. Below ~1140px the nine-column row no longer fits, and the
+   old fallback wrapped the figures into a 3-column grid with the column
+   headings hidden — unlabelled numbers. Instead: name + status on top, then
+   the six figures as a labelled strip (each cell carries data-label). */
+@container fd (max-width: 1140px) {
+  .fd-root .run-cols-hd { display: none; }
+  .fd-root .run-card-5c {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px 14px;
+    align-items: start;
+  }
+  .fd-root .run-card-5c > .run-id-line { grid-column: 1 / 5; align-self: center; }
+  .fd-root .run-card-5c > :nth-child(2) { grid-column: 5 / 7; justify-self: end; align-self: center; }
+  .fd-root .run-card-5c .run-chevron { display: none; }
+  .fd-root .run-card-5c [data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--uih-font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-muted);
+    margin-bottom: 1px;
+  }
+}
+@container fd (max-width: 720px) {
+  /* The subtitle is the first thing to go: it would push the range control
+     out of the (overflow: hidden) header. */
+  .fd-root .header-sep, .fd-root .header-sub { display: none; }
+  .fd-root .run-card-5c { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fd-root .run-card-5c > .run-id-line,
+  .fd-root .run-card-5c > :nth-child(2) { grid-column: 1 / -1; justify-self: start; }
+}
+.fd-root .date-group-sticky {
+  position: sticky;
+  top: -1px; /* 1px above the scroll edge so the .stuck observer can detect pinning */
+  z-index: 20;
+  background: var(--bg);
+  margin: 0 -24px;          /* bleed across the page gutters so nothing peeks at the edges */
+  padding: 11px 24px 0;
+  transition: box-shadow .12s;
+}
+.fd-root .date-group-sticky.stuck {
+  box-shadow: 0 1px 0 var(--border), 0 8px 14px -8px rgba(19, 40, 63, .28);
+}
+
+.fd-root .run-id-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.fd-root .run-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-root .run-sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.fd-root .run-col-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); }
+.fd-root .run-col-value { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.fd-root .run-col-value.amount { font-size: 14px; font-weight: 700; color: var(--brand-light); }
+
+.fd-root .run-outcome { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fd-root .mini-meter {
+  width: 100%; max-width: 130px;
+  height: 5px;
+  background: var(--danger-pale);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.fd-root .mini-meter .ok { height: 100%; background: var(--success); border-radius: 99px; }
+
+.fd-root .run-chevron { color: var(--text-muted); font-size: 14px; text-align: right; }
+
+.fd-root .runs-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 13px;
+  padding: 18px 4px;
+  text-align: center;
+}
+
+/* Payments-by-type with nothing to chart. Rows for types with no payments are
+   hidden, so the whole panel can end up empty in a quiet range. */
+.fd-root .hbar-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 13px;
+  padding: 18px 4px;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .fd-root .run-card { grid-template-columns: 1fr 1fr; }
+  .fd-root .run-chevron { display: none; }
+}
+
+/* ── Drill-down view ─────────────────────────────────────── */
+.fd-root .back-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 14px;
+  background: var(--surface);
+}
+.fd-root .back-btn:hover { background: var(--bg); color: var(--text); }
+
+.fd-root .detail-hd {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--brand-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.fd-root .detail-hd h2 { font-size: 17px; font-weight: 700; font-family: var(--uih-font-display); letter-spacing: -.3px; color: var(--uih-hub-ink); display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.fd-root .detail-hd-date { font-size: 15px; font-weight: 700; letter-spacing: -.1px; color: var(--uih-hub-ink); display: inline-flex; align-items: baseline; gap: 7px; padding-left: 10px; border-left: 1px solid var(--border); }
+.fd-root .detail-hd-date .time { font-size: 13px; font-weight: 600; color: var(--uih-hub-sub); letter-spacing: 0; }
+.fd-root .detail-hd-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 5px; }
+.fd-root .detail-hd .spacer { flex: 1; }
+.fd-root .detail-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.fd-root .detail-action:hover { background: var(--bg); color: var(--text); border-color: var(--text-muted); }
+.fd-root .detail-action:disabled { opacity: .55; cursor: progress; }
+.fd-root .detail-action.primary { background: var(--brand-light); color: #fff; border-color: var(--brand-light); font-weight: 700; }
+.fd-root .detail-action.primary:hover { background: var(--brand); border-color: var(--brand); color: #fff; }
+.fd-root .detail-action.danger { background: var(--danger); color: #fff; border-color: var(--danger); font-weight: 700; }
+.fd-root .detail-action.danger:hover { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+
+/* The three summary panels are equal height (grid stretch), so a shorter table
+   leaves slack. `margin-bottom: auto` parks that slack BELOW the table.
+
+   It used to be pushed into a spacer row instead, to pin each Total row to the
+   bottom of its card so the three footers lined up — via `height: 100%` on the
+   table plus `height: 100%` on a `.mini-spacer` cell. That is two stacked
+   percentage heights against an indefinite containing block, and CSS leaves the
+   distribution of a table's extra height across its rows UNDEFINED: Chromium
+   gave the slack to the spacer cell (the intended look), Gecko resolved the
+   spacer against the table's own content height, grew the table by roughly its
+   own height, and pushed <tfoot> clean out of the card and over the next
+   section. Don't reintroduce a percentage height on a table or a table cell
+   here — the footers no longer align across the three cards, and that is the
+   trade for rendering the same way in every browser. */
+.fd-root .detail-panels .panel { display: flex; flex-direction: column; }
+.fd-root .detail-panels .mini-table { margin-bottom: auto; }
+/* Last-resort guard: the breakpoint below sizes the panels so the tables fit, but
+   a longer decline reason or a six-figure total must scroll inside its card
+   rather than spill out of it. */
+.fd-root .detail-panels .panel { overflow-x: auto; }
+/* Belt and braces: the spacer rows are gone from fd-run.js, but stale markup
+   (a cached shell, the old artifact mockups) must not render a blank row. */
+.fd-root .mini-spacer { display: none; }
+.fd-root .detail-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+/* 1080, not 980. Measured across all runs, the widest of the three tables
+   ("Payment type": a label column plus five numeric ones) needs 300px of inner
+   width, so a panel needs 334px and three of them need a ~1074px viewport. At
+   980 the panels were 304px and the table — whose min-content width beats
+   `width: 100%` — hung ~15px past the card's right edge, footer included. */
+@media (max-width: 1080px) { .fd-root .detail-panels { grid-template-columns: 1fr; } }
+
+/* ── Tables ──────────────────────────────────────────────── */
+/* No scroll container here: the sticky <th> must pin against .main-scroll */
+.fd-root .table-wrap { overflow: visible; }
+.fd-root table.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+/* Corners are rounded per-cell: an overflow:hidden table would trap the sticky header */
+.fd-root table.report-table thead th:first-child { border-top-left-radius: var(--radius); }
+.fd-root table.report-table thead th:last-child { border-top-right-radius: var(--radius); }
+.fd-root table.report-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--radius); }
+.fd-root table.report-table tbody tr:last-child td:last-child { border-bottom-right-radius: var(--radius); }
+.fd-root table.report-table tbody tr:last-child td { border-bottom: none; }
+.fd-root table.report-table th {
+  background: var(--brand);
+  color: #fff;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-shadow: 0 1px 0 rgba(0,0,0,.12);
+}
+/* When pinned, the header band squares off and bleeds to the page gutters */
+.fd-root table.report-table.stuck thead th:first-child, .fd-root table.report-table.stuck thead th:last-child { border-radius: 0; }
+.fd-root table.report-table.stuck thead th:first-child::after, .fd-root table.report-table.stuck thead th:last-child::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 24px; background: var(--brand);
+}
+.fd-root table.report-table.stuck thead th:first-child::after { left: -24px; }
+.fd-root table.report-table.stuck thead th:last-child::after { right: -24px; }
+.fd-root table.report-table th.num, .fd-root table.report-table td.num { text-align: right; }
+.fd-root table.report-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.fd-root table.report-table tr:last-child td { border-bottom: none; }
+.fd-root table.report-table tbody tr:nth-child(even) td { background: var(--bg); }
+.fd-root table.report-table tbody tr:hover td { background: var(--brand-pale); }
+.fd-root table.report-table tfoot td {
+  background: var(--brand-pale);
+  font-weight: 700;
+  border-top: 2px solid var(--brand-light);
+}
+.fd-root .cell-muted { color: var(--text-muted); }
+.fd-root .cell-strong { font-weight: 700; }
+.fd-root .cell-amount { font-weight: 600; }
+.fd-root .cell-amount.neg { color: var(--danger); }
+
+/* Compact summary tables inside panels */
+.fd-root table.mini-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.fd-root table.mini-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.fd-root table.mini-table th.num, .fd-root table.mini-table td.num { text-align: right; }
+.fd-root table.mini-table td { padding: 6px; border-bottom: 1px solid var(--bg); white-space: nowrap; }
+/* The label column wraps; the numeric columns don't. `width: 100%` on a table is
+   only a suggestion — its min-content width wins — so with every cell nowrap,
+   "Payment cancelled by member" made the table wider than its card and the rows
+   (footer included) spilled out of the right edge. Measured: ~50px past the card
+   at a 1000px pane, which is squarely in the range an iMIS RiSE column gives us. */
+.fd-root table.mini-table td:first-child { white-space: normal; }
+.fd-root table.mini-table tr:last-child td { border-bottom: none; }
+.fd-root table.mini-table tfoot td { border-top: 1px solid var(--border); font-weight: 700; }
+/* Gentle row hover on the summary panels (payment type, outcome, decline
+   reasons) — a read aid for lining up a label with its figures. Body rows
+   only: the total row isn't a data row. Rounded ends so the tint reads as a
+   band, not a stripe. */
+.fd-root table.mini-table tbody td { transition: background-color .15s ease; }
+.fd-root table.mini-table tbody tr:hover td { background: var(--brand-pale); }
+.fd-root table.mini-table tbody tr:hover td:first-child { border-radius: 4px 0 0 4px; }
+.fd-root table.mini-table tbody tr:hover td:last-child  { border-radius: 0 4px 4px 0; }
+
+.fd-root .more-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+/* ── Transactions pager ──────────────────────────────────────
+   Wraps to two lines on a narrow iMIS column rather than pushing the card
+   sideways — .detail-panels already showed how expensive horizontal overflow
+   is in a RiSE pane. */
+.fd-root .pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.fd-root .pager-count { font-size: 12px; color: var(--text-muted); }
+.fd-root .pager-controls { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+/* Same shape as .filter-chip, but a square-ish tap target: a row of pill
+   buttons at these widths reads as a sentence rather than a control.
+   `min-width` keeps 1 and 139 the same size so the row does not reflow as you
+   page through. Properties the iMIS host theme also sets on bare `button` are
+   pinned — see the .badge block for why that matters. */
+.fd-root .pager-btn {
+  font-family: var(--uih-font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  line-height: 1;
+  margin: 0;
+  text-shadow: none;
+  box-shadow: none;
+  text-transform: none;
+}
+.fd-root .pager-btn:hover:not(:disabled):not(.active) {
+  background: var(--brand-pale); border-color: var(--brand-light); color: var(--brand-light);
+}
+.fd-root .pager-btn.active {
+  background: var(--brand-light); border-color: var(--brand-light); color: #fff; cursor: default;
+}
+.fd-root .pager-btn:disabled { opacity: .4; cursor: default; }
+.fd-root .pager-btn:focus-visible { outline: 2px solid var(--brand-light); outline-offset: 1px; }
+.fd-root .pager-gap { font-size: 11px; color: var(--text-muted); padding: 0 2px; }
+
+/* Toast */
+.fd-root .toast-container {
+  position: fixed; bottom: 20px; right: 20px;
+  display: flex; flex-direction: column; gap: 7px; z-index: 999;
+}
+.fd-root .toast {
+  padding: 9px 15px;
+  border-radius: var(--radius);
+  background: var(--text); color: #fff;
+  font-size: 13px;
+  box-shadow: var(--shadow-lg);
+  animation: fd-slideIn .2s ease;
+}
+.fd-root .toast.success { background: var(--success); }
+
+/* CSV export progress — a toast that stays until the export finishes. */
+.fd-root .csv-progress { width: 310px; padding: 10px 14px 12px; }
+.fd-root .csv-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.fd-root .csv-progress-label { flex: 1; font-variant-numeric: tabular-nums; }
+.fd-root .csv-progress-cancel {
+  background: none; border: 1px solid rgba(255,255,255,.35); color: #fff;
+  border-radius: var(--radius); padding: 2px 9px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.fd-root .csv-progress-cancel:hover { background: rgba(255,255,255,.15); }
+.fd-root .csv-progress-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.2); overflow: hidden; }
+.fd-root .csv-progress-bar { height: 100%; width: 0; border-radius: 99px; background: #fff; transition: width .2s ease; }
+@keyframes fd-slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* .mock-note removed 4 Sep 2026 with the "Prototype mock-up" line it styled —
+   the app now shows real figures and must not caption them as sample data. */
+
+/* ── Dense runs table ────────────────────────────────────── */
+.fd-root .runs-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.fd-root table.runs-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.fd-root table.runs-table th { background: var(--brand); color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 11.5px; letter-spacing: .3px; white-space: nowrap; position: sticky; top: 0; z-index: 4; }
+.fd-root table.runs-table th.num, .fd-root table.runs-table td.num { text-align: right; }
+.fd-root table.runs-table td { padding: 7px 12px; border-bottom: 1px solid var(--uih-hub-border-soft); white-space: nowrap; vertical-align: middle; }
+.fd-root tr.group-row td { position: sticky; top: 33px; z-index: 3; background: var(--bg); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); padding: 6px 12px; }
+.fd-root tr.group-row .g-date { font-family: var(--uih-font-display); font-weight: 700; font-size: 12.5px; color: var(--brand); margin-right: 10px; }
+.fd-root tr.group-row .g-meta { font-size: 11px; color: var(--text-muted); }
+.fd-root tr.run-row { cursor: pointer; }
+.fd-root tr.run-row:hover td { background: var(--brand-pale); }
+
+.fd-root tr.run-row td .run-name { font-size: 12.5px; }
+.fd-root .pct-cell { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); }
+.fd-root .pct-cell .mini-meter { width: 64px; margin-top: 0; }
+
+/* ── Print ───────────────────────────────────────────────── */
+@media print {
+  .fd-root header, .fd-root .runs-toolbar, .fd-root .back-btn, .fd-root .detail-action, .fd-root .toast-container, .fd-root .attention-strip button { display: none !important; }
+  .fd-root, .fd-root .main-scroll { display: block !important; overflow: visible !important; height: auto !important; }
+  .fd-root .panel, .fd-root .kpi-card, .fd-root .run-card, .fd-root table.report-table { box-shadow: none !important; }
+  .fd-root table.report-table th { background: #1a4b8c !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION BETWEEN SURFACES  (added with the two-surface split)
+   The run list and the run detail are separate pages/URLs, so the
+   run screen needs its own way back and a "not found" state.
+   ═══════════════════════════════════════════════════════════ */
+.fd-root .header-back {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff; text-decoration: none;
+  border-radius: var(--radius);
+  padding: 5px 12px; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background .15s;
+}
+.fd-root .header-back:hover { background: rgba(255,255,255,.22); color: #fff; }
+.fd-root .header-back i { font-size: 11px; }
+
+/* Empty / error state used when ?run= is missing, unknown, or the host is
+   not licensed. Deliberately plain — it must render with no data at all. */
+.fd-root .fd-notice {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--uih-radius-lg);
+  box-shadow: var(--uih-shadow-card);
+  padding: 28px 26px;
+  max-width: 560px;
+  margin: 26px auto;
+  text-align: center;
+}
+.fd-root .fd-notice h3 {
+  font-family: var(--uih-font-display);
+  font-size: 16px; font-weight: 700; color: var(--uih-hub-ink);
+  margin-bottom: 6px;
+}
+.fd-root .fd-notice p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+.fd-root .fd-notice .back-btn { margin: 0 auto; }
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING SKELETONS — fd-core.js → skeletonDashboard / skeletonRun.
+   Shapes only; each one sits in the same container the real content will
+   overwrite, so the page does not jump when the data lands.
+   ═══════════════════════════════════════════════════════════ */
+.fd-root .sk {
+  display: block;
+  height: 10px;
+  border-radius: 4px;
+  --sk-base: var(--border);
+  background: linear-gradient(90deg, var(--sk-base) 0%, var(--surface) 50%, var(--sk-base) 100%);
+  background-size: 200% 100%;
+  animation: fd-shimmer 1.4s ease-in-out infinite;
+}
+.fd-root .sk + .sk { margin-top: 8px; }
+.fd-root .sk.sm  { height: 8px; }
+.fd-root .sk.lg  { height: 14px; }
+.fd-root .sk.w20 { width: 20%; }  .fd-root .sk.w40 { width: 40%; }  .fd-root .sk.w45 { width: 45%; }
+.fd-root .sk.w60 { width: 60%; }  .fd-root .sk.w70 { width: 70%; }
+.fd-root .sk-value { height: 22px; width: 55%; margin-top: 10px !important; }
+.fd-root .sk-kpi { min-height: 94px; }
+.fd-root .sk-svg { fill: var(--border); animation: fd-pulse 1.4s ease-in-out infinite; }
+.fd-root .sk-hbar { display: grid; grid-template-columns: 90px 1fr; align-items: center; gap: 12px; padding: 7px 0; }
+.fd-root .sk-hbar .sk { margin: 0; }
+.fd-root .sk-hbar .sk.w20 { width: 70px; }
+.fd-root .sk-track { height: 12px; width: var(--w); border-radius: 99px; }
+.fd-root .sk-date { padding: 16px 0 12px; border-bottom: 2px solid var(--uih-hub-border-soft); margin-bottom: 10px; }
+.fd-root .sk-run {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 110px repeat(4, minmax(0, .6fr));
+  gap: 14px; align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--uih-hub-border-soft);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 7px;
+}
+.fd-root .sk-run > .sk { margin: 0; }
+.fd-root .sk-pill { height: 20px; border-radius: 99px; }
+.fd-root .sk-hd { display: flex; align-items: center; gap: 10px; }
+.fd-root .sk-hd-text { flex: 1; }
+.fd-root .sk-hd .sk-btn { width: 96px; height: 30px; margin: 0; border-radius: var(--radius); }
+.fd-root .sk-tr { display: flex; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--uih-hub-border-soft); }
+.fd-root .sk-tr .sk { margin: 0; }
+.fd-root .sk-tr .sk.w45 { flex: 1; }
+.fd-root .sk-table {
+  margin-top: 24px; padding: 6px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+@container fd (max-width: 720px) {
+  .fd-root .sk-run { grid-template-columns: 1fr 1fr 1fr; }
+  .fd-root .sk-run-name { grid-column: 1 / -1; }
+}
+/* Static controls do nothing useful until the data they filter exists. */
+.fd-root.fd-loading .runs-toolbar,
+.fd-root.fd-loading .metric-toggle,
+.fd-root.fd-loading .header-select { pointer-events: none; opacity: .6; }
+@keyframes fd-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@keyframes fd-pulse   { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .fd-root .sk, .fd-root .sk-svg { animation: none; }
+}

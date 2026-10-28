@@ -134,7 +134,7 @@ read. After the theme's IQA scripts or styles change, rebuild from the project
 root:
 
 ```bash
-node "Standalolne Scripts/Embed/build-iqa-standalone.cjs"
+node "embeds/iqa-enhancements/build-iqa-standalone.cjs"
 ```
 
 `--check` fails if the script is out of date. The build stops with a message if

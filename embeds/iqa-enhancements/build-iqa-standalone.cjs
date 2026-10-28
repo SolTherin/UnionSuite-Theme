@@ -3,8 +3,8 @@
  * Builds IQA-Enhancements-Standalone.js: every IQA enhancement in one script,
  * for an iMIS site that does not have the UnionSuite theme.
  *
- *   node "Standalolne Scripts/Embed/build-iqa-standalone.cjs"           build
- *   node "Standalolne Scripts/Embed/build-iqa-standalone.cjs" --check   fail if stale
+ *   node "embeds/iqa-enhancements/build-iqa-standalone.cjs"           build
+ *   node "embeds/iqa-enhancements/build-iqa-standalone.cjs" --check   fail if stale
  *
  * The theme files are read, never written. The bundle holds:
  *   • the theme's IQA scripts, unchanged: HtmlSourceEditor.js,

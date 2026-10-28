@@ -43,3 +43,6 @@ THeme/**/*.zip
 !/.preview/*.js
 !/.preview/*.py
 !/.preview/README.md
+
+# Built paste-in embeds; rebuild with each embed's build script
+/embeds/finance-dashboard/dist/

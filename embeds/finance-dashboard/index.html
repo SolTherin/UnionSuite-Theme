@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard — payment runs</title>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     SURFACE 1 of 2 — the payment-run LIST (dashboard).
+     Clicking a run navigates to payment-run.html (or its RiSE page). See
+     fd-dashboard.js → FD.openRun and fd-core.js → Nav.
+
+     Everything lives inside .fd-root: the app is inlined into a live iMIS RiSE
+     page, and every CSS rule is scoped to this element so it cannot restyle the
+     host page.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div class="fd-root" id="fd-root">
+
+  <header>
+    <div class="header-inner">
+      <span class="header-logo">Finance Dashboard</span>
+      <div class="header-sep"></div>
+      <span class="header-sub" id="header-context">Payment runs &amp; settlement tracking</span>
+      <div class="header-spacer"></div>
+      <select class="header-select" id="range-select" data-fd-action="range" aria-label="Date range">
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last 12 months</option>
+        <option value="custom">Custom range&hellip;</option>
+      </select>
+      <!-- Shown only for "Custom range". Both inputs get min/max set at runtime:
+           max is today, min is the oldest run loaded, so the picker cannot offer
+           a date the loaded window has no data for. -->
+      <span class="header-daterange" id="custom-range" hidden>
+        <input type="date" id="range-from" data-fd-action="custom-from" aria-label="From date">
+        <span class="header-daterange-sep">to</span>
+        <input type="date" id="range-to" data-fd-action="custom-to" aria-label="To date">
+      </span>
+    </div>
+  </header>
+
+  <div class="main-scroll" id="main-scroll">
+
+    <!-- ══ VIEW 1 : Dashboard ══════════════════════════════════ -->
+    <div class="page" id="view-dashboard">
+
+      <!-- Text set by fd-dashboard.js → rangeLabel(): "Last 30 days" for a
+           preset, an explicit date span for a custom range. -->
+      <div class="section-title" id="kpi-range-label">Last 30 days at a glance</div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <div class="charts-row">
+        <div class="panel">
+          <!-- Text swapped to "Weekly payment volume" by renderTrend() when the
+               window is over 90 days and the bars are weekly buckets. -->
+          <div class="panel-title"><span id="trend-title">Daily payment volume</span>
+            <span class="metric-toggle" role="group" aria-label="Daily volume metric">
+              <button type="button" data-fd-action="trend-metric" data-fd-arg="count">Count</button>
+              <button type="button" class="active" data-fd-action="trend-metric" data-fd-arg="value">$ value</button>
+            </span>
+          </div>
+          <div class="trend-chart">
+            <div class="trend-yaxis" id="trend-yaxis"></div>
+            <svg class="trend-svg" id="trend-svg" viewBox="0 0 560 130" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="trend-xaxis" id="trend-xaxis"></div>
+          <div class="trend-legend">
+            <span><span class="dot" style="background:var(--brand-light)"></span><span id="trend-lg-ok">Collected value</span></span>
+            <span><span class="dot" style="background:var(--danger)"></span><span id="trend-lg-bad">Declined value</span></span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Payments by type
+            <span class="metric-toggle" role="group" aria-label="Payments by type metric">
+              <button type="button" class="active" data-fd-action="type-metric" data-fd-arg="count">Count</button>
+              <button type="button" data-fd-action="type-metric" data-fd-arg="value">$ value</button>
+            </span>
+          </div>
+          <div id="type-bars"></div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:26px;">Payment runs <span class="count-badge" id="runs-count-badge">0</span></div>
+      <div class="runs-toolbar">
+        <input type="text" class="runs-search" id="runs-search" placeholder="Search by run title or date&hellip;" data-fd-action="runs-search">
+        <span style="flex:1"></span>
+        <button type="button" class="filter-chip active" data-f="all" data-fd-action="run-filter" data-fd-arg="all">All</button>
+        <button type="button" class="filter-chip" data-f="generated" data-fd-action="run-filter" data-fd-arg="generated">Generated</button>
+        <button type="button" class="filter-chip" data-f="processing" data-fd-action="run-filter" data-fd-arg="processing">Processing</button>
+        <button type="button" class="filter-chip" data-f="finalised" data-fd-action="run-filter" data-fd-arg="finalised">Finalised</button>
+        <button type="button" class="filter-chip review" data-f="review" id="chip-review" data-fd-action="review-filter" title="Runs with payments processing longer than 5 days">To review <span class="chip-count" id="chip-review-count">0</span></button>
+      </div>
+      <div id="runs-list"></div>
+    </div>
+
+    <!-- ══ VIEW 2 : Run drill-down — FALLBACK ONLY ═══════════════
+         Normally a run opens on its own page (payment-run.html). This container
+         is used only when FDConfig.imisPages.run is not set, so a
+         half-configured deploy still works instead of dead-ending. Rendered by
+         fd-run.js → showInline(). -->
+    <div class="page" id="view-detail" style="display:none;">
+      <div id="detail-back-slot"></div>
+      <div id="detail-content"></div>
+    </div>
+
+    <!-- The declines / arrears view used to sit here as VIEW 3. It is now its
+         own surface (arrears.html) and is v2 — see README "Scope". -->
+
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+</div><!-- /.fd-root -->
+
+<script>window.FD_SURFACE = "dashboard";</script>
+
+<!-- ── Asset loader ─────────────────────────────────────────────────────────
+     Built at runtime in this inline script rather than as static <link>/<script
+     src> tags, because iMIS strips the domain off absolute URLs in static tags
+     (→ 404 against the iMIS path). iMIS does NOT rewrite URLs constructed in JS.
+     async=false preserves execution order: config → core → data → views → boot.
+     On localhost / file:// the CDN prefix is dropped so the same file runs from a
+     dev server. If the Pages project is renamed, change CDN here, in
+     payment-run.html, and in fd-config.js. -->
+<script>
+(function () {
+  var CDN   = "https://hubfinancedashboard.pages.dev/";
+  var local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === "file:";
+  var base  = local ? "" : CDN;
+
+  // A dynamically inserted <link rel=stylesheet> does NOT block the scripts
+  // below, so the app can render — and MEASURE — before any of these rules
+  // apply. Firefox lost that race where Chromium won it, and the payments-by-type
+  // chart ranked its rows against an unstyled row height. fd-boot.js awaits this
+  // promise before its first render. The timeout is the point of the race:
+  // never let a slow or blocked CDN turn "unstyled for a moment" into
+  // "never renders".
+  // Union Suite theme (16 Oct 2026): fd-theme-unionsuite.css is an override
+  // layer, appended after fd-styles.css so it wins on source order. The ready
+  // promise waits for both sheets.
+  window.__fdCssReady = Promise.all(["fd-styles.css", "fd-theme-unionsuite.css"].map(function (file) {
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = base + file;
+    document.head.appendChild(css);
+    return new Promise(function (resolve) {
+      css.onload = css.onerror = resolve;
+      setTimeout(resolve, 4000);
+    });
+  }));
+
+  // Source Sans 3 is the UIH display font. A blocked CDN degrades to the system
+  // stack in --uih-font-display, so this is never load-bearing.
+  var font = document.createElement("link");
+  font.rel = "stylesheet";
+  font.href = "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Red+Hat+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap";
+  document.head.appendChild(font);
+
+  // iMIS already ships FontAwesome 6 on every RiSE page, so production pulls
+  // nothing extra. Load it from a CDN outside iMIS only, so icons aren't blank
+  // on a dev server.
+  if (!document.getElementById("__RequestVerificationToken") && !document.getElementById("__ClientContext")) {
+    var fa = document.createElement("link");
+    fa.rel = "stylesheet";
+    fa.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css";
+    document.head.appendChild(fa);
+  }
+
+  ["fd-config.js", "fd-core.js", "fd-data.js", "fd-run.js", "fd-dashboard.js", "fd-theme-series.js", "fd-boot.js"]
+    .forEach(function (file) {
+      var s = document.createElement("script");
+      s.src = base + file;
+      s.async = false;   // preserve execution order across dynamically-added scripts
+      s.onerror = function () { console.error("Finance Dashboard: failed to load " + file); };
+      document.head.appendChild(s);
+    });
+})();
+</script>
+
+</body>
+</html>
