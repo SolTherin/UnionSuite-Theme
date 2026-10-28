@@ -63,6 +63,7 @@
     --activity-change-bg: #3d2c22;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 20%);
     --shadow: 0 2px 5px rgb(0 0 0 / 24%);
+    --shadow-md: 0 6px 18px rgb(0 0 0 / 27%);
     --shadow-lg: 0 12px 30px rgb(0 0 0 / 30%);
     --us-dialog-shadow: 0 24px 48px -12px rgb(0 0 0 / 60%), 0 2px 6px rgb(0 0 0 / 30%);
     --us-dialog-scrim: #000;
