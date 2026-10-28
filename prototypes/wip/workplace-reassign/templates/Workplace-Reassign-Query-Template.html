@@ -1,0 +1,65 @@
+<div class="us-reassign" data-from-id="{#query.CurrentEmployer_ID}" data-same="{#query.SameEmployer}">
+
+  <div class="us-reassign__record">
+    <div class="us-reassign__record-body">
+      <p class="us-reassign__eyebrow">Reassigning this workplace</p>
+      <h3 class="us-reassign__record-name">{#query.CurrentRecord}</h3>
+      <ul class="us-reassign__record-meta">
+        <li>ID <span class="us-reassign__id">{#query.CurrentRecord_ID}</span></li>
+        <li>{#query.CurrentRecord_Address}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="us-reassign__compare">
+
+    <section class="us-reassign__employer us-reassign__employer--from" aria-label="Current employer">
+      <p class="us-reassign__role">Current employer <span class="us-reassign__tag">From</span></p>
+      <div class="us-reassign__details">
+        <h4 class="us-reassign__name">{#query.CurrentEmployer}</h4>
+        <dl class="us-reassign__fields">
+          <div><dt>Type</dt><dd>{#query.CurrentEmployer_Type}</dd></div>
+          <div><dt>ID</dt><dd class="us-reassign__id">{#query.CurrentEmployer_ID}</dd></div>
+          <div class="us-reassign__field--wide"><dt>Address</dt><dd>{#query.CurrentEmployer_Address}</dd></div>
+        </dl>
+      </div>
+      <p class="us-reassign__none">No current employer. This workplace isn't assigned to one.</p>
+    </section>
+
+    <span class="us-reassign__arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 18l6-6M13 6l6 6"/></svg>
+    </span>
+
+    <section class="us-reassign__employer us-reassign__employer--to" aria-label="New employer">
+      <p class="us-reassign__role">New employer <span class="us-reassign__tag">To</span></p>
+      <div class="us-reassign__details">
+        <h4 class="us-reassign__name">{#query.NewEmployer}</h4>
+        <dl class="us-reassign__fields">
+          <div><dt>Type</dt><dd>{#query.NewEmployer_EmployerType}</dd></div>
+          <div><dt>ID</dt><dd class="us-reassign__id">{#query.NewEmployer_ID}</dd></div>
+          <div class="us-reassign__field--wide"><dt>Address</dt><dd>{#query.NewEmployer_Address}</dd></div>
+        </dl>
+      </div>
+    </section>
+
+  </div>
+
+  <p class="us-reassign__summary">
+    <span class="us-reassign__summary-move"><strong>{#query.CurrentRecord}</strong> will move from <strong>{#query.CurrentEmployer}</strong> to <strong>{#query.NewEmployer}</strong>.</span>
+    <span class="us-reassign__summary-none"><strong>{#query.CurrentRecord}</strong> will be assigned to <strong>{#query.NewEmployer}</strong>.</span>
+    Its ID and details stay the same.
+  </p>
+
+  <p class="us-reassign__same" role="status">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636-2.87l-8.106-13.536a1.914 1.914 0 0 0-3.274 0zM12 16h.01"/></svg>
+    <span>This workplace already belongs to <strong>{#query.NewEmployer}</strong>. Choose a different employer.</span>
+  </p>
+
+  <div class="us-reassign__actions">
+    <button type="button" class="TextButton us-outline-button us-reassign__cancel">Cancel</button>
+    <button type="button" class="TextButton PrimaryButton us-reassign__confirm" data-workplace-id="{#query.CurrentRecord_ID}" data-to-id="{#query.NewEmployer_ID}">Confirm reassignment</button>
+  </div>
+
+  <div class="us-reassign__result" role="status" aria-live="polite" hidden></div>
+
+</div>

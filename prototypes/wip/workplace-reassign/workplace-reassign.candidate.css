@@ -1,0 +1,489 @@
+/* US-REASSIGN:START — confirm moving a record to a new parent (a workplace
+   to a new employer), as one Query Template result.
+
+   Works two ways:
+   - With the UnionSuite theme, every colour, face and radius is a theme
+     token, so branding and dark mode follow the theme.
+   - Without it (plain Orion, or a page with no iMIS CSS at all), each token
+     falls back to the theme's own light value, written here once on the
+     component root.
+
+   The buttons are native TextButton / PrimaryButton / us-outline-button.
+   Their fallback paint below is wrapped in :where(), so it has no
+   specificity: the theme's and Orion's button rules always win when they
+   are loaded, and these only paint the buttons when they are not.
+
+   State comes from the IQA row, not script:
+   - data-from-id=""  the record has no parent now; the Current card says so.
+   - data-same="1"    the chosen parent is the current one; a warning
+                      replaces the summary and Confirm is removed. */
+
+.us-reassign {
+  --rs-surface: var(--bg-surface, #ffffff);
+  --rs-subtle: var(--bg-subtle, #f8f9fa);
+  --rs-sunken: var(--bg-sunken, #f1f3f5);
+  --rs-border: var(--border, #e2e5e9);
+  --rs-border-strong: var(--border-strong, #9aa1aa);
+  --rs-strong: var(--text-strong, #1c2024);
+  --rs-text: var(--text-base, #545962);
+  --rs-muted: var(--text-muted, #545962);
+  /* The record bar uses the focus colour, not --brand-600: dark mode keeps
+     the brand ramp, so a navy brand would vanish on the dark surface. */
+  --rs-brand: var(--border-focus, #006f94);
+  --rs-new: var(--info, #006f94);
+  --rs-new-bg: var(--info-bg, #e4f0f4);
+  --rs-warning: var(--warning, #a35a00);
+  --rs-warning-bg: var(--warning-bg, #fdefe0);
+  --rs-radius: var(--radius, 8px);
+  --rs-radius-sm: var(--radius-sm, 4px);
+  --rs-face: var(--font-body, "Open Sans", "Helvetica Neue", Arial, sans-serif);
+  --rs-face-ui: var(--font-ui, "Inter", system-ui, -apple-system, sans-serif);
+
+  container: us-reassign / inline-size;
+  display: grid;
+  gap: var(--space-4, 16px);
+
+  /* Centred, and no wider than two employer cards need: wider, the cards'
+     fields spread too far apart to read across. */
+  max-width: 800px;
+  margin-inline: auto;
+  color: var(--rs-text);
+  font-family: var(--rs-face);
+  font-size: var(--fs-base, 14px);
+  line-height: var(--lh-base, 1.5);
+}
+
+.us-reassign *,
+.us-reassign *::before,
+.us-reassign *::after {
+  box-sizing: border-box;
+}
+
+.us-reassign svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Small uppercase labels: the record strip, each card's role, the fields. */
+.us-reassign__eyebrow,
+.us-reassign__role,
+.us-reassign__fields dt {
+  margin: 0;
+  color: var(--rs-muted);
+  font-family: var(--rs-face-ui);
+  font-size: var(--fs-2xs, 11px);
+  font-weight: var(--fw-semi, 600);
+  letter-spacing: .06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+/* The record being moved: the page's own record, so it leads, with the
+   brand bar the theme uses to mark "this one". */
+.us-reassign__record {
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  border: 1px solid var(--rs-border);
+  border-inline-start: 4px solid var(--rs-brand);
+  border-radius: var(--rs-radius);
+  background: var(--rs-subtle);
+}
+
+.us-reassign__record-body {
+  min-width: 0;
+}
+
+.us-reassign__record-name {
+  margin: 2px 0 0;
+  color: var(--rs-strong);
+  font-family: var(--rs-face);
+  font-size: var(--fs-md, 16px);
+  font-weight: var(--fw-semi, 600);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.us-reassign__record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3, 12px);
+  margin: var(--space-1, 4px) 0 0;
+  padding: 0;
+  color: var(--rs-muted);
+  font-size: var(--fs-sm, 13px);
+  list-style: none;
+}
+
+.us-reassign__record-meta li {
+  margin: 0;
+}
+
+.us-reassign__record-meta li:empty {
+  display: none;
+}
+
+/* Current → New. Side by side with an arrow between; stacked, with the
+   arrow turned down, when the panel is narrow. */
+.us-reassign__compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: var(--space-3, 12px);
+}
+
+.us-reassign__arrow {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rs-border);
+  border-radius: 50%;
+  background: var(--rs-surface);
+  color: var(--rs-new);
+}
+
+.us-reassign__employer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  min-width: 0;
+  padding: var(--space-3, 12px) var(--space-4, 16px) var(--space-4, 16px);
+  border: 1px solid var(--rs-border);
+  border-radius: var(--rs-radius);
+  background: var(--rs-surface);
+}
+
+.us-reassign__employer--to {
+  border-color: var(--rs-new);
+  box-shadow: inset 0 3px 0 var(--rs-new);
+}
+
+.us-reassign__role {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.us-reassign__employer--to .us-reassign__role {
+  color: var(--rs-new);
+}
+
+.us-reassign__tag {
+  margin-inline-start: auto;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--rs-sunken);
+  color: var(--rs-muted);
+  letter-spacing: .02em;
+  text-transform: none;
+}
+
+.us-reassign__employer--to .us-reassign__tag {
+  background: var(--rs-new-bg);
+  color: var(--rs-new);
+}
+
+.us-reassign__name {
+  margin: 0;
+  color: var(--rs-strong);
+  font-family: var(--rs-face);
+  font-size: var(--fs-md, 16px);
+  font-weight: var(--fw-semi, 600);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.us-reassign__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-2, 8px) var(--space-4, 16px);
+  margin: var(--space-1, 4px) 0 0;
+}
+
+.us-reassign__fields > div {
+  min-width: 0;
+}
+
+.us-reassign__field--wide {
+  grid-column: 1 / -1;
+}
+
+.us-reassign__fields dd {
+  margin: 1px 0 0;
+  color: var(--rs-strong);
+  font-size: var(--fs-sm, 13px);
+  overflow-wrap: anywhere;
+}
+
+/* A blank value still holds its row, as a dash. Escaped, so it survives a
+   page that is not served as UTF-8. */
+.us-reassign__fields dd:empty::before {
+  content: "\2014";
+  color: var(--rs-muted);
+}
+
+.us-reassign__id {
+  font-family: var(--face-mono, ui-monospace, "Cascadia Mono", Consolas, monospace);
+  font-size: var(--fs-xs, 12px);
+}
+
+/* No current employer: an empty dashed card that says so. */
+.us-reassign__none {
+  display: none;
+  margin: auto 0;
+  padding: var(--space-4, 16px) 0;
+  color: var(--rs-muted);
+  font-size: var(--fs-sm, 13px);
+  text-align: center;
+}
+
+.us-reassign[data-from-id=""] .us-reassign__employer--from {
+  border-style: dashed;
+  border-color: var(--rs-border-strong);
+  background: var(--rs-subtle);
+}
+
+.us-reassign[data-from-id=""] .us-reassign__employer--from .us-reassign__details,
+.us-reassign[data-from-id=""] .us-reassign__employer--from .us-reassign__tag {
+  display: none;
+}
+
+.us-reassign[data-from-id=""] .us-reassign__none {
+  display: block;
+}
+
+.us-reassign__details {
+  display: grid;
+  gap: var(--space-2, 8px);
+}
+
+/* What will happen, in a sentence, so the confirm reads back the change. */
+.us-reassign__summary,
+.us-reassign__same {
+  margin: 0;
+  font-size: var(--fs-sm, 13px);
+}
+
+.us-reassign__summary strong,
+.us-reassign__same strong {
+  color: var(--rs-strong);
+  font-weight: var(--fw-semi, 600);
+}
+
+.us-reassign__summary-none {
+  display: none;
+}
+
+.us-reassign[data-from-id=""] .us-reassign__summary-move {
+  display: none;
+}
+
+.us-reassign[data-from-id=""] .us-reassign__summary-none {
+  display: inline;
+}
+
+/* Same employer: nothing to change. */
+.us-reassign__same {
+  display: none;
+  align-items: flex-start;
+  gap: var(--space-2, 8px);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border: 1px solid var(--rs-warning);
+  border-radius: var(--rs-radius-sm);
+  background: var(--rs-warning-bg);
+  color: var(--rs-warning);
+}
+
+.us-reassign__same svg {
+  margin-top: 1px;
+}
+
+.us-reassign[data-same="1"] .us-reassign__same {
+  display: flex;
+}
+
+.us-reassign[data-same="1"] .us-reassign__summary,
+.us-reassign[data-same="1"] .us-reassign__confirm {
+  display: none;
+}
+
+.us-reassign__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2, 8px);
+  padding-top: var(--space-4, 16px);
+  border-top: 1px solid var(--rs-border);
+}
+
+/* Confirm and Cancel leave once the flow succeeds; its reply shows below
+   (workplace-reassign.js). */
+.us-reassign__actions[hidden],
+.us-reassign__result[hidden] {
+  display: none;
+}
+
+.us-reassign__result > :last-child {
+  margin-bottom: 0;
+}
+
+/* Reply fallback: no specificity, so the theme's US-MESSAGES styling wins
+   when it is loaded. */
+:where(.us-reassign__result) :where(.AsiSuccess, .AsiError, .AsiInformation) {
+  margin: 0;
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border: 1px solid currentColor;
+  border-radius: var(--rs-radius-sm);
+  font-size: var(--fs-sm, 13px);
+}
+
+:where(.us-reassign__result) :where(.AsiSuccess) {
+  background: var(--success-bg, #e8f4e2);
+  color: var(--success, #3f7a2a);
+}
+
+:where(.us-reassign__result) :where(.AsiError) {
+  background: var(--danger-bg, #fbe4e2);
+  color: var(--danger, #d03528);
+}
+
+:where(.us-reassign__result) :where(.AsiInformation) {
+  background: var(--rs-new-bg);
+  color: var(--rs-new);
+}
+
+@container us-reassign (max-width: 560px) {
+  .us-reassign__compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .us-reassign__arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+}
+
+@container us-reassign (max-width: 360px) {
+  .us-reassign__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .us-reassign__actions > * {
+    flex: 1 1 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .us-reassign__record,
+  .us-reassign__employer,
+  .us-reassign__tag,
+  .us-reassign__same {
+    border-color: CanvasText;
+  }
+}
+
+/* Button fallback: no specificity, so it only shows without the theme. The
+   colours read the theme's per-button variables first, then its tokens,
+   then Orion's light values. */
+:where(.us-reassign__actions) :where(.TextButton) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 14px;
+  border: 1px solid var(--button-border, transparent);
+  border-radius: 5px;
+  background-color: var(--button-current-bg, var(--brand-800, #003a4c));
+  color: var(--button-current-text, var(--text-inverse, #ffffff));
+  font-family: var(--rs-face-ui);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color .15s cubic-bezier(.2, 0, 0, 1),
+    color .15s cubic-bezier(.2, 0, 0, 1),
+    border-color .15s cubic-bezier(.2, 0, 0, 1);
+}
+
+:where(.us-reassign__actions) :where(.TextButton.PrimaryButton) {
+  border-color: var(--accent, #ff9947);
+  background-color: var(--accent, #ff9947);
+  color: var(--text-on-accent, #002632);
+}
+
+:where(.us-reassign__actions) :where(.TextButton.PrimaryButton):hover {
+  background-color: var(--rs-surface);
+  color: var(--accent-hover, #e07a1f);
+}
+
+:where(.us-reassign__actions) :where(.TextButton.us-outline-button) {
+  border-color: var(--brand-800, #003a4c);
+  background-color: var(--rs-surface);
+  color: var(--brand-800, #003a4c);
+}
+
+:where(.us-reassign__actions) :where(.TextButton.us-outline-button):hover {
+  background-color: var(--rs-new-bg);
+}
+
+:where(.us-reassign__actions) :where(.TextButton):focus-visible {
+  outline: 2px solid var(--border-focus, #006f94);
+  outline-offset: 2px;
+}
+
+:where(.us-reassign__actions) :where(.TextButton):disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+/* Busy spinner fallback: the theme's .us-button-spinner, for pages
+   without it. */
+:where(.us-reassign__actions) :where(.us-button-spinner) {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: us-reassign-spin .8s linear infinite;
+}
+
+:where(.us-reassign__actions) :where(.us-button-spinner[hidden]) {
+  display: none;
+}
+
+@keyframes us-reassign-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 950px) {
+  :where(.us-reassign__actions) :where(.TextButton) {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.us-reassign__actions) :where(.TextButton) {
+    transition: none;
+  }
+
+  :where(.us-reassign__actions) :where(.us-button-spinner) {
+    animation: none;
+  }
+}
+
+/* US-REASSIGN:END */

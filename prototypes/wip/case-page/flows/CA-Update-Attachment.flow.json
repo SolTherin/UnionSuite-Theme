@@ -1,0 +1,1193 @@
+{
+  "hierarchies": [
+    {
+      "id": 1495,
+      "coreOrgId": null,
+      "parentId": 1064,
+      "isFolder": false,
+      "excludeFromWorkflowInstancesDisplay": false,
+      "definitionId": "b12d9fa43ab348408fcff0091779caf3",
+      "displayName": "CA: Update Attachment",
+      "version": 80,
+      "isPublished": true,
+      "createdAt": "2026-05-27T11:58:42.7212537+00:00",
+      "lastExecutedAt": "2026-10-25T22:21:35.5867068+00:00",
+      "avgRuntime": 0,
+      "latestInstanceStatus": "Finished",
+      "protected": false,
+      "cronSetting": null,
+      "endpointPath": "/ca/update-attachment",
+      "inMaintenanceWindow": false,
+      "securedEndpoint": "green",
+      "createdBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "updatedBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "hasChildRecords": false
+    }
+  ],
+  "flowz": [
+    {
+      "definitionId": "b12d9fa43ab348408fcff0091779caf3",
+      "versionId": "0e4a969b06eb42b0805cd434ab3d461c",
+      "tenantId": null,
+      "name": "CA: Update Attachment",
+      "displayName": "CA: Update Attachment",
+      "description": null,
+      "channel": null,
+      "version": 80,
+      "variables": {
+        "data": {}
+      },
+      "customAttributes": {
+        "data": {}
+      },
+      "contextOptions": null,
+      "isSingleton": false,
+      "persistenceBehavior": "WorkflowBurst",
+      "deleteCompletedInstances": false,
+      "isPublished": true,
+      "isLatest": true,
+      "tag": null,
+      "activities": [
+        {
+          "activityId": "e18ec940-02ee-458b-b81b-ff32a0e52da9",
+          "type": "HttpEndpoint",
+          "name": "EndpointData",
+          "displayName": "HTTP Endpoint",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Path",
+              "syntax": null,
+              "expressions": {
+                "Literal": "/ca/update-attachment"
+              }
+            },
+            {
+              "name": "Methods",
+              "syntax": null,
+              "expressions": {
+                "Json": "[\"POST\"]"
+              }
+            },
+            {
+              "name": "ReadContent",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "TargetType",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Schema",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": ""
+              }
+            },
+            {
+              "name": "Authorize",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Policy",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "AuthorizeWithCustomHeader",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderName",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderValue",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "bfb98560-9a8a-40a4-b5f2-33f061bcb717",
+          "type": "RequestAuthorization",
+          "name": "Authorisation",
+          "displayName": "Request Authorization",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Role",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "HttpRequest",
+              "syntax": null,
+              "expressions": {
+                "JavaScript": "activities.EndpointData.Output()"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "2db7942a-77a2-48c0-b70a-7d28d72c12a9",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Unauthorised",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Unauthorized"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "54f612ec-1626-4331-ae9e-cd2ab2be8b86",
+          "type": "Fault",
+          "name": null,
+          "displayName": "Fault - Unauthorised",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Message",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Unauthorised"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "28a1f6a4-d58a-4aaa-8dfe-dda79f70ed9d",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_CurrentValues",
+          "displayName": "SQL: Current Values and Timestamp",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "-- The signed-in user's local time, for LastUpdatedOn\nDECLARE @EntityCode varchar(255) = COALESCE(\n    (SELECT EntityCode FROM ZenCrm.[Individuals] WHERE ImisId = @loggedInUser),\n    (SELECT OrgCode FROM UnionTemplate.Entities WHERE IsDefault = 1)\n);\n\n-- The file's member (ZCFS_ID), its name and tags as they are now, and the\n-- names of the tags picked: the change history's old and new values. Tags\n-- are compared as sorted names, so their order does not count as a change.\nSELECT\n    [UnionTemplate].fn_GetDateTimeWithTimeZone(@EntityCode) AS Timestamp,\n    I.ImisID AS Zcfs_ID,\n    F.FileName AS OldFileName,\n    ISNULL((SELECT STRING_AGG(Tag.TagName, ', ') WITHIN GROUP (ORDER BY Tag.TagName)\n            FROM (SELECT DISTINCT T.TagName\n                  FROM [ZideBar].[Zen_CloudFiles_Tags] FT\n                  INNER JOIN [ZideBar].[Zen_Tags] T ON T.Ordinal = FT.TagOrdinal\n                  WHERE FT.ZCFS_Ordinal = F.Ordinal) Tag), '') AS OldTags,\n    ISNULL((SELECT STRING_AGG(Tag.TagName, ', ') WITHIN GROUP (ORDER BY Tag.TagName)\n            FROM (SELECT DISTINCT T.TagName\n                  FROM STRING_SPLIT(@tagOrdinals, ',') S\n                  INNER JOIN [ZideBar].[Zen_Tags] T ON S.value = T.Ordinal) Tag), '') AS NewTags\nFROM [ZideBar].[Zen_CloudFiles_Storage] F\nINNER JOIN [ZenCRM].[Individuals] I\n    ON F.CrmID = I.ID\nWHERE F.Ordinal = CAST(@fileOrdinal AS int)"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{Name:\"@loggedInUser\",Value:activities.EndpointData.Output().Headers.loggedinpartyid},{Name:\"@fileOrdinal\",Value:activities.EndpointData.Output().Body.FileOrdinal},{Name:\"@tagOrdinals\",Value:String(activities.EndpointData.Output().Body.NewTagOrdinals ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "6d700179-8746-405a-a40f-681d073b3732",
+          "type": "RunJavaScript",
+          "name": "SetVariables",
+          "displayName": "JS: Set Variables",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "// No row: the file is not in CloudToolz (or not a member's).\nvar row = activities.SQL_CurrentValues.ResultSet()[0] || {};\nsetVariable('Timestamp', row.Timestamp);\nsetVariable('ZcfsID', row.Zcfs_ID || '');\nsetVariable('OldFileName', row.OldFileName || '');\nsetVariable('OldTags', row.OldTags || '');\nsetVariable('NewTags', row.NewTags || '');"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "fec4ab8f-e0b0-405f-9188-d3e3c4250f35",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: File Found",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('ZcfsID') !== ''"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "9125617e-6b4c-4d56-a92f-123c2df30940",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - File Not Found",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "File not found"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "NotFound"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "a2c38f50-32a1-4a71-abe6-d809a4e43452",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_TagsToAdd",
+          "displayName": "SQL: Tags To Add (iMIS rows)",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "-- NewTagOrdinals is every tag picked: the ones the file does not have yet\n-- are the rows to insert in iMIS.\nSELECT\n    T.Ordinal AS TagOrdinal,\n    @zcfsID AS ZCFS_ID,\n    @fileOrdinal AS ZCFS_Ordinal\nFROM STRING_SPLIT(@tagOrdinals, ',') S\nINNER JOIN [ZideBar].[Zen_Tags] T\n    ON S.value = T.Ordinal\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM [ZideBar].[Zen_CloudFiles_Tags] Z\n    WHERE Z.TagOrdinal = T.Ordinal\n        AND Z.ZCFS_Ordinal = @fileOrdinal\n)"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{Name:\"@zcfsID\",Value:getVariable(\"ZcfsID\")},{Name:\"@fileOrdinal\",Value:activities.EndpointData.Output().Body.FileOrdinal},{Name:\"@tagOrdinals\",Value:String(activities.EndpointData.Output().Body.NewTagOrdinals ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "45944c84-46f6-46c1-8956-abfc0e1bcec1",
+          "type": "BulkDataSourceOperation",
+          "name": null,
+          "displayName": "iMIS: Add Tags",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "DataSource",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Standalone|Zen_CloudFiles_Tags|Multi"
+              }
+            },
+            {
+              "name": "DataSourceOperation",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Insert"
+              }
+            },
+            {
+              "name": "CollectionToProcess",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_TagsToAdd.ResultSet()"
+              }
+            },
+            {
+              "name": "KeyField",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "SwitchOnStopwatch",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "MaxDegreeOfParallelism",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "DataSourceType",
+              "syntax": null,
+              "expressions": {
+                "Literal": ""
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "42a28a46-cf8e-4706-8bd9-36bc72740eee",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Filename",
+          "displayName": "SQL: Update Filename (and iMIS row)",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "-- Rename in CloudToolz\nUPDATE F\nSET FileName = @fileName,\n    LastUpdatedBy = @loggedInUser,\n    LastUpdatedOn = @timestamp\nFROM [ZideBar].[Zen_CloudFiles_Storage] F\nWHERE Ordinal = @fileOrdinal\n\n-- The row for the iMIS update\nSELECT\n    I.ImisID AS ID,\n    S.Ordinal,\n    S.FileName,\n    S.LastUpdatedBy,\n    S.LastUpdatedOn\nFROM [ZideBar].[Zen_CloudFiles_Storage] S\nINNER JOIN ZenCRM.[Individuals] I\n    ON S.CrmID = I.ID\nWHERE S.Ordinal = @fileOrdinal"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{Name:\"@timestamp\",Value:getVariable(\"Timestamp\")},{Name:\"@loggedInUser\",Value:activities.EndpointData.Output().Headers.loggedinpartyid},{Name:\"@fileName\",Value:activities.EndpointData.Output().Body.FileName},{Name:\"@fileOrdinal\",Value:activities.EndpointData.Output().Body.FileOrdinal}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "2856d09a-0b56-40c0-a18c-88393157c429",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_RemoveTags",
+          "displayName": "SQL: Remove Tags (and iMIS rows)",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "-- The rows for the iMIS delete\nSELECT T.*\nFROM STRING_SPLIT(@removedTagOrdinals, ',') S\nINNER JOIN [ZideBar].[Zen_CloudFiles_Tags] T\n    ON S.value = T.TagOrdinal\nWHERE ZCFS_Ordinal = @fileOrdinal\n\n-- Remove them in CloudToolz\nDELETE T\nFROM STRING_SPLIT(@removedTagOrdinals, ',') S\nINNER JOIN [ZideBar].[Zen_CloudFiles_Tags] T\n    ON S.value = T.TagOrdinal\nWHERE ZCFS_Ordinal = @fileOrdinal"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{Name:\"@removedTagOrdinals\",Value:String(activities.EndpointData.Output().Body.RemovedTagOrdinals ?? \"\")},{Name:\"@fileOrdinal\",Value:activities.EndpointData.Output().Body.FileOrdinal}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "f91e7dfa-9b43-43ae-994c-5610eb7b8885",
+          "type": "IntelligentQueryArchitectData",
+          "name": "IQA_iMISTags",
+          "displayName": "IQA: File Tags In iMIS",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/SandBox/CA/Attachment Tags - By File Ordinal"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "'&parameter=' + activities.EndpointData.Output().Body.FileOrdinal"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "2d23add5-76a0-42e1-b993-01cd7161e1aa",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_CopyNewTags",
+          "displayName": "SQL: Copy New Tags From iMIS",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "-- The file's tags as iMIS has them, with iMIS's ordinals: only the ones\n-- CloudToolz lacks, and not the tags being removed (iMIS still has them\n-- until iMIS: Remove Tags runs).\nINSERT INTO [ZideBar].[Zen_CloudFiles_Tags] (\n    Ordinal,\n    TagOrdinal,\n    ZCFS_ID,\n    ZCFS_Ordinal\n)\nSELECT\n    JSON_VALUE(J.value, '$.Ordinal'),\n    JSON_VALUE(J.value, '$.TagOrdinal'),\n    JSON_VALUE(J.value, '$.ZCFS_ID'),\n    JSON_VALUE(J.value, '$.ZCFS_Ordinal')\nFROM OPENJSON(@imisTags) J\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM [ZideBar].[Zen_CloudFiles_Tags] Z\n    WHERE Z.Ordinal = JSON_VALUE(J.value, '$.Ordinal')\n)\nAND JSON_VALUE(J.value, '$.TagOrdinal') NOT IN (\n    SELECT LTRIM(S.value)\n    FROM STRING_SPLIT(@removedTagOrdinals, ',') S\n)"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify([{Name:\"@imisTags\",Value:JSON.stringify(activities.IQA_iMISTags.ResultSet())},{Name:\"@removedTagOrdinals\",Value:String(activities.EndpointData.Output().Body.RemovedTagOrdinals ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "type": "BulkDataSourceOperation",
+          "name": null,
+          "displayName": "iMIS: Update Filename",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "DataSource",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Party|Zen_CloudFiles_Storage|Multi"
+              }
+            },
+            {
+              "name": "DataSourceOperation",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Update"
+              }
+            },
+            {
+              "name": "CollectionToProcess",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Filename.ResultSet()"
+              }
+            },
+            {
+              "name": "KeyField",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "SwitchOnStopwatch",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "MaxDegreeOfParallelism",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "DataSourceType",
+              "syntax": null,
+              "expressions": {
+                "Literal": ""
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "type": "BulkDataSourceOperation",
+          "name": null,
+          "displayName": "iMIS: Remove Tags",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "DataSource",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Standalone|Zen_CloudFiles_Tags|Multi"
+              }
+            },
+            {
+              "name": "DataSourceOperation",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Delete"
+              }
+            },
+            {
+              "name": "CollectionToProcess",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_RemoveTags.ResultSet()"
+              }
+            },
+            {
+              "name": "KeyField",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "SwitchOnStopwatch",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "MaxDegreeOfParallelism",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "DataSourceType",
+              "syntax": null,
+              "expressions": {
+                "Literal": ""
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "62b0b3f6-d90a-4a67-ba3c-c8a4fae36dd0",
+          "type": "RunJavaScript",
+          "name": "CreateLogContext",
+          "displayName": "JS: Create Log Context",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "// The attachment's name and tags before and after, for the record's change\n// history (LogChangesToIMIS; usage guide #change-history). The editor sends\n// the record's ID (RecordID: a case's CaseID or an agreement's AgreementID);\n// without one the change is logged against the file's member.\nvar endpoint = activities.EndpointData.Output();\nvar body = endpoint.Body;\nvar oldValues = {\n    \"FileName\": String(getVariable(\"OldFileName\") ?? \"\"),\n    \"Tags\": String(getVariable(\"OldTags\") ?? \"\")\n};\nvar newValues = {\n    \"FileName\": String(body.FileName ?? \"\"),\n    \"Tags\": String(getVariable(\"NewTags\") ?? \"\")\n};\n\n// Only the fields that changed. None: nothing is logged.\nvar fieldsToCompare = [\"FileName\", \"Tags\"].filter(field => oldValues[field] !== newValues[field]);\nsetVariable(\"HasChanges\", fieldsToCompare.length > 0);\n\nvar logContext = {\n    \"Note\": \"Attachment \" + newValues.FileName + \": name and tags updated\",\n    \"Table\": \"Zen_CloudFiles_Storage\",\n    \"UpdateReason\": \"Edit\",\n    \"workflowDefinitionId\": workflowDefinitionId, // provided by CloudToolz\n    \"sourceOrdinal\": Number(body.FileOrdinal)\n};\n\n// An Edit's old values travel as the OldValue JSON string, as a BeyondForm's do.\nvar logChanges = {\n    \"logContext\": logContext,\n    \"fieldsToCompare\": fieldsToCompare,\n    \"body\": {\n        \"FileName\": newValues.FileName,\n        \"Tags\": newValues.Tags,\n        \"OldValue\": JSON.stringify(oldValues)\n    },\n    \"profileID\": String(body.RecordID || getVariable(\"ZcfsID\")),\n    \"updatedByID\": endpoint.Headers.loggedinpartyid\n};\nsetVariable(\"logChanges\", logChanges);"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "0159b4f9-41bc-40e0-8a95-be03c2ff04d5",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Anything Changed",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('HasChanges') === true"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "860cf744-ac3d-4808-8ced-b60f27706ed6",
+          "type": "RunWorkflow",
+          "name": "LogChangesToIMIS",
+          "displayName": "Log Changes To IMIS",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "WorkflowDefinitionId",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getWorkflowDefinitionIdByName('LogChangesToIMIS')"
+              }
+            },
+            {
+              "name": "Input",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('logChanges')"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Mode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "FireAndForget"
+              }
+            },
+            {
+              "name": "TenantId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CorrelationId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ContextId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomAttributes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RetryFailedActivities",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "832b4b41-9e73-46b5-8e23-25055ea24a27",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Saved",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify({Status: 'S'})"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "application/json"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "OK"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - CloudToolz Error",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The attachment could not be updated in CloudToolz."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "4264a849-4881-47e9-97fc-badc71ca6cc0",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - iMIS Error",
+          "description": null,
+          "x": null,
+          "y": null,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The attachment could not be updated in iMIS."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        }
+      ],
+      "connections": [
+        {
+          "sourceActivityId": "e18ec940-02ee-458b-b81b-ff32a0e52da9",
+          "targetActivityId": "bfb98560-9a8a-40a4-b5f2-33f061bcb717",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "bfb98560-9a8a-40a4-b5f2-33f061bcb717",
+          "targetActivityId": "2db7942a-77a2-48c0-b70a-7d28d72c12a9",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "2db7942a-77a2-48c0-b70a-7d28d72c12a9",
+          "targetActivityId": "54f612ec-1626-4331-ae9e-cd2ab2be8b86",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "bfb98560-9a8a-40a4-b5f2-33f061bcb717",
+          "targetActivityId": "28a1f6a4-d58a-4aaa-8dfe-dda79f70ed9d",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "28a1f6a4-d58a-4aaa-8dfe-dda79f70ed9d",
+          "targetActivityId": "6d700179-8746-405a-a40f-681d073b3732",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "28a1f6a4-d58a-4aaa-8dfe-dda79f70ed9d",
+          "targetActivityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "6d700179-8746-405a-a40f-681d073b3732",
+          "targetActivityId": "fec4ab8f-e0b0-405f-9188-d3e3c4250f35",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "fec4ab8f-e0b0-405f-9188-d3e3c4250f35",
+          "targetActivityId": "a2c38f50-32a1-4a71-abe6-d809a4e43452",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "fec4ab8f-e0b0-405f-9188-d3e3c4250f35",
+          "targetActivityId": "9125617e-6b4c-4d56-a92f-123c2df30940",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "a2c38f50-32a1-4a71-abe6-d809a4e43452",
+          "targetActivityId": "45944c84-46f6-46c1-8956-abfc0e1bcec1",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "a2c38f50-32a1-4a71-abe6-d809a4e43452",
+          "targetActivityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "45944c84-46f6-46c1-8956-abfc0e1bcec1",
+          "targetActivityId": "42a28a46-cf8e-4706-8bd9-36bc72740eee",
+          "outcome": "Successful"
+        },
+        {
+          "sourceActivityId": "45944c84-46f6-46c1-8956-abfc0e1bcec1",
+          "targetActivityId": "42a28a46-cf8e-4706-8bd9-36bc72740eee",
+          "outcome": "NoRecords"
+        },
+        {
+          "sourceActivityId": "45944c84-46f6-46c1-8956-abfc0e1bcec1",
+          "targetActivityId": "4264a849-4881-47e9-97fc-badc71ca6cc0",
+          "outcome": "Failed"
+        },
+        {
+          "sourceActivityId": "42a28a46-cf8e-4706-8bd9-36bc72740eee",
+          "targetActivityId": "2856d09a-0b56-40c0-a18c-88393157c429",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "42a28a46-cf8e-4706-8bd9-36bc72740eee",
+          "targetActivityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "2856d09a-0b56-40c0-a18c-88393157c429",
+          "targetActivityId": "f91e7dfa-9b43-43ae-994c-5610eb7b8885",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "2856d09a-0b56-40c0-a18c-88393157c429",
+          "targetActivityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "f91e7dfa-9b43-43ae-994c-5610eb7b8885",
+          "targetActivityId": "2d23add5-76a0-42e1-b993-01cd7161e1aa",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "f91e7dfa-9b43-43ae-994c-5610eb7b8885",
+          "targetActivityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "2d23add5-76a0-42e1-b993-01cd7161e1aa",
+          "targetActivityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "2d23add5-76a0-42e1-b993-01cd7161e1aa",
+          "targetActivityId": "12d19aee-a28c-4e98-81f0-05af53d5d6d8",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "targetActivityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "outcome": "Successful"
+        },
+        {
+          "sourceActivityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "targetActivityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "outcome": "NoRecords"
+        },
+        {
+          "sourceActivityId": "8f90676b-253a-48e3-a83e-22d64075c804",
+          "targetActivityId": "4264a849-4881-47e9-97fc-badc71ca6cc0",
+          "outcome": "Failed"
+        },
+        {
+          "sourceActivityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "targetActivityId": "62b0b3f6-d90a-4a67-ba3c-c8a4fae36dd0",
+          "outcome": "Successful"
+        },
+        {
+          "sourceActivityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "targetActivityId": "62b0b3f6-d90a-4a67-ba3c-c8a4fae36dd0",
+          "outcome": "NoRecords"
+        },
+        {
+          "sourceActivityId": "b39b90b3-3c5a-4cd9-874c-0553f68d1da2",
+          "targetActivityId": "4264a849-4881-47e9-97fc-badc71ca6cc0",
+          "outcome": "Failed"
+        },
+        {
+          "sourceActivityId": "62b0b3f6-d90a-4a67-ba3c-c8a4fae36dd0",
+          "targetActivityId": "0159b4f9-41bc-40e0-8a95-be03c2ff04d5",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "0159b4f9-41bc-40e0-8a95-be03c2ff04d5",
+          "targetActivityId": "860cf744-ac3d-4808-8ced-b60f27706ed6",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "0159b4f9-41bc-40e0-8a95-be03c2ff04d5",
+          "targetActivityId": "832b4b41-9e73-46b5-8e23-25055ea24a27",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "860cf744-ac3d-4808-8ced-b60f27706ed6",
+          "targetActivityId": "832b4b41-9e73-46b5-8e23-25055ea24a27",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "860cf744-ac3d-4808-8ced-b60f27706ed6",
+          "targetActivityId": "832b4b41-9e73-46b5-8e23-25055ea24a27",
+          "outcome": "Not Found"
+        }
+      ]
+    }
+  ]
+}

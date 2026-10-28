@@ -1,0 +1,63 @@
+/* Preview chrome for the workplace reassignment prototype. Not part of the
+   candidate. Falls back to plain values so it still reads with the theme
+   CSS switched off. */
+
+body {
+  margin: 0;
+  background: var(--bg-page, #eeeeef);
+  color: var(--text-base, #545962);
+  font-family: var(--font-body, "Open Sans", Arial, sans-serif);
+}
+
+.rs-preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border, #e2e5e9);
+  background: var(--bg-surface, #ffffff);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px;
+}
+
+.rs-preview-bar > strong {
+  color: var(--text-strong, #1c2024);
+  font-size: 13px;
+}
+
+.rs-preview-bar__group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.rs-preview-bar button {
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong, #9aa1aa);
+  border-radius: 999px;
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-strong, #1c2024);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rs-preview-bar button[aria-pressed="true"] {
+  border-color: var(--brand-600, #006f94);
+  background: var(--info-bg, #e4f0f4);
+  color: var(--info, #006f94);
+}
+
+.rs-preview-bar button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.rs-preview-stage {
+  padding: 20px 16px;
+}
+
+.rs-preview-frame {
+  max-width: 760px;
+  margin-inline: auto;
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reassign Workplace</title>
+  <!-- Live theme in production load order. "Theme: off" in the bar reloads
+       with ?theme=off, which disables every data-theme-css sheet and skips
+       zUnionSuite.js: the embed on its own, as on a page without the theme. -->
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite-Guides/usage/vendor/10-UltraWaveResponsive.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite/99-Orion.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite/zUnionSuite.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite/Tabler.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite-Client/Branding.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite-Client/Override.css">
+  <link rel="stylesheet" data-theme-css href="../../../THeme/UnionSuite/zzDarkMode.css">
+  <script>
+    window.previewThemeOff = new URLSearchParams(location.search).get('theme') === 'off';
+    if (window.previewThemeOff) {
+      document.querySelectorAll('link[data-theme-css]').forEach(sheet => { sheet.disabled = true; });
+    }
+  </script>
+  <link rel="stylesheet" href="workplace-reassign.candidate.css">
+  <link rel="stylesheet" href="workplace-reassign.preview.css">
+</head>
+<body>
+  <!-- Preview chrome only: not part of the candidate. -->
+  <div class="rs-preview-bar" role="toolbar" aria-label="Preview options">
+    <strong>Reassign workplace</strong>
+    <span>WIP · sample data · one Query Template result</span>
+    <button type="button" data-preview-theme aria-pressed="true">Theme: on</button>
+    <button type="button" data-preview-scheme aria-pressed="false">Mode: light</button>
+    <span class="rs-preview-bar__group" role="group" aria-label="Sample row">
+      <button type="button" data-preview-row="move" aria-pressed="true">Move</button>
+      <button type="button" data-preview-row="none" aria-pressed="false">No current employer</button>
+      <button type="button" data-preview-row="same" aria-pressed="false">Same employer</button>
+    </span>
+    <button type="button" data-preview-flow="success">Flow reply: success</button>
+    <span class="rs-preview-bar__group" role="group" aria-label="Panel width">
+      <button type="button" data-preview-width="760px" aria-pressed="true">760</button>
+      <button type="button" data-preview-width="540px" aria-pressed="false">540</button>
+      <button type="button" data-preview-width="340px" aria-pressed="false">340</button>
+    </span>
+  </div>
+
+  <main class="rs-preview-stage">
+    <div class="rs-preview-frame" data-preview-frame>
+
+      <!-- One Query Template Display iPart, in a popup or on the workplace
+           page. CSS class field: us-query-template (optional).
+           Title: Reassign workplace.
+           Query Template field: templates/Workplace-Reassign-Query-Template.html,
+           one result. The preview script fills it with a sample row as iMIS
+           would. No results field: see README. -->
+      <div class="ContentItemContainer">
+        <div class="us-query-template">
+          <div class="panel">
+            <div class="panel-heading Distinguish"><h2 class="panel-title">Reassign workplace</h2></div>
+            <div class="panel-body-container">
+              <div class="panel-body">
+                <div class="QueryTemplateSet">
+                  <section data-item="0" class="mb-3"><div class="card QueryTemplateItem"><div class="card-body" data-preview-result></div></div></section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Stand-ins for the fields every iMIS page carries. -->
+  <input type="hidden" id="__RequestVerificationToken" value="preview-token">
+  <input type="hidden" id="__ClientContext" value='{"loggedInPartyId":"100001","selectedPartyId":"100001"}'>
+
+  <script>
+    if (!window.previewThemeOff) document.write('<script src="../../../THeme/UnionSuite/zUnionSuite.js"><\/script>');
+  </script>
+  <script src="workplace-reassign.preview.js"></script>
+  <script src="workplace-reassign.js"></script>
+</body>
+</html>

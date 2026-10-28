@@ -1,0 +1,1028 @@
+{
+  "hierarchies": [
+    {
+      "id": 1873,
+      "coreOrgId": null,
+      "parentId": 1857,
+      "isFolder": false,
+      "excludeFromWorkflowInstancesDisplay": false,
+      "definitionId": "385800ea8b7c4330bd4acdba8e6925d7",
+      "displayName": "Cases: Quick Add Attachment",
+      "version": 1,
+      "isPublished": true,
+      "createdAt": "2026-10-25T21:21:53.290496+00:00",
+      "lastExecutedAt": null,
+      "avgRuntime": null,
+      "latestInstanceStatus": null,
+      "protected": false,
+      "cronSetting": null,
+      "endpointPath": "/cases/quick-add/attachment",
+      "inMaintenanceWindow": false,
+      "securedEndpoint": "green",
+      "createdBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "updatedBy": "17b7df1b-5e7c-40ea-ad3b-c164fa77e754",
+      "hasChildRecords": false
+    }
+  ],
+  "flowz": [
+    {
+      "definitionId": "385800ea8b7c4330bd4acdba8e6925d7",
+      "versionId": "a9cd7484add6402badf842e46b2057c8",
+      "tenantId": null,
+      "name": "Cases: Quick Add Attachment",
+      "displayName": "Cases: Quick Add Attachment",
+      "description": null,
+      "channel": null,
+      "version": 1,
+      "variables": {
+        "data": {}
+      },
+      "customAttributes": {
+        "data": {}
+      },
+      "contextOptions": null,
+      "isSingleton": false,
+      "persistenceBehavior": "WorkflowBurst",
+      "deleteCompletedInstances": false,
+      "isPublished": true,
+      "isLatest": true,
+      "tag": null,
+      "activities": [
+        {
+          "activityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "type": "HttpEndpoint",
+          "name": "EndpointData",
+          "displayName": "HTTP Endpoint",
+          "description": null,
+          "x": 275,
+          "y": 40,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Path",
+              "syntax": null,
+              "expressions": {
+                "Literal": "/cases/quick-add/attachment"
+              }
+            },
+            {
+              "name": "Methods",
+              "syntax": null,
+              "expressions": {
+                "Json": "[\"POST\"]"
+              }
+            },
+            {
+              "name": "ReadContent",
+              "syntax": null,
+              "expressions": {
+                "Literal": "true"
+              }
+            },
+            {
+              "name": "TargetType",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Schema",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": ""
+              }
+            },
+            {
+              "name": "ValidateCallerUrl",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateImisRequest",
+              "syntax": null,
+              "expressions": {
+                "Literal": "false"
+              }
+            },
+            {
+              "name": "ImisRequestVerificationRole",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Authorize",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "Policy",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "AuthorizeWithCustomHeader",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderName",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomHeaderValue",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ValidateOutlookPluginToken",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RequiredOutlookPluginUsername",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "OutlookPluginMailboxEmail",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "type": "ExecuteSqlAgainstCloudToolz",
+          "name": "SQL_Validation",
+          "displayName": "SQL - Validation and Timestamp",
+          "description": null,
+          "x": 275,
+          "y": 314,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "ExpectedResults",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Result Set"
+              }
+            },
+            {
+              "name": "ConnectionId",
+              "syntax": null,
+              "expressions": {
+                "Literal": "default"
+              }
+            },
+            {
+              "name": "Script",
+              "syntax": "Literal",
+              "expressions": {
+                "Literal": "DECLARE @EntityCode AS varchar(20) = COALESCE(\r\n  (SELECT OrgCode FROM [Cases].[i4u_UT_Cases] WHERE Ordinal = @CaseOrdinal), -- this would be @ImisID\r\n  (SELECT EntityCode FROM [ZenCrm].[Individuals] WHERE ImisId = @LoggedInUser),  -- this would be @LoggedInUserID\r\n  (SELECT OrgCode FROM UnionTemplate.Entities WHERE IsDefault = 1) -- Final fallback, default org code\r\n);\r\nDECLARE @localTimestamp datetime = COALESCE([UnionTemplate].fn_GetDateTimeWithTimeZone(@EntityCode), GETUTCDATE());\r\n\r\n\r\nDECLARE @valid int = 1\r\nDECLARE @message varchar(4000) = ''\r\nSET @message = ''\r\n\r\n-- check if case exists\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND Ordinal = @CaseOrdinal\r\n)\r\n    SET @message =+ 'Case is not valid. | '\r\n\r\n-- check if users entity matches case\r\nIF NOT EXISTS (\r\n\tSELECT * \r\n\tFROM Cases.i4u_UT_Cases C\r\n\tINNER JOIN UnionTemplate.EntityAccess A\r\n\t\tON C.OrgCode = A.EntityCode\r\n\tWHERE CaseID = @CaseID\r\n\t\tAND C.Ordinal = @CaseOrdinal\r\n\t\tAND A.StaffimisID = @loggedInUser\r\n)\r\n    SET @message =+ 'Unauthorised entity | '\r\n\r\nIF @message <> ''\r\n\tSET @valid = 0\r\n\r\nSELECT \r\n\t@valid AS [Valid],\r\n\t@message AS [Message],\r\n\tCONVERT(varchar(23), @localTimestamp, 126) AS [Timestamp];\r\n"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Grid": "[{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseOrdinal\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"activity\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseNum\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@CaseID\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Body.CaseID\"}}},{\"Name\":{\"syntax\":\"Literal\",\"expressions\":{\"Literal\":\"@loggedInUser\",\"JavaScript\":\"\"}},\"Value\":{\"syntax\":\"JavaScript\",\"expressions\":{\"Literal\":\"\",\"JavaScript\":\"activities.EndpointData.Output().Headers.loggedinpartyid\"}}}]",
+                "JavaScript": "JSON.stringify([{\"Name\":\"@CaseOrdinal\",\"Value\":String((activities.EndpointData.Output().Body.CaseNum) ?? \"\")},{\"Name\":\"@CaseID\",\"Value\":String((activities.EndpointData.Output().Body.CaseID) ?? \"\")},{\"Name\":\"@loggedInUser\",\"Value\":String((activities.EndpointData.Output().Headers.loggedinpartyid) ?? \"\")}])"
+              }
+            },
+            {
+              "name": "Timeout",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "StrictlySelectOnly",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Case Valid",
+          "description": null,
+          "x": 40,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.SQL_Validation.ResultSet()[0].Valid == 1"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "55727115-9880-478e-8fc9-b971c2bd205d",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Case Not Valid",
+          "description": null,
+          "x": 510,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Case not valid"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "a6cc0a55-a6e6-4eae-9443-7ff33d33f249",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - General Error",
+          "description": null,
+          "x": 750,
+          "y": 565,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "An unexpected error occurred. Please contact a system adminstrator."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e6ee994d-2935-4d48-91d6-c07957cd1e93",
+          "type": "IntelligentQueryArchitectData",
+          "name": "CaseRecord",
+          "displayName": "IQA: Get Case Contact ID",
+          "description": null,
+          "x": 275,
+          "y": 816,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/Core/Zidebar/Drag and Drop Fileuploader/CaseID"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "\"&parameter=\" + activities.EndpointData.Output().Body.CaseID"
+              }
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Case"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {
+                "Literal": "0"
+              }
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {
+                "Literal": "1"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "eb67556d-809f-4277-8470-d475ca76ba39",
+          "type": "IntelligentQueryArchitectData",
+          "name": "ContactRecord",
+          "displayName": "IQA: Get Contact Record",
+          "description": null,
+          "x": 275,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "IqaPath",
+              "syntax": null,
+              "expressions": {
+                "Literal": "$/_i4u_/Core/Zidebar/Drag and Drop Fileuploader/BranchAndIdOfContactRecord"
+              }
+            },
+            {
+              "name": "Parameters",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "\"&parameter=\" + Case[0].PrimaryContactID"
+              }
+            },
+            {
+              "name": "CollectionName",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Contact"
+              }
+            },
+            {
+              "name": "Offset",
+              "syntax": null,
+              "expressions": {
+                "Literal": "0"
+              }
+            },
+            {
+              "name": "Limit",
+              "syntax": null,
+              "expressions": {
+                "Literal": "1"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8ef85e5c-3e48-4387-b7f9-97ece8a37beb",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Case Lookup Failure",
+          "description": null,
+          "x": 750,
+          "y": 1067,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "The case's member record could not be found."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "8d3ba8c1-59b0-4b13-ab7f-8fda01a55071",
+          "type": "RunJavaScript",
+          "name": null,
+          "displayName": "JS - Set Tags, Date and File Count",
+          "description": null,
+          "x": 275,
+          "y": 1318,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "var body = activities.EndpointData.Output().Body;\n\n// Tags: the composer's TagOrdinals (\"15,7\"), plus 3, which the drag and\n// drop flow adds to every case file. Each tag once.\nvar tags = String(body.TagOrdinals ?? '').split(',').map(tag => tag.trim()).filter(tag => tag !== '');\ntags.push('3');\nsetVariable('TagsJson', JSON.stringify(tags.filter((tag, index) => tags.indexOf(tag) === index)));\n\n// The staged files' {UploadName, Uuid}, filled in as each goes into Redis.\nsetVariable('FilesJson', '[]');\n\n// Body.Files is a .NET list or a JS array, depending on how it was read.\nvar files = body.Files;\nsetVariable('FileCount', files == null ? 0 : Number(files.length ?? files.Count ?? 0));\n\n// The Fileupload flow's Date, as the form sends NoteDate: the entity's\n// local time as \"YYYY-MM-DD HH:mm\".\nsetVariable('UploadDate', String(activities.SQL_Validation.ResultSet()[0].Timestamp).slice(0, 16).replace('T', ' '));"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "9367691b-6453-4de2-8487-302118d32465",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Has Files",
+          "description": null,
+          "x": 275,
+          "y": 1569,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('FileCount') > 0"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "7995a825-b67a-46ab-9320-4f80a0431e0c",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - No Files",
+          "description": null,
+          "x": 510,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Choose a file to upload."
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "BadRequest"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "c7ecbd80-9e13-483e-91fe-e6a3be2aac64",
+          "type": "ForEach",
+          "name": "StageFile",
+          "displayName": "For Each: File",
+          "description": null,
+          "x": 275,
+          "y": 1820,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Items",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "activities.EndpointData.Output().Body.Files"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "50e1cf26-a409-4b60-9116-893101146d86",
+          "type": "RunJavaScript",
+          "name": null,
+          "displayName": "JS - Give the File an Upload ID",
+          "description": null,
+          "x": 40,
+          "y": 2071,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "var file = activities.StageFile.Output();\n\n// guid() where the engine has it, otherwise a random v4 GUID.\nvar uuid = typeof guid === 'function' ? String(guid()) : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n  var r = Math.random() * 16 | 0;\n  return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);\n});\n\nvar files = JSON.parse(getVariable('FilesJson'));\nfiles.push({ UploadName: String(file.FileName), Uuid: uuid });\nsetVariable('FilesJson', JSON.stringify(files));\nsetVariable('StagedUuid', uuid);"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "3416366e-1c61-42c5-a1df-be8fdb6c2b3c",
+          "type": "Redis",
+          "name": "StagedFile",
+          "displayName": "Stage File In REDIS Cache",
+          "description": null,
+          "x": 40,
+          "y": 2322,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Method",
+              "syntax": null,
+              "expressions": {
+                "Literal": "SET"
+              }
+            },
+            {
+              "name": "Variable",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "\"FineUploader[\" + getVariable('StagedUuid') + \"]\""
+              }
+            },
+            {
+              "name": "WorkflowOnly",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "DataToAssign",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "// The shape the Fileupload flow reads back: Filename and Base64String.\nvar file = activities.StageFile.Output();\nreturn JSON.stringify({ Filename: String(file.FileName), Base64String: String(file.Base64string ?? file.Base64String ?? '') });"
+              }
+            },
+            {
+              "name": "ExpireInMinutes",
+              "syntax": null,
+              "expressions": {
+                "Literal": "30"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "5717cec6-8158-4cef-80c4-70987d7d5f02",
+          "type": "RunJavaScript",
+          "name": null,
+          "displayName": "JS - Build Fileupload Input",
+          "description": null,
+          "x": 275,
+          "y": 2573,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "// The Fileupload flow's input, as the drag and drop flow builds it for an\n// attachment on a case. Quick-add files are always Open.\nvar endpoint = activities.EndpointData.Output();\nvar json = {\n    \"Files\": JSON.parse(getVariable('FilesJson')),\n    \"FileTags\": JSON.parse(getVariable('TagsJson')),\n    \"EntityCode\": Contact[0].EntityCode,\n    \"NoteOrdinal\": '',\n    \"Date\": getVariable('UploadDate'),\n    \"Case\": {\n        \"CaseOrdinal\": Case[0].CaseOrdinal,\n        \"CaseID\": endpoint.Body.CaseID,\n        \"NewCase\": false,\n        \"CreatedByMember\": false,\n        \"DefaultTagOrdinal\": '',\n        \"Access\": 'Open'\n    },\n    \"Agreement\": null,\n    \"Type\": 'Case',\n    \"Email\": {\n        \"IsEmail\": false\n    },\n    \"User\": {\n        \"StaffIMISID\": endpoint.Headers.loggedinpartyid,\n        \"MemberIMISID\": Contact[0].ID\n    }\n}\nsetVariable('ParentInput', json)"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "1ecda110-0265-4af4-8719-178c94fbf70c",
+          "type": "RunWorkflow",
+          "name": "ChildUpload",
+          "displayName": "Run Fileupload And Tagging",
+          "description": null,
+          "x": 275,
+          "y": 2824,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "WorkflowDefinitionId",
+              "syntax": "JavaScript",
+              "expressions": {
+                "Literal": "6361a7452a034d8a9142204e9ec433d2",
+                "JavaScript": "getWorkflowDefinitionIdByName(\"Zidebar: Fileupload\")"
+              }
+            },
+            {
+              "name": "Input",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('ParentInput')"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {
+                "Json": "[\"Status\"]"
+              }
+            },
+            {
+              "name": "Mode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "Blocking"
+              }
+            },
+            {
+              "name": "TenantId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CorrelationId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "ContextId",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "CustomAttributes",
+              "syntax": null,
+              "expressions": {}
+            },
+            {
+              "name": "RetryFailedActivities",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {
+            "Output": "WorkflowInstance"
+          }
+        },
+        {
+          "activityId": "e650238b-5b12-41c3-8356-bcb32f60acc2",
+          "type": "RunJavaScript",
+          "name": null,
+          "displayName": "JS - Read Upload Status",
+          "description": null,
+          "x": 275,
+          "y": 3075,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Script",
+              "syntax": null,
+              "expressions": {
+                "Literal": "// The Fileupload flow finishes with {Status: 'S' or 'E', Message}. It sets\n// 'E' on every failure, so anything else counts as uploaded: a false\n// failure would only invite a second, duplicate upload.\nvar result = activities.ChildUpload.Output();\nvar output = (result && (result.WorkflowOutput || result.Output)) || result || {};\nsetVariable('UploadFailed', output.Status === 'E');\nsetVariable('UploadMessage', String(output.Message || ''));"
+              }
+            },
+            {
+              "name": "PossibleOutcomes",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "97d4809c-ebcd-40ed-936f-40da1b78f17e",
+          "type": "If",
+          "name": null,
+          "displayName": "IF: Upload Succeeded",
+          "description": null,
+          "x": 275,
+          "y": 3326,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Condition",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('UploadFailed') != true"
+              }
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response",
+          "description": null,
+          "x": 275,
+          "y": 3577,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "JSON.stringify({ Status: 'S', Files: getVariable('FileCount') })"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "application/json"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "OK"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        },
+        {
+          "activityId": "e9accf6e-d920-4a6f-9e1e-b1b058331eda",
+          "type": "WriteHttpResponse",
+          "name": null,
+          "displayName": "HTTP Response - Upload Failure",
+          "description": null,
+          "x": 510,
+          "y": 3577,
+          "persistWorkflow": false,
+          "loadWorkflowContext": false,
+          "saveWorkflowContext": false,
+          "properties": [
+            {
+              "name": "Content",
+              "syntax": "JavaScript",
+              "expressions": {
+                "JavaScript": "getVariable('UploadMessage') || 'The upload failed.'"
+              }
+            },
+            {
+              "name": "ContentType",
+              "syntax": null,
+              "expressions": {
+                "Literal": "text/plain"
+              }
+            },
+            {
+              "name": "StatusCode",
+              "syntax": null,
+              "expressions": {
+                "Literal": "InternalServerError"
+              }
+            },
+            {
+              "name": "CharSet",
+              "syntax": null,
+              "expressions": {
+                "Literal": "utf-8"
+              }
+            },
+            {
+              "name": "ResponseHeaders",
+              "syntax": null,
+              "expressions": {}
+            }
+          ],
+          "propertyStorageProviders": {}
+        }
+      ],
+      "connections": [
+        {
+          "sourceActivityId": "568df3ab-c244-4da3-8b15-034b7ae9e26d",
+          "targetActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "targetActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "8501032d-06f9-4453-93af-ff97fc3cf263",
+          "targetActivityId": "a6cc0a55-a6e6-4eae-9443-7ff33d33f249",
+          "outcome": "Error"
+        },
+        {
+          "sourceActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "targetActivityId": "55727115-9880-478e-8fc9-b971c2bd205d",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "1e2d6057-5770-4ccb-a22e-5eae5cc63742",
+          "targetActivityId": "e6ee994d-2935-4d48-91d6-c07957cd1e93",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "e6ee994d-2935-4d48-91d6-c07957cd1e93",
+          "targetActivityId": "eb67556d-809f-4277-8470-d475ca76ba39",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "e6ee994d-2935-4d48-91d6-c07957cd1e93",
+          "targetActivityId": "8ef85e5c-3e48-4387-b7f9-97ece8a37beb",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "eb67556d-809f-4277-8470-d475ca76ba39",
+          "targetActivityId": "8d3ba8c1-59b0-4b13-ab7f-8fda01a55071",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "eb67556d-809f-4277-8470-d475ca76ba39",
+          "targetActivityId": "8ef85e5c-3e48-4387-b7f9-97ece8a37beb",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "8d3ba8c1-59b0-4b13-ab7f-8fda01a55071",
+          "targetActivityId": "9367691b-6453-4de2-8487-302118d32465",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "9367691b-6453-4de2-8487-302118d32465",
+          "targetActivityId": "c7ecbd80-9e13-483e-91fe-e6a3be2aac64",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "9367691b-6453-4de2-8487-302118d32465",
+          "targetActivityId": "7995a825-b67a-46ab-9320-4f80a0431e0c",
+          "outcome": "False"
+        },
+        {
+          "sourceActivityId": "c7ecbd80-9e13-483e-91fe-e6a3be2aac64",
+          "targetActivityId": "50e1cf26-a409-4b60-9116-893101146d86",
+          "outcome": "Iterate"
+        },
+        {
+          "sourceActivityId": "50e1cf26-a409-4b60-9116-893101146d86",
+          "targetActivityId": "3416366e-1c61-42c5-a1df-be8fdb6c2b3c",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "3416366e-1c61-42c5-a1df-be8fdb6c2b3c",
+          "targetActivityId": "c7ecbd80-9e13-483e-91fe-e6a3be2aac64",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "c7ecbd80-9e13-483e-91fe-e6a3be2aac64",
+          "targetActivityId": "5717cec6-8158-4cef-80c4-70987d7d5f02",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "5717cec6-8158-4cef-80c4-70987d7d5f02",
+          "targetActivityId": "1ecda110-0265-4af4-8719-178c94fbf70c",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "1ecda110-0265-4af4-8719-178c94fbf70c",
+          "targetActivityId": "e650238b-5b12-41c3-8356-bcb32f60acc2",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "1ecda110-0265-4af4-8719-178c94fbf70c",
+          "targetActivityId": "a6cc0a55-a6e6-4eae-9443-7ff33d33f249",
+          "outcome": "Not Found"
+        },
+        {
+          "sourceActivityId": "e650238b-5b12-41c3-8356-bcb32f60acc2",
+          "targetActivityId": "97d4809c-ebcd-40ed-936f-40da1b78f17e",
+          "outcome": "Done"
+        },
+        {
+          "sourceActivityId": "97d4809c-ebcd-40ed-936f-40da1b78f17e",
+          "targetActivityId": "e3d6e95e-58b6-4d95-b88a-1d89a51bb00d",
+          "outcome": "True"
+        },
+        {
+          "sourceActivityId": "97d4809c-ebcd-40ed-936f-40da1b78f17e",
+          "targetActivityId": "e9accf6e-d920-4a6f-9e1e-b1b058331eda",
+          "outcome": "False"
+        }
+      ]
+    }
+  ]
+}
